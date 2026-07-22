@@ -92,6 +92,22 @@ Diese Skripte prüfen Node.js, installieren bei Bedarf die Abhängigkeiten, setz
 DASHBOARD_DEMO=1 npm start
 ```
 
+**Browser (ohne Electron):**
+
+Die Oberfläche läuft auch direkt im Browser – ganz ohne Electron-Installation. Daten werden
+dabei lokal im Browser (`localStorage`) gespeichert, der Video-Chat nutzt Kamera/Mikrofon des
+Browsers, und der Screenshot nutzt die Bildschirmfreigabe. Google Drive ist in der reinen
+Browser-Demo nicht verfügbar.
+
+```
+pwsh ./scripts/demo-browser.ps1        # startet lokalen Server + öffnet den Browser
+# oder plattformunabhängig:
+npm run serve                          # dann http://localhost:4173 öffnen
+```
+
+> Empfehlung: über `http://localhost` starten (nicht per Doppelklick als `file://`), damit
+> Kamera und Bildschirmfreigabe im sicheren Kontext funktionieren.
+
 **Mobil (Android / iOS):**
 
 Die App basiert auf **Electron** und läuft daher **nicht nativ auf Android oder iOS**.
