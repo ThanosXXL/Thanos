@@ -30,6 +30,7 @@
   let conversations = [];
   let activeConversationId = null;
   let groupBuilderActive = false;
+  let allMuted = false;
   const LOCAL_ID = 'me';
 
   function uid() {
@@ -66,7 +67,9 @@
       todos: [],
       openProjects: [],
       doneProjects: [],
-      chat: []
+      chat: [],
+      homework: [],
+      exams: []
     };
     state.dozenten.push(dozent);
     activeDozentId = dozent.id;
@@ -350,6 +353,8 @@
     panel.appendChild(grid);
 
     panel.appendChild(buildChatPanel(dozent));
+    panel.appendChild(buildHomeworkFolder(dozent));
+    panel.appendChild(buildCalendarFolder(dozent));
 
     content.appendChild(panel);
   }
@@ -612,6 +617,7 @@
 
     renderSharedFiles();
     renderParticipants();
+    setMuteAllButtonLabel();
     renderLessonChat();
     renderConversations();
 
@@ -647,6 +653,18 @@
 
   // ===== Teilnehmer-Leiste =====
 
+  function isDozent(p) {
+    return p.id === 'dozent';
+  }
+
+  function participantBadges(p) {
+    const mini = [];
+    if (!isDozent(p) && !p.audioOn) mini.push('<span class="mini">🔇</span>');
+    if (!p.videoOn) mini.push('<span class="mini">📹</span>');
+    if (p.handRaised) mini.push('<span class="mini hand">✋</span>');
+    return mini.join('');
+  }
+
   function renderParticipants() {
     const strip = document.getElementById('participantThumbs');
     const countEl = document.getElementById('participantCount');
@@ -658,14 +676,18 @@
       const thumb = document.createElement('div');
       thumb.className = 'participant-thumb';
       thumb.dataset.id = p.id;
-      thumb.title = p.isLocal ? 'Das bin ich' : `Privatchat mit ${p.name}`;
+      thumb.title = p.isLocal
+        ? 'Das bin ich'
+        : isDozent(p)
+        ? 'Dozent (Übertragung)'
+        : `Privatchat mit ${p.name}`;
 
       const videoBox = document.createElement('div');
       videoBox.className = 'thumb-video';
 
       const avatar = document.createElement('div');
       avatar.className = 'thumb-avatar';
-      avatar.textContent = '👤';
+      avatar.textContent = isDozent(p) ? '🎓' : '👤';
       videoBox.appendChild(avatar);
 
       if (p.isLocal) {
@@ -678,9 +700,11 @@
 
       const badges = document.createElement('div');
       badges.className = 'thumb-badges';
+      badges.innerHTML = participantBadges(p);
       videoBox.appendChild(badges);
 
-      if (!p.isLocal) {
+      // Entfernen nur für hinzugefügte Teilnehmer (nicht Dozent, nicht ich)
+      if (!p.isLocal && !isDozent(p)) {
         const removeBtn = document.createElement('button');
         removeBtn.className = 'thumb-remove';
         removeBtn.textContent = '✕';
@@ -692,6 +716,35 @@
         videoBox.appendChild(removeBtn);
       }
 
+      // Aktionen: Melden (Teilnehmer) und Freischalten (Dozent)
+      if (!isDozent(p)) {
+        const actions = document.createElement('div');
+        actions.className = 'thumb-actions';
+
+        const handBtn = document.createElement('button');
+        handBtn.textContent = p.handRaised ? '✋ meldet' : '✋';
+        handBtn.title = p.handRaised ? 'Meldung zurücknehmen' : 'Melden';
+        if (p.handRaised) handBtn.classList.add('active');
+        handBtn.addEventListener('click', (e) => {
+          e.stopPropagation();
+          toggleHand(p.id);
+        });
+        actions.appendChild(handBtn);
+
+        if (!p.audioOn) {
+          const unmuteBtn = document.createElement('button');
+          unmuteBtn.textContent = '🔊';
+          unmuteBtn.title = 'Freischalten (Dozent) – Teilnehmer kann sprechen';
+          unmuteBtn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            freischalten(p.id);
+          });
+          actions.appendChild(unmuteBtn);
+        }
+
+        videoBox.appendChild(actions);
+      }
+
       const name = document.createElement('span');
       name.className = 'thumb-name';
       name.textContent = p.name;
@@ -700,7 +753,7 @@
       thumb.appendChild(name);
 
       // Klick auf einen Teilnehmer öffnet einen Privatchat
-      if (!p.isLocal) {
+      if (!p.isLocal && !isDozent(p)) {
         thumb.addEventListener('click', () => openPrivateChat(p.id));
       }
 
@@ -709,6 +762,63 @@
 
     attachLocalStreamToThumb();
     updateLocalStatus();
+  }
+
+  // ===== Moderation: Stummschalten & Melden =====
+
+  function setMuteAllButtonLabel() {
+    const btn = document.getElementById('muteAllBtn');
+    if (!btn) return;
+    btn.textContent = allMuted ? '🔊 Stummschaltung aufheben' : '🔇 Alle stummschalten';
+    btn.classList.toggle('active', allMuted);
+  }
+
+  function toggleMuteAll() {
+    allMuted = !allMuted;
+    participants.forEach((p) => {
+      if (!isDozent(p)) {
+        p.audioOn = !allMuted;
+        if (!allMuted) p.handRaised = false;
+      }
+    });
+    // Eigenes Mikrofon entsprechend schalten
+    mediaState.audioOn = !allMuted;
+    applyMediaState();
+    setMuteAllButtonLabel();
+    renderParticipants();
+    showToast(
+      allMuted
+        ? 'Alle Teilnehmer stummgeschaltet – nur der Dozent ist zu hören.'
+        : 'Stummschaltung aufgehoben.'
+    );
+  }
+
+  function toggleHand(id) {
+    const p = participants.find((x) => x.id === id);
+    if (!p) return;
+    p.handRaised = !p.handRaised;
+    renderParticipants();
+    if (p.handRaised) {
+      showToast(`${p.name} meldet sich zu Wort.`);
+    }
+  }
+
+  function raiseLocalHand() {
+    toggleHand(LOCAL_ID);
+  }
+
+  // Dozent schaltet eine gemeldete Person frei – sie kann sprechen, alle hören es.
+  function freischalten(id) {
+    const p = participants.find((x) => x.id === id);
+    if (!p) return;
+    p.audioOn = true;
+    p.handRaised = false;
+    if (p.isLocal) {
+      mediaState.audioOn = true;
+      applyMediaState();
+    }
+    renderParticipants();
+    showToast(`${p.name} wurde freigeschaltet und kann jetzt sprechen.`);
   }
 
   function showAddParticipant() {
@@ -1014,21 +1124,18 @@
       localStatus.innerHTML = badges.join('');
     }
 
-    // Mini-Badges auf der eigenen Teilnehmer-Kachel
-    const thumbBadges = document.querySelector(
-      `.participant-thumb[data-id="${LOCAL_ID}"] .thumb-badges`
-    );
-    if (thumbBadges) {
-      const mini = [];
-      if (!mediaState.audioOn) mini.push('<span class="mini">🎤</span>');
-      if (!mediaState.videoOn) mini.push('<span class="mini">📹</span>');
-      thumbBadges.innerHTML = mini.join('');
-    }
-
     const me = participants.find((p) => p.id === LOCAL_ID);
     if (me) {
       me.audioOn = mediaState.audioOn;
       me.videoOn = mediaState.videoOn;
+    }
+
+    // Mini-Badges auf der eigenen Teilnehmer-Kachel
+    const thumbBadges = document.querySelector(
+      `.participant-thumb[data-id="${LOCAL_ID}"] .thumb-badges`
+    );
+    if (thumbBadges && me) {
+      thumbBadges.innerHTML = participantBadges(me);
     }
   }
 
@@ -1173,6 +1280,351 @@
     }, 6000);
   }
 
+  // ===== Ordner 1: Hausaufgaben =====
+
+  function nowStr() {
+    return new Date().toLocaleString('de-DE', {
+      day: '2-digit',
+      month: '2-digit',
+      year: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit'
+    });
+  }
+
+  function addHomework(dozentId, author, text, attachments) {
+    const dozent = findDozent(dozentId);
+    if (!dozent) return;
+    if (!author.trim() || !text.trim()) {
+      showToast('Bitte Name und Aufgabe ausfüllen.', true);
+      return;
+    }
+    dozent.homework.push({
+      id: uid(),
+      author: author.trim(),
+      text: text.trim(),
+      attachments: attachments || [],
+      submittedAt: nowStr(),
+      feedback: '',
+      corrected: false,
+      returnedAt: null
+    });
+    persist();
+    render();
+  }
+
+  function correctHomework(dozentId, hwId, feedback) {
+    const dozent = findDozent(dozentId);
+    if (!dozent) return;
+    const hw = dozent.homework.find((h) => h.id === hwId);
+    if (!hw) return;
+    hw.feedback = (feedback || '').trim();
+    hw.corrected = true;
+    hw.returnedAt = nowStr();
+    persist();
+    render();
+    showToast(`Hausaufgabe von ${hw.author} korrigiert und zurückgegeben.`);
+  }
+
+  function deleteHomework(dozentId, hwId) {
+    const dozent = findDozent(dozentId);
+    if (!dozent) return;
+    dozent.homework = dozent.homework.filter((h) => h.id !== hwId);
+    persist();
+    render();
+  }
+
+  function buildHomeworkFolder(dozent) {
+    const folder = document.createElement('div');
+    folder.className = 'folder homework-folder';
+
+    const title = document.createElement('h3');
+    title.className = 'folder-title';
+    title.textContent = '📁 Ordner: Hausaufgaben';
+    folder.appendChild(title);
+
+    const hint = document.createElement('p');
+    hint.className = 'folder-hint';
+    hint.textContent =
+      'Teilnehmer reichen Hausaufgaben ein; der Dozent korrigiert sie hier und gibt sie zurück.';
+    folder.appendChild(hint);
+
+    // Eingabe-Bereich
+    const addRow = document.createElement('div');
+    addRow.className = 'hw-add';
+    const author = document.createElement('input');
+    author.type = 'text';
+    author.placeholder = 'Name des Teilnehmers';
+    author.className = 'hw-author';
+    const text = document.createElement('input');
+    text.type = 'text';
+    text.placeholder = 'Aufgabe / Beschreibung';
+    text.className = 'hw-text';
+
+    let pendingAttachments = [];
+    const attachBtn = document.createElement('button');
+    attachBtn.className = 'btn-secondary btn-sm';
+    attachBtn.textContent = '📎 Datei';
+    const attachLabel = document.createElement('span');
+    attachLabel.className = 'hw-attach';
+    attachBtn.addEventListener('click', async () => {
+      const res = await window.dashboardAPI.openFileDialog();
+      if (res.canceled) return;
+      pendingAttachments = res.files.map((f) => f.name);
+      attachLabel.textContent = pendingAttachments.join(', ');
+    });
+
+    const submit = document.createElement('button');
+    submit.className = 'btn-primary btn-sm';
+    submit.textContent = 'Einreichen';
+    submit.addEventListener('click', () =>
+      addHomework(dozent.id, author.value, text.value, pendingAttachments)
+    );
+
+    addRow.appendChild(author);
+    addRow.appendChild(text);
+    addRow.appendChild(attachBtn);
+    addRow.appendChild(submit);
+    folder.appendChild(addRow);
+    if (attachLabel.textContent) folder.appendChild(attachLabel);
+
+    // Liste der Hausaufgaben
+    const list = document.createElement('div');
+    list.className = 'hw-list';
+    if (!dozent.homework.length) {
+      const empty = document.createElement('p');
+      empty.className = 'folder-empty';
+      empty.textContent = 'Noch keine Hausaufgaben eingereicht.';
+      list.appendChild(empty);
+    }
+    dozent.homework.forEach((hw) => {
+      list.appendChild(buildHomeworkItem(dozent, hw));
+    });
+    folder.appendChild(list);
+
+    return folder;
+  }
+
+  function buildHomeworkItem(dozent, hw) {
+    const item = document.createElement('div');
+    item.className = 'hw-item' + (hw.corrected ? ' corrected' : '');
+
+    const head = document.createElement('div');
+    head.className = 'hw-item-head';
+    const who = document.createElement('span');
+    who.className = 'hw-who';
+    who.textContent = hw.author;
+    const when = document.createElement('span');
+    when.className = 'hw-when';
+    when.textContent = 'eingereicht am ' + hw.submittedAt;
+    const status = document.createElement('span');
+    status.className = 'hw-status' + (hw.corrected ? ' done' : '');
+    status.textContent = hw.corrected ? 'Korrigiert & zurückgegeben' : 'Eingereicht';
+    const del = document.createElement('button');
+    del.className = 'icon-btn danger';
+    del.textContent = '✕';
+    del.title = 'Löschen';
+    del.addEventListener('click', () => deleteHomework(dozent.id, hw.id));
+    head.appendChild(who);
+    head.appendChild(when);
+    head.appendChild(status);
+    head.appendChild(del);
+    item.appendChild(head);
+
+    const body = document.createElement('div');
+    body.className = 'hw-body';
+    body.textContent = hw.text;
+    item.appendChild(body);
+
+    if (hw.attachments && hw.attachments.length) {
+      const att = document.createElement('div');
+      att.className = 'hw-files';
+      att.textContent = '📎 ' + hw.attachments.join(', ');
+      item.appendChild(att);
+    }
+
+    if (hw.corrected) {
+      const fb = document.createElement('div');
+      fb.className = 'hw-feedback';
+      fb.innerHTML = '<strong>Rückgabe des Dozenten:</strong> ';
+      fb.appendChild(document.createTextNode(hw.feedback || '(ohne Kommentar)'));
+      const ret = document.createElement('div');
+      ret.className = 'hw-when';
+      ret.textContent = 'zurückgegeben am ' + hw.returnedAt;
+      item.appendChild(fb);
+      item.appendChild(ret);
+    } else {
+      const correctRow = document.createElement('div');
+      correctRow.className = 'hw-correct';
+      const fbInput = document.createElement('input');
+      fbInput.type = 'text';
+      fbInput.placeholder = 'Korrektur / Feedback des Dozenten…';
+      const correctBtn = document.createElement('button');
+      correctBtn.className = 'btn-primary btn-sm';
+      correctBtn.textContent = 'Korrigieren & zurückgeben';
+      correctBtn.addEventListener('click', () =>
+        correctHomework(dozent.id, hw.id, fbInput.value)
+      );
+      correctRow.appendChild(fbInput);
+      correctRow.appendChild(correctBtn);
+      item.appendChild(correctRow);
+    }
+
+    return item;
+  }
+
+  // ===== Ordner 2: Kalender – Tests & Prüfungen =====
+
+  function startClock() {
+    const update = () => {
+      const clock = document.getElementById('liveClock');
+      if (clock) {
+        clock.textContent = new Date().toLocaleString('de-DE', {
+          weekday: 'long',
+          day: '2-digit',
+          month: 'long',
+          year: 'numeric',
+          hour: '2-digit',
+          minute: '2-digit',
+          second: '2-digit'
+        });
+      }
+    };
+    update();
+    setInterval(update, 1000);
+  }
+
+  function addExam(dozentId, title, date, time) {
+    const dozent = findDozent(dozentId);
+    if (!dozent) return;
+    if (!title.trim() || !date) {
+      showToast('Bitte Titel und Datum angeben.', true);
+      return;
+    }
+    dozent.exams.push({
+      id: uid(),
+      title: title.trim(),
+      date,
+      time: time || '00:00'
+    });
+    persist();
+    render();
+  }
+
+  function deleteExam(dozentId, examId) {
+    const dozent = findDozent(dozentId);
+    if (!dozent) return;
+    dozent.exams = dozent.exams.filter((e) => e.id !== examId);
+    persist();
+    render();
+  }
+
+  function examCountdown(dt) {
+    const diff = dt.getTime() - Date.now();
+    if (diff < 0) return 'vorbei';
+    const days = Math.floor(diff / 86400000);
+    const hours = Math.floor((diff % 86400000) / 3600000);
+    if (days > 0) return `in ${days} Tag(en), ${hours} Std.`;
+    const mins = Math.floor((diff % 3600000) / 60000);
+    return `in ${hours} Std. ${mins} Min.`;
+  }
+
+  function buildCalendarFolder(dozent) {
+    const folder = document.createElement('div');
+    folder.className = 'folder calendar-folder';
+
+    const title = document.createElement('h3');
+    title.className = 'folder-title';
+    title.textContent = '📁 Ordner: Kalender – Tests & Prüfungen';
+    folder.appendChild(title);
+
+    const clock = document.createElement('div');
+    clock.className = 'live-clock';
+    clock.id = 'liveClock';
+    folder.appendChild(clock);
+
+    // Eingabe-Bereich
+    const addRow = document.createElement('div');
+    addRow.className = 'exam-add';
+    const examTitle = document.createElement('input');
+    examTitle.type = 'text';
+    examTitle.placeholder = 'Titel (z. B. Java-Prüfung)';
+    const examDate = document.createElement('input');
+    examDate.type = 'date';
+    const examTime = document.createElement('input');
+    examTime.type = 'time';
+    const submit = document.createElement('button');
+    submit.className = 'btn-primary btn-sm';
+    submit.textContent = 'Eintragen';
+    submit.addEventListener('click', () =>
+      addExam(dozent.id, examTitle.value, examDate.value, examTime.value)
+    );
+    addRow.appendChild(examTitle);
+    addRow.appendChild(examDate);
+    addRow.appendChild(examTime);
+    addRow.appendChild(submit);
+    folder.appendChild(addRow);
+
+    // Liste kommender Tests/Prüfungen
+    const list = document.createElement('ul');
+    list.className = 'exam-list';
+    const sorted = dozent.exams
+      .slice()
+      .sort((a, b) => (a.date + a.time).localeCompare(b.date + b.time));
+
+    if (!sorted.length) {
+      const empty = document.createElement('li');
+      empty.className = 'folder-empty';
+      empty.textContent = 'Keine Tests oder Prüfungen eingetragen.';
+      list.appendChild(empty);
+    }
+
+    sorted.forEach((ex) => {
+      const dt = new Date(`${ex.date}T${ex.time || '00:00'}`);
+      const li = document.createElement('li');
+      const past = dt.getTime() < Date.now();
+      if (past) li.classList.add('past');
+
+      const info = document.createElement('div');
+      info.className = 'exam-info';
+      const t = document.createElement('span');
+      t.className = 'exam-title';
+      t.textContent = ex.title;
+      const d = document.createElement('span');
+      d.className = 'exam-date';
+      d.textContent = isNaN(dt.getTime())
+        ? `${ex.date} ${ex.time}`
+        : dt.toLocaleString('de-DE', {
+            weekday: 'long',
+            day: '2-digit',
+            month: 'long',
+            year: 'numeric',
+            hour: '2-digit',
+            minute: '2-digit'
+          });
+      info.appendChild(t);
+      info.appendChild(d);
+
+      const cd = document.createElement('span');
+      cd.className = 'exam-countdown';
+      cd.textContent = isNaN(dt.getTime()) ? '' : examCountdown(dt);
+
+      const del = document.createElement('button');
+      del.className = 'icon-btn danger';
+      del.textContent = '✕';
+      del.title = 'Löschen';
+      del.addEventListener('click', () => deleteExam(dozent.id, ex.id));
+
+      li.appendChild(info);
+      li.appendChild(cd);
+      li.appendChild(del);
+      list.appendChild(li);
+    });
+    folder.appendChild(list);
+
+    return folder;
+  }
+
   function render() {
     renderTabs();
     renderPanel();
@@ -1194,6 +1646,10 @@
   document.getElementById('videoHangup').addEventListener('click', closeVideoChat);
   document.getElementById('videoToggleAudio').addEventListener('click', toggleAudio);
   document.getElementById('videoToggleVideo').addEventListener('click', toggleVideo);
+
+  // Moderation: Melden / Alle stummschalten
+  document.getElementById('raiseHandBtn').addEventListener('click', raiseLocalHand);
+  document.getElementById('muteAllBtn').addEventListener('click', toggleMuteAll);
 
   // Teilnehmer, Unterrichts-Chat, Privat-/Gruppenchat
   document.getElementById('addParticipantBtn').addEventListener('click', showAddParticipant);
@@ -1230,9 +1686,12 @@
     state = loaded && Array.isArray(loaded.dozenten) ? loaded : { dozenten: [] };
     state.dozenten.forEach((d) => {
       if (!Array.isArray(d.chat)) d.chat = [];
+      if (!Array.isArray(d.homework)) d.homework = [];
+      if (!Array.isArray(d.exams)) d.exams = [];
     });
     activeDozentId = state.dozenten.length ? state.dozenten[0].id : null;
     setFileShareEnabled(document.getElementById('fileShareToggle').checked);
+    startClock();
     render();
   }
 

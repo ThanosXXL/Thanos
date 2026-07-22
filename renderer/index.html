@@ -2,12 +2,12 @@
 <html lang="de">
 <head>
 <meta charset="UTF-8">
-<title>Dozenten Dashboard</title>
+<title>IT Schulungsmaßnahmen</title>
 <link rel="stylesheet" href="style.css">
 </head>
 <body>
   <header class="app-header">
-    <h1>Dozenten Dashboard</h1>
+    <h1>IT Schulungsmaßnahmen</h1>
   </header>
 
   <nav class="dozent-tabs" id="dozentTabs">
@@ -82,6 +82,8 @@
         <div class="participant-strip-head">
           <span>Teilnehmer (<span id="participantCount">0</span>)</span>
           <span class="strip-hint">Teilnahme nur mit Videochat</span>
+          <button id="raiseHandBtn" class="btn-secondary btn-sm" title="Zum Sprechen melden">✋ Melden</button>
+          <button id="muteAllBtn" class="btn-secondary btn-sm" title="Alle Teilnehmer stummschalten (nur Dozent)">🔇 Alle stummschalten</button>
           <button id="addParticipantBtn" class="btn-secondary btn-sm">+ Teilnehmer</button>
         </div>
         <div class="participant-add" id="participantAdd" hidden>

@@ -1,4 +1,4 @@
-# Dozenten Dashboard
+# IT Schulungsmaßnahmen
 
 Desktop-Dashboard (Electron) zur Verwaltung von bis zu vier Dozenten. Jeder Dozent hat drei Listen:
 
@@ -29,6 +29,18 @@ Das Video-Chat-Fenster ist als **Unterrichts-Ansicht** aufgebaut:
   **⏸ Pause** lässt sich eine Pause für alle sichtbar eintragen.
 - **Privat- & Gruppenchat** (darunter): Klick auf einen Teilnehmer öffnet einen **Privatchat**;
   über **+ Gruppe** lassen sich mehrere Teilnehmer auswählen und zu einem **Gruppenchat** zusammenfassen.
+- **Moderation**: Der Dozent kann über **🔇 Alle stummschalten** alle Teilnehmer stummschalten – dann
+  ist nur der Dozent zu hören. Teilnehmer können sich per **✋ Melden** melden; der Dozent schaltet die
+  gemeldete Person dann über **🔊** frei, sodass sie sprechen kann und alle es hören.
+
+Unter jedem Dozenten-Panel gibt es außerdem zwei Ordner:
+
+- **📁 Ordner: Hausaufgaben** – Teilnehmer reichen Hausaufgaben ein (mit optionalem Datei-Anhang);
+  im selben Ordner korrigiert der Dozent sie mit Feedback und gibt sie über
+  **Korrigieren & zurückgeben** zurück.
+- **📁 Ordner: Kalender – Tests & Prüfungen** – ein Echtzeit-Kalender mit laufender Uhr (Wochentag,
+  Datum, Monat, Jahr, Uhrzeit). Anstehende Tests/Prüfungen lassen sich mit Titel, Datum und Uhrzeit
+  eintragen und werden mit Countdown angezeigt.
 
 Im Video-Chat-Fenster gibt es außerdem eine **Dateifreigabe**:
 
