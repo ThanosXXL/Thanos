@@ -20,6 +20,16 @@ Zusätzlich bietet jedes Dozenten-Panel eine Werkzeugleiste mit:
   Werkzeugleiste als auch direkt im Video-Chat-Fenster. Der Status (*Mikro aus* / *Kamera aus*)
   erscheint als Markierung in der eigenen Kachel.
 
+Das Video-Chat-Fenster ist als **Unterrichts-Ansicht** aufgebaut:
+
+- **Teilnehmer-Leiste** (oben): kleine Live-Kacheln aller Teilnehmer mit Namen und Gesamtanzahl.
+  Über **+ Teilnehmer** treten weitere Personen bei – die Teilnahme erfolgt immer per Videochat.
+- **Live-Übertragung – Unterricht** (links): das große Video der Unterrichtsübertragung.
+- **Unterrichts-Chat** (rechts daneben): Chat für **alle** Teilnehmer, z. B. für Fragen. Über
+  **⏸ Pause** lässt sich eine Pause für alle sichtbar eintragen.
+- **Privat- & Gruppenchat** (darunter): Klick auf einen Teilnehmer öffnet einen **Privatchat**;
+  über **+ Gruppe** lassen sich mehrere Teilnehmer auswählen und zu einem **Gruppenchat** zusammenfassen.
+
 Im Video-Chat-Fenster gibt es außerdem eine **Dateifreigabe**:
 
 - Ein-/Ausschalter, der die Funktion aktiviert.

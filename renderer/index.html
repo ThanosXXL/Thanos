@@ -77,19 +77,62 @@
         <button id="closeVideoChat" class="icon-btn danger" title="Schließen">✕</button>
       </div>
 
-      <div class="video-tiles">
-        <div class="video-tile">
-          <div class="tile-placeholder" id="remotePlaceholder">
-            <span class="tile-avatar">👤</span>
-            <span class="tile-wait">Warte auf Dozent…</span>
-          </div>
-          <video id="remoteVideo" autoplay playsinline></video>
-          <div class="tile-label">Dozent</div>
+      <!-- Teilnehmer-Leiste: kleine Live-Kacheln mit Namen + Gesamtanzahl -->
+      <div class="participant-strip">
+        <div class="participant-strip-head">
+          <span>Teilnehmer (<span id="participantCount">0</span>)</span>
+          <span class="strip-hint">Teilnahme nur mit Videochat</span>
+          <button id="addParticipantBtn" class="btn-secondary btn-sm">+ Teilnehmer</button>
         </div>
-        <div class="video-tile">
-          <video id="localVideo" autoplay playsinline muted></video>
-          <div class="tile-label">Ich</div>
+        <div class="participant-add" id="participantAdd" hidden>
+          <input id="newParticipantName" type="text" placeholder="Name des Teilnehmers" maxlength="40">
+          <button id="confirmParticipantBtn" class="btn-primary btn-sm">Hinzufügen</button>
+          <button id="cancelParticipantBtn" class="btn-secondary btn-sm">Abbrechen</button>
+        </div>
+        <div class="participant-thumbs" id="participantThumbs"></div>
+      </div>
+
+      <!-- Unterricht: links Live-Übertragung, rechts Chat für alle Teilnehmer -->
+      <div class="lesson-area">
+        <div class="lesson-video">
+          <video id="lessonVideo" autoplay playsinline muted></video>
           <div class="tile-status" id="localStatus"></div>
+          <div class="lesson-video-label">Live-Übertragung – Unterricht</div>
+        </div>
+        <div class="lesson-chat">
+          <div class="lesson-chat-head">
+            <span>Unterrichts-Chat</span>
+            <button id="pauseBtn" class="btn-secondary btn-sm" title="Pause eintragen">⏸ Pause</button>
+          </div>
+          <div class="lesson-chat-messages" id="lessonChatMessages"></div>
+          <div class="add-item-row lesson-chat-input">
+            <input id="lessonChatInput" type="text" placeholder="Frage oder Nachricht an alle…">
+            <button id="lessonChatSend">Senden</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Privat- und Gruppenchat -->
+      <div class="direct-chat">
+        <div class="direct-chat-head">
+          <span>Privat- &amp; Gruppenchat</span>
+          <button id="newGroupBtn" class="btn-secondary btn-sm">+ Gruppe</button>
+        </div>
+
+        <div class="group-builder" id="groupBuilder" hidden>
+          <input id="groupNameInput" type="text" placeholder="Gruppenname">
+          <div class="group-members" id="groupMembers"></div>
+          <div class="group-builder-actions">
+            <button id="createGroupBtn" class="btn-primary btn-sm">Gruppe erstellen</button>
+            <button id="cancelGroupBtn" class="btn-secondary btn-sm">Abbrechen</button>
+          </div>
+        </div>
+
+        <div class="direct-chat-body">
+          <ul class="conversation-list" id="conversationList"></ul>
+          <div class="conversation-view" id="conversationView">
+            <div class="conversation-empty">Teilnehmer oder Gruppe anklicken, um zu chatten.</div>
+          </div>
         </div>
       </div>
 
