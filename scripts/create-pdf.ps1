@@ -16,7 +16,9 @@
 #>
 
 param(
-    [string]$OutDir = (Split-Path -Parent $PSScriptRoot)
+    [string]$OutDir = (Split-Path -Parent $PSScriptRoot),
+    # Optionales Plattform-Label (z. B. Windows, Mac, Android, iOS) für Dateiname und Untertitel.
+    [string]$Label = ''
 )
 
 $ErrorActionPreference = 'Stop'
@@ -24,8 +26,11 @@ $ErrorActionPreference = 'Stop'
 $year = (Get-Date).Year
 $genDate = (Get-Date).ToString('dd.MM.yyyy HH:mm')
 
-$htmlPath = Join-Path $OutDir 'IT-Schulungsmassnahmen-Demo.html'
-$pdfPath = Join-Path $OutDir 'IT-Schulungsmassnahmen-Demo.pdf'
+$suffix = if ($Label) { '-' + ($Label -replace '[^\w\-]', '') } else { '' }
+$platformNote = if ($Label) { " &middot; Ansicht f&uuml;r $Label" } else { '' }
+
+$htmlPath = Join-Path $OutDir "IT-Schulungsmassnahmen-Demo$suffix.html"
+$pdfPath = Join-Path $OutDir "IT-Schulungsmassnahmen-Demo$suffix.pdf"
 
 # --- Beispielbilder (Mockups) als eingebettete SVG-Grafiken ---
 $imgDashboard = @'
@@ -135,7 +140,7 @@ $html = @"
   <div class="page">
     <div class="hero">
       <h1>IT Schulungsmaßnahmen</h1>
-      <p class="subtitle">Demo-Broschüre · Desktop-Dashboard für Dozenten, Teilnehmende und Unterricht</p>
+      <p class="subtitle">Demo-Broschüre · Desktop-Dashboard für Dozenten, Teilnehmende und Unterricht$platformNote</p>
     </div>
 
     <div class="slide">

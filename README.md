@@ -73,22 +73,40 @@ Für eine schnelle Vorführung gibt es eine **Demo-Version** mit vorbefüllten B
 (zwei Dozenten inkl. Aufgaben, Hausaufgaben und anstehenden Prüfungen). Die Demo nutzt eine
 eigene Datendatei und lässt die echten Daten unangetastet.
 
-PowerShell-Skripte (PowerShell 7+/`pwsh`; unter Windows auch Windows PowerShell) im Ordner `scripts/`:
+PowerShell-Skripte (PowerShell 7+/`pwsh`; unter Windows auch Windows PowerShell) im Ordner `scripts/`.
+
+**Desktop (interaktive App):**
 
 | Plattform            | Befehl                                                        |
 | -------------------- | ------------------------------------------------------------ |
 | Windows              | `powershell -ExecutionPolicy Bypass -File scripts\demo-windows.ps1` |
 | macOS                | `pwsh ./scripts/demo-macos.ps1`                              |
-| Linux                | `pwsh ./scripts/demo-linux.ps1`                              |
+| Linux (Bonus)        | `pwsh ./scripts/demo-linux.ps1`                              |
 | Automatisch erkennen | `pwsh ./scripts/demo-all.ps1`                                |
 
-Die Skripte prüfen Node.js, installieren bei Bedarf die Abhängigkeiten, setzen
+Diese Skripte prüfen Node.js, installieren bei Bedarf die Abhängigkeiten, setzen
 `DASHBOARD_DEMO=1` und starten die App. Alternativ manuell:
 
 ```bash
 # macOS/Linux
 DASHBOARD_DEMO=1 npm start
 ```
+
+**Mobil (Android / iOS):**
+
+Die App basiert auf **Electron** und läuft daher **nicht nativ auf Android oder iOS**.
+Für Mobilgeräte ist die Demo die gestaltete **PDF-Broschüre** (mit Beispielbildern im
+bekannten Farbschema). Die folgenden Skripte werden auf einem Rechner ausgeführt und
+erzeugen die passende PDF, die anschließend auf das Gerät übertragen und dort geöffnet wird:
+
+| Plattform | Befehl                             | Ergebnis                                   |
+| --------- | ---------------------------------- | ------------------------------------------ |
+| Android   | `pwsh ./scripts/demo-android.ps1`  | `IT-Schulungsmassnahmen-Demo-Android.pdf`  |
+| iOS       | `pwsh ./scripts/demo-ios.ps1`      | `IT-Schulungsmassnahmen-Demo-iOS.pdf`      |
+
+> Ein echtes natives Mobil-App-Paket würde einen anderen Technologie-Stack erfordern
+> (z. B. eine PWA oder einen Capacitor-/React-Native-Wrapper) – das ist bewusst nicht Teil
+> dieses Desktop-Projekts.
 
 ## Demo-PDF erzeugen
 
