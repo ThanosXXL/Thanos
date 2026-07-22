@@ -22,6 +22,23 @@ Ein Reminder-Hinweis in der Kopfzeile macht ab 12:00 Uhr darauf aufmerksam, sola
 noch nicht ausgefüllt ist. Alle Daten werden ebenfalls lokal im Benutzerdatenverzeichnis der App gespeichert
 (separat von den Dozenten-Daten).
 
+## Live-Demo (Bauplanphase)
+
+Unter `docs/demo.html` liegt eine eigenständige, interaktive Klick-Demo ("Bauplanphase") zum Zeigen der
+Kernfunktionen (Tagesreport, Status, Bestellstatus, Screenshots, Team-Einladung) – ganz ohne Installation
+im Browser. Die Demo speichert bewusst nichts dauerhaft (nur im Arbeitsspeicher des Browser-Tabs); ein
+Banner weist darauf hin, dass in der echten App die Daten stattdessen per Cloud mit dem Team synchronisiert
+würden.
+
+So bekommt sie einen öffentlichen Link über GitHub Pages:
+
+1. Repository-Einstellungen öffnen → **Settings → Pages**
+2. Unter "Build and deployment" → **Source: Deploy from a branch** wählen
+3. Branch auf diesen Branch (bzw. nach dem Merge auf den Standard-Branch) und Ordner **`/docs`** stellen
+4. Speichern – GitHub zeigt danach die Demo-URL an (z. B. `https://<user>.github.io/<repo>/`)
+
+Alternativ funktioniert `docs/demo.html` auch einfach lokal per Doppelklick im Browser, ganz ohne Server.
+
 ## Fertige Installer herunterladen (ohne Terminal)
 
 Unter **[Releases](../../releases)** stehen fertig gebaute Dateien zum Anklicken bereit:
