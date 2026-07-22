@@ -9,7 +9,22 @@ Desktop-Dashboard (Electron) zur Verwaltung von bis zu vier Dozenten. Jeder Doze
 Projekte lassen sich per Klick von "Offene Projekte" nach "Erledigte Projekte" verschieben (und zurück).
 Alle Daten werden lokal gespeichert (im Benutzerdatenverzeichnis der App) und bleiben nach dem Neustart erhalten.
 
-## Installation
+## Fertigen Installer herunterladen (ohne Terminal)
+
+Unter **[Releases](../../releases)** stehen fertig gebaute Installationsdateien zum Anklicken bereit:
+
+- Windows: `.exe` (Installer)
+- macOS: `.dmg`
+- Linux: `.AppImage`
+
+Einfach die passende Datei für dein Betriebssystem herunterladen und ausführen – kein `npm install`,
+kein Terminal nötig.
+
+Neue Installer werden automatisch von GitHub Actions gebaut, sobald ein neuer Versions-Tag
+(z. B. `v1.0.0`) gepusht wird, oder manuell über den Button **"Run workflow"** im Tab
+**Actions → Build & Release Desktop App**.
+
+## Installation (für Entwicklung)
 
 ```bash
 npm install
