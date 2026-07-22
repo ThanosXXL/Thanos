@@ -67,6 +67,43 @@ Neue Installer werden automatisch von GitHub Actions gebaut, sobald ein neuer Ve
 (z. B. `v1.0.0`) gepusht wird, oder manuell über den Button **"Run workflow"** im Tab
 **Actions → Build & Release Desktop App**.
 
+## Demo-Version starten (PowerShell)
+
+Für eine schnelle Vorführung gibt es eine **Demo-Version** mit vorbefüllten Beispieldaten
+(zwei Dozenten inkl. Aufgaben, Hausaufgaben und anstehenden Prüfungen). Die Demo nutzt eine
+eigene Datendatei und lässt die echten Daten unangetastet.
+
+PowerShell-Skripte (PowerShell 7+/`pwsh`; unter Windows auch Windows PowerShell) im Ordner `scripts/`:
+
+| Plattform            | Befehl                                                        |
+| -------------------- | ------------------------------------------------------------ |
+| Windows              | `powershell -ExecutionPolicy Bypass -File scripts\demo-windows.ps1` |
+| macOS                | `pwsh ./scripts/demo-macos.ps1`                              |
+| Linux                | `pwsh ./scripts/demo-linux.ps1`                              |
+| Automatisch erkennen | `pwsh ./scripts/demo-all.ps1`                                |
+
+Die Skripte prüfen Node.js, installieren bei Bedarf die Abhängigkeiten, setzen
+`DASHBOARD_DEMO=1` und starten die App. Alternativ manuell:
+
+```bash
+# macOS/Linux
+DASHBOARD_DEMO=1 npm start
+```
+
+## Demo-PDF erzeugen
+
+`scripts/create-pdf.ps1` erstellt eine gestaltete Demo-Broschüre als **PDF** im bekannten
+Farbschema (Sandton/Beige-Hintergrund, weiße Folienfläche, dunkelrote Headlines) mit
+Beispielbildern und Copyright-Zeile am unteren Rand:
+
+```
+pwsh ./scripts/create-pdf.ps1
+```
+
+Das Skript baut eine HTML-Datei und rendert sie über einen vorhandenen Chromium/Chrome/Edge
+headless zu `IT-Schulungsmassnahmen-Demo.pdf`. Ist kein Browser vorhanden, bleibt die
+HTML-Datei erhalten und kann manuell über „Drucken → Als PDF speichern" exportiert werden.
+
 ## Installation (für Entwicklung)
 
 ```bash

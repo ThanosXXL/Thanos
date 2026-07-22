@@ -11,14 +11,91 @@ const path = require('path');
 const fs = require('fs');
 const https = require('https');
 
-const dataFilePath = path.join(app.getPath('userData'), 'dozenten-data.json');
+// Demo-Modus: eigene Datendatei + vorbefüllte Beispieldaten (DASHBOARD_DEMO=1)
+const DEMO = process.env.DASHBOARD_DEMO === '1';
+const dataFilePath = path.join(
+  app.getPath('userData'),
+  DEMO ? 'dozenten-demo.json' : 'dozenten-data.json'
+);
 const settingsFilePath = path.join(app.getPath('userData'), 'dashboard-settings.json');
+
+// Beispieldaten für die Demo-Version
+function demoData() {
+  const d = (offsetDays) => {
+    const dt = new Date();
+    dt.setDate(dt.getDate() + offsetDays);
+    return dt.toISOString().slice(0, 10);
+  };
+  return {
+    dozenten: [
+      {
+        id: 'demo-mueller',
+        name: 'Frau Müller (Java)',
+        todos: [
+          { id: 't1', text: 'Folien für Vererbung vorbereiten', done: false },
+          { id: 't2', text: 'Quiz Woche 3 einsammeln', done: true }
+        ],
+        openProjects: [{ id: 'p1', text: 'Abschlussprojekt: To-Do-App', done: false }],
+        doneProjects: [{ id: 'p2', text: 'Grundlagen-Modul', done: false }],
+        chat: [
+          { id: 'c1', text: 'Willkommen im Java-Kurs!', time: '01.07. 09:00' }
+        ],
+        homework: [
+          {
+            id: 'h1',
+            author: 'Max Mustermann',
+            text: 'Aufgabe 2: Klassen und Objekte',
+            attachments: ['Aufgabe2.zip'],
+            submittedAt: '05.07.2026, 18:20',
+            feedback: 'Sehr gut gelöst, Getter/Setter noch ergänzen.',
+            corrected: true,
+            returnedAt: '06.07.2026, 08:15'
+          },
+          {
+            id: 'h2',
+            author: 'Erika Beispiel',
+            text: 'Aufgabe 3: Vererbung',
+            attachments: [],
+            submittedAt: '10.07.2026, 20:05',
+            feedback: '',
+            corrected: false,
+            returnedAt: null
+          }
+        ],
+        exams: [
+          { id: 'e1', title: 'Java-Zwischentest', date: d(3), time: '10:00' },
+          { id: 'e2', title: 'Abschlussprüfung Java', date: d(21), time: '09:30' }
+        ]
+      },
+      {
+        id: 'demo-schmidt',
+        name: 'Herr Schmidt (Netzwerke)',
+        todos: [{ id: 't3', text: 'Lab: Subnetting vorbereiten', done: false }],
+        openProjects: [{ id: 'p3', text: 'Projekt: Heimnetz planen', done: false }],
+        doneProjects: [],
+        chat: [],
+        homework: [],
+        exams: [{ id: 'e3', title: 'Test: OSI-Modell', date: d(7), time: '14:00' }]
+      }
+    ]
+  };
+}
 
 function loadData() {
   try {
     const raw = fs.readFileSync(dataFilePath, 'utf-8');
     return JSON.parse(raw);
   } catch (err) {
+    // In der Demo beim ersten Start mit Beispieldaten füllen
+    if (DEMO) {
+      const seed = demoData();
+      try {
+        saveData(seed);
+      } catch (e) {
+        /* Schreiben optional */
+      }
+      return seed;
+    }
     return { dozenten: [] };
   }
 }
@@ -130,6 +207,12 @@ function createWindow() {
 
   win.setMenuBarVisibility(false);
   win.loadFile(path.join(__dirname, 'renderer', 'index.html'));
+
+  if (DEMO) {
+    win.webContents.once('did-finish-load', () => {
+      win.setTitle('IT Schulungsmaßnahmen — Demo');
+    });
+  }
 }
 
 ipcMain.handle('load-data', () => {
