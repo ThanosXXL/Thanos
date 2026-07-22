@@ -37,6 +37,13 @@ So bekommt sie einen öffentlichen Link über GitHub Pages:
 3. Branch auf diesen Branch (bzw. nach dem Merge auf den Standard-Branch) und Ordner **`/docs`** stellen
 4. Speichern – GitHub zeigt danach die Demo-URL an (z. B. `https://<user>.github.io/<repo>/`)
 
+## Handbücher (PDF)
+
+Unter [`docs/handbuecher/`](docs/handbuecher/) liegen die HTML-Quellen der PDF-Handbücher (PowerShell-
+Download-Skripte, Benutzerhandbuch) samt Design-Standard und Anleitung zum Neu-Erzeugen der PDFs. Jedes
+künftige Handbuch/PDF in diesem Projekt folgt demselben Muster: Orange/Schwarz-auf-Weiß, 3D-isometrische
+Illustrationen, Copyright-Block ganz unten.
+
 Alternativ funktioniert `docs/demo.html` auch einfach lokal per Doppelklick im Browser, ganz ohne Server.
 
 ## Fertige Installer herunterladen (ohne Terminal)
