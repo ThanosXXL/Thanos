@@ -9,6 +9,27 @@ Desktop-Dashboard (Electron) zur Verwaltung von bis zu vier Dozenten. Jeder Doze
 Projekte lassen sich per Klick von "Offene Projekte" nach "Erledigte Projekte" verschieben (und zurück).
 Alle Daten werden lokal gespeichert (im Benutzerdatenverzeichnis der App) und bleiben nach dem Neustart erhalten.
 
+Zusätzlich bietet jedes Dozenten-Panel eine Werkzeugleiste mit:
+
+- **📷 Screenshot** – nimmt den gesamten Bildschirm auf.
+- **✂️ Sniping** – Bereichsauswahl-Screenshot: Ausschnitt mit der Maus aufziehen (ESC bricht ab).
+  Aufnahmen werden im Bilder-Ordner gespeichert und – sofern ein Google-Drive-Token hinterlegt
+  ist (Button **⚙ Drive**) – automatisch nach Google Drive hochgeladen.
+- **🎥 Video-Chat** – öffnet den Video-Live-Chat mit den Kacheln *Dozent* und *Ich*.
+- **🎤 Audio an/aus** und **📹 Video an/aus** – Umschalter für Mikrofon und Kamera, sowohl in der
+  Werkzeugleiste als auch direkt im Video-Chat-Fenster. Der Status (*Mikro aus* / *Kamera aus*)
+  erscheint als Markierung in der eigenen Kachel.
+
+Im Video-Chat-Fenster gibt es außerdem eine **Dateifreigabe**:
+
+- Ein-/Ausschalter, der die Funktion aktiviert.
+- **📁 Datei aus Ordner öffnen** (nur bei eingeschalteter Freigabe) – öffnet den Datei-Dialog des Geräts.
+- Nach der Auswahl kann die Datei an **Nur Dozent** oder **Alle Teilnehmer** geteilt werden; geteilte
+  Dateien erscheinen in einer Liste. Ein kompakter 📎-Button in der Steuerleiste öffnet die Auswahl direkt.
+
+> Hinweis: Der Google-Drive-Upload nutzt einen manuell hinterlegten OAuth-Access-Token; ohne Token
+> wird der Screenshot ausschließlich lokal gespeichert.
+
 ## Fertigen Installer herunterladen (ohne Terminal)
 
 Unter **[Releases](../../releases)** stehen fertig gebaute Installationsdateien zum Anklicken bereit:

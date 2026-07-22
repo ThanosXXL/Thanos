@@ -45,6 +45,90 @@
     </div>
   </div>
 
+  <!-- Modal: Google-Drive-Einstellungen -->
+  <div class="modal-overlay" id="settingsModal">
+    <div class="modal">
+      <h2>Google Drive verbinden</h2>
+      <p class="modal-hint">
+        Füge einen gültigen OAuth-Access-Token mit Drive-Berechtigung ein.
+        Screenshots werden dann beim Speichern automatisch nach Google Drive hochgeladen.
+      </p>
+      <input type="text" id="driveTokenInput" placeholder="Google Drive Access-Token" autocomplete="off">
+      <div class="modal-actions">
+        <button id="cancelSettings" class="btn-secondary">Abbrechen</button>
+        <button id="saveSettingsBtn" class="btn-primary">Speichern</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Sniping-Overlay: Bereichsauswahl auf dem eingefrorenen Screenshot -->
+  <div class="snip-overlay" id="snipOverlay">
+    <img id="snipImage" class="snip-image" alt="">
+    <div class="snip-dim"></div>
+    <div class="snip-selection" id="snipSelection"></div>
+    <div class="snip-hint">Bereich mit der Maus aufziehen &middot; ESC zum Abbrechen</div>
+  </div>
+
+  <!-- Video-Live-Chat-Fenster -->
+  <div class="video-overlay" id="videoOverlay">
+    <div class="video-window">
+      <div class="video-window-header">
+        <h2 id="videoChatTitle">Video-Live-Chat</h2>
+        <button id="closeVideoChat" class="icon-btn danger" title="Schließen">✕</button>
+      </div>
+
+      <div class="video-tiles">
+        <div class="video-tile">
+          <div class="tile-placeholder" id="remotePlaceholder">
+            <span class="tile-avatar">👤</span>
+            <span class="tile-wait">Warte auf Dozent…</span>
+          </div>
+          <video id="remoteVideo" autoplay playsinline></video>
+          <div class="tile-label">Dozent</div>
+        </div>
+        <div class="video-tile">
+          <video id="localVideo" autoplay playsinline muted></video>
+          <div class="tile-label">Ich</div>
+          <div class="tile-status" id="localStatus"></div>
+        </div>
+      </div>
+
+      <!-- Dateifreigabe -->
+      <div class="file-share" id="fileShare">
+        <div class="file-share-head">
+          <label class="switch">
+            <input type="checkbox" id="fileShareToggle">
+            <span class="switch-slider"></span>
+          </label>
+          <span class="file-share-title">Dateifreigabe</span>
+          <button id="openFileBtn" class="btn-secondary btn-sm" disabled>📁 Datei aus Ordner öffnen</button>
+        </div>
+
+        <div class="file-share-pending" id="fileSharePending" hidden>
+          <span class="pending-name" id="pendingFileName"></span>
+          <select id="shareTargetSelect">
+            <option value="dozent">Nur Dozent</option>
+            <option value="alle">Alle Teilnehmer</option>
+          </select>
+          <button id="confirmShareBtn" class="btn-primary btn-sm">Teilen</button>
+          <button id="cancelShareBtn" class="btn-secondary btn-sm">Verwerfen</button>
+        </div>
+
+        <ul class="shared-file-list" id="sharedFileList"></ul>
+      </div>
+
+      <div class="video-controls">
+        <button id="videoToggleAudio" class="btn-secondary" data-media-toggle="audio">🎤 Audio aus</button>
+        <button id="videoToggleVideo" class="btn-secondary" data-media-toggle="video">📹 Video aus</button>
+        <button id="videoShareFile" class="btn-secondary" title="Datei teilen">📎</button>
+        <button id="videoHangup" class="btn-danger">Auflegen</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Kurzmeldungen -->
+  <div class="toast" id="toast"></div>
+
   <script src="renderer.js"></script>
 </body>
 </html>
