@@ -177,6 +177,48 @@
     border-top: 1px solid #eeeeee;
     padding-top: 8px;
   }
+  /* ---------- Terminal-Beispielbild ---------- */
+  .terminal {
+    background: #0d0f14;
+    border-radius: 8px;
+    overflow: hidden;
+    margin-top: 10px;
+    box-shadow: 0 6px 16px rgba(0,0,0,0.15);
+  }
+  .terminal-bar {
+    background: #21252b;
+    padding: 7px 10px;
+    display: flex;
+    gap: 6px;
+    align-items: center;
+  }
+  .terminal-dot { width: 9px; height: 9px; border-radius: 50%; }
+  .terminal-dot.red { background: #ff5f56; }
+  .terminal-dot.yellow { background: #ffbd2e; }
+  .terminal-dot.green { background: #27c93f; }
+  .terminal-title {
+    margin-left: 6px;
+    font-size: 9.5px;
+    color: #8d97a3;
+    font-family: 'Consolas', 'Courier New', monospace;
+  }
+  .terminal-body {
+    padding: 12px 14px;
+    font-family: 'Consolas', 'Courier New', monospace;
+    font-size: 10.3px;
+    line-height: 1.65;
+    color: #e6e6e6;
+    white-space: pre-wrap;
+  }
+  .terminal-body .prompt { color: #f2660c; }
+  .terminal-body .out { color: #8be28b; }
+  .example-caption {
+    font-size: 9.5px;
+    color: #999999;
+    margin-top: 5px;
+    font-style: italic;
+  }
+
   .copyright-block {
     margin-top: 22px;
     text-align: center;
@@ -276,6 +318,15 @@ $release = Invoke-RestMethod -Uri "https://api.github.com/repos/$repo/releases/l
 $asset = $release.assets | Where-Object { $_.name -like "*.exe" } | Select-Object -First 1
 Invoke-WebRequest -Uri $asset.browser_download_url -OutFile $asset.name
 Write-Host "Heruntergeladen: $($asset.name)"</pre>
+      <div class="terminal">
+        <div class="terminal-bar">
+          <div class="terminal-dot red"></div><div class="terminal-dot yellow"></div><div class="terminal-dot green"></div>
+          <div class="terminal-title">PowerShell</div>
+        </div>
+        <div class="terminal-body"><span class="prompt">PS C:\Downloads&gt;</span> .\download-windows.ps1
+<span class="out">Heruntergeladen: Dozenten Dashboard Setup 1.0.0.exe</span></div>
+      </div>
+      <div class="example-caption">Beispiel: erwartete Ausgabe nach dem Ausfuehren</div>
       <div class="footer-note">Anschliessend die heruntergeladene .exe-Datei per Doppelklick ausfuehren.</div>
     </div>
 
@@ -300,6 +351,15 @@ $release = Invoke-RestMethod -Uri "https://api.github.com/repos/$repo/releases/l
 $asset = $release.assets | Where-Object { $_.name -like "*.dmg" } | Select-Object -First 1
 Invoke-WebRequest -Uri $asset.browser_download_url -OutFile $asset.name
 Write-Host "Heruntergeladen: $($asset.name)"</pre>
+      <div class="terminal">
+        <div class="terminal-bar">
+          <div class="terminal-dot red"></div><div class="terminal-dot yellow"></div><div class="terminal-dot green"></div>
+          <div class="terminal-title">pwsh</div>
+        </div>
+        <div class="terminal-body"><span class="prompt">PS /Users/du/Downloads&gt;</span> ./download-macos.ps1
+<span class="out">Heruntergeladen: Dozenten Dashboard-1.0.0.dmg</span></div>
+      </div>
+      <div class="example-caption">Beispiel: erwartete Ausgabe nach dem Ausfuehren</div>
       <div class="footer-note">Die .dmg-Datei oeffnen und die App in den Programme-Ordner ziehen.</div>
     </div>
 
@@ -324,6 +384,15 @@ $release = Invoke-RestMethod -Uri "https://api.github.com/repos/$repo/releases/l
 $asset = $release.assets | Where-Object { $_.name -like "*android*.apk" } | Select-Object -First 1
 Invoke-WebRequest -Uri $asset.browser_download_url -OutFile $asset.name
 Write-Host "Heruntergeladen: $($asset.name) - danach aufs Android-Geraet uebertragen und antippen."</pre>
+      <div class="terminal">
+        <div class="terminal-bar">
+          <div class="terminal-dot red"></div><div class="terminal-dot yellow"></div><div class="terminal-dot green"></div>
+          <div class="terminal-title">PowerShell</div>
+        </div>
+        <div class="terminal-body"><span class="prompt">PS C:\Downloads&gt;</span> .\download-android.ps1
+<span class="out">Heruntergeladen: dozenten-dashboard-android.apk - danach aufs Android-Geraet uebertragen und antippen.</span></div>
+      </div>
+      <div class="example-caption">Beispiel: erwartete Ausgabe nach dem Ausfuehren</div>
       <div class="footer-note">Auf dem Geraet einmalig "Installation aus unbekannter Quelle zulassen" bestaetigen.</div>
     </div>
 
@@ -346,6 +415,17 @@ Write-Host "Heruntergeladen: $($asset.name) - danach aufs Android-Geraet uebertr
 <pre>Write-Host "Fuer iOS gibt es keine herunterladbare .ipa-Datei (erfordert kostenpflichtiges Apple-Developer-Konto)."
 Write-Host "Stattdessen: docs/demo.html bzw. renderer/index.html per GitHub Pages veroeffentlichen,"
 Write-Host "dann auf dem iPhone/iPad in Safari oeffnen -> Teilen -> 'Zum Home-Bildschirm' antippen."</pre>
+      <div class="terminal">
+        <div class="terminal-bar">
+          <div class="terminal-dot red"></div><div class="terminal-dot yellow"></div><div class="terminal-dot green"></div>
+          <div class="terminal-title">PowerShell</div>
+        </div>
+        <div class="terminal-body"><span class="prompt">PS C:\Downloads&gt;</span> .\ios-hinweis.ps1
+<span class="out">Fuer iOS gibt es keine herunterladbare .ipa-Datei (erfordert kostenpflichtiges Apple-Developer-Konto).
+Stattdessen: docs/demo.html bzw. renderer/index.html per GitHub Pages veroeffentlichen,
+dann auf dem iPhone/iPad in Safari oeffnen -&gt; Teilen -&gt; 'Zum Home-Bildschirm' antippen.</span></div>
+      </div>
+      <div class="example-caption">Beispiel: erwartete Ausgabe nach dem Ausfuehren</div>
       <div class="footer-note">Die App startet danach im Vollbild vom Home-Bildschirm aus, wie eine echte App.</div>
     </div>
 

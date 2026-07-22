@@ -115,6 +115,25 @@
 
   .toc-hint { text-align: center; font-size: 11px; color: #888888; margin-top: 4px; }
 
+  .example-figure {
+    text-align: center;
+    margin: 0 0 26px;
+    page-break-inside: avoid;
+  }
+  .example-figure img {
+    max-width: 260px;
+    width: 100%;
+    border: 1px solid #333b46;
+    border-radius: 10px;
+    box-shadow: 0 6px 18px rgba(0,0,0,0.18);
+  }
+  .example-caption {
+    font-size: 10.5px;
+    color: #888888;
+    margin-top: 8px;
+    font-style: italic;
+  }
+
   .copyright-block { margin-top: 34px; text-align: center; }
   .copyright-block .copyright-line { font-size: 11px; font-weight: 700; color: #111111; }
   .copyright-block .copyright-note {
@@ -129,15 +148,11 @@
     <div class="eyebrow">Dozenten Dashboard &middot; Bauplanphase</div>
     <h1>Benutzer<span class="orange">handbuch</span></h1>
     <div class="sub">
-      Ueberblick ueber die Dozenten-Verwaltung und die Baustelle-Tagesreport-Ansicht -
+      Ueberblick ueber die Baustelle-Tagesreport-Ansicht -
       Funktionen, Bedienung und Installation auf einen Blick.
     </div>
 
     <div class="cover-devices">
-      <div>
-        <div class="iso-wrap"><div class="iso-device"><div class="iso-face iso-top">DOZ</div><div class="iso-face iso-side-r"></div><div class="iso-face iso-side-b"></div></div></div>
-        <div class="device-label">Dozenten</div>
-      </div>
       <div>
         <div class="iso-wrap"><div class="iso-device"><div class="iso-face iso-top">TR</div><div class="iso-face iso-side-r"></div><div class="iso-face iso-side-b"></div></div></div>
         <div class="device-label">Tagesreport</div>
@@ -152,28 +167,15 @@
       </div>
     </div>
 
-    <div class="toc-hint">Dozenten-Verwaltung &middot; Tagesreport &middot; Status &middot; Bestellstatus &middot; Screenshots &middot; Installation</div>
+    <div class="toc-hint">Tagesreport &middot; Status &middot; Bestellstatus &middot; Screenshots &middot; Installation</div>
   </div>
 
   <!-- ===================== INHALT ===================== -->
   <div class="page">
 
-    <div class="section">
-      <div class="section-header">
-        <div class="iso-wrap" style="width:70px; height:82px;">
-          <div class="iso-device" style="width:56px; height:34px;"><div class="iso-face iso-top">DOZ</div><div class="iso-face iso-side-r"></div><div class="iso-face iso-side-b"></div></div>
-        </div>
-        <div class="section-meta">
-          <h2 class="section-title">1&nbsp;&middot;&nbsp;Dozenten-Verwaltung</h2>
-          <p>Bis zu vier Dozenten, jeder mit drei eigenen Listen.</p>
-        </div>
-      </div>
-      <ul class="feature-list">
-        <li><b>Liste 1 – To-Do-Liste:</b> Aufgaben anlegen, per Haekchen als erledigt markieren.</li>
-        <li><b>Liste 2 – Offene Projekte:</b> laufende Projekte des Dozenten.</li>
-        <li><b>Liste 3 – Erledigte Projekte:</b> per Klick aus "Offene Projekte" verschoben (und zurueck).</li>
-        <li>Alle Daten werden lokal auf dem Geraet gespeichert und bleiben nach dem Neustart erhalten.</li>
-      </ul>
+    <div class="example-figure">
+      <img src="assets/tagesreport-beispiel.png" alt="Beispielansicht Baustelle Tagesreport">
+      <div class="example-caption">Beispielansicht: die Baustelle-Tagesreport-Seite in der App</div>
     </div>
 
     <div class="section">
@@ -182,7 +184,7 @@
           <div class="iso-device" style="width:56px; height:34px;"><div class="iso-face iso-top">TR</div><div class="iso-face iso-side-r"></div><div class="iso-face iso-side-b"></div></div>
         </div>
         <div class="section-meta">
-          <h2 class="section-title">2&nbsp;&middot;&nbsp;Tagesreport <span class="badge">Baustelle</span></h2>
+          <h2 class="section-title">1&nbsp;&middot;&nbsp;Tagesreport <span class="badge">Baustelle</span></h2>
           <p>Erreichbar ueber den Link "Baustelle Tagesreport" im Header der Dozenten-Ansicht.</p>
         </div>
       </div>
@@ -199,7 +201,7 @@
           <div class="iso-device" style="width:56px; height:34px;"><div class="iso-face iso-top">STAT</div><div class="iso-face iso-side-r"></div><div class="iso-face iso-side-b"></div></div>
         </div>
         <div class="section-meta">
-          <h2 class="section-title">3&nbsp;&middot;&nbsp;Status</h2>
+          <h2 class="section-title">2&nbsp;&middot;&nbsp;Status</h2>
           <p>Fortschritt des aktuellen Bauabschnitts auf einen Blick.</p>
         </div>
       </div>
@@ -215,7 +217,7 @@
           <div class="iso-device" style="width:56px; height:34px;"><div class="iso-face iso-top">BST</div><div class="iso-face iso-side-r"></div><div class="iso-face iso-side-b"></div></div>
         </div>
         <div class="section-meta">
-          <h2 class="section-title">4&nbsp;&middot;&nbsp;Bestellstatus</h2>
+          <h2 class="section-title">3&nbsp;&middot;&nbsp;Bestellstatus</h2>
           <p>Materialbestellungen im Blick behalten.</p>
         </div>
       </div>
@@ -232,7 +234,7 @@
           <div class="iso-device" style="width:56px; height:34px;"><div class="iso-face iso-top">FOTO</div><div class="iso-face iso-side-r"></div><div class="iso-face iso-side-b"></div></div>
         </div>
         <div class="section-meta">
-          <h2 class="section-title">5&nbsp;&middot;&nbsp;Screenshots</h2>
+          <h2 class="section-title">4&nbsp;&middot;&nbsp;Screenshots</h2>
           <p>Fotos und Screenshots direkt der Baustelle zuordnen.</p>
         </div>
       </div>
@@ -246,7 +248,7 @@
 
   <!-- ===================== INSTALLATION ===================== -->
   <div class="page">
-    <h2 class="section-title" style="margin-bottom:16px;">6&nbsp;&middot;&nbsp;Installation</h2>
+    <h2 class="section-title" style="margin-bottom:16px;">5&nbsp;&middot;&nbsp;Installation</h2>
     <p style="font-size:12.5px; color:#333333; line-height:1.6; margin:0 0 18px;">
       Fertige Installationsdateien stehen unter <b>GitHub Releases</b> zum Download bereit. Details und
       fertige PowerShell-Download-Snippets fuer alle vier Plattformen liegen im separaten Dokument
