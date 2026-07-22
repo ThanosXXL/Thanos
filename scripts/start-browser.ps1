@@ -1,13 +1,10 @@
 <#
-    IT Schulungsmaßnahmen – Browser-Demo
-
-    Startet einen kleinen lokalen Webserver und öffnet die Oberfläche im
-    Standard-Browser. Es ist KEIN Electron nötig – Daten werden im Browser
-    (localStorage) gespeichert. Kamera/Bildschirmfreigabe funktionieren, weil
-    die Seite über http://localhost läuft (sicherer Kontext).
+    IT Schulungsmaßnahmen – VOLLVERSION im Browser (ohne Electron)
+    Startet einen lokalen Webserver und öffnet die Vollversion (leerer Start,
+    Speicherung im Browser via localStorage). Kein Demo-Modus.
 
     Benötigt Node.js und PowerShell 7+/Windows PowerShell.
-    Ausführen:  pwsh ./scripts/demo-browser.ps1   (optional: -Port 4173)
+    Ausführen:  pwsh ./scripts/start-browser.ps1   (optional: -Port 4173)
 #>
 
 param(
@@ -26,20 +23,18 @@ $onWindows = if ($null -ne $IsWindows) { $IsWindows } else { $true }
 $onMac = if ($null -ne $IsMacOS) { $IsMacOS } else { $false }
 $onLinux = if ($null -ne $IsLinux) { $IsLinux } else { $false }
 
-$url = "http://localhost:$Port/?demo=1"
+$url = "http://localhost:$Port"
 $env:PORT = "$Port"
 
-Write-Host '== IT Schulungsmaßnahmen – Browser-Demo ==' -ForegroundColor DarkRed
+Write-Host '== IT Schulungsmaßnahmen – Vollversion im Browser ==' -ForegroundColor DarkRed
 Write-Host "Starte lokalen Server auf $url …" -ForegroundColor Green
 
-# Server im Hintergrund starten
 $serve = Start-Process -FilePath 'node' `
     -ArgumentList (Join-Path $root 'scripts/serve.js') `
     -PassThru
 
 Start-Sleep -Seconds 1
 
-# Standard-Browser öffnen
 try {
     if ($onWindows) { Start-Process $url }
     elseif ($onMac) { & open $url }

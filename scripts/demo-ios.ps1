@@ -18,7 +18,7 @@ $ErrorActionPreference = 'Stop'
 Write-Host '== IT Schulungsmaßnahmen – Demo-PDF für iOS ==' -ForegroundColor DarkRed
 Write-Host 'Electron läuft nicht auf iOS – es wird die themierte PDF-Broschüre erzeugt.' -ForegroundColor Yellow
 
-& (Join-Path $PSScriptRoot 'create-pdf.ps1') -Label 'iOS'
+& (Join-Path $PSScriptRoot 'create-pdf.ps1') -Label 'iOS' -Edition 'Demo'
 
 Write-Host 'Fertig. Die PDF-Datei "IT-Schulungsmassnahmen-Demo-iOS.pdf" auf das' -ForegroundColor Green
 Write-Host 'iOS-Gerät übertragen (z. B. AirDrop) und in "Dateien" oder "Bücher" öffnen.' -ForegroundColor Green

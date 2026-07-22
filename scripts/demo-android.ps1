@@ -18,7 +18,7 @@ $ErrorActionPreference = 'Stop'
 Write-Host '== IT Schulungsmaßnahmen – Demo-PDF für Android ==' -ForegroundColor DarkRed
 Write-Host 'Electron läuft nicht auf Android – es wird die themierte PDF-Broschüre erzeugt.' -ForegroundColor Yellow
 
-& (Join-Path $PSScriptRoot 'create-pdf.ps1') -Label 'Android'
+& (Join-Path $PSScriptRoot 'create-pdf.ps1') -Label 'Android' -Edition 'Demo'
 
 Write-Host 'Fertig. Die PDF-Datei "IT-Schulungsmassnahmen-Demo-Android.pdf" auf das' -ForegroundColor Green
 Write-Host 'Android-Gerät übertragen und dort mit einem PDF-Viewer öffnen.' -ForegroundColor Green

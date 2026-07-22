@@ -67,6 +67,38 @@ Neue Installer werden automatisch von GitHub Actions gebaut, sobald ein neuer Ve
 (z. B. `v1.0.0`) gepusht wird, oder manuell über den Button **"Run workflow"** im Tab
 **Actions → Build & Release Desktop App**.
 
+## Vollversion starten (PowerShell)
+
+Für den produktiven Einsatz (echte, persistente Daten – **kein** Demo-Modus) gibt es eigene
+Start-Skripte im Ordner `scripts/`:
+
+| Ziel                 | Befehl                                                          |
+| -------------------- | -------------------------------------------------------------- |
+| Windows              | `powershell -ExecutionPolicy Bypass -File scripts\start-windows.ps1` |
+| macOS                | `pwsh ./scripts/start-macos.ps1`                               |
+| Linux                | `pwsh ./scripts/start-linux.ps1`                               |
+| Automatisch erkennen | `pwsh ./scripts/start-all.ps1`                                 |
+| Browser (ohne Electron) | `pwsh ./scripts/start-browser.ps1` → `http://localhost:4173` |
+| Android (PDF)        | `pwsh ./scripts/start-android.ps1`                             |
+| iOS (PDF)            | `pwsh ./scripts/start-ios.ps1`                                 |
+
+Für Windows/macOS/Linux startet das die interaktive App mit Datei-Speicherung; im Browser
+läuft die Vollversion mit leerem Start (Speicherung im `localStorage`). Da Electron nicht auf
+Android/iOS läuft, erzeugen die Mobil-Skripte die **Vollversion als PDF-Broschüre**.
+
+### Alle Plattform-PDFs auf einmal (3D-Bilder + Copyright)
+
+`scripts/create-all-pdfs.ps1` erzeugt für **jede** Plattform eine eigene PDF-Datei mit
+**3D-Beispielbildern** und Copyright im Farbschema (Sandton/Beige, weiße Flächen, dunkelrote
+Headlines):
+
+```
+pwsh ./scripts/create-all-pdfs.ps1
+```
+
+Ergebnis: `IT-Schulungsmassnahmen-Vollversion-{Windows,Mac,Android,iOS,Browser}.pdf`.
+Einzeln geht es auch: `pwsh ./scripts/create-pdf.ps1 -Label Windows -Edition Vollversion`.
+
 ## Demo-Version starten (PowerShell)
 
 Für eine schnelle Vorführung gibt es eine **Demo-Version** mit vorbefüllten Beispieldaten
@@ -100,10 +132,12 @@ Browsers, und der Screenshot nutzt die Bildschirmfreigabe. Google Drive ist in d
 Browser-Demo nicht verfügbar.
 
 ```
-pwsh ./scripts/demo-browser.ps1        # startet lokalen Server + öffnet den Browser
+pwsh ./scripts/demo-browser.ps1        # Server + Browser mit Beispieldaten (?demo=1)
 # oder plattformunabhängig:
-npm run serve                          # dann http://localhost:4173 öffnen
+npm run serve                          # dann http://localhost:4173/?demo=1 öffnen
 ```
+
+Ohne `?demo=1` startet die Browser-**Vollversion** leer (siehe `start-browser.ps1`).
 
 > Empfehlung: über `http://localhost` starten (nicht per Doppelklick als `file://`), damit
 > Kamera und Bildschirmfreigabe im sicheren Kontext funktionieren.

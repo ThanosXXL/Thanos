@@ -10,8 +10,10 @@
 (function () {
   if (window.dashboardAPI) return; // Electron: echtes API vorhanden
 
-  const DATA_KEY = 'itschulung-demo-data';
-  const SETTINGS_KEY = 'itschulung-demo-settings';
+  // Demo-Modus nur bei ?demo=1; sonst Vollversion (leerer Start, eigener Speicher).
+  const isDemo = /(?:[?&])demo=1(?:&|$)/.test(location.search);
+  const DATA_KEY = isDemo ? 'itschulung-demo-data' : 'itschulung-full-data';
+  const SETTINGS_KEY = isDemo ? 'itschulung-demo-settings' : 'itschulung-full-settings';
 
   function relDate(offsetDays) {
     const dt = new Date();
@@ -80,6 +82,8 @@
     } catch (e) {
       /* ignorieren */
     }
+    // Vollversion startet leer; nur die Demo wird mit Beispieldaten befüllt.
+    if (!isDemo) return { dozenten: [] };
     const seed = demoSeed();
     try {
       localStorage.setItem(DATA_KEY, JSON.stringify(seed));
@@ -175,13 +179,17 @@
     openFileDialog
   };
 
-  // Kleiner Hinweisbanner für die Browser-Demo
+  // Kleiner Hinweisbanner (Demo oder Vollversion im Browser)
   window.addEventListener('DOMContentLoaded', () => {
-    document.title = 'IT Schulungsmaßnahmen — Browser-Demo';
+    document.title = isDemo
+      ? 'IT Schulungsmaßnahmen — Browser-Demo'
+      : 'IT Schulungsmaßnahmen — Browser (Vollversion)';
     const banner = document.createElement('div');
-    banner.textContent =
-      'Browser-Demo — Daten werden lokal im Browser (localStorage) gespeichert. ' +
-      'Screenshot nutzt die Bildschirmfreigabe; Google Drive ist hier nicht verfügbar.';
+    banner.textContent = isDemo
+      ? 'Browser-Demo — Beispieldaten, lokal im Browser (localStorage) gespeichert. ' +
+        'Screenshot nutzt die Bildschirmfreigabe; Google Drive ist hier nicht verfügbar.'
+      : 'Browser-Version — Daten werden lokal im Browser (localStorage) gespeichert. ' +
+        'Screenshot nutzt die Bildschirmfreigabe; Google Drive ist hier nicht verfügbar.';
     banner.style.cssText =
       'flex-shrink:0;background:#8c3b3b;color:#fff;font:13px "Segoe UI",Arial;' +
       'padding:6px 16px;text-align:center;';
