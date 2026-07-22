@@ -22,9 +22,11 @@ Ein Reminder-Hinweis in der Kopfzeile macht ab 12:00 Uhr darauf aufmerksam, sola
 noch nicht ausgefüllt ist. Alle Daten werden ebenfalls lokal im Benutzerdatenverzeichnis der App gespeichert
 (separat von den Dozenten-Daten).
 
-## Fertigen Installer herunterladen (ohne Terminal)
+## Fertige Installer herunterladen (ohne Terminal)
 
-Unter **[Releases](../../releases)** stehen fertig gebaute Installationsdateien zum Anklicken bereit:
+Unter **[Releases](../../releases)** stehen fertig gebaute Dateien zum Anklicken bereit:
+
+### Desktop
 
 - Windows: `.exe` (Installer)
 - macOS: `.dmg`
@@ -33,7 +35,31 @@ Unter **[Releases](../../releases)** stehen fertig gebaute Installationsdateien 
 Einfach die passende Datei für dein Betriebssystem herunterladen und ausführen – kein `npm install`,
 kein Terminal nötig.
 
-Neue Installer werden automatisch von GitHub Actions gebaut, sobald ein neuer Versions-Tag
+### Android
+
+- `dozenten-dashboard-android.apk` direkt herunterladen und antippen.
+- Da die App nicht über den Play Store verteilt wird, fragt Android beim ersten Mal nach der Erlaubnis
+  **"Installation aus unbekannter Quelle zulassen"** – das ist normal für Apps außerhalb des Play Stores
+  und muss einmalig bestätigt werden.
+- Die APK ist selbstsigniert (Debug-Signatur); Daten werden lokal auf dem Gerät gespeichert.
+
+### iOS (iPhone/iPad)
+
+Eine echte, direkt installierbare `.ipa`-Datei ist ohne kostenpflichtiges Apple-Developer-Konto
+(Code-Signierung, App Store bzw. TestFlight-Review) technisch nicht möglich – das ist eine
+Einschränkung von Apple, keine Einschränkung dieses Projekts. Stattdessen läuft die App als
+**installierbare Web-App (PWA)**:
+
+1. Die Datei `renderer/index.html` (bzw. eine gehostete Version davon) in **Safari** öffnen.
+2. Auf das Teilen-Symbol tippen → **"Zum Home-Bildschirm"**.
+3. Die App erscheint danach als eigenes Icon auf dem Home-Bildschirm und startet im Vollbild,
+   ganz ohne Browser-Leiste.
+
+Sobald ein Apple-Developer-Konto mit Zertifikat/Provisioning-Profil zur Verfügung steht, lässt sich
+über das bereits vorbereitete Capacitor-Setup (siehe unten) zusätzlich eine echte iOS-App bauen
+(`npx cap add ios`).
+
+Neue Installer/APKs werden automatisch von GitHub Actions gebaut, sobald ein neuer Versions-Tag
 (z. B. `v1.0.0`) gepusht wird, oder manuell über den Button **"Run workflow"** im Tab
 **Actions → Build & Release Desktop App**.
 
@@ -56,3 +82,25 @@ npm run dist
 ```
 
 Erzeugt eine installierbare Desktop-Anwendung (Windows/macOS/Linux) im Ordner `dist/`.
+
+## Android-App bauen (für Entwicklung)
+
+Die Web-Oberfläche unter `renderer/` läuft dank [Capacitor](https://capacitorjs.com/) unverändert auch als
+native Android-App (`android/`-Ordner). Persistiert wird dort über das `@capacitor/preferences`-Plugin statt
+über Electron-IPC (siehe `renderer/platform-bridge.js`).
+
+```bash
+npx cap sync android
+cd android
+./gradlew assembleDebug
+```
+
+Das fertige, direkt installierbare APK liegt danach unter `android/app/build/outputs/apk/debug/app-debug.apk`.
+In der CI (`.github/workflows/build-release.yml`) passiert das automatisch bei jedem Versions-Tag; das Ergebnis
+landet als `dozenten-dashboard-android.apk` im GitHub Release.
+
+## Web-App / PWA
+
+`renderer/index.html` und `renderer/tagesreport.html` funktionieren auch direkt in jedem Browser (z. B. über
+GitHub Pages oder einen beliebigen Webserver) und lassen sich dank `manifest.json` + Service Worker als
+Web-App installieren ("Zum Home-Bildschirm hinzufügen" auf iOS/Android).

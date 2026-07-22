@@ -1,0 +1,6 @@
+{
+  "appId": "com.dozenten.dashboard",
+  "appName": "Dozenten Dashboard",
+  "webDir": "renderer",
+  "bundledWebRuntime": false
+}
