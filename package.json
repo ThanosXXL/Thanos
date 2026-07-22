@@ -10,6 +10,8 @@
     "dist": "electron-builder"
   },
   "devDependencies": {
+    "@capacitor/android": "^8.4.2",
+    "@capacitor/cli": "^8.4.2",
     "electron": "^31.0.0",
     "electron-builder": "^24.13.3"
   },
@@ -39,5 +41,9 @@
         "provider": "github"
       }
     ]
+  },
+  "dependencies": {
+    "@capacitor/core": "^8.4.2",
+    "@capacitor/preferences": "^8.0.1"
   }
 }

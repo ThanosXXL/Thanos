@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Baustelle — Tagesreport</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="tagesreport.css">
+<link rel="manifest" href="manifest.json">
+<link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+<link rel="icon" href="icons/icon-192.png">
+<meta name="theme-color" content="#14171c">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Tagesreport">
+</head>
+<body>
+<div class="app">
+
+  <div class="topbar">
+    <div class="topbar-row">
+      <div class="brand">
+        <div class="brand-mark">TR</div>
+        <div>
+          <div class="brand-name">Tagesreport</div>
+          <div class="brand-sub" id="brandSub">Baustelle · wird geladen…</div>
+        </div>
+      </div>
+      <a class="back-link" href="index.html">← Dozenten Dashboard</a>
+    </div>
+    <div class="topbar-row" style="margin-top:10px;">
+      <button class="reminder-pill" id="reminderPill"><span class="dot"></span><span id="reminderText">12:00</span></button>
+    </div>
+    <div class="reminder-note" id="reminderNote">Reminder aktiv täglich um 12:00 Uhr, solange der Tagesreport noch nicht ausgefüllt ist.</div>
+  </div>
+
+  <main>
+
+    <!-- Tagesreport / Kalender -->
+    <section class="card">
+      <div class="card-head">
+        <div class="card-title"><span class="idx">01</span> Tagesreport</div>
+        <span class="save-tag" id="reportSaveTag">Gespeichert ✓</span>
+      </div>
+
+      <div class="cal-tabs" id="calTabs">
+        <div class="cal-tab active" data-view="woche">Woche</div>
+        <div class="cal-tab" data-view="monat">Monat</div>
+      </div>
+
+      <div class="cal-live">
+        <div class="cal-date" id="calDate">—</div>
+        <div class="cal-nav">
+          <button id="navPrev">‹</button>
+          <button class="cal-today-btn" id="navToday">Heute</button>
+          <button id="navNext">›</button>
+        </div>
+      </div>
+
+      <div class="week-strip" id="weekStrip"></div>
+
+      <textarea class="report-field" id="reportField" placeholder="Heutiger Eintrag: Bautagebuch, Wetter, Besonderheiten…"></textarea>
+      <div class="report-actions">
+        <button class="btn-save" id="saveReportBtn">Speichern</button>
+      </div>
+    </section>
+
+    <!-- Status -->
+    <section class="card">
+      <div class="card-head">
+        <div class="card-title"><span class="idx">02</span> Status</div>
+        <span class="save-tag" id="statusSaveTag">Gespeichert ✓</span>
+      </div>
+      <span class="field-label">Bauabschnitt</span>
+      <input class="status-title-input" id="statusTitle" placeholder="z. B. Bauabschnitt 2. OG">
+
+      <div class="bar-row">
+        <div class="bar-label"><span>Wochenziel</span><b id="weekVal">0%</b></div>
+        <input type="range" min="0" max="100" value="0" id="weekSlider">
+      </div>
+      <div class="bar-row">
+        <div class="bar-label"><span>Monatsziel</span><b id="monthVal">0%</b></div>
+        <input type="range" min="0" max="100" value="0" id="monthSlider">
+      </div>
+    </section>
+
+    <!-- Bestellstatus -->
+    <section class="card">
+      <div class="card-head">
+        <div class="card-title"><span class="idx">03</span> Bestellstatus</div>
+      </div>
+      <div id="ordersList"></div>
+      <div class="empty-note" id="ordersEmpty" style="display:none;">Noch keine Bestellungen erfasst.</div>
+
+      <div class="add-order">
+        <input id="orderName" placeholder="Material / Bezeichnung">
+        <div class="add-order-row">
+          <input id="orderDate" type="date">
+          <input id="orderNote" placeholder="Notiz (optional)">
+        </div>
+        <button class="btn-add" id="addOrderBtn">+ Bestellung hinzufügen</button>
+      </div>
+    </section>
+
+    <!-- Screenshots -->
+    <section class="card">
+      <div class="card-head">
+        <div class="card-title"><span class="idx">04</span> Screenshots</div>
+      </div>
+      <div class="shots" id="shotsGrid"></div>
+      <input type="file" id="fileInput" accept="image/*" multiple>
+    </section>
+
+  </main>
+
+  <footer>Voll funktionsfähig · Daten werden dauerhaft auf diesem Gerät gespeichert</footer>
+</div>
+
+<div class="modal-overlay" id="modalOverlay">
+  <img id="modalImg" src="">
+</div>
+
+<script src="platform-bridge.js"></script>
+<script src="tagesreport.js"></script>
+</body>
+</html>

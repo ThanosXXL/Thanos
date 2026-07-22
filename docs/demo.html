@@ -1,0 +1,354 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Bauplanphase — Live-Demo</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#14171c; --bg-blueprint:#171b21; --panel:#1e232b; --panel-2:#252b34; --line:#333b46;
+    --text:#eef1f4; --text-dim:#8d97a3; --orange:#f2660c; --orange-dim:#f2660c33;
+    --green:#3fae7a; --amber:#e0a92c; --red:#e5484d;
+  }
+  *{box-sizing:border-box; margin:0; padding:0;}
+  html,body{ background:var(--bg); color:var(--text); font-family:'Inter',sans-serif; -webkit-font-smoothing:antialiased; }
+  body{ background-image:linear-gradient(var(--bg-blueprint) 1px, transparent 1px), linear-gradient(90deg, var(--bg-blueprint) 1px, transparent 1px); background-size:28px 28px; }
+  .app{ max-width:420px; margin:0 auto; min-height:100vh; background:var(--bg); position:relative; }
+  button{ font-family:inherit; cursor:pointer; }
+  input{ font-family:inherit; }
+
+  .demo-banner{ background:var(--orange); color:#14171c; font-size:11px; font-weight:700; text-align:center; padding:6px; }
+
+  .topbar{ position:sticky; top:0; z-index:30; background:rgba(20,23,28,0.92); backdrop-filter:blur(8px); border-bottom:1px solid var(--line); padding:14px 18px 12px; }
+  .topbar-row{ display:flex; align-items:center; justify-content:space-between; gap:8px; }
+  .brand{ display:flex; align-items:center; gap:10px; min-width:0; }
+  .brand-mark{ width:30px; height:30px; border-radius:7px; background:var(--orange); display:flex; align-items:center; justify-content:center; font-family:'Space Grotesk',sans-serif; font-weight:700; color:#14171c; font-size:15px; flex-shrink:0; }
+  .brand-name{ font-family:'Space Grotesk',sans-serif; font-weight:600; font-size:16px; }
+  .brand-sub{ font-size:11px; color:var(--text-dim); margin-top:1px; }
+  .reminder-pill{ display:flex; align-items:center; gap:6px; background:var(--orange-dim); border:1px solid var(--orange); color:var(--orange); font-size:11.5px; font-weight:600; padding:6px 10px; border-radius:999px; font-family:'JetBrains Mono',monospace; }
+  .reminder-pill .dot{ width:6px; height:6px; border-radius:50%; background:currentColor; animation:pulse 1.8s infinite; }
+  @keyframes pulse{ 0%,100%{opacity:1;} 50%{opacity:0.35;} }
+  .reminder-note{ font-size:10.5px; color:var(--text-dim); margin-top:8px; }
+
+  main{ padding:18px 16px 40px; display:flex; flex-direction:column; gap:16px; }
+  .card{ background:var(--panel); border:1px solid var(--line); border-radius:14px; padding:16px; }
+  .card-head{ display:flex; align-items:center; justify-content:space-between; margin-bottom:12px; }
+  .card-title{ display:flex; align-items:center; gap:8px; font-family:'Space Grotesk',sans-serif; font-weight:600; font-size:14.5px; }
+  .idx{ font-family:'JetBrains Mono',monospace; font-size:11px; color:var(--orange); background:var(--orange-dim); border-radius:5px; padding:2px 6px; }
+  .save-tag{ font-size:10px; color:var(--green); font-weight:600; opacity:0; transition:opacity .3s; }
+  .save-tag.show{ opacity:1; }
+
+  .cal-tabs{ display:flex; gap:6px; margin-bottom:12px; }
+  .cal-tab{ flex:1; text-align:center; padding:7px 0; border-radius:8px; font-size:12px; font-weight:600; color:var(--text-dim); border:1px solid var(--line); background:var(--panel-2); }
+  .cal-tab.active{ background:var(--orange); color:#14171c; border-color:var(--orange); }
+  .cal-live{ display:flex; align-items:baseline; justify-content:space-between; margin-bottom:10px; gap:8px; }
+  .cal-date{ font-family:'JetBrains Mono',monospace; font-size:12.5px; }
+  .cal-nav{ display:flex; gap:6px; }
+  .cal-nav button{ background:var(--panel-2); border:1px solid var(--line); color:var(--text); width:24px; height:24px; border-radius:6px; font-size:13px; }
+  .cal-today-btn{ font-size:10px; color:var(--orange); background:none; border:1px solid var(--orange); border-radius:99px; padding:3px 8px; font-weight:600; }
+  .week-strip{ display:grid; grid-template-columns:repeat(7,1fr); gap:5px; margin-bottom:4px; }
+  .day-cell{ aspect-ratio:1; border-radius:8px; background:var(--panel-2); border:1px solid var(--line); display:flex; flex-direction:column; align-items:center; justify-content:center; font-size:11px; color:var(--text-dim); gap:2px; position:relative; cursor:pointer; }
+  .day-cell .d{ font-weight:600; color:var(--text); font-size:12px; }
+  .day-cell.today{ border-color:var(--orange); }
+  .day-cell.selected{ background:var(--orange); border-color:var(--orange); }
+  .day-cell.selected .d, .day-cell.selected span{ color:#14171c; }
+  .day-cell.has-entry::after{ content:""; position:absolute; bottom:4px; width:4px; height:4px; border-radius:50%; background:var(--green); }
+  .day-cell.selected.has-entry::after{ background:#14171c; }
+
+  .report-field{ margin-top:12px; width:100%; resize:vertical; min-height:80px; background:var(--panel-2); border:1px solid var(--line); border-radius:10px; padding:12px; font-size:12.5px; color:var(--text); line-height:1.5; font-family:inherit; }
+  .report-actions{ display:flex; justify-content:flex-end; gap:10px; margin-top:8px; }
+  .btn-save{ background:var(--orange); color:#14171c; border:none; border-radius:8px; padding:8px 14px; font-size:12px; font-weight:700; }
+
+  .field-label{ font-size:11px; color:var(--text-dim); margin-bottom:5px; display:block; }
+  .status-title-input{ width:100%; background:var(--panel-2); border:1px solid var(--line); border-radius:8px; color:var(--text); font-size:13px; font-weight:600; padding:8px 10px; margin-bottom:12px; }
+  .bar-row{ margin-bottom:14px; }
+  .bar-row:last-child{ margin-bottom:0; }
+  .bar-label{ display:flex; justify-content:space-between; font-size:11.5px; color:var(--text-dim); margin-bottom:6px; }
+  .bar-label b{ color:var(--text); font-family:'JetBrains Mono',monospace; }
+  input[type=range]{ width:100%; accent-color:var(--orange); }
+
+  .order{ display:flex; align-items:center; gap:10px; padding:9px 0; border-bottom:1px solid var(--line); }
+  .order:last-child{ border-bottom:none; }
+  .order-name{ font-size:12.5px; }
+  .order-sub{ font-size:10.5px; color:var(--text-dim); }
+  .chip{ font-size:10px; font-weight:600; padding:4px 9px; border-radius:99px; font-family:'JetBrains Mono',monospace; border:none; }
+  .chip.delivered{ background:#3fae7a26; color:var(--green); border:1px solid #3fae7a55; }
+  .chip.pending{ background:#e0a92c26; color:var(--amber); border:1px solid #e0a92c55; }
+  .order-del{ background:none; border:none; color:var(--text-dim); font-size:15px; padding:2px 4px; }
+  .add-order{ display:flex; flex-direction:column; gap:8px; margin-top:12px; padding-top:12px; border-top:1px dashed var(--line); }
+  .add-order input{ background:var(--panel-2); border:1px solid var(--line); border-radius:8px; color:var(--text); font-size:12px; padding:9px 10px; font-family:inherit; }
+  .add-order-row{ display:flex; gap:8px; }
+  .add-order-row input{ flex:1; }
+  .btn-add{ background:var(--panel-2); border:1px solid var(--orange); color:var(--orange); border-radius:8px; padding:9px; font-size:12px; font-weight:700; width:100%; }
+
+  .shots{ display:grid; grid-template-columns:repeat(3,1fr); gap:8px; }
+  .shot{ aspect-ratio:1; border-radius:9px; background:var(--panel-2); border:1px solid var(--line); display:flex; align-items:center; justify-content:center; color:var(--text-dim); font-size:9.5px; text-align:center; position:relative; overflow:hidden; }
+  .shot img{ width:100%; height:100%; object-fit:cover; }
+  .shot-del{ position:absolute; top:3px; right:3px; width:18px; height:18px; border-radius:50%; background:#00000090; color:#fff; border:none; font-size:11px; }
+  .shot-add{ border:1.5px dashed var(--orange); color:var(--orange); font-weight:700; font-size:20px; background:none; }
+  #fileInput{ display:none; }
+
+  .member-row{ display:flex; align-items:center; gap:8px; padding:7px 0; border-bottom:1px solid var(--line); font-size:12.5px; }
+  .member-row:last-child{ border-bottom:none; }
+  .member-row .you{ color:var(--orange); font-size:10px; font-weight:700; margin-left:auto; }
+  .invite-row{ display:flex; gap:8px; margin-top:12px; padding-top:12px; border-top:1px dashed var(--line); }
+  .invite-row input{ flex:1; background:var(--panel-2); border:1px solid var(--line); border-radius:8px; color:var(--text); font-size:12px; padding:9px 10px; }
+
+  .empty-note{ font-size:11.5px; color:var(--text-dim); text-align:center; padding:8px 0; }
+  footer{ text-align:center; padding:10px 0 28px; font-size:10.5px; color:var(--text-dim); }
+</style>
+</head>
+<body>
+<div class="app">
+  <div class="demo-banner">LIVE-DEMO · alles anklickbar, Daten sind nur lokal in diesem Fenster</div>
+
+  <div class="topbar">
+    <div class="topbar-row">
+      <div class="brand">
+        <div class="brand-mark">BP</div>
+        <div>
+          <div class="brand-name">Bauplanphase</div>
+          <div class="brand-sub" id="brandSub">Bauabschnitt 2. OG</div>
+        </div>
+      </div>
+      <button class="reminder-pill" id="reminderPill"><span class="dot"></span><span id="reminderText">12:00</span></button>
+    </div>
+    <div class="reminder-note" id="reminderNote">Reminder aktiv täglich um 12:00 Uhr, solange der Tagesreport noch nicht ausgefüllt ist.</div>
+  </div>
+
+  <main>
+    <section class="card">
+      <div class="card-head">
+        <div class="card-title"><span class="idx">01</span> Tagesreport</div>
+        <span class="save-tag" id="reportSaveTag">Gespeichert ✓</span>
+      </div>
+      <div class="cal-tabs" id="calTabs">
+        <div class="cal-tab active" data-view="woche">Woche</div>
+        <div class="cal-tab" data-view="monat">Monat</div>
+      </div>
+      <div class="cal-live">
+        <div class="cal-date" id="calDate">—</div>
+        <div class="cal-nav">
+          <button id="navPrev">‹</button>
+          <button class="cal-today-btn" id="navToday">Heute</button>
+          <button id="navNext">›</button>
+        </div>
+      </div>
+      <div class="week-strip" id="weekStrip"></div>
+      <textarea class="report-field" id="reportField" placeholder="Heutiger Eintrag: Bautagebuch, Wetter, Besonderheiten…"></textarea>
+      <div class="report-actions"><button class="btn-save" id="saveReportBtn">Speichern</button></div>
+    </section>
+
+    <section class="card">
+      <div class="card-head">
+        <div class="card-title"><span class="idx">02</span> Status</div>
+        <span class="save-tag" id="statusSaveTag">Gespeichert ✓</span>
+      </div>
+      <span class="field-label">Bauabschnitt</span>
+      <input class="status-title-input" id="statusTitle" value="Bauabschnitt 2. OG">
+      <div class="bar-row">
+        <div class="bar-label"><span>Wochenziel</span><b id="weekVal">65%</b></div>
+        <input type="range" min="0" max="100" value="65" id="weekSlider">
+      </div>
+      <div class="bar-row">
+        <div class="bar-label"><span>Monatsziel</span><b id="monthVal">40%</b></div>
+        <input type="range" min="0" max="100" value="40" id="monthSlider">
+      </div>
+    </section>
+
+    <section class="card">
+      <div class="card-head"><div class="card-title"><span class="idx">03</span> Bestellstatus</div></div>
+      <div id="ordersList"></div>
+      <div class="empty-note" id="ordersEmpty" style="display:none;">Noch keine Bestellungen erfasst.</div>
+      <div class="add-order">
+        <input id="orderName" placeholder="Material / Bezeichnung">
+        <div class="add-order-row">
+          <input id="orderDate" type="date">
+          <input id="orderNote" placeholder="Notiz (optional)">
+        </div>
+        <button class="btn-add" id="addOrderBtn">+ Bestellung hinzufügen</button>
+      </div>
+    </section>
+
+    <section class="card">
+      <div class="card-head"><div class="card-title"><span class="idx">04</span> Screenshots</div></div>
+      <div class="shots" id="shotsGrid"></div>
+      <input type="file" id="fileInput" accept="image/*" multiple>
+    </section>
+
+    <section class="card">
+      <div class="card-head"><div class="card-title"><span class="idx">05</span> Team</div></div>
+      <div id="memberList"></div>
+      <div class="invite-row">
+        <input id="inviteEmail" type="email" placeholder="E-Mail einladen">
+        <button class="btn-add" id="inviteBtn" style="flex:0 0 auto; padding:9px 14px;">Einladen</button>
+      </div>
+    </section>
+  </main>
+  <footer>Live-Demo · in der echten App synchronisieren diese Daten per Cloud mit deinem Team</footer>
+</div>
+
+<script>
+  const dayNames = ['So','Mo','Di','Mi','Do','Fr','Sa'];
+  const weekdayNamesFull = ['Sonntag','Montag','Dienstag','Mittwoch','Donnerstag','Freitag','Samstag'];
+  function pad(n){ return String(n).padStart(2,'0'); }
+  function toKey(d){ return `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}`; }
+  function formatDate(d){ return `${weekdayNamesFull[d.getDay()]}, ${pad(d.getDate())}.${pad(d.getMonth()+1)}.${d.getFullYear()}`; }
+  function sameDay(a,b){ return a.toDateString()===b.toDateString(); }
+  function escapeHtml(s){ const d=document.createElement('div'); d.textContent=s||''; return d.innerHTML; }
+  function flashSave(tagEl){ tagEl.classList.add('show'); clearTimeout(tagEl._t); tagEl._t=setTimeout(()=>tagEl.classList.remove('show'),1200); }
+
+  // In-memory Demo-Daten (nichts wird dauerhaft gespeichert)
+  const today = new Date();
+  const reports = {};
+  reports[toKey(today)] = 'Betonage 2. OG abgeschlossen, Wetter trocken, keine Verzögerungen.';
+  let orders = [
+    { id:'o1', name:'Bewehrungsstahl Ø12', date:'2026-07-20', note:'Lieferant Meier', status:'delivered' },
+    { id:'o2', name:'Schalungsplatten', date:'2026-07-24', note:'', status:'pending' }
+  ];
+  let shots = [];
+  let members = ['du@beispiel.de', 'kollege@beispiel.de'];
+
+  let selectedDate = new Date();
+  let calView = 'woche';
+
+  function loadReportFor(date){
+    document.getElementById('calDate').textContent = formatDate(date);
+    document.getElementById('reportField').value = reports[toKey(date)] || '';
+  }
+  document.getElementById('saveReportBtn').addEventListener('click', ()=>{
+    reports[toKey(selectedDate)] = document.getElementById('reportField').value;
+    flashSave(document.getElementById('reportSaveTag'));
+    renderCalendar();
+  });
+  let saveTimer=null;
+  document.getElementById('reportField').addEventListener('input', ()=>{
+    clearTimeout(saveTimer);
+    saveTimer = setTimeout(()=>document.getElementById('saveReportBtn').click(), 900);
+  });
+
+  const weekStrip = document.getElementById('weekStrip');
+  function renderCalendar(){
+    weekStrip.innerHTML = '';
+    const now = new Date();
+    if(calView==='woche'){
+      const start = new Date(selectedDate);
+      start.setDate(selectedDate.getDate() - ((selectedDate.getDay()+6)%7));
+      for(let i=0;i<7;i++){
+        const d = new Date(start); d.setDate(start.getDate()+i);
+        weekStrip.appendChild(makeDayCell(d, now));
+      }
+    } else {
+      const first = new Date(selectedDate.getFullYear(), selectedDate.getMonth(), 1);
+      const startOffset = (first.getDay()+6)%7;
+      const daysInMonth = new Date(selectedDate.getFullYear(), selectedDate.getMonth()+1, 0).getDate();
+      for(let i=0;i<startOffset;i++){ const e=document.createElement('div'); e.style.visibility='hidden'; weekStrip.appendChild(e); }
+      for(let d=1; d<=daysInMonth; d++){
+        weekStrip.appendChild(makeDayCell(new Date(selectedDate.getFullYear(), selectedDate.getMonth(), d), now, true));
+      }
+    }
+  }
+  function makeDayCell(d, now, monthMode){
+    const cell = document.createElement('div');
+    let cls = 'day-cell';
+    if(sameDay(d, now)) cls += ' today';
+    if(sameDay(d, selectedDate)) cls += ' selected';
+    if(reports[toKey(d)]) cls += ' has-entry';
+    cell.className = cls;
+    cell.innerHTML = monthMode ? `<span class="d">${d.getDate()}</span>` : `<span>${dayNames[d.getDay()]}</span><span class="d">${d.getDate()}</span>`;
+    cell.addEventListener('click', ()=>{ selectedDate = new Date(d); loadReportFor(selectedDate); renderCalendar(); });
+    return cell;
+  }
+  document.getElementById('calTabs').addEventListener('click', e=>{
+    const tab = e.target.closest('.cal-tab'); if(!tab) return;
+    document.querySelectorAll('.cal-tab').forEach(t=>t.classList.remove('active'));
+    tab.classList.add('active'); calView = tab.dataset.view; renderCalendar();
+  });
+  document.getElementById('navPrev').addEventListener('click', ()=>{ const d=new Date(selectedDate); calView==='woche'?d.setDate(d.getDate()-7):d.setMonth(d.getMonth()-1); selectedDate=d; loadReportFor(d); renderCalendar(); });
+  document.getElementById('navNext').addEventListener('click', ()=>{ const d=new Date(selectedDate); calView==='woche'?d.setDate(d.getDate()+7):d.setMonth(d.getMonth()+1); selectedDate=d; loadReportFor(d); renderCalendar(); });
+  document.getElementById('navToday').addEventListener('click', ()=>{ selectedDate=new Date(); loadReportFor(selectedDate); renderCalendar(); });
+
+  const weekSlider=document.getElementById('weekSlider'), monthSlider=document.getElementById('monthSlider');
+  const weekVal=document.getElementById('weekVal'), monthVal=document.getElementById('monthVal');
+  const statusSaveTag=document.getElementById('statusSaveTag');
+  function flashStatus(){ flashSave(statusSaveTag); document.getElementById('brandSub').textContent = document.getElementById('statusTitle').value; }
+  document.getElementById('statusTitle').addEventListener('input', flashStatus);
+  weekSlider.addEventListener('input', ()=>{ weekVal.textContent=weekSlider.value+'%'; flashStatus(); });
+  monthSlider.addEventListener('input', ()=>{ monthVal.textContent=monthSlider.value+'%'; flashStatus(); });
+
+  const ordersList=document.getElementById('ordersList'), ordersEmpty=document.getElementById('ordersEmpty');
+  function renderOrders(){
+    ordersList.innerHTML=''; ordersEmpty.style.display = orders.length?'none':'block';
+    orders.forEach(o=>{
+      const row=document.createElement('div'); row.className='order';
+      const dateStr = o.date ? new Date(o.date).toLocaleDateString('de-DE') : '';
+      row.innerHTML = `<div style="flex:1"><div class="order-name">${escapeHtml(o.name)}</div><div class="order-sub">${dateStr}${o.note?' · '+escapeHtml(o.note):''}</div></div>
+        <button class="chip ${o.status}" data-id="${o.id}" data-action="toggle">${o.status==='delivered'?'Geliefert':'Ausstehend'}</button>
+        <button class="order-del" data-id="${o.id}" data-action="del">✕</button>`;
+      ordersList.appendChild(row);
+    });
+  }
+  ordersList.addEventListener('click', e=>{
+    const btn=e.target.closest('button'); if(!btn) return;
+    const id=btn.dataset.id;
+    if(btn.dataset.action==='toggle'){ orders=orders.map(o=>o.id===id?{...o,status:o.status==='delivered'?'pending':'delivered'}:o); }
+    else if(btn.dataset.action==='del'){ orders=orders.filter(o=>o.id!==id); }
+    renderOrders();
+  });
+  document.getElementById('addOrderBtn').addEventListener('click', ()=>{
+    const name=document.getElementById('orderName').value.trim(); if(!name) return;
+    orders.unshift({ id:'o'+Date.now(), name, date:document.getElementById('orderDate').value, note:document.getElementById('orderNote').value.trim(), status:'pending' });
+    document.getElementById('orderName').value=''; document.getElementById('orderDate').value=''; document.getElementById('orderNote').value='';
+    renderOrders();
+  });
+
+  const shotsGrid=document.getElementById('shotsGrid'), fileInput=document.getElementById('fileInput');
+  function renderShots(){
+    shotsGrid.innerHTML='';
+    shots.forEach(s=>{
+      const el=document.createElement('div'); el.className='shot';
+      el.innerHTML = `<img src="${s.url}"><button class="shot-del" data-id="${s.id}">✕</button>`;
+      el.querySelector('.shot-del').addEventListener('click', e=>{ e.stopPropagation(); shots=shots.filter(x=>x.id!==s.id); renderShots(); });
+      shotsGrid.appendChild(el);
+    });
+    const addBtn=document.createElement('button'); addBtn.className='shot shot-add'; addBtn.textContent='+';
+    addBtn.addEventListener('click', ()=>fileInput.click());
+    shotsGrid.appendChild(addBtn);
+  }
+  fileInput.addEventListener('change', ()=>{
+    Array.from(fileInput.files).forEach(file=>{
+      const reader = new FileReader();
+      reader.onload = ()=>{ shots.unshift({ id:'s'+Date.now()+Math.random(), url:reader.result }); renderShots(); };
+      reader.readAsDataURL(file);
+    });
+    fileInput.value='';
+  });
+
+  const memberList=document.getElementById('memberList');
+  function renderMembers(){
+    memberList.innerHTML='';
+    members.forEach((email,i)=>{
+      const row=document.createElement('div'); row.className='member-row';
+      row.innerHTML = `<span>${escapeHtml(email)}</span>${i===0?'<span class="you">DU</span>':''}`;
+      memberList.appendChild(row);
+    });
+  }
+  document.getElementById('inviteBtn').addEventListener('click', ()=>{
+    const email=document.getElementById('inviteEmail').value.trim(); if(!email) return;
+    members.push(email); document.getElementById('inviteEmail').value=''; renderMembers();
+  });
+
+  function clockStr(){ const n=new Date(); return pad(n.getHours())+':'+pad(n.getMinutes()); }
+  document.getElementById('reminderText').textContent = clockStr();
+  document.getElementById('reminderPill').addEventListener('click', ()=>{ selectedDate=new Date(); loadReportFor(selectedDate); renderCalendar(); document.getElementById('reportField').focus(); });
+
+  loadReportFor(selectedDate);
+  renderCalendar();
+  renderOrders();
+  renderShots();
+  renderMembers();
+</script>
+</body>
+</html>

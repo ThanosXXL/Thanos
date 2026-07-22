@@ -33,3 +33,46 @@ jobs:
         run: npm run dist -- --publish always
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+  build-android:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Repository auschecken
+        uses: actions/checkout@v4
+
+      - name: Node.js einrichten
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Java einrichten
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "17"
+
+      - name: Android SDK einrichten
+        uses: android-actions/setup-android@v3
+
+      - name: Abhängigkeiten installieren
+        run: npm install --ignore-scripts
+
+      - name: Web-Assets in Android-Projekt synchronisieren
+        run: npx cap sync android
+
+      - name: Android-APK bauen (Debug, selbstsigniert)
+        working-directory: android
+        run: |
+          chmod +x gradlew
+          ./gradlew assembleDebug
+
+      - name: APK umbenennen
+        run: cp android/app/build/outputs/apk/debug/app-debug.apk dozenten-dashboard-android.apk
+
+      - name: APK veröffentlichen
+        uses: softprops/action-gh-release@v2
+        with:
+          files: dozenten-dashboard-android.apk
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
