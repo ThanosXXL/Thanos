@@ -299,6 +299,66 @@ ul.item-list li span.item-text {
   gap: 10px;
 }
 
+.chat-panel {
+  margin-top: 20px;
+  background: var(--white);
+  border: 1px solid var(--pale-blue);
+  border-radius: 10px;
+  padding: 14px;
+  box-shadow: 0 2px 6px rgba(11, 31, 77, 0.08);
+}
+
+.chat-panel h3 {
+  margin: 0 0 12px 0;
+  color: var(--white);
+  background: linear-gradient(90deg, var(--dark-blue), var(--light-blue));
+  padding: 8px 10px;
+  border-radius: 6px;
+  font-size: 15px;
+}
+
+.chat-messages {
+  max-height: 220px;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-bottom: 10px;
+  padding-right: 4px;
+}
+
+.chat-bubble {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  background: var(--pale-blue);
+  color: var(--black);
+  border-radius: 8px;
+  padding: 8px 12px;
+  align-self: flex-start;
+  max-width: 80%;
+}
+
+.chat-bubble .chat-text {
+  flex: 1;
+  font-size: 14px;
+  word-break: break-word;
+}
+
+.chat-bubble .chat-time {
+  font-size: 11px;
+  color: #55606f;
+  white-space: nowrap;
+}
+
+.chat-bubble .chat-delete {
+  font-size: 12px;
+}
+
+.chat-input-row {
+  margin-bottom: 0;
+}
+
 @media (max-width: 900px) {
   .lists-grid {
     grid-template-columns: 1fr;
