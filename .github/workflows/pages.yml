@@ -34,6 +34,10 @@ jobs:
 
       - name: Pages konfigurieren
         uses: actions/configure-pages@v5
+        with:
+          # Versucht, GitHub Pages (Quelle: GitHub Actions) automatisch zu aktivieren,
+          # falls es im Repository noch nicht eingeschaltet ist.
+          enablement: true
 
       - name: renderer/ als Pages-Artefakt hochladen
         uses: actions/upload-pages-artifact@v3
