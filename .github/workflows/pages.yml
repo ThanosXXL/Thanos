@@ -1,0 +1,49 @@
+name: PWA auf GitHub Pages veröffentlichen
+
+# Veröffentlicht den Ordner renderer/ (die PWA-Variante von Music Heaven)
+# auf GitHub Pages, damit sie über eine echte HTTPS-URL installierbar ist
+# (Android "Zum Startbildschirm hinzufügen", iOS Safari "Zum Home-Bildschirm").
+#
+# Läuft vorerst nur manuell und bei Push auf diesen Feature-Branch, um main
+# und andere Branches nicht zu beeinflussen. Nach dem Merge auf main kann der
+# "push"-Trigger unten auf "main" umgestellt werden.
+on:
+  push:
+    branches:
+      - claude/music-heaven-app-40fd45
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: true
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: Repository auschecken
+        uses: actions/checkout@v4
+
+      - name: Pages konfigurieren
+        uses: actions/configure-pages@v5
+        with:
+          # Versucht, GitHub Pages (Quelle: GitHub Actions) automatisch zu aktivieren,
+          # falls es im Repository noch nicht eingeschaltet ist.
+          enablement: true
+
+      - name: renderer/ als Pages-Artefakt hochladen
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: renderer
+
+      - name: Auf GitHub Pages veröffentlichen
+        id: deployment
+        uses: actions/deploy-pages@v4

@@ -1,0 +1,17 @@
+{
+  "name": "Music Heaven",
+  "short_name": "Music Heaven",
+  "description": "Musik hochladen und automatisch mixen, oder eigene Musikstücke aus Drums, Piano, Saxophon und Vocals kreieren.",
+  "start_url": "./index.html?source=pwa",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "any",
+  "background_color": "#050a07",
+  "theme_color": "#1fdb6f",
+  "lang": "de",
+  "icons": [
+    { "src": "icons/icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
+    { "src": "icons/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
+    { "src": "icons/icon-maskable-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+  ]
+}

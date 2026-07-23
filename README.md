@@ -39,6 +39,43 @@ Neue Installer werden automatisch von GitHub Actions gebaut, sobald ein neuer Ve
 (z. B. `v1.0.0`) gepusht wird, oder manuell über den Button **"Run workflow"** im Tab
 **Actions → Build & Release Desktop App**.
 
+## PWA – echte installierbare App für Android &amp; iOS
+
+Da Electron nicht auf Mobilgeräten läuft, gibt es die Oberfläche zusätzlich als **PWA**
+(Progressive Web App). Über den Browser lässt sie sich auf Android und iOS **installieren**
+(eigenes App-Icon, Vollbild ohne Browserleiste, Offline-Start) – ganz ohne App Store, und mit
+denselben Funktionen (Upload, Auto-Mix, Step-Sequencer, Aufnehmen, Speichern/Herunterladen).
+
+Enthalten in `renderer/`:
+
+- **`browser-demo.js`** – stellt `window.musicHeaven` bereit, falls kein Electron läuft: Uploads
+  und gespeicherte Musikstücke landen in **IndexedDB** des Browsers, der Datei-Dialog nutzt
+  `<input type="file">`, „Extern speichern unter…" löst einen Download (bzw. den nativen
+  Speichern-Dialog, falls verfügbar) aus. In Electron tut diese Datei nichts.
+- **`manifest.webmanifest`** – Name, Icons, Theme-Farbe (`#1fdb6f`, frisches Grün), Hintergrund
+  (`#050a07`, Schwarz), Start im Vollbildmodus (`display: standalone`).
+- **`sw.js`** – Service Worker: cached die App beim ersten Aufruf, damit sie auch offline bzw.
+  bei wackliger Verbindung startet.
+- **`icons/`** – App-Icons (192/512px, inkl. maskable-Variante für Android und Apple-Touch-Icon
+  für iOS), generiert mit `scripts/generate-icons.js`.
+- **`pwa-register.js`** – registriert den Service Worker nur im echten Browser (in Electron
+  passiert nichts).
+
+**Installieren:**
+
+1. Lokal testen: `npm run serve` und `http://localhost:4173` öffnen.
+2. Für eine echte Installation auf dem Smartphone wird eine **HTTPS-URL** benötigt (auf dem
+   eigenen Gerät reicht `localhost` nicht). Dafür liegt der Workflow
+   `.github/workflows/pages.yml` bereit, der `renderer/` auf **GitHub Pages** veröffentlicht
+   (manuell auslösbar über den Tab **Actions → PWA auf GitHub Pages veröffentlichen → Run workflow**,
+   oder automatisch bei Push auf diesen Branch). Danach die angezeigte `https://…github.io/…`-URL
+   auf dem Smartphone öffnen:
+   - **Android (Chrome):** Menü → „App installieren" / „Zum Startbildschirm hinzufügen".
+   - **iOS (Safari):** Teilen-Symbol → „Zum Home-Bildschirm".
+
+> Sobald dieser Branch in `main` gemerged ist, sollte der `push`-Trigger in `pages.yml` von
+> diesem Feature-Branch auf `main` umgestellt werden.
+
 ## Installation (für Entwicklung)
 
 ```bash
