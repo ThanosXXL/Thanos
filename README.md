@@ -67,6 +67,39 @@ Neue Installer werden automatisch von GitHub Actions gebaut, sobald ein neuer Ve
 (z. B. `v1.0.0`) gepusht wird, oder manuell über den Button **"Run workflow"** im Tab
 **Actions → Build & Release Desktop App**.
 
+## PWA – echte installierbare App für Android &amp; iOS
+
+Da Electron nicht auf Mobilgeräten läuft, gibt es die Oberfläche zusätzlich als **PWA**
+(Progressive Web App). Über den Browser lässt sie sich auf Android und iOS **installieren**
+(eigenes App-Icon, Vollbild ohne Browserleiste, Offline-Start) – ganz ohne App Store.
+
+Enthalten in `renderer/`:
+
+- **`manifest.webmanifest`** – Name, Icons, Theme-Farbe (`#8c3b3b`, das bekannte Dunkelrot),
+  Hintergrundfarbe (`#f2ead9`, Sandton), Start im Vollbildmodus (`display: standalone`).
+- **`sw.js`** – Service Worker: cached die App beim ersten Aufruf, damit sie auch offline bzw.
+  bei wackliger Verbindung startet.
+- **`icons/`** – App-Icons (192/512px, inkl. maskable-Variante für Android und Apple-Touch-Icon
+  für iOS).
+- **`pwa-register.js`** – registriert den Service Worker nur im echten Browser (in Electron
+  passiert nichts).
+
+**Installieren:**
+
+1. Lokal testen: `pwsh ./scripts/start-browser.ps1` (oder `npm run serve`) und
+   `http://localhost:4173` öffnen.
+2. Für eine echte Installation auf dem Smartphone wird eine **HTTPS-URL** benötigt (auf dem
+   eigenen Gerät reicht `localhost` nicht). Dafür liegt der Workflow
+   `.github/workflows/pages.yml` bereit, der `renderer/` auf **GitHub Pages** veröffentlicht
+   (manuell auslösbar über den Tab **Actions → PWA auf GitHub Pages veröffentlichen → Run workflow**,
+   oder automatisch bei Push auf diesen Branch). Danach die angezeigte `https://…github.io/…`-URL
+   auf dem Smartphone öffnen:
+   - **Android (Chrome):** Menü → „App installieren" / „Zum Startbildschirm hinzufügen".
+   - **iOS (Safari):** Teilen-Symbol → „Zum Home-Bildschirm".
+
+> Sobald dieser Branch in `main` gemerged ist, sollte der `push`-Trigger in `pages.yml` von
+> diesem Feature-Branch auf `main` umgestellt werden.
+
 ## Vollversion starten (PowerShell)
 
 Für den produktiven Einsatz (echte, persistente Daten – **kein** Demo-Modus) gibt es eigene

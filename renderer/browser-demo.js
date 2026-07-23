@@ -10,6 +10,10 @@
 (function () {
   if (window.dashboardAPI) return; // Electron: echtes API vorhanden
 
+  // Markierung für andere Skripte (z. B. pwa-register.js), dass dies der
+  // Browser-Fallback ist und kein echtes Electron-preload-API vorliegt.
+  window.__isBrowserFallback = true;
+
   // Demo-Modus nur bei ?demo=1; sonst Vollversion (leerer Start, eigener Speicher).
   const isDemo = /(?:[?&])demo=1(?:&|$)/.test(location.search);
   const DATA_KEY = isDemo ? 'itschulung-demo-data' : 'itschulung-full-data';

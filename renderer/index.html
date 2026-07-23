@@ -2,8 +2,18 @@
 <html lang="de">
 <head>
 <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>IT Schulungsmaßnahmen</title>
 <link rel="stylesheet" href="style.css">
+
+<!-- PWA: installierbar auf Android/iOS und Desktop -->
+<link rel="manifest" href="manifest.webmanifest">
+<meta name="theme-color" content="#8c3b3b">
+<link rel="icon" href="icons/icon-192.png" type="image/png">
+<link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="IT Schulung">
 </head>
 <body>
   <header class="app-header">
@@ -176,6 +186,8 @@
 
   <!-- Browser-Demo-Fallback: definiert window.dashboardAPI nur, wenn kein Electron-preload aktiv ist -->
   <script src="browser-demo.js"></script>
+  <!-- PWA: registriert den Service Worker nur im echten Browser (nicht in Electron) -->
+  <script src="pwa-register.js"></script>
   <script src="renderer.js"></script>
 </body>
 </html>

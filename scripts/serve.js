@@ -17,6 +17,7 @@ const contentTypes = {
   '.js': 'text/javascript; charset=utf-8',
   '.css': 'text/css; charset=utf-8',
   '.json': 'application/json; charset=utf-8',
+  '.webmanifest': 'application/manifest+json; charset=utf-8',
   '.png': 'image/png',
   '.jpg': 'image/jpeg',
   '.svg': 'image/svg+xml',
@@ -28,7 +29,7 @@ const server = http.createServer((req, res) => {
   if (urlPath === '/') urlPath = '/index.html';
 
   const filePath = path.normalize(path.join(root, urlPath));
-  if (!filePath.startsWith(root)) {
+  if (filePath !== root && !filePath.startsWith(root + path.sep)) {
     res.writeHead(403);
     res.end('Forbidden');
     return;
