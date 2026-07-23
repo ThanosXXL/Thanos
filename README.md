@@ -1,13 +1,28 @@
-# Dozenten Dashboard
+# Music Heaven
 
-Desktop-Dashboard (Electron) zur Verwaltung von bis zu vier Dozenten. Jeder Dozent hat drei Listen:
+Desktop-Musik-App (Electron) im Design "frisches Grün auf Schwarz". Music Heaven hat zwei Ordner:
 
-1. **Liste 1 – To-Do-Liste** (Aufgabenliste)
-2. **Liste 2 – Offene Projekte**
-3. **Liste 3 – Erledigte Projekte**
+1. **Ordner 1 – Hochgeladene Musik**: Eigene Musikdateien hochladen (MP3, WAV, OGG, M4A, FLAC).
+   Zwei Tracks (oder gleich die ganze Bibliothek) auswählen und Music Heaven mixt sie
+   **vollautomatisch** ineinander – entweder als **nahtloser Crossfade** oder als
+   simulierter **Scratch-Übergang** (Pitch-/Tempo-Wobble mit Cut, wie beim DJ-Scratchen).
+2. **Ordner 2 – Musikstücke selbst kreieren**: Eigenes Musikstück aus Equipment bauen –
+   Drums (Kick, Snare, Hi-Hat, Open Hat, Clap), Piano, Saxophon, Vocals und Bass. Noten
+   auswählen, Spuren zum Step-Sequencer hinzufügen, Pattern anklicken, Tempo einstellen.
 
-Projekte lassen sich per Klick von "Offene Projekte" nach "Erledigte Projekte" verschieben (und zurück).
-Alle Daten werden lokal gespeichert (im Benutzerdatenverzeichnis der App) und bleiben nach dem Neustart erhalten.
+Alle Sounds von Ordner 2 werden per Web Audio API live synthetisiert (kein externes
+Sample-Material nötig).
+
+## Abhören vor dem Speichern
+
+Beide Ordner haben denselben Ablauf:
+
+- **▶ Abhören & aufnehmen** spielt den Mix bzw. das Musikstück ab und nimmt genau diese
+  Wiedergabe gleichzeitig auf.
+- Danach lässt sich das Ergebnis:
+  - **in Music Heaven speichern** (interne Bibliothek, sichtbar am Ende der App), oder
+  - **extern speichern unter…** (freie Ordnerauswahl über den nativen Speichern-Dialog), oder
+  - **verwerfen**, um es neu abzumischen/aufzunehmen.
 
 ## Fertigen Installer herunterladen (ohne Terminal)
 

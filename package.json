@@ -1,7 +1,7 @@
 {
-  "name": "dozenten-dashboard",
+  "name": "music-heaven",
   "version": "1.0.0",
-  "description": "Desktop-Dashboard zur Verwaltung von Dozenten, Aufgaben und Projekten",
+  "description": "Music Heaven - Musik hochladen & automatisch mixen, eigene Musikstücke kreieren",
   "main": "main.js",
   "author": "",
   "license": "MIT",
@@ -14,8 +14,8 @@
     "electron-builder": "^24.13.3"
   },
   "build": {
-    "appId": "com.dozenten.dashboard",
-    "productName": "Dozenten Dashboard",
+    "appId": "com.musicheaven.app",
+    "productName": "Music Heaven",
     "files": [
       "main.js",
       "preload.js",

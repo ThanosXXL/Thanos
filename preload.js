@@ -1,6 +1,13 @@
 const { contextBridge, ipcRenderer } = require('electron');
 
-contextBridge.exposeInMainWorld('dashboardAPI', {
-  loadData: () => ipcRenderer.invoke('load-data'),
-  saveData: (data) => ipcRenderer.invoke('save-data', data)
+contextBridge.exposeInMainWorld('musicHeaven', {
+  listUploads: () => ipcRenderer.invoke('uploads:list'),
+  chooseUploads: () => ipcRenderer.invoke('uploads:choose'),
+  deleteUpload: (id) => ipcRenderer.invoke('uploads:delete', id),
+
+  listLibrary: () => ipcRenderer.invoke('library:list'),
+  saveToLibrary: (payload) => ipcRenderer.invoke('library:save', payload),
+  deleteLibraryItem: (id) => ipcRenderer.invoke('library:delete', id),
+
+  saveExternal: (payload) => ipcRenderer.invoke('export:save-as', payload)
 });
