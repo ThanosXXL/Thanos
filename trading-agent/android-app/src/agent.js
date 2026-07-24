@@ -40,6 +40,13 @@ export class TradingAgent {
     const startingBalance =
       tradingMode === 'paper' ? Number(this.settings.paperStartingBalance) : await this._getStartingBalance();
 
+    if (tradingMode === 'live' && startingBalance < Number(this.settings.minLiveBalance)) {
+      throw new Error(
+        `Live-Modus erfordert mindestens ${this.settings.minLiveBalance} Guthaben; ` +
+          `aktuell: ${startingBalance}. Guthaben direkt über Binance einzahlen — diese App sammelt keine Einzahlungen.`
+      );
+    }
+
     this.portfolio = new Portfolio(startingBalance);
     await this.portfolio.load();
 

@@ -88,6 +88,39 @@
           <label>Dashboard-Port
             <input type="number" name="DASHBOARD_PORT" />
           </label>
+          <label>Mindestguthaben für Live-Modus
+            <input type="number" name="MIN_LIVE_BALANCE" />
+          </label>
+        </fieldset>
+
+        <fieldset>
+          <legend>Auszahlung (Krypto, manuell, keine automatischen Zahlungen)</legend>
+          <p class="hint">
+            Kein Fiat-/Bank-Überweisungsversand durch diese App — Ein-/Auszahlungen in Euro
+            laufen direkt über Binance selbst. Hier nur: manuelle Krypto-Auszahlung an eine
+            Adresse, die dir gehört.
+          </p>
+          <label>Asset (z.B. USDT)
+            <input type="text" name="WITHDRAWAL_ASSET" />
+          </label>
+          <label>Zieladresse
+            <input type="text" name="WITHDRAWAL_ADDRESS" />
+          </label>
+          <label>SMTP-Host (optional, für Auszahlungs-E-Mail)
+            <input type="text" name="SMTP_HOST" />
+          </label>
+          <label>SMTP-Port
+            <input type="number" name="SMTP_PORT" />
+          </label>
+          <label>SMTP-Benutzer
+            <input type="text" name="SMTP_USER" />
+          </label>
+          <label>SMTP-Passwort
+            <input type="password" name="SMTP_PASS" autocomplete="off" />
+          </label>
+          <label>Empfänger-E-Mail für Auszahlungsbeleg
+            <input type="email" name="NOTIFY_EMAIL" />
+          </label>
         </fieldset>
       </form>
 
@@ -96,6 +129,14 @@
         <button id="startBtn" type="button" class="primary">Starten</button>
         <button id="stopBtn" type="button" class="danger" disabled>Stoppen</button>
       </div>
+
+      <h2>Auszahlung auslösen</h2>
+      <div class="withdraw-row">
+        <input type="number" id="withdrawAmount" placeholder="Betrag" min="0" step="0.0001" />
+        <input type="text" id="withdrawConfirm" placeholder='Bestätigung: I_CONFIRM_THIS_WITHDRAWAL' />
+        <button id="withdrawBtn" type="button" class="danger">Auszahlen</button>
+      </div>
+      <p class="hint">Nur im Live-Modus verfügbar. Bewegt echtes Guthaben unwiderruflich.</p>
 
       <h2>Log</h2>
       <pre id="log"></pre>

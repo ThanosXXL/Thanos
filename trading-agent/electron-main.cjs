@@ -19,6 +19,15 @@ const SETTINGS_FIELDS = [
   'MAX_OPEN_POSITIONS',
   'PAPER_STARTING_BALANCE',
   'DASHBOARD_PORT',
+  'MIN_LIVE_BALANCE',
+  'WITHDRAWAL_ASSET',
+  'WITHDRAWAL_ADDRESS',
+  'WITHDRAWAL_CONFIRM_PHRASE',
+  'SMTP_HOST',
+  'SMTP_PORT',
+  'SMTP_USER',
+  'SMTP_PASS',
+  'NOTIFY_EMAIL',
 ];
 
 const DEFAULT_SETTINGS = {
@@ -37,6 +46,15 @@ const DEFAULT_SETTINGS = {
   MAX_OPEN_POSITIONS: '1',
   PAPER_STARTING_BALANCE: '1000',
   DASHBOARD_PORT: '4173',
+  MIN_LIVE_BALANCE: '50',
+  WITHDRAWAL_ASSET: '',
+  WITHDRAWAL_ADDRESS: '',
+  WITHDRAWAL_CONFIRM_PHRASE: 'I_CONFIRM_THIS_WITHDRAWAL',
+  SMTP_HOST: '',
+  SMTP_PORT: '587',
+  SMTP_USER: '',
+  SMTP_PASS: '',
+  NOTIFY_EMAIL: '',
 };
 
 let mainWindow = null;
@@ -129,6 +147,33 @@ ipcMain.handle('stop-agent', () => {
 });
 
 ipcMain.handle('get-run-state', () => Boolean(agentProcess));
+
+ipcMain.handle('withdraw', (_event, settings, amount, confirmPhrase) => {
+  return new Promise((resolve) => {
+    const clean = saveSettings(settings);
+    const child = spawn(
+      process.execPath,
+      [path.join(__dirname, 'src', 'withdrawCli.js'), '--amount', String(amount), '--confirm', String(confirmPhrase)],
+      {
+        cwd: __dirname,
+        env: { ...process.env, ...clean, ELECTRON_RUN_AS_NODE: '1' },
+      }
+    );
+
+    let output = '';
+    child.stdout.on('data', (chunk) => {
+      output += chunk.toString();
+      sendLog(chunk.toString());
+    });
+    child.stderr.on('data', (chunk) => {
+      output += chunk.toString();
+      sendLog(chunk.toString());
+    });
+    child.on('exit', (code) => {
+      resolve({ ok: code === 0, output });
+    });
+  });
+});
 
 app.whenReady().then(createWindow);
 

@@ -6,6 +6,7 @@ contextBridge.exposeInMainWorld('desktopAPI', {
   startAgent: (settings) => ipcRenderer.invoke('start-agent', settings),
   stopAgent: () => ipcRenderer.invoke('stop-agent'),
   getRunState: () => ipcRenderer.invoke('get-run-state'),
+  withdraw: (settings, amount, confirmPhrase) => ipcRenderer.invoke('withdraw', settings, amount, confirmPhrase),
   onLog: (callback) => ipcRenderer.on('agent-log', (_event, line) => callback(line)),
   onRunState: (callback) => ipcRenderer.on('agent-run-state', (_event, running) => callback(running)),
 });

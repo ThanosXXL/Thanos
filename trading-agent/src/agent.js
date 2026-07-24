@@ -39,6 +39,15 @@ export async function startAgent() {
   }
 
   const startingBalance = await getStartingBalance(symbol);
+
+  if (config.mode === 'live' && startingBalance < config.minLiveBalance) {
+    throw new Error(
+      `Live mode requires a balance of at least ${config.minLiveBalance} (quote-asset units); ` +
+        `current balance is ${startingBalance}. Fund your Binance account through Binance's own ` +
+        'deposit flow (card/SEPA/etc.) first — this project does not process deposits itself.'
+    );
+  }
+
   const portfolio = new Portfolio(startingBalance);
   const riskManager = new RiskManager();
   const strategy = createDefaultStrategy();

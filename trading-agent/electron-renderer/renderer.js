@@ -7,6 +7,9 @@ const statusBadge = document.getElementById('statusBadge');
 const dashboardFrame = document.getElementById('dashboardFrame');
 const liveConfirmRow = document.getElementById('liveConfirmRow');
 const modeSelect = form.elements['TRADING_MODE'];
+const withdrawAmount = document.getElementById('withdrawAmount');
+const withdrawConfirm = document.getElementById('withdrawConfirm');
+const withdrawBtn = document.getElementById('withdrawBtn');
 
 function formToSettings() {
   const settings = {};
@@ -62,6 +65,28 @@ startBtn.addEventListener('click', async () => {
 stopBtn.addEventListener('click', async () => {
   await window.desktopAPI.stopAgent();
   dashboardFrame.src = 'about:blank';
+});
+
+withdrawBtn.addEventListener('click', async () => {
+  const settings = formToSettings();
+  if (settings.TRADING_MODE !== 'live') {
+    appendLog('\n[desktop] Auszahlung nur im Live-Modus möglich.\n');
+    return;
+  }
+  if (!withdrawAmount.value || Number(withdrawAmount.value) <= 0) {
+    appendLog('\n[desktop] Bitte einen gültigen Betrag angeben.\n');
+    return;
+  }
+  const confirmed = window.confirm(
+    `Wirklich ${withdrawAmount.value} ${settings.WITHDRAWAL_ASSET || ''} an ${settings.WITHDRAWAL_ADDRESS || '(keine Adresse gesetzt)'} auszahlen? Das ist unwiderruflich.`
+  );
+  if (!confirmed) return;
+
+  withdrawBtn.disabled = true;
+  appendLog(`\n[desktop] Löse Auszahlung über ${withdrawAmount.value} aus...\n`);
+  const result = await window.desktopAPI.withdraw(settings, withdrawAmount.value, withdrawConfirm.value);
+  withdrawBtn.disabled = false;
+  appendLog(result.ok ? '\n[desktop] Auszahlung abgeschlossen.\n' : '\n[desktop] Auszahlung fehlgeschlagen.\n');
 });
 
 window.desktopAPI.onLog(appendLog);

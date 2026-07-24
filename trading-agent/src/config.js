@@ -31,7 +31,9 @@ if (!['paper', 'testnet', 'live'].includes(mode)) {
   throw new Error(`TRADING_MODE must be one of paper|testnet|live, got: ${mode}`);
 }
 
-const LIVE_CONFIRM_PHRASE = 'I_UNDERSTAND_THE_RISK';
+export const LIVE_CONFIRM_PHRASE = 'I_UNDERSTAND_THE_RISK';
+export const WITHDRAWAL_CONFIRM_PHRASE = process.env.WITHDRAWAL_CONFIRM_PHRASE || 'I_CONFIRM_THIS_WITHDRAWAL';
+
 if (mode === 'live' && process.env.LIVE_CONFIRM !== LIVE_CONFIRM_PHRASE) {
   throw new Error(
     `TRADING_MODE=live requires LIVE_CONFIRM=${LIVE_CONFIRM_PHRASE} in your .env. ` +
@@ -79,6 +81,29 @@ export const config = {
   },
   dashboard: {
     port: Number(process.env.DASHBOARD_PORT || 4173),
+  },
+  // Live mode refuses to start below this quote-asset balance. This project never
+  // collects deposits itself — fund your Binance account directly through Binance's
+  // own app/website (card, SEPA, etc.), which already handles that as a licensed
+  // exchange. This is just a local safety floor before the agent risks real orders.
+  minLiveBalance: Number(process.env.MIN_LIVE_BALANCE || 50),
+  // Optional manual crypto withdrawal to an address you control. Never automatic,
+  // never fiat/bank transfer — this project does not initiate bank transfers itself;
+  // do that through Binance's own withdrawal flow to your verified bank account.
+  withdrawal: {
+    asset: process.env.WITHDRAWAL_ASSET || '',
+    address: process.env.WITHDRAWAL_ADDRESS || '',
+    enabled: Boolean(process.env.WITHDRAWAL_ASSET && process.env.WITHDRAWAL_ADDRESS),
+  },
+  // Optional: emails a record to yourself after each withdrawal you trigger, using
+  // your own SMTP account. A missing/failed email never blocks the withdrawal itself.
+  smtp: {
+    host: process.env.SMTP_HOST || '',
+    port: Number(process.env.SMTP_PORT || 587),
+    user: process.env.SMTP_USER || '',
+    pass: process.env.SMTP_PASS || '',
+    notifyEmail: process.env.NOTIFY_EMAIL || '',
+    enabled: Boolean(process.env.SMTP_HOST && process.env.NOTIFY_EMAIL),
   },
 };
 

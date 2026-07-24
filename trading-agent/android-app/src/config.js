@@ -3,6 +3,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 const SETTINGS_KEY = '@trading_agent_settings_v1';
 
 export const LIVE_CONFIRM_PHRASE = 'I_UNDERSTAND_THE_RISK';
+export const WITHDRAWAL_CONFIRM_PHRASE = 'I_CONFIRM_THIS_WITHDRAWAL';
 
 export const DEFAULT_SETTINGS = {
   binanceApiKey: '',
@@ -19,6 +20,16 @@ export const DEFAULT_SETTINGS = {
   maxDailyLossPct: 0.03,
   maxOpenPositions: 1,
   paperStartingBalance: 1000,
+  // Live mode refuses to start below this quote-asset balance. Fund your Binance
+  // account through Binance's own deposit flow — this app never collects deposits.
+  minLiveBalance: 50,
+  // Manual crypto withdrawal only, never automatic, never fiat/bank transfer —
+  // do fiat withdrawals through Binance's own app to your verified bank account.
+  withdrawalAsset: '',
+  withdrawalAddress: '',
+  // Email address to send a withdrawal summary to via the device's own mail app
+  // (Linking/mailto — no SMTP credentials are stored on the device).
+  notifyEmail: '',
 };
 
 export async function loadSettings() {

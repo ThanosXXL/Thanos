@@ -78,6 +78,14 @@ export async function placeOrder(settings, { symbol, side, type = 'MARKET', quan
 }
 
 /**
+ * Signed: withdraw crypto to an address you control. Production Binance only;
+ * callers must gate this to live mode themselves (see withdrawal.js).
+ */
+export async function withdraw(settings, { coin, address, amount }) {
+  return request(settings, 'POST', '/sapi/v1/capital/withdraw/apply', { coin, address, amount }, { signed: true });
+}
+
+/**
  * Subscribes to the live production kline stream and invokes onCandle(candle, isFinal)
  * for every update. Returns an unsubscribe function.
  */

@@ -31,6 +31,36 @@ If you go live, you are trading with real money and are solely responsible
 for the outcome. Start with paper trading, then testnet, and only move to
 live mode once you understand and accept how the strategy behaves.
 
+## Deposits, withdrawals, and payments — scope
+
+This project is a personal trading tool for your own Binance account. It
+deliberately does **not**, and will not, include:
+
+- Collecting deposits from anyone via PayPal, credit card, direct debit, or
+  bank transfer. Fund your own Binance account through Binance's own
+  deposit flow (it already supports card/SEPA/etc.) — this app has no
+  payment-collection code and never will, because accepting deposits from
+  other people is a regulated activity (payment services/deposit-taking)
+  that requires a license this project doesn't have and isn't trying to get.
+- Initiating real bank transfers (SEPA, "Echtzeitüberweisung", or
+  otherwise) itself. Withdraw fiat to your own verified bank account
+  directly through Binance's own app/website — that's Binance acting as
+  your licensed exchange, not something this project reimplements or fakes.
+
+What it does include, for managing your own funds:
+
+- A **minimum-balance gate** (`MIN_LIVE_BALANCE`, default 50, in quote-asset
+  units) that blocks live mode from starting until your account holds at
+  least that much — a safety floor, not a deposit mechanism.
+- A **manual, on-demand crypto withdrawal** to an address you control, using
+  Binance's own documented withdrawal API, gated behind a typed
+  confirmation phrase (like live mode itself). Never automatic, never daily
+  by itself — you trigger it, once, for an amount you choose, each time.
+- An **email sent to yourself** after each withdrawal (CLI/desktop: via your
+  own SMTP account; Android: via your phone's own mail app, so no email
+  credentials are stored on the device) with a record for your own
+  bookkeeping. This is not a compliance or KYC process — it's a receipt.
+
 ## Downloads
 
 Windows and Android builds are produced by CI, not by hand — nothing is
@@ -72,6 +102,9 @@ src/                     Core engine, shared by the CLI and the Electron desktop
   backtester.js          replays historical candles through strategy + risk manager
   backtestRunner.js      CLI: fetches history and prints a backtest report
   dashboard/             local Express server + static page showing live status
+  withdrawal.js          manual crypto withdrawal (Binance API) behind a confirmation phrase
+  withdrawCli.js          CLI entrypoint: npm run withdraw -- --amount X --confirm Y
+  notifier.js             emails a withdrawal record to yourself via your own SMTP account
 
 electron-main.cjs        Electron main process: settings storage, spawns electron-run.js
 electron-preload.cjs     contextBridge API exposed to the renderer
@@ -89,7 +122,9 @@ android-app/             Standalone React Native app — a full on-device tradin
   src/agent.js           same orchestration as the CLI's agent.js
   src/backgroundTask.js  wraps the agent in a react-native-background-actions
                          foreground service so it can keep running while backgrounded
-  App.tsx                settings + dashboard UI in one screen, polls AsyncStorage
+  src/withdrawal.js      manual crypto withdrawal (Binance API), AsyncStorage-logged
+  App.tsx                settings + dashboard UI in one screen, polls AsyncStorage;
+                         withdrawal emails go through the device's own mail app (mailto)
 ```
 
 State model (CLI/desktop): `Portfolio` mutates in memory, then persists the
@@ -162,7 +197,16 @@ single screen shows both settings and live status.
    confirmation phrase (`I_UNDERSTAND_THE_RISK`) the app asks for — this is
    enforced in code, not just the UI, so it can't be skipped by accident.
 3. Start with a small amount of real capital and conservative
-   risk-per-trade/daily-loss settings.
+   risk-per-trade/daily-loss settings. Live mode won't start below
+   `MIN_LIVE_BALANCE` (default 50, quote-asset units) — fund your Binance
+   account directly through Binance first.
+4. To withdraw crypto to an address you control: set `WITHDRAWAL_ASSET` and
+   `WITHDRAWAL_ADDRESS` in `.env` (CLI/desktop) or in-app (Android), then
+   trigger it with `npm run withdraw -- --amount <x> --confirm
+   I_CONFIRM_THIS_WITHDRAWAL`, the desktop app's "Auszahlen" button, or the
+   Android app's withdrawal panel. Optionally set `SMTP_HOST`/`NOTIFY_EMAIL`
+   (CLI/desktop) or just `notifyEmail` (Android) to get a record emailed to
+   yourself afterwards.
 
 ### Known limitations to address before trusting this with real capital
 
@@ -204,3 +248,17 @@ single screen shows both settings and live status.
   available in the sandbox this was developed in. Run it once (via
   `workflow_dispatch` or a `trading-v*` tag) and check both jobs succeed
   before relying on it.
+- **Withdrawal API is untested against real Binance** in this session (no
+  network access to Binance from this sandbox — see the Downloads section).
+  `/sapi/v1/capital/withdraw/apply` is Binance's documented endpoint, but
+  verify it works for your account/region before relying on it; it is not
+  available on Binance's spot testnet, so withdrawal only works in live mode.
+- **The withdrawal amount is not itself risk-limited** by `RISK_PER_TRADE_PCT`
+  or similar — it's an amount you type, up to whatever Binance's own API
+  allows for your account. Double-check the amount before confirming; it
+  moves real funds off the exchange irreversibly.
+- **Email notification is best-effort.** A missing SMTP config, a wrong
+  password, or a network hiccup means no email — but the withdrawal itself
+  already happened by that point. Don't rely on the email as your only
+  record; check `data/withdrawals.log` (CLI/desktop) or the in-app history
+  (Android) too.
