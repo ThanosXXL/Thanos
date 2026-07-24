@@ -5,6 +5,15 @@ risk limits, backtesting, paper trading, and a local monitoring dashboard —
 available as a CLI, a Windows desktop app ("FreshTrades Desktop"), and an
 Android app ("FreshTrades").
 
+[![Download for Windows](https://img.shields.io/badge/Download-Windows-0078D6?style=for-the-badge&logo=windowsterminal&logoColor=white)](https://github.com/ThanosXXL/Thanos/releases/latest/download/FreshTrades-Setup.exe)
+[![Download for Android](https://img.shields.io/badge/Download-Android-3DDC84?style=for-the-badge&logo=android&logoColor=white)](https://github.com/ThanosXXL/Thanos/releases/latest/download/FreshTrades.apk)
+
+These links always point at the newest published release (via GitHub's
+`/releases/latest/download/` alias) — no need to hunt for a version number.
+They only work once at least one release has actually been published (see
+**Downloads** below for how that happens and what "one click" does and
+doesn't mean here).
+
 ## No guarantees — read this first
 
 **No software can guarantee a profit, daily or otherwise.** Markets move
@@ -111,14 +120,25 @@ What it does include, for managing your own funds:
 ## Downloads
 
 Windows and Android builds are produced by CI, not by hand — nothing is
-uploaded from a developer machine.
+uploaded from a developer machine. Once at least one release has been
+published, the two buttons at the top of this file are genuinely one click:
+they point at fixed, version-independent filenames
+(`FreshTrades-Setup.exe`, `FreshTrades.apk`) via GitHub's
+`/releases/latest/download/` alias, so they always resolve to the newest
+build without anyone having to look up a version number.
+
+Getting that first (and every subsequent) release published still takes one
+of these two triggers — this project doesn't auto-publish on every commit,
+deliberately, since a release is a public, real thing other people can
+download:
 
 1. Push a tag matching `freshtrades-v*` (e.g. `freshtrades-v0.1.0`) to this
    repository, or run **Actions → Build & Release FreshTrades (Windows +
    Android) → Run workflow** manually.
 2. The workflow builds the Windows installer (`.exe`, NSIS) and the Android
-   package (`.apk`) and attaches both to a GitHub Release for that tag.
-3. Download the `.exe` or `.apk` from the release page and run/install it.
+   package (`.apk`) and attaches both to a GitHub Release for that tag —
+   the two download buttons above then work immediately, no further
+   action needed.
 
 The Android APK is **debug-signed** (see limitations below) — Android will
 warn about an unverified app; that's expected for a sideloaded build that

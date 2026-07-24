@@ -81,17 +81,20 @@ jobs:
           chmod +x gradlew
           ./gradlew assembleRelease
 
+      - name: APK auf stabilen Dateinamen umbenennen
+        run: cp android/app/build/outputs/apk/release/app-release.apk android/app/build/outputs/apk/release/FreshTrades.apk
+
       - name: APK als Artifact hochladen
         uses: actions/upload-artifact@v4
         with:
           name: freshtrades-android
-          path: trading-agent/android-app/android/app/build/outputs/apk/release/*.apk
+          path: trading-agent/android-app/android/app/build/outputs/apk/release/FreshTrades.apk
           if-no-files-found: warn
 
       - name: APK zum GitHub Release hinzufügen
         if: github.ref_type == 'tag'
         uses: softprops/action-gh-release@v2
         with:
-          files: trading-agent/android-app/android/app/build/outputs/apk/release/*.apk
+          files: trading-agent/android-app/android/app/build/outputs/apk/release/FreshTrades.apk
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
