@@ -95,3 +95,17 @@ npm run dist
 ```
 
 Erzeugt eine installierbare Desktop-Anwendung (Windows/macOS/Linux) im Ordner `dist/`.
+
+## Nutzerhandbuch als PDF erzeugen
+
+```bash
+npm run handbook
+```
+
+`scripts/create-pdf.js` baut ein Nutzerhandbuch im Music-Heaven-Farbschema (frisches Grün auf
+Schwarz) mit 3D-Beispielbildern der beiden Ordner und der Bibliothek. Das Skript erzeugt zunächst
+eine HTML-Datei und rendert sie über einen vorhandenen Chromium/Chrome/Edge headless zu
+`Music-Heaven-Handbuch.pdf`. Ist kein Browser vorhanden, bleibt die HTML-Datei erhalten und kann
+manuell über „Drucken → Als PDF speichern" exportiert werden. Jede Seite trägt unten die
+Copyright-Zeile `© {Jahr} Music Heaven – Alle Rechte vorbehalten. · Erstellt am {Datum}` – dasselbe
+Format wie bei früheren Handbüchern in diesem Repository.

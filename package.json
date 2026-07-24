@@ -8,7 +8,8 @@
   "scripts": {
     "start": "electron .",
     "dist": "electron-builder",
-    "serve": "node scripts/serve.js"
+    "serve": "node scripts/serve.js",
+    "handbook": "node scripts/create-pdf.js"
   },
   "devDependencies": {
     "electron": "^31.0.0",
