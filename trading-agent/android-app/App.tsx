@@ -73,6 +73,7 @@ export default function App() {
   const [markets, setMarkets] = useState<any[]>([]);
   const [marketsSearch, setMarketsSearch] = useState('');
   const [marketsLoading, setMarketsLoading] = useState(false);
+  const [showTechDetails, setShowTechDetails] = useState(false);
 
   useEffect(() => {
     (async () => {
@@ -219,6 +220,9 @@ export default function App() {
             {running ? `LÄUFT · ${settings.tradingMode.toUpperCase()}` : 'GESTOPPT'}
           </Text>
         </View>
+        <Text style={styles.statusHint}>
+          {running ? 'Läuft normal. Details unten in den Karten.' : 'Bereit. Tippe auf „Starten", um zu beginnen.'}
+        </Text>
 
         <Text style={styles.disclaimer}>
           Keine Gewinngarantie. Live-Modus handelt mit echtem Geld auf eigenes Risiko. Diese App sammelt keine
@@ -409,14 +413,20 @@ export default function App() {
           </View>
         )}
 
-        <Text style={styles.sectionTitle}>Log</Text>
-        <View style={styles.logBox}>
-          {log.slice(-40).map((line, i) => (
-            <Text key={i} style={styles.logLine}>
-              {line}
-            </Text>
-          ))}
-        </View>
+        <TouchableOpacity onPress={() => setShowTechDetails((v) => !v)}>
+          <Text style={styles.sectionTitle}>
+            {showTechDetails ? '▾' : '▸'} Technische Details (nur bei Problemen nötig)
+          </Text>
+        </TouchableOpacity>
+        {showTechDetails && (
+          <View style={styles.logBox}>
+            {log.slice(-40).map((line, i) => (
+              <Text key={i} style={styles.logLine}>
+                {line}
+              </Text>
+            ))}
+          </View>
+        )}
       </ScrollView>
     </SafeAreaView>
   );
@@ -428,6 +438,7 @@ const styles = StyleSheet.create({
   title: { fontSize: 22, fontWeight: '700', color: '#000000', marginBottom: 8 },
   badge: { alignSelf: 'flex-start', paddingHorizontal: 10, paddingVertical: 4, borderRadius: 999, marginBottom: 12 },
   badgeTextLight: { color: '#ffffff', fontWeight: '700', fontSize: 12 },
+  statusHint: { color: '#000000', fontSize: 12, marginBottom: 12 },
   disclaimer: {
     color: '#000000',
     backgroundColor: 'rgba(255,255,255,0.7)',

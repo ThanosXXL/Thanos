@@ -78,6 +78,15 @@ What it does include, for managing your own funds:
 
 ## Dashboard features
 
+- **No raw script/log output by default.** The Electron desktop app and
+  Android app both hide the technical stdout/stderr trail behind a
+  collapsed "Technische Details" toggle — the default view is only the
+  structured cards/tables (status, balance, today's trades, positions,
+  markets, withdrawal history) plus a plain-language one-line status
+  ("Läuft", "Gestoppt", "Start fehlgeschlagen: ..."). The technical log is
+  still there and still gets every event (including errors) — it's just
+  not shown unless you open it, so a fresh install feels like a normal app
+  rather than a developer console.
 - **Live USD→EUR rate**: fetched from
   [frankfurter.app](https://www.frankfurter.app/) (free, keyless, ECB
   reference rates). This is a real, currently-published rate, refreshed

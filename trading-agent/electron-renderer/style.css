@@ -110,3 +110,28 @@ button:disabled { opacity: 0.5; cursor: not-allowed; }
   word-break: break-word;
   color: var(--text);
 }
+.statusHint {
+  font-size: 0.85rem;
+  color: var(--text);
+  background: rgba(255, 255, 255, 0.6);
+  border-radius: 6px;
+  padding: 8px 10px;
+  margin-top: 12px;
+}
+.statusHint.statusHintError {
+  background: rgba(217, 43, 43, 0.15);
+  color: var(--danger);
+  font-weight: 600;
+}
+.techDetails {
+  margin-top: 10px;
+}
+.techDetails summary {
+  cursor: pointer;
+  font-size: 0.78rem;
+  color: var(--muted);
+  padding: 4px 0;
+}
+.techDetails #log {
+  margin-top: 8px;
+}

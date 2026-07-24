@@ -10,6 +10,12 @@ const modeSelect = form.elements['TRADING_MODE'];
 const withdrawAmount = document.getElementById('withdrawAmount');
 const withdrawConfirm = document.getElementById('withdrawConfirm');
 const withdrawBtn = document.getElementById('withdrawBtn');
+const statusHint = document.getElementById('statusHint');
+
+function setStatusHint(text, isError) {
+  statusHint.textContent = text;
+  statusHint.classList.toggle('statusHintError', Boolean(isError));
+}
 
 function formToSettings() {
   const settings = {};
@@ -49,32 +55,38 @@ modeSelect.addEventListener('change', updateLiveConfirmVisibility);
 
 saveBtn.addEventListener('click', async () => {
   await window.desktopAPI.saveSettings(formToSettings());
+  setStatusHint('Einstellungen gespeichert.');
   appendLog('\n[desktop] Einstellungen gespeichert.\n');
 });
 
 startBtn.addEventListener('click', async () => {
   logEl.textContent = '';
+  setStatusHint('Starte...');
   const result = await window.desktopAPI.startAgent(formToSettings());
   if (!result.ok) {
+    setStatusHint(`Start fehlgeschlagen: ${result.error}`, true);
     appendLog(`\n[desktop] Start fehlgeschlagen: ${result.error}\n`);
     return;
   }
+  setStatusHint('Läuft. Details im Live-Dashboard rechts.');
   dashboardFrame.src = `http://localhost:${result.dashboardPort}`;
 });
 
 stopBtn.addEventListener('click', async () => {
+  stopRequested = true;
   await window.desktopAPI.stopAgent();
+  setStatusHint('Gestoppt.');
   dashboardFrame.src = 'about:blank';
 });
 
 withdrawBtn.addEventListener('click', async () => {
   const settings = formToSettings();
   if (settings.TRADING_MODE !== 'live') {
-    appendLog('\n[desktop] Auszahlung nur im Live-Modus möglich.\n');
+    setStatusHint('Auszahlung nur im Live-Modus möglich.', true);
     return;
   }
   if (!withdrawAmount.value || Number(withdrawAmount.value) <= 0) {
-    appendLog('\n[desktop] Bitte einen gültigen Betrag angeben.\n');
+    setStatusHint('Bitte einen gültigen Betrag angeben.', true);
     return;
   }
   const confirmed = window.confirm(
@@ -83,14 +95,25 @@ withdrawBtn.addEventListener('click', async () => {
   if (!confirmed) return;
 
   withdrawBtn.disabled = true;
+  setStatusHint('Auszahlung wird ausgelöst...');
   appendLog(`\n[desktop] Löse Auszahlung über ${withdrawAmount.value} aus...\n`);
   const result = await window.desktopAPI.withdraw(settings, withdrawAmount.value, withdrawConfirm.value);
   withdrawBtn.disabled = false;
+  setStatusHint(result.ok ? 'Auszahlung abgeschlossen.' : 'Auszahlung fehlgeschlagen — Details unten.', !result.ok);
   appendLog(result.ok ? '\n[desktop] Auszahlung abgeschlossen.\n' : '\n[desktop] Auszahlung fehlgeschlagen.\n');
 });
 
+let stopRequested = false;
+
 window.desktopAPI.onLog(appendLog);
-window.desktopAPI.onRunState(setRunning);
+window.desktopAPI.onRunState((running) => {
+  setRunning(running);
+  if (!running && !stopRequested) {
+    setStatusHint('Unerwartet gestoppt — Details unten.', true);
+    dashboardFrame.src = 'about:blank';
+  }
+  if (running) stopRequested = false;
+});
 
 (async () => {
   const settings = await window.desktopAPI.getSettings();
@@ -98,6 +121,7 @@ window.desktopAPI.onRunState(setRunning);
   const running = await window.desktopAPI.getRunState();
   setRunning(running);
   if (running) {
+    setStatusHint('Läuft. Details im Live-Dashboard rechts.');
     dashboardFrame.src = `http://localhost:${settings.DASHBOARD_PORT}`;
   }
 })();
