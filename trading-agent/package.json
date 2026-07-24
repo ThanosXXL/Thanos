@@ -1,0 +1,21 @@
+{
+  "name": "trading-agent",
+  "version": "0.1.0",
+  "description": "Autonomous crypto trading agent (Binance) with paper-trading default, risk management, and backtesting. Makes no profit guarantees.",
+  "type": "module",
+  "private": true,
+  "main": "src/index.js",
+  "scripts": {
+    "start": "node src/index.js",
+    "backtest": "node src/backtestRunner.js",
+    "dashboard": "node src/dashboard/server.js"
+  },
+  "engines": {
+    "node": ">=18"
+  },
+  "dependencies": {
+    "dotenv": "^16.4.5",
+    "express": "^4.19.2",
+    "ws": "^8.18.0"
+  }
+}

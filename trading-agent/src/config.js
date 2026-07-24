@@ -1,0 +1,81 @@
+import 'dotenv/config';
+
+const REQUIRED_NUMERIC = [
+  'FAST_MA_PERIOD',
+  'SLOW_MA_PERIOD',
+  'RISK_PER_TRADE_PCT',
+  'STOP_LOSS_PCT',
+  'TAKE_PROFIT_PCT',
+  'MAX_DAILY_LOSS_PCT',
+  'MAX_OPEN_POSITIONS',
+];
+
+function requireNumber(name) {
+  const raw = process.env[name];
+  if (raw === undefined || raw === '') {
+    throw new Error(`Missing required env var: ${name}`);
+  }
+  const value = Number(raw);
+  if (!Number.isFinite(value)) {
+    throw new Error(`Env var ${name} must be a number, got: ${raw}`);
+  }
+  return value;
+}
+
+for (const name of REQUIRED_NUMERIC) {
+  requireNumber(name);
+}
+
+const mode = (process.env.TRADING_MODE || 'paper').toLowerCase();
+if (!['paper', 'testnet', 'live'].includes(mode)) {
+  throw new Error(`TRADING_MODE must be one of paper|testnet|live, got: ${mode}`);
+}
+
+const LIVE_CONFIRM_PHRASE = 'I_UNDERSTAND_THE_RISK';
+if (mode === 'live' && process.env.LIVE_CONFIRM !== LIVE_CONFIRM_PHRASE) {
+  throw new Error(
+    `TRADING_MODE=live requires LIVE_CONFIRM=${LIVE_CONFIRM_PHRASE} in your .env. ` +
+      'This is a deliberate safeguard: live mode places real orders with real money. ' +
+      'No strategy in this project guarantees profit. Only proceed if you accept the risk of loss.'
+  );
+}
+
+if (mode === 'live' && (!process.env.BINANCE_API_KEY || !process.env.BINANCE_API_SECRET)) {
+  throw new Error('TRADING_MODE=live requires BINANCE_API_KEY and BINANCE_API_SECRET.');
+}
+
+export const config = {
+  mode,
+  isLive: mode === 'live',
+  binance: {
+    apiKey: process.env.BINANCE_API_KEY || '',
+    apiSecret: process.env.BINANCE_API_SECRET || '',
+    restBaseUrl: mode === 'live' ? 'https://api.binance.com' : 'https://testnet.binance.vision',
+    wsBaseUrl: mode === 'live' ? 'wss://stream.binance.com:9443/ws' : 'wss://testnet.binance.vision/ws',
+  },
+  market: {
+    symbol: (process.env.SYMBOL || 'BTCUSDT').toUpperCase(),
+    interval: process.env.INTERVAL || '5m',
+  },
+  strategy: {
+    fastMaPeriod: requireNumber('FAST_MA_PERIOD'),
+    slowMaPeriod: requireNumber('SLOW_MA_PERIOD'),
+  },
+  risk: {
+    riskPerTradePct: requireNumber('RISK_PER_TRADE_PCT'),
+    stopLossPct: requireNumber('STOP_LOSS_PCT'),
+    takeProfitPct: requireNumber('TAKE_PROFIT_PCT'),
+    maxDailyLossPct: requireNumber('MAX_DAILY_LOSS_PCT'),
+    maxOpenPositions: requireNumber('MAX_OPEN_POSITIONS'),
+  },
+  paper: {
+    startingBalance: Number(process.env.PAPER_STARTING_BALANCE || 1000),
+  },
+  dashboard: {
+    port: Number(process.env.DASHBOARD_PORT || 4173),
+  },
+};
+
+if (config.strategy.fastMaPeriod >= config.strategy.slowMaPeriod) {
+  throw new Error('FAST_MA_PERIOD must be smaller than SLOW_MA_PERIOD');
+}
