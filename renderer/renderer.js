@@ -6,11 +6,11 @@
 
   const TARIFE = [
     {
-      name: 'Comfort Flat',
-      preis: '19,99 € / Monat',
+      name: 'Tarif 1',
+      preis: '6,89 € / Monat',
       accent: 'green',
-      daten: '15 GB Datenvolumen mit 5G-Speed',
-      telefonie: 'Allnet-Flat für Telefonie & SMS ins deutsche Netz',
+      daten: '10 GB Datenvolumen mit 5G-Speed',
+      telefonie: 'Flat Telefonieren ins deutsche Netz',
       netz: 'Telekom-Netz – deutschlandweit die beste Netzabdeckung',
       sim: 'SIM-Karte kostenlos inklusive',
       laufzeit: '24 Monate Laufzeit',
@@ -21,18 +21,18 @@
       ]
     },
     {
-      name: 'Premium Unlimited',
-      preis: '34,99 € / Monat',
+      name: 'Tarif 2',
+      preis: '12,89 € / Monat',
       accent: 'orange',
-      daten: 'Unbegrenztes Datenvolumen (Drosselung auf 3 Mbit/s nach 60 GB High-Speed-Volumen)',
-      telefonie: 'Allnet-Flat für Telefonie & SMS ins deutsche Netz und EU-Ausland',
-      netz: 'Telekom-Netz mit 5G+ Frequenzen für ein besonders stabiles Netz',
+      daten: '20 GB Datenvolumen mit 5G-Speed',
+      telefonie: 'Flat Telefonieren ins deutsche Netz',
+      netz: 'Telekom-Netz – deutschlandweit die beste Netzabdeckung',
       sim: 'SIM-Karte kostenlos inklusive',
       laufzeit: '24 Monate Laufzeit',
       vorteile: [
-        'WLAN Call & VoLTE inklusive',
-        'Hotspot-Nutzung inklusive',
-        'Doppelte Netzanbindung für höchste Ausfallsicherheit'
+        'EU-Roaming inklusive',
+        '5G ohne Aufpreis',
+        'Nach Laufzeitende monatlich kündbar'
       ]
     }
   ];
