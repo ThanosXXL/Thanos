@@ -23,7 +23,8 @@ async function request(method, path, params = {}, { signed = false } = {}) {
   if (signed) {
     queryString += `&signature=${sign(queryString)}`;
   }
-  const url = `${config.binance.restBaseUrl}${path}${queryString ? `?${queryString}` : ''}`;
+  const baseUrl = signed ? config.binance.signedRestBaseUrl : config.binance.publicRestBaseUrl;
+  const url = `${baseUrl}${path}${queryString ? `?${queryString}` : ''}`;
 
   const headers = {};
   if (signed || config.binance.apiKey) {
@@ -73,9 +74,8 @@ export async function placeOrder({ symbol, side, type = 'MARKET', quantity, pric
 }
 
 /**
- * Subscribes to a live kline stream and invokes onCandle(candle, isFinal) for every update.
- * Returns an unsubscribe function. Works against testnet or live streams depending on mode;
- * paper mode also uses the live/testnet price feed (it just doesn't submit real orders).
+ * Subscribes to the live production kline stream (real market data, all modes) and
+ * invokes onCandle(candle, isFinal) for every update. Returns an unsubscribe function.
  */
 export function subscribeKlines(symbol, interval, onCandle) {
   const streamName = `${symbol.toLowerCase()}@kline_${interval}`;

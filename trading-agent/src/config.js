@@ -50,8 +50,14 @@ export const config = {
   binance: {
     apiKey: process.env.BINANCE_API_KEY || '',
     apiSecret: process.env.BINANCE_API_SECRET || '',
-    restBaseUrl: mode === 'live' ? 'https://api.binance.com' : 'https://testnet.binance.vision',
-    wsBaseUrl: mode === 'live' ? 'wss://stream.binance.com:9443/ws' : 'wss://testnet.binance.vision/ws',
+    // Public market data (klines, price stream) always comes from production Binance,
+    // in every mode including paper/testnet: it's unauthenticated, free, and testnet's
+    // sandboxed order book does not track real prices closely enough to paper-trade against.
+    publicRestBaseUrl: 'https://api.binance.com',
+    wsBaseUrl: 'wss://stream.binance.com:9443/ws',
+    // Signed calls (account balance, order placement) go to testnet unless mode is live —
+    // paper mode never calls these (see agent.js), so this only matters for testnet/live.
+    signedRestBaseUrl: mode === 'live' ? 'https://api.binance.com' : 'https://testnet.binance.vision',
   },
   market: {
     symbol: (process.env.SYMBOL || 'BTCUSDT').toUpperCase(),

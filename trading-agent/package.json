@@ -4,11 +4,13 @@
   "description": "Autonomous crypto trading agent (Binance) with paper-trading default, risk management, and backtesting. Makes no profit guarantees.",
   "type": "module",
   "private": true,
-  "main": "src/index.js",
+  "main": "electron-main.cjs",
   "scripts": {
     "start": "node src/index.js",
     "backtest": "node src/backtestRunner.js",
-    "dashboard": "node src/dashboard/server.js"
+    "dashboard": "node src/dashboard/server.js",
+    "electron": "electron electron-main.cjs",
+    "dist": "electron-builder --win"
   },
   "engines": {
     "node": ">=18"
@@ -17,5 +19,32 @@
     "dotenv": "^16.4.5",
     "express": "^4.19.2",
     "ws": "^8.18.0"
+  },
+  "devDependencies": {
+    "electron": "^31.0.0",
+    "electron-builder": "^24.13.3"
+  },
+  "build": {
+    "appId": "com.tradingagent.desktop",
+    "productName": "Trading Agent",
+    "files": [
+      "electron-main.cjs",
+      "electron-preload.cjs",
+      "electron-run.js",
+      "electron-renderer/**/*",
+      "src/**/*",
+      "package.json"
+    ],
+    "directories": {
+      "output": "dist-desktop"
+    },
+    "win": {
+      "target": "nsis"
+    },
+    "publish": [
+      {
+        "provider": "github"
+      }
+    ]
   }
 }

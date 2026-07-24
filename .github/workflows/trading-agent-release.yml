@@ -1,0 +1,97 @@
+name: Build & Release Trading Agent (Windows + Android)
+
+on:
+  push:
+    tags:
+      - "trading-v*"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  build-windows:
+    runs-on: windows-latest
+    defaults:
+      run:
+        working-directory: trading-agent
+    steps:
+      - name: Repository auschecken
+        uses: actions/checkout@v4
+
+      - name: Node.js einrichten
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Abhängigkeiten installieren
+        run: npm ci
+
+      - name: Windows-Installer bauen (und bei Tag-Push veröffentlichen)
+        shell: bash
+        run: |
+          if [ "${{ github.ref_type }}" = "tag" ]; then
+            npm run dist -- --publish always
+          else
+            npm run dist
+          fi
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Installer als Artifact hochladen
+        uses: actions/upload-artifact@v4
+        with:
+          name: trading-agent-windows
+          path: trading-agent/dist-desktop/*.exe
+          if-no-files-found: warn
+
+  build-android:
+    # Runs after build-windows so the GitHub Release for this tag already
+    # exists (created by electron-builder's publish step) before this job
+    # attaches the APK to it — avoids two jobs racing to create the release.
+    needs: build-windows
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: trading-agent/android-app
+    steps:
+      - name: Repository auschecken
+        uses: actions/checkout@v4
+
+      - name: Node.js einrichten
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: JDK einrichten
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "17"
+
+      - name: Android SDK einrichten
+        uses: android-actions/setup-android@v3
+
+      - name: Abhängigkeiten installieren
+        run: npm ci
+
+      - name: APK bauen (debug-signiert, siehe README)
+        run: |
+          cd android
+          chmod +x gradlew
+          ./gradlew assembleRelease
+
+      - name: APK als Artifact hochladen
+        uses: actions/upload-artifact@v4
+        with:
+          name: trading-agent-android
+          path: trading-agent/android-app/android/app/build/outputs/apk/release/*.apk
+          if-no-files-found: warn
+
+      - name: APK zum GitHub Release hinzufügen
+        if: github.ref_type == 'tag'
+        uses: softprops/action-gh-release@v2
+        with:
+          files: trading-agent/android-app/android/app/build/outputs/apk/release/*.apk
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
