@@ -33,6 +33,8 @@ header h1 { font-size: 1.1rem; margin: 0; flex: 1; color: var(--text); }
 }
 .badge.stopped { background: rgba(255, 255, 255, 0.7); }
 .badge.running { background: #7de3ad; }
+.badge.demo { background: #ffb020; font-weight: 700; }
+.demoNotice { border: 1px solid var(--accent); font-weight: 600; }
 .disclaimer {
   background: rgba(255, 255, 255, 0.75);
   color: var(--text);

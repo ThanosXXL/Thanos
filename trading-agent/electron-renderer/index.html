@@ -8,6 +8,7 @@
 <body>
   <header>
     <h1>FreshTrades Desktop</h1>
+    <span id="demoBadge" class="badge demo" style="display:none">DEMO-VERSION</span>
     <span id="statusBadge" class="badge stopped">GESTOPPT</span>
   </header>
 
@@ -15,12 +16,16 @@
     Keine Gewinngarantie. Live-Modus handelt mit echtem Geld auf eigenes Risiko.
     Immer zuerst Paper- oder Testnet-Modus verwenden.
   </div>
+  <div id="demoNotice" class="disclaimer demoNotice" style="display:none">
+    Dies ist die Demo-Version: nur simulierter Paper-Modus, keine Binance-Zugangsdaten nötig,
+    keine Auszahlung möglich. Es wird zu keinem Zeitpunkt echtes Geld bewegt.
+  </div>
 
   <main>
     <section class="panel settings">
       <h2>Einstellungen</h2>
       <form id="settingsForm">
-        <fieldset>
+        <fieldset id="binanceAccessFieldset">
           <legend>Binance-Zugang</legend>
           <label>API Key
             <input type="password" name="BINANCE_API_KEY" autocomplete="off" />
@@ -30,7 +35,7 @@
           </label>
         </fieldset>
 
-        <fieldset>
+        <fieldset id="modeFieldset">
           <legend>Modus</legend>
           <label>Trading-Modus
             <select name="TRADING_MODE">
@@ -96,7 +101,7 @@
           </label>
         </fieldset>
 
-        <fieldset>
+        <fieldset id="withdrawalFieldset">
           <legend>Krypto-Auszahlung (KEIN Euro, manuell, keine automatischen Zahlungen)</legend>
           <p class="hint">
             Wichtig: Diese Funktion zahlt eine Kryptowährung aus (z.B. USDT, BTC), nicht Euro —
@@ -133,16 +138,18 @@
         <button id="stopBtn" type="button" class="danger" disabled>Stoppen</button>
       </div>
 
-      <h2>Krypto-Auszahlung auslösen (kein Euro)</h2>
-      <div class="withdraw-row">
-        <input type="number" id="withdrawAmount" placeholder="Betrag (in der Kryptowährung oben)" min="0" step="0.0001" />
-        <input type="text" id="withdrawConfirm" placeholder='Bestätigung: I_CONFIRM_THIS_WITHDRAWAL' />
-        <button id="withdrawBtn" type="button" class="danger">Krypto auszahlen</button>
+      <div id="withdrawTriggerSection">
+        <h2>Krypto-Auszahlung auslösen (kein Euro)</h2>
+        <div class="withdraw-row">
+          <input type="number" id="withdrawAmount" placeholder="Betrag (in der Kryptowährung oben)" min="0" step="0.0001" />
+          <input type="text" id="withdrawConfirm" placeholder='Bestätigung: I_CONFIRM_THIS_WITHDRAWAL' />
+          <button id="withdrawBtn" type="button" class="danger">Krypto auszahlen</button>
+        </div>
+        <p class="hint">
+          Nur im Live-Modus verfügbar. Bewegt echtes Krypto-Guthaben unwiderruflich. Für Euro:
+          Binances eigenen SEPA-Auszahlungsbildschirm verwenden.
+        </p>
       </div>
-      <p class="hint">
-        Nur im Live-Modus verfügbar. Bewegt echtes Krypto-Guthaben unwiderruflich. Für Euro:
-        Binances eigenen SEPA-Auszahlungsbildschirm verwenden.
-      </p>
 
       <p class="statusHint" id="statusHint">Bereit. Klicke „Starten", um zu beginnen.</p>
       <details class="techDetails">

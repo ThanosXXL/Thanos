@@ -3,6 +3,12 @@ const path = require('node:path');
 const fs = require('node:fs');
 const { spawn } = require('node:child_process');
 
+// True only in builds produced by `npm run dist:demo` (electron-builder bakes
+// `demo: true` into the packaged package.json via extraMetadata). Enforced
+// here in the main process, not just hidden in the renderer, so a demo build
+// can never actually reach testnet/live mode or trigger a withdrawal.
+const DEMO_MODE = Boolean(require('./package.json').demo);
+
 const SETTINGS_FIELDS = [
   'BINANCE_API_KEY',
   'BINANCE_API_SECRET',
@@ -82,6 +88,14 @@ function saveSettings(settings) {
   for (const key of SETTINGS_FIELDS) {
     clean[key] = String(settings[key] ?? DEFAULT_SETTINGS[key] ?? '');
   }
+  if (DEMO_MODE) {
+    // Belt-and-suspenders: even if a modified/tampered renderer sent something
+    // else, a demo build only ever persists paper mode with no credentials.
+    clean.TRADING_MODE = 'paper';
+    clean.BINANCE_API_KEY = '';
+    clean.BINANCE_API_SECRET = '';
+    clean.LIVE_CONFIRM = '';
+  }
   fs.writeFileSync(settingsPath(), JSON.stringify(clean, null, 2));
   return clean;
 }
@@ -112,6 +126,8 @@ function sendRunState(running) {
 }
 
 ipcMain.handle('get-settings', () => loadSettings());
+
+ipcMain.handle('get-demo-mode', () => DEMO_MODE);
 
 ipcMain.handle('save-settings', (_event, settings) => saveSettings(settings));
 
@@ -153,6 +169,9 @@ ipcMain.handle('stop-agent', () => {
 ipcMain.handle('get-run-state', () => Boolean(agentProcess));
 
 ipcMain.handle('withdraw', (_event, settings, amount, confirmPhrase) => {
+  if (DEMO_MODE) {
+    return Promise.resolve({ ok: false, output: 'Auszahlungen sind in der Demo-Version nicht verfügbar.' });
+  }
   return new Promise((resolve) => {
     const clean = saveSettings(settings);
     const child = spawn(

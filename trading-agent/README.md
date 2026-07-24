@@ -8,11 +8,15 @@ Android app ("FreshTrades").
 [![Download for Windows](https://img.shields.io/badge/Download-Windows-0078D6?style=for-the-badge&logo=windowsterminal&logoColor=white)](https://github.com/ThanosXXL/Thanos/releases/latest/download/FreshTrades-Setup.exe)
 [![Download for Android](https://img.shields.io/badge/Download-Android-3DDC84?style=for-the-badge&logo=android&logoColor=white)](https://github.com/ThanosXXL/Thanos/releases/latest/download/FreshTrades.apk)
 
+[![Download Demo for Windows](https://img.shields.io/badge/Demo-Windows-0078D6?style=for-the-badge&logo=windowsterminal&logoColor=white)](https://github.com/ThanosXXL/Thanos/releases/latest/download/FreshTrades-Demo-Setup.exe)
+[![Download Demo for Android](https://img.shields.io/badge/Demo-Android-3DDC84?style=for-the-badge&logo=android&logoColor=white)](https://github.com/ThanosXXL/Thanos/releases/latest/download/FreshTrades-Demo.apk)
+
 These links always point at the newest published release (via GitHub's
 `/releases/latest/download/` alias) — no need to hunt for a version number.
 They only work once at least one release has actually been published (see
 **Downloads** below for how that happens and what "one click" does and
-doesn't mean here).
+doesn't mean here). The **Demo** builds are the safest way to try the app —
+see **Demo mode** below for exactly what they lock down.
 
 ## No guarantees — read this first
 
@@ -121,11 +125,12 @@ What it does include, for managing your own funds:
 
 Windows and Android builds are produced by CI, not by hand — nothing is
 uploaded from a developer machine. Once at least one release has been
-published, the two buttons at the top of this file are genuinely one click:
-they point at fixed, version-independent filenames
-(`FreshTrades-Setup.exe`, `FreshTrades.apk`) via GitHub's
-`/releases/latest/download/` alias, so they always resolve to the newest
-build without anyone having to look up a version number.
+published, the four buttons at the top of this file are genuinely one
+click: they point at fixed, version-independent filenames
+(`FreshTrades-Setup.exe`, `FreshTrades.apk`, `FreshTrades-Demo-Setup.exe`,
+`FreshTrades-Demo.apk`) via GitHub's `/releases/latest/download/` alias, so
+they always resolve to the newest build without anyone having to look up a
+version number.
 
 Getting that first (and every subsequent) release published still takes one
 of these two triggers — this project doesn't auto-publish on every commit,
@@ -135,25 +140,49 @@ download:
 1. Push a tag matching `freshtrades-v*` (e.g. `freshtrades-v0.1.0`) to this
    repository, or run **Actions → Build & Release FreshTrades (Windows +
    Android) → Run workflow** manually.
-2. The workflow builds the Windows installer (`.exe`, NSIS) and the Android
-   package (`.apk`) and attaches both to a GitHub Release for that tag —
-   the two download buttons above then work immediately, no further
-   action needed.
+2. The workflow builds the full Windows installer, the full Android APK,
+   and their demo counterparts, and attaches all four to a GitHub Release
+   for that tag — all four download buttons above then work immediately,
+   no further action needed.
 
-The Android APK is **debug-signed** (see limitations below) — Android will
-warn about an unverified app; that's expected for a sideloaded build that
-hasn't gone through Play Store review, not a sign of tampering, as long as
-you got it from this repository's GitHub Releases page.
+The Android APKs are **debug-signed** (see limitations below) — Android
+will warn about an unverified app; that's expected for a sideloaded build
+that hasn't gone through Play Store review, not a sign of tampering, as
+long as you got it from this repository's GitHub Releases page.
 
-**This session could not build or run either the Windows installer or the
-Android APK** — the sandbox this was developed in has no Windows machine and
-no Android SDK/emulator, and downloading the Android SDK components is
+**This session could not build or run any of the Windows or Android
+outputs** — the sandbox this was developed in has no Windows machine and no
+Android SDK/emulator, and downloading the Android SDK components is
 blocked by the sandbox's network policy. What was verified locally instead:
-the Electron app boots cleanly under Xvfb with no wiring errors, the RN
-project's TypeScript compiles with no errors, and its Jest test suite
-passes. The actual `.exe`/`.apk` build should be treated as unverified until
-someone runs the CI workflow (or builds locally) and confirms the outputs
-install and run.
+the Electron app boots cleanly under Xvfb in both normal and demo mode with
+no wiring errors, the RN project's TypeScript compiles with no errors, and
+its Jest test suite (including the demo-mode render path) passes. The
+actual `.exe`/`.apk` builds should be treated as unverified until someone
+runs the CI workflow (or builds locally) and confirms the outputs install
+and run.
+
+## Demo mode
+
+The demo builds (`FreshTrades-Demo-Setup.exe`, `FreshTrades-Demo.apk`) are
+the same app with three things removed at build time, not just hidden
+behind a setting a user could flip:
+
+- **Trading mode is locked to paper.** The mode selector isn't shown, and
+  even if a saved settings file somehow held something else, the app
+  overwrites it back to `paper` on every load and before every start — see
+  `DEMO_MODE` in `electron-main.cjs` and `IS_DEMO` in
+  `android-app/src/buildFlavor.js`.
+- **No Binance API key fields.** Paper mode never calls a signed endpoint,
+  so a demo build has no use for credentials and doesn't ask for them.
+- **No withdrawal feature.** The withdrawal button/section isn't shown, and
+  the underlying withdrawal call refuses to run at all in a demo build,
+  independent of the UI.
+
+A demo build genuinely cannot place a real order, hold real credentials, or
+move real funds — safe to hand to someone who just wants to see the app
+run. The full builds are unaffected: `demo` defaults to `false` in
+`package.json` and `IS_DEMO` defaults to `false` in `buildFlavor.js`; only
+the CI steps that explicitly build the demo variant flip either flag.
 
 ## Architecture
 
@@ -174,7 +203,9 @@ src/                     Core engine, shared by the CLI and the Electron desktop
   notifier.js             emails a withdrawal record to yourself via your own SMTP account
   fxRate.js               live USD->EUR rate (frankfurter.app, ECB reference rates), cached
 
-electron-main.cjs        Electron main process: settings storage, spawns electron-run.js
+electron-main.cjs        Electron main process: settings storage, spawns electron-run.js;
+                         reads `demo` from package.json (see Demo mode above) and enforces
+                         paper-only + no withdrawal server-side, not just in the renderer
 electron-preload.cjs     contextBridge API exposed to the renderer
 electron-run.js          child-process entrypoint: starts the dashboard server + agent
 electron-renderer/       settings form, start/stop, log console, embedded dashboard iframe
@@ -192,6 +223,8 @@ android-app/             Standalone React Native app — a full on-device tradin
                          foreground service so it can keep running while backgrounded
   src/withdrawal.js      manual crypto withdrawal (Binance API), AsyncStorage-logged
   src/fxRate.js          live USD->EUR rate (frankfurter.app), cached in memory
+  src/buildFlavor.js     IS_DEMO constant (see Demo mode above); CI swaps it to `true`
+                         via a source-file overwrite before building the demo APK
   App.tsx                settings + dashboard UI in one screen, polls AsyncStorage;
                          withdrawal emails go through the device's own mail app (mailto)
 ```
@@ -238,6 +271,7 @@ through the files in `data/`.
 ```bash
 npm run electron     # launches the desktop app (uses electron-main.cjs)
 npm run dist          # builds a Windows installer locally (electron-builder --win)
+npm run dist:demo      # builds the demo variant locally (see Demo mode above)
 ```
 
 The desktop app is a GUI shell around the same `src/` engine: it stores

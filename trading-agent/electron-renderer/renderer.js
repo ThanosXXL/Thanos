@@ -11,6 +11,23 @@ const withdrawAmount = document.getElementById('withdrawAmount');
 const withdrawConfirm = document.getElementById('withdrawConfirm');
 const withdrawBtn = document.getElementById('withdrawBtn');
 const statusHint = document.getElementById('statusHint');
+const demoBadge = document.getElementById('demoBadge');
+const demoNotice = document.getElementById('demoNotice');
+const binanceAccessFieldset = document.getElementById('binanceAccessFieldset');
+const modeFieldset = document.getElementById('modeFieldset');
+const withdrawalFieldset = document.getElementById('withdrawalFieldset');
+const withdrawTriggerSection = document.getElementById('withdrawTriggerSection');
+
+function applyDemoMode(isDemo) {
+  if (!isDemo) return;
+  demoBadge.style.display = 'inline-block';
+  demoNotice.style.display = 'block';
+  binanceAccessFieldset.style.display = 'none';
+  modeFieldset.style.display = 'none';
+  withdrawalFieldset.style.display = 'none';
+  withdrawTriggerSection.style.display = 'none';
+  form.elements['TRADING_MODE'].value = 'paper';
+}
 
 function setStatusHint(text, isError) {
   statusHint.textContent = text;
@@ -116,6 +133,8 @@ window.desktopAPI.onRunState((running) => {
 });
 
 (async () => {
+  const isDemo = await window.desktopAPI.getDemoMode();
+  applyDemoMode(isDemo);
   const settings = await window.desktopAPI.getSettings();
   settingsToForm(settings);
   const running = await window.desktopAPI.getRunState();

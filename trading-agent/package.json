@@ -5,13 +5,15 @@
   "type": "module",
   "private": true,
   "main": "electron-main.cjs",
+  "demo": false,
   "scripts": {
     "start": "node src/index.js",
     "backtest": "node src/backtestRunner.js",
     "dashboard": "node src/dashboard/server.js",
     "withdraw": "node src/withdrawCli.js",
     "electron": "electron electron-main.cjs",
-    "dist": "electron-builder --win"
+    "dist": "electron-builder --win",
+    "dist:demo": "electron-builder --win --config.extraMetadata.demo=true --config.productName=\"FreshTrades Demo\" --config.appId=com.freshtrades.demodesktop --config.nsis.artifactName=FreshTrades-Demo-Setup.exe"
   },
   "engines": {
     "node": ">=18"

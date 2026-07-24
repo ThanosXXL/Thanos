@@ -19,6 +19,7 @@ import { getExchangeInfo } from './src/binanceClient';
 import { getUsdEurRate } from './src/fxRate';
 import { readLog } from './src/logStore';
 import { Portfolio } from './src/portfolio';
+import { IS_DEMO } from './src/buildFlavor';
 
 function isToday(isoString: string) {
   if (!isoString) return false;
@@ -78,6 +79,15 @@ export default function App() {
   useEffect(() => {
     (async () => {
       const loaded = await loadSettings();
+      // Belt-and-suspenders: even if AsyncStorage somehow held a non-paper
+      // value (e.g. restored from a non-demo backup), the demo build never
+      // trades anything but paper mode and never touches real credentials.
+      if (IS_DEMO) {
+        loaded.tradingMode = 'paper';
+        loaded.binanceApiKey = '';
+        loaded.binanceApiSecret = '';
+        loaded.liveConfirm = '';
+      }
       setSettings(loaded);
       setRunning(isBackgroundAgentRunning());
     })();
@@ -135,9 +145,16 @@ export default function App() {
   }, [settings]);
 
   const onStart = useCallback(async () => {
-    const errors = validateSettings(settings);
+    const effectiveSettings = IS_DEMO ? { ...settings, tradingMode: 'paper' } : settings;
+    const errors = validateSettings(effectiveSettings);
     if (errors.length > 0) {
       Alert.alert('Ungültige Einstellungen', errors.join('\n'));
+      return;
+    }
+    if (IS_DEMO) {
+      await saveSettings(effectiveSettings);
+      await startBackgroundAgent(effectiveSettings);
+      setRunning(true);
       return;
     }
     if (settings.tradingMode === 'live') {
@@ -170,6 +187,10 @@ export default function App() {
   }, []);
 
   const onWithdraw = useCallback(() => {
+    if (IS_DEMO) {
+      Alert.alert('Nicht möglich', 'Auszahlungen sind in der Demo-Version nicht verfügbar.');
+      return;
+    }
     if (settings.tradingMode !== 'live') {
       Alert.alert('Nicht möglich', 'Auszahlungen sind nur im Live-Modus möglich.');
       return;
@@ -215,6 +236,11 @@ export default function App() {
       <StatusBar barStyle="dark-content" backgroundColor="#a7d8f0" />
       <ScrollView contentContainerStyle={styles.scroll}>
         <Text style={styles.title}>FreshTrades</Text>
+        {IS_DEMO && (
+          <View style={[styles.badge, styles.demoBadge]}>
+            <Text style={styles.badgeTextLight}>DEMO-VERSION</Text>
+          </View>
+        )}
         <View style={[styles.badge, { backgroundColor: modeColor }]}>
           <Text style={styles.badgeTextLight}>
             {running ? `LÄUFT · ${settings.tradingMode.toUpperCase()}` : 'GESTOPPT'}
@@ -223,6 +249,13 @@ export default function App() {
         <Text style={styles.statusHint}>
           {running ? 'Läuft normal. Details unten in den Karten.' : 'Bereit. Tippe auf „Starten", um zu beginnen.'}
         </Text>
+
+        {IS_DEMO && (
+          <Text style={styles.demoNotice}>
+            Dies ist die Demo-Version: nur simulierter Paper-Modus, keine Binance-Zugangsdaten nötig, keine
+            Auszahlung möglich. Es wird zu keinem Zeitpunkt echtes Geld bewegt.
+          </Text>
+        )}
 
         <Text style={styles.disclaimer}>
           Keine Gewinngarantie. Live-Modus handelt mit echtem Geld auf eigenes Risiko. Diese App sammelt keine
@@ -259,48 +292,52 @@ export default function App() {
           </View>
         )}
 
-        <Text style={styles.sectionTitle}>Binance-Zugang</Text>
-        <TextInput
-          style={styles.input}
-          placeholder="API Key"
-          placeholderTextColor="#333333"
-          secureTextEntry
-          value={settings.binanceApiKey}
-          onChangeText={(v) => update('binanceApiKey', v)}
-          editable={!running}
-        />
-        <TextInput
-          style={styles.input}
-          placeholder="API Secret"
-          placeholderTextColor="#333333"
-          secureTextEntry
-          value={settings.binanceApiSecret}
-          onChangeText={(v) => update('binanceApiSecret', v)}
-          editable={!running}
-        />
+        {!IS_DEMO && (
+          <>
+            <Text style={styles.sectionTitle}>Binance-Zugang</Text>
+            <TextInput
+              style={styles.input}
+              placeholder="API Key"
+              placeholderTextColor="#333333"
+              secureTextEntry
+              value={settings.binanceApiKey}
+              onChangeText={(v) => update('binanceApiKey', v)}
+              editable={!running}
+            />
+            <TextInput
+              style={styles.input}
+              placeholder="API Secret"
+              placeholderTextColor="#333333"
+              secureTextEntry
+              value={settings.binanceApiSecret}
+              onChangeText={(v) => update('binanceApiSecret', v)}
+              editable={!running}
+            />
 
-        <Text style={styles.sectionTitle}>Modus</Text>
-        <View style={styles.modeRow}>
-          {MODES.map((m) => (
-            <TouchableOpacity
-              key={m.value}
-              style={[styles.modeButton, settings.tradingMode === m.value && styles.modeButtonActive]}
-              onPress={() => !running && update('tradingMode', m.value)}
-              disabled={running}
-            >
-              <Text style={styles.modeButtonText}>{m.label}</Text>
-            </TouchableOpacity>
-          ))}
-        </View>
-        {settings.tradingMode === 'live' && (
-          <TextInput
-            style={styles.input}
-            placeholder={`Bestätigung: ${LIVE_CONFIRM_PHRASE}`}
-            placeholderTextColor="#333333"
-            value={settings.liveConfirm}
-            onChangeText={(v) => update('liveConfirm', v)}
-            editable={!running}
-          />
+            <Text style={styles.sectionTitle}>Modus</Text>
+            <View style={styles.modeRow}>
+              {MODES.map((m) => (
+                <TouchableOpacity
+                  key={m.value}
+                  style={[styles.modeButton, settings.tradingMode === m.value && styles.modeButtonActive]}
+                  onPress={() => !running && update('tradingMode', m.value)}
+                  disabled={running}
+                >
+                  <Text style={styles.modeButtonText}>{m.label}</Text>
+                </TouchableOpacity>
+              ))}
+            </View>
+            {settings.tradingMode === 'live' && (
+              <TextInput
+                style={styles.input}
+                placeholder={`Bestätigung: ${LIVE_CONFIRM_PHRASE}`}
+                placeholderTextColor="#333333"
+                value={settings.liveConfirm}
+                onChangeText={(v) => update('liveConfirm', v)}
+                editable={!running}
+              />
+            )}
+          </>
         )}
 
         <Text style={styles.sectionTitle}>Markt, Strategie &amp; Risiko</Text>
@@ -332,39 +369,41 @@ export default function App() {
           )}
         </View>
 
-        <Text style={styles.sectionTitle}>Krypto-Auszahlung (KEIN Euro, manuell)</Text>
-        <Text style={styles.hint}>
-          Wichtig: zahlt eine Kryptowährung aus (z.B. USDT, BTC), nicht Euro — Euro hat keine
-          Blockchain-Adresse und kann hier nicht eingetragen werden. Echte Euro-Ein-/Auszahlungen
-          (SEPA) laufen ausschließlich direkt über Binance selbst. Nur im Live-Modus verfügbar.
-        </Text>
-        {WITHDRAWAL_FIELD_ROWS.map((row) => (
-          <View key={row.key as string} style={styles.fieldRow}>
-            <Text style={styles.fieldLabel}>{row.label}</Text>
-            <TextInput style={styles.input} value={String(settings[row.key] ?? '')} onChangeText={(v) => update(row.key as string, v)} />
-          </View>
-        ))}
-        <TextInput
-          style={styles.input}
-          placeholder="Betrag (in der Kryptowährung oben)"
-          placeholderTextColor="#333333"
-          keyboardType="numeric"
-          value={withdrawAmount}
-          onChangeText={setWithdrawAmount}
-        />
-        <TextInput
-          style={styles.input}
-          placeholder={`Bestätigung: ${WITHDRAWAL_CONFIRM_PHRASE}`}
-          placeholderTextColor="#333333"
-          value={withdrawConfirm}
-          onChangeText={setWithdrawConfirm}
-        />
-        <TouchableOpacity style={styles.withdrawButton} onPress={onWithdraw}>
-          <Text style={styles.buttonTextLight}>Krypto auszahlen</Text>
-        </TouchableOpacity>
+        {!IS_DEMO && (
+          <>
+            <Text style={styles.sectionTitle}>Krypto-Auszahlung (KEIN Euro, manuell)</Text>
+            <Text style={styles.hint}>
+              Wichtig: zahlt eine Kryptowährung aus (z.B. USDT, BTC), nicht Euro — Euro hat keine
+              Blockchain-Adresse und kann hier nicht eingetragen werden. Echte Euro-Ein-/Auszahlungen
+              (SEPA) laufen ausschließlich direkt über Binance selbst. Nur im Live-Modus verfügbar.
+            </Text>
+            {WITHDRAWAL_FIELD_ROWS.map((row) => (
+              <View key={row.key as string} style={styles.fieldRow}>
+                <Text style={styles.fieldLabel}>{row.label}</Text>
+                <TextInput style={styles.input} value={String(settings[row.key] ?? '')} onChangeText={(v) => update(row.key as string, v)} />
+              </View>
+            ))}
+            <TextInput
+              style={styles.input}
+              placeholder="Betrag (in der Kryptowährung oben)"
+              placeholderTextColor="#333333"
+              keyboardType="numeric"
+              value={withdrawAmount}
+              onChangeText={setWithdrawAmount}
+            />
+            <TextInput
+              style={styles.input}
+              placeholder={`Bestätigung: ${WITHDRAWAL_CONFIRM_PHRASE}`}
+              placeholderTextColor="#333333"
+              value={withdrawConfirm}
+              onChangeText={setWithdrawConfirm}
+            />
+            <TouchableOpacity style={styles.withdrawButton} onPress={onWithdraw}>
+              <Text style={styles.buttonTextLight}>Krypto auszahlen</Text>
+            </TouchableOpacity>
 
-        <Text style={styles.sectionTitle}>Krypto-Auszahlungen (Verlauf)</Text>
-        <View style={styles.modeRow}>
+            <Text style={styles.sectionTitle}>Krypto-Auszahlungen (Verlauf)</Text>
+            <View style={styles.modeRow}>
           {WITHDRAW_RANGES.map((r) => (
             <TouchableOpacity
               key={r.days}
@@ -385,6 +424,8 @@ export default function App() {
               <Text style={styles.hint}>an {w.address}</Text>
             </View>
           ))
+        )}
+          </>
         )}
 
         <Text style={styles.sectionTitle}>Alle Binance-Märkte (nur Krypto, zur Ansicht)</Text>
@@ -438,6 +479,18 @@ const styles = StyleSheet.create({
   title: { fontSize: 22, fontWeight: '700', color: '#000000', marginBottom: 8 },
   badge: { alignSelf: 'flex-start', paddingHorizontal: 10, paddingVertical: 4, borderRadius: 999, marginBottom: 12 },
   badgeTextLight: { color: '#ffffff', fontWeight: '700', fontSize: 12 },
+  demoBadge: { backgroundColor: '#ffb020', marginRight: 8 },
+  demoNotice: {
+    color: '#000000',
+    backgroundColor: 'rgba(255,255,255,0.85)',
+    borderWidth: 1,
+    borderColor: '#2563eb',
+    fontWeight: '600',
+    fontSize: 12,
+    padding: 10,
+    borderRadius: 8,
+    marginBottom: 12,
+  },
   statusHint: { color: '#000000', fontSize: 12, marginBottom: 12 },
   disclaimer: {
     color: '#000000',

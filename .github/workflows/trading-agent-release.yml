@@ -38,6 +38,17 @@ jobs:
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
+      - name: Windows-Demo-Installer bauen (paper-only, keine Auszahlung; und bei Tag-Push veröffentlichen)
+        shell: bash
+        run: |
+          if [ "${{ github.ref_type }}" = "tag" ]; then
+            npm run dist:demo -- --publish always
+          else
+            npm run dist:demo
+          fi
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
       - name: Installer als Artifact hochladen
         uses: actions/upload-artifact@v4
         with:
@@ -84,17 +95,35 @@ jobs:
       - name: APK auf stabilen Dateinamen umbenennen
         run: cp android/app/build/outputs/apk/release/app-release.apk android/app/build/outputs/apk/release/FreshTrades.apk
 
-      - name: APK als Artifact hochladen
+      - name: Demo-Flag aktivieren (paper-only, keine Auszahlung)
+        run: |
+          cat > src/buildFlavor.js << 'EOF'
+          export const IS_DEMO = true;
+          EOF
+
+      - name: Demo-APK bauen (debug-signiert, siehe README)
+        run: |
+          cd android
+          ./gradlew assembleRelease
+
+      - name: Demo-APK auf stabilen Dateinamen umbenennen
+        run: cp android/app/build/outputs/apk/release/app-release.apk android/app/build/outputs/apk/release/FreshTrades-Demo.apk
+
+      - name: APKs als Artifact hochladen
         uses: actions/upload-artifact@v4
         with:
           name: freshtrades-android
-          path: trading-agent/android-app/android/app/build/outputs/apk/release/FreshTrades.apk
+          path: |
+            trading-agent/android-app/android/app/build/outputs/apk/release/FreshTrades.apk
+            trading-agent/android-app/android/app/build/outputs/apk/release/FreshTrades-Demo.apk
           if-no-files-found: warn
 
-      - name: APK zum GitHub Release hinzufügen
+      - name: APKs zum GitHub Release hinzufügen
         if: github.ref_type == 'tag'
         uses: softprops/action-gh-release@v2
         with:
-          files: trading-agent/android-app/android/app/build/outputs/apk/release/FreshTrades.apk
+          files: |
+            trading-agent/android-app/android/app/build/outputs/apk/release/FreshTrades.apk
+            trading-agent/android-app/android/app/build/outputs/apk/release/FreshTrades-Demo.apk
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
