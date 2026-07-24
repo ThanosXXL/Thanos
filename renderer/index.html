@@ -2,48 +2,11 @@
 <html lang="de">
 <head>
 <meta charset="UTF-8">
-<title>Dozenten Dashboard</title>
+<title>MyS!m – Tarifangebote</title>
 <link rel="stylesheet" href="style.css">
 </head>
 <body>
-  <header class="app-header">
-    <h1>Dozenten Dashboard</h1>
-  </header>
-
-  <nav class="dozent-tabs" id="dozentTabs">
-    <!-- Dozenten-Tabs werden hier eingefügt -->
-  </nav>
-
-  <main id="content">
-    <div class="empty-state" id="emptyState">
-      <p>Noch keine Dozenten angelegt.</p>
-      <button id="addDozentEmptyBtn" class="btn-primary">+ Dozent hinzufügen</button>
-    </div>
-  </main>
-
-  <!-- Modal: Dozent hinzufügen -->
-  <div class="modal-overlay" id="addDozentModal">
-    <div class="modal">
-      <h2>Neuen Dozenten hinzufügen</h2>
-      <input type="text" id="newDozentName" placeholder="Name des Dozenten" maxlength="60">
-      <div class="modal-actions">
-        <button id="cancelAddDozent" class="btn-secondary">Abbrechen</button>
-        <button id="confirmAddDozent" class="btn-primary">Hinzufügen</button>
-      </div>
-    </div>
-  </div>
-
-  <!-- Modal: Dozent löschen bestätigen -->
-  <div class="modal-overlay" id="deleteDozentModal">
-    <div class="modal">
-      <h2>Dozenten entfernen?</h2>
-      <p id="deleteDozentText"></p>
-      <div class="modal-actions">
-        <button id="cancelDeleteDozent" class="btn-secondary">Abbrechen</button>
-        <button id="confirmDeleteDozent" class="btn-danger">Entfernen</button>
-      </div>
-    </div>
-  </div>
+  <main id="content"></main>
 
   <script src="renderer.js"></script>
 </body>
