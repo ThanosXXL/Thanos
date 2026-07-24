@@ -27,10 +27,10 @@ jobs:
       - name: Abhängigkeiten installieren
         run: npm ci
 
-      - name: Windows-Installer bauen (und bei Tag-Push veröffentlichen)
+      - name: Windows-Installer bauen (und bei Tag-Push oder manuellem Start veröffentlichen)
         shell: bash
         run: |
-          if [ "${{ github.ref_type }}" = "tag" ]; then
+          if [ "${{ github.ref_type }}" = "tag" ] || [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
             npm run dist -- --publish always
           else
             npm run dist
@@ -38,10 +38,10 @@ jobs:
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Windows-Demo-Installer bauen (paper-only, keine Auszahlung; und bei Tag-Push veröffentlichen)
+      - name: Windows-Demo-Installer bauen (paper-only, keine Auszahlung; und bei Tag-Push oder manuellem Start veröffentlichen)
         shell: bash
         run: |
-          if [ "${{ github.ref_type }}" = "tag" ]; then
+          if [ "${{ github.ref_type }}" = "tag" ] || [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
             npm run dist:demo -- --publish always
           else
             npm run dist:demo
@@ -68,6 +68,16 @@ jobs:
     steps:
       - name: Repository auschecken
         uses: actions/checkout@v4
+
+      - name: Release-Tag bestimmen
+        id: tag
+        shell: bash
+        run: |
+          if [ "${{ github.ref_type }}" = "tag" ]; then
+            echo "name=${{ github.ref_name }}" >> "$GITHUB_OUTPUT"
+          else
+            echo "name=v$(node -p "require('../package.json').version")" >> "$GITHUB_OUTPUT"
+          fi
 
       - name: Node.js einrichten
         uses: actions/setup-node@v4
@@ -119,9 +129,10 @@ jobs:
           if-no-files-found: warn
 
       - name: APKs zum GitHub Release hinzufügen
-        if: github.ref_type == 'tag'
+        if: github.ref_type == 'tag' || github.event_name == 'workflow_dispatch'
         uses: softprops/action-gh-release@v2
         with:
+          tag_name: ${{ steps.tag.outputs.name }}
           files: |
             trading-agent/android-app/android/app/build/outputs/apk/release/FreshTrades.apk
             trading-agent/android-app/android/app/build/outputs/apk/release/FreshTrades-Demo.apk
