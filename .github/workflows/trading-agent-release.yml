@@ -1,0 +1,140 @@
+name: Build & Release FreshTrades (Windows + Android)
+
+on:
+  push:
+    tags:
+      - "freshtrades-v*"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  build-windows:
+    runs-on: windows-latest
+    defaults:
+      run:
+        working-directory: trading-agent
+    steps:
+      - name: Repository auschecken
+        uses: actions/checkout@v4
+
+      - name: Node.js einrichten
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Abhängigkeiten installieren
+        run: npm ci
+
+      - name: Windows-Installer bauen (und bei Tag-Push oder manuellem Start veröffentlichen)
+        shell: bash
+        run: |
+          if [ "${{ github.ref_type }}" = "tag" ] || [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
+            npm run dist -- --publish always
+          else
+            npm run dist
+          fi
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Windows-Demo-Installer bauen (paper-only, keine Auszahlung; und bei Tag-Push oder manuellem Start veröffentlichen)
+        shell: bash
+        run: |
+          if [ "${{ github.ref_type }}" = "tag" ] || [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
+            npm run dist:demo -- --publish always
+          else
+            npm run dist:demo
+          fi
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Installer als Artifact hochladen
+        uses: actions/upload-artifact@v4
+        with:
+          name: freshtrades-windows
+          path: trading-agent/dist-desktop/*.exe
+          if-no-files-found: warn
+
+  build-android:
+    # Runs after build-windows so the GitHub Release for this tag already
+    # exists (created by electron-builder's publish step) before this job
+    # attaches the APK to it — avoids two jobs racing to create the release.
+    needs: build-windows
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: trading-agent/android-app
+    steps:
+      - name: Repository auschecken
+        uses: actions/checkout@v4
+
+      - name: Release-Tag bestimmen
+        id: tag
+        shell: bash
+        run: |
+          if [ "${{ github.ref_type }}" = "tag" ]; then
+            echo "name=${{ github.ref_name }}" >> "$GITHUB_OUTPUT"
+          else
+            echo "name=v$(node -p "require('../package.json').version")" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Node.js einrichten
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: JDK einrichten
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "17"
+
+      - name: Android SDK einrichten
+        uses: android-actions/setup-android@v3
+
+      - name: Abhängigkeiten installieren
+        run: npm ci
+
+      - name: APK bauen (debug-signiert, siehe README)
+        run: |
+          cd android
+          chmod +x gradlew
+          ./gradlew assembleRelease
+
+      - name: APK auf stabilen Dateinamen umbenennen
+        run: cp android/app/build/outputs/apk/release/app-release.apk android/app/build/outputs/apk/release/FreshTrades.apk
+
+      - name: Demo-Flag aktivieren (paper-only, keine Auszahlung)
+        run: |
+          cat > src/buildFlavor.js << 'EOF'
+          export const IS_DEMO = true;
+          EOF
+
+      - name: Demo-APK bauen (debug-signiert, siehe README)
+        run: |
+          cd android
+          ./gradlew assembleRelease
+
+      - name: Demo-APK auf stabilen Dateinamen umbenennen
+        run: cp android/app/build/outputs/apk/release/app-release.apk android/app/build/outputs/apk/release/FreshTrades-Demo.apk
+
+      - name: APKs als Artifact hochladen
+        uses: actions/upload-artifact@v4
+        with:
+          name: freshtrades-android
+          path: |
+            trading-agent/android-app/android/app/build/outputs/apk/release/FreshTrades.apk
+            trading-agent/android-app/android/app/build/outputs/apk/release/FreshTrades-Demo.apk
+          if-no-files-found: warn
+
+      - name: APKs zum GitHub Release hinzufügen
+        if: github.ref_type == 'tag' || github.event_name == 'workflow_dispatch'
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ steps.tag.outputs.name }}
+          files: |
+            trading-agent/android-app/android/app/build/outputs/apk/release/FreshTrades.apk
+            trading-agent/android-app/android/app/build/outputs/apk/release/FreshTrades-Demo.apk
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
