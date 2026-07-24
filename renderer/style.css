@@ -26,19 +26,6 @@ body {
   overflow: hidden;
 }
 
-.app-header {
-  background: linear-gradient(90deg, var(--dark-blue), var(--light-blue));
-  color: var(--white);
-  padding: 16px 24px;
-  flex-shrink: 0;
-}
-
-.app-header h1 {
-  margin: 0;
-  font-size: 22px;
-  letter-spacing: 0.5px;
-}
-
 main#content {
   flex: 1;
   overflow-y: auto;
