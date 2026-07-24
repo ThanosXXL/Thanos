@@ -18,6 +18,11 @@
   "engines": {
     "node": ">=18"
   },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/ThanosXXL/Thanos.git"
+  },
+  "author": "ThanosXXL",
   "dependencies": {
     "dotenv": "^16.4.5",
     "express": "^4.19.2",
