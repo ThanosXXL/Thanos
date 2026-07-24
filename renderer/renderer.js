@@ -2,7 +2,7 @@
   const MAX_DOZENTEN = 4;
 
   const COMPANY = {
-    name: 'Meine Firma',
+    name: 'MySim',
     tagline: 'Ihr zuverlässiger Partner für Handytarife'
   };
 
