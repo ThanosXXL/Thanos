@@ -1,9 +1,40 @@
 (function () {
   const MAX_DOZENTEN = 4;
 
+  const TARIFE = [
+    {
+      name: 'Comfort Flat',
+      preis: '19,99 € / Monat',
+      daten: '15 GB Datenvolumen mit 5G-Speed',
+      telefonie: 'Allnet-Flat für Telefonie & SMS ins deutsche Netz',
+      netz: 'Telekom-Netz – deutschlandweit die beste Netzabdeckung',
+      laufzeit: '24 Monate Laufzeit',
+      vorteile: [
+        'EU-Roaming inklusive',
+        '5G ohne Aufpreis',
+        'Nach Laufzeitende monatlich kündbar'
+      ]
+    },
+    {
+      name: 'Premium Unlimited',
+      preis: '34,99 € / Monat',
+      daten: 'Unbegrenztes Datenvolumen (Drosselung auf 3 Mbit/s nach 60 GB High-Speed-Volumen)',
+      telefonie: 'Allnet-Flat für Telefonie & SMS ins deutsche Netz und EU-Ausland',
+      netz: 'Telekom-Netz mit 5G+ Frequenzen für ein besonders stabiles Netz',
+      laufzeit: '24 Monate Laufzeit',
+      vorteile: [
+        'WLAN Call & VoLTE inklusive',
+        'Hotspot-Nutzung inklusive',
+        'Doppelte Netzanbindung für höchste Ausfallsicherheit'
+      ]
+    }
+  ];
+
   let state = { dozenten: [] };
   let activeDozentId = null;
+  let activeView = 'dozenten';
 
+  const viewTabs = document.getElementById('viewTabs');
   const dozentTabs = document.getElementById('dozentTabs');
   const content = document.getElementById('content');
   const emptyState = document.getElementById('emptyState');
@@ -210,6 +241,66 @@
     return col;
   }
 
+  function renderTarifePanel() {
+    content.innerHTML = '';
+
+    const panel = document.createElement('div');
+    panel.className = 'tarife-panel';
+
+    const heading = document.createElement('h2');
+    heading.textContent = 'Tarifvorschläge – Handyvertrag mit Surfen & Telefonieren';
+    panel.appendChild(heading);
+
+    const intro = document.createElement('p');
+    intro.className = 'tarife-intro';
+    intro.textContent = 'Zwei Tarifvorschläge inklusive stabilem Netz zur Auswahl:';
+    panel.appendChild(intro);
+
+    const grid = document.createElement('div');
+    grid.className = 'tarife-grid';
+
+    TARIFE.forEach((tarif) => {
+      const card = document.createElement('div');
+      card.className = 'tarif-card';
+
+      const name = document.createElement('h3');
+      name.textContent = tarif.name;
+      card.appendChild(name);
+
+      const preis = document.createElement('div');
+      preis.className = 'tarif-preis';
+      preis.textContent = tarif.preis;
+      card.appendChild(preis);
+
+      const details = document.createElement('ul');
+      details.className = 'tarif-details';
+      [tarif.daten, tarif.telefonie, tarif.netz, tarif.laufzeit].forEach((text) => {
+        const li = document.createElement('li');
+        li.textContent = text;
+        details.appendChild(li);
+      });
+      card.appendChild(details);
+
+      const vorteileHeading = document.createElement('h4');
+      vorteileHeading.textContent = 'Vorteile';
+      card.appendChild(vorteileHeading);
+
+      const vorteile = document.createElement('ul');
+      vorteile.className = 'tarif-vorteile';
+      tarif.vorteile.forEach((text) => {
+        const li = document.createElement('li');
+        li.textContent = text;
+        vorteile.appendChild(li);
+      });
+      card.appendChild(vorteile);
+
+      grid.appendChild(card);
+    });
+
+    panel.appendChild(grid);
+    content.appendChild(panel);
+  }
+
   function renderPanel() {
     content.innerHTML = '';
 
@@ -397,10 +488,27 @@
     return panel;
   }
 
+  function setActiveView(view) {
+    activeView = view;
+    Array.from(viewTabs.children).forEach((tab) => {
+      tab.classList.toggle('active', tab.dataset.view === view);
+    });
+    dozentTabs.style.display = view === 'dozenten' ? '' : 'none';
+    render();
+  }
+
   function render() {
+    if (activeView === 'tarife') {
+      renderTarifePanel();
+      return;
+    }
     renderTabs();
     renderPanel();
   }
+
+  Array.from(viewTabs.children).forEach((tab) => {
+    tab.addEventListener('click', () => setActiveView(tab.dataset.view));
+  });
 
   document.getElementById('addDozentEmptyBtn').addEventListener('click', openAddDozentModal);
   document.getElementById('cancelAddDozent').addEventListener('click', closeAddDozentModal);

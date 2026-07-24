@@ -36,6 +36,28 @@ body {
   letter-spacing: 0.5px;
 }
 
+.view-tabs {
+  display: flex;
+  gap: 8px;
+  margin-top: 12px;
+}
+
+.view-tab {
+  background: rgba(255, 255, 255, 0.15);
+  color: var(--white);
+  border: 1px solid rgba(255, 255, 255, 0.5);
+  padding: 6px 14px;
+  border-radius: 16px;
+  cursor: pointer;
+  font-size: 13px;
+}
+
+.view-tab.active {
+  background: var(--white);
+  color: var(--dark-blue);
+  border-color: var(--white);
+}
+
 .dozent-tabs {
   display: flex;
   align-items: center;
@@ -359,8 +381,84 @@ ul.item-list li span.item-text {
   margin-bottom: 0;
 }
 
+.tarife-panel h2 {
+  color: var(--dark-blue);
+  border-bottom: 3px solid var(--light-blue);
+  padding-bottom: 8px;
+}
+
+.tarife-intro {
+  color: #444;
+  margin-bottom: 16px;
+}
+
+.tarife-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 20px;
+}
+
+.tarif-card {
+  background: var(--white);
+  border: 1px solid var(--pale-blue);
+  border-radius: 10px;
+  padding: 18px;
+  box-shadow: 0 2px 6px rgba(11, 31, 77, 0.08);
+}
+
+.tarif-card h3 {
+  margin: 0 0 6px 0;
+  color: var(--dark-blue);
+  font-size: 18px;
+}
+
+.tarif-preis {
+  display: inline-block;
+  background: var(--mid-blue);
+  color: var(--white);
+  padding: 4px 12px;
+  border-radius: 14px;
+  font-size: 14px;
+  font-weight: bold;
+  margin-bottom: 12px;
+}
+
+.tarif-details {
+  list-style: none;
+  margin: 0 0 14px 0;
+  padding: 0;
+}
+
+.tarif-details li {
+  padding: 6px 0;
+  border-bottom: 1px solid #eef2f8;
+  font-size: 14px;
+  color: var(--black);
+}
+
+.tarif-card h4 {
+  margin: 0 0 8px 0;
+  color: var(--mid-blue);
+  font-size: 14px;
+}
+
+.tarif-vorteile {
+  margin: 0;
+  padding-left: 18px;
+}
+
+.tarif-vorteile li {
+  font-size: 13px;
+  color: var(--black);
+  margin-bottom: 4px;
+}
+
 @media (max-width: 900px) {
   .lists-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .tarife-grid {
     grid-template-columns: 1fr;
   }
 }
