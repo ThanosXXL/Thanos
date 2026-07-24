@@ -6,6 +6,9 @@
   --white: #ffffff;
   --black: #111111;
   --danger: #b3261e;
+  --brand-yellow: #f7c948;
+  --brand-green: #2e9e4f;
+  --brand-orange: #f2761e;
 }
 
 * {
@@ -381,6 +384,28 @@ ul.item-list li span.item-text {
   margin-bottom: 0;
 }
 
+.company-header {
+  background: linear-gradient(90deg, var(--brand-yellow), var(--brand-orange), var(--brand-green));
+  border-radius: 10px;
+  padding: 18px 22px;
+  margin-bottom: 20px;
+  color: var(--black);
+}
+
+.company-name {
+  margin: 0 0 4px 0;
+  font-size: 24px;
+  color: var(--black);
+  border-bottom: none;
+  padding-bottom: 0;
+}
+
+.company-tagline {
+  margin: 0;
+  font-size: 14px;
+  color: #2a2a2a;
+}
+
 .tarife-panel h2 {
   color: var(--dark-blue);
   border-bottom: 3px solid var(--light-blue);
@@ -401,9 +426,18 @@ ul.item-list li span.item-text {
 .tarif-card {
   background: var(--white);
   border: 1px solid var(--pale-blue);
+  border-top: 5px solid var(--mid-blue);
   border-radius: 10px;
   padding: 18px;
   box-shadow: 0 2px 6px rgba(11, 31, 77, 0.08);
+}
+
+.tarif-card.accent-green {
+  border-top-color: var(--brand-green);
+}
+
+.tarif-card.accent-orange {
+  border-top-color: var(--brand-orange);
 }
 
 .tarif-card h3 {
@@ -423,6 +457,14 @@ ul.item-list li span.item-text {
   margin-bottom: 12px;
 }
 
+.accent-green .tarif-preis {
+  background: var(--brand-green);
+}
+
+.accent-orange .tarif-preis {
+  background: var(--brand-orange);
+}
+
 .tarif-details {
   list-style: none;
   margin: 0 0 14px 0;
@@ -440,6 +482,14 @@ ul.item-list li span.item-text {
   margin: 0 0 8px 0;
   color: var(--mid-blue);
   font-size: 14px;
+}
+
+.accent-green h4 {
+  color: var(--brand-green);
+}
+
+.accent-orange h4 {
+  color: var(--brand-orange);
 }
 
 .tarif-vorteile {
