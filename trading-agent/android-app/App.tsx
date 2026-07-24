@@ -19,7 +19,7 @@ import { readLog } from './src/logStore';
 import { Portfolio } from './src/portfolio';
 
 const FIELD_ROWS: Array<{ key: keyof typeof DEFAULT_SETTINGS; label: string; keyboard?: 'numeric' }> = [
-  { key: 'symbol', label: 'Symbol' },
+  { key: 'symbol', label: 'Symbol (EUR-Paar empfohlen, z.B. BTCEUR, damit Guthaben in Euro ist)' },
   { key: 'interval', label: 'Intervall (z.B. 1m, 5m, 1h)' },
   { key: 'fastMaPeriod', label: 'Fast-MA-Periode', keyboard: 'numeric' },
   { key: 'slowMaPeriod', label: 'Slow-MA-Periode', keyboard: 'numeric' },
@@ -28,12 +28,12 @@ const FIELD_ROWS: Array<{ key: keyof typeof DEFAULT_SETTINGS; label: string; key
   { key: 'takeProfitPct', label: 'Take-Profit (z.B. 0.012 = 1,2%)', keyboard: 'numeric' },
   { key: 'maxDailyLossPct', label: 'Max. Tagesverlust (z.B. 0.03 = 3%)', keyboard: 'numeric' },
   { key: 'maxOpenPositions', label: 'Max. offene Positionen', keyboard: 'numeric' },
-  { key: 'paperStartingBalance', label: 'Startkapital (Paper-Modus)', keyboard: 'numeric' },
-  { key: 'minLiveBalance', label: 'Mindestguthaben für Live-Modus', keyboard: 'numeric' },
+  { key: 'paperStartingBalance', label: 'Startkapital Paper-Modus (€)', keyboard: 'numeric' },
+  { key: 'minLiveBalance', label: 'Mindestguthaben für Live-Modus (€)', keyboard: 'numeric' },
 ];
 
 const WITHDRAWAL_FIELD_ROWS: Array<{ key: keyof typeof DEFAULT_SETTINGS; label: string }> = [
-  { key: 'withdrawalAsset', label: 'Auszahlungs-Asset (z.B. USDT)' },
+  { key: 'withdrawalAsset', label: 'Krypto-Asset für Auszahlung (z.B. USDT — NICHT "EUR")' },
   { key: 'withdrawalAddress', label: 'Zieladresse (gehört dir selbst)' },
   { key: 'notifyEmail', label: 'E-Mail für Auszahlungsbeleg' },
 ];
@@ -175,10 +175,10 @@ export default function App() {
 
         {summary && (
           <View style={styles.card}>
-            <Text style={styles.cardLabel}>Kontostand</Text>
-            <Text style={styles.cardValue}>{summary.balance?.toFixed?.(2) ?? '–'}</Text>
-            <Text style={styles.cardLabel}>Realisierter Gewinn/Verlust</Text>
-            <Text style={styles.cardValue}>{summary.realizedPnl?.toFixed?.(2) ?? '–'}</Text>
+            <Text style={styles.cardLabel}>Kontostand (EUR)</Text>
+            <Text style={styles.cardValue}>{summary.balance !== undefined ? `${summary.balance.toFixed(2)} €` : '–'}</Text>
+            <Text style={styles.cardLabel}>Realisierter Gewinn/Verlust (EUR)</Text>
+            <Text style={styles.cardValue}>{summary.realizedPnl !== undefined ? `${summary.realizedPnl.toFixed(2)} €` : '–'}</Text>
             <Text style={styles.cardLabel}>Offene Positionen: {summary.openPositions?.length ?? 0}</Text>
           </View>
         )}
@@ -256,10 +256,11 @@ export default function App() {
           )}
         </View>
 
-        <Text style={styles.sectionTitle}>Auszahlung (Krypto, manuell)</Text>
+        <Text style={styles.sectionTitle}>Krypto-Auszahlung (KEIN Euro, manuell)</Text>
         <Text style={styles.hint}>
-          Kein Fiat-/Bank-Überweisungsversand durch diese App — Euro-Ein-/Auszahlungen laufen direkt über Binance.
-          Hier nur: manuelle Krypto-Auszahlung an eine Adresse, die dir gehört. Nur im Live-Modus verfügbar.
+          Wichtig: zahlt eine Kryptowährung aus (z.B. USDT, BTC), nicht Euro — Euro hat keine
+          Blockchain-Adresse und kann hier nicht eingetragen werden. Echte Euro-Ein-/Auszahlungen
+          (SEPA) laufen ausschließlich direkt über Binance selbst. Nur im Live-Modus verfügbar.
         </Text>
         {WITHDRAWAL_FIELD_ROWS.map((row) => (
           <View key={row.key as string} style={styles.fieldRow}>
@@ -269,7 +270,7 @@ export default function App() {
         ))}
         <TextInput
           style={styles.input}
-          placeholder="Betrag"
+          placeholder="Betrag (in der Kryptowährung oben)"
           placeholderTextColor="#333333"
           keyboardType="numeric"
           value={withdrawAmount}
@@ -283,7 +284,7 @@ export default function App() {
           onChangeText={setWithdrawConfirm}
         />
         <TouchableOpacity style={styles.withdrawButton} onPress={onWithdraw}>
-          <Text style={styles.buttonTextLight}>Auszahlen</Text>
+          <Text style={styles.buttonTextLight}>Krypto auszahlen</Text>
         </TouchableOpacity>
 
         <Text style={styles.sectionTitle}>Log</Text>

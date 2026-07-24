@@ -62,7 +62,7 @@ export const config = {
     signedRestBaseUrl: mode === 'live' ? 'https://api.binance.com' : 'https://testnet.binance.vision',
   },
   market: {
-    symbol: (process.env.SYMBOL || 'BTCUSDT').toUpperCase(),
+    symbol: (process.env.SYMBOL || 'BTCEUR').toUpperCase(),
     interval: process.env.INTERVAL || '5m',
   },
   strategy: {
@@ -109,4 +109,13 @@ export const config = {
 
 if (config.strategy.fastMaPeriod >= config.strategy.slowMaPeriod) {
   throw new Error('FAST_MA_PERIOD must be smaller than SLOW_MA_PERIOD');
+}
+
+if (config.withdrawal.asset.toUpperCase() === 'EUR') {
+  throw new Error(
+    'WITHDRAWAL_ASSET cannot be EUR: EUR has no blockchain address, so Binance\'s ' +
+      'crypto withdrawal API cannot pay it out. This feature only withdraws an actual ' +
+      'coin (e.g. USDT, BTC) to an address you control. For EUR, withdraw directly ' +
+      'through Binance\'s own app/website to your verified bank account (SEPA).'
+  );
 }

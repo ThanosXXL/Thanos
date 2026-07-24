@@ -47,7 +47,7 @@
 
         <fieldset>
           <legend>Markt &amp; Strategie</legend>
-          <label>Symbol
+          <label>Symbol (EUR-Paar empfohlen, z.B. BTCEUR, damit Guthaben in Euro ist)
             <input type="text" name="SYMBOL" />
           </label>
           <label>Intervall
@@ -82,25 +82,25 @@
 
         <fieldset>
           <legend>Sonstiges</legend>
-          <label>Startkapital Paper-Modus
+          <label>Startkapital Paper-Modus (€)
             <input type="number" name="PAPER_STARTING_BALANCE" />
           </label>
           <label>Dashboard-Port
             <input type="number" name="DASHBOARD_PORT" />
           </label>
-          <label>Mindestguthaben für Live-Modus
+          <label>Mindestguthaben für Live-Modus (€)
             <input type="number" name="MIN_LIVE_BALANCE" />
           </label>
         </fieldset>
 
         <fieldset>
-          <legend>Auszahlung (Krypto, manuell, keine automatischen Zahlungen)</legend>
+          <legend>Krypto-Auszahlung (KEIN Euro, manuell, keine automatischen Zahlungen)</legend>
           <p class="hint">
-            Kein Fiat-/Bank-Überweisungsversand durch diese App — Ein-/Auszahlungen in Euro
-            laufen direkt über Binance selbst. Hier nur: manuelle Krypto-Auszahlung an eine
-            Adresse, die dir gehört.
+            Wichtig: Diese Funktion zahlt eine Kryptowährung aus (z.B. USDT, BTC), nicht Euro —
+            Euro hat keine Blockchain-Adresse und kann hier nicht eingetragen werden. Echte
+            Euro-Ein-/Auszahlungen (SEPA) laufen ausschließlich direkt über Binance selbst.
           </p>
-          <label>Asset (z.B. USDT)
+          <label>Asset (Kryptowährung, z.B. USDT — NICHT "EUR")
             <input type="text" name="WITHDRAWAL_ASSET" />
           </label>
           <label>Zieladresse
@@ -130,13 +130,16 @@
         <button id="stopBtn" type="button" class="danger" disabled>Stoppen</button>
       </div>
 
-      <h2>Auszahlung auslösen</h2>
+      <h2>Krypto-Auszahlung auslösen (kein Euro)</h2>
       <div class="withdraw-row">
-        <input type="number" id="withdrawAmount" placeholder="Betrag" min="0" step="0.0001" />
+        <input type="number" id="withdrawAmount" placeholder="Betrag (in der Kryptowährung oben)" min="0" step="0.0001" />
         <input type="text" id="withdrawConfirm" placeholder='Bestätigung: I_CONFIRM_THIS_WITHDRAWAL' />
-        <button id="withdrawBtn" type="button" class="danger">Auszahlen</button>
+        <button id="withdrawBtn" type="button" class="danger">Krypto auszahlen</button>
       </div>
-      <p class="hint">Nur im Live-Modus verfügbar. Bewegt echtes Guthaben unwiderruflich.</p>
+      <p class="hint">
+        Nur im Live-Modus verfügbar. Bewegt echtes Krypto-Guthaben unwiderruflich. Für Euro:
+        Binances eigenen SEPA-Auszahlungsbildschirm verwenden.
+      </p>
 
       <h2>Log</h2>
       <pre id="log"></pre>

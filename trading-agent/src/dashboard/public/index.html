@@ -68,8 +68,8 @@
 
   <div class="cards">
     <div class="card"><div class="label">Modus</div><div class="value" id="mode">–</div></div>
-    <div class="card"><div class="label">Kontostand</div><div class="value" id="balance">–</div></div>
-    <div class="card"><div class="label">Realisierter Gewinn/Verlust</div><div class="value" id="pnl">–</div></div>
+    <div class="card"><div class="label">Kontostand (EUR)</div><div class="value" id="balance">–</div></div>
+    <div class="card"><div class="label">Realisierter Gewinn/Verlust (EUR)</div><div class="value" id="pnl">–</div></div>
     <div class="card"><div class="label">Offene Positionen</div><div class="value" id="openCount">–</div></div>
   </div>
 
@@ -85,7 +85,7 @@
 
   <script>
     function fmt(n) {
-      return typeof n === 'number' ? n.toFixed(2) : '–';
+      return typeof n === 'number' ? `${n.toFixed(2)} €` : '–';
     }
 
     async function refresh() {

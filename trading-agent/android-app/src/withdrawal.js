@@ -21,6 +21,14 @@ export async function requestWithdrawal(settings, { amount, confirmPhrase }) {
   if (!settings.withdrawalAsset || !settings.withdrawalAddress) {
     throw new Error('Auszahlung nicht konfiguriert: Asset und Zieladresse in den Einstellungen setzen.');
   }
+  if (settings.withdrawalAsset.toUpperCase() === 'EUR') {
+    throw new Error(
+      'EUR kann hier nicht ausgezahlt werden: Euro hat keine Blockchain-Adresse, Binances ' +
+        'Krypto-Auszahlungs-API kann es nicht auszahlen. Diese Funktion zahlt nur eine echte ' +
+        'Kryptowährung (z.B. USDT, BTC) an eine Adresse aus, die dir gehört. Für Euro nutze ' +
+        'Binances eigenen SEPA-Auszahlungsbildschirm zu deinem verifizierten Bankkonto.'
+    );
+  }
   if (confirmPhrase !== WITHDRAWAL_CONFIRM_PHRASE) {
     throw new Error(`Auszahlung erfordert die exakte Bestätigung "${WITHDRAWAL_CONFIRM_PHRASE}".`);
   }

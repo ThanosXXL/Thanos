@@ -49,13 +49,23 @@ deliberately does **not**, and will not, include:
 
 What it does include, for managing your own funds:
 
-- A **minimum-balance gate** (`MIN_LIVE_BALANCE`, default 50, in quote-asset
-  units) that blocks live mode from starting until your account holds at
-  least that much — a safety floor, not a deposit mechanism.
-- A **manual, on-demand crypto withdrawal** to an address you control, using
-  Binance's own documented withdrawal API, gated behind a typed
-  confirmation phrase (like live mode itself). Never automatic, never daily
-  by itself — you trigger it, once, for an amount you choose, each time.
+- **Euro as the reference currency for balances.** The default trading pair
+  is `BTCEUR` (a real Binance EUR-quoted spot pair), so your account
+  balance, `PAPER_STARTING_BALANCE`, and `MIN_LIVE_BALANCE` are genuinely in
+  EUR, not a USDT stand-in — this is what "Einzahlung ... immer Euro" means
+  in practice: deposit EUR into your Binance account (via Binance's own
+  deposit flow) and the app tracks and gates on that EUR balance directly.
+- A **minimum-balance gate** (`MIN_LIVE_BALANCE`, default 50, in EUR given
+  the default pair above) that blocks live mode from starting until your
+  account holds at least that much — a safety floor, not a deposit mechanism.
+- A **manual, on-demand CRYPTO withdrawal** (e.g. USDT, BTC — a real coin
+  with a blockchain address) to an address you control, using Binance's own
+  documented withdrawal API, gated behind a typed confirmation phrase (like
+  live mode itself). Never automatic, never daily by itself — you trigger
+  it, once, for an amount you choose, each time. **This is not a Euro
+  withdrawal**: EUR has no blockchain address, so it can't be paid out this
+  way — the app refuses `WITHDRAWAL_ASSET=EUR` outright with an error
+  pointing you to Binance's own SEPA withdrawal screen for that.
 - An **email sent to yourself** after each withdrawal (CLI/desktop: via your
   own SMTP account; Android: via your phone's own mail app, so no email
   credentials are stored on the device) with a record for your own

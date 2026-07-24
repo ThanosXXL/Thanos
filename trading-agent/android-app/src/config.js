@@ -10,7 +10,7 @@ export const DEFAULT_SETTINGS = {
   binanceApiSecret: '',
   tradingMode: 'paper', // 'paper' | 'testnet' | 'live'
   liveConfirm: '',
-  symbol: 'BTCUSDT',
+  symbol: 'BTCEUR',
   interval: '1m',
   fastMaPeriod: 5,
   slowMaPeriod: 13,
@@ -20,11 +20,14 @@ export const DEFAULT_SETTINGS = {
   maxDailyLossPct: 0.03,
   maxOpenPositions: 1,
   paperStartingBalance: 1000,
-  // Live mode refuses to start below this quote-asset balance. Fund your Binance
-  // account through Binance's own deposit flow — this app never collects deposits.
+  // Live mode refuses to start below this balance, in EUR given the default
+  // EUR-quoted symbol above. Fund your Binance account through Binance's own
+  // deposit flow — this app never collects deposits.
   minLiveBalance: 50,
-  // Manual crypto withdrawal only, never automatic, never fiat/bank transfer —
-  // do fiat withdrawals through Binance's own app to your verified bank account.
+  // Manual CRYPTO withdrawal only (e.g. BTC/USDT — a real coin with a blockchain
+  // address), never automatic, never EUR/fiat/bank transfer. EUR has no
+  // blockchain address, so it cannot be set here — do EUR/SEPA withdrawals
+  // through Binance's own app to your verified bank account.
   withdrawalAsset: '',
   withdrawalAddress: '',
   // Email address to send a withdrawal summary to via the device's own mail app
