@@ -6,7 +6,7 @@
 
   const TARIFE = [
     {
-      name: 'Tarif 1',
+      name: 'Standard Tarif',
       preis: '6,89 € / Monat',
       accent: 'green',
       daten: '10 GB Datenvolumen mit 5G-Speed',
@@ -21,7 +21,7 @@
       ]
     },
     {
-      name: 'Tarif 2',
+      name: 'Premium Tarif',
       preis: '12,89 € / Monat',
       accent: 'orange',
       daten: '20 GB Datenvolumen mit 5G-Speed',
