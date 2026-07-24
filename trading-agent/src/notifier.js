@@ -41,7 +41,7 @@ export async function sendWithdrawalNotification(withdrawalRecord, portfolioSumm
     await transporter.sendMail({
       from: config.smtp.user || config.smtp.notifyEmail,
       to: config.smtp.notifyEmail,
-      subject: `Trading Agent – Auszahlung ${withdrawalRecord.amount} ${withdrawalRecord.asset}`,
+      subject: `FreshTrades – Auszahlung ${withdrawalRecord.amount} ${withdrawalRecord.asset}`,
       text,
     });
 

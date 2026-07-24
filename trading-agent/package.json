@@ -1,7 +1,7 @@
 {
-  "name": "trading-agent",
+  "name": "freshtrades",
   "version": "0.1.0",
-  "description": "Autonomous crypto trading agent (Binance) with paper-trading default, risk management, and backtesting. Makes no profit guarantees.",
+  "description": "FreshTrades: an autonomous crypto trading agent (Binance) with paper-trading default, risk management, and backtesting. Makes no profit guarantees.",
   "type": "module",
   "private": true,
   "main": "electron-main.cjs",
@@ -27,8 +27,8 @@
     "electron-builder": "^24.13.3"
   },
   "build": {
-    "appId": "com.tradingagent.desktop",
-    "productName": "Trading Agent",
+    "appId": "com.freshtrades.desktop",
+    "productName": "FreshTrades",
     "files": [
       "electron-main.cjs",
       "electron-preload.cjs",

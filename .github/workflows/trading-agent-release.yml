@@ -1,9 +1,9 @@
-name: Build & Release Trading Agent (Windows + Android)
+name: Build & Release FreshTrades (Windows + Android)
 
 on:
   push:
     tags:
-      - "trading-v*"
+      - "freshtrades-v*"
   workflow_dispatch:
 
 permissions:
@@ -41,7 +41,7 @@ jobs:
       - name: Installer als Artifact hochladen
         uses: actions/upload-artifact@v4
         with:
-          name: trading-agent-windows
+          name: freshtrades-windows
           path: trading-agent/dist-desktop/*.exe
           if-no-files-found: warn
 
@@ -84,7 +84,7 @@ jobs:
       - name: APK als Artifact hochladen
         uses: actions/upload-artifact@v4
         with:
-          name: trading-agent-android
+          name: freshtrades-android
           path: trading-agent/android-app/android/app/build/outputs/apk/release/*.apk
           if-no-files-found: warn
 

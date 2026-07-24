@@ -191,7 +191,7 @@ export default function App() {
                 );
                 await Linking.openURL(
                   `mailto:${settings.notifyEmail}?subject=${encodeURIComponent(
-                    `Trading Agent – Auszahlung ${record.amount} ${record.asset}`
+                    `FreshTrades – Auszahlung ${record.amount} ${record.asset}`
                   )}&body=${body}`
                 );
               }
@@ -214,7 +214,7 @@ export default function App() {
     <SafeAreaView style={styles.root}>
       <StatusBar barStyle="dark-content" backgroundColor="#a7d8f0" />
       <ScrollView contentContainerStyle={styles.scroll}>
-        <Text style={styles.title}>Trading Agent</Text>
+        <Text style={styles.title}>FreshTrades</Text>
         <View style={[styles.badge, { backgroundColor: modeColor }]}>
           <Text style={styles.badgeTextLight}>
             {running ? `LÄUFT · ${settings.tradingMode.toUpperCase()}` : 'GESTOPPT'}

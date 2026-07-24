@@ -1,8 +1,9 @@
-# Trading Agent (Binance)
+# FreshTrades (Binance Trading Agent)
 
 An autonomous crypto trading agent for Binance: pluggable strategy engine, hard
 risk limits, backtesting, paper trading, and a local monitoring dashboard —
-available as a CLI, a Windows desktop app, and an Android app.
+available as a CLI, a Windows desktop app ("FreshTrades Desktop"), and an
+Android app ("FreshTrades").
 
 ## No guarantees — read this first
 
@@ -112,8 +113,8 @@ What it does include, for managing your own funds:
 Windows and Android builds are produced by CI, not by hand — nothing is
 uploaded from a developer machine.
 
-1. Push a tag matching `trading-v*` (e.g. `trading-v0.1.0`) to this
-   repository, or run **Actions → Build & Release Trading Agent (Windows +
+1. Push a tag matching `freshtrades-v*` (e.g. `freshtrades-v0.1.0`) to this
+   repository, or run **Actions → Build & Release FreshTrades (Windows +
    Android) → Run workflow** manually.
 2. The workflow builds the Windows installer (`.exe`, NSIS) and the Android
    package (`.apk`) and attaches both to a GitHub Release for that tag.
@@ -294,7 +295,7 @@ single screen shows both settings and live status.
   written to mirror the existing Dozenten Dashboard release workflow, but
   has not actually been run — the Windows and Android SDK toolchains aren't
   available in the sandbox this was developed in. Run it once (via
-  `workflow_dispatch` or a `trading-v*` tag) and check both jobs succeed
+  `workflow_dispatch` or a `freshtrades-v*` tag) and check both jobs succeed
   before relying on it.
 - **Withdrawal API is untested against real Binance** in this session (no
   network access to Binance from this sandbox — see the Downloads section).
@@ -314,9 +315,15 @@ single screen shows both settings and live status.
   ECB reference rates, published once per ECB business day — real and
   current, but not a tick-by-tick feed. It's shown for reference only and is
   not used anywhere in the trading/risk logic itself.
-- **The markets browser and FX rate calls could not be tested against their
-  real APIs in this session** (same sandbox network restriction as the
-  Binance calls — see the Downloads section). Both were verified to fail
-  gracefully (clear error, no crash) when the network call itself fails;
-  the actual successful-response path should be checked once you have
-  normal internet access.
+- **The markets browser and FX rate calls could not be exercised against the
+  live real APIs in this session** (same sandbox network restriction as the
+  Binance calls — see the Downloads section). Two things *were* verified
+  here, though: (1) both fail gracefully — clear error, no crash — when the
+  network call itself fails, and (2) their parsing/filtering/caching logic
+  was checked against fixture payloads shaped exactly like the real,
+  documented API responses (frankfurter.app's `/latest` and Binance's
+  `/api/v3/exchangeInfo`) — see `android-app/__tests__/fxRate.test.js` and
+  `android-app/__tests__/binanceClient.test.js`, which run as part of the
+  normal `npm test` suite. What's still unverified is the live network
+  round-trip itself (DNS, TLS, actual current API behavior) — check that
+  once you have normal internet access.
