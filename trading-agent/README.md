@@ -70,6 +70,33 @@ What it does include, for managing your own funds:
   own SMTP account; Android: via your phone's own mail app, so no email
   credentials are stored on the device) with a record for your own
   bookkeeping. This is not a compliance or KYC process — it's a receipt.
+- A **maximum tradable capital** (`MAX_TRADABLE_CAPITAL`, default 5000, in
+  EUR) that caps how much of your balance the position-sizing calculation
+  will ever use — a personal risk ceiling, not a deposit limit or a payment
+  processing feature. If your balance is higher, the excess simply isn't
+  risked; nothing stops you from holding more than this on Binance.
+
+## Dashboard features
+
+- **Live USD→EUR rate**: fetched from
+  [frankfurter.app](https://www.frankfurter.app/) (free, keyless, ECB
+  reference rates). This is a real, currently-published rate, refreshed
+  periodically — not sub-second forex tick data (ECB publishes once per
+  business day), and not a made-up number.
+- **All Binance markets, browsable**: a searchable list of every real,
+  currently tradable Binance spot pair (via the public `exchangeInfo`
+  endpoint), so you can look up a symbol before typing it into the
+  settings. This is Binance's own crypto market list — **no stock markets,
+  no countries, no sector/theme categories**: those don't exist on a crypto
+  exchange, and adding them for real would mean an entirely separate broker
+  integration (see the "no guarantees" note above about staying
+  Binance/crypto-only).
+- **Crypto withdrawal history with a time-range filter** (last 5 days / 30
+  days / 3 months) — reads the same `data/withdrawals.log` /
+  `AsyncStorage` history already used for the email receipts.
+- **Today's trades**: closed trades filtered to the current calendar day,
+  with a running total of today's win count and P&L, alongside the
+  all-time balance/P&L cards.
 
 ## Downloads
 
@@ -115,6 +142,7 @@ src/                     Core engine, shared by the CLI and the Electron desktop
   withdrawal.js          manual crypto withdrawal (Binance API) behind a confirmation phrase
   withdrawCli.js          CLI entrypoint: npm run withdraw -- --amount X --confirm Y
   notifier.js             emails a withdrawal record to yourself via your own SMTP account
+  fxRate.js               live USD->EUR rate (frankfurter.app, ECB reference rates), cached
 
 electron-main.cjs        Electron main process: settings storage, spawns electron-run.js
 electron-preload.cjs     contextBridge API exposed to the renderer
@@ -133,6 +161,7 @@ android-app/             Standalone React Native app — a full on-device tradin
   src/backgroundTask.js  wraps the agent in a react-native-background-actions
                          foreground service so it can keep running while backgrounded
   src/withdrawal.js      manual crypto withdrawal (Binance API), AsyncStorage-logged
+  src/fxRate.js          live USD->EUR rate (frankfurter.app), cached in memory
   App.tsx                settings + dashboard UI in one screen, polls AsyncStorage;
                          withdrawal emails go through the device's own mail app (mailto)
 ```
@@ -272,3 +301,13 @@ single screen shows both settings and live status.
   already happened by that point. Don't rely on the email as your only
   record; check `data/withdrawals.log` (CLI/desktop) or the in-app history
   (Android) too.
+- **The FX rate is not sub-second live forex data.** frankfurter.app serves
+  ECB reference rates, published once per ECB business day — real and
+  current, but not a tick-by-tick feed. It's shown for reference only and is
+  not used anywhere in the trading/risk logic itself.
+- **The markets browser and FX rate calls could not be tested against their
+  real APIs in this session** (same sandbox network restriction as the
+  Binance calls — see the Downloads section). Both were verified to fail
+  gracefully (clear error, no crash) when the network call itself fails;
+  the actual successful-response path should be checked once you have
+  normal internet access.

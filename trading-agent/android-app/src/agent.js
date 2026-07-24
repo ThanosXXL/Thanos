@@ -119,7 +119,8 @@ export class TradingAgent {
     }
 
     const entryPrice = candle.close;
-    const rawQuantity = this.riskManager.sizePosition({ balance: this.portfolio.balance, price: entryPrice });
+    const sizingBalance = Math.min(this.portfolio.balance, Number(this.settings.maxTradableCapital));
+    const rawQuantity = this.riskManager.sizePosition({ balance: sizingBalance, price: entryPrice });
     const quantity = Number(rawQuantity.toFixed(6));
     if (quantity <= 0) return;
 

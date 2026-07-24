@@ -89,7 +89,8 @@ export async function startAgent() {
     }
 
     const entryPrice = candle.close;
-    const rawQuantity = riskManager.sizePosition({ balance: portfolio.balance, price: entryPrice });
+    const sizingBalance = Math.min(portfolio.balance, config.maxTradableCapital);
+    const rawQuantity = riskManager.sizePosition({ balance: sizingBalance, price: entryPrice });
     const quantity = Number(rawQuantity.toFixed(6));
     if (quantity <= 0) return;
 

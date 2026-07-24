@@ -87,6 +87,12 @@ export const config = {
   // own app/website (card, SEPA, etc.), which already handles that as a licensed
   // exchange. This is just a local safety floor before the agent risks real orders.
   minLiveBalance: Number(process.env.MIN_LIVE_BALANCE || 50),
+  // Caps how much of the account balance position-sizing will ever use, even if the
+  // real balance is higher. A personal risk ceiling, not a deposit limit.
+  maxTradableCapital: Number(process.env.MAX_TRADABLE_CAPITAL || 5000),
+  fx: {
+    refreshSeconds: Number(process.env.FX_REFRESH_SECONDS || 300),
+  },
   // Optional manual crypto withdrawal to an address you control. Never automatic,
   // never fiat/bank transfer — this project does not initiate bank transfers itself;
   // do that through Binance's own withdrawal flow to your verified bank account.
@@ -109,6 +115,10 @@ export const config = {
 
 if (config.strategy.fastMaPeriod >= config.strategy.slowMaPeriod) {
   throw new Error('FAST_MA_PERIOD must be smaller than SLOW_MA_PERIOD');
+}
+
+if (config.maxTradableCapital < config.minLiveBalance) {
+  throw new Error('MAX_TRADABLE_CAPITAL must be >= MIN_LIVE_BALANCE');
 }
 
 if (config.withdrawal.asset.toUpperCase() === 'EUR') {

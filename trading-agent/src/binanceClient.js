@@ -54,6 +54,18 @@ export async function getKlines(symbol, interval, limit = 500) {
   }));
 }
 
+/**
+ * Public, unsigned: every tradable spot market on production Binance, with its
+ * base/quote asset and status. Used to let the user browse/pick a real SYMBOL
+ * rather than typing one blind.
+ */
+export async function getExchangeInfo() {
+  const body = await request('GET', '/api/v3/exchangeInfo');
+  return body.symbols
+    .filter((s) => s.status === 'TRADING' && s.isSpotTradingAllowed)
+    .map((s) => ({ symbol: s.symbol, baseAsset: s.baseAsset, quoteAsset: s.quoteAsset }));
+}
+
 /** Signed: account balances. Requires API credentials (testnet or live). */
 export async function getAccount() {
   return request('GET', '/api/v3/account', {}, { signed: true });

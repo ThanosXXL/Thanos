@@ -24,6 +24,9 @@ export const DEFAULT_SETTINGS = {
   // EUR-quoted symbol above. Fund your Binance account through Binance's own
   // deposit flow — this app never collects deposits.
   minLiveBalance: 50,
+  // Caps how much of the balance position-sizing will ever use, even if the real
+  // balance is higher. A personal risk ceiling, not a deposit limit.
+  maxTradableCapital: 5000,
   // Manual CRYPTO withdrawal only (e.g. BTC/USDT — a real coin with a blockchain
   // address), never automatic, never EUR/fiat/bank transfer. EUR has no
   // blockchain address, so it cannot be set here — do EUR/SEPA withdrawals
@@ -63,6 +66,9 @@ export function validateSettings(settings) {
   }
   if (Number(settings.fastMaPeriod) >= Number(settings.slowMaPeriod)) {
     errors.push('Fast-MA-Periode muss kleiner als Slow-MA-Periode sein.');
+  }
+  if (Number(settings.maxTradableCapital) < Number(settings.minLiveBalance)) {
+    errors.push('Maximales Handelskapital muss mindestens dem Mindestguthaben entsprechen.');
   }
   for (const key of ['riskPerTradePct', 'stopLossPct', 'takeProfitPct', 'maxDailyLossPct']) {
     const value = Number(settings[key]);

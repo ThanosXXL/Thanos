@@ -14,9 +14,24 @@ import {
 
 import { DEFAULT_SETTINGS, LIVE_CONFIRM_PHRASE, WITHDRAWAL_CONFIRM_PHRASE, loadSettings, saveSettings, validateSettings } from './src/config';
 import { startBackgroundAgent, stopBackgroundAgent, isBackgroundAgentRunning } from './src/backgroundTask';
-import { requestWithdrawal } from './src/withdrawal';
+import { requestWithdrawal, readWithdrawalHistory } from './src/withdrawal';
+import { getExchangeInfo } from './src/binanceClient';
+import { getUsdEurRate } from './src/fxRate';
 import { readLog } from './src/logStore';
 import { Portfolio } from './src/portfolio';
+
+function isToday(isoString: string) {
+  if (!isoString) return false;
+  const d = new Date(isoString);
+  const now = new Date();
+  return d.getFullYear() === now.getFullYear() && d.getMonth() === now.getMonth() && d.getDate() === now.getDate();
+}
+
+const WITHDRAW_RANGES = [
+  { label: 'Letzte 5 Tage', days: 5 },
+  { label: 'Letzte 30 Tage', days: 30 },
+  { label: 'Letzte 3 Monate', days: 90 },
+];
 
 const FIELD_ROWS: Array<{ key: keyof typeof DEFAULT_SETTINGS; label: string; keyboard?: 'numeric' }> = [
   { key: 'symbol', label: 'Symbol (EUR-Paar empfohlen, z.B. BTCEUR, damit Guthaben in Euro ist)' },
@@ -30,6 +45,7 @@ const FIELD_ROWS: Array<{ key: keyof typeof DEFAULT_SETTINGS; label: string; key
   { key: 'maxOpenPositions', label: 'Max. offene Positionen', keyboard: 'numeric' },
   { key: 'paperStartingBalance', label: 'Startkapital Paper-Modus (€)', keyboard: 'numeric' },
   { key: 'minLiveBalance', label: 'Mindestguthaben für Live-Modus (€)', keyboard: 'numeric' },
+  { key: 'maxTradableCapital', label: 'Maximales Handelskapital (€, Risiko-Obergrenze, keine Einzahlungsgrenze)', keyboard: 'numeric' },
 ];
 
 const WITHDRAWAL_FIELD_ROWS: Array<{ key: keyof typeof DEFAULT_SETTINGS; label: string }> = [
@@ -51,6 +67,12 @@ export default function App() {
   const [log, setLog] = useState<string[]>([]);
   const [withdrawAmount, setWithdrawAmount] = useState('');
   const [withdrawConfirm, setWithdrawConfirm] = useState('');
+  const [fx, setFx] = useState<any>(null);
+  const [withdrawHistory, setWithdrawHistory] = useState<any[]>([]);
+  const [withdrawRangeDays, setWithdrawRangeDays] = useState(5);
+  const [markets, setMarkets] = useState<any[]>([]);
+  const [marketsSearch, setMarketsSearch] = useState('');
+  const [marketsLoading, setMarketsLoading] = useState(false);
 
   useEffect(() => {
     (async () => {
@@ -66,9 +88,41 @@ export default function App() {
       setLog(await readLog());
       const portfolio = await new Portfolio(Number(settings.paperStartingBalance)).load();
       setSummary(portfolio.summary());
+      setWithdrawHistory(await readWithdrawalHistory());
     }, 3000);
     return () => clearInterval(interval);
   }, [settings.paperStartingBalance]);
+
+  useEffect(() => {
+    const fetchFx = () => getUsdEurRate().then(setFx);
+    fetchFx();
+    const interval = setInterval(fetchFx, 5 * 60000);
+    return () => clearInterval(interval);
+  }, []);
+
+  const onLoadMarkets = useCallback(async () => {
+    setMarketsLoading(true);
+    try {
+      setMarkets(await getExchangeInfo(settings));
+    } catch (err: any) {
+      Alert.alert('Märkte konnten nicht geladen werden', err.message);
+    } finally {
+      setMarketsLoading(false);
+    }
+  }, [settings]);
+
+  const filteredMarkets = markets
+    .filter((m) => !marketsSearch || m.symbol.includes(marketsSearch.toUpperCase()))
+    .slice(0, 100);
+
+  const todaysTrades = (summary?.closedTrades || []).filter((t: any) => isToday(t.exitTime));
+  const todaysPnl = todaysTrades.reduce((sum: number, t: any) => sum + t.pnl, 0);
+
+  const withdrawCutoff = Date.now() - withdrawRangeDays * 24 * 60 * 60 * 1000;
+  const filteredWithdrawals = withdrawHistory
+    .filter((w) => new Date(w.time).getTime() >= withdrawCutoff)
+    .slice()
+    .reverse();
 
   const update = useCallback((key: string, value: string) => {
     setSettings((prev: any) => ({ ...prev, [key]: value }));
@@ -183,6 +237,24 @@ export default function App() {
           </View>
         )}
 
+        <View style={styles.card}>
+          <Text style={styles.cardLabel}>USD → EUR (live)</Text>
+          <Text style={styles.cardValue}>{fx?.rate ? `1 USD = ${fx.rate.toFixed(4)} EUR` : fx?.error ? 'n/a' : '…'}</Text>
+          <Text style={styles.hint}>{fx?.error ? `Fehler: ${fx.error}` : fx?.asOf ? `Stand: ${fx.asOf} (ECB-Referenzkurs)` : ''}</Text>
+        </View>
+
+        <Text style={styles.sectionTitle}>Trades heute</Text>
+        {todaysTrades.length === 0 ? (
+          <Text style={styles.hint}>Heute noch keine abgeschlossenen Trades.</Text>
+        ) : (
+          <View style={styles.card}>
+            <Text style={styles.cardLabel}>
+              {todaysTrades.length} Trades, {todaysTrades.filter((t: any) => t.pnl > 0).length} Gewinner
+            </Text>
+            <Text style={styles.cardValue}>{todaysPnl.toFixed(2)} €</Text>
+          </View>
+        )}
+
         <Text style={styles.sectionTitle}>Binance-Zugang</Text>
         <TextInput
           style={styles.input}
@@ -287,6 +359,56 @@ export default function App() {
           <Text style={styles.buttonTextLight}>Krypto auszahlen</Text>
         </TouchableOpacity>
 
+        <Text style={styles.sectionTitle}>Krypto-Auszahlungen (Verlauf)</Text>
+        <View style={styles.modeRow}>
+          {WITHDRAW_RANGES.map((r) => (
+            <TouchableOpacity
+              key={r.days}
+              style={[styles.rangeButton, withdrawRangeDays === r.days && styles.modeButtonActive]}
+              onPress={() => setWithdrawRangeDays(r.days)}
+            >
+              <Text style={styles.modeButtonText}>{r.label}</Text>
+            </TouchableOpacity>
+          ))}
+        </View>
+        {filteredWithdrawals.length === 0 ? (
+          <Text style={styles.hint}>Keine Auszahlungen in diesem Zeitraum.</Text>
+        ) : (
+          filteredWithdrawals.map((w, i) => (
+            <View key={i} style={styles.card}>
+              <Text style={styles.cardLabel}>{w.time}</Text>
+              <Text style={styles.cardValue}>{w.amount} {w.asset}</Text>
+              <Text style={styles.hint}>an {w.address}</Text>
+            </View>
+          ))
+        )}
+
+        <Text style={styles.sectionTitle}>Alle Binance-Märkte (nur Krypto, zur Ansicht)</Text>
+        <Text style={styles.hint}>
+          Reine Binance-Marktdaten zum Nachschlagen. Symbol zum Handeln wird oben in den Einstellungen gesetzt.
+        </Text>
+        <View style={styles.actions}>
+          <TextInput
+            style={[styles.input, { flex: 1, marginBottom: 0 }]}
+            placeholder="Suche, z.B. BTC oder EUR..."
+            placeholderTextColor="#333333"
+            value={marketsSearch}
+            onChangeText={setMarketsSearch}
+          />
+          <TouchableOpacity style={styles.saveButton} onPress={onLoadMarkets} disabled={marketsLoading}>
+            <Text style={styles.buttonTextLight}>{marketsLoading ? 'Lädt…' : 'Märkte laden'}</Text>
+          </TouchableOpacity>
+        </View>
+        {filteredMarkets.length > 0 && (
+          <View style={styles.logBox}>
+            {filteredMarkets.map((m) => (
+              <Text key={m.symbol} style={styles.logLine}>
+                {m.symbol} ({m.baseAsset}/{m.quoteAsset})
+              </Text>
+            ))}
+          </View>
+        )}
+
         <Text style={styles.sectionTitle}>Log</Text>
         <View style={styles.logBox}>
           {log.slice(-40).map((line, i) => (
@@ -350,6 +472,15 @@ const styles = StyleSheet.create({
   },
   modeButtonActive: { backgroundColor: '#a7d8f0', borderColor: '#001f5c' },
   modeButtonText: { color: '#000000', fontWeight: '600', fontSize: 13 },
+  rangeButton: {
+    flex: 1,
+    padding: 8,
+    borderRadius: 6,
+    borderWidth: 1,
+    borderColor: '#001f5c',
+    backgroundColor: 'rgba(255,255,255,0.7)',
+    alignItems: 'center',
+  },
   actions: { flexDirection: 'row', gap: 10, marginTop: 12 },
   saveButton: { flex: 1, backgroundColor: '#39507a', padding: 12, borderRadius: 8, alignItems: 'center' },
   startButton: { flex: 1, backgroundColor: '#2563eb', padding: 12, borderRadius: 8, alignItems: 'center' },

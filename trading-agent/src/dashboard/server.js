@@ -3,11 +3,17 @@ import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { config } from '../config.js';
+import { getUsdEurRate } from '../fxRate.js';
+import { getExchangeInfo } from '../binanceClient.js';
+import { readWithdrawalHistory } from '../withdrawal.js';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const DATA_DIR = path.join(__dirname, '..', '..', 'data');
 const STATE_FILE = path.join(DATA_DIR, 'state.json');
 const TRADES_FILE = path.join(DATA_DIR, 'trades.log');
+
+let marketsCache = { markets: [], fetchedAt: 0 };
+const MARKETS_CACHE_MS = 60 * 60 * 1000;
 
 const app = express();
 app.use(express.static(path.join(__dirname, 'public')));
@@ -41,10 +47,32 @@ app.get('/api/status', (req, res) => {
     balance: state.balance,
     startingBalance: state.startingBalance,
     realizedPnl,
+    maxTradableCapital: config.maxTradableCapital,
     openPositions: state.openPositions || [],
     trades: trades.slice(0, 100),
+    withdrawals: readWithdrawalHistory(),
     updatedAt: state.updatedAt,
   });
+});
+
+app.get('/api/fx', async (req, res) => {
+  const fx = await getUsdEurRate();
+  res.json(fx);
+});
+
+app.get('/api/markets', async (req, res) => {
+  const age = Date.now() - marketsCache.fetchedAt;
+  if (marketsCache.markets.length === 0 || age > MARKETS_CACHE_MS) {
+    try {
+      marketsCache = { markets: await getExchangeInfo(), fetchedAt: Date.now() };
+    } catch (err) {
+      if (marketsCache.markets.length === 0) {
+        return res.status(502).json({ error: err.message });
+      }
+      // serve stale cache on a refresh failure rather than erroring out
+    }
+  }
+  res.json({ markets: marketsCache.markets });
 });
 
 app.listen(config.dashboard.port, () => {

@@ -50,6 +50,7 @@
   }
   .card .label { color: var(--text); font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.04em; }
   .card .value { font-size: 1.4rem; font-weight: 600; margin-top: 4px; color: var(--text); }
+  .card .sub { font-size: 0.7rem; color: var(--muted); margin-top: 2px; }
   .value.pos { color: var(--green); }
   .value.neg { color: var(--red); }
   table { width: 100%; border-collapse: collapse; background: var(--panel); border: 1px solid var(--border); border-radius: 10px; overflow: hidden; color: var(--text); }
@@ -59,6 +60,28 @@
   section { margin-bottom: 28px; }
   section h2 { font-size: 0.95rem; margin-bottom: 8px; color: var(--text); }
   .empty { color: var(--muted); font-size: 0.85rem; padding: 12px; }
+  .hint { color: var(--muted); font-size: 0.75rem; margin-bottom: 8px; }
+  .range-select { display: flex; gap: 8px; margin-bottom: 10px; }
+  .range-select button {
+    padding: 6px 12px;
+    border-radius: 6px;
+    border: 1px solid var(--border);
+    background: rgba(255,255,255,0.6);
+    color: var(--text);
+    cursor: pointer;
+    font-size: 0.8rem;
+  }
+  .range-select button.active { background: var(--navy-blue); color: white; }
+  .markets-search {
+    width: 100%;
+    max-width: 320px;
+    padding: 8px 10px;
+    border-radius: 6px;
+    border: 1px solid var(--border);
+    margin-bottom: 10px;
+    font-size: 0.85rem;
+  }
+  .markets-scroll { max-height: 260px; overflow-y: auto; border-radius: 10px; }
 </style>
 </head>
 <body>
@@ -71,7 +94,17 @@
     <div class="card"><div class="label">Kontostand (EUR)</div><div class="value" id="balance">–</div></div>
     <div class="card"><div class="label">Realisierter Gewinn/Verlust (EUR)</div><div class="value" id="pnl">–</div></div>
     <div class="card"><div class="label">Offene Positionen</div><div class="value" id="openCount">–</div></div>
+    <div class="card">
+      <div class="label">USD → EUR (live)</div>
+      <div class="value" id="fxRate">–</div>
+      <div class="sub" id="fxAsOf"></div>
+    </div>
   </div>
+
+  <section>
+    <h2>Trades heute</h2>
+    <div id="todayTrades"></div>
+  </section>
 
   <section>
     <h2>Offene Positionen</h2>
@@ -83,14 +116,117 @@
     <div id="tradeLog"></div>
   </section>
 
+  <section>
+    <h2>Krypto-Auszahlungen (kein Euro — siehe README)</h2>
+    <div class="range-select" id="withdrawRange">
+      <button data-days="5" class="active">Letzte 5 Tage</button>
+      <button data-days="30">Letzte 30 Tage</button>
+      <button data-days="90">Letzte 3 Monate</button>
+    </div>
+    <div id="withdrawalLog"></div>
+  </section>
+
+  <section>
+    <h2>Alle Binance-Märkte (nur Krypto, zur Ansicht)</h2>
+    <p class="hint">Reine Binance-Marktdaten zum Nachschlagen — Symbol zum Handeln wird weiterhin in den Einstellungen gesetzt.</p>
+    <input type="text" id="marketsSearch" class="markets-search" placeholder="Suche, z.B. BTC oder EUR..." />
+    <div class="markets-scroll" id="marketsList"></div>
+  </section>
+
   <script>
+    let allMarkets = [];
+    let withdrawRangeDays = 5;
+    let latestData = null;
+
     function fmt(n) {
       return typeof n === 'number' ? `${n.toFixed(2)} €` : '–';
+    }
+
+    function isToday(isoString) {
+      if (!isoString) return false;
+      const d = new Date(isoString);
+      const now = new Date();
+      return d.getFullYear() === now.getFullYear() && d.getMonth() === now.getMonth() && d.getDate() === now.getDate();
+    }
+
+    function renderTodayTrades(trades) {
+      const today = trades.filter((t) => isToday(t.exitTime));
+      const wrap = document.getElementById('todayTrades');
+      if (today.length === 0) {
+        wrap.innerHTML = '<div class="empty">Heute noch keine abgeschlossenen Trades.</div>';
+        return;
+      }
+      const totalPnl = today.reduce((sum, t) => sum + t.pnl, 0);
+      const wins = today.filter((t) => t.pnl > 0).length;
+      wrap.innerHTML =
+        `<div class="card" style="margin-bottom:10px;">
+          <div class="label">Heute: ${today.length} Trades, ${wins} Gewinner</div>
+          <div class="value ${totalPnl > 0 ? 'pos' : totalPnl < 0 ? 'neg' : ''}">${fmt(totalPnl)}</div>
+        </div>` +
+        renderTable(
+          ['Seite', 'Menge', 'Einstieg', 'Ausstieg', 'Grund', 'P&L', 'Zeit'],
+          today.map((t) => [t.side, t.quantity, fmt(t.entryPrice), fmt(t.exitPrice), t.reason, fmt(t.pnl), t.exitTime])
+        );
+    }
+
+    function renderWithdrawals(withdrawals) {
+      const cutoff = Date.now() - withdrawRangeDays * 24 * 60 * 60 * 1000;
+      const filtered = (withdrawals || []).filter((w) => new Date(w.time).getTime() >= cutoff).reverse();
+      const wrap = document.getElementById('withdrawalLog');
+      if (filtered.length === 0) {
+        wrap.innerHTML = '<div class="empty">Keine Auszahlungen in diesem Zeitraum.</div>';
+        return;
+      }
+      wrap.innerHTML = renderTable(
+        ['Zeit', 'Asset', 'Betrag', 'Zieladresse', 'Binance Withdraw ID'],
+        filtered.map((w) => [w.time, w.asset, w.amount, w.address, w.binanceWithdrawId])
+      );
+    }
+
+    function renderMarkets(filterText) {
+      const term = (filterText || '').trim().toUpperCase();
+      const filtered = term ? allMarkets.filter((m) => m.symbol.includes(term)).slice(0, 200) : allMarkets.slice(0, 200);
+      const wrap = document.getElementById('marketsList');
+      if (filtered.length === 0) {
+        wrap.innerHTML = '<div class="empty">Keine Märkte gefunden.</div>';
+        return;
+      }
+      wrap.innerHTML = renderTable(
+        ['Symbol', 'Basis-Asset', 'Quote-Asset'],
+        filtered.map((m) => [m.symbol, m.baseAsset, m.quoteAsset])
+      );
+    }
+
+    async function refreshFx() {
+      try {
+        const res = await fetch('/api/fx');
+        const fx = await res.json();
+        document.getElementById('fxRate').textContent = fx.rate ? `1 USD = ${fx.rate.toFixed(4)} EUR` : 'n/a';
+        document.getElementById('fxAsOf').textContent = fx.error
+          ? `Fehler: ${fx.error}`
+          : fx.asOf
+          ? `Stand: ${fx.asOf} (ECB-Referenzkurs)`
+          : '';
+      } catch {
+        document.getElementById('fxRate').textContent = 'n/a';
+      }
+    }
+
+    async function refreshMarkets() {
+      try {
+        const res = await fetch('/api/markets');
+        const data = await res.json();
+        allMarkets = data.markets || [];
+        renderMarkets(document.getElementById('marketsSearch').value);
+      } catch {
+        document.getElementById('marketsList').innerHTML = '<div class="empty">Marktliste konnte nicht geladen werden.</div>';
+      }
     }
 
     async function refresh() {
       const res = await fetch('/api/status');
       const data = await res.json();
+      latestData = data;
 
       document.getElementById('subtitle').textContent =
         `${data.symbol} · ${data.interval} · zuletzt aktualisiert: ${data.updatedAt || '–'}`;
@@ -118,6 +254,9 @@
       pnlEl.className = 'value ' + (data.realizedPnl > 0 ? 'pos' : data.realizedPnl < 0 ? 'neg' : '');
 
       document.getElementById('openCount').textContent = data.openPositions.length;
+
+      renderTodayTrades(data.trades);
+      renderWithdrawals(data.withdrawals);
 
       const openWrap = document.getElementById('openPositions');
       if (data.openPositions.length === 0) {
@@ -154,8 +293,23 @@
       return `<table><thead>${thead}</thead><tbody>${tbody}</tbody></table>`;
     }
 
+    document.getElementById('withdrawRange').addEventListener('click', (e) => {
+      const btn = e.target.closest('button');
+      if (!btn) return;
+      withdrawRangeDays = Number(btn.dataset.days);
+      for (const b of document.querySelectorAll('#withdrawRange button')) b.classList.remove('active');
+      btn.classList.add('active');
+      if (latestData) renderWithdrawals(latestData.withdrawals);
+    });
+
+    document.getElementById('marketsSearch').addEventListener('input', (e) => renderMarkets(e.target.value));
+
     refresh();
+    refreshFx();
+    refreshMarkets();
     setInterval(refresh, 3000);
+    setInterval(refreshFx, 60000);
+    setInterval(refreshMarkets, 5 * 60000);
   </script>
 </body>
 </html>
