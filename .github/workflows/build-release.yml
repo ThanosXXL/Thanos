@@ -29,7 +29,23 @@ jobs:
       - name: Abhängigkeiten installieren
         run: npm install
 
-      - name: Desktop-App bauen und veröffentlichen
-        run: npm run dist -- --publish always
+      - name: Desktop-App bauen (und bei Tag-Push veröffentlichen)
+        shell: bash
+        run: |
+          if [ "${{ github.ref_type }}" = "tag" ]; then
+            npm run dist -- --publish always
+          else
+            npm run dist
+          fi
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Installer als Artifact hochladen
+        uses: actions/upload-artifact@v4
+        with:
+          name: dozenten-dashboard-${{ matrix.os }}
+          path: |
+            dist/*.exe
+            dist/*.dmg
+            dist/*.AppImage
+          if-no-files-found: warn
