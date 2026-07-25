@@ -7,11 +7,13 @@ Desktop-Musik-App (Electron) im Design "frisches Grün auf Schwarz". Music Heave
    **vollautomatisch** ineinander – entweder als **nahtloser Crossfade** oder als
    simulierter **Scratch-Übergang** (Pitch-/Tempo-Wobble mit Cut, wie beim DJ-Scratchen).
 2. **Ordner 2 – Musikstücke selbst kreieren**: Eigenes Musikstück aus Equipment bauen –
-   Drums (Kick, Snare, Hi-Hat, Open Hat, Clap), Piano, Saxophon, Vocals, Bass,
-   **EFX** (Riser, Downlifter, Impact, Noise Sweep, Reverse Cymbal) und **Loops**
-   (Drum Loop, Bass Loop, Perc Loop, Arp Loop). Noten auswählen, Spuren zum
-   Step-Sequencer hinzufügen, Pattern anklicken, Tempo einstellen. Die Equipment-Pads
-   haben einen gewölbten 3D-Tasten-Look (Tiefe, die beim Klicken "eindrückt").
+   Drums (Kick, Snare, Hi-Hat, Open Hat, Clap), Piano, Saxophon, Bass,
+   **EFX** (Riser, Downlifter, Impact, Noise Sweep, Reverse Cymbal), **Loops**
+   (Drum Loop, Bass Loop, Perc Loop, Arp Loop) und **Vocals** mit acht wählbaren Stilen
+   (Gesang, Einzelne Wörter, Chor, Rap/Soul, House/Electro, Jazz, Pop, Hip Hop). Noten
+   auswählen, Spuren zum Step-Sequencer hinzufügen, Pattern anklicken, Tempo einstellen.
+   Alle Equipment-Pads haben einen glänzenden, gewölbten 3D-Tasten-Look (Hochglanz-Highlight,
+   Tiefenschatten, die beim Klicken sichtbar "eindrücken").
 
 Alle Sounds von Ordner 2 werden per Web Audio API live synthetisiert (kein externes
 Sample-Material nötig).

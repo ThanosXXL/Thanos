@@ -162,6 +162,123 @@ const AudioEngine = (() => {
     osc.start(time); osc.stop(time + 0.7);
   }
 
+  // ---- Vocals: gemeinsamer Formant-Synth fuer verschiedene Gesangs-Stile ----
+  function playVocalStyle(destination, time, freq, opts) {
+    const context = getCtx();
+    const {
+      wave = 'sine',
+      duration = 0.7,
+      attack = 0.08,
+      sustainUntil = 0.45,
+      sustainLevel = 0.4,
+      vibratoRate = 5.5,
+      vibratoDepth = 6,
+      formantMult = 2,
+      formantQ = 6,
+      pitchBend = 1,
+      noiseAmount = 0
+    } = opts || {};
+
+    const osc = context.createOscillator();
+    osc.type = wave;
+    osc.frequency.setValueAtTime(freq, time);
+    if (pitchBend !== 1) {
+      osc.frequency.exponentialRampToValueAtTime(Math.max(20, freq * pitchBend), time + duration);
+    }
+
+    let vibrato = null;
+    if (vibratoDepth > 0) {
+      vibrato = context.createOscillator();
+      vibrato.frequency.value = vibratoRate;
+      const vibratoGain = context.createGain();
+      vibratoGain.gain.value = vibratoDepth;
+      vibrato.connect(vibratoGain).connect(osc.frequency);
+    }
+
+    const formant = context.createBiquadFilter();
+    formant.type = 'bandpass';
+    formant.frequency.value = freq * formantMult;
+    formant.Q.value = formantQ;
+
+    const gain = context.createGain();
+    gain.gain.setValueAtTime(0.0001, time);
+    gain.gain.exponentialRampToValueAtTime(sustainLevel, time + attack);
+    gain.gain.setValueAtTime(sustainLevel, time + sustainUntil);
+    gain.gain.exponentialRampToValueAtTime(0.0001, time + duration);
+
+    osc.connect(formant);
+
+    if (noiseAmount > 0) {
+      const noise = context.createBufferSource();
+      noise.buffer = noiseBuffer(context, duration);
+      const noiseFilter = context.createBiquadFilter();
+      noiseFilter.type = 'highpass';
+      noiseFilter.frequency.value = 2500;
+      const noiseGain = context.createGain();
+      noiseGain.gain.value = noiseAmount;
+      noise.connect(noiseFilter).connect(noiseGain).connect(formant);
+      noise.start(time);
+      noise.stop(time + duration);
+    }
+
+    formant.connect(gain).connect(destination);
+    if (vibrato) { vibrato.start(time); vibrato.stop(time + duration); }
+    osc.start(time);
+    osc.stop(time + duration + 0.05);
+  }
+
+  function playVocalWords(destination, time, freq) {
+    playVocalStyle(destination, time, freq, {
+      wave: 'triangle', duration: 0.22, attack: 0.01, sustainUntil: 0.08,
+      vibratoDepth: 0, formantMult: 2.4, formantQ: 8, noiseAmount: 0.15
+    });
+  }
+
+  function playVocalChor(destination, time, freq) {
+    // Drei leicht verstimmte Stimmen fuer Chor-Charakter
+    [0.99, 1, 1.01].forEach((detune) => {
+      playVocalStyle(destination, time, freq * detune, {
+        wave: 'sine', duration: 1.1, attack: 0.18, sustainUntil: 0.8,
+        vibratoDepth: 4, vibratoRate: 4.5, formantMult: 1.8, formantQ: 4, sustainLevel: 0.28
+      });
+    });
+  }
+
+  function playVocalRapSoul(destination, time, freq) {
+    playVocalStyle(destination, time, freq, {
+      wave: 'sawtooth', duration: 0.3, attack: 0.005, sustainUntil: 0.1,
+      vibratoDepth: 2, formantMult: 1.6, formantQ: 5, pitchBend: 0.85, noiseAmount: 0.08
+    });
+  }
+
+  function playVocalHouse(destination, time, freq) {
+    playVocalStyle(destination, time, freq, {
+      wave: 'square', duration: 0.4, attack: 0.01, sustainUntil: 0.05,
+      vibratoDepth: 0, formantMult: 2, formantQ: 10, sustainLevel: 0.3
+    });
+  }
+
+  function playVocalJazz(destination, time, freq) {
+    playVocalStyle(destination, time, freq, {
+      wave: 'sine', duration: 0.9, attack: 0.15, sustainUntil: 0.55,
+      vibratoDepth: 8, vibratoRate: 4, formantMult: 2.2, formantQ: 5
+    });
+  }
+
+  function playVocalPop(destination, time, freq) {
+    playVocalStyle(destination, time, freq, {
+      wave: 'triangle', duration: 0.5, attack: 0.03, sustainUntil: 0.3,
+      vibratoDepth: 5, vibratoRate: 6, formantMult: 2.6, formantQ: 7
+    });
+  }
+
+  function playVocalHipHop(destination, time, freq) {
+    playVocalStyle(destination, time, freq, {
+      wave: 'sawtooth', duration: 0.35, attack: 0.005, sustainUntil: 0.08,
+      vibratoDepth: 0, formantMult: 1.4, formantQ: 4, pitchBend: 0.75, noiseAmount: 0.1
+    });
+  }
+
   function playBass(destination, time, freq) {
     const context = getCtx();
     const osc = context.createOscillator();
@@ -308,6 +425,14 @@ const AudioEngine = (() => {
     sax: (dest, t, note) => playSax(dest, t, note),
     vocal: (dest, t, note) => playVocal(dest, t, note),
     bass: (dest, t, note) => playBass(dest, t, note),
+    'vocal-gesang': (dest, t, note) => playVocal(dest, t, note),
+    'vocal-woerter': (dest, t, note) => playVocalWords(dest, t, note),
+    'vocal-chor': (dest, t, note) => playVocalChor(dest, t, note),
+    'vocal-rapsoul': (dest, t, note) => playVocalRapSoul(dest, t, note),
+    'vocal-house': (dest, t, note) => playVocalHouse(dest, t, note),
+    'vocal-jazz': (dest, t, note) => playVocalJazz(dest, t, note),
+    'vocal-pop': (dest, t, note) => playVocalPop(dest, t, note),
+    'vocal-hiphop': (dest, t, note) => playVocalHipHop(dest, t, note),
     riser: (dest, t) => playRiser(dest, t),
     downlifter: (dest, t) => playDownlifter(dest, t),
     impact: (dest, t) => playImpact(dest, t),

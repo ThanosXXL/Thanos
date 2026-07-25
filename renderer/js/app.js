@@ -5,6 +5,11 @@
     C5: 523.25
   };
 
+  const VOCAL_STYLE_NAMES = {
+    gesang: 'Gesang', woerter: 'Einzelne Wörter', chor: 'Chor', rapsoul: 'Rap/Soul',
+    house: 'House/Electro', jazz: 'Jazz', pop: 'Pop', hiphop: 'Hip Hop'
+  };
+
   const capitalize = (s) => s.charAt(0).toUpperCase() + s.slice(1);
   const genId = () => `t_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`;
   const escapeHtml = (str) => String(str).replace(/[&<>"']/g, (c) => ({
@@ -243,17 +248,32 @@
   }
   populateNoteSelects();
 
-  document.querySelectorAll('.pad').forEach((btn) => {
+  document.querySelectorAll('.pad[data-voice]').forEach((btn) => {
     btn.addEventListener('click', () => {
       const ctx = AudioEngine.getCtx();
       AudioEngine.triggerVoice(btn.dataset.voice, ctx.destination, ctx.currentTime);
     });
   });
 
+  let vocalStyle = 'gesang';
+  const vocalGroup = document.querySelector('.equipment-group[data-melodic="vocal"]');
+
+  vocalGroup.querySelectorAll('.pad[data-vocal-style]').forEach((btn) => {
+    btn.addEventListener('click', () => {
+      vocalStyle = btn.dataset.vocalStyle;
+      vocalGroup.querySelectorAll('.pad[data-vocal-style]').forEach((b) => b.classList.toggle('selected', b === btn));
+      const note = vocalGroup.querySelector('.note-select').value;
+      const ctx = AudioEngine.getCtx();
+      AudioEngine.triggerVoice(`vocal-${vocalStyle}`, ctx.destination, ctx.currentTime, NOTE_FREQS[note]);
+    });
+  });
+
   document.querySelectorAll('.equipment-group[data-melodic] .note-select').forEach((select) => {
-    const voice = select.closest('.equipment-group').dataset.melodic;
+    const group = select.closest('.equipment-group');
+    const baseVoice = group.dataset.melodic;
     select.addEventListener('change', () => {
       const ctx = AudioEngine.getCtx();
+      const voice = baseVoice === 'vocal' ? `vocal-${vocalStyle}` : baseVoice;
       AudioEngine.triggerVoice(voice, ctx.destination, ctx.currentTime, NOTE_FREQS[select.value]);
     });
   });
@@ -283,10 +303,15 @@
 
   document.querySelectorAll('[data-add-melodic]').forEach((btn) => {
     btn.addEventListener('click', () => {
-      const voice = btn.dataset.addMelodic;
+      const base = btn.dataset.addMelodic;
       const group = btn.closest('.equipment-group');
       const note = group.querySelector('.note-select').value;
-      const label = `${capitalize(voice)} ${note}`;
+      let voice = base;
+      let label = `${capitalize(base)} ${note}`;
+      if (base === 'vocal') {
+        voice = `vocal-${vocalStyle}`;
+        label = `Vocals – ${VOCAL_STYLE_NAMES[vocalStyle]} (${note})`;
+      }
       seqTracks.push(Sequencer.createTrack(genId(), voice, NOTE_FREQS[note], label));
       renderSeqGrid();
     });
