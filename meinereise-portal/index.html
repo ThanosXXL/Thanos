@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>MeineRe!se – Dein Vergleichsportal</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<header class="site-header">
+  <div class="header-inner">
+    <div class="logo">Meine<span class="logo-accent">Re!se</span></div>
+    <nav class="category-nav" id="categoryNav">
+      <button class="cat-btn active" data-cat="flug" data-icon="✈️">✈️ <span>Flug</span></button>
+      <button class="cat-btn" data-cat="hotel" data-icon="🏨">🏨 <span>Hotel</span></button>
+      <button class="cat-btn" data-cat="mietwagen" data-icon="🚗">🚗 <span>Mietwagen</span></button>
+      <button class="cat-btn" data-cat="kreuzfahrt" data-icon="🚢">🚢 <span>Kreuzfahrt</span></button>
+      <button class="cat-btn" data-cat="seefahrt" data-icon="⛴️">⛴️ <span>Inland Seefahrten</span></button>
+      <button class="cat-btn" data-cat="kurztrip" data-icon="🌴">🌴 <span>Kurztrips</span></button>
+    </nav>
+  </div>
+</header>
+
+<section class="hero">
+  <h1>Vergleiche. Buche. Erlebe.</h1>
+  <p class="hero-sub" id="heroSub">Finde die besten Flugangebote im Vergleich – schnell, transparent, günstig.</p>
+
+  <form class="search-card" id="searchForm">
+    <div class="field field-from">
+      <label for="fromInput" id="fromLabel">Abflugort</label>
+      <input type="text" id="fromInput" list="citySuggestions" placeholder="z. B. Frankfurt" autocomplete="off">
+    </div>
+
+    <button type="button" class="swap-btn" id="swapBtn" title="Tauschen" aria-label="Orte tauschen">⇄</button>
+
+    <div class="field field-to">
+      <label for="toInput" id="toLabel">Landeort</label>
+      <input type="text" id="toInput" list="citySuggestions" placeholder="z. B. Palma de Mallorca" autocomplete="off">
+    </div>
+
+    <div class="field field-date">
+      <label for="dateFrom">Reise von</label>
+      <input type="date" id="dateFrom">
+    </div>
+
+    <div class="field field-date">
+      <label for="dateTo">Reise bis</label>
+      <input type="date" id="dateTo">
+    </div>
+
+    <div class="field field-passengers">
+      <label for="paxSummaryBtn">Passagiere</label>
+      <button type="button" class="pax-summary" id="paxSummaryBtn">2 Passagiere</button>
+      <div class="pax-popover" id="paxPopover">
+        <div class="pax-row">
+          <div class="pax-row-label">
+            <strong>Erwachsene</strong>
+            <span>12+ Jahre</span>
+          </div>
+          <div class="pax-stepper">
+            <button type="button" class="step-btn" data-target="adults" data-delta="-1">−</button>
+            <span id="adultsCount">2</span>
+            <button type="button" class="step-btn" data-target="adults" data-delta="1">+</button>
+          </div>
+        </div>
+        <div class="pax-row">
+          <div class="pax-row-label">
+            <strong>Kinder</strong>
+            <span>0–11 Jahre</span>
+          </div>
+          <div class="pax-stepper">
+            <button type="button" class="step-btn" data-target="children" data-delta="-1">−</button>
+            <span id="childrenCount">0</span>
+            <button type="button" class="step-btn" data-target="children" data-delta="1">+</button>
+          </div>
+        </div>
+        <button type="button" class="pax-done-btn" id="paxDoneBtn">Übernehmen</button>
+      </div>
+    </div>
+
+    <button type="submit" class="search-btn">🔍 Suchen</button>
+  </form>
+
+  <datalist id="citySuggestions">
+    <option value="Frankfurt">
+    <option value="München">
+    <option value="Berlin">
+    <option value="Hamburg">
+    <option value="Palma de Mallorca">
+    <option value="Antalya">
+    <option value="Kreta">
+    <option value="Barcelona">
+    <option value="Lissabon">
+    <option value="Dubai">
+  </datalist>
+
+  <div class="kurztrip-note" id="kurztripNote">Kurztrips: 2 bis 5 Tage Angebote – perfekt für ein spontanes Wochenende.</div>
+</section>
+
+<section class="filters">
+  <h2>Filter</h2>
+  <div class="filter-chips" id="filterChips">
+    <button type="button" class="chip" data-filter="pool">🏊 Swimmingpool</button>
+    <button type="button" class="chip" data-filter="haus">🏡 Haus</button>
+    <button type="button" class="chip" data-filter="wohnung">🏢 Wohnung</button>
+    <button type="button" class="chip" data-filter="strand">🏖️ Strandnähe</button>
+  </div>
+  <div class="beach-range" id="beachRange">
+    <label for="beachDistance">Maximale Entfernung zum Strand: <strong id="beachDistanceValue">10</strong> km</label>
+    <input type="range" id="beachDistance" min="0" max="10" step="1" value="10">
+  </div>
+</section>
+
+<section class="offers">
+  <h2>Top Angebote</h2>
+  <div class="offers-grid" id="offersGrid"></div>
+</section>
+
+<footer class="site-footer">
+  <p>© 2026 MeineRe!se – Dein Vergleichsportal für Flug, Hotel, Mietwagen, Kreuzfahrt &amp; mehr.</p>
+</footer>
+
+<div class="modal-overlay" id="modalOverlay">
+  <div class="modal" id="modal">
+    <button class="modal-close" id="modalClose" aria-label="Schließen">×</button>
+    <div id="modalContent"></div>
+  </div>
+</div>
+
+<script src="script.js"></script>
+</body>
+</html>
