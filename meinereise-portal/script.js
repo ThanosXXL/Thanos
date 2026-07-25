@@ -88,18 +88,96 @@
   ];
 
   var OFFERS = [
-    { cat: "flug", icon: "✈️", title: "Frankfurt → Palma de Mallorca", meta: "Direktflug · 2h 20min", tags: [], price: 89, rating: 5 },
-    { cat: "hotel", icon: "🏨", title: "Strandresort Playa Azul", meta: "Kreta · 300 m zum Strand", tags: ["pool", "wohnung", "strand"], price: 74, rating: 5 },
-    { cat: "hotel", icon: "🏡", title: "Ferienhaus Casa Mint", meta: "Algarve · 800 m zum Strand", tags: ["pool", "haus", "strand"], price: 96, rating: 4 },
-    { cat: "mietwagen", icon: "🚗", title: "Kompaktklasse Cabrio", meta: "Flughafen Palma · Automatik", tags: [], price: 32, rating: 4 },
-    { cat: "hundepension", icon: "🐶", title: "Hundepension Alpenblick", meta: "München · Garten & Auslauf", tags: ["haus"], price: 28, rating: 5 },
-    { cat: "hundepension", icon: "🐕", title: "Hundehotel Wedelwald", meta: "Schwarzwald · Rudelbetreuung", tags: ["haus", "pool"], price: 35, rating: 4 },
-    { cat: "kreuzfahrt", icon: "🚢", title: "7 Tage Mittelmeer-Route", meta: "Ab Barcelona · Vollpension", tags: ["pool"], price: 549, rating: 5 },
-    { cat: "seefahrt", icon: "⛴️", title: "Fähre Rostock – Rügen", meta: "Tagesausflug · Sonnendeck", tags: [], price: 19, rating: 4 },
-    { cat: "kurztrip", icon: "🌴", title: "3 Tage Städtetrip Prag", meta: "Kurztrip · inkl. Frühstück", tags: ["wohnung"], price: 129, rating: 4 },
-    { cat: "hotel", icon: "🏢", title: "City Apartment Lissabon", meta: "Zentrum · 4,5 km zum Strand", tags: ["wohnung", "strand"], price: 65, rating: 4 },
-    { cat: "kurztrip", icon: "🌴", title: "2 Tage Wellness Bodensee", meta: "Kurztrip · Spa inklusive", tags: ["pool", "haus"], price: 149, rating: 5 }
+    { cat: "flug", iconKey: "plane", title: "Frankfurt → Palma de Mallorca", meta: "Direktflug · 2h 20min", tags: [], price: 89, rating: 5 },
+    { cat: "hotel", iconKey: "hotel", title: "Strandresort Playa Azul", meta: "Kreta · 300 m zum Strand", tags: ["pool", "wohnung", "strand"], price: 74, rating: 5 },
+    { cat: "hotel", iconKey: "house", title: "Ferienhaus Casa Mint", meta: "Algarve · 800 m zum Strand", tags: ["pool", "haus", "strand"], price: 96, rating: 4 },
+    { cat: "mietwagen", iconKey: "car", title: "Kompaktklasse Cabrio", meta: "Flughafen Palma · Automatik", tags: [], price: 32, rating: 4 },
+    { cat: "hundepension", iconKey: "dog", title: "Hundepension Alpenblick", meta: "München · Garten & Auslauf", tags: ["haus"], price: 28, rating: 5 },
+    { cat: "hundepension", iconKey: "dog", title: "Hundehotel Wedelwald", meta: "Schwarzwald · Rudelbetreuung", tags: ["haus", "pool"], price: 35, rating: 4 },
+    { cat: "kreuzfahrt", iconKey: "ship", title: "7 Tage Mittelmeer-Route", meta: "Ab Barcelona · Vollpension", tags: ["pool"], price: 549, rating: 5 },
+    { cat: "seefahrt", iconKey: "ferry", title: "Fähre Rostock – Rügen", meta: "Tagesausflug · Sonnendeck", tags: [], price: 19, rating: 4 },
+    { cat: "kurztrip", iconKey: "palm", title: "3 Tage Städtetrip Prag", meta: "Kurztrip · inkl. Frühstück", tags: ["wohnung"], price: 129, rating: 4 },
+    { cat: "hotel", iconKey: "apartment", title: "City Apartment Lissabon", meta: "Zentrum · 4,5 km zum Strand", tags: ["wohnung", "strand"], price: 65, rating: 4 },
+    { cat: "kurztrip", iconKey: "palm", title: "2 Tage Wellness Bodensee", meta: "Kurztrip · Spa inklusive", tags: ["pool", "haus"], price: 149, rating: 5 }
   ];
+
+  var ICONS = {
+    plane:
+      '<svg viewBox="0 0 64 64"><g filter="url(#glossyShadow)">' +
+      '<polygon points="4,34 60,10 34,60 28,40" fill="url(#gradBlue)"/>' +
+      '<polygon points="4,34 28,40 20,52" fill="url(#gradSky)"/>' +
+      '<polygon points="28,40 34,60 40,44" fill="url(#gradDeep)" opacity="0.85"/>' +
+      '</g></svg>',
+    hotel:
+      '<svg viewBox="0 0 64 64"><g filter="url(#glossyShadow)">' +
+      '<rect x="26" y="8" width="12" height="14" fill="url(#gradWarm)"/>' +
+      '<rect x="10" y="20" width="44" height="36" rx="4" fill="url(#gradSky)"/>' +
+      '<rect x="10" y="20" width="44" height="10" rx="4" fill="url(#gradDeep)"/>' +
+      '<rect x="18" y="34" width="8" height="8" rx="1" fill="url(#gradWhite)"/>' +
+      '<rect x="30" y="34" width="8" height="8" rx="1" fill="url(#gradWhite)"/>' +
+      '<rect x="42" y="34" width="6" height="8" rx="1" fill="url(#gradWhite)"/>' +
+      '<rect x="18" y="46" width="8" height="8" rx="1" fill="url(#gradWhite)"/>' +
+      '<rect x="30" y="46" width="8" height="8" rx="1" fill="url(#gradWhite)"/>' +
+      '</g></svg>',
+    house:
+      '<svg viewBox="0 0 64 64"><g filter="url(#glossyShadow)">' +
+      '<polygon points="32,8 56,28 8,28" fill="url(#gradWarm)"/>' +
+      '<rect x="14" y="28" width="36" height="28" fill="url(#gradSky)"/>' +
+      '<rect x="27" y="40" width="10" height="16" fill="url(#gradDeep)"/>' +
+      '<rect x="18" y="34" width="8" height="8" fill="url(#gradWhite)"/>' +
+      '<rect x="38" y="34" width="8" height="8" fill="url(#gradWhite)"/>' +
+      '</g></svg>',
+    apartment:
+      '<svg viewBox="0 0 64 64"><g filter="url(#glossyShadow)">' +
+      '<rect x="16" y="6" width="32" height="52" rx="3" fill="url(#gradSky)"/>' +
+      '<rect x="22" y="12" width="7" height="7" fill="url(#gradWhite)"/>' +
+      '<rect x="35" y="12" width="7" height="7" fill="url(#gradWhite)"/>' +
+      '<rect x="22" y="23" width="7" height="7" fill="url(#gradWhite)"/>' +
+      '<rect x="35" y="23" width="7" height="7" fill="url(#gradWhite)"/>' +
+      '<rect x="22" y="34" width="7" height="7" fill="url(#gradWhite)"/>' +
+      '<rect x="35" y="34" width="7" height="7" fill="url(#gradWhite)"/>' +
+      '<rect x="26" y="47" width="12" height="11" fill="url(#gradDeep)"/>' +
+      '</g></svg>',
+    car:
+      '<svg viewBox="0 0 64 64"><g filter="url(#glossyShadow)">' +
+      '<path d="M16 34 Q22 20 30 20 L38 20 Q44 20 48 34 Z" fill="url(#gradRed)"/>' +
+      '<rect x="8" y="34" width="48" height="14" rx="6" fill="url(#gradRed)"/>' +
+      '<rect x="20" y="24" width="24" height="10" rx="3" fill="url(#gradWhite)" opacity="0.9"/>' +
+      '<circle cx="20" cy="50" r="7" fill="url(#gradDeep)"/>' +
+      '<circle cx="44" cy="50" r="7" fill="url(#gradDeep)"/>' +
+      '</g></svg>',
+    dog:
+      '<svg viewBox="0 0 64 64"><g filter="url(#glossyShadow)">' +
+      '<ellipse cx="32" cy="44" rx="15" ry="11" fill="url(#gradBrown)"/>' +
+      '<ellipse cx="15" cy="30" rx="6" ry="8" fill="url(#gradBrown)" transform="rotate(-20 15 30)"/>' +
+      '<ellipse cx="27" cy="18" rx="6" ry="8" fill="url(#gradBrown)" transform="rotate(-8 27 18)"/>' +
+      '<ellipse cx="40" cy="18" rx="6" ry="8" fill="url(#gradBrown)" transform="rotate(8 40 18)"/>' +
+      '<ellipse cx="51" cy="30" rx="6" ry="8" fill="url(#gradBrown)" transform="rotate(20 51 30)"/>' +
+      '</g></svg>',
+    ship:
+      '<svg viewBox="0 0 64 64"><g filter="url(#glossyShadow)">' +
+      '<path d="M6 44 L58 44 L49 58 L15 58 Z" fill="url(#gradWhite)"/>' +
+      '<rect x="16" y="30" width="32" height="16" rx="2" fill="url(#gradBlue)"/>' +
+      '<rect x="22" y="18" width="20" height="13" rx="2" fill="url(#gradWhite)"/>' +
+      '<rect x="29" y="6" width="6" height="13" fill="url(#gradRed)"/>' +
+      '</g></svg>',
+    ferry:
+      '<svg viewBox="0 0 64 64"><g filter="url(#glossyShadow)">' +
+      '<path d="M10 40 L54 40 L46 54 L18 54 Z" fill="url(#gradSky)"/>' +
+      '<rect x="22" y="24" width="20" height="16" fill="url(#gradWhite)"/>' +
+      '<rect x="30" y="12" width="4" height="14" fill="url(#gradDeep)"/>' +
+      '<polygon points="34,12 46,18 34,20" fill="url(#gradWarm)"/>' +
+      '</g></svg>',
+    palm:
+      '<svg viewBox="0 0 64 64"><g filter="url(#glossyShadow)">' +
+      '<path d="M32 58 C30 40 30 28 34 14" stroke="url(#gradBrown)" stroke-width="6" fill="none" stroke-linecap="round"/>' +
+      '<ellipse cx="34" cy="12" rx="14" ry="7" fill="url(#gradGreen)" transform="rotate(-25 34 12)"/>' +
+      '<ellipse cx="34" cy="12" rx="14" ry="7" fill="url(#gradGreen)" transform="rotate(25 34 12)"/>' +
+      '<ellipse cx="34" cy="12" rx="16" ry="6" fill="url(#gradGreen)"/>' +
+      '<ellipse cx="34" cy="12" rx="10" ry="6" fill="url(#gradGreen)" transform="rotate(-58 34 12)"/>' +
+      '<ellipse cx="34" cy="12" rx="10" ry="6" fill="url(#gradGreen)" transform="rotate(58 34 12)"/>' +
+      '</g></svg>'
+  };
 
   var state = {
     category: "flug",
@@ -193,7 +271,7 @@
     orb.className = "icon-orb";
     var icon = document.createElement("span");
     icon.className = "icon-3d";
-    icon.textContent = offer.icon;
+    icon.innerHTML = ICONS[offer.iconKey] || "";
     orb.appendChild(icon);
     image.appendChild(orb);
 
