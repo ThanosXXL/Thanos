@@ -612,13 +612,15 @@ h1, h2 {
   top: 50%;
   left: 50%;
   transform: translate(-50%, -50%);
-  width: 64px;
-  height: 64px;
+  width: auto;
+  height: calc(100% - 20px);
+  aspect-ratio: 1;
+  max-height: 300px;
   border-radius: 50%;
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 56px;
+  font-size: 132px;
   line-height: 1;
   background:
     radial-gradient(circle at 32% 26%, rgba(255,255,255,0.5), rgba(255,255,255,0) 40%),
@@ -646,8 +648,8 @@ h1, h2 {
 }
 
 .offer-image .icon-3d svg {
-  width: 88px;
-  height: 88px;
+  width: 112px;
+  height: 112px;
   filter: drop-shadow(0 10px 10px rgba(0,0,0,0.35));
 }
 
