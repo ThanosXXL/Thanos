@@ -179,6 +179,125 @@ const AudioEngine = (() => {
     osc.stop(time + 0.55);
   }
 
+  // ---- EFX: einschlaegige DJ-/Produktions-Effekte ----
+  function playRiser(destination, time) {
+    const context = getCtx();
+    const osc = context.createOscillator();
+    osc.type = 'sawtooth';
+    osc.frequency.setValueAtTime(200, time);
+    osc.frequency.exponentialRampToValueAtTime(2200, time + 1.1);
+    const filter = context.createBiquadFilter();
+    filter.type = 'lowpass';
+    filter.frequency.setValueAtTime(400, time);
+    filter.frequency.exponentialRampToValueAtTime(7000, time + 1.1);
+    const gain = context.createGain();
+    gain.gain.setValueAtTime(0.0001, time);
+    gain.gain.exponentialRampToValueAtTime(0.35, time + 0.9);
+    gain.gain.exponentialRampToValueAtTime(0.0001, time + 1.15);
+    osc.connect(filter).connect(gain).connect(destination);
+    osc.start(time);
+    osc.stop(time + 1.2);
+  }
+
+  function playDownlifter(destination, time) {
+    const context = getCtx();
+    const osc = context.createOscillator();
+    osc.type = 'sawtooth';
+    osc.frequency.setValueAtTime(1800, time);
+    osc.frequency.exponentialRampToValueAtTime(70, time + 0.9);
+    const gain = context.createGain();
+    gain.gain.setValueAtTime(0.3, time);
+    gain.gain.exponentialRampToValueAtTime(0.0001, time + 0.95);
+    osc.connect(gain).connect(destination);
+    osc.start(time);
+    osc.stop(time + 1);
+  }
+
+  function playImpact(destination, time) {
+    const context = getCtx();
+    const sub = context.createOscillator();
+    sub.type = 'sine';
+    sub.frequency.setValueAtTime(120, time);
+    sub.frequency.exponentialRampToValueAtTime(35, time + 0.5);
+    const subGain = context.createGain();
+    subGain.gain.setValueAtTime(0.8, time);
+    subGain.gain.exponentialRampToValueAtTime(0.001, time + 0.8);
+    sub.connect(subGain).connect(destination);
+
+    const noise = context.createBufferSource();
+    noise.buffer = noiseBuffer(context, 0.6);
+    const noiseFilter = context.createBiquadFilter();
+    noiseFilter.type = 'lowpass';
+    noiseFilter.frequency.value = 3000;
+    const noiseGain = context.createGain();
+    noiseGain.gain.setValueAtTime(0.5, time);
+    noiseGain.gain.exponentialRampToValueAtTime(0.001, time + 0.6);
+    noise.connect(noiseFilter).connect(noiseGain).connect(destination);
+
+    sub.start(time); sub.stop(time + 0.85);
+    noise.start(time); noise.stop(time + 0.6);
+  }
+
+  function playNoiseSweep(destination, time) {
+    const context = getCtx();
+    const dur = 1.0;
+    const noise = context.createBufferSource();
+    noise.buffer = noiseBuffer(context, dur);
+    const filter = context.createBiquadFilter();
+    filter.type = 'bandpass';
+    filter.Q.value = 1.2;
+    filter.frequency.setValueAtTime(200, time);
+    filter.frequency.exponentialRampToValueAtTime(8000, time + 0.9);
+    const gain = context.createGain();
+    gain.gain.setValueAtTime(0.0001, time);
+    gain.gain.exponentialRampToValueAtTime(0.4, time + 0.5);
+    gain.gain.exponentialRampToValueAtTime(0.0001, time + dur);
+    noise.connect(filter).connect(gain).connect(destination);
+    noise.start(time);
+    noise.stop(time + dur);
+  }
+
+  function playReverseCymbal(destination, time) {
+    const context = getCtx();
+    const dur = 1.4;
+    const noise = context.createBufferSource();
+    noise.buffer = noiseBuffer(context, dur);
+    const filter = context.createBiquadFilter();
+    filter.type = 'highpass';
+    filter.frequency.value = 4000;
+    const gain = context.createGain();
+    gain.gain.setValueAtTime(0.0001, time);
+    gain.gain.exponentialRampToValueAtTime(0.5, time + dur - 0.05);
+    gain.gain.exponentialRampToValueAtTime(0.0001, time + dur);
+    noise.connect(filter).connect(gain).connect(destination);
+    noise.start(time);
+    noise.stop(time + dur);
+  }
+
+  // ---- Loops: kurze, live synthetisierte Phrasen als ein Trigger ----
+  function playDrumLoop(destination, time) {
+    const step = 0.15;
+    playKick(destination, time);
+    playHiHat(destination, time + step, false);
+    playSnare(destination, time + step * 2);
+    playHiHat(destination, time + step * 3, false);
+  }
+
+  function playBassLoop(destination, time) {
+    const step = 0.2;
+    [110, 110, 146.83, 130.81].forEach((freq, i) => playBass(destination, time + i * step, freq));
+  }
+
+  function playPercLoop(destination, time) {
+    const step = 0.125;
+    [false, true, false, false, true, false, false, false].forEach((open, i) => playHiHat(destination, time + i * step, open));
+  }
+
+  function playArpLoop(destination, time) {
+    const step = 0.14;
+    [261.63, 329.63, 392.0, 523.25].forEach((freq, i) => playPiano(destination, time + i * step, freq));
+  }
+
   const VOICES = {
     kick: (dest, t) => playKick(dest, t),
     snare: (dest, t) => playSnare(dest, t),
@@ -188,7 +307,16 @@ const AudioEngine = (() => {
     piano: (dest, t, note) => playPiano(dest, t, note),
     sax: (dest, t, note) => playSax(dest, t, note),
     vocal: (dest, t, note) => playVocal(dest, t, note),
-    bass: (dest, t, note) => playBass(dest, t, note)
+    bass: (dest, t, note) => playBass(dest, t, note),
+    riser: (dest, t) => playRiser(dest, t),
+    downlifter: (dest, t) => playDownlifter(dest, t),
+    impact: (dest, t) => playImpact(dest, t),
+    noisesweep: (dest, t) => playNoiseSweep(dest, t),
+    reversecymbal: (dest, t) => playReverseCymbal(dest, t),
+    drumloop: (dest, t) => playDrumLoop(dest, t),
+    bassloop: (dest, t) => playBassLoop(dest, t),
+    percloop: (dest, t) => playPercLoop(dest, t),
+    arploop: (dest, t) => playArpLoop(dest, t)
   };
 
   function triggerVoice(voiceId, destination, time, note) {

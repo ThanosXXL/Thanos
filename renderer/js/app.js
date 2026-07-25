@@ -259,17 +259,26 @@
   });
 
   let seqTracks = [];
-  let drumsAdded = false;
 
-  document.querySelector('[data-add-drums]').addEventListener('click', () => {
-    if (drumsAdded) {
-      showToast('Drums sind bereits in deinem Musikstück.', true);
-      return;
-    }
-    drumsAdded = true;
-    [['kick', 'Kick'], ['snare', 'Snare'], ['hihat', 'Hi-Hat'], ['openhat', 'Open Hat'], ['clap', 'Clap']]
-      .forEach(([voice, label]) => seqTracks.push(Sequencer.createTrack(genId(), voice, null, label)));
-    renderSeqGrid();
+  const FIXED_GROUPS = {
+    drums: [['kick', 'Kick'], ['snare', 'Snare'], ['hihat', 'Hi-Hat'], ['openhat', 'Open Hat'], ['clap', 'Clap']],
+    efx: [['riser', 'Riser'], ['downlifter', 'Downlifter'], ['impact', 'Impact'], ['noisesweep', 'Noise Sweep'], ['reversecymbal', 'Reverse Cymbal']],
+    loops: [['drumloop', 'Drum Loop'], ['bassloop', 'Bass Loop'], ['percloop', 'Perc Loop'], ['arploop', 'Arp Loop']]
+  };
+  const FIXED_GROUP_NAMES = { drums: 'Drums', efx: 'EFX', loops: 'Loops' };
+  const addedFixedGroups = new Set();
+
+  document.querySelectorAll('[data-add-fixed]').forEach((btn) => {
+    const key = btn.dataset.addFixed;
+    btn.addEventListener('click', () => {
+      if (addedFixedGroups.has(key)) {
+        showToast(`${FIXED_GROUP_NAMES[key]} sind bereits in deinem Musikstück.`, true);
+        return;
+      }
+      addedFixedGroups.add(key);
+      FIXED_GROUPS[key].forEach(([voice, label]) => seqTracks.push(Sequencer.createTrack(genId(), voice, null, label)));
+      renderSeqGrid();
+    });
   });
 
   document.querySelectorAll('[data-add-melodic]').forEach((btn) => {
@@ -305,7 +314,10 @@
     const removeId = e.target.dataset.remove;
     if (removeId) {
       seqTracks = seqTracks.filter((t) => t.id !== removeId);
-      if (!seqTracks.some((t) => ['kick', 'snare', 'hihat', 'openhat', 'clap'].includes(t.voice))) drumsAdded = false;
+      Object.entries(FIXED_GROUPS).forEach(([key, defs]) => {
+        const voices = defs.map(([voice]) => voice);
+        if (!seqTracks.some((t) => voices.includes(t.voice))) addedFixedGroups.delete(key);
+      });
       renderSeqGrid();
       return;
     }
