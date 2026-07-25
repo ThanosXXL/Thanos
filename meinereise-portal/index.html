@@ -165,7 +165,22 @@
   </div>
   <div class="beach-range" id="beachRange">
     <label for="beachDistance">Maximale Entfernung zum Strand: <strong id="beachDistanceValue">10</strong> km</label>
-    <input type="range" id="beachDistance" min="0" max="10" step="1" value="10">
+    <input type="range" id="beachDistance" min="0" max="10" step="0.5" value="10">
+  </div>
+  <div class="price-range" id="priceRange">
+    <label>Preisspanne pro Person</label>
+    <div class="price-inputs">
+      <div class="price-field">
+        <span>von</span>
+        <input type="number" id="priceMin" min="0" max="100000" step="5" value="0">
+        <span>€</span>
+      </div>
+      <div class="price-field">
+        <span>bis</span>
+        <input type="number" id="priceMax" min="0" max="100000" step="5" value="100000">
+        <span>€</span>
+      </div>
+    </div>
   </div>
 </section>
 

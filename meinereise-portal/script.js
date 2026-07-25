@@ -89,15 +89,15 @@
 
   var OFFERS = [
     { cat: "flug", iconKey: "plane", title: "Frankfurt → Palma de Mallorca", meta: "Direktflug · 2h 20min", tags: [], price: 89, rating: 5 },
-    { cat: "hotel", iconKey: "hotel", title: "Strandresort Playa Azul", meta: "Kreta · 300 m zum Strand", tags: ["pool", "wohnung", "strand"], price: 74, rating: 5 },
-    { cat: "hotel", iconKey: "house", title: "Ferienhaus Casa Mint", meta: "Algarve · 800 m zum Strand", tags: ["pool", "haus", "strand"], price: 96, rating: 4 },
+    { cat: "hotel", iconKey: "hotel", title: "Strandresort Playa Azul", meta: "Kreta · 300 m zum Strand", tags: ["pool", "wohnung", "strand"], price: 74, rating: 5, beachKm: 0.3 },
+    { cat: "hotel", iconKey: "house", title: "Ferienhaus Casa Mint", meta: "Algarve · 800 m zum Strand", tags: ["pool", "haus", "strand"], price: 96, rating: 4, beachKm: 0.8 },
     { cat: "mietwagen", iconKey: "car", title: "Kompaktklasse Cabrio", meta: "Flughafen Palma · Automatik", tags: [], price: 32, rating: 4 },
     { cat: "hundepension", iconKey: "dog", title: "Hundepension Alpenblick", meta: "München · Garten & Auslauf", tags: ["haus"], price: 28, rating: 5 },
     { cat: "hundepension", iconKey: "dog", title: "Hundehotel Wedelwald", meta: "Schwarzwald · Rudelbetreuung", tags: ["haus", "pool"], price: 35, rating: 4 },
     { cat: "kreuzfahrt", iconKey: "ship", title: "7 Tage Mittelmeer-Route", meta: "Ab Barcelona · Vollpension", tags: ["pool"], price: 549, rating: 5 },
     { cat: "seefahrt", iconKey: "ferry", title: "Fähre Rostock – Rügen", meta: "Tagesausflug · Sonnendeck", tags: [], price: 19, rating: 4 },
     { cat: "kurztrip", iconKey: "palm", title: "3 Tage Städtetrip Prag", meta: "Kurztrip · inkl. Frühstück", tags: ["wohnung"], price: 129, rating: 4 },
-    { cat: "hotel", iconKey: "apartment", title: "City Apartment Lissabon", meta: "Zentrum · 4,5 km zum Strand", tags: ["wohnung", "strand"], price: 65, rating: 4 },
+    { cat: "hotel", iconKey: "apartment", title: "City Apartment Lissabon", meta: "Zentrum · 4,5 km zum Strand", tags: ["wohnung", "strand"], price: 65, rating: 4, beachKm: 4.5 },
     { cat: "kurztrip", iconKey: "palm", title: "2 Tage Wellness Bodensee", meta: "Kurztrip · Spa inklusive", tags: ["pool", "haus"], price: 149, rating: 5 }
   ];
 
@@ -183,6 +183,8 @@
     category: "flug",
     filters: [],
     beachMax: 10,
+    priceMin: 0,
+    priceMax: 100000,
     adults: 2,
     children: 0,
     sort: "empfehlung"
@@ -218,6 +220,12 @@
         if (offer.tags.indexOf(f) === -1) return false;
       }
       if (state.filters.indexOf("strand") !== -1 && offer.tags.indexOf("strand") === -1) {
+        return false;
+      }
+      if (offer.beachKm !== undefined && offer.beachKm > state.beachMax) {
+        return false;
+      }
+      if (offer.price < state.priceMin || offer.price > state.priceMax) {
         return false;
       }
       return true;
@@ -267,13 +275,14 @@
       image.appendChild(bestBadge);
     }
 
-    var orb = document.createElement("div");
-    orb.className = "icon-orb";
+    var globe = document.createElement("div");
+    globe.className = "bg-globe";
+    image.appendChild(globe);
+
     var icon = document.createElement("span");
     icon.className = "icon-3d";
     icon.innerHTML = ICONS[offer.iconKey] || "";
-    orb.appendChild(icon);
-    image.appendChild(orb);
+    image.appendChild(icon);
 
     card.appendChild(image);
 
@@ -621,9 +630,30 @@
     });
 
     $("beachDistance").addEventListener("input", function (e) {
-      state.beachMax = parseInt(e.target.value, 10);
+      state.beachMax = parseFloat(e.target.value);
       $("beachDistanceValue").textContent = state.beachMax;
+      renderOffers();
     });
+
+    function applyPriceRange() {
+      var min = parseFloat($("priceMin").value);
+      var max = parseFloat($("priceMax").value);
+      if (isNaN(min)) min = 0;
+      if (isNaN(max)) max = 100000;
+      min = Math.max(0, Math.min(100000, min));
+      max = Math.max(0, Math.min(100000, max));
+      if (min > max) {
+        var tmp = min;
+        min = max;
+        max = tmp;
+      }
+      state.priceMin = min;
+      state.priceMax = max;
+      renderOffers();
+    }
+
+    $("priceMin").addEventListener("change", applyPriceRange);
+    $("priceMax").addEventListener("change", applyPriceRange);
 
     $("filterResetBtn").addEventListener("click", function () {
       state.filters = [];
@@ -633,6 +663,10 @@
       state.beachMax = 10;
       $("beachDistance").value = 10;
       $("beachDistanceValue").textContent = 10;
+      state.priceMin = 0;
+      state.priceMax = 100000;
+      $("priceMin").value = 0;
+      $("priceMax").value = 100000;
       renderOffers();
     });
   }

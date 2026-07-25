@@ -474,6 +474,46 @@ h1, h2 {
   margin-top: 6px;
 }
 
+.price-range {
+  margin-top: 20px;
+}
+
+.price-range > label {
+  font-size: 0.85rem;
+  color: #3d6b60;
+  display: block;
+  margin-bottom: 8px;
+}
+
+.price-inputs {
+  display: flex;
+  gap: 20px;
+  flex-wrap: wrap;
+}
+
+.price-field {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.85rem;
+  color: #3d6b60;
+  font-weight: 600;
+}
+
+.price-field input {
+  width: 110px;
+  border: 1.5px solid var(--mint-light);
+  border-radius: 8px;
+  padding: 8px 10px;
+  font-size: 0.9rem;
+  color: var(--teal-text);
+}
+
+.price-field input:focus {
+  outline: none;
+  border-color: var(--mint);
+}
+
 /* Offers */
 .offers {
   max-width: 1200px;
@@ -567,26 +607,38 @@ h1, h2 {
   background: linear-gradient(135deg, rgba(255,255,255,0.35) 0%, rgba(255,255,255,0) 45%, rgba(0,0,0,0.12) 100%);
 }
 
-.icon-orb {
-  width: 108px;
-  height: 108px;
+.bg-globe {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 64px;
+  height: 64px;
   border-radius: 50%;
   display: flex;
   align-items: center;
   justify-content: center;
+  font-size: 56px;
+  line-height: 1;
   background:
-    radial-gradient(circle at 32% 26%, rgba(255,255,255,0.95), rgba(255,255,255,0) 32%),
-    radial-gradient(circle at 68% 76%, rgba(10,61,51,0.3), rgba(10,61,51,0) 45%),
-    linear-gradient(160deg, #eafff9, #3fe0c0 55%, #0c8f74);
+    radial-gradient(circle at 32% 26%, rgba(255,255,255,0.5), rgba(255,255,255,0) 40%),
+    radial-gradient(circle at 68% 76%, rgba(10,61,51,0.35), rgba(10,61,51,0) 45%);
   box-shadow:
-    0 16px 26px rgba(0,30,22,0.4),
-    inset -10px -10px 20px rgba(10,61,51,0.35),
-    inset 8px 8px 18px rgba(255,255,255,0.55);
-  transform: perspective(500px) rotateX(6deg) rotateY(-4deg);
-  z-index: 1;
+    0 10px 18px rgba(0,30,22,0.4),
+    inset -6px -6px 14px rgba(10,61,51,0.3),
+    inset 5px 5px 12px rgba(255,255,255,0.45);
+  z-index: 0;
+}
+
+.bg-globe::after {
+  content: "🌍";
 }
 
 .offer-image .icon-3d {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -594,8 +646,9 @@ h1, h2 {
 }
 
 .offer-image .icon-3d svg {
-  width: 62px;
-  height: 62px;
+  width: 88px;
+  height: 88px;
+  filter: drop-shadow(0 10px 10px rgba(0,0,0,0.35));
 }
 
 .offer-badge {
