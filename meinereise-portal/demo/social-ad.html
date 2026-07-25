@@ -43,12 +43,39 @@
     background: radial-gradient(circle at 30% 30%, rgba(255,255,255,0.9), rgba(255,255,255,0) 70%);
   }
 
+  .top-nav {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 96px;
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    padding: 0 60px;
+    background: rgba(10, 61, 51, 0.16);
+    border-bottom: 1.5px solid rgba(255,255,255,0.35);
+  }
+  .top-nav-pill {
+    background: rgba(255,255,255,0.85);
+    color: var(--mint-deep);
+    font-weight: 700;
+    font-size: 20px;
+    padding: 10px 20px;
+    border-radius: 999px;
+    white-space: nowrap;
+  }
+  .top-nav-pill.active {
+    background: linear-gradient(135deg, #fff, #eafff9);
+    box-shadow: 0 8px 18px rgba(0,0,0,0.2);
+  }
+
   .content {
     position: absolute;
     inset: 0;
     display: flex;
     align-items: center;
-    padding: 0 100px;
+    padding: 96px 100px 0;
   }
 
   .text-block { width: 900px; }
@@ -195,6 +222,16 @@
   <div class="blob" style="width:520px;height:520px;top:-160px;left:-160px;"></div>
   <div class="blob" style="width:360px;height:360px;bottom:-140px;left:520px;"></div>
   <div class="sheen"></div>
+
+  <div class="top-nav">
+    <span class="top-nav-pill">✈️ Flug</span>
+    <span class="top-nav-pill">🏨 Hotel</span>
+    <span class="top-nav-pill">🚗 Mietwagen</span>
+    <span class="top-nav-pill active">🐶 Hundepension</span>
+    <span class="top-nav-pill">🚢 Kreuzfahrt</span>
+    <span class="top-nav-pill">⛴️ Inland Seefahrten</span>
+    <span class="top-nav-pill">🌴 Kurztrips</span>
+  </div>
 
   <div class="content">
     <div class="text-block">

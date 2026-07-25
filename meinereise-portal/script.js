@@ -23,6 +23,13 @@
       toPlaceholder: "z. B. Flughafen Berlin",
       heroSub: "Finde den passenden Mietwagen zum besten Preis."
     },
+    hundepension: {
+      fromLabel: "Wohnort",
+      toLabel: "Hundepension",
+      fromPlaceholder: "z. B. München",
+      toPlaceholder: "z. B. Hundepension Alpenblick",
+      heroSub: "Vergleiche liebevolle Hundepensionen für die Betreuung deines Vierbeiners."
+    },
     kreuzfahrt: {
       fromLabel: "Abfahrtshafen",
       toLabel: "Zielregion",
@@ -85,6 +92,8 @@
     { cat: "hotel", icon: "🏨", title: "Strandresort Playa Azul", meta: "Kreta · 300 m zum Strand", tags: ["pool", "wohnung", "strand"], price: 74, rating: 5 },
     { cat: "hotel", icon: "🏡", title: "Ferienhaus Casa Mint", meta: "Algarve · 800 m zum Strand", tags: ["pool", "haus", "strand"], price: 96, rating: 4 },
     { cat: "mietwagen", icon: "🚗", title: "Kompaktklasse Cabrio", meta: "Flughafen Palma · Automatik", tags: [], price: 32, rating: 4 },
+    { cat: "hundepension", icon: "🐶", title: "Hundepension Alpenblick", meta: "München · Garten & Auslauf", tags: ["haus"], price: 28, rating: 5 },
+    { cat: "hundepension", icon: "🐕", title: "Hundehotel Wedelwald", meta: "Schwarzwald · Rudelbetreuung", tags: ["haus", "pool"], price: 35, rating: 4 },
     { cat: "kreuzfahrt", icon: "🚢", title: "7 Tage Mittelmeer-Route", meta: "Ab Barcelona · Vollpension", tags: ["pool"], price: 549, rating: 5 },
     { cat: "seefahrt", icon: "⛴️", title: "Fähre Rostock – Rügen", meta: "Tagesausflug · Sonnendeck", tags: [], price: 19, rating: 4 },
     { cat: "kurztrip", icon: "🌴", title: "3 Tage Städtetrip Prag", meta: "Kurztrip · inkl. Frühstück", tags: ["wohnung"], price: 129, rating: 4 },
