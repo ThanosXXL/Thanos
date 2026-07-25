@@ -283,9 +283,13 @@
   const FIXED_GROUPS = {
     drums: [['kick', 'Kick'], ['snare', 'Snare'], ['hihat', 'Hi-Hat'], ['openhat', 'Open Hat'], ['clap', 'Clap']],
     efx: [['riser', 'Riser'], ['downlifter', 'Downlifter'], ['impact', 'Impact'], ['noisesweep', 'Noise Sweep'], ['reversecymbal', 'Reverse Cymbal']],
-    loops: [['drumloop', 'Drum Loop'], ['bassloop', 'Bass Loop'], ['percloop', 'Perc Loop'], ['arploop', 'Arp Loop']]
+    loops: [['drumloop', 'Drum Loop'], ['bassloop', 'Bass Loop'], ['percloop', 'Perc Loop'], ['arploop', 'Arp Loop']],
+    scratch: [
+      ['scratchbaby', 'Baby Scratch'], ['scratchchirp', 'Chirp Scratch'], ['scratchtransformer', 'Transformer'],
+      ['scratchcrab', 'Crab Scratch'], ['scratchflare', 'Flare Scratch'], ['scratchtear', 'Tear Scratch']
+    ]
   };
-  const FIXED_GROUP_NAMES = { drums: 'Drums', efx: 'EFX', loops: 'Loops' };
+  const FIXED_GROUP_NAMES = { drums: 'Drums', efx: 'EFX', loops: 'Loops', scratch: 'Scratch' };
   const addedFixedGroups = new Set();
 
   document.querySelectorAll('[data-add-fixed]').forEach((btn) => {

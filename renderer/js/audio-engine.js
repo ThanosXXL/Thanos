@@ -25,6 +25,20 @@ const AudioEngine = (() => {
     return buffer;
   }
 
+  // Kurzer, perkussiv abklingender Ton als "Vinyl-Sample" fuer die Scratch-Pads
+  // (playbackRate-automatisierbar, im Gegensatz zu einem Oszillator).
+  function stabBuffer(context, freq, duration) {
+    const length = Math.max(1, Math.floor(context.sampleRate * duration));
+    const buffer = context.createBuffer(1, length, context.sampleRate);
+    const data = buffer.getChannelData(0);
+    for (let i = 0; i < length; i++) {
+      const t = i / context.sampleRate;
+      const env = Math.exp(-t * 5);
+      data[i] = Math.sin(2 * Math.PI * freq * t) * env;
+    }
+    return buffer;
+  }
+
   function playKick(destination, time) {
     const context = getCtx();
     const osc = context.createOscillator();
@@ -279,6 +293,97 @@ const AudioEngine = (() => {
     });
   }
 
+  // ---- Scratch: klassische DJ-/Turntablism-Techniken ----
+  function playScratchBase(destination, time, opts) {
+    const context = getCtx();
+    const { freq = 220, duration = 0.45, rateKeyframes, gainKeyframes } = opts;
+    const source = context.createBufferSource();
+    source.buffer = stabBuffer(context, freq, duration + 0.15);
+    const gain = context.createGain();
+    source.connect(gain).connect(destination);
+
+    source.playbackRate.setValueAtTime(Math.max(0.05, rateKeyframes[0].rate), time);
+    rateKeyframes.slice(1).forEach((kf) => {
+      source.playbackRate.linearRampToValueAtTime(Math.max(0.05, kf.rate), time + kf.at);
+    });
+
+    gain.gain.setValueAtTime(Math.max(0.0001, gainKeyframes[0].gain), time);
+    gainKeyframes.slice(1).forEach((kf) => {
+      gain.gain.linearRampToValueAtTime(Math.max(0.0001, kf.gain), time + kf.at);
+    });
+
+    source.start(time);
+    source.stop(time + duration + 0.2);
+  }
+
+  function playScratchBaby(destination, time) {
+    playScratchBase(destination, time, {
+      freq: 220, duration: 0.45,
+      rateKeyframes: [{ at: 0, rate: 1 }, { at: 0.12, rate: 0.3 }, { at: 0.24, rate: 1.3 }, { at: 0.4, rate: 0.9 }],
+      gainKeyframes: [{ at: 0, gain: 0.6 }, { at: 0.45, gain: 0.0001 }]
+    });
+  }
+
+  function playScratchChirp(destination, time) {
+    playScratchBase(destination, time, {
+      freq: 260, duration: 0.35,
+      rateKeyframes: [{ at: 0, rate: 1.4 }, { at: 0.08, rate: 0.2 }, { at: 0.16, rate: 1.6 }, { at: 0.3, rate: 0.8 }],
+      gainKeyframes: [{ at: 0, gain: 0.6 }, { at: 0.09, gain: 0.0001 }, { at: 0.1, gain: 0.6 }, { at: 0.3, gain: 0.0001 }]
+    });
+  }
+
+  function playScratchTransformer(destination, time) {
+    const total = 0.4;
+    const steps = 8;
+    const step = total / steps;
+    const gainKeyframes = [{ at: 0, gain: 0.0001 }];
+    for (let i = 0; i < steps; i++) {
+      gainKeyframes.push({ at: i * step + step * 0.15, gain: 0.6 });
+      gainKeyframes.push({ at: i * step + step * 0.5, gain: 0.0001 });
+    }
+    playScratchBase(destination, time, {
+      freq: 240, duration: total,
+      rateKeyframes: [{ at: 0, rate: 1 }, { at: total, rate: 1 }],
+      gainKeyframes
+    });
+  }
+
+  function playScratchCrab(destination, time) {
+    const total = 0.35;
+    const clicks = 5;
+    const step = total / clicks;
+    const gainKeyframes = [{ at: 0, gain: 0.0001 }];
+    const rateKeyframes = [{ at: 0, rate: 0.8 }];
+    for (let i = 0; i < clicks; i++) {
+      gainKeyframes.push({ at: i * step + step * 0.1, gain: 0.55 });
+      gainKeyframes.push({ at: i * step + step * 0.35, gain: 0.0001 });
+      rateKeyframes.push({ at: i * step + step * 0.5, rate: i % 2 === 0 ? 1.4 : 0.5 });
+    }
+    playScratchBase(destination, time, { freq: 260, duration: total, rateKeyframes, gainKeyframes });
+  }
+
+  function playScratchFlare(destination, time) {
+    playScratchBase(destination, time, {
+      freq: 230, duration: 0.4,
+      rateKeyframes: [{ at: 0, rate: 1 }, { at: 0.18, rate: 0.3 }, { at: 0.35, rate: 1.2 }],
+      gainKeyframes: [
+        { at: 0, gain: 0.6 }, { at: 0.15, gain: 0.6 }, { at: 0.17, gain: 0.0001 },
+        { at: 0.19, gain: 0.6 }, { at: 0.4, gain: 0.0001 }
+      ]
+    });
+  }
+
+  function playScratchTear(destination, time) {
+    playScratchBase(destination, time, {
+      freq: 210, duration: 0.6,
+      rateKeyframes: [
+        { at: 0, rate: 0.6 }, { at: 0.15, rate: 1.1 }, { at: 0.3, rate: 0.4 },
+        { at: 0.45, rate: 1.3 }, { at: 0.6, rate: 0.7 }
+      ],
+      gainKeyframes: [{ at: 0, gain: 0.5 }, { at: 0.6, gain: 0.0001 }]
+    });
+  }
+
   function playBass(destination, time, freq) {
     const context = getCtx();
     const osc = context.createOscillator();
@@ -441,7 +546,13 @@ const AudioEngine = (() => {
     drumloop: (dest, t) => playDrumLoop(dest, t),
     bassloop: (dest, t) => playBassLoop(dest, t),
     percloop: (dest, t) => playPercLoop(dest, t),
-    arploop: (dest, t) => playArpLoop(dest, t)
+    arploop: (dest, t) => playArpLoop(dest, t),
+    scratchbaby: (dest, t) => playScratchBaby(dest, t),
+    scratchchirp: (dest, t) => playScratchChirp(dest, t),
+    scratchtransformer: (dest, t) => playScratchTransformer(dest, t),
+    scratchcrab: (dest, t) => playScratchCrab(dest, t),
+    scratchflare: (dest, t) => playScratchFlare(dest, t),
+    scratchtear: (dest, t) => playScratchTear(dest, t)
   };
 
   function triggerVoice(voiceId, destination, time, note) {

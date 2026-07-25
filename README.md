@@ -9,9 +9,11 @@ Desktop-Musik-App (Electron) im Design "frisches Grün auf Schwarz". Music Heave
 2. **Ordner 2 – Musikstücke selbst kreieren**: Eigenes Musikstück aus Equipment bauen –
    Drums (Kick, Snare, Hi-Hat, Open Hat, Clap), Piano, Saxophon, Bass,
    **EFX** (Riser, Downlifter, Impact, Noise Sweep, Reverse Cymbal), **Loops**
-   (Drum Loop, Bass Loop, Perc Loop, Arp Loop) und **Vocals** mit acht wählbaren Stilen
-   (Gesang, Einzelne Wörter, Chor, Rap/Soul, House/Electro, Jazz, Pop, Hip Hop). Noten
-   auswählen, Spuren zum Step-Sequencer hinzufügen, Pattern anklicken, Tempo einstellen.
+   (Drum Loop, Bass Loop, Perc Loop, Arp Loop), **Vocals** mit acht wählbaren Stilen
+   (Gesang, Einzelne Wörter, Chor, Rap/Soul, House/Electro, Jazz, Pop, Hip Hop) und
+   **Scratch** mit sechs klassischen Turntablism-Techniken (Baby Scratch, Chirp Scratch,
+   Transformer, Crab Scratch, Flare Scratch, Tear Scratch). Noten auswählen, Spuren zum
+   Step-Sequencer hinzufügen, Pattern anklicken, Tempo einstellen.
    Alle Equipment-Pads haben einen glänzenden, gewölbten 3D-Tasten-Look (Hochglanz-Highlight,
    Tiefenschatten, die beim Klicken sichtbar "eindrücken").
 
