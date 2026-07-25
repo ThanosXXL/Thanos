@@ -189,10 +189,13 @@
       image.appendChild(bestBadge);
     }
 
+    var orb = document.createElement("div");
+    orb.className = "icon-orb";
     var icon = document.createElement("span");
     icon.className = "icon-3d";
     icon.textContent = offer.icon;
-    image.appendChild(icon);
+    orb.appendChild(icon);
+    image.appendChild(orb);
 
     card.appendChild(image);
 
