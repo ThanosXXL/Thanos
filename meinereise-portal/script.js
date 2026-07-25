@@ -46,6 +46,40 @@
     }
   };
 
+  var DESTINATIONS = [
+    "Deutschland", "Österreich", "Schweiz", "Liechtenstein", "Luxemburg", "Belgien", "Niederlande",
+    "Frankreich", "Spanien", "Portugal", "Italien", "Vatikanstadt", "San Marino", "Monaco", "Andorra",
+    "Vereinigtes Königreich", "Irland", "Island", "Dänemark", "Norwegen", "Schweden", "Finnland",
+    "Polen", "Tschechien", "Slowakei", "Ungarn", "Slowenien", "Kroatien", "Bosnien und Herzegowina",
+    "Serbien", "Montenegro", "Nordmazedonien", "Albanien", "Kosovo", "Griechenland", "Bulgarien",
+    "Rumänien", "Moldau", "Ukraine", "Weißrussland", "Litauen", "Lettland", "Estland", "Russland",
+    "Türkei", "Zypern", "Malta", "Georgien", "Armenien", "Aserbaidschan",
+    "USA", "Kanada", "Mexiko", "Kuba", "Jamaika", "Bahamas", "Dominikanische Republik", "Haiti",
+    "Costa Rica", "Panama", "Guatemala", "Belize", "Honduras", "El Salvador", "Nicaragua",
+    "Kolumbien", "Venezuela", "Ecuador", "Peru", "Bolivien", "Brasilien", "Chile", "Argentinien",
+    "Uruguay", "Paraguay", "Guyana", "Suriname",
+    "Marokko", "Algerien", "Tunesien", "Libyen", "Ägypten", "Sudan", "Äthiopien", "Kenia", "Tansania",
+    "Uganda", "Ruanda", "Somalia", "Nigeria", "Ghana", "Senegal", "Elfenbeinküste", "Kamerun",
+    "Kongo", "Angola", "Namibia", "Botswana", "Simbabwe", "Sambia", "Mosambik", "Südafrika",
+    "Madagaskar", "Mauritius", "Seychellen", "Kap Verde", "Sansibar",
+    "China", "Japan", "Südkorea", "Nordkorea", "Mongolei", "Taiwan", "Hongkong", "Vietnam", "Laos",
+    "Kambodscha", "Thailand", "Myanmar", "Malaysia", "Singapur", "Indonesien", "Philippinen",
+    "Brunei", "Osttimor", "Indien", "Pakistan", "Bangladesch", "Sri Lanka", "Nepal", "Bhutan",
+    "Malediven", "Afghanistan", "Iran", "Irak", "Saudi-Arabien", "Vereinigte Arabische Emirate",
+    "Dubai", "Abu Dhabi", "Katar", "Kuwait", "Bahrain", "Oman", "Jemen", "Jordanien", "Libanon",
+    "Israel", "Syrien", "Kasachstan", "Usbekistan", "Turkmenistan", "Tadschikistan", "Kirgisistan",
+    "Australien", "Neuseeland", "Fidschi", "Papua-Neuguinea", "Samoa", "Tonga", "Vanuatu",
+    "Palau", "Salomonen",
+    "Malediven-Inseln", "Bali", "Lombok", "Phuket", "Koh Samui", "Boracay", "Palawan", "Hawaii",
+    "Bora Bora", "Tahiti", "Seychellen-Inseln", "Sansibar-Insel",
+    "Mallorca", "Ibiza", "Menorca", "Formentera", "Kanarische Inseln", "Teneriffa", "Gran Canaria",
+    "Fuerteventura", "Lanzarote", "La Palma", "Azoren", "Madeira",
+    "Sizilien", "Sardinien", "Elba", "Capri", "Kreta", "Rhodos", "Korfu", "Santorin", "Mykonos",
+    "Zakynthos", "Kos",
+    "Barbados", "Aruba", "Curaçao", "Trinidad und Tobago", "Grenada", "St. Lucia", "Martinique",
+    "Guadeloupe", "Puerto Rico"
+  ];
+
   var OFFERS = [
     { cat: "flug", icon: "✈️", title: "Frankfurt → Palma de Mallorca", meta: "Direktflug · 2h 20min", tags: [], price: 89, rating: 5 },
     { cat: "hotel", icon: "🏨", title: "Strandresort Playa Azul", meta: "Kreta · 300 m zum Strand", tags: ["pool", "wohnung", "strand"], price: 74, rating: 5 },
@@ -63,7 +97,8 @@
     filters: [],
     beachMax: 10,
     adults: 2,
-    children: 0
+    children: 0,
+    sort: "empfehlung"
   };
 
   function $(id) {
@@ -72,6 +107,16 @@
 
   function stars(count) {
     return "★★★★★".slice(0, count) + "☆☆☆☆☆".slice(0, 5 - count);
+  }
+
+  function populateDestinations() {
+    var datalist = $("citySuggestions");
+    datalist.textContent = "";
+    DESTINATIONS.forEach(function (name) {
+      var option = document.createElement("option");
+      option.value = name;
+      datalist.appendChild(option);
+    });
   }
 
   function renderOffers() {
@@ -91,6 +136,9 @@
       return true;
     });
 
+    var count = $("offersCount");
+    count.textContent = matches.length + (matches.length === 1 ? " Angebot gefunden" : " Angebote gefunden");
+
     if (matches.length === 0) {
       var empty = document.createElement("p");
       empty.textContent = "Keine Angebote für diese Auswahl gefunden. Passe Filter oder Reisekategorie an.";
@@ -98,12 +146,21 @@
       return;
     }
 
-    matches.forEach(function (offer) {
-      grid.appendChild(buildOfferCard(offer));
+    var bestPrice = Math.min.apply(null, matches.map(function (o) { return o.price; }));
+
+    var sorted = matches.slice();
+    if (state.sort === "guenstig") {
+      sorted.sort(function (a, b) { return a.price - b.price; });
+    } else if (state.sort === "teuer") {
+      sorted.sort(function (a, b) { return b.price - a.price; });
+    }
+
+    sorted.forEach(function (offer) {
+      grid.appendChild(buildOfferCard(offer, offer.price === bestPrice));
     });
   }
 
-  function buildOfferCard(offer) {
+  function buildOfferCard(offer, isBestPrice) {
     var card = document.createElement("div");
     card.className = "offer-card";
 
@@ -115,6 +172,13 @@
     badge.className = "offer-badge";
     badge.textContent = offer.cat;
     image.appendChild(badge);
+
+    if (isBestPrice) {
+      var bestBadge = document.createElement("span");
+      bestBadge.className = "offer-badge offer-badge-best";
+      bestBadge.textContent = "🏆 Bester Preis";
+      image.appendChild(bestBadge);
+    }
 
     var icon = document.createElement("span");
     icon.className = "icon-3d";
@@ -163,6 +227,18 @@
     body.appendChild(price);
 
     card.appendChild(body);
+
+    var bookRow = document.createElement("div");
+    bookRow.className = "offer-book-row";
+    var bookBtn = document.createElement("button");
+    bookBtn.type = "button";
+    bookBtn.className = "action-btn book-btn";
+    bookBtn.textContent = "✅ Jetzt buchen";
+    bookBtn.addEventListener("click", function () {
+      openBookingModal(offer);
+    });
+    bookRow.appendChild(bookBtn);
+    card.appendChild(bookRow);
 
     var actions = document.createElement("div");
     actions.className = "offer-actions";
@@ -299,6 +375,69 @@
     openModal();
   }
 
+  var PAYMENT_METHODS = [
+    { id: "ueberweisung", label: "🏦 Überweisung" },
+    { id: "lastschrift", label: "🧾 Lastschrift" },
+    { id: "kreditkarte", label: "💳 Kreditkarte" },
+    { id: "paypal", label: "🅿️ PayPal" },
+    { id: "googlepay", label: "📱 Google Pay" },
+    { id: "applepay", label: "📲 Apple Pay (iOS)" }
+  ];
+
+  function openBookingModal(offer) {
+    var content = $("modalContent");
+    content.textContent = "";
+
+    var heading = document.createElement("h3");
+    heading.textContent = "Jetzt buchen · " + offer.title;
+    content.appendChild(heading);
+
+    var summary = document.createElement("p");
+    summary.className = "booking-summary";
+    summary.textContent = "Bestpreis: ab " + offer.price + " € pro Person · " + (state.adults + state.children) + " Passagiere";
+    content.appendChild(summary);
+
+    var paymentLabel = document.createElement("p");
+    paymentLabel.className = "payment-choice-label";
+    paymentLabel.textContent = "Zahlungsart wählen:";
+    content.appendChild(paymentLabel);
+
+    var list = document.createElement("div");
+    list.className = "payment-options-list";
+
+    PAYMENT_METHODS.forEach(function (method, idx) {
+      var optionLabel = document.createElement("label");
+      optionLabel.className = "payment-option";
+
+      var radio = document.createElement("input");
+      radio.type = "radio";
+      radio.name = "paymentMethod";
+      radio.value = method.id;
+      if (idx === 0) radio.checked = true;
+      optionLabel.appendChild(radio);
+
+      var text = document.createElement("span");
+      text.textContent = method.label;
+      optionLabel.appendChild(text);
+
+      list.appendChild(optionLabel);
+    });
+    content.appendChild(list);
+
+    var confirmBtn = document.createElement("button");
+    confirmBtn.type = "button";
+    confirmBtn.className = "feedback-submit";
+    confirmBtn.textContent = "Jetzt sicher bezahlen";
+    confirmBtn.addEventListener("click", function () {
+      confirmBtn.textContent = "Buchung bestätigt – vielen Dank!";
+      confirmBtn.disabled = true;
+      window.setTimeout(closeModal, 1400);
+    });
+    content.appendChild(confirmBtn);
+
+    openModal();
+  }
+
   function setCategory(cat) {
     state.category = cat;
 
@@ -395,6 +534,24 @@
       state.beachMax = parseInt(e.target.value, 10);
       $("beachDistanceValue").textContent = state.beachMax;
     });
+
+    $("filterResetBtn").addEventListener("click", function () {
+      state.filters = [];
+      chips.forEach(function (chip) {
+        chip.classList.remove("active");
+      });
+      state.beachMax = 10;
+      $("beachDistance").value = 10;
+      $("beachDistanceValue").textContent = 10;
+      renderOffers();
+    });
+  }
+
+  function initSort() {
+    $("sortSelect").addEventListener("change", function (e) {
+      state.sort = e.target.value;
+      renderOffers();
+    });
   }
 
   function initModal() {
@@ -413,10 +570,12 @@
   }
 
   function init() {
+    populateDestinations();
     initCategoryNav();
     initSwap();
     initPassengers();
     initFilters();
+    initSort();
     initModal();
     initSearchForm();
     updatePaxSummary();

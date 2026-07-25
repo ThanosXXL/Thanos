@@ -82,29 +82,45 @@
     <button type="submit" class="search-btn">🔍 Suchen</button>
   </form>
 
-  <datalist id="citySuggestions">
-    <option value="Frankfurt">
-    <option value="München">
-    <option value="Berlin">
-    <option value="Hamburg">
-    <option value="Palma de Mallorca">
-    <option value="Antalya">
-    <option value="Kreta">
-    <option value="Barcelona">
-    <option value="Lissabon">
-    <option value="Dubai">
-  </datalist>
+  <datalist id="citySuggestions"></datalist>
 
   <div class="kurztrip-note" id="kurztripNote">Kurztrips: 2 bis 5 Tage Angebote – perfekt für ein spontanes Wochenende.</div>
+
+  <div class="best-price-banner">✅ Bestpreis-Garantie – wir zeigen dir immer den besten verfügbaren Preis</div>
+</section>
+
+<section class="demo-video">
+  <h2>So funktioniert MeineRe!se</h2>
+  <div class="video-frame">
+    <video id="demoVideo" class="demo-video-el" controls>
+      Dein Browser unterstützt das Video-Element leider nicht.
+    </video>
+    <div class="video-placeholder" id="videoPlaceholder">
+      <span class="video-play-3d">▶</span>
+      <p>Demo-Video folgt in Kürze</p>
+      <p class="video-placeholder-sub">3D-Rundgang mit freundlicher, männlicher Sprecherstimme</p>
+    </div>
+  </div>
+  <details class="video-script">
+    <summary>Sprecherskript für die Vertonung (männliche, sympathische Stimme)</summary>
+    <p>„Willkommen bei MeineRe!se – deinem Vergleichsportal für Flug, Hotel, Mietwagen, Kreuzfahrt und mehr.
+    Gib einfach deinen Abflugort, dein Reiseziel und deine Reisedaten ein, wähle die Anzahl deiner Mitreisenden –
+    und wir zeigen dir sofort die besten Angebote aus aller Welt, von beliebten Städten bis zu den schönsten Inseln.
+    Filtere nach Swimmingpool, Haus, Wohnung oder Strandnähe, sortiere nach dem günstigsten Preis und chatte direkt
+    mit dem Anbieter deiner Wahl. Bezahle bequem per Überweisung, Lastschrift, Kreditkarte, PayPal, Google Pay oder
+    Apple Pay. MeineRe!se – vergleiche, buche, erlebe.“</p>
+  </details>
 </section>
 
 <section class="filters">
-  <h2>Filter</h2>
+  <h2>Filter manuell auswählen</h2>
+  <p class="filters-sub">Wähle deine Wunschkriterien – die Ergebnisse passen sich sofort an.</p>
   <div class="filter-chips" id="filterChips">
     <button type="button" class="chip" data-filter="pool">🏊 Swimmingpool</button>
     <button type="button" class="chip" data-filter="haus">🏡 Haus</button>
     <button type="button" class="chip" data-filter="wohnung">🏢 Wohnung</button>
     <button type="button" class="chip" data-filter="strand">🏖️ Strandnähe</button>
+    <button type="button" class="chip-reset" id="filterResetBtn">Filter zurücksetzen</button>
   </div>
   <div class="beach-range" id="beachRange">
     <label for="beachDistance">Maximale Entfernung zum Strand: <strong id="beachDistanceValue">10</strong> km</label>
@@ -113,8 +129,31 @@
 </section>
 
 <section class="offers">
-  <h2>Top Angebote</h2>
+  <div class="offers-header">
+    <h2>Top Angebote</h2>
+    <div class="sort-control">
+      <label for="sortSelect">Ergebnisse sortieren</label>
+      <select id="sortSelect">
+        <option value="empfehlung">Empfehlung</option>
+        <option value="guenstig">Günstigstes Angebot zuerst</option>
+        <option value="teuer">Teuerstes Angebot zuerst</option>
+      </select>
+    </div>
+  </div>
+  <p class="offers-count" id="offersCount"></p>
   <div class="offers-grid" id="offersGrid"></div>
+</section>
+
+<section class="payment-trust">
+  <h2>Sichere Zahloptionen bei jeder Buchung</h2>
+  <div class="payment-badges">
+    <span class="payment-badge">🏦 Überweisung</span>
+    <span class="payment-badge">🧾 Lastschrift</span>
+    <span class="payment-badge">💳 Kreditkarte</span>
+    <span class="payment-badge">🅿️ PayPal</span>
+    <span class="payment-badge">📱 Google Pay</span>
+    <span class="payment-badge">📲 Apple Pay (iOS)</span>
+  </div>
 </section>
 
 <footer class="site-footer">
