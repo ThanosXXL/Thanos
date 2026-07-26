@@ -30,6 +30,7 @@ fitness-app/
   css/style.css     Gelb/Schwarz-Theme, responsive
   js/data.js        Übungen, Muskelgruppen, Wochenplan, Musikgenres
   js/audio.js       Wiedergabe der Hintergrundmusik
+  js/exercise-icons.js  Prozedurale Übungs-Piktogramme (2 Posen je Übung)
   js/app.js         State, Rendering, Trainings-Flow
   assets/audio/     Platzhalter-Loops je Musikrichtung (synthetisch erzeugt)
   assets/icons/     App-Icons für Manifest/Homescreen
@@ -53,6 +54,9 @@ fitness-app/
   `js/data.js`) zusammengestellt.
 - **Trainingspläne**: Wochentabelle, die die Muskelpartien tageweise
   wechselt (z. B. Montag Brust & Arme, Dienstag Rücken, Mittwoch Beine …).
+  Jede Übung zeigt 2 Piktogramme (Start-/Endposition einer Wiederholung) im
+  Gelb/Schwarz-Glanzstil der App – prozedural als SVG-Strichfiguren erzeugt
+  (`js/exercise-icons.js`), da keine echten Übungsfotos vorliegen.
 - **Trainingsstart-Dialog**: Vor dem Training wird zuerst das Ziel
   (Ausdauertraining, Muskelaufbau, Muskeln definieren) und danach die
   gewünschten Muskelpartien abgefragt (Mehrfachauswahl). Nach der Auswahl

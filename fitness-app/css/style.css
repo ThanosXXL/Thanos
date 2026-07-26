@@ -288,6 +288,33 @@ main {
   font-weight: 600;
 }
 
+.exercise-icons {
+  display: flex;
+  gap: 6px;
+  flex-shrink: 0;
+}
+
+.exercise-icon {
+  width: 40px;
+  height: 40px;
+  min-width: 40px;
+  border-radius: 50%;
+  background: var(--surface-yellow);
+  box-shadow: var(--raise-yellow);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  overflow: hidden;
+}
+
+.exercise-name-cell {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+}
+
 .delete-btn {
   background: transparent;
   border: none;
@@ -523,7 +550,8 @@ main {
 .chip::before,
 .option-card::before,
 .check-btn::before,
-.program-badge::before {
+.program-badge::before,
+.exercise-icon::before {
   content: '';
   position: absolute;
   inset: 0;

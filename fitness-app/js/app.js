@@ -378,6 +378,21 @@
     return box;
   }
 
+  // Baut die 2 Pose-Icons (Start/Ende einer Wiederholung) für eine Übung.
+  // Das SVG-Markup kommt aus exercise-icons.js (statisch, entwicklerseitig
+  // erzeugt - keine Nutzereingabe), daher ist innerHTML hier unbedenklich.
+  function buildExerciseIcons(name, size) {
+    const wrap = document.createElement('div');
+    wrap.className = 'exercise-icons';
+    window.MYWORKOUT_ICONS.iconsForExercise(name, size || 34).forEach((svg) => {
+      const badge = document.createElement('span');
+      badge.className = 'exercise-icon';
+      badge.innerHTML = svg;
+      wrap.appendChild(badge);
+    });
+    return wrap;
+  }
+
   function renderActiveSession() {
     const session = state.activeSession;
     const box = document.createElement('div');
@@ -420,6 +435,8 @@
       text.className = 'task-text';
       text.textContent = ex.name;
       li.appendChild(text);
+
+      li.appendChild(buildExerciseIcons(ex.name, 34));
 
       list.appendChild(li);
     });
@@ -472,7 +489,13 @@
       (DATA.EXERCISES[groupId] || []).forEach((name) => {
         const tr = document.createElement('tr');
         const tdName = document.createElement('td');
-        tdName.textContent = name;
+        const nameCell = document.createElement('div');
+        nameCell.className = 'exercise-name-cell';
+        const nameSpan = document.createElement('span');
+        nameSpan.textContent = name;
+        nameCell.appendChild(nameSpan);
+        nameCell.appendChild(buildExerciseIcons(name, 30));
+        tdName.appendChild(nameCell);
         const tdGroup = document.createElement('td');
         tdGroup.textContent = groupLabel;
         tr.appendChild(tdName);
