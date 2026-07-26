@@ -1,11 +1,12 @@
-# FitSpark
+# MyWorkOut
 
-FitSpark ist eine plattformübergreifende Fitness-App: Tagesaufgaben mit
+MyWorkOut ist eine plattformübergreifende Fitness-App: Tagesaufgaben mit
 Erledigt-Kennzeichnung, Trainingspläne mit wechselnden Muskelpartien und ein
 kurzer Vorab-Dialog (Ziel → Muskelpartien → "Okay, lass uns beginnen!"), bevor
 das Training startet. Oben in der Kopfzeile lässt sich die Hintergrundmusik
-(Samba, Lounge, House, Motivation) auswählen. Design: frisches Gelb mit
-schwarzer Schrift.
+(Samba, Lounge, House, Motivation) auswählen, und sobald ein Training läuft
+zeigt ein Badge dort die Programmdauer (z. B. „12 Wochen“) an. Design:
+frisches Gelb mit schwarzer, glänzender 3D-Schrift.
 
 Die App ist als ein einziges Vanilla-HTML/CSS/JS-Projekt gebaut (kein
 Build-Schritt nötig) und läuft dadurch unverändert auf **5 Plattformen**:
@@ -46,7 +47,10 @@ fitness-app/
   produktiven Einsatz durch lizenzierte Tracks gleichen Dateinamens ersetzen.
 - **Tagesaufgaben**: Liste mit Checkbox → Häkchen bei Erledigung. Aufgaben
   können ergänzt/entfernt werden; der Erledigt-Status setzt sich täglich
-  automatisch zurück.
+  automatisch zurück. Zwei anklickbare Modi: **Feste Liste** oder **Alle 3
+  Tage mischen** – im Mischmodus wird alle drei Tage automatisch eine neue
+  Auswahl von vier Aufgaben aus einem größeren Pool (`TASK_POOL` in
+  `js/data.js`) zusammengestellt.
 - **Trainingspläne**: Wochentabelle, die die Muskelpartien tageweise
   wechselt (z. B. Montag Brust & Arme, Dienstag Rücken, Mittwoch Beine …).
 - **Trainingsstart-Dialog**: Vor dem Training wird zuerst das Ziel
@@ -54,7 +58,9 @@ fitness-app/
   gewünschten Muskelpartien abgefragt (Mehrfachauswahl). Nach der Auswahl
   erscheint kurz die Ansage **„Okay, lass uns beginnen!“**, bevor die aktive
   Übungsliste mit Sätzen/Wiederholungen passend zum gewählten Ziel angezeigt
-  wird.
+  wird. Solange die Einheit läuft, zeigt die Kopfzeile die geplante
+  Programmdauer des gewählten Ziels (Ausdauertraining 8, Muskelaufbau 12,
+  Muskeln definieren 10 Wochen).
 
 ## Entwicklung & Build je Plattform
 

@@ -1,7 +1,7 @@
 {
-  "name": "fitspark",
+  "name": "myworkout",
   "version": "1.0.0",
-  "description": "FitSpark – plattformübergreifende Fitness-App (Web, iOS, Android, Windows, macOS)",
+  "description": "MyWorkOut – plattformübergreifende Fitness-App (Web, iOS, Android, Windows, macOS)",
   "main": "electron/main.js",
   "author": "",
   "license": "MIT",
@@ -23,8 +23,8 @@
     "@capacitor/ios": "^6.0.0"
   },
   "build": {
-    "appId": "com.fitspark.app",
-    "productName": "FitSpark",
+    "appId": "com.myworkout.app",
+    "productName": "MyWorkOut",
     "files": [
       "electron/**/*",
       "index.html",

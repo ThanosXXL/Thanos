@@ -5,6 +5,33 @@
   --white: #ffffff;
   --gray: #4a4a4a;
   --radius: 14px;
+
+  /* Glossy 3D text: stacked, unblurred offset shadows (a "step" extrusion)
+     plus one soft ambient shadow underneath. Unlike a gradient text-fill,
+     plain offsets can't misrender depending on font metrics/fallback fonts,
+     so this stays crisp and legible on every engine while still reading as
+     embossed/3D. Headings get a taller stack for a bolder look; the yellow
+     variant is for text sitting on the black top bar/buttons. */
+  --shadow-3d-dark: 0 1px 0 rgba(255, 255, 255, 0.7), 0 2px 0 rgba(0, 0, 0, 0.18),
+    0 3px 5px rgba(0, 0, 0, 0.28);
+  --shadow-3d-yellow: 0 1px 0 rgba(255, 255, 255, 0.25), 0 2px 0 rgba(0, 0, 0, 0.55),
+    0 3px 6px rgba(0, 0, 0, 0.5);
+  --shadow-3d-dark-heading: 0 1px 0 rgba(255, 255, 255, 0.8), 0 2px 0 rgba(0, 0, 0, 0.16),
+    0 3px 0 rgba(0, 0, 0, 0.22), 0 4px 0 rgba(0, 0, 0, 0.28), 0 6px 10px rgba(0, 0, 0, 0.35);
+  --shadow-3d-yellow-heading: 0 1px 0 rgba(255, 255, 255, 0.25), 0 2px 0 rgba(0, 0, 0, 0.5),
+    0 3px 0 rgba(0, 0, 0, 0.6), 0 4px 0 rgba(0, 0, 0, 0.65), 0 6px 10px rgba(0, 0, 0, 0.5);
+
+  /* Glossy surfaces: gradient fill + inset highlight/shade for a raised look. */
+  --surface-yellow: linear-gradient(180deg, #fff6a8 0%, #ffe600 45%, #e6b800 100%);
+  --surface-black: linear-gradient(180deg, #3d3d3d 0%, #121212 55%, #000000 100%);
+  --surface-white: linear-gradient(180deg, #ffffff 0%, #f4f4f4 60%, #e6e6e6 100%);
+
+  --raise-yellow: inset 0 1px 0 rgba(255, 255, 255, 0.7), inset 0 -3px 5px rgba(0, 0, 0, 0.15),
+    0 3px 6px rgba(0, 0, 0, 0.25);
+  --raise-black: inset 0 1px 0 rgba(255, 255, 255, 0.2), inset 0 -3px 5px rgba(0, 0, 0, 0.5),
+    0 3px 6px rgba(0, 0, 0, 0.4);
+  --raise-white: inset 0 1px 0 rgba(255, 255, 255, 0.9), inset 0 -2px 4px rgba(0, 0, 0, 0.08),
+    0 3px 6px rgba(0, 0, 0, 0.15);
 }
 
 * {
@@ -18,11 +45,47 @@ html, body {
   background: var(--yellow);
   color: var(--black);
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+  text-shadow: var(--shadow-3d-dark);
 }
 
 button {
   font-family: inherit;
   cursor: pointer;
+  color: var(--black);
+  text-shadow: var(--shadow-3d-dark);
+}
+
+/* ---------- 3D typography ----------
+   Headings/brand/announcement get a taller "stepped" shadow stack for a
+   bold embossed look; body copy (task/table/description text) gets the
+   same treatment at a subtler depth. Solid colour throughout - legible on
+   every font/engine, no gradient-fill fragility. Buttons/chips keep plain
+   colour + the subtler shadow too; their glossiness comes from their own
+   gradient *surface* fill and shine overlay further below. */
+
+h1, h2, h3, .announce-text, .option-title, .day-table h3, .modal h2 {
+  color: var(--black);
+  text-shadow: var(--shadow-3d-dark-heading);
+}
+
+.topbar .brand {
+  color: var(--yellow);
+  text-shadow: var(--shadow-3d-yellow-heading);
+}
+
+.task-text, .scheme-line, .day-table td, .day-table th,
+.progress-line, .modal-sub, .option-desc, .rest-note {
+  color: var(--black);
+  text-shadow: var(--shadow-3d-dark);
+}
+
+.progress-line, .modal-sub, .option-desc, .rest-note, .day-table th {
+  color: var(--gray);
+}
+
+.task-item.done .task-text {
+  color: var(--gray);
+  text-shadow: none;
 }
 
 /* ---------- Top bar ---------- */
@@ -47,6 +110,24 @@ button {
   letter-spacing: 0.5px;
 }
 
+.program-badge {
+  background: var(--surface-yellow);
+  box-shadow: var(--raise-yellow);
+  color: var(--black);
+  text-shadow: var(--shadow-3d-dark);
+  border-radius: 999px;
+  padding: 6px 14px;
+  font-size: 0.85rem;
+  font-weight: 800;
+  position: relative;
+  overflow: hidden;
+  white-space: nowrap;
+}
+
+.program-badge[hidden] {
+  display: none;
+}
+
 .music-selector {
   display: flex;
   align-items: center;
@@ -55,8 +136,10 @@ button {
 }
 
 .music-toggle {
-  background: var(--yellow);
+  background: var(--surface-yellow);
+  box-shadow: var(--raise-yellow);
   color: var(--black);
+  text-shadow: var(--shadow-3d-dark);
   border: none;
   border-radius: 50%;
   width: 34px;
@@ -65,6 +148,8 @@ button {
   display: flex;
   align-items: center;
   justify-content: center;
+  position: relative;
+  overflow: hidden;
 }
 
 .music-genres {
@@ -76,17 +161,23 @@ button {
 .genre-btn {
   background: transparent;
   color: var(--yellow);
+  text-shadow: var(--shadow-3d-yellow);
   border: 1.5px solid var(--yellow);
   border-radius: 999px;
   padding: 6px 14px;
   font-size: 0.85rem;
   font-weight: 600;
   transition: background 0.15s, color 0.15s;
+  position: relative;
+  overflow: hidden;
 }
 
 .genre-btn.active {
-  background: var(--yellow);
+  background: var(--surface-yellow);
+  box-shadow: var(--raise-yellow);
   color: var(--black);
+  text-shadow: var(--shadow-3d-dark);
+  border-color: var(--yellow);
 }
 
 /* ---------- Tab bar ---------- */
@@ -103,6 +194,7 @@ button {
   background: transparent;
   border: none;
   color: var(--black);
+  text-shadow: var(--shadow-3d-dark);
   font-weight: 700;
   font-size: 0.95rem;
   padding: 12px 16px;
@@ -132,9 +224,12 @@ main {
 }
 
 .progress-line {
-  color: var(--gray);
   margin: 0 0 16px;
   font-weight: 600;
+}
+
+.task-mode-row {
+  margin: 12px 0 16px;
 }
 
 /* ---------- Tasks / exercise list ---------- */
@@ -152,19 +247,15 @@ main {
   display: flex;
   align-items: center;
   gap: 12px;
-  background: var(--white);
+  background: var(--surface-white);
+  box-shadow: var(--raise-white);
   border: 2px solid var(--black);
   border-radius: var(--radius);
   padding: 10px 14px;
 }
 
 .task-item.done {
-  background: var(--yellow-dark);
-}
-
-.task-item.done .task-text {
-  text-decoration: line-through;
-  color: var(--gray);
+  background: linear-gradient(180deg, #fff6a8 0%, var(--yellow-dark) 100%);
 }
 
 .check-btn {
@@ -173,17 +264,23 @@ main {
   min-width: 28px;
   border-radius: 50%;
   border: 2px solid var(--black);
-  background: var(--white);
+  background: var(--surface-white);
+  box-shadow: var(--raise-white);
   font-weight: 900;
   color: var(--black);
+  text-shadow: var(--shadow-3d-dark);
   display: flex;
   align-items: center;
   justify-content: center;
+  position: relative;
+  overflow: hidden;
 }
 
 .task-item.done .check-btn {
-  background: var(--black);
+  background: var(--surface-black);
+  box-shadow: var(--raise-black);
   color: var(--yellow);
+  text-shadow: var(--shadow-3d-yellow);
 }
 
 .task-text {
@@ -198,6 +295,7 @@ main {
   font-size: 1.2rem;
   line-height: 1;
   padding: 0 4px;
+  text-shadow: none;
 }
 
 .add-task-btn {
@@ -207,13 +305,17 @@ main {
 /* ---------- Buttons ---------- */
 
 .btn-primary {
-  background: var(--black);
+  background: var(--surface-black);
+  box-shadow: var(--raise-black);
   color: var(--yellow);
+  text-shadow: var(--shadow-3d-yellow);
   border: none;
   border-radius: var(--radius);
   padding: 12px 20px;
   font-weight: 700;
   font-size: 1rem;
+  position: relative;
+  overflow: hidden;
 }
 
 .btn-primary:disabled {
@@ -222,18 +324,23 @@ main {
 }
 
 .btn-secondary {
-  background: transparent;
+  background: var(--surface-white);
+  box-shadow: var(--raise-white);
   color: var(--black);
+  text-shadow: var(--shadow-3d-dark);
   border: 2px solid var(--black);
   border-radius: var(--radius);
   padding: 10px 18px;
   font-weight: 700;
+  position: relative;
+  overflow: hidden;
 }
 
 /* ---------- Start callout / active session ---------- */
 
 .start-callout, .active-session {
-  background: var(--white);
+  background: var(--surface-white);
+  box-shadow: var(--raise-white);
   border: 2px solid var(--black);
   border-radius: var(--radius);
   padding: 20px;
@@ -255,7 +362,8 @@ main {
 /* ---------- Day tables ---------- */
 
 .day-table {
-  background: var(--white);
+  background: var(--surface-white);
+  box-shadow: var(--raise-white);
   border: 2px solid var(--black);
   border-radius: var(--radius);
   padding: 16px;
@@ -280,13 +388,11 @@ main {
 }
 
 .day-table th {
-  color: var(--gray);
   font-size: 0.8rem;
   text-transform: uppercase;
 }
 
 .rest-note {
-  color: var(--gray);
   margin: 0;
 }
 
@@ -308,7 +414,8 @@ main {
 }
 
 .modal {
-  background: var(--white);
+  background: var(--surface-white);
+  box-shadow: var(--raise-white), 0 12px 30px rgba(0, 0, 0, 0.35);
   color: var(--black);
   border-radius: var(--radius);
   padding: 24px;
@@ -324,7 +431,6 @@ main {
 }
 
 .modal-sub {
-  color: var(--gray);
   margin: 0 0 16px;
 }
 
@@ -336,13 +442,16 @@ main {
 
 .option-card {
   text-align: left;
-  background: var(--yellow);
+  background: var(--surface-yellow);
+  box-shadow: var(--raise-yellow);
   border: 2px solid var(--black);
   border-radius: var(--radius);
   padding: 14px;
   display: flex;
   flex-direction: column;
   gap: 4px;
+  position: relative;
+  overflow: hidden;
 }
 
 .option-title {
@@ -351,8 +460,6 @@ main {
 }
 
 .option-desc {
-  color: var(--black);
-  opacity: 0.75;
   font-size: 0.88rem;
 }
 
@@ -363,15 +470,19 @@ main {
 }
 
 .chip {
-  background: var(--white);
+  background: var(--surface-white);
+  box-shadow: var(--raise-white);
   border: 2px solid var(--black);
   border-radius: 999px;
   padding: 8px 16px;
   font-weight: 600;
+  position: relative;
+  overflow: hidden;
 }
 
 .chip.selected {
-  background: var(--yellow);
+  background: var(--surface-yellow);
+  box-shadow: var(--raise-yellow);
 }
 
 .modal-actions {
@@ -383,7 +494,8 @@ main {
 
 .modal-announce {
   text-align: center;
-  background: var(--yellow);
+  background: var(--surface-yellow);
+  box-shadow: var(--raise-yellow), 0 12px 30px rgba(0, 0, 0, 0.35);
 }
 
 .announce-text {
@@ -398,6 +510,30 @@ main {
   border-radius: 10px;
   border: 2px solid var(--black);
   font-size: 1rem;
+  background: var(--white);
+  color: var(--black);
+}
+
+/* ---------- Glossy shine overlay for raised buttons/pills/cards ---------- */
+
+.btn-primary::before,
+.btn-secondary::before,
+.genre-btn::before,
+.music-toggle::before,
+.chip::before,
+.option-card::before,
+.check-btn::before,
+.program-badge::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    180deg,
+    rgba(255, 255, 255, 0.55) 0%,
+    rgba(255, 255, 255, 0.15) 40%,
+    rgba(255, 255, 255, 0) 62%
+  );
+  pointer-events: none;
 }
 
 @media (max-width: 520px) {

@@ -1,8 +1,8 @@
 (function () {
   'use strict';
 
-  const DATA = window.FITSPARK_DATA;
-  const STORAGE_KEY = 'fitspark-state';
+  const DATA = window.MYWORKOUT_DATA;
+  const STORAGE_KEY = 'myworkout-state';
 
   function todayKey() {
     return new Date().toISOString().slice(0, 10);
@@ -13,15 +13,40 @@
   }
 
   function defaultState() {
+    const tasks = DATA.DEFAULT_TASKS.map((text) => ({ id: uid(), text, done: false }));
     return {
       date: todayKey(),
-      tasks: DATA.DEFAULT_TASKS.map((text) => ({ id: uid(), text, done: false })),
+      taskMode: 'fixed', // 'fixed' | 'mixed' (alle 3 Tage neu gemischt)
+      fixedTasks: tasks,
+      taskCycle: null,
+      tasks,
       musicGenre: 'samba',
       activeSession: null, // { goal, muscles: [], exercises: [{id,name,muscle,done}] }
     };
   }
 
-  let state = load();
+  // Anzahl ganzer Tage seit der Unix-Epoche, fürs 3-Tage-Mischintervall.
+  function daysSinceEpoch(dateKey) {
+    return Math.floor(new Date(dateKey + 'T00:00:00Z').getTime() / 86400000);
+  }
+
+  function currentCycleIndex() {
+    return Math.floor(daysSinceEpoch(todayKey()) / 3);
+  }
+
+  // Deterministischer Pseudo-Zufall je Zyklus, damit dieselben 3 Tage
+  // immer dieselbe Auswahl aus dem Aufgabenpool ergeben.
+  function tasksForCycle(cycleIndex) {
+    const pool = DATA.TASK_POOL;
+    const order = pool.map((_, i) => i);
+    let seed = (cycleIndex + 1) * 2654435761;
+    for (let i = order.length - 1; i > 0; i--) {
+      seed = (seed * 1103515245 + 12345) & 0x7fffffff;
+      const j = seed % (i + 1);
+      [order[i], order[j]] = [order[j], order[i]];
+    }
+    return order.slice(0, 4).map((i) => pool[i]);
+  }
 
   function load() {
     let saved = null;
@@ -39,8 +64,20 @@
     }
     if (!Array.isArray(saved.tasks)) saved.tasks = defaultState().tasks;
     if (!saved.musicGenre) saved.musicGenre = 'samba';
+    if (saved.taskMode !== 'mixed') saved.taskMode = 'fixed';
+    if (!Array.isArray(saved.fixedTasks)) saved.fixedTasks = saved.tasks;
+
+    if (saved.taskMode === 'mixed') {
+      const cycle = currentCycleIndex();
+      if (saved.taskCycle !== cycle) {
+        saved.taskCycle = cycle;
+        saved.tasks = tasksForCycle(cycle).map((text) => ({ id: uid(), text, done: false }));
+      }
+    }
     return saved;
   }
+
+  let state = load();
 
   function persist() {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
@@ -66,6 +103,23 @@
     const trimmed = text.trim();
     if (!trimmed) return;
     state.tasks.push({ id: uid(), text: trimmed, done: false });
+    persist();
+    render();
+  }
+
+  function setTaskMode(mode) {
+    if (mode === state.taskMode) return;
+    if (mode === 'mixed') {
+      state.fixedTasks = state.tasks;
+      const cycle = currentCycleIndex();
+      state.taskCycle = cycle;
+      state.tasks = tasksForCycle(cycle).map((text) => ({ id: uid(), text, done: false }));
+      state.taskMode = 'mixed';
+    } else {
+      state.tasks = (state.fixedTasks || DATA.DEFAULT_TASKS.map((text) => ({ id: uid(), text, done: false })))
+        .map((t) => ({ ...t, done: false }));
+      state.taskMode = 'fixed';
+    }
     persist();
     render();
   }
@@ -122,6 +176,7 @@
     state.activeSession = { goal: pendingGoal, muscles, exercises };
     persist();
     hide('muscleModal');
+    updateProgramBadge();
 
     show('startAnnounceModal');
     window.setTimeout(() => {
@@ -143,7 +198,20 @@
   function endSession() {
     state.activeSession = null;
     persist();
+    updateProgramBadge();
     render();
+  }
+
+  function updateProgramBadge() {
+    const badge = document.getElementById('programBadge');
+    if (state.activeSession) {
+      const scheme = DATA.GOAL_SCHEMES[state.activeSession.goal];
+      badge.textContent = `${scheme.durationWeeks} Wochen`;
+      badge.hidden = false;
+    } else {
+      badge.textContent = '';
+      badge.hidden = true;
+    }
   }
 
   // ---------- Musik ----------
@@ -151,7 +219,7 @@
   function selectGenre(genreId) {
     state.musicGenre = genreId;
     persist();
-    window.FitSparkAudio.setGenre(genreId, true);
+    window.MyWorkoutAudio.setGenre(genreId, true);
     renderMusicSelector();
   }
 
@@ -162,7 +230,7 @@
       btn.setAttribute('aria-selected', String(active));
     });
     const playBtn = document.getElementById('musicPlayBtn');
-    playBtn.textContent = window.FitSparkAudio.isPlaying() ? '❚❚' : '▶';
+    playBtn.textContent = window.MyWorkoutAudio.isPlaying() ? '❚❚' : '▶';
   }
 
   // ---------- Tabs / Modals ----------
@@ -199,6 +267,25 @@
     const heading = document.createElement('h1');
     heading.textContent = 'Tagesaufgaben';
     wrap.appendChild(heading);
+
+    const modeRow = document.createElement('div');
+    modeRow.className = 'chip-grid task-mode-row';
+
+    const fixedChip = document.createElement('button');
+    fixedChip.className = 'chip' + (state.taskMode === 'fixed' ? ' selected' : '');
+    fixedChip.type = 'button';
+    fixedChip.textContent = 'Feste Liste';
+    fixedChip.addEventListener('click', () => setTaskMode('fixed'));
+    modeRow.appendChild(fixedChip);
+
+    const mixedChip = document.createElement('button');
+    mixedChip.className = 'chip' + (state.taskMode === 'mixed' ? ' selected' : '');
+    mixedChip.type = 'button';
+    mixedChip.textContent = 'Alle 3 Tage mischen';
+    mixedChip.addEventListener('click', () => setTaskMode('mixed'));
+    modeRow.appendChild(mixedChip);
+
+    wrap.appendChild(modeRow);
 
     const doneCount = state.tasks.filter((t) => t.done).length;
     const progress = document.createElement('p');
@@ -410,7 +497,7 @@
     });
 
     document.getElementById('musicPlayBtn').addEventListener('click', () => {
-      window.FitSparkAudio.toggle();
+      window.MyWorkoutAudio.toggle();
       renderMusicSelector();
     });
 
@@ -445,9 +532,10 @@
   }
 
   function init() {
-    window.FitSparkAudio.setGenre(state.musicGenre, false);
+    window.MyWorkoutAudio.setGenre(state.musicGenre, false);
     initEvents();
     renderMusicSelector();
+    updateProgramBadge();
     render();
 
     if ('serviceWorker' in navigator) {

@@ -1,5 +1,5 @@
-// Statische Trainings- und Übungsdaten für FitSpark.
-window.FITSPARK_DATA = (function () {
+// Statische Trainings- und Übungsdaten für MyWorkOut.
+window.MYWORKOUT_DATA = (function () {
 
   const MUSCLE_GROUPS = [
     { id: 'brust', label: 'Brust' },
@@ -10,11 +10,12 @@ window.FITSPARK_DATA = (function () {
     { id: 'bauch', label: 'Bauch' },
   ];
 
-  // Rep-/Satz-Schemata je Trainingsziel.
+  // Rep-/Satz-Schemata je Trainingsziel, plus grobe Programmdauer in Wochen
+  // (angezeigt in der Kopfzeile, sobald ein Training läuft).
   const GOAL_SCHEMES = {
-    ausdauer: { label: 'Ausdauertraining', scheme: '3 x 20', pause: '30 Sek. Pause' },
-    aufbau: { label: 'Muskelaufbau', scheme: '4 x 8-10', pause: '90 Sek. Pause' },
-    definition: { label: 'Muskeln definieren', scheme: '3 x 15', pause: '45 Sek. Pause' },
+    ausdauer: { label: 'Ausdauertraining', scheme: '3 x 20', pause: '30 Sek. Pause', durationWeeks: 8 },
+    aufbau: { label: 'Muskelaufbau', scheme: '4 x 8-10', pause: '90 Sek. Pause', durationWeeks: 12 },
+    definition: { label: 'Muskeln definieren', scheme: '3 x 15', pause: '45 Sek. Pause', durationWeeks: 10 },
   };
 
   // Übungen je Muskelpartie. Die Wochenpläne (siehe WEEKLY_SPLIT) wechseln die
@@ -46,6 +47,23 @@ window.FITSPARK_DATA = (function () {
     '8.000 Schritte gehen',
   ];
 
+  // Größerer Aufgabenpool für den "Alle 3 Tage mischen"-Modus: je Zyklus
+  // werden 4 Aufgaben deterministisch daraus ausgewählt (siehe app.js).
+  const TASK_POOL = [
+    '2 Liter Wasser trinken',
+    '10 Minuten dehnen',
+    'Proteinreiches Frühstück',
+    '8.000 Schritte gehen',
+    '5 Minuten Meditation',
+    'Vitamine einnehmen',
+    'Treppe statt Aufzug nehmen',
+    '7-8 Stunden schlafen',
+    'Gemüse zu jeder Mahlzeit',
+    'Handydisplay 1 Stunde vor dem Schlafen aus',
+    'Nacken- und Schulterkreisen',
+    'Foam Rolling / Faszienrolle',
+  ];
+
   const MUSIC_GENRES = [
     { id: 'samba', label: 'Samba', src: 'assets/audio/samba.wav' },
     { id: 'lounge', label: 'Lounge', src: 'assets/audio/lounge.wav' },
@@ -53,5 +71,5 @@ window.FITSPARK_DATA = (function () {
     { id: 'motivation', label: 'Motivation', src: 'assets/audio/motivation.wav' },
   ];
 
-  return { MUSCLE_GROUPS, GOAL_SCHEMES, EXERCISES, WEEKLY_SPLIT, DEFAULT_TASKS, MUSIC_GENRES };
+  return { MUSCLE_GROUPS, GOAL_SCHEMES, EXERCISES, WEEKLY_SPLIT, DEFAULT_TASKS, TASK_POOL, MUSIC_GENRES };
 })();

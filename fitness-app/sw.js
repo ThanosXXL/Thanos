@@ -1,4 +1,4 @@
-const CACHE_NAME = 'fitspark-v1';
+const CACHE_NAME = 'myworkout-v1';
 const ASSETS = [
   './',
   './index.html',

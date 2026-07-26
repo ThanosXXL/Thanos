@@ -1,6 +1,6 @@
 {
-  "appId": "com.fitspark.app",
-  "appName": "FitSpark",
+  "appId": "com.myworkout.app",
+  "appName": "MyWorkOut",
   "webDir": ".",
   "backgroundColor": "#ffe600",
   "server": {

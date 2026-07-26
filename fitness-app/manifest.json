@@ -1,6 +1,6 @@
 {
-  "name": "FitSpark – Dein Trainingscoach",
-  "short_name": "FitSpark",
+  "name": "MyWorkOut – Dein Trainingscoach",
+  "short_name": "MyWorkOut",
   "description": "Tagesaufgaben, Trainingspläne und Motivationsmusik in einer App.",
   "start_url": "./index.html",
   "scope": "./",
