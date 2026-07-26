@@ -10,7 +10,6 @@ const Sequencer = (() => {
   function play(context, destination, tracks, bpm, loops, onStep) {
     const stepDuration = 60 / bpm / 4; // 16tel Noten
     const startTime = context.currentTime + 0.1;
-    let stepCount = 0;
     const totalSteps = STEPS * loops;
 
     for (let loop = 0; loop < loops; loop++) {

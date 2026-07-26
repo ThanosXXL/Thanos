@@ -9,11 +9,13 @@
     "start": "electron .",
     "dist": "electron-builder",
     "serve": "node scripts/serve.js",
-    "handbook": "node scripts/create-pdf.js"
+    "handbook": "node scripts/create-pdf.js",
+    "test": "node tests/run-tests.js"
   },
   "devDependencies": {
     "electron": "^31.0.0",
-    "electron-builder": "^24.13.3"
+    "electron-builder": "^24.13.3",
+    "playwright-core": "^1.62.0"
   },
   "build": {
     "appId": "com.musicheaven.app",

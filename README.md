@@ -103,6 +103,17 @@ npm run dist
 
 Erzeugt eine installierbare Desktop-Anwendung (Windows/macOS/Linux) im Ordner `dist/`.
 
+## Tests
+
+```bash
+npm test
+```
+
+`tests/run-tests.js` prüft automatisiert die wichtigsten Abläufe (Equipment-Pads,
+Vocals-Stile, Fixed-Groups mit Duplikat-Schutz, Sequencer-Aufnahme, Upload & Auto-Mix)
+in der Browser-Variante. Genutzt wird eine lokal installierte Chromium/Chrome/Edge-Instanz
+(kein Browser-Download nötig, siehe `scripts/find-browser.js`) über `playwright-core`.
+
 ## Nutzerhandbuch als PDF erzeugen
 
 ```bash

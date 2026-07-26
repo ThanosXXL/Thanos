@@ -261,7 +261,11 @@
   vocalGroup.querySelectorAll('.pad[data-vocal-style]').forEach((btn) => {
     btn.addEventListener('click', () => {
       vocalStyle = btn.dataset.vocalStyle;
-      vocalGroup.querySelectorAll('.pad[data-vocal-style]').forEach((b) => b.classList.toggle('selected', b === btn));
+      vocalGroup.querySelectorAll('.pad[data-vocal-style]').forEach((b) => {
+        const isSelected = b === btn;
+        b.classList.toggle('selected', isSelected);
+        b.setAttribute('aria-pressed', String(isSelected));
+      });
       const note = vocalGroup.querySelector('.note-select').value;
       const ctx = AudioEngine.getCtx();
       AudioEngine.triggerVoice(`vocal-${vocalStyle}`, ctx.destination, ctx.currentTime, NOTE_FREQS[note]);
