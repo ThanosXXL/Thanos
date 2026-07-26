@@ -9,18 +9,16 @@ zeigt ein Badge dort die Programmdauer (z. B. „12 Wochen“) an. Design:
 frisches Gelb mit schwarzer, glänzender 3D-Schrift.
 
 Die App ist als ein einziges Vanilla-HTML/CSS/JS-Projekt gebaut (kein
-Build-Schritt nötig) und läuft dadurch unverändert auf **5 Plattformen**:
+Build-Schritt nötig) und läuft dadurch unverändert auf **6 Plattformen**:
 
 | Plattform | Technik |
 |---|---|
 | Web (Browser/PWA) | direkt `index.html`, installierbar via `manifest.json` + `sw.js` |
 | Windows | Electron (`electron-builder`, NSIS) |
 | macOS | Electron (`electron-builder`, DMG) |
+| Linux | Electron (`electron-builder`, AppImage) |
 | Android | Capacitor-Wrapper um dieselbe Web-App |
 | iOS | Capacitor-Wrapper um dieselbe Web-App |
-
-(Linux ist als Bonus über dieselbe Electron-Konfiguration als AppImage
-erhältlich.)
 
 ## Struktur
 
