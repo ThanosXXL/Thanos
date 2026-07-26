@@ -724,6 +724,24 @@ h1, h2 {
   font-size: 0.85rem;
 }
 
+.offer-viewers {
+  display: none;
+  align-items: center;
+  gap: 4px;
+  font-size: 0.78rem;
+  font-weight: 700;
+  color: #e0631a;
+  background: #fff2e8;
+  padding: 4px 10px;
+  border-radius: 999px;
+  width: fit-content;
+  margin-top: 2px;
+}
+
+.offer-card {
+  cursor: pointer;
+}
+
 .offer-price {
   font-size: 1.3rem;
   font-weight: 800;

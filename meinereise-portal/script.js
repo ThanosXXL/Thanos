@@ -187,8 +187,30 @@
     priceMax: 100000,
     adults: 2,
     children: 0,
-    sort: "empfehlung"
+    sort: "empfehlung",
+    viewersActive: false
   };
+
+  var viewersInterval = null;
+
+  function randomViewerCount() {
+    return 8 + Math.floor(Math.random() * 40);
+  }
+
+  function activateViewers() {
+    if (state.viewersActive) return;
+    state.viewersActive = true;
+    document.querySelectorAll(".offer-viewers").forEach(function (el) {
+      el.style.display = "flex";
+    });
+    if (!viewersInterval) {
+      viewersInterval = setInterval(function () {
+        document.querySelectorAll(".offer-viewers").forEach(function (el) {
+          el.textContent = "🔥 " + randomViewerCount() + " weitere Kunden schauen sich dieses Angebot an";
+        });
+      }, 4000);
+    }
+  }
 
   function $(id) {
     return document.getElementById(id);
@@ -317,6 +339,17 @@
     rating.textContent = stars(offer.rating);
     body.appendChild(rating);
 
+    var viewers = document.createElement("div");
+    viewers.className = "offer-viewers";
+    viewers.style.display = state.viewersActive ? "flex" : "none";
+    viewers.textContent = "🔥 " + randomViewerCount() + " weitere Kunden schauen sich dieses Angebot an";
+    body.appendChild(viewers);
+
+    card.addEventListener("click", function (e) {
+      if (e.target.closest("button")) return;
+      activateViewers();
+    });
+
     card.appendChild(body);
 
     var side = document.createElement("div");
@@ -335,6 +368,7 @@
     bookBtn.className = "action-btn book-btn";
     bookBtn.textContent = "✅ Jetzt buchen";
     bookBtn.addEventListener("click", function () {
+      activateViewers();
       openBookingModal(offer);
     });
     side.appendChild(bookBtn);
@@ -347,6 +381,7 @@
     chatBtn.className = "action-btn chat-btn";
     chatBtn.textContent = "💬 Chat";
     chatBtn.addEventListener("click", function () {
+      activateViewers();
       openChatModal(offer);
     });
     actions.appendChild(chatBtn);
@@ -356,6 +391,7 @@
     feedbackBtn.className = "action-btn feedback-btn";
     feedbackBtn.textContent = "⭐";
     feedbackBtn.addEventListener("click", function () {
+      activateViewers();
       openFeedbackModal(offer);
     });
     actions.appendChild(feedbackBtn);
