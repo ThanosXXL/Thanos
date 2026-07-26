@@ -565,7 +565,9 @@ const AudioEngine = (() => {
   function createRecorder(context, sourceNode) {
     const streamDest = context.createMediaStreamDestination();
     sourceNode.connect(streamDest);
-    const recorder = new MediaRecorder(streamDest.stream, { mimeType: 'audio/webm' });
+    // Immer hoechste Aufnahmequalitaet: hohe Opus-Bitrate, spaeter optional
+    // verlustfrei als WAV exportierbar (siehe blobToWav).
+    const recorder = new MediaRecorder(streamDest.stream, { mimeType: 'audio/webm', audioBitsPerSecond: 320000 });
     const chunks = [];
     recorder.ondataavailable = (e) => {
       if (e.data && e.data.size) chunks.push(e.data);
@@ -579,5 +581,59 @@ const AudioEngine = (() => {
     };
   }
 
-  return { getCtx, loadBuffer, triggerVoice, createRecorder, VOICES };
+  // ---- WAV-Export: dekodiert eine Aufnahme (webm/opus) und kodiert sie
+  // als unkomprimiertes PCM16-WAV fuer maximale Kompatibilitaet mit
+  // anderen DAWs/Playern. Ganz ohne externe Bibliothek.
+  function encodeWav(audioBuffer) {
+    const numChannels = audioBuffer.numberOfChannels;
+    const sampleRate = audioBuffer.sampleRate;
+    const numFrames = audioBuffer.length;
+    const bytesPerSample = 2;
+    const blockAlign = numChannels * bytesPerSample;
+    const dataSize = numFrames * blockAlign;
+    const buffer = new ArrayBuffer(44 + dataSize);
+    const view = new DataView(buffer);
+
+    const writeString = (offset, str) => {
+      for (let i = 0; i < str.length; i++) view.setUint8(offset + i, str.charCodeAt(i));
+    };
+
+    writeString(0, 'RIFF');
+    view.setUint32(4, 36 + dataSize, true);
+    writeString(8, 'WAVE');
+    writeString(12, 'fmt ');
+    view.setUint32(16, 16, true);
+    view.setUint16(20, 1, true); // PCM
+    view.setUint16(22, numChannels, true);
+    view.setUint32(24, sampleRate, true);
+    view.setUint32(28, sampleRate * blockAlign, true);
+    view.setUint16(32, blockAlign, true);
+    view.setUint16(34, 16, true);
+    writeString(36, 'data');
+    view.setUint32(40, dataSize, true);
+
+    const channels = [];
+    for (let c = 0; c < numChannels; c++) channels.push(audioBuffer.getChannelData(c));
+
+    let offset = 44;
+    for (let i = 0; i < numFrames; i++) {
+      for (let c = 0; c < numChannels; c++) {
+        let sample = Math.max(-1, Math.min(1, channels[c][i]));
+        sample = sample < 0 ? sample * 0x8000 : sample * 0x7fff;
+        view.setInt16(offset, sample, true);
+        offset += 2;
+      }
+    }
+
+    return new Blob([buffer], { type: 'audio/wav' });
+  }
+
+  async function blobToWav(blob) {
+    const context = getCtx();
+    const arrayBuffer = await blob.arrayBuffer();
+    const audioBuffer = await context.decodeAudioData(arrayBuffer);
+    return encodeWav(audioBuffer);
+  }
+
+  return { getCtx, loadBuffer, triggerVoice, createRecorder, blobToWav, VOICES };
 })();

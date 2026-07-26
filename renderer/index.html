@@ -24,6 +24,13 @@
     <p class="tagline">Deine Musik. Vollautomatisch gemixt. Selbst kreiert.</p>
   </header>
 
+  <div class="global-toolbar">
+    <button id="global-preview-btn" class="pad pad-lg">▶ Abhören</button>
+    <button id="global-save-btn" class="pad pad-lg">💾 Speichern</button>
+    <button id="global-save-as-btn" class="pad pad-lg">💾 Speichern unter…</button>
+    <span id="global-toolbar-status" class="status-text"></span>
+  </div>
+
   <nav class="tabs">
     <button class="tab-btn active" data-tab="upload">📁 Ordner 1 · Hochgeladene Musik</button>
     <button class="tab-btn" data-tab="create">📁 Ordner 2 · Musikstücke kreieren</button>
@@ -77,9 +84,17 @@
           </div>
 
           <div id="mix-save-panel" class="save-panel hidden">
-            <label>Name
-              <input type="text" id="mix-name" placeholder="Mein automatischer Mix" />
-            </label>
+            <div class="field-row">
+              <label>Name
+                <input type="text" id="mix-name" placeholder="Mein automatischer Mix" />
+              </label>
+              <label>Format
+                <select id="mix-format">
+                  <option value="wav" selected>WAV (unkomprimiert, beste Qualität)</option>
+                  <option value="webm">WebM (kompakt)</option>
+                </select>
+              </label>
+            </div>
             <div class="save-actions">
               <button id="mix-save-internal" class="btn">In Music Heaven speichern</button>
               <button id="mix-save-external" class="btn btn-outline">Extern speichern unter…</button>
@@ -209,6 +224,15 @@
                   <option value="8">8x</option>
                 </select>
               </label>
+              <label>Takte
+                <select id="seq-bars">
+                  <option value="1" selected>1 Takt (16 Steps)</option>
+                  <option value="2">2 Takte (32 Steps)</option>
+                </select>
+              </label>
+              <label>Master-Lautstärke: <span id="seq-master-value">80</span>%
+                <input type="range" id="seq-master" min="0" max="100" value="80" />
+              </label>
             </div>
           </div>
 
@@ -218,13 +242,22 @@
 
           <div class="transport">
             <button id="seq-preview-btn" class="btn btn-accent">▶ Abhören &amp; aufnehmen</button>
+            <button id="seq-reset" class="btn btn-ghost">Muster zurücksetzen</button>
             <span id="seq-status" class="status-text"></span>
           </div>
 
           <div id="seq-save-panel" class="save-panel hidden">
-            <label>Name
-              <input type="text" id="seq-name" placeholder="Mein Musikstück" />
-            </label>
+            <div class="field-row">
+              <label>Name
+                <input type="text" id="seq-name" placeholder="Mein Musikstück" />
+              </label>
+              <label>Format
+                <select id="seq-format">
+                  <option value="wav" selected>WAV (unkomprimiert, beste Qualität)</option>
+                  <option value="webm">WebM (kompakt)</option>
+                </select>
+              </label>
+            </div>
             <div class="save-actions">
               <button id="seq-save-internal" class="btn">In Music Heaven speichern</button>
               <button id="seq-save-external" class="btn btn-outline">Extern speichern unter…</button>

@@ -17,16 +17,36 @@ Desktop-Musik-App (Electron) im Design "frisches Grün auf Schwarz". Music Heave
    Alle Equipment-Pads haben einen glänzenden, gewölbten 3D-Tasten-Look (Hochglanz-Highlight,
    Tiefenschatten, die beim Klicken sichtbar "eindrücken").
 
+   Der Step-Sequencer bietet außerdem:
+   - **1 Takt (16 Steps) oder 2 Takte (32 Steps)** – beim Umschalten bleiben bereits gesetzte
+     Steps im überlappenden Bereich erhalten.
+   - **Master-Lautstärke** sowie **Mute (M) / Solo (S)** pro Spur, um z. B. einen Kick gegen
+     einen lauten Scratch-Sound abzustimmen (ist irgendeine Spur solo geschaltet, sind nur
+     solo-und-nicht-stumme Spuren zu hören).
+   - **Automatisches Speichern des Patterns als Entwurf** (Tempo, Wiederholungen, Takte,
+     Lautstärke, Mute/Solo, alle Spuren und Steps) in `localStorage` – beim nächsten Öffnen
+     der App steht das zuletzt bearbeitete Muster sofort wieder bereit. Über
+     „Muster zurücksetzen" lässt es sich komplett verwerfen.
+
 Alle Sounds von Ordner 2 werden per Web Audio API live synthetisiert (kein externes
 Sample-Material nötig).
+
+## Immer sichtbare Werkzeugleiste
+
+Ganz oben, unter dem Titel, steht unabhängig vom aktiven Ordner immer dieselbe Leiste im
+grün-schwarzen 3D-Tasten-Look zur Verfügung: **▶ Abhören**, **💾 Speichern** und
+**💾 Speichern unter…**. Sie wirkt jeweils auf den Ordner, der gerade aktiv ist (Mix aus
+Ordner 1 oder Musikstück aus Ordner 2), spiegelt Beschriftung und Status der entsprechenden
+Schaltfläche im aktiven Ordner und meldet sich, falls noch keine Aufnahme zum Speichern vorliegt.
 
 ## Abhören vor dem Speichern
 
 Beide Ordner haben denselben Ablauf:
 
 - **▶ Abhören & aufnehmen** spielt den Mix bzw. das Musikstück ab und nimmt genau diese
-  Wiedergabe gleichzeitig auf.
-- Danach lässt sich das Ergebnis:
+  Wiedergabe gleichzeitig auf – immer in bestmöglicher Qualität (320 kbit/s bei der Aufnahme).
+- Danach lässt sich ein **Format** wählen: **WAV** (unkomprimiert, beste Qualität, Standard –
+  kompatibel mit jeder DAW/jedem Player) oder **WebM** (kompakter). Das Ergebnis lässt sich:
   - **in Music Heaven speichern** (interne Bibliothek, sichtbar am Ende der App), oder
   - **extern speichern unter…** (freie Ordnerauswahl über den nativen Speichern-Dialog), oder
   - **verwerfen**, um es neu abzumischen/aufzunehmen.
@@ -110,9 +130,11 @@ npm test
 ```
 
 `tests/run-tests.js` prüft automatisiert die wichtigsten Abläufe (Equipment-Pads,
-Vocals-Stile, Fixed-Groups mit Duplikat-Schutz, Sequencer-Aufnahme, Upload & Auto-Mix)
-in der Browser-Variante. Genutzt wird eine lokal installierte Chromium/Chrome/Edge-Instanz
-(kein Browser-Download nötig, siehe `scripts/find-browser.js`) über `playwright-core`.
+Vocals-Stile, Fixed-Groups mit Duplikat-Schutz, 32-Step/2-Takte-Umschaltung, Mute/Solo,
+Master-Lautstärke, Pattern-Persistenz über einen Reload, WAV-Export, globale Werkzeugleiste,
+Sequencer-Aufnahme, Upload & Auto-Mix) in der Browser-Variante. Genutzt wird eine lokal
+installierte Chromium/Chrome/Edge-Instanz (kein Browser-Download nötig, siehe
+`scripts/find-browser.js`) über `playwright-core`.
 
 ## Nutzerhandbuch als PDF erzeugen
 

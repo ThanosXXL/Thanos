@@ -16,6 +16,15 @@
     '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'
   }[c]));
 
+  // Wandelt eine Aufnahme bei Bedarf verlustfrei nach WAV um (bester Qualitaet),
+  // sonst bleibt es beim kompakten WebM-Original.
+  async function prepareExport(blob, format) {
+    if (format === 'wav') {
+      return { blob: await AudioEngine.blobToWav(blob), ext: 'wav' };
+    }
+    return { blob, ext: 'webm' };
+  }
+
   // ---- Toast ----
   const toastEl = document.getElementById('toast');
   let toastTimer = null;
@@ -63,6 +72,7 @@
   const mixStatusEl = document.getElementById('mix-status');
   const mixSavePanel = document.getElementById('mix-save-panel');
   const mixNameEl = document.getElementById('mix-name');
+  const mixFormatEl = document.getElementById('mix-format');
 
   function setMixStatus(text) { mixStatusEl.textContent = text; }
 
@@ -200,9 +210,10 @@
 
   document.getElementById('mix-save-internal').addEventListener('click', async () => {
     if (!mixBlob) return;
-    const bytes = new Uint8Array(await mixBlob.arrayBuffer());
+    const { blob: outBlob, ext } = await prepareExport(mixBlob, mixFormatEl.value);
+    const bytes = new Uint8Array(await outBlob.arrayBuffer());
     const name = mixNameEl.value || 'Mein automatischer Mix';
-    currentLibrary = await window.musicHeaven.saveToLibrary({ name, type: 'mix', ext: 'webm', bytes });
+    currentLibrary = await window.musicHeaven.saveToLibrary({ name, type: 'mix', ext, bytes });
     renderLibrary(currentLibrary);
     showToast('Mix in Music Heaven gespeichert.');
     resetMixSavePanel();
@@ -210,9 +221,10 @@
 
   document.getElementById('mix-save-external').addEventListener('click', async () => {
     if (!mixBlob) return;
-    const bytes = new Uint8Array(await mixBlob.arrayBuffer());
+    const { blob: outBlob, ext } = await prepareExport(mixBlob, mixFormatEl.value);
+    const bytes = new Uint8Array(await outBlob.arrayBuffer());
     const name = mixNameEl.value || 'music-heaven-mix';
-    const result = await window.musicHeaven.saveExternal({ name, ext: 'webm', bytes });
+    const result = await window.musicHeaven.saveExternal({ name, ext, bytes });
     if (result.ok) {
       showToast(`Extern gespeichert: ${result.path}`);
       resetMixSavePanel();
@@ -228,10 +240,15 @@
   const seqBpmEl = document.getElementById('seq-bpm');
   const seqBpmValueEl = document.getElementById('seq-bpm-value');
   const seqLoopsEl = document.getElementById('seq-loops');
+  const seqMasterEl = document.getElementById('seq-master');
+  const seqMasterValueEl = document.getElementById('seq-master-value');
+  const seqBarsEl = document.getElementById('seq-bars');
+  const seqResetBtn = document.getElementById('seq-reset');
   const seqPreviewBtn = document.getElementById('seq-preview-btn');
   const seqStatusEl = document.getElementById('seq-status');
   const seqSavePanel = document.getElementById('seq-save-panel');
   const seqNameEl = document.getElementById('seq-name');
+  const seqFormatEl = document.getElementById('seq-format');
 
   function setSeqStatus(text) { seqStatusEl.textContent = text; }
 
@@ -283,6 +300,7 @@
   });
 
   let seqTracks = [];
+  let seqStepCount = Sequencer.DEFAULT_STEPS;
 
   const FIXED_GROUPS = {
     drums: [['kick', 'Kick'], ['snare', 'Snare'], ['hihat', 'Hi-Hat'], ['openhat', 'Open Hat'], ['clap', 'Clap']],
@@ -304,8 +322,9 @@
         return;
       }
       addedFixedGroups.add(key);
-      FIXED_GROUPS[key].forEach(([voice, label]) => seqTracks.push(Sequencer.createTrack(genId(), voice, null, label)));
+      FIXED_GROUPS[key].forEach(([voice, label]) => seqTracks.push(Sequencer.createTrack(genId(), voice, null, label, seqStepCount)));
       renderSeqGrid();
+      saveDraft();
     });
   });
 
@@ -320,8 +339,9 @@
         voice = `vocal-${vocalStyle}`;
         label = `Vocals – ${VOCAL_STYLE_NAMES[vocalStyle]} (${note})`;
       }
-      seqTracks.push(Sequencer.createTrack(genId(), voice, NOTE_FREQS[note], label));
+      seqTracks.push(Sequencer.createTrack(genId(), voice, NOTE_FREQS[note], label, seqStepCount));
       renderSeqGrid();
+      saveDraft();
     });
   });
 
@@ -333,8 +353,12 @@
     seqGridEl.innerHTML = seqTracks.map((track) => `
       <div class="seq-row" data-track-id="${track.id}">
         <div class="seq-row-label">
-          <span>${escapeHtml(track.label)}</span>
-          <button class="remove-track" data-remove="${track.id}">✕</button>
+          <span class="label-text">${escapeHtml(track.label)}</span>
+          <span class="seq-row-controls">
+            <button class="mini-btn mute${track.muted ? ' active' : ''}" data-mute="${track.id}" title="Stummschalten">M</button>
+            <button class="mini-btn solo${track.solo ? ' active' : ''}" data-solo="${track.id}" title="Solo">S</button>
+            <button class="remove-track" data-remove="${track.id}" title="Entfernen">✕</button>
+          </span>
         </div>
         <div class="seq-cells">
           ${track.steps.map((on, i) => `<button class="seq-cell${(i % 4 === 0) ? ' beat' : ''}${on ? ' on' : ''}" data-track="${track.id}" data-step="${i}"></button>`).join('')}
@@ -352,6 +376,19 @@
         if (!seqTracks.some((t) => voices.includes(t.voice))) addedFixedGroups.delete(key);
       });
       renderSeqGrid();
+      saveDraft();
+      return;
+    }
+    const muteId = e.target.dataset.mute;
+    if (muteId) {
+      const track = seqTracks.find((t) => t.id === muteId);
+      if (track) { track.muted = !track.muted; renderSeqGrid(); saveDraft(); }
+      return;
+    }
+    const soloId = e.target.dataset.solo;
+    if (soloId) {
+      const track = seqTracks.find((t) => t.id === soloId);
+      if (track) { track.solo = !track.solo; renderSeqGrid(); saveDraft(); }
       return;
     }
     const trackId = e.target.dataset.track;
@@ -361,11 +398,37 @@
       if (track) {
         track.steps[step] = !track.steps[step];
         e.target.classList.toggle('on', track.steps[step]);
+        saveDraft();
       }
     }
   });
 
-  seqBpmEl.addEventListener('input', () => { seqBpmValueEl.textContent = seqBpmEl.value; });
+  seqBpmEl.addEventListener('input', () => { seqBpmValueEl.textContent = seqBpmEl.value; saveDraft(); });
+
+  seqMasterEl.addEventListener('input', () => {
+    seqMasterValueEl.textContent = seqMasterEl.value;
+    saveDraft();
+  });
+
+  seqLoopsEl.addEventListener('change', saveDraft);
+
+  seqBarsEl.addEventListener('change', () => {
+    const newStepCount = seqBarsEl.value === '2' ? 32 : 16;
+    seqTracks.forEach((track) => Sequencer.resizeTrack(track, newStepCount));
+    seqStepCount = newStepCount;
+    renderSeqGrid();
+    saveDraft();
+  });
+
+  seqResetBtn.addEventListener('click', () => {
+    if (!seqTracks.length) return;
+    if (!window.confirm('Wirklich das komplette Muster zurücksetzen? Das kann nicht rückgängig gemacht werden.')) return;
+    seqTracks = [];
+    addedFixedGroups.clear();
+    renderSeqGrid();
+    saveDraft();
+    showToast('Muster zurückgesetzt.');
+  });
 
   function highlightStep(step) {
     document.querySelectorAll('.seq-cell.playing').forEach((el) => el.classList.remove('playing'));
@@ -384,13 +447,14 @@
     }
     const ctx = AudioEngine.getCtx();
     const masterGain = ctx.createGain();
+    masterGain.gain.value = parseInt(seqMasterEl.value, 10) / 100;
     masterGain.connect(ctx.destination);
     const recorder = AudioEngine.createRecorder(ctx, masterGain);
     recorder.start();
 
     const bpm = parseInt(seqBpmEl.value, 10);
     const loops = parseInt(seqLoopsEl.value, 10);
-    const { cancel } = Sequencer.play(ctx, masterGain, seqTracks, bpm, loops, (step, done) => {
+    const { cancel } = Sequencer.play(ctx, masterGain, seqTracks, bpm, loops, seqStepCount, (step, done) => {
       if (done) setTimeout(() => finishSeqPreview(), 1000);
       else highlightStep(step);
     });
@@ -428,9 +492,10 @@
 
   document.getElementById('seq-save-internal').addEventListener('click', async () => {
     if (!seqBlob) return;
-    const bytes = new Uint8Array(await seqBlob.arrayBuffer());
+    const { blob: outBlob, ext } = await prepareExport(seqBlob, seqFormatEl.value);
+    const bytes = new Uint8Array(await outBlob.arrayBuffer());
     const name = seqNameEl.value || 'Mein Musikstück';
-    currentLibrary = await window.musicHeaven.saveToLibrary({ name, type: 'creation', ext: 'webm', bytes });
+    currentLibrary = await window.musicHeaven.saveToLibrary({ name, type: 'creation', ext, bytes });
     renderLibrary(currentLibrary);
     showToast('Musikstück in Music Heaven gespeichert.');
     resetSeqSavePanel();
@@ -438,9 +503,10 @@
 
   document.getElementById('seq-save-external').addEventListener('click', async () => {
     if (!seqBlob) return;
-    const bytes = new Uint8Array(await seqBlob.arrayBuffer());
+    const { blob: outBlob, ext } = await prepareExport(seqBlob, seqFormatEl.value);
+    const bytes = new Uint8Array(await outBlob.arrayBuffer());
     const name = seqNameEl.value || 'music-heaven-track';
-    const result = await window.musicHeaven.saveExternal({ name, ext: 'webm', bytes });
+    const result = await window.musicHeaven.saveExternal({ name, ext, bytes });
     if (result.ok) {
       showToast(`Extern gespeichert: ${result.path}`);
       resetSeqSavePanel();
@@ -448,6 +514,66 @@
   });
 
   document.getElementById('seq-discard').addEventListener('click', resetSeqSavePanel);
+
+  // ---- Pattern-Entwurf: bleibt beim Neuladen erhalten (localStorage) ----
+  const DRAFT_KEY = 'music-heaven-sequencer-draft';
+
+  function saveDraft() {
+    try {
+      const draft = {
+        version: 1,
+        bpm: parseInt(seqBpmEl.value, 10),
+        loops: parseInt(seqLoopsEl.value, 10),
+        stepCount: seqStepCount,
+        masterVolume: parseInt(seqMasterEl.value, 10),
+        tracks: seqTracks.map((t) => ({
+          voice: t.voice, note: t.note, label: t.label, steps: t.steps, muted: t.muted, solo: t.solo
+        }))
+      };
+      localStorage.setItem(DRAFT_KEY, JSON.stringify(draft));
+    } catch (err) { /* z. B. Speicher voll oder localStorage gesperrt - Entwurf einfach nicht sichern */ }
+  }
+
+  function loadDraft() {
+    let draft;
+    try {
+      const raw = localStorage.getItem(DRAFT_KEY);
+      if (!raw) return;
+      draft = JSON.parse(raw);
+    } catch (err) { return; }
+    if (!draft || !Array.isArray(draft.tracks) || !draft.tracks.length) return;
+
+    seqStepCount = draft.stepCount === 32 ? 32 : 16;
+    seqBarsEl.value = String(seqStepCount === 32 ? 2 : 1);
+
+    seqTracks = draft.tracks.map((t) => {
+      const track = Sequencer.createTrack(genId(), t.voice, t.note, t.label, seqStepCount);
+      if (Array.isArray(t.steps)) {
+        for (let i = 0; i < seqStepCount; i++) track.steps[i] = !!t.steps[i];
+      }
+      track.muted = !!t.muted;
+      track.solo = !!t.solo;
+      return track;
+    });
+
+    addedFixedGroups.clear();
+    Object.entries(FIXED_GROUPS).forEach(([key, defs]) => {
+      const voices = defs.map(([voice]) => voice);
+      if (seqTracks.some((t) => voices.includes(t.voice))) addedFixedGroups.add(key);
+    });
+
+    if (draft.bpm) {
+      seqBpmEl.value = String(draft.bpm);
+      seqBpmValueEl.textContent = String(draft.bpm);
+    }
+    if (draft.loops) seqLoopsEl.value = String(draft.loops);
+    if (draft.masterVolume != null) {
+      seqMasterEl.value = String(draft.masterVolume);
+      seqMasterValueEl.textContent = String(draft.masterVolume);
+    }
+
+    renderSeqGrid();
+  }
 
   // =====================================================================
   // Bibliothek (gemeinsam für beide Ordner gespeicherte Ergebnisse)
@@ -488,7 +614,61 @@
     }
   });
 
+  // =====================================================================
+  // Globale Werkzeugleiste (immer sichtbar, unabhängig vom aktiven Ordner)
+  // =====================================================================
+  const globalPreviewBtn = document.getElementById('global-preview-btn');
+  const globalSaveBtn = document.getElementById('global-save-btn');
+  const globalSaveAsBtn = document.getElementById('global-save-as-btn');
+  const globalToolbarStatusEl = document.getElementById('global-toolbar-status');
+
+  function activeOrdner() {
+    return document.getElementById('tab-create').classList.contains('active') ? 'create' : 'upload';
+  }
+
+  function syncGlobalPreviewLabel() {
+    const isCreate = activeOrdner() === 'create';
+    globalPreviewBtn.textContent = isCreate ? seqPreviewBtn.textContent : mixPreviewBtn.textContent;
+    globalToolbarStatusEl.textContent = isCreate ? seqStatusEl.textContent : mixStatusEl.textContent;
+  }
+
+  new MutationObserver(syncGlobalPreviewLabel).observe(mixPreviewBtn, { characterData: true, childList: true, subtree: true });
+  new MutationObserver(syncGlobalPreviewLabel).observe(seqPreviewBtn, { characterData: true, childList: true, subtree: true });
+  new MutationObserver(syncGlobalPreviewLabel).observe(mixStatusEl, { characterData: true, childList: true, subtree: true });
+  new MutationObserver(syncGlobalPreviewLabel).observe(seqStatusEl, { characterData: true, childList: true, subtree: true });
+
+  document.querySelectorAll('.tab-btn').forEach((btn) => {
+    btn.addEventListener('click', syncGlobalPreviewLabel);
+  });
+  syncGlobalPreviewLabel();
+
+  globalPreviewBtn.addEventListener('click', () => {
+    const target = activeOrdner() === 'create' ? seqPreviewBtn : mixPreviewBtn;
+    target.click();
+  });
+
+  globalSaveBtn.addEventListener('click', () => {
+    if (activeOrdner() === 'create') {
+      if (!seqBlob) { showToast('Bitte zuerst abhören & aufnehmen.', true); return; }
+      document.getElementById('seq-save-internal').click();
+    } else {
+      if (!mixBlob) { showToast('Bitte zuerst abhören & aufnehmen.', true); return; }
+      document.getElementById('mix-save-internal').click();
+    }
+  });
+
+  globalSaveAsBtn.addEventListener('click', () => {
+    if (activeOrdner() === 'create') {
+      if (!seqBlob) { showToast('Bitte zuerst abhören & aufnehmen.', true); return; }
+      document.getElementById('seq-save-external').click();
+    } else {
+      if (!mixBlob) { showToast('Bitte zuerst abhören & aufnehmen.', true); return; }
+      document.getElementById('mix-save-external').click();
+    }
+  });
+
   // ---- Init ----
   refreshUploads();
   window.musicHeaven.listLibrary().then(renderLibrary);
+  loadDraft();
 })();

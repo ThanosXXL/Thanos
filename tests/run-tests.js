@@ -94,6 +94,9 @@ async function main() {
     const errors = [];
     page.on('pageerror', (e) => errors.push('pageerror: ' + e.message));
     page.on('console', (msg) => { if (msg.type() === 'error') errors.push('console: ' + msg.text()); });
+    // Headless Chromium haengt beim File-System-Access-Dialog (kein User-Gesture-Handling) -
+    // fuer Tests deaktivieren, damit "Extern speichern unter..." auf den Download-Fallback geht.
+    await page.addInitScript(() => { delete window.showSaveFilePicker; });
 
     await page.goto(BASE_URL, { waitUntil: 'load' });
     await page.waitForTimeout(200);
@@ -147,8 +150,50 @@ async function main() {
     record('Scratch zur Spur hinzufuegen + Duplikat-Schutz', rowsAfterFirst === 6 && rowsAfterSecond === 6,
       `rows: ${rowsAfterFirst} -> ${rowsAfterSecond}`);
 
-    // ---- Sequencer: Abhoeren & Aufnehmen -> Speichern ----
+    // ---- 32-Step/2-Takte-Option: Steps im ueberlappenden Bereich bleiben erhalten ----
     await page.click('.seq-row:nth-child(1) .seq-cell[data-step="0"]');
+    await page.click('.seq-row:nth-child(1) .seq-cell[data-step="4"]');
+    await page.selectOption('#seq-bars', '2');
+    await page.waitForTimeout(100);
+    const stepsAfterResize = await page.evaluate(() => document.querySelectorAll('.seq-row:nth-child(1) .seq-cell').length);
+    const preservedAfterResize = await page.evaluate(() => {
+      const cells = document.querySelectorAll('.seq-row:nth-child(1) .seq-cell[data-step="0"], .seq-row:nth-child(1) .seq-cell[data-step="4"]');
+      return Array.from(cells).every((c) => c.classList.contains('on'));
+    });
+    record('32-Step-Option: Umschalten auf 2 Takte erhaelt bestehende Steps',
+      stepsAfterResize === 32 && preservedAfterResize, `steps: ${stepsAfterResize}`);
+
+    // ---- Mute/Solo pro Spur ----
+    await page.click('.seq-row:nth-child(2) [data-mute]');
+    const muteActive = await page.evaluate(() => document.querySelector('.seq-row:nth-child(2) [data-mute]').classList.contains('active'));
+    await page.click('.seq-row:nth-child(2) [data-mute]'); // wieder entstummen
+    await page.click('.seq-row:nth-child(3) [data-solo]');
+    const soloActive = await page.evaluate(() => document.querySelector('.seq-row:nth-child(3) [data-solo]').classList.contains('active'));
+    await page.click('.seq-row:nth-child(3) [data-solo]'); // Solo wieder aus
+    record('Mute/Solo-Buttons pro Spur schalten um', muteActive && soloActive);
+
+    // ---- Master-Lautstaerke ----
+    await page.$eval('#seq-master', (el) => { el.value = '55'; el.dispatchEvent(new Event('input')); });
+    await page.waitForTimeout(50);
+    const masterLabel = await page.evaluate(() => document.getElementById('seq-master-value').textContent);
+    record('Master-Lautstaerke-Regler aktualisiert Anzeige', masterLabel === '55', `Wert: ${masterLabel}`);
+
+    // ---- Sequencer-Pattern-Persistenz (localStorage-Entwurf ueberlebt Reload) ----
+    await page.waitForTimeout(200);
+    await page.reload({ waitUntil: 'load' });
+    await page.click('.tab-btn[data-tab="create"]');
+    await page.waitForTimeout(200);
+    const draftRestored = await page.evaluate(() => {
+      const rows = document.querySelectorAll('.seq-row').length;
+      const steps = document.querySelectorAll('.seq-row:nth-child(1) .seq-cell').length;
+      const master = document.getElementById('seq-master').value;
+      const stepsOn = Array.from(document.querySelectorAll('.seq-row:nth-child(1) .seq-cell[data-step="0"], .seq-row:nth-child(1) .seq-cell[data-step="4"]'))
+        .every((c) => c.classList.contains('on'));
+      return rows === 6 && steps === 32 && master === '55' && stepsOn;
+    });
+    record('Sequencer-Pattern bleibt nach Neuladen erhalten (Entwurf)', draftRestored);
+
+    // ---- Sequencer: Abhoeren & Aufnehmen -> Speichern ----
     await page.click('#seq-preview-btn');
     let seqSaveOk = true;
     try {
@@ -157,12 +202,37 @@ async function main() {
     record('Sequencer: Abhoeren & Aufnehmen zeigt Save-Panel', seqSaveOk);
 
     if (seqSaveOk) {
+      // ---- WAV-Export: als Standard vorausgewaehlt, erzeugt gueltige RIFF/WAVE-Datei ----
+      const wavIsDefault = await page.evaluate(() => document.getElementById('seq-format').value === 'wav');
+      const [download] = await Promise.all([
+        page.waitForEvent('download', { timeout: 15000 }),
+        page.click('#seq-save-external')
+      ]);
+      const downloadPath = await download.path();
+      const wavBuf = fs.readFileSync(downloadPath);
+      const isValidWav = wavBuf.toString('ascii', 0, 4) === 'RIFF' && wavBuf.toString('ascii', 8, 12) === 'WAVE';
+      record('WAV ist Standardformat & Export erzeugt gueltige WAV-Datei',
+        wavIsDefault && isValidWav && download.suggestedFilename().endsWith('.wav'));
+
+      // Export leert Blob & Panel wieder - fuer den Bibliotheks-Test neu aufnehmen.
+      await page.click('#seq-preview-btn');
+      await page.waitForSelector('#seq-save-panel:not(.hidden)', { timeout: 15000 });
       await page.fill('#seq-name', 'Test-Musikstück');
       await page.click('#seq-save-internal');
       await page.waitForTimeout(300);
       const libCount = await page.evaluate(() => document.querySelectorAll('#library-list li:not(.empty)').length);
       record('Musikstück in Bibliothek gespeichert', libCount >= 1, `Eintraege: ${libCount}`);
     }
+
+    // ---- Globale Werkzeugleiste: spiegelt aktiven Tab & loest Aktionen aus ----
+    const globalLabelCreate = await page.evaluate(() => document.getElementById('global-preview-btn').textContent);
+    await page.click('.tab-btn[data-tab="upload"]');
+    await page.waitForTimeout(100);
+    const globalLabelUpload = await page.evaluate(() => document.getElementById('global-preview-btn').textContent);
+    await page.click('.tab-btn[data-tab="create"]');
+    await page.waitForTimeout(100);
+    record('Globale Werkzeugleiste spiegelt Label des aktiven Ordners',
+      globalLabelCreate.includes('Abhören') && globalLabelUpload.includes('Abhören'));
 
     // ---- Ordner 1: Upload + Auto-Mix ----
     await page.click('.tab-btn[data-tab="upload"]');

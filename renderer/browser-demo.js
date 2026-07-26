@@ -119,12 +119,13 @@
     return records.map(withUrl);
   }
 
-  async function saveToLibrary({ name, type, bytes }) {
+  async function saveToLibrary({ name, type, ext, bytes }) {
+    const mime = ext === 'wav' ? 'audio/wav' : 'audio/webm';
     await put('library', {
       id: genId(),
       name: name && name.trim() ? name.trim() : `Music Heaven ${new Date().toLocaleString()}`,
       type,
-      blob: new Blob([bytes], { type: 'audio/webm' }),
+      blob: new Blob([bytes], { type: mime }),
       createdAt: Date.now()
     });
     return listLibrary();
@@ -138,7 +139,8 @@
   }
 
   async function saveExternal({ name, ext, bytes }) {
-    const blob = new Blob([bytes], { type: 'audio/webm' });
+    const mime = ext === 'wav' ? 'audio/wav' : 'audio/webm';
+    const blob = new Blob([bytes], { type: mime });
     const filename = `${(name || 'music-heaven-export').replace(/[\\/:*?"<>|]/g, '_')}.${ext || 'webm'}`;
 
     if (window.showSaveFilePicker) {
