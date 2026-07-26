@@ -1,0 +1,727 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<title>MeineRe!se – Demo Storyboard</title>
+<style>
+  :root {
+    --mint-light: #b7f7e6;
+    --mint: #3fe0c0;
+    --mint-dark: #14b892;
+    --mint-deep: #0c8f74;
+    --teal-text: #0a3d33;
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; background: #000; }
+  #stage {
+    width: 1920px;
+    height: 1080px;
+    position: relative;
+    overflow: hidden;
+    background: linear-gradient(160deg, #eafff9 0%, #d4faef 55%, #b7f7e6 100%);
+    font-family: "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    color: var(--teal-text);
+    perspective: 1600px;
+  }
+
+  .blob {
+    position: absolute;
+    border-radius: 50%;
+    filter: blur(2px);
+    opacity: 0.35;
+    background: radial-gradient(circle at 30% 30%, rgba(255,255,255,0.9), rgba(63,224,192,0.55));
+  }
+
+  .scene {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
+    transform-style: preserve-3d;
+  }
+
+  .caption-bar {
+    position: absolute;
+    left: 50%;
+    bottom: 64px;
+    transform: translateX(-50%);
+    max-width: 1500px;
+    background: rgba(10, 61, 51, 0.82);
+    color: #fff;
+    font-size: 34px;
+    font-weight: 600;
+    padding: 20px 42px;
+    border-radius: 999px;
+    text-align: center;
+    box-shadow: 0 12px 30px rgba(0,0,0,0.25);
+  }
+
+  .logo-big {
+    font-size: 130px;
+    font-weight: 800;
+    letter-spacing: 1px;
+    text-shadow: 0 10px 24px rgba(12,143,116,0.35);
+  }
+  .logo-big .accent { color: var(--mint-dark); }
+
+  .tagline {
+    font-size: 42px;
+    font-weight: 600;
+    color: var(--mint-deep);
+    margin-top: 24px;
+  }
+
+  .badge-pill {
+    background: #fff;
+    border: 2px solid var(--mint);
+    color: var(--mint-deep);
+    font-weight: 700;
+    font-size: 28px;
+    padding: 14px 34px;
+    border-radius: 999px;
+    box-shadow: 0 8px 20px rgba(20,184,146,0.25);
+  }
+
+  /* Nav pills */
+  .nav-row {
+    display: flex;
+    gap: 24px;
+  }
+  .nav-pill {
+    background: rgba(255,255,255,0.55);
+    border: 2px solid transparent;
+    color: var(--mint-deep);
+    font-weight: 700;
+    font-size: 30px;
+    padding: 20px 38px;
+    border-radius: 999px;
+    box-shadow: 0 6px 18px rgba(12,143,116,0.15);
+  }
+  .nav-pill.active {
+    background: linear-gradient(135deg, var(--mint), var(--mint-dark));
+    color: #fff;
+    box-shadow: 0 10px 26px rgba(20,184,146,0.5);
+  }
+
+  /* Search card */
+  .search-card {
+    background: #fff;
+    border-radius: 32px;
+    padding: 48px 56px;
+    box-shadow: 0 24px 60px rgba(20,184,146,0.3), inset 0 1px 0 rgba(255,255,255,0.7);
+    display: flex;
+    gap: 36px;
+    align-items: flex-end;
+  }
+  .field-block { display: flex; flex-direction: column; min-width: 260px; }
+  .field-block label {
+    font-size: 20px;
+    font-weight: 700;
+    color: var(--mint-deep);
+    text-transform: uppercase;
+    margin-bottom: 10px;
+  }
+  .field-block .value-box {
+    border: 3px solid var(--mint-light);
+    border-radius: 14px;
+    padding: 18px 20px;
+    font-size: 28px;
+    color: var(--teal-text);
+    background: #fff;
+    min-height: 34px;
+  }
+  .search-go {
+    background: linear-gradient(135deg, var(--mint), var(--mint-dark));
+    color: #fff;
+    font-weight: 800;
+    font-size: 30px;
+    padding: 22px 44px;
+    border-radius: 16px;
+    box-shadow: 0 12px 26px rgba(20,184,146,0.5);
+  }
+
+  /* Offer cards */
+  .offer-row { display: flex; gap: 40px; }
+  .offer-card-demo {
+    width: 340px;
+    background: #fff;
+    border-radius: 24px;
+    overflow: hidden;
+    box-shadow: 0 20px 45px rgba(10,61,51,0.25);
+    transform-style: preserve-3d;
+  }
+  .offer-img-demo {
+    height: 190px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: linear-gradient(135deg, var(--mint), var(--mint-deep));
+    position: relative;
+  }
+  .demo-bg-globe {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: auto;
+    height: calc(100% - 20px);
+    aspect-ratio: 1;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 150px;
+    line-height: 1;
+    background:
+      radial-gradient(circle at 32% 26%, rgba(255,255,255,0.5), rgba(255,255,255,0) 40%),
+      radial-gradient(circle at 68% 76%, rgba(10,61,51,0.35), rgba(10,61,51,0) 45%);
+    box-shadow:
+      0 10px 18px rgba(0,30,22,0.4),
+      inset -6px -6px 14px rgba(10,61,51,0.3),
+      inset 5px 5px 12px rgba(255,255,255,0.45);
+  }
+  .demo-bg-globe::after { content: "🌍"; }
+  .demo-icon {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .demo-icon svg {
+    width: 128px;
+    height: 128px;
+    filter: drop-shadow(0 10px 10px rgba(0,0,0,0.35));
+  }
+  .offer-body-demo { padding: 26px 28px; }
+  .offer-title-demo { font-size: 26px; font-weight: 700; margin-bottom: 8px; }
+  .offer-meta-demo { font-size: 19px; color: #5f7c74; margin-bottom: 14px; }
+  .offer-price-demo { font-size: 32px; font-weight: 800; color: var(--mint-deep); }
+  .offer-price-demo span { font-size: 16px; color: #6b8f86; font-weight: 500; }
+  .best-ribbon {
+    position: absolute;
+    top: 14px;
+    right: 14px;
+    background: linear-gradient(135deg, #ffd76a, #f0b400);
+    color: #4a3400;
+    font-weight: 800;
+    font-size: 18px;
+    padding: 8px 16px;
+    border-radius: 999px;
+    box-shadow: 0 6px 14px rgba(240,180,0,0.5);
+  }
+
+  /* Filter chips */
+  .chip-row { display: flex; gap: 20px; margin-bottom: 44px; }
+  .chip-demo {
+    background: #fff;
+    border: 3px solid var(--mint-light);
+    color: var(--teal-text);
+    font-weight: 700;
+    font-size: 26px;
+    padding: 16px 30px;
+    border-radius: 999px;
+  }
+  .chip-demo.active {
+    background: linear-gradient(135deg, var(--mint), var(--mint-dark));
+    color: #fff;
+    border-color: transparent;
+    box-shadow: 0 8px 18px rgba(20,184,146,0.4);
+  }
+  .sort-box {
+    background: #fff;
+    border: 3px solid var(--mint-light);
+    border-radius: 14px;
+    padding: 16px 26px;
+    font-size: 26px;
+    font-weight: 700;
+    color: var(--mint-deep);
+    margin-bottom: 40px;
+  }
+
+  /* Chat */
+  .chat-window {
+    width: 620px;
+    background: #fff;
+    border-radius: 24px;
+    box-shadow: 0 24px 50px rgba(10,61,51,0.3);
+    padding: 34px;
+  }
+  .chat-title { font-size: 28px; font-weight: 700; color: var(--mint-deep); margin-bottom: 22px; }
+  .bubble {
+    max-width: 460px;
+    padding: 16px 22px;
+    border-radius: 18px;
+    font-size: 24px;
+    margin-bottom: 18px;
+  }
+  .bubble.them { background: var(--mint-light); color: var(--teal-text); }
+  .bubble.me { background: var(--mint-dark); color: #fff; margin-left: auto; }
+
+  /* Booking */
+  .booking-modal {
+    width: 760px;
+    background: #fff;
+    border-radius: 28px;
+    box-shadow: 0 30px 60px rgba(10,61,51,0.35);
+    padding: 44px;
+  }
+  .booking-title { font-size: 32px; font-weight: 800; color: var(--mint-deep); margin-bottom: 26px; }
+  .pay-row {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    border: 3px solid var(--mint-light);
+    border-radius: 14px;
+    padding: 18px 24px;
+    font-size: 26px;
+    font-weight: 600;
+    margin-bottom: 14px;
+  }
+  .pay-row .dot {
+    width: 26px; height: 26px; border-radius: 50%;
+    border: 3px solid var(--mint);
+  }
+  .pay-row.selected .dot { background: var(--mint-dark); }
+  .confirm-box {
+    text-align: center;
+    font-size: 34px;
+    font-weight: 800;
+    color: var(--mint-deep);
+  }
+
+  .payment-icons-row {
+    display: flex;
+    gap: 20px;
+    margin-top: 30px;
+  }
+  .payment-icons-row .badge-pill { font-size: 24px; padding: 12px 24px; }
+</style>
+</head>
+<body>
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <defs>
+    <linearGradient id="gradSky" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#eafff9"/><stop offset="100%" stop-color="#3fe0c0"/>
+    </linearGradient>
+    <linearGradient id="gradDeep" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#3fe0c0"/><stop offset="100%" stop-color="#0c8f74"/>
+    </linearGradient>
+    <linearGradient id="gradWhite" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#ffffff"/><stop offset="100%" stop-color="#eafff9"/>
+    </linearGradient>
+    <linearGradient id="gradWarm" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#ffd76a"/><stop offset="100%" stop-color="#f0b400"/>
+    </linearGradient>
+    <linearGradient id="gradRed" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#ff8a80"/><stop offset="100%" stop-color="#e53935"/>
+    </linearGradient>
+    <linearGradient id="gradBlue" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#8ecbff"/><stop offset="100%" stop-color="#2f7fd1"/>
+    </linearGradient>
+    <linearGradient id="gradBrown" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#c68e5a"/><stop offset="100%" stop-color="#8a5a2b"/>
+    </linearGradient>
+    <linearGradient id="gradGreen" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#8ee6a0"/><stop offset="100%" stop-color="#2f9e52"/>
+    </linearGradient>
+    <filter id="glossyShadow" x="-40%" y="-40%" width="180%" height="180%">
+      <feDropShadow dx="0" dy="3" stdDeviation="2.2" flood-color="#0a3d33" flood-opacity="0.4"/>
+    </filter>
+  </defs>
+</svg>
+
+<div id="stage">
+  <div class="blob" id="blob1" style="width:420px;height:420px;top:-120px;left:-100px;"></div>
+  <div class="blob" id="blob2" style="width:560px;height:560px;bottom:-180px;right:-140px;"></div>
+  <div class="blob" id="blob3" style="width:280px;height:280px;top:60%;left:70%;"></div>
+
+  <div class="scene" id="scene-logo">
+    <div class="logo-big">Meine<span class="accent">Re!se</span></div>
+    <div class="tagline" id="logo-tagline">Vergleiche. Buche. Erlebe.</div>
+  </div>
+
+  <div class="scene" id="scene-nav">
+    <div class="nav-row" id="nav-row"></div>
+  </div>
+
+  <div class="scene" id="scene-search">
+    <div class="search-card">
+      <div class="field-block">
+        <label>Abflugort</label>
+        <div class="value-box" id="val-from"></div>
+      </div>
+      <div class="field-block">
+        <label>Landeort</label>
+        <div class="value-box" id="val-to"></div>
+      </div>
+      <div class="field-block">
+        <label>Reise von</label>
+        <div class="value-box" id="val-datefrom"></div>
+      </div>
+      <div class="field-block">
+        <label>Reise bis</label>
+        <div class="value-box" id="val-dateto"></div>
+      </div>
+      <div class="field-block">
+        <label>Passagiere</label>
+        <div class="value-box" id="val-pax">1 Passagier</div>
+      </div>
+      <button class="search-go">🔍 Suchen</button>
+    </div>
+  </div>
+
+  <div class="scene" id="scene-offers">
+    <div class="offer-row" id="offer-row">
+      <div class="offer-card-demo" id="card-a">
+        <div class="offer-img-demo">
+          <div class="demo-bg-globe"></div>
+          <div class="demo-icon"><svg viewBox="0 0 64 64"><g filter="url(#glossyShadow)">
+            <rect x="26" y="8" width="12" height="14" fill="url(#gradWarm)"/>
+            <rect x="10" y="20" width="44" height="36" rx="4" fill="url(#gradSky)"/>
+            <rect x="10" y="20" width="44" height="10" rx="4" fill="url(#gradDeep)"/>
+            <rect x="18" y="34" width="8" height="8" rx="1" fill="url(#gradWhite)"/>
+            <rect x="30" y="34" width="8" height="8" rx="1" fill="url(#gradWhite)"/>
+            <rect x="42" y="34" width="6" height="8" rx="1" fill="url(#gradWhite)"/>
+            <rect x="18" y="46" width="8" height="8" rx="1" fill="url(#gradWhite)"/>
+            <rect x="30" y="46" width="8" height="8" rx="1" fill="url(#gradWhite)"/>
+          </g></svg></div>
+        </div>
+        <div class="offer-body-demo">
+          <div class="offer-title-demo">Strandresort Playa Azul</div>
+          <div class="offer-meta-demo">Kreta · 300 m zum Strand</div>
+          <div class="offer-price-demo">ab 74 € <span>/ Person</span></div>
+        </div>
+      </div>
+      <div class="offer-card-demo" id="card-b">
+        <div class="offer-img-demo">
+          <div class="demo-bg-globe"></div>
+          <div class="demo-icon"><svg viewBox="0 0 64 64"><g filter="url(#glossyShadow)">
+            <polygon points="32,8 56,28 8,28" fill="url(#gradWarm)"/>
+            <rect x="14" y="28" width="36" height="28" fill="url(#gradSky)"/>
+            <rect x="27" y="40" width="10" height="16" fill="url(#gradDeep)"/>
+            <rect x="18" y="34" width="8" height="8" fill="url(#gradWhite)"/>
+            <rect x="38" y="34" width="8" height="8" fill="url(#gradWhite)"/>
+          </g></svg></div>
+        </div>
+        <div class="offer-body-demo">
+          <div class="offer-title-demo">Ferienhaus Casa Mint</div>
+          <div class="offer-meta-demo">Algarve · 800 m zum Strand</div>
+          <div class="offer-price-demo">ab 96 € <span>/ Person</span></div>
+        </div>
+      </div>
+      <div class="offer-card-demo" id="card-c">
+        <div class="offer-img-demo">
+          <div class="demo-bg-globe"></div>
+          <div class="demo-icon"><svg viewBox="0 0 64 64"><g filter="url(#glossyShadow)">
+            <rect x="16" y="6" width="32" height="52" rx="3" fill="url(#gradSky)"/>
+            <rect x="22" y="12" width="7" height="7" fill="url(#gradWhite)"/>
+            <rect x="35" y="12" width="7" height="7" fill="url(#gradWhite)"/>
+            <rect x="22" y="23" width="7" height="7" fill="url(#gradWhite)"/>
+            <rect x="35" y="23" width="7" height="7" fill="url(#gradWhite)"/>
+            <rect x="22" y="34" width="7" height="7" fill="url(#gradWhite)"/>
+            <rect x="35" y="34" width="7" height="7" fill="url(#gradWhite)"/>
+            <rect x="26" y="47" width="12" height="11" fill="url(#gradDeep)"/>
+          </g></svg></div>
+          <div class="best-ribbon" id="best-ribbon">🏆 Bester Preis</div>
+        </div>
+        <div class="offer-body-demo">
+          <div class="offer-title-demo">City Apartment Lissabon</div>
+          <div class="offer-meta-demo">Zentrum · 4,5 km zum Strand</div>
+          <div class="offer-price-demo">ab 65 € <span>/ Person</span></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="scene" id="scene-filters">
+    <div>
+      <div class="chip-row" id="chip-row">
+        <div class="chip-demo" data-c>🏊 Swimmingpool</div>
+        <div class="chip-demo" data-c>🏡 Haus</div>
+        <div class="chip-demo" data-c>🏢 Wohnung</div>
+        <div class="chip-demo" data-c>🏖️ Strandnähe</div>
+      </div>
+      <div class="sort-box" id="sort-box">Ergebnisse sortieren: Empfehlung</div>
+    </div>
+  </div>
+
+  <div class="scene" id="scene-chat">
+    <div class="chat-window">
+      <div class="chat-title">💬 Chat mit Anbieter · Strandresort Playa Azul</div>
+      <div id="chat-bubbles"></div>
+    </div>
+  </div>
+
+  <div class="scene" id="scene-booking">
+    <div class="booking-modal">
+      <div class="booking-title" id="booking-title">Jetzt buchen · City Apartment Lissabon</div>
+      <div id="pay-list"></div>
+      <div class="confirm-box" id="confirm-box" style="opacity:0;"></div>
+    </div>
+  </div>
+
+  <div class="scene" id="scene-outro">
+    <div class="logo-big">Meine<span class="accent">Re!se</span></div>
+    <div class="tagline">Bestpreis-Garantie · Vergleiche. Buche. Erlebe.</div>
+    <div class="payment-icons-row" id="outro-pay"></div>
+  </div>
+
+  <div class="caption-bar" id="caption"></div>
+</div>
+
+<script>
+  var CATS = ["✈️ Flug", "🏨 Hotel", "🚗 Mietwagen", "🐶 Hundepension", "🚢 Kreuzfahrt", "⛴️ Inland Seefahrten", "🌴 Kurztrips"];
+  var PAYMENTS = ["🏦 Überweisung", "🧾 Lastschrift", "💳 Kreditkarte", "🅿️ PayPal", "📱 Google Pay", "📲 Apple Pay"];
+
+  var navRow = document.getElementById("nav-row");
+  CATS.forEach(function (label) {
+    var el = document.createElement("div");
+    el.className = "nav-pill";
+    el.textContent = label;
+    navRow.appendChild(el);
+  });
+  var navPills = navRow.children;
+
+  var chatBubbles = document.getElementById("chat-bubbles");
+  var BUBBLE_SEQ = [
+    { side: "them", text: "Hallo! Wie kann ich dir zu diesem Angebot helfen?" },
+    { side: "me", text: "Gibt es noch Zimmer mit Meerblick frei?" },
+    { side: "them", text: "Ja, aktuell sogar zum Bestpreis verfügbar!" }
+  ];
+  BUBBLE_SEQ.forEach(function (b) {
+    var el = document.createElement("div");
+    el.className = "bubble " + b.side;
+    el.textContent = b.text;
+    el.style.opacity = 0;
+    chatBubbles.appendChild(el);
+  });
+  var bubbleEls = chatBubbles.children;
+
+  var payList = document.getElementById("pay-list");
+  PAYMENTS.forEach(function (label) {
+    var row = document.createElement("div");
+    row.className = "pay-row";
+    var dot = document.createElement("div");
+    dot.className = "dot";
+    var text = document.createElement("span");
+    text.textContent = label;
+    row.appendChild(dot);
+    row.appendChild(text);
+    payList.appendChild(row);
+  });
+  var payRows = payList.children;
+
+  var outroPay = document.getElementById("outro-pay");
+  PAYMENTS.forEach(function (label) {
+    var el = document.createElement("div");
+    el.className = "badge-pill";
+    el.textContent = label;
+    outroPay.appendChild(el);
+  });
+
+  var chipRow = document.getElementById("chip-row");
+  var chipEls = chipRow.children;
+
+  function clamp01(x) { return Math.max(0, Math.min(1, x)); }
+  function within(t, start, end) { return clamp01((t - start) / (end - start)); }
+  function easeOutCubic(t) { return 1 - Math.pow(1 - t, 3); }
+  function easeInOutCubic(t) { return t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2; }
+  function sceneOpacity(t, start, end, fade) {
+    fade = fade || 0.5;
+    if (t <= start - fade || t >= end + fade) return 0;
+    if (t < start) return clamp01((t - (start - fade)) / fade);
+    if (t > end) return clamp01(((end + fade) - t) / fade);
+    return 1;
+  }
+
+  var SCENES = {
+    logo1: [0.0, 6.70],
+    nav: [7.05, 13.83],
+    search: [14.18, 19.73],
+    offers: [20.08, 25.15],
+    filters: [25.50, 31.96],
+    chat: [32.31, 35.05],
+    booking: [35.40, 42.05],
+    logo2: [42.40, 46.80]
+  };
+  var DURATION = 47.4;
+
+  var CAPTIONS = [
+    [0.0, 6.70, "Willkommen bei MeineRe!se – deinem Vergleichsportal für Flug, Hotel, Mietwagen, Kreuzfahrt und mehr."],
+    [7.05, 13.83, "Wähle deine Reiseart: Flug, Hotel, Mietwagen, Kreuzfahrt, Inland Seefahrten oder Kurztrips."],
+    [14.18, 19.73, "Gib Abflugort, Reiseziel und Reisedaten ein – wähle die Anzahl deiner Mitreisenden."],
+    [20.08, 25.15, "Wir zeigen dir sofort die besten Angebote aus aller Welt – immer mit dem besten Preis."],
+    [25.50, 31.96, "Filtere nach Swimmingpool, Haus, Wohnung oder Strandnähe und sortiere nach dem günstigsten Angebot."],
+    [32.31, 35.05, "Chatte direkt mit dem Anbieter deiner Wahl."],
+    [35.40, 42.05, "Bezahle bequem per Überweisung, Lastschrift, Kreditkarte, PayPal, Google Pay oder Apple Pay."],
+    [42.40, 46.80, "MeineRe!se – vergleiche, buche, erlebe."]
+  ];
+
+  var els = {};
+  ["scene-logo", "scene-nav", "scene-search", "scene-offers", "scene-filters", "scene-chat", "scene-booking", "scene-outro", "caption",
+   "val-from", "val-to", "val-datefrom", "val-dateto", "val-pax", "logo-tagline", "best-ribbon", "card-a", "card-b", "card-c",
+   "chip-row", "sort-box", "confirm-box", "booking-title"].forEach(function (id) {
+    els[id] = document.getElementById(id);
+  });
+
+  function typeText(full, progress) {
+    var n = Math.round(full.length * clamp01(progress));
+    return full.slice(0, n);
+  }
+
+  function setBlobs(t) {
+    document.getElementById("blob1").style.transform = "translate(" + (Math.sin(t * 0.2) * 40) + "px," + (Math.cos(t * 0.15) * 30) + "px)";
+    document.getElementById("blob2").style.transform = "translate(" + (Math.cos(t * 0.18) * 50) + "px," + (Math.sin(t * 0.22) * 35) + "px)";
+    document.getElementById("blob3").style.transform = "translate(" + (Math.sin(t * 0.25) * 30) + "px," + (Math.cos(t * 0.2) * 40) + "px)";
+  }
+
+  function render(t) {
+    setBlobs(t);
+
+    // Caption
+    var capText = "";
+    CAPTIONS.forEach(function (c) {
+      if (t >= c[0] && t < c[1]) capText = c[2];
+    });
+    els["caption"].textContent = capText;
+    els["caption"].style.opacity = capText ? 1 : 0;
+
+    // Scene 1: logo intro
+    (function () {
+      var s = SCENES.logo1;
+      var op = sceneOpacity(t, s[0], s[1], 0.6);
+      els["scene-logo"].style.opacity = op;
+      var p = within(t, s[0], s[0] + 1.2);
+      var scale = 0.7 + 0.3 * easeOutCubic(p);
+      els["scene-logo"].style.transform = "scale(" + scale + ")";
+      els["logo-tagline"].style.opacity = clamp01((within(t, s[0] + 0.8, s[0] + 1.8)));
+    })();
+
+    // Scene 2: nav
+    (function () {
+      var s = SCENES.nav;
+      var op = sceneOpacity(t, s[0], s[1], 0.5);
+      els["scene-nav"].style.opacity = op;
+      var perPill = (s[1] - s[0] - 1.0) / 6;
+      for (var i = 0; i < navPills.length; i++) {
+        var pillStart = s[0] + 0.3 + i * perPill;
+        var p = within(t, pillStart, pillStart + 0.4);
+        navPills[i].style.opacity = p;
+        navPills[i].style.transform = "translateY(" + (30 * (1 - easeOutCubic(p))) + "px)";
+        var activeStart = s[0] + 1.4 + i * perPill;
+        var activeP = within(t, activeStart, activeStart + perPill);
+        navPills[i].classList.toggle("active", activeP > 0 && activeP < 1);
+      }
+    })();
+
+    // Scene 3: search
+    (function () {
+      var s = SCENES.search;
+      var op = sceneOpacity(t, s[0], s[1], 0.5);
+      els["scene-search"].style.opacity = op;
+
+      var fromP = within(t, s[0] + 0.3, s[0] + 1.3);
+      els["val-from"].textContent = typeText("Frankfurt", fromP);
+
+      var toP = within(t, s[0] + 1.4, s[0] + 2.8);
+      els["val-to"].textContent = typeText("Palma de Mallorca", toP);
+
+      var d1 = within(t, s[0] + 2.9, s[0] + 3.4);
+      els["val-datefrom"].textContent = d1 > 0.05 ? "12.08.2026" : "";
+
+      var d2 = within(t, s[0] + 3.5, s[0] + 4.0);
+      els["val-dateto"].textContent = d2 > 0.05 ? "19.08.2026" : "";
+
+      var paxP = within(t, s[0] + 4.1, s[0] + 5.0);
+      els["val-pax"].textContent = paxP > 0.5 ? "2 Passagiere" : "1 Passagier";
+    })();
+
+    // Scene 4: offers
+    (function () {
+      var s = SCENES.offers;
+      var op = sceneOpacity(t, s[0], s[1], 0.5);
+      els["scene-offers"].style.opacity = op;
+
+      [["card-a", 0], ["card-b", 0.25], ["card-c", 0.5]].forEach(function (pair) {
+        var p = within(t, s[0] + 0.2 + pair[1], s[0] + 0.9 + pair[1]);
+        var e = els[pair[0]];
+        e.style.opacity = p;
+        var eased = easeOutCubic(p);
+        e.style.transform = "translateY(" + (120 * (1 - eased)) + "px) rotateX(" + (40 * (1 - eased)) + "deg)";
+      });
+
+      var ribbonP = within(t, s[0] + 1.6, s[0] + 2.1);
+      var bounce = ribbonP < 1 ? Math.sin(ribbonP * Math.PI) * 0.15 : 0;
+      els["best-ribbon"].style.opacity = ribbonP;
+      els["best-ribbon"].style.transform = "scale(" + (0.6 + 0.4 * easeOutCubic(ribbonP) + bounce) + ")";
+    })();
+
+    // Scene 5: filters + sort
+    (function () {
+      var s = SCENES.filters;
+      var op = sceneOpacity(t, s[0], s[1], 0.5);
+      els["scene-filters"].style.opacity = op;
+
+      for (var i = 0; i < chipEls.length; i++) {
+        var chipStart = s[0] + 0.2 + i * 0.5;
+        var p = within(t, chipStart, chipStart + 0.3);
+        chipEls[i].classList.toggle("active", p > 0);
+      }
+
+      var sortP = within(t, s[0] + 2.6, s[0] + 3.0);
+      els["sort-box"].textContent = sortP > 0.5
+        ? "Ergebnisse sortieren: Günstigstes Angebot zuerst"
+        : "Ergebnisse sortieren: Empfehlung";
+    })();
+
+    // Scene 6: chat
+    (function () {
+      var s = SCENES.chat;
+      var op = sceneOpacity(t, s[0], s[1], 0.5);
+      els["scene-chat"].style.opacity = op;
+      for (var i = 0; i < bubbleEls.length; i++) {
+        var bStart = s[0] + 0.3 + i * 0.8;
+        var p = within(t, bStart, bStart + 0.4);
+        bubbleEls[i].style.opacity = p;
+        bubbleEls[i].style.transform = "translateY(" + (20 * (1 - easeOutCubic(p))) + "px)";
+      }
+    })();
+
+    // Scene 7: booking
+    (function () {
+      var s = SCENES.booking;
+      var op = sceneOpacity(t, s[0], s[1], 0.5);
+      els["scene-booking"].style.opacity = op;
+
+      var perRow = 2.2 / payRows.length;
+      for (var i = 0; i < payRows.length; i++) {
+        var rowStart = s[0] + 0.2 + i * perRow;
+        var p = within(t, rowStart, rowStart + perRow * 0.8);
+        payRows[i].style.opacity = clamp01(0.35 + 0.65 * p);
+        payRows[i].classList.toggle("selected", i === payRows.length - 1 && within(t, s[0] + 2.6, s[0] + 2.9) > 0);
+      }
+
+      var confirmP = within(t, s[0] + 2.9, s[0] + 3.3);
+      els["confirm-box"].style.opacity = confirmP;
+      els["confirm-box"].textContent = "✅ Buchung bestätigt – vielen Dank!";
+    })();
+
+    // Scene 8: outro
+    (function () {
+      var s = SCENES.logo2;
+      var op = sceneOpacity(t, s[0], s[1], 0.6);
+      els["scene-outro"].style.opacity = op;
+    })();
+  }
+
+  window.setTime = render;
+  window.DEMO_DURATION = DURATION;
+  render(0);
+</script>
+</body>
+</html>

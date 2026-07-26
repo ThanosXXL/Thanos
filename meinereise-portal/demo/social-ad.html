@@ -1,0 +1,345 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<title>MeineRe!se – Social Media Ad</title>
+<style>
+  :root {
+    --mint-light: #b7f7e6;
+    --mint: #3fe0c0;
+    --mint-dark: #14b892;
+    --mint-deep: #0c8f74;
+    --teal-text: #0a3d33;
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; background: #000; }
+  #stage {
+    width: 1920px;
+    height: 1080px;
+    position: relative;
+    overflow: hidden;
+    font-family: "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    background:
+      radial-gradient(circle at 78% 22%, rgba(255,255,255,0.55), rgba(255,255,255,0) 40%),
+      linear-gradient(135deg, #0c8f74 0%, #14b892 38%, #3fe0c0 72%, #b7f7e6 100%);
+    color: var(--teal-text);
+  }
+
+  /* glossy sheen sweep */
+  .sheen {
+    position: absolute;
+    top: -20%;
+    left: -10%;
+    width: 160%;
+    height: 140%;
+    background: linear-gradient(120deg, rgba(255,255,255,0) 30%, rgba(255,255,255,0.22) 45%, rgba(255,255,255,0) 60%);
+    transform: rotate(-8deg);
+  }
+
+  .blob {
+    position: absolute;
+    border-radius: 50%;
+    opacity: 0.28;
+    background: radial-gradient(circle at 30% 30%, rgba(255,255,255,0.9), rgba(255,255,255,0) 70%);
+  }
+
+  .top-nav {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 96px;
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    padding: 0 60px;
+    background: rgba(10, 61, 51, 0.16);
+    border-bottom: 1.5px solid rgba(255,255,255,0.35);
+  }
+  .top-nav-pill {
+    background: rgba(255,255,255,0.85);
+    color: var(--mint-deep);
+    font-weight: 700;
+    font-size: 20px;
+    padding: 10px 20px;
+    border-radius: 999px;
+    white-space: nowrap;
+  }
+  .top-nav-pill.active {
+    background: linear-gradient(135deg, #fff, #eafff9);
+    box-shadow: 0 8px 18px rgba(0,0,0,0.2);
+  }
+
+  .content {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    padding: 96px 100px 0;
+  }
+
+  .text-block { width: 900px; }
+
+  .kicker {
+    display: inline-block;
+    background: rgba(255,255,255,0.85);
+    color: var(--mint-deep);
+    font-weight: 800;
+    font-size: 24px;
+    padding: 10px 26px;
+    border-radius: 999px;
+    box-shadow: 0 8px 20px rgba(0,0,0,0.15);
+    margin-bottom: 28px;
+    letter-spacing: 0.5px;
+  }
+
+  .logo-ad {
+    font-size: 110px;
+    font-weight: 800;
+    color: #fff;
+    text-shadow: 0 14px 30px rgba(0,40,30,0.35);
+    line-height: 1.02;
+    margin-bottom: 18px;
+  }
+  .logo-ad .accent { color: #0a3d33; }
+
+  .tagline-ad {
+    font-size: 40px;
+    font-weight: 700;
+    color: #0a3d33;
+    margin-bottom: 18px;
+  }
+
+  .sub-ad {
+    font-size: 26px;
+    font-weight: 600;
+    color: rgba(10,61,51,0.85);
+    line-height: 1.5;
+    margin-bottom: 40px;
+    max-width: 760px;
+  }
+
+  .cta-btn {
+    display: inline-block;
+    background: linear-gradient(135deg, #ffffff, #eafff9);
+    color: var(--mint-deep);
+    font-weight: 800;
+    font-size: 32px;
+    padding: 24px 56px;
+    border-radius: 999px;
+    box-shadow: 0 18px 36px rgba(0,0,0,0.28), inset 0 2px 0 rgba(255,255,255,0.9);
+  }
+
+  .trust-row {
+    display: flex;
+    gap: 16px;
+    margin-top: 44px;
+    flex-wrap: wrap;
+    max-width: 780px;
+  }
+  .trust-pill {
+    background: rgba(10,61,51,0.18);
+    color: #fff;
+    font-weight: 700;
+    font-size: 20px;
+    padding: 10px 20px;
+    border-radius: 999px;
+    border: 1.5px solid rgba(255,255,255,0.4);
+  }
+
+  /* 3D visual scene right side */
+  .scene3d {
+    position: absolute;
+    right: 40px;
+    top: 0;
+    width: 820px;
+    height: 1080px;
+    perspective: 1400px;
+  }
+
+  .globe {
+    position: absolute;
+    top: 300px;
+    left: 180px;
+    width: 460px;
+    height: 460px;
+    border-radius: 50%;
+    background:
+      radial-gradient(circle at 35% 30%, rgba(255,255,255,0.95), rgba(255,255,255,0) 30%),
+      radial-gradient(circle at 65% 75%, rgba(10,61,51,0.25), rgba(10,61,51,0) 45%),
+      linear-gradient(160deg, #eafff9, #3fe0c0 55%, #0c8f74);
+    box-shadow:
+      0 40px 80px rgba(0,40,30,0.45),
+      inset -30px -30px 60px rgba(10,61,51,0.35),
+      inset 20px 20px 50px rgba(255,255,255,0.5);
+    transform: rotateY(-12deg) rotateX(6deg);
+  }
+  .globe::after {
+    content: "🌍";
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 220px;
+    filter: drop-shadow(0 10px 14px rgba(0,0,0,0.25));
+  }
+
+  .float-card {
+    position: absolute;
+    background: #fff;
+    border-radius: 26px;
+    box-shadow: 0 30px 60px rgba(0,20,15,0.35), inset 0 1px 0 rgba(255,255,255,0.8);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transform-style: preserve-3d;
+  }
+
+  .float-card svg {
+    width: 62%;
+    height: 62%;
+  }
+  #card1 { width: 190px; height: 190px; top: 60px; left: 40px; transform: rotate(-10deg) rotateY(18deg); background: linear-gradient(135deg,#fff,#eafff9); }
+  #card2 { width: 170px; height: 170px; top: 120px; right: 20px; transform: rotate(9deg) rotateY(-16deg); }
+  #card3 { width: 180px; height: 180px; bottom: 190px; left: 0px; transform: rotate(7deg) rotateY(14deg); }
+  #card4 { width: 190px; height: 190px; bottom: 90px; right: 60px; transform: rotate(-8deg) rotateY(-14deg); }
+  #card5 { width: 150px; height: 150px; bottom: 10px; left: 260px; transform: rotate(4deg) rotateX(8deg); }
+
+  .best-badge {
+    position: absolute;
+    top: 40px;
+    right: 60px;
+    background: linear-gradient(135deg, #ffd76a, #f0b400);
+    color: #4a3400;
+    font-weight: 800;
+    font-size: 26px;
+    padding: 16px 30px;
+    border-radius: 999px;
+    box-shadow: 0 16px 34px rgba(240,180,0,0.55), inset 0 1px 0 rgba(255,255,255,0.6);
+    transform: rotate(6deg);
+  }
+</style>
+</head>
+<body>
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <defs>
+    <linearGradient id="gradSky" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#eafff9"/><stop offset="100%" stop-color="#3fe0c0"/>
+    </linearGradient>
+    <linearGradient id="gradDeep" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#3fe0c0"/><stop offset="100%" stop-color="#0c8f74"/>
+    </linearGradient>
+    <linearGradient id="gradWhite" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#ffffff"/><stop offset="100%" stop-color="#eafff9"/>
+    </linearGradient>
+    <linearGradient id="gradWarm" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#ffd76a"/><stop offset="100%" stop-color="#f0b400"/>
+    </linearGradient>
+    <linearGradient id="gradRed" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#ff8a80"/><stop offset="100%" stop-color="#e53935"/>
+    </linearGradient>
+    <linearGradient id="gradBlue" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#8ecbff"/><stop offset="100%" stop-color="#2f7fd1"/>
+    </linearGradient>
+    <linearGradient id="gradBrown" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#c68e5a"/><stop offset="100%" stop-color="#8a5a2b"/>
+    </linearGradient>
+    <linearGradient id="gradGreen" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#8ee6a0"/><stop offset="100%" stop-color="#2f9e52"/>
+    </linearGradient>
+    <filter id="glossyShadow" x="-40%" y="-40%" width="180%" height="180%">
+      <feDropShadow dx="0" dy="3" stdDeviation="2.2" flood-color="#0a3d33" flood-opacity="0.4"/>
+    </filter>
+  </defs>
+</svg>
+
+<div id="stage">
+  <div class="blob" style="width:520px;height:520px;top:-160px;left:-160px;"></div>
+  <div class="blob" style="width:360px;height:360px;bottom:-140px;left:520px;"></div>
+  <div class="sheen"></div>
+
+  <div class="top-nav">
+    <span class="top-nav-pill">✈️ Flug</span>
+    <span class="top-nav-pill">🏨 Hotel</span>
+    <span class="top-nav-pill">🚗 Mietwagen</span>
+    <span class="top-nav-pill active">🐶 Hundepension</span>
+    <span class="top-nav-pill">🚢 Kreuzfahrt</span>
+    <span class="top-nav-pill">⛴️ Inland Seefahrten</span>
+    <span class="top-nav-pill">🌴 Kurztrips</span>
+  </div>
+
+  <div class="content">
+    <div class="text-block">
+      <div class="kicker">🏆 Bestpreis-Garantie</div>
+      <div class="logo-ad">Meine<span class="accent">Re!se</span></div>
+      <div class="tagline-ad">Vergleiche. Buche. Erlebe.</div>
+      <div class="sub-ad">
+        Flug, Hotel, Mietwagen, Kreuzfahrt &amp; Kurztrips – alle Länder und Inseln weltweit,
+        immer zum besten Preis. Direkter Chat mit dem Anbieter, sichere Bezahlung.
+      </div>
+      <div class="cta-btn">Jetzt vergleichen →</div>
+      <div class="trust-row">
+        <span class="trust-pill">🏦 Überweisung</span>
+        <span class="trust-pill">🧾 Lastschrift</span>
+        <span class="trust-pill">💳 Kreditkarte</span>
+        <span class="trust-pill">🅿️ PayPal</span>
+        <span class="trust-pill">📱 Google Pay</span>
+        <span class="trust-pill">📲 Apple Pay</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="scene3d">
+    <div class="best-badge">🏆 Bester Preis</div>
+    <div class="globe"></div>
+    <div class="float-card" id="card1">
+      <svg viewBox="0 0 64 64"><g filter="url(#glossyShadow)">
+        <polygon points="4,34 60,10 34,60 28,40" fill="url(#gradBlue)"/>
+        <polygon points="4,34 28,40 20,52" fill="url(#gradSky)"/>
+        <polygon points="28,40 34,60 40,44" fill="url(#gradDeep)" opacity="0.85"/>
+      </g></svg>
+    </div>
+    <div class="float-card" id="card2">
+      <svg viewBox="0 0 64 64"><g filter="url(#glossyShadow)">
+        <rect x="26" y="8" width="12" height="14" fill="url(#gradWarm)"/>
+        <rect x="10" y="20" width="44" height="36" rx="4" fill="url(#gradSky)"/>
+        <rect x="10" y="20" width="44" height="10" rx="4" fill="url(#gradDeep)"/>
+        <rect x="18" y="34" width="8" height="8" rx="1" fill="url(#gradWhite)"/>
+        <rect x="30" y="34" width="8" height="8" rx="1" fill="url(#gradWhite)"/>
+        <rect x="42" y="34" width="6" height="8" rx="1" fill="url(#gradWhite)"/>
+        <rect x="18" y="46" width="8" height="8" rx="1" fill="url(#gradWhite)"/>
+        <rect x="30" y="46" width="8" height="8" rx="1" fill="url(#gradWhite)"/>
+      </g></svg>
+    </div>
+    <div class="float-card" id="card3">
+      <svg viewBox="0 0 64 64"><g filter="url(#glossyShadow)">
+        <path d="M6 44 L58 44 L49 58 L15 58 Z" fill="url(#gradWhite)"/>
+        <rect x="16" y="30" width="32" height="16" rx="2" fill="url(#gradBlue)"/>
+        <rect x="22" y="18" width="20" height="13" rx="2" fill="url(#gradWhite)"/>
+        <rect x="29" y="6" width="6" height="13" fill="url(#gradRed)"/>
+      </g></svg>
+    </div>
+    <div class="float-card" id="card4">
+      <svg viewBox="0 0 64 64"><g filter="url(#glossyShadow)">
+        <path d="M32 58 C30 40 30 28 34 14" stroke="url(#gradBrown)" stroke-width="6" fill="none" stroke-linecap="round"/>
+        <ellipse cx="34" cy="12" rx="14" ry="7" fill="url(#gradGreen)" transform="rotate(-25 34 12)"/>
+        <ellipse cx="34" cy="12" rx="14" ry="7" fill="url(#gradGreen)" transform="rotate(25 34 12)"/>
+        <ellipse cx="34" cy="12" rx="16" ry="6" fill="url(#gradGreen)"/>
+        <ellipse cx="34" cy="12" rx="10" ry="6" fill="url(#gradGreen)" transform="rotate(-58 34 12)"/>
+        <ellipse cx="34" cy="12" rx="10" ry="6" fill="url(#gradGreen)" transform="rotate(58 34 12)"/>
+      </g></svg>
+    </div>
+    <div class="float-card" id="card5">
+      <svg viewBox="0 0 64 64"><g filter="url(#glossyShadow)">
+        <path d="M16 34 Q22 20 30 20 L38 20 Q44 20 48 34 Z" fill="url(#gradRed)"/>
+        <rect x="8" y="34" width="48" height="14" rx="6" fill="url(#gradRed)"/>
+        <rect x="20" y="24" width="24" height="10" rx="3" fill="url(#gradWhite)" opacity="0.9"/>
+        <circle cx="20" cy="50" r="7" fill="url(#gradDeep)"/>
+        <circle cx="44" cy="50" r="7" fill="url(#gradDeep)"/>
+      </g></svg>
+    </div>
+  </div>
+</div>
+</body>
+</html>
