@@ -317,18 +317,19 @@
     rating.textContent = stars(offer.rating);
     body.appendChild(rating);
 
+    card.appendChild(body);
+
+    var side = document.createElement("div");
+    side.className = "offer-side";
+
     var price = document.createElement("div");
     price.className = "offer-price";
     price.textContent = "ab " + offer.price + " € ";
     var perPerson = document.createElement("span");
     perPerson.textContent = "/ Person";
     price.appendChild(perPerson);
-    body.appendChild(price);
+    side.appendChild(price);
 
-    card.appendChild(body);
-
-    var bookRow = document.createElement("div");
-    bookRow.className = "offer-book-row";
     var bookBtn = document.createElement("button");
     bookBtn.type = "button";
     bookBtn.className = "action-btn book-btn";
@@ -336,8 +337,7 @@
     bookBtn.addEventListener("click", function () {
       openBookingModal(offer);
     });
-    bookRow.appendChild(bookBtn);
-    card.appendChild(bookRow);
+    side.appendChild(bookBtn);
 
     var actions = document.createElement("div");
     actions.className = "offer-actions";
@@ -345,7 +345,7 @@
     var chatBtn = document.createElement("button");
     chatBtn.type = "button";
     chatBtn.className = "action-btn chat-btn";
-    chatBtn.textContent = "💬 Chat mit Anbieter";
+    chatBtn.textContent = "💬 Chat";
     chatBtn.addEventListener("click", function () {
       openChatModal(offer);
     });
@@ -354,13 +354,14 @@
     var feedbackBtn = document.createElement("button");
     feedbackBtn.type = "button";
     feedbackBtn.className = "action-btn feedback-btn";
-    feedbackBtn.textContent = "⭐ Feedback";
+    feedbackBtn.textContent = "⭐";
     feedbackBtn.addEventListener("click", function () {
       openFeedbackModal(offer);
     });
     actions.appendChild(feedbackBtn);
 
-    card.appendChild(actions);
+    side.appendChild(actions);
+    card.appendChild(side);
 
     return card;
   }

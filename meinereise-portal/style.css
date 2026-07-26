@@ -571,9 +571,12 @@ h1, h2 {
 }
 
 .offers-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(270px, 1fr));
-  gap: 22px;
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+  max-height: 900px;
+  overflow-y: auto;
+  padding-right: 6px;
 }
 
 .offer-card {
@@ -581,18 +584,22 @@ h1, h2 {
   border-radius: var(--radius);
   overflow: hidden;
   box-shadow: 0 8px 24px rgba(10, 61, 51, 0.12);
-  transition: transform 0.25s, box-shadow 0.25s;
+  transition: transform 0.2s, box-shadow 0.25s;
   display: flex;
-  flex-direction: column;
+  flex-direction: row;
+  align-items: stretch;
+  flex: 0 0 auto;
 }
 
 .offer-card:hover {
-  transform: translateY(-6px) rotateX(2deg);
-  box-shadow: 0 18px 36px rgba(10, 61, 51, 0.22);
+  transform: translateX(4px);
+  box-shadow: 0 14px 30px rgba(10, 61, 51, 0.18);
 }
 
 .offer-image {
-  height: 170px;
+  width: 200px;
+  height: auto;
+  flex: 0 0 200px;
   position: relative;
   display: flex;
   align-items: center;
@@ -677,11 +684,13 @@ h1, h2 {
 }
 
 .offer-body {
-  padding: 16px;
+  padding: 16px 20px;
   display: flex;
   flex-direction: column;
+  justify-content: center;
   gap: 6px;
   flex: 1;
+  min-width: 0;
 }
 
 .offer-title {
@@ -719,7 +728,6 @@ h1, h2 {
   font-size: 1.3rem;
   font-weight: 800;
   color: var(--mint-deep);
-  margin-top: auto;
 }
 
 .offer-price span {
@@ -728,8 +736,14 @@ h1, h2 {
   font-weight: 500;
 }
 
-.offer-book-row {
-  padding: 0 16px 10px;
+.offer-side {
+  flex: 0 0 210px;
+  padding: 16px 20px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 10px;
+  border-left: 1px solid rgba(10, 61, 51, 0.08);
 }
 
 .book-btn {
@@ -748,7 +762,11 @@ h1, h2 {
 .offer-actions {
   display: flex;
   gap: 8px;
-  padding: 0 16px 16px;
+}
+
+.offer-actions .feedback-btn {
+  flex: 0 0 auto;
+  width: 42px;
 }
 
 .action-btn {
