@@ -1,0 +1,15 @@
+{
+  "name": "FitSpark – Dein Trainingscoach",
+  "short_name": "FitSpark",
+  "description": "Tagesaufgaben, Trainingspläne und Motivationsmusik in einer App.",
+  "start_url": "./index.html",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#ffe600",
+  "theme_color": "#ffe600",
+  "orientation": "portrait-primary",
+  "icons": [
+    { "src": "assets/icons/icon-192.png", "sizes": "192x192", "type": "image/png" },
+    { "src": "assets/icons/icon-512.png", "sizes": "512x512", "type": "image/png" }
+  ]
+}

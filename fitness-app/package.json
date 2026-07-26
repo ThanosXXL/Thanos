@@ -1,0 +1,51 @@
+{
+  "name": "fitspark",
+  "version": "1.0.0",
+  "description": "FitSpark – plattformübergreifende Fitness-App (Web, iOS, Android, Windows, macOS)",
+  "main": "electron/main.js",
+  "author": "",
+  "license": "MIT",
+  "scripts": {
+    "web": "http-server . -p 8080 -c-1",
+    "start": "electron .",
+    "dist": "electron-builder",
+    "cap:sync": "cap sync"
+  },
+  "devDependencies": {
+    "electron": "^31.0.0",
+    "electron-builder": "^24.13.3",
+    "http-server": "^14.1.1",
+    "@capacitor/cli": "^6.0.0"
+  },
+  "dependencies": {
+    "@capacitor/core": "^6.0.0",
+    "@capacitor/android": "^6.0.0",
+    "@capacitor/ios": "^6.0.0"
+  },
+  "build": {
+    "appId": "com.fitspark.app",
+    "productName": "FitSpark",
+    "files": [
+      "electron/**/*",
+      "index.html",
+      "manifest.json",
+      "sw.js",
+      "css/**/*",
+      "js/**/*",
+      "assets/**/*",
+      "package.json"
+    ],
+    "directories": {
+      "output": "dist"
+    },
+    "win": {
+      "target": "nsis"
+    },
+    "mac": {
+      "target": "dmg"
+    },
+    "linux": {
+      "target": "AppImage"
+    }
+  }
+}

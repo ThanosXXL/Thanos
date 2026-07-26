@@ -1,0 +1,9 @@
+{
+  "appId": "com.fitspark.app",
+  "appName": "FitSpark",
+  "webDir": ".",
+  "backgroundColor": "#ffe600",
+  "server": {
+    "androidScheme": "https"
+  }
+}
