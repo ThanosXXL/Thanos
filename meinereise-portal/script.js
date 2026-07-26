@@ -87,6 +87,8 @@
     "Guadeloupe", "Puerto Rico"
   ];
 
+  // Add "imageUrl: '...'" to any offer below to show a real photo instead
+  // of the 3D globe/icon placeholder (e.g. once a partner feed provides one).
   var OFFERS = [
     { cat: "flug", iconKey: "plane", title: "Frankfurt → Palma de Mallorca", meta: "Direktflug · 2h 20min", tags: [], price: 89, rating: 5,
       reviews: [
@@ -341,14 +343,22 @@
       image.appendChild(bestBadge);
     }
 
-    var globe = document.createElement("div");
-    globe.className = "bg-globe";
-    image.appendChild(globe);
+    if (offer.imageUrl) {
+      var photo = document.createElement("img");
+      photo.className = "offer-photo";
+      photo.src = offer.imageUrl;
+      photo.alt = offer.title;
+      image.appendChild(photo);
+    } else {
+      var globe = document.createElement("div");
+      globe.className = "bg-globe";
+      image.appendChild(globe);
 
-    var icon = document.createElement("span");
-    icon.className = "icon-3d";
-    icon.innerHTML = ICONS[offer.iconKey] || "";
-    image.appendChild(icon);
+      var icon = document.createElement("span");
+      icon.className = "icon-3d";
+      icon.innerHTML = ICONS[offer.iconKey] || "";
+      image.appendChild(icon);
+    }
 
     card.appendChild(image);
 
