@@ -19,6 +19,19 @@ const { findBrowser } = require('../scripts/find-browser');
 const PORT = Number(process.env.TEST_PORT) || 4399;
 const BASE_URL = `http://localhost:${PORT}/index.html`;
 
+// Wartet auf eine Bedingung statt auf eine feste Zeitspanne - robuster gegen
+// variable Laufzeiten (z. B. CPU-lastiges MP3-Encoding vor einem Bibliotheks-Save).
+async function waitForCondition(fn, timeoutMs) {
+  const deadline = Date.now() + timeoutMs;
+  let last;
+  while (Date.now() < deadline) {
+    last = await fn();
+    if (last) return last;
+    await new Promise((r) => setTimeout(r, 50));
+  }
+  return last;
+}
+
 function waitForServer(url, timeoutMs) {
   const deadline = Date.now() + timeoutMs;
   return new Promise((resolve, reject) => {
@@ -114,6 +127,7 @@ async function main() {
     // ---- Alle festen Equipment-Pads vorhanden & antestbar ----
     const fixedVoices = [
       'kick', 'snare', 'hihat', 'openhat', 'clap',
+      'conga', 'bongo', 'shaker', 'tabla', 'cajon',
       'riser', 'downlifter', 'impact', 'noisesweep', 'reversecymbal',
       'drumloop', 'bassloop', 'percloop', 'arploop',
       'scratchbaby', 'scratchchirp', 'scratchtransformer', 'scratchcrab', 'scratchflare', 'scratchtear'
@@ -125,7 +139,7 @@ async function main() {
       await btn.click();
       await page.waitForTimeout(15);
     }
-    record('Alle Drums/EFX/Loops/Scratch-Pads vorhanden & antestbar', allVoicesOk);
+    record('Alle Drums/Percussion/EFX/Loops/Scratch-Pads vorhanden & antestbar', allVoicesOk);
 
     // ---- Alle Vocals-Stile vorhanden, klickbar, aria-pressed korrekt ----
     const vocalStyles = ['gesang', 'woerter', 'chor', 'rapsoul', 'house', 'jazz', 'pop', 'hiphop'];
@@ -139,6 +153,28 @@ async function main() {
       if (pressed !== 'true') { vocalOk = false; console.log(`  aria-pressed falsch bei "${style}": ${pressed}`); }
     }
     record('Alle 8 Vocals-Stile vorhanden, klickbar, aria-pressed korrekt', vocalOk);
+
+    // ---- Gitarre- & Synth-Stile (generischer Stil-Umschalter) ----
+    let styleGroupOk = true;
+    for (const [base, styles] of [['guitar', ['akustik', 'electric']], ['synth', ['lead', 'pad']]]) {
+      for (const style of styles) {
+        const btn = await page.$(`.equipment-group[data-melodic="${base}"] .pad[data-style="${style}"]`);
+        if (!btn) { styleGroupOk = false; console.log(`  fehlt: [data-melodic="${base}"] [data-style="${style}"]`); continue; }
+        await btn.click();
+        await page.waitForTimeout(15);
+        const pressed = await btn.getAttribute('aria-pressed');
+        if (pressed !== 'true') { styleGroupOk = false; console.log(`  aria-pressed falsch bei ${base}/${style}: ${pressed}`); }
+      }
+    }
+    record('Gitarre- & Synth-Stile vorhanden, klickbar, aria-pressed korrekt', styleGroupOk);
+
+    // ---- Streicher & Blaeser antestbar ----
+    let orchestralOk = true;
+    for (const base of ['strings', 'brass']) {
+      const btn = await page.$(`[data-add-melodic="${base}"]`);
+      if (!btn) { orchestralOk = false; console.log(`  fehlt: [data-add-melodic="${base}"]`); }
+    }
+    record('Streicher & Bläser als Equipment vorhanden', orchestralOk);
 
     // ---- Fixed-Group hinzufuegen + Duplikat-Schutz ----
     await page.click('[data-add-fixed="scratch"]');
@@ -194,7 +230,7 @@ async function main() {
     record('Sequencer-Pattern bleibt nach Neuladen erhalten (Entwurf)', draftRestored);
 
     // ---- Sequencer: Abhoeren & Aufnehmen -> Speichern ----
-    await page.click('#seq-preview-btn');
+    await page.click('#seq-record-btn');
     let seqSaveOk = true;
     try {
       await page.waitForSelector('#seq-save-panel:not(.hidden)', { timeout: 15000 });
@@ -214,25 +250,58 @@ async function main() {
       record('WAV ist Standardformat & Export erzeugt gueltige WAV-Datei',
         wavIsDefault && isValidWav && download.suggestedFilename().endsWith('.wav'));
 
-      // Export leert Blob & Panel wieder - fuer den Bibliotheks-Test neu aufnehmen.
-      await page.click('#seq-preview-btn');
+      // ---- MP3-Export: fuer unterwegs (Handy/Tablet/Auto/andere Player) ----
+      await page.click('#seq-record-btn');
       await page.waitForSelector('#seq-save-panel:not(.hidden)', { timeout: 15000 });
+      await page.selectOption('#seq-format', 'mp3');
+      const [mp3Download] = await Promise.all([
+        page.waitForEvent('download', { timeout: 20000 }),
+        page.click('#seq-save-external')
+      ]);
+      const mp3Path = await mp3Download.path();
+      const mp3Buf = fs.readFileSync(mp3Path);
+      const isValidMp3 = mp3Buf.length > 0 && mp3Buf[0] === 0xff && (mp3Buf[1] & 0xe0) === 0xe0;
+      record('MP3-Export erzeugt gueltige MPEG-Audiodatei',
+        isValidMp3 && mp3Download.suggestedFilename().endsWith('.mp3'), `Groesse: ${mp3Buf.length} Bytes`);
+
+      // Export leert Blob & Panel wieder - fuer den Bibliotheks-Test neu aufnehmen.
+      await page.click('#seq-record-btn');
+      await page.waitForSelector('#seq-save-panel:not(.hidden)', { timeout: 15000 });
+      await page.selectOption('#seq-format', 'wav');
       await page.fill('#seq-name', 'Test-Musikstück');
       await page.click('#seq-save-internal');
-      await page.waitForTimeout(300);
-      const libCount = await page.evaluate(() => document.querySelectorAll('#library-list li:not(.empty)').length);
+      const libCount = await waitForCondition(async () => {
+        const n = await page.evaluate(() => document.querySelectorAll('#library-list li:not(.empty)').length);
+        return n >= 1 ? n : null;
+      }, 5000) || 0;
       record('Musikstück in Bibliothek gespeichert', libCount >= 1, `Eintraege: ${libCount}`);
     }
 
     // ---- Globale Werkzeugleiste: spiegelt aktiven Tab & loest Aktionen aus ----
-    const globalLabelCreate = await page.evaluate(() => document.getElementById('global-preview-btn').textContent);
+    const globalLabelsCreate = await page.evaluate(() => ({
+      listen: document.getElementById('global-listen-btn').textContent,
+      record: document.getElementById('global-record-btn').textContent
+    }));
     await page.click('.tab-btn[data-tab="upload"]');
     await page.waitForTimeout(100);
-    const globalLabelUpload = await page.evaluate(() => document.getElementById('global-preview-btn').textContent);
+    const globalLabelsUpload = await page.evaluate(() => ({
+      listen: document.getElementById('global-listen-btn').textContent,
+      record: document.getElementById('global-record-btn').textContent
+    }));
     await page.click('.tab-btn[data-tab="create"]');
     await page.waitForTimeout(100);
-    record('Globale Werkzeugleiste spiegelt Label des aktiven Ordners',
-      globalLabelCreate.includes('Abhören') && globalLabelUpload.includes('Abhören'));
+    record('Globale Werkzeugleiste spiegelt Anhören/Aufnehmen als getrennte Optionen',
+      globalLabelsCreate.listen.includes('Anhören') && globalLabelsCreate.record.includes('Aufnehmen') &&
+      globalLabelsUpload.listen.includes('Anhören') && globalLabelsUpload.record.includes('Aufnehmen'));
+
+    // ---- Globale "Öffnen"-Schaltfläche (Browser-Fallback: springt zur Bibliothek) ----
+    await page.click('#global-open-btn');
+    await page.waitForTimeout(400);
+    const openFeedbackOk = await page.evaluate(() => {
+      const toast = document.getElementById('toast');
+      return !toast.classList.contains('hidden') && toast.textContent.includes('Browser');
+    });
+    record('Globale "Öffnen"-Schaltfläche zeigt Browser-Hinweis', openFeedbackOk);
 
     // ---- Ordner 1: Upload + Auto-Mix ----
     await page.click('.tab-btn[data-tab="upload"]');
@@ -249,7 +318,19 @@ async function main() {
     await page.selectOption('#mix-track-a', { index: 1 });
     await page.selectOption('#mix-track-b', { index: 2 });
     await page.$eval('#mix-crossfade', (el) => { el.value = '1'; el.dispatchEvent(new Event('input')); });
-    await page.click('#mix-preview-btn');
+
+    // ---- "Anhören" (nur abspielen) ist von "Aufnehmen" getrennt - kein Save-Panel danach ----
+    await page.click('#mix-listen-btn');
+    let listenTogglesToStop = true;
+    try {
+      await page.waitForFunction(() => document.getElementById('mix-listen-btn').textContent.includes('Stop'), { timeout: 5000 });
+    } catch (err) { listenTogglesToStop = false; }
+    await page.waitForFunction(() => document.getElementById('mix-listen-btn').textContent.includes('Anhören'), { timeout: 15000 });
+    const savePanelStillHidden = await page.evaluate(() => document.getElementById('mix-save-panel').classList.contains('hidden'));
+    record('"Anhören" spielt nur ab - kein Save-Panel, getrennt von "Aufnehmen"',
+      listenTogglesToStop && savePanelStillHidden);
+
+    await page.click('#mix-record-btn');
     let mixSaveOk = true;
     try {
       await page.waitForSelector('#mix-save-panel:not(.hidden)', { timeout: 15000 });
@@ -258,8 +339,10 @@ async function main() {
 
     if (mixSaveOk) {
       await page.click('#mix-save-internal');
-      await page.waitForTimeout(300);
-      const libCount = await page.evaluate(() => document.querySelectorAll('#library-list li:not(.empty)').length);
+      const libCount = await waitForCondition(async () => {
+        const n = await page.evaluate(() => document.querySelectorAll('#library-list li:not(.empty)').length);
+        return n >= 2 ? n : null;
+      }, 5000) || 0;
       record('Mix in Bibliothek gespeichert', libCount >= 2, `Eintraege: ${libCount}`);
     }
 

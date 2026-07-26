@@ -1,4 +1,4 @@
-const { app, BrowserWindow, ipcMain, dialog, protocol, net } = require('electron');
+const { app, BrowserWindow, ipcMain, dialog, protocol, net, shell } = require('electron');
 const path = require('path');
 const fs = require('fs');
 const crypto = require('crypto');
@@ -154,6 +154,11 @@ ipcMain.handle('library:save', (event, { name, type, ext, bytes }) => {
   list.unshift(entry);
   saveLibrary(list);
   return list;
+});
+
+ipcMain.handle('library:open-folder', async () => {
+  const errorMessage = await shell.openPath(LIBRARY_DIR);
+  return { ok: !errorMessage, error: errorMessage || null };
 });
 
 ipcMain.handle('library:delete', (event, id) => {

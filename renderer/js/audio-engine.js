@@ -401,6 +401,248 @@ const AudioEngine = (() => {
     osc.stop(time + 0.55);
   }
 
+  // ---- Gitarre: Akustik (gedaempft, warm) & E-Gitarre (clean, laenger sustained) ----
+  function playGuitarAcoustic(destination, time, freq) {
+    const context = getCtx();
+    const osc1 = context.createOscillator();
+    osc1.type = 'triangle';
+    osc1.frequency.setValueAtTime(freq, time);
+    const osc2 = context.createOscillator();
+    osc2.type = 'sine';
+    osc2.frequency.setValueAtTime(freq * 2, time);
+    const osc2Gain = context.createGain();
+    osc2Gain.gain.value = 0.15;
+    const filter = context.createBiquadFilter();
+    filter.type = 'lowpass';
+    filter.frequency.setValueAtTime(3500, time);
+    filter.frequency.exponentialRampToValueAtTime(900, time + 0.6);
+    const gain = context.createGain();
+    gain.gain.setValueAtTime(0.0001, time);
+    gain.gain.exponentialRampToValueAtTime(0.5, time + 0.008);
+    gain.gain.exponentialRampToValueAtTime(0.0001, time + 0.7);
+    osc1.connect(filter);
+    osc2.connect(osc2Gain).connect(filter);
+    filter.connect(gain).connect(destination);
+    osc1.start(time); osc1.stop(time + 0.75);
+    osc2.start(time); osc2.stop(time + 0.75);
+  }
+
+  function playGuitarElectric(destination, time, freq) {
+    const context = getCtx();
+    const osc1 = context.createOscillator();
+    osc1.type = 'sawtooth';
+    osc1.frequency.setValueAtTime(freq, time);
+    const osc2 = context.createOscillator();
+    osc2.type = 'sawtooth';
+    osc2.frequency.setValueAtTime(freq * 1.004, time);
+    const filter = context.createBiquadFilter();
+    filter.type = 'lowpass';
+    filter.Q.value = 3;
+    filter.frequency.setValueAtTime(2200, time);
+    filter.frequency.exponentialRampToValueAtTime(700, time + 0.9);
+    const gain = context.createGain();
+    gain.gain.setValueAtTime(0.0001, time);
+    gain.gain.exponentialRampToValueAtTime(0.4, time + 0.01);
+    gain.gain.setValueAtTime(0.4, time + 0.2);
+    gain.gain.exponentialRampToValueAtTime(0.0001, time + 0.95);
+    osc1.connect(filter);
+    osc2.connect(filter);
+    filter.connect(gain).connect(destination);
+    osc1.start(time); osc1.stop(time + 1);
+    osc2.start(time); osc2.stop(time + 1);
+  }
+
+  // ---- Synth: schneidender Lead & warmes Flaechen-Pad ----
+  function playSynthLead(destination, time, freq) {
+    const context = getCtx();
+    const osc = context.createOscillator();
+    osc.type = 'sawtooth';
+    osc.frequency.setValueAtTime(freq, time);
+    const filter = context.createBiquadFilter();
+    filter.type = 'lowpass';
+    filter.Q.value = 8;
+    filter.frequency.setValueAtTime(300, time);
+    filter.frequency.exponentialRampToValueAtTime(4000, time + 0.08);
+    filter.frequency.exponentialRampToValueAtTime(800, time + 0.5);
+    const gain = context.createGain();
+    gain.gain.setValueAtTime(0.0001, time);
+    gain.gain.exponentialRampToValueAtTime(0.45, time + 0.02);
+    gain.gain.exponentialRampToValueAtTime(0.0001, time + 0.55);
+    osc.connect(filter).connect(gain).connect(destination);
+    osc.start(time); osc.stop(time + 0.6);
+  }
+
+  function playSynthPad(destination, time, freq) {
+    const context = getCtx();
+    const gain = context.createGain();
+    gain.gain.setValueAtTime(0.0001, time);
+    gain.gain.exponentialRampToValueAtTime(0.3, time + 0.5);
+    gain.gain.setValueAtTime(0.3, time + 1.0);
+    gain.gain.exponentialRampToValueAtTime(0.0001, time + 1.8);
+    const filter = context.createBiquadFilter();
+    filter.type = 'lowpass';
+    filter.frequency.value = 1600;
+    filter.connect(gain).connect(destination);
+    [1, 1.005, 0.997, 2.003].forEach((mult, i) => {
+      const osc = context.createOscillator();
+      osc.type = i === 3 ? 'sine' : 'sawtooth';
+      osc.frequency.setValueAtTime(freq * mult, time);
+      const oscGain = context.createGain();
+      oscGain.gain.value = i === 3 ? 0.1 : 0.33;
+      osc.connect(oscGain).connect(filter);
+      osc.start(time); osc.stop(time + 1.85);
+    });
+  }
+
+  // ---- Streicher & Blaeser: Orchester-/Big-Band-Farben ----
+  function playStrings(destination, time, freq) {
+    const context = getCtx();
+    const gain = context.createGain();
+    gain.gain.setValueAtTime(0.0001, time);
+    gain.gain.exponentialRampToValueAtTime(0.35, time + 0.25);
+    gain.gain.setValueAtTime(0.35, time + 0.7);
+    gain.gain.exponentialRampToValueAtTime(0.0001, time + 1.1);
+    const filter = context.createBiquadFilter();
+    filter.type = 'lowpass';
+    filter.frequency.value = 2500;
+    filter.connect(gain).connect(destination);
+    const vibrato = context.createOscillator();
+    vibrato.frequency.value = 4.5;
+    const vibratoGain = context.createGain();
+    vibratoGain.gain.value = 3;
+    vibrato.connect(vibratoGain);
+    [0.995, 1, 1.005].forEach((detune) => {
+      const osc = context.createOscillator();
+      osc.type = 'sawtooth';
+      osc.frequency.setValueAtTime(freq * detune, time);
+      vibratoGain.connect(osc.frequency);
+      osc.connect(filter);
+      osc.start(time); osc.stop(time + 1.15);
+    });
+    vibrato.start(time); vibrato.stop(time + 1.15);
+  }
+
+  function playBrass(destination, time, freq) {
+    const context = getCtx();
+    const osc1 = context.createOscillator();
+    osc1.type = 'sawtooth';
+    osc1.frequency.setValueAtTime(freq, time);
+    const osc2 = context.createOscillator();
+    osc2.type = 'square';
+    osc2.frequency.setValueAtTime(freq, time);
+    const osc2Gain = context.createGain();
+    osc2Gain.gain.value = 0.25;
+    const filter = context.createBiquadFilter();
+    filter.type = 'lowpass';
+    filter.Q.value = 2;
+    filter.frequency.setValueAtTime(500, time);
+    filter.frequency.exponentialRampToValueAtTime(3200, time + 0.1);
+    filter.frequency.setValueAtTime(3200, time + 0.35);
+    filter.frequency.exponentialRampToValueAtTime(600, time + 0.65);
+    const gain = context.createGain();
+    gain.gain.setValueAtTime(0.0001, time);
+    gain.gain.exponentialRampToValueAtTime(0.4, time + 0.06);
+    gain.gain.setValueAtTime(0.4, time + 0.4);
+    gain.gain.exponentialRampToValueAtTime(0.0001, time + 0.7);
+    osc1.connect(filter);
+    osc2.connect(osc2Gain).connect(filter);
+    filter.connect(gain).connect(destination);
+    osc1.start(time); osc1.stop(time + 0.75);
+    osc2.start(time); osc2.stop(time + 0.75);
+  }
+
+  // ---- Percussion/World: Conga, Bongo, Shaker, Tabla, Cajon ----
+  function playConga(destination, time) {
+    const context = getCtx();
+    const osc = context.createOscillator();
+    osc.type = 'sine';
+    osc.frequency.setValueAtTime(300, time);
+    osc.frequency.exponentialRampToValueAtTime(180, time + 0.12);
+    const gain = context.createGain();
+    gain.gain.setValueAtTime(0.7, time);
+    gain.gain.exponentialRampToValueAtTime(0.001, time + 0.25);
+    osc.connect(gain).connect(destination);
+    osc.start(time); osc.stop(time + 0.3);
+  }
+
+  function playBongo(destination, time) {
+    const context = getCtx();
+    const osc = context.createOscillator();
+    osc.type = 'sine';
+    osc.frequency.setValueAtTime(500, time);
+    osc.frequency.exponentialRampToValueAtTime(320, time + 0.08);
+    const gain = context.createGain();
+    gain.gain.setValueAtTime(0.6, time);
+    gain.gain.exponentialRampToValueAtTime(0.001, time + 0.15);
+    osc.connect(gain).connect(destination);
+    osc.start(time); osc.stop(time + 0.2);
+  }
+
+  function playShaker(destination, time) {
+    const context = getCtx();
+    const noise = context.createBufferSource();
+    noise.buffer = noiseBuffer(context, 0.12);
+    const filter = context.createBiquadFilter();
+    filter.type = 'bandpass';
+    filter.frequency.value = 6000;
+    filter.Q.value = 0.8;
+    const gain = context.createGain();
+    gain.gain.setValueAtTime(0.4, time);
+    gain.gain.exponentialRampToValueAtTime(0.001, time + 0.12);
+    noise.connect(filter).connect(gain).connect(destination);
+    noise.start(time); noise.stop(time + 0.12);
+  }
+
+  function playTabla(destination, time) {
+    const context = getCtx();
+    const osc = context.createOscillator();
+    osc.type = 'sine';
+    osc.frequency.setValueAtTime(220, time);
+    osc.frequency.exponentialRampToValueAtTime(110, time + 0.18);
+    const gain = context.createGain();
+    gain.gain.setValueAtTime(0.6, time);
+    gain.gain.exponentialRampToValueAtTime(0.001, time + 0.22);
+    osc.connect(gain).connect(destination);
+
+    const click = context.createBufferSource();
+    click.buffer = noiseBuffer(context, 0.02);
+    const clickFilter = context.createBiquadFilter();
+    clickFilter.type = 'highpass';
+    clickFilter.frequency.value = 3000;
+    const clickGain = context.createGain();
+    clickGain.gain.setValueAtTime(0.3, time);
+    clickGain.gain.exponentialRampToValueAtTime(0.001, time + 0.02);
+    click.connect(clickFilter).connect(clickGain).connect(destination);
+
+    osc.start(time); osc.stop(time + 0.25);
+    click.start(time); click.stop(time + 0.02);
+  }
+
+  function playCajon(destination, time) {
+    const context = getCtx();
+    const osc = context.createOscillator();
+    osc.type = 'sine';
+    osc.frequency.setValueAtTime(130, time);
+    osc.frequency.exponentialRampToValueAtTime(55, time + 0.15);
+    const gain = context.createGain();
+    gain.gain.setValueAtTime(0.8, time);
+    gain.gain.exponentialRampToValueAtTime(0.001, time + 0.3);
+    osc.connect(gain).connect(destination);
+
+    const noise = context.createBufferSource();
+    noise.buffer = noiseBuffer(context, 0.08);
+    const noiseFilter = context.createBiquadFilter();
+    noiseFilter.type = 'highpass';
+    noiseFilter.frequency.value = 2000;
+    const noiseGain = context.createGain();
+    noiseGain.gain.setValueAtTime(0.35, time);
+    noiseGain.gain.exponentialRampToValueAtTime(0.001, time + 0.08);
+    noise.connect(noiseFilter).connect(noiseGain).connect(destination);
+
+    osc.start(time); osc.stop(time + 0.35);
+    noise.start(time); noise.stop(time + 0.08);
+  }
+
   // ---- EFX: einschlaegige DJ-/Produktions-Effekte ----
   function playRiser(destination, time) {
     const context = getCtx();
@@ -552,7 +794,18 @@ const AudioEngine = (() => {
     scratchtransformer: (dest, t) => playScratchTransformer(dest, t),
     scratchcrab: (dest, t) => playScratchCrab(dest, t),
     scratchflare: (dest, t) => playScratchFlare(dest, t),
-    scratchtear: (dest, t) => playScratchTear(dest, t)
+    scratchtear: (dest, t) => playScratchTear(dest, t),
+    'guitar-akustik': (dest, t, note) => playGuitarAcoustic(dest, t, note),
+    'guitar-electric': (dest, t, note) => playGuitarElectric(dest, t, note),
+    'synth-lead': (dest, t, note) => playSynthLead(dest, t, note),
+    'synth-pad': (dest, t, note) => playSynthPad(dest, t, note),
+    strings: (dest, t, note) => playStrings(dest, t, note),
+    brass: (dest, t, note) => playBrass(dest, t, note),
+    conga: (dest, t) => playConga(dest, t),
+    bongo: (dest, t) => playBongo(dest, t),
+    shaker: (dest, t) => playShaker(dest, t),
+    tabla: (dest, t) => playTabla(dest, t),
+    cajon: (dest, t) => playCajon(dest, t)
   };
 
   function triggerVoice(voiceId, destination, time, note) {
@@ -635,5 +888,38 @@ const AudioEngine = (() => {
     return encodeWav(audioBuffer);
   }
 
-  return { getCtx, loadBuffer, triggerVoice, createRecorder, blobToWav, VOICES };
+  // ---- MP3-Export: fuer unterwegs (Handy, Tablet, Auto, andere Player) - per
+  // lokal gebuendeltem lamejs (renderer/vendor/lame.min.js, kein CDN/Netzwerk).
+  function floatTo16BitPCM(channelData) {
+    const out = new Int16Array(channelData.length);
+    for (let i = 0; i < channelData.length; i++) {
+      const s = Math.max(-1, Math.min(1, channelData[i]));
+      out[i] = s < 0 ? s * 0x8000 : s * 0x7fff;
+    }
+    return out;
+  }
+
+  async function blobToMp3(blob) {
+    const context = getCtx();
+    const arrayBuffer = await blob.arrayBuffer();
+    const audioBuffer = await context.decodeAudioData(arrayBuffer);
+    const numChannels = Math.min(2, audioBuffer.numberOfChannels);
+    const encoder = new lamejs.Mp3Encoder(numChannels, audioBuffer.sampleRate, 192);
+    const left = floatTo16BitPCM(audioBuffer.getChannelData(0));
+    const right = numChannels > 1 ? floatTo16BitPCM(audioBuffer.getChannelData(1)) : null;
+    const blockSize = 1152;
+    const chunks = [];
+    for (let i = 0; i < left.length; i += blockSize) {
+      const leftChunk = left.subarray(i, i + blockSize);
+      const mp3buf = right
+        ? encoder.encodeBuffer(leftChunk, right.subarray(i, i + blockSize))
+        : encoder.encodeBuffer(leftChunk);
+      if (mp3buf.length) chunks.push(mp3buf);
+    }
+    const end = encoder.flush();
+    if (end.length) chunks.push(end);
+    return new Blob(chunks, { type: 'audio/mpeg' });
+  }
+
+  return { getCtx, loadBuffer, triggerVoice, createRecorder, blobToWav, blobToMp3, VOICES };
 })();

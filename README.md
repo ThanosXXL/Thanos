@@ -7,13 +7,15 @@ Desktop-Musik-App (Electron) im Design "frisches Grün auf Schwarz". Music Heave
    **vollautomatisch** ineinander – entweder als **nahtloser Crossfade** oder als
    simulierter **Scratch-Übergang** (Pitch-/Tempo-Wobble mit Cut, wie beim DJ-Scratchen).
 2. **Ordner 2 – Musikstücke selbst kreieren**: Eigenes Musikstück aus Equipment bauen –
-   Drums (Kick, Snare, Hi-Hat, Open Hat, Clap), Piano, Saxophon, Bass,
+   Drums (Kick, Snare, Hi-Hat, Open Hat, Clap), **Percussion/World** (Conga, Bongo, Shaker,
+   Tabla, Cajón), Piano, Saxophon, **Gitarre** (Akustik & E-Gitarre), **Synth** (Lead & Pad),
+   Vocals mit acht wählbaren Stilen (Gesang, Einzelne Wörter, Chor, Rap/Soul, House/Electro,
+   Jazz, Pop, Hip Hop), Bass, **Streicher** und **Bläser**,
    **EFX** (Riser, Downlifter, Impact, Noise Sweep, Reverse Cymbal), **Loops**
-   (Drum Loop, Bass Loop, Perc Loop, Arp Loop), **Vocals** mit acht wählbaren Stilen
-   (Gesang, Einzelne Wörter, Chor, Rap/Soul, House/Electro, Jazz, Pop, Hip Hop) und
-   **Scratch** mit sechs klassischen Turntablism-Techniken (Baby Scratch, Chirp Scratch,
-   Transformer, Crab Scratch, Flare Scratch, Tear Scratch). Noten auswählen, Spuren zum
-   Step-Sequencer hinzufügen, Pattern anklicken, Tempo einstellen.
+   (Drum Loop, Bass Loop, Perc Loop, Arp Loop) und **Scratch** mit sechs klassischen
+   Turntablism-Techniken (Baby Scratch, Chirp Scratch, Transformer, Crab Scratch, Flare Scratch,
+   Tear Scratch). Noten auswählen, Spuren zum Step-Sequencer hinzufügen, Pattern anklicken,
+   Tempo einstellen.
    Alle Equipment-Pads haben einen glänzenden, gewölbten 3D-Tasten-Look (Hochglanz-Highlight,
    Tiefenschatten, die beim Klicken sichtbar "eindrücken").
 
@@ -34,22 +36,37 @@ Sample-Material nötig).
 ## Immer sichtbare Werkzeugleiste
 
 Ganz oben, unter dem Titel, steht unabhängig vom aktiven Ordner immer dieselbe Leiste im
-grün-schwarzen 3D-Tasten-Look zur Verfügung: **▶ Abhören**, **💾 Speichern** und
-**💾 Speichern unter…**. Sie wirkt jeweils auf den Ordner, der gerade aktiv ist (Mix aus
-Ordner 1 oder Musikstück aus Ordner 2), spiegelt Beschriftung und Status der entsprechenden
-Schaltfläche im aktiven Ordner und meldet sich, falls noch keine Aufnahme zum Speichern vorliegt.
+grün-schwarzen 3D-Tasten-Look zur Verfügung: **▶ Anhören**, **⏺ Aufnehmen**, **💾 Speichern**,
+**💾 Speichern unter…** und **📂 Öffnen** – fünf einzelne, immer anklickbare Optionen (kein
+kombinierter Button). Die ersten vier wirken jeweils auf den Ordner, der gerade aktiv ist (Mix
+aus Ordner 1 oder Musikstück aus Ordner 2), spiegeln Beschriftung und Status der entsprechenden
+Schaltfläche im aktiven Ordner und melden sich, falls noch keine Aufnahme zum Speichern
+vorliegt. **📂 Öffnen** öffnet den Ordner mit der gespeicherten Musik direkt im Datei-Explorer
+des Betriebssystems (Electron); im Browser springt es stattdessen zur Bibliothek weiter unten
+auf der Seite, da Browser keinen Zugriff auf das Dateisystem haben.
 
-## Abhören vor dem Speichern
+## Anhören vor dem Speichern
 
-Beide Ordner haben denselben Ablauf:
+Beide Ordner haben denselben Ablauf, jeweils als getrennte Optionen:
 
-- **▶ Abhören & aufnehmen** spielt den Mix bzw. das Musikstück ab und nimmt genau diese
-  Wiedergabe gleichzeitig auf – immer in bestmöglicher Qualität (320 kbit/s bei der Aufnahme).
-- Danach lässt sich ein **Format** wählen: **WAV** (unkomprimiert, beste Qualität, Standard –
-  kompatibel mit jeder DAW/jedem Player) oder **WebM** (kompakter). Das Ergebnis lässt sich:
+- **▶ Anhören** spielt den Mix bzw. das Musikstück nur ab – zum Reinhören, ohne dass etwas
+  aufgenommen oder das Speichern-Panel geöffnet wird.
+- **⏺ Aufnehmen** spielt dieselbe Wiedergabe ab und nimmt sie gleichzeitig auf – immer in
+  bestmöglicher Qualität (320 kbit/s). Danach öffnet sich das Speichern-Panel.
+- Dort lässt sich ein **Format** wählen:
+  - **WAV** (unkomprimiert, beste Qualität, Standard – kompatibel mit jeder DAW/jedem Player),
+  - **MP3** (kompakt und auf praktisch jedem Gerät abspielbar – ideal für unterwegs auf
+    PC, Tablet, Handy, im Auto oder auf anderen Playern), oder
+  - **WebM** (am kompaktesten).
+
+  Das Ergebnis lässt sich:
   - **in Music Heaven speichern** (interne Bibliothek, sichtbar am Ende der App), oder
   - **extern speichern unter…** (freie Ordnerauswahl über den nativen Speichern-Dialog), oder
   - **verwerfen**, um es neu abzumischen/aufzunehmen.
+
+Der MP3-Export läuft komplett lokal im Browser/in der App über die mitgelieferte
+`renderer/vendor/lame.min.js` (JavaScript-Port des LAME-Encoders, LGPL-lizenziert) – ganz ohne
+Internetverbindung oder externen Dienst.
 
 ## Fertigen Installer herunterladen (ohne Terminal)
 
@@ -129,12 +146,14 @@ Erzeugt eine installierbare Desktop-Anwendung (Windows/macOS/Linux) im Ordner `d
 npm test
 ```
 
-`tests/run-tests.js` prüft automatisiert die wichtigsten Abläufe (Equipment-Pads,
-Vocals-Stile, Fixed-Groups mit Duplikat-Schutz, 32-Step/2-Takte-Umschaltung, Mute/Solo,
-Master-Lautstärke, Pattern-Persistenz über einen Reload, WAV-Export, globale Werkzeugleiste,
-Sequencer-Aufnahme, Upload & Auto-Mix) in der Browser-Variante. Genutzt wird eine lokal
-installierte Chromium/Chrome/Edge-Instanz (kein Browser-Download nötig, siehe
-`scripts/find-browser.js`) über `playwright-core`.
+`tests/run-tests.js` prüft automatisiert die wichtigsten Abläufe (Equipment-Pads inkl.
+Percussion/World, Gitarre-/Synth-Stile, Streicher/Bläser, Vocals-Stile, Fixed-Groups mit
+Duplikat-Schutz, 32-Step/2-Takte-Umschaltung, Mute/Solo, Master-Lautstärke, Pattern-Persistenz
+über einen Reload, getrennte Anhören-/Aufnehmen-Optionen, WAV- & MP3-Export, globale
+Werkzeugleiste inkl. „Öffnen", Sequencer-Aufnahme, Upload & Auto-Mix) in der Browser-Variante.
+Genutzt wird eine lokal installierte
+Chromium/Chrome/Edge-Instanz (kein Browser-Download nötig, siehe `scripts/find-browser.js`)
+über `playwright-core`.
 
 ## Nutzerhandbuch als PDF erzeugen
 

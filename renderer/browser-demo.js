@@ -119,8 +119,14 @@
     return records.map(withUrl);
   }
 
+  function extToMime(ext) {
+    if (ext === 'wav') return 'audio/wav';
+    if (ext === 'mp3') return 'audio/mpeg';
+    return 'audio/webm';
+  }
+
   async function saveToLibrary({ name, type, ext, bytes }) {
-    const mime = ext === 'wav' ? 'audio/wav' : 'audio/webm';
+    const mime = extToMime(ext);
     await put('library', {
       id: genId(),
       name: name && name.trim() ? name.trim() : `Music Heaven ${new Date().toLocaleString()}`,
@@ -139,7 +145,7 @@
   }
 
   async function saveExternal({ name, ext, bytes }) {
-    const mime = ext === 'wav' ? 'audio/wav' : 'audio/webm';
+    const mime = extToMime(ext);
     const blob = new Blob([bytes], { type: mime });
     const filename = `${(name || 'music-heaven-export').replace(/[\\/:*?"<>|]/g, '_')}.${ext || 'webm'}`;
 
@@ -167,6 +173,12 @@
     return { ok: true, path: filename };
   }
 
+  async function openLibraryFolder() {
+    // Im Browser gibt es kein OS-Dateisystem zum Oeffnen - die App zeigt
+    // stattdessen die Bibliothek weiter unten auf der Seite an.
+    return { ok: false, browserFallback: true };
+  }
+
   window.musicHeaven = {
     listUploads,
     chooseUploads,
@@ -174,7 +186,8 @@
     listLibrary,
     saveToLibrary,
     deleteLibraryItem,
-    saveExternal
+    saveExternal,
+    openLibraryFolder
   };
 
   window.addEventListener('DOMContentLoaded', () => {

@@ -9,6 +9,9 @@
     gesang: 'Gesang', woerter: 'Einzelne Wörter', chor: 'Chor', rapsoul: 'Rap/Soul',
     house: 'House/Electro', jazz: 'Jazz', pop: 'Pop', hiphop: 'Hip Hop'
   };
+  const GUITAR_STYLE_NAMES = { akustik: 'Akustik', electric: 'E-Gitarre' };
+  const SYNTH_STYLE_NAMES = { lead: 'Lead', pad: 'Pad' };
+  const BASE_LABELS = { piano: 'Piano', sax: 'Saxophon', bass: 'Bass', strings: 'Streicher', brass: 'Bläser' };
 
   const capitalize = (s) => s.charAt(0).toUpperCase() + s.slice(1);
   const genId = () => `t_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`;
@@ -16,11 +19,14 @@
     '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'
   }[c]));
 
-  // Wandelt eine Aufnahme bei Bedarf verlustfrei nach WAV um (bester Qualitaet),
-  // sonst bleibt es beim kompakten WebM-Original.
+  // Wandelt eine Aufnahme bei Bedarf nach WAV (verlustfrei) oder MP3 (fuer
+  // unterwegs) um, sonst bleibt es beim kompakten WebM-Original.
   async function prepareExport(blob, format) {
     if (format === 'wav') {
       return { blob: await AudioEngine.blobToWav(blob), ext: 'wav' };
+    }
+    if (format === 'mp3') {
+      return { blob: await AudioEngine.blobToMp3(blob), ext: 'mp3' };
     }
     return { blob, ext: 'webm' };
   }
@@ -68,7 +74,8 @@
   const mixStyleEl = document.getElementById('mix-style');
   const mixCrossfadeEl = document.getElementById('mix-crossfade');
   const mixCrossfadeValueEl = document.getElementById('mix-crossfade-value');
-  const mixPreviewBtn = document.getElementById('mix-preview-btn');
+  const mixListenBtn = document.getElementById('mix-listen-btn');
+  const mixRecordBtn = document.getElementById('mix-record-btn');
   const mixStatusEl = document.getElementById('mix-status');
   const mixSavePanel = document.getElementById('mix-save-panel');
   const mixNameEl = document.getElementById('mix-name');
@@ -147,7 +154,10 @@
   let mixState = null;
   let mixBlob = null;
 
-  async function startMixPreview() {
+  // mode: 'listen' spielt nur ab, 'record' spielt ab UND nimmt die Wiedergabe
+  // fuer den Save-Panel gleichzeitig auf - zwei getrennte Optionen statt einer
+  // kombinierten Schaltflaeche.
+  async function startMix(mode) {
     const selectedIds = getMixSelectionIds();
     if (!selectedIds.length) {
       showToast('Bitte mindestens einen Track auswählen.', true);
@@ -169,36 +179,50 @@
 
     const masterGain = ctx.createGain();
     masterGain.connect(ctx.destination);
-    const recorder = AudioEngine.createRecorder(ctx, masterGain);
-    recorder.start();
+    let recorder = null;
+    if (mode === 'record') {
+      recorder = AudioEngine.createRecorder(ctx, masterGain);
+      recorder.start();
+    }
 
     const style = mixStyleEl.value;
     const crossfade = parseFloat(mixCrossfadeEl.value);
     const { sources, duration } = Mixer.schedule(ctx, masterGain, buffers, style, crossfade);
 
     mixState = { sources, recorder, masterGain, timer: null };
-    mixPreviewBtn.textContent = '■ Stop';
-    setMixStatus('Wird abgespielt & aufgenommen…');
-    mixState.timer = setTimeout(() => finishMixPreview(), Math.max(300, duration * 1000 + 500));
+    mixListenBtn.textContent = mode === 'listen' ? '■ Stop' : '▶ Anhören';
+    mixRecordBtn.textContent = mode === 'record' ? '■ Stop' : '⏺ Aufnehmen';
+    setMixStatus(mode === 'record' ? 'Wird abgespielt & aufgenommen…' : 'Wird abgespielt…');
+    mixState.timer = setTimeout(() => finishMix(), Math.max(300, duration * 1000 + 500));
   }
 
-  async function finishMixPreview() {
+  async function finishMix() {
     if (!mixState) return;
     const state = mixState;
     mixState = null;
     clearTimeout(state.timer);
     Mixer.stopAll(state.sources);
-    const blob = await state.recorder.stop();
+    const blob = state.recorder ? await state.recorder.stop() : null;
     state.masterGain.disconnect();
-    mixPreviewBtn.textContent = '▶ Abhören & aufnehmen';
-    setMixStatus('Vorschau bereit zum Speichern.');
-    mixBlob = blob;
-    mixSavePanel.classList.remove('hidden');
+    mixListenBtn.textContent = '▶ Anhören';
+    mixRecordBtn.textContent = '⏺ Aufnehmen';
+    if (blob) {
+      setMixStatus('Vorschau bereit zum Speichern.');
+      mixBlob = blob;
+      mixSavePanel.classList.remove('hidden');
+    } else {
+      setMixStatus('');
+    }
   }
 
-  mixPreviewBtn.addEventListener('click', () => {
-    if (mixState) finishMixPreview();
-    else startMixPreview();
+  mixListenBtn.addEventListener('click', () => {
+    if (mixState) finishMix();
+    else startMix('listen');
+  });
+
+  mixRecordBtn.addEventListener('click', () => {
+    if (mixState) finishMix();
+    else startMix('record');
   });
 
   function resetMixSavePanel() {
@@ -244,7 +268,8 @@
   const seqMasterValueEl = document.getElementById('seq-master-value');
   const seqBarsEl = document.getElementById('seq-bars');
   const seqResetBtn = document.getElementById('seq-reset');
-  const seqPreviewBtn = document.getElementById('seq-preview-btn');
+  const seqListenBtn = document.getElementById('seq-listen-btn');
+  const seqRecordBtn = document.getElementById('seq-record-btn');
   const seqStatusEl = document.getElementById('seq-status');
   const seqSavePanel = document.getElementById('seq-save-panel');
   const seqNameEl = document.getElementById('seq-name');
@@ -289,12 +314,37 @@
     });
   });
 
+  // Generischer Stil-Umschalter fuer Equipment-Gruppen mit mehreren Klangvarianten
+  // (aktuell Gitarre: Akustik/E-Gitarre, Synth: Lead/Pad) - analog zu Vocals oben.
+  function createStyleGroup(base, defaultStyle) {
+    const state = { style: defaultStyle };
+    const group = document.querySelector(`.equipment-group[data-melodic="${base}"]`);
+    group.querySelectorAll('.pad[data-style]').forEach((btn) => {
+      btn.addEventListener('click', () => {
+        state.style = btn.dataset.style;
+        group.querySelectorAll('.pad[data-style]').forEach((b) => {
+          const isSelected = b === btn;
+          b.classList.toggle('selected', isSelected);
+          b.setAttribute('aria-pressed', String(isSelected));
+        });
+        const note = group.querySelector('.note-select').value;
+        const ctx = AudioEngine.getCtx();
+        AudioEngine.triggerVoice(`${base}-${state.style}`, ctx.destination, ctx.currentTime, NOTE_FREQS[note]);
+      });
+    });
+    return state;
+  }
+
+  const guitarState = createStyleGroup('guitar', 'akustik');
+  const synthState = createStyleGroup('synth', 'lead');
+  const STYLE_GETTERS = { vocal: () => vocalStyle, guitar: () => guitarState.style, synth: () => synthState.style };
+
   document.querySelectorAll('.equipment-group[data-melodic] .note-select').forEach((select) => {
     const group = select.closest('.equipment-group');
     const baseVoice = group.dataset.melodic;
     select.addEventListener('change', () => {
       const ctx = AudioEngine.getCtx();
-      const voice = baseVoice === 'vocal' ? `vocal-${vocalStyle}` : baseVoice;
+      const voice = STYLE_GETTERS[baseVoice] ? `${baseVoice}-${STYLE_GETTERS[baseVoice]()}` : baseVoice;
       AudioEngine.triggerVoice(voice, ctx.destination, ctx.currentTime, NOTE_FREQS[select.value]);
     });
   });
@@ -304,6 +354,7 @@
 
   const FIXED_GROUPS = {
     drums: [['kick', 'Kick'], ['snare', 'Snare'], ['hihat', 'Hi-Hat'], ['openhat', 'Open Hat'], ['clap', 'Clap']],
+    percussion: [['conga', 'Conga'], ['bongo', 'Bongo'], ['shaker', 'Shaker'], ['tabla', 'Tabla'], ['cajon', 'Cajón']],
     efx: [['riser', 'Riser'], ['downlifter', 'Downlifter'], ['impact', 'Impact'], ['noisesweep', 'Noise Sweep'], ['reversecymbal', 'Reverse Cymbal']],
     loops: [['drumloop', 'Drum Loop'], ['bassloop', 'Bass Loop'], ['percloop', 'Perc Loop'], ['arploop', 'Arp Loop']],
     scratch: [
@@ -311,7 +362,7 @@
       ['scratchcrab', 'Crab Scratch'], ['scratchflare', 'Flare Scratch'], ['scratchtear', 'Tear Scratch']
     ]
   };
-  const FIXED_GROUP_NAMES = { drums: 'Drums', efx: 'EFX', loops: 'Loops', scratch: 'Scratch' };
+  const FIXED_GROUP_NAMES = { drums: 'Drums', percussion: 'Percussion/World', efx: 'EFX', loops: 'Loops', scratch: 'Scratch' };
   const addedFixedGroups = new Set();
 
   document.querySelectorAll('[data-add-fixed]').forEach((btn) => {
@@ -334,10 +385,16 @@
       const group = btn.closest('.equipment-group');
       const note = group.querySelector('.note-select').value;
       let voice = base;
-      let label = `${capitalize(base)} ${note}`;
+      let label = `${BASE_LABELS[base] || capitalize(base)} ${note}`;
       if (base === 'vocal') {
         voice = `vocal-${vocalStyle}`;
         label = `Vocals – ${VOCAL_STYLE_NAMES[vocalStyle]} (${note})`;
+      } else if (base === 'guitar') {
+        voice = `guitar-${guitarState.style}`;
+        label = `Gitarre – ${GUITAR_STYLE_NAMES[guitarState.style]} (${note})`;
+      } else if (base === 'synth') {
+        voice = `synth-${synthState.style}`;
+        label = `Synth – ${SYNTH_STYLE_NAMES[synthState.style]} (${note})`;
       }
       seqTracks.push(Sequencer.createTrack(genId(), voice, NOTE_FREQS[note], label, seqStepCount));
       renderSeqGrid();
@@ -440,7 +497,10 @@
   let seqState = null;
   let seqBlob = null;
 
-  async function startSeqPreview() {
+  // mode: 'listen' spielt nur ab, 'record' spielt ab UND nimmt die Wiedergabe
+  // fuer den Save-Panel gleichzeitig auf - zwei getrennte Optionen statt einer
+  // kombinierten Schaltflaeche.
+  async function startSeq(mode) {
     if (!seqTracks.length || !seqTracks.some((t) => t.steps.some(Boolean))) {
       showToast('Bitte zuerst Equipment-Spuren hinzufügen und Steps aktivieren.', true);
       return;
@@ -449,38 +509,52 @@
     const masterGain = ctx.createGain();
     masterGain.gain.value = parseInt(seqMasterEl.value, 10) / 100;
     masterGain.connect(ctx.destination);
-    const recorder = AudioEngine.createRecorder(ctx, masterGain);
-    recorder.start();
+    let recorder = null;
+    if (mode === 'record') {
+      recorder = AudioEngine.createRecorder(ctx, masterGain);
+      recorder.start();
+    }
 
     const bpm = parseInt(seqBpmEl.value, 10);
     const loops = parseInt(seqLoopsEl.value, 10);
     const { cancel } = Sequencer.play(ctx, masterGain, seqTracks, bpm, loops, seqStepCount, (step, done) => {
-      if (done) setTimeout(() => finishSeqPreview(), 1000);
+      if (done) setTimeout(() => finishSeq(), 1000);
       else highlightStep(step);
     });
 
     seqState = { masterGain, recorder, cancel };
-    seqPreviewBtn.textContent = '■ Stop';
-    setSeqStatus('Wird abgespielt & aufgenommen…');
+    seqListenBtn.textContent = mode === 'listen' ? '■ Stop' : '▶ Anhören';
+    seqRecordBtn.textContent = mode === 'record' ? '■ Stop' : '⏺ Aufnehmen';
+    setSeqStatus(mode === 'record' ? 'Wird abgespielt & aufgenommen…' : 'Wird abgespielt…');
   }
 
-  async function finishSeqPreview() {
+  async function finishSeq() {
     if (!seqState) return;
     const state = seqState;
     seqState = null;
     state.cancel();
     highlightStep(-1);
-    const blob = await state.recorder.stop();
+    const blob = state.recorder ? await state.recorder.stop() : null;
     state.masterGain.disconnect();
-    seqPreviewBtn.textContent = '▶ Abhören & aufnehmen';
-    setSeqStatus('Vorschau bereit zum Speichern.');
-    seqBlob = blob;
-    seqSavePanel.classList.remove('hidden');
+    seqListenBtn.textContent = '▶ Anhören';
+    seqRecordBtn.textContent = '⏺ Aufnehmen';
+    if (blob) {
+      setSeqStatus('Vorschau bereit zum Speichern.');
+      seqBlob = blob;
+      seqSavePanel.classList.remove('hidden');
+    } else {
+      setSeqStatus('');
+    }
   }
 
-  seqPreviewBtn.addEventListener('click', () => {
-    if (seqState) finishSeqPreview();
-    else startSeqPreview();
+  seqListenBtn.addEventListener('click', () => {
+    if (seqState) finishSeq();
+    else startSeq('listen');
+  });
+
+  seqRecordBtn.addEventListener('click', () => {
+    if (seqState) finishSeq();
+    else startSeq('record');
   });
 
   function resetSeqSavePanel() {
@@ -617,53 +691,72 @@
   // =====================================================================
   // Globale Werkzeugleiste (immer sichtbar, unabhängig vom aktiven Ordner)
   // =====================================================================
-  const globalPreviewBtn = document.getElementById('global-preview-btn');
+  const globalListenBtn = document.getElementById('global-listen-btn');
+  const globalRecordBtn = document.getElementById('global-record-btn');
   const globalSaveBtn = document.getElementById('global-save-btn');
   const globalSaveAsBtn = document.getElementById('global-save-as-btn');
+  const globalOpenBtn = document.getElementById('global-open-btn');
   const globalToolbarStatusEl = document.getElementById('global-toolbar-status');
 
   function activeOrdner() {
     return document.getElementById('tab-create').classList.contains('active') ? 'create' : 'upload';
   }
 
-  function syncGlobalPreviewLabel() {
+  function syncGlobalLabels() {
     const isCreate = activeOrdner() === 'create';
-    globalPreviewBtn.textContent = isCreate ? seqPreviewBtn.textContent : mixPreviewBtn.textContent;
+    globalListenBtn.textContent = isCreate ? seqListenBtn.textContent : mixListenBtn.textContent;
+    globalRecordBtn.textContent = isCreate ? seqRecordBtn.textContent : mixRecordBtn.textContent;
     globalToolbarStatusEl.textContent = isCreate ? seqStatusEl.textContent : mixStatusEl.textContent;
   }
 
-  new MutationObserver(syncGlobalPreviewLabel).observe(mixPreviewBtn, { characterData: true, childList: true, subtree: true });
-  new MutationObserver(syncGlobalPreviewLabel).observe(seqPreviewBtn, { characterData: true, childList: true, subtree: true });
-  new MutationObserver(syncGlobalPreviewLabel).observe(mixStatusEl, { characterData: true, childList: true, subtree: true });
-  new MutationObserver(syncGlobalPreviewLabel).observe(seqStatusEl, { characterData: true, childList: true, subtree: true });
+  [mixListenBtn, mixRecordBtn, seqListenBtn, seqRecordBtn, mixStatusEl, seqStatusEl].forEach((el) => {
+    new MutationObserver(syncGlobalLabels).observe(el, { characterData: true, childList: true, subtree: true });
+  });
 
   document.querySelectorAll('.tab-btn').forEach((btn) => {
-    btn.addEventListener('click', syncGlobalPreviewLabel);
+    btn.addEventListener('click', syncGlobalLabels);
   });
-  syncGlobalPreviewLabel();
+  syncGlobalLabels();
 
-  globalPreviewBtn.addEventListener('click', () => {
-    const target = activeOrdner() === 'create' ? seqPreviewBtn : mixPreviewBtn;
+  globalListenBtn.addEventListener('click', () => {
+    const target = activeOrdner() === 'create' ? seqListenBtn : mixListenBtn;
+    target.click();
+  });
+
+  globalRecordBtn.addEventListener('click', () => {
+    const target = activeOrdner() === 'create' ? seqRecordBtn : mixRecordBtn;
     target.click();
   });
 
   globalSaveBtn.addEventListener('click', () => {
     if (activeOrdner() === 'create') {
-      if (!seqBlob) { showToast('Bitte zuerst abhören & aufnehmen.', true); return; }
+      if (!seqBlob) { showToast('Bitte zuerst aufnehmen.', true); return; }
       document.getElementById('seq-save-internal').click();
     } else {
-      if (!mixBlob) { showToast('Bitte zuerst abhören & aufnehmen.', true); return; }
+      if (!mixBlob) { showToast('Bitte zuerst aufnehmen.', true); return; }
       document.getElementById('mix-save-internal').click();
     }
   });
 
   globalSaveAsBtn.addEventListener('click', () => {
     if (activeOrdner() === 'create') {
-      if (!seqBlob) { showToast('Bitte zuerst abhören & aufnehmen.', true); return; }
+      if (!seqBlob) { showToast('Bitte zuerst aufnehmen.', true); return; }
       document.getElementById('seq-save-external').click();
     } else {
-      if (!mixBlob) { showToast('Bitte zuerst abhören & aufnehmen.', true); return; }
+      if (!mixBlob) { showToast('Bitte zuerst aufnehmen.', true); return; }
       document.getElementById('mix-save-external').click();
+    }
+  });
+
+  globalOpenBtn.addEventListener('click', async () => {
+    const result = await window.musicHeaven.openLibraryFolder();
+    if (result && result.ok) {
+      showToast('Ordner mit gespeicherter Musik geöffnet.');
+    } else if (result && result.browserFallback) {
+      document.querySelector('.library-card').scrollIntoView({ behavior: 'smooth', block: 'start' });
+      showToast('Im Browser: Bibliothek unten – zum Herunterladen „Speichern unter…“ nutzen.');
+    } else {
+      showToast('Ordner konnte nicht geöffnet werden.', true);
     }
   });
 

@@ -25,9 +25,11 @@
   </header>
 
   <div class="global-toolbar">
-    <button id="global-preview-btn" class="pad pad-lg">▶ Abhören</button>
+    <button id="global-listen-btn" class="pad pad-lg">▶ Anhören</button>
+    <button id="global-record-btn" class="pad pad-lg">⏺ Aufnehmen</button>
     <button id="global-save-btn" class="pad pad-lg">💾 Speichern</button>
     <button id="global-save-as-btn" class="pad pad-lg">💾 Speichern unter…</button>
+    <button id="global-open-btn" class="pad pad-lg">📂 Öffnen</button>
     <span id="global-toolbar-status" class="status-text"></span>
   </div>
 
@@ -79,7 +81,8 @@
           </div>
 
           <div class="transport">
-            <button id="mix-preview-btn" class="btn btn-accent">▶ Abhören &amp; aufnehmen</button>
+            <button id="mix-listen-btn" class="btn btn-accent">▶ Anhören</button>
+            <button id="mix-record-btn" class="btn btn-accent">⏺ Aufnehmen</button>
             <span id="mix-status" class="status-text"></span>
           </div>
 
@@ -91,6 +94,7 @@
               <label>Format
                 <select id="mix-format">
                   <option value="wav" selected>WAV (unkomprimiert, beste Qualität)</option>
+                  <option value="mp3">MP3 (für unterwegs – Handy, Tablet, Auto &amp; andere Player)</option>
                   <option value="webm">WebM (kompakt)</option>
                 </select>
               </label>
@@ -122,6 +126,18 @@
             <button class="btn btn-small" data-add-fixed="drums">+ Drums zur Spur hinzufügen</button>
           </div>
 
+          <div class="equipment-group">
+            <h3>Percussion/World</h3>
+            <div class="pad-row">
+              <button class="pad" data-voice="conga">Conga</button>
+              <button class="pad" data-voice="bongo">Bongo</button>
+              <button class="pad" data-voice="shaker">Shaker</button>
+              <button class="pad" data-voice="tabla">Tabla</button>
+              <button class="pad" data-voice="cajon">Cajón</button>
+            </div>
+            <button class="btn btn-small" data-add-fixed="percussion">+ Percussion zur Spur hinzufügen</button>
+          </div>
+
           <div class="equipment-group" data-melodic="piano">
             <h3>Piano</h3>
             <div class="field-row">
@@ -139,6 +155,34 @@
                 <select class="note-select"></select>
               </label>
               <button class="btn btn-small" data-add-melodic="sax">+ Spur hinzufügen</button>
+            </div>
+          </div>
+
+          <div class="equipment-group" data-melodic="guitar">
+            <h3>Gitarre</h3>
+            <div class="pad-row">
+              <button class="pad selected" data-style="akustik" aria-pressed="true">Akustik</button>
+              <button class="pad" data-style="electric" aria-pressed="false">E-Gitarre</button>
+            </div>
+            <div class="field-row">
+              <label>Note
+                <select class="note-select"></select>
+              </label>
+              <button class="btn btn-small" data-add-melodic="guitar">+ Spur hinzufügen</button>
+            </div>
+          </div>
+
+          <div class="equipment-group" data-melodic="synth">
+            <h3>Synth</h3>
+            <div class="pad-row">
+              <button class="pad selected" data-style="lead" aria-pressed="true">Lead</button>
+              <button class="pad" data-style="pad" aria-pressed="false">Pad</button>
+            </div>
+            <div class="field-row">
+              <label>Note
+                <select class="note-select"></select>
+              </label>
+              <button class="btn btn-small" data-add-melodic="synth">+ Spur hinzufügen</button>
             </div>
           </div>
 
@@ -169,6 +213,26 @@
                 <select class="note-select"></select>
               </label>
               <button class="btn btn-small" data-add-melodic="bass">+ Spur hinzufügen</button>
+            </div>
+          </div>
+
+          <div class="equipment-group" data-melodic="strings">
+            <h3>Streicher</h3>
+            <div class="field-row">
+              <label>Note
+                <select class="note-select"></select>
+              </label>
+              <button class="btn btn-small" data-add-melodic="strings">+ Spur hinzufügen</button>
+            </div>
+          </div>
+
+          <div class="equipment-group" data-melodic="brass">
+            <h3>Bläser</h3>
+            <div class="field-row">
+              <label>Note
+                <select class="note-select"></select>
+              </label>
+              <button class="btn btn-small" data-add-melodic="brass">+ Spur hinzufügen</button>
             </div>
           </div>
 
@@ -241,7 +305,8 @@
           </div>
 
           <div class="transport">
-            <button id="seq-preview-btn" class="btn btn-accent">▶ Abhören &amp; aufnehmen</button>
+            <button id="seq-listen-btn" class="btn btn-accent">▶ Anhören</button>
+            <button id="seq-record-btn" class="btn btn-accent">⏺ Aufnehmen</button>
             <button id="seq-reset" class="btn btn-ghost">Muster zurücksetzen</button>
             <span id="seq-status" class="status-text"></span>
           </div>
@@ -254,6 +319,7 @@
               <label>Format
                 <select id="seq-format">
                   <option value="wav" selected>WAV (unkomprimiert, beste Qualität)</option>
+                  <option value="mp3">MP3 (für unterwegs – Handy, Tablet, Auto &amp; andere Player)</option>
                   <option value="webm">WebM (kompakt)</option>
                 </select>
               </label>
@@ -278,6 +344,7 @@
   <div id="toast" class="toast hidden"></div>
 
   <script src="browser-demo.js"></script>
+  <script src="vendor/lame.min.js"></script>
   <script src="js/audio-engine.js"></script>
   <script src="js/mixer.js"></script>
   <script src="js/sequencer.js"></script>

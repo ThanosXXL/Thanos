@@ -1,0 +1,4 @@
+lame.min.js (bundled here for offline MP3-Export) is part of the "lamejs"
+project (https://github.com/zhuker/lamejs), a JavaScript port of the LAME
+MP3 encoder, licensed under the GNU Lesser General Public License (LGPL).
+See https://lame.sourceforge.io/ for the original LAME project.
