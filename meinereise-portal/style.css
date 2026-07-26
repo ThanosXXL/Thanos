@@ -724,6 +724,13 @@ h1, h2 {
   font-size: 0.85rem;
 }
 
+.offer-review-quote {
+  font-size: 0.8rem;
+  font-style: italic;
+  color: #3d6b60;
+  margin-top: 2px;
+}
+
 .offer-viewers {
   display: none;
   align-items: center;
@@ -976,6 +983,36 @@ h1, h2 {
   color: #fff;
   font-weight: 700;
   cursor: pointer;
+}
+
+.existing-reviews {
+  margin-bottom: 16px;
+}
+
+.existing-reviews-label {
+  font-size: 0.8rem;
+  font-weight: 700;
+  color: var(--mint-deep);
+  margin: 0 0 8px;
+}
+
+.existing-review {
+  background: var(--bg);
+  border-radius: 10px;
+  padding: 10px 12px;
+  margin-bottom: 8px;
+  font-size: 0.85rem;
+}
+
+.existing-review p {
+  margin: 0 0 4px;
+  color: var(--teal-text);
+}
+
+.existing-review span {
+  font-size: 0.78rem;
+  color: #6b8f86;
+  font-weight: 600;
 }
 
 .stars-picker {

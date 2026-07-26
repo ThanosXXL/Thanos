@@ -88,17 +88,61 @@
   ];
 
   var OFFERS = [
-    { cat: "flug", iconKey: "plane", title: "Frankfurt → Palma de Mallorca", meta: "Direktflug · 2h 20min", tags: [], price: 89, rating: 5 },
-    { cat: "hotel", iconKey: "hotel", title: "Strandresort Playa Azul", meta: "Kreta · 300 m zum Strand", tags: ["pool", "wohnung", "strand"], price: 74, rating: 5, beachKm: 0.3 },
-    { cat: "hotel", iconKey: "house", title: "Ferienhaus Casa Mint", meta: "Algarve · 800 m zum Strand", tags: ["pool", "haus", "strand"], price: 96, rating: 4, beachKm: 0.8 },
-    { cat: "mietwagen", iconKey: "car", title: "Kompaktklasse Cabrio", meta: "Flughafen Palma · Automatik", tags: [], price: 32, rating: 4 },
-    { cat: "hundepension", iconKey: "dog", title: "Hundepension Alpenblick", meta: "München · Garten & Auslauf", tags: ["haus"], price: 28, rating: 5 },
-    { cat: "hundepension", iconKey: "dog", title: "Hundehotel Wedelwald", meta: "Schwarzwald · Rudelbetreuung", tags: ["haus", "pool"], price: 35, rating: 4 },
-    { cat: "kreuzfahrt", iconKey: "ship", title: "7 Tage Mittelmeer-Route", meta: "Ab Barcelona · Vollpension", tags: ["pool"], price: 549, rating: 5 },
-    { cat: "seefahrt", iconKey: "ferry", title: "Fähre Rostock – Rügen", meta: "Tagesausflug · Sonnendeck", tags: [], price: 19, rating: 4 },
-    { cat: "kurztrip", iconKey: "palm", title: "3 Tage Städtetrip Prag", meta: "Kurztrip · inkl. Frühstück", tags: ["wohnung"], price: 129, rating: 4 },
-    { cat: "hotel", iconKey: "apartment", title: "City Apartment Lissabon", meta: "Zentrum · 4,5 km zum Strand", tags: ["wohnung", "strand"], price: 65, rating: 4, beachKm: 4.5 },
-    { cat: "kurztrip", iconKey: "palm", title: "2 Tage Wellness Bodensee", meta: "Kurztrip · Spa inklusive", tags: ["pool", "haus"], price: 149, rating: 5 }
+    { cat: "flug", iconKey: "plane", title: "Frankfurt → Palma de Mallorca", meta: "Direktflug · 2h 20min", tags: [], price: 89, rating: 5,
+      reviews: [
+        { text: "Pünktlicher Flug, freundliche Crew – reibungslos gebucht über MeineRe!se.", author: "Markus T." },
+        { text: "Bester Preis weit und breit gefunden, kann ich nur empfehlen!", author: "Julia R." }
+      ] },
+    { cat: "hotel", iconKey: "hotel", title: "Strandresort Playa Azul", meta: "Kreta · 300 m zum Strand", tags: ["pool", "wohnung", "strand"], price: 74, rating: 5, beachKm: 0.3,
+      reviews: [
+        { text: "Traumhafte Lage direkt am Strand, Zimmer super sauber. Kommen wieder!", author: "Sarah M." },
+        { text: "Pool und Frühstück top, Personal sehr herzlich.", author: "Daniel K." }
+      ] },
+    { cat: "hotel", iconKey: "house", title: "Ferienhaus Casa Mint", meta: "Algarve · 800 m zum Strand", tags: ["pool", "haus", "strand"], price: 96, rating: 4,
+      reviews: [
+        { text: "Gemütliches Ferienhaus mit viel Platz für die ganze Familie.", author: "Nina W." },
+        { text: "Toller Garten und ruhige Lage, genau richtig zum Entspannen.", author: "Peter L." }
+      ], beachKm: 0.8 },
+    { cat: "mietwagen", iconKey: "car", title: "Kompaktklasse Cabrio", meta: "Flughafen Palma · Automatik", tags: [], price: 32, rating: 4,
+      reviews: [
+        { text: "Unkomplizierte Abholung direkt am Flughafen, Auto neuwertig.", author: "Thomas B." },
+        { text: "Faires Preis-Leistungs-Verhältnis, würde ich wieder buchen.", author: "Claudia S." }
+      ] },
+    { cat: "hundepension", iconKey: "dog", title: "Hundepension Alpenblick", meta: "München · Garten & Auslauf", tags: ["haus"], price: 28, rating: 5,
+      reviews: [
+        { text: "Unser Hund wurde liebevoll umsorgt, kam glücklich und ausgeglichen zurück.", author: "Anja F." },
+        { text: "Täglich Fotos vom Gassigehen bekommen – super Service!", author: "Michael H." }
+      ] },
+    { cat: "hundepension", iconKey: "dog", title: "Hundehotel Wedelwald", meta: "Schwarzwald · Rudelbetreuung", tags: ["haus", "pool"], price: 35, rating: 4,
+      reviews: [
+        { text: "Tolle Rudelbetreuung, unser Welpe hat viele neue Freunde gefunden.", author: "Laura P." },
+        { text: "Sehr kompetentes und liebevolles Team.", author: "Stefan G." }
+      ] },
+    { cat: "kreuzfahrt", iconKey: "ship", title: "7 Tage Mittelmeer-Route", meta: "Ab Barcelona · Vollpension", tags: ["pool"], price: 549, rating: 5,
+      reviews: [
+        { text: "Traumhafte Häfen, exzellentes Essen an Bord – rundum gelungen.", author: "Familie Neumann" },
+        { text: "Bestpreis-Garantie hat sich wirklich ausgezahlt, günstiger als überall sonst.", author: "Robert K." }
+      ] },
+    { cat: "seefahrt", iconKey: "ferry", title: "Fähre Rostock – Rügen", meta: "Tagesausflug · Sonnendeck", tags: [], price: 19, rating: 4,
+      reviews: [
+        { text: "Schöner kurzer Ausflug, Sonnendeck war ein Highlight.", author: "Birgit A." },
+        { text: "Günstig, pünktlich, unkompliziert.", author: "Jens O." }
+      ] },
+    { cat: "kurztrip", iconKey: "palm", title: "3 Tage Städtetrip Prag", meta: "Kurztrip · inkl. Frühstück", tags: ["wohnung"], price: 129, rating: 4,
+      reviews: [
+        { text: "Perfekt für ein Wochenende, zentrale Unterkunft, tolles Frühstück.", author: "Melanie D." },
+        { text: "Reibungslose Buchung und super Preis für die Kurztrip-Kategorie.", author: "Alexander V." }
+      ] },
+    { cat: "hotel", iconKey: "apartment", title: "City Apartment Lissabon", meta: "Zentrum · 4,5 km zum Strand", tags: ["wohnung", "strand"], price: 65, rating: 4, beachKm: 4.5,
+      reviews: [
+        { text: "Moderne Wohnung mitten im Zentrum, perfekt gelegen.", author: "Sophie N." },
+        { text: "Bestes Preis-Leistungs-Verhältnis in Lissabon, jederzeit wieder.", author: "Marco D." }
+      ] },
+    { cat: "kurztrip", iconKey: "palm", title: "2 Tage Wellness Bodensee", meta: "Kurztrip · Spa inklusive", tags: ["pool", "haus"], price: 149, rating: 5,
+      reviews: [
+        { text: "Herrliche Entspannung, Spa-Bereich war traumhaft.", author: "Katrin S." },
+        { text: "Toller Kurztrip, kommen definitiv wieder.", author: "Andreas M." }
+      ] }
   ];
 
   var ICONS = {
@@ -208,7 +252,7 @@
         document.querySelectorAll(".offer-viewers").forEach(function (el) {
           el.textContent = "🔥 " + randomViewerCount() + " weitere Kunden schauen sich dieses Angebot an";
         });
-      }, 4000);
+      }, 2000);
     }
   }
 
@@ -338,6 +382,13 @@
     rating.className = "offer-rating";
     rating.textContent = stars(offer.rating);
     body.appendChild(rating);
+
+    if (offer.reviews && offer.reviews.length > 0) {
+      var reviewQuote = document.createElement("div");
+      reviewQuote.className = "offer-review-quote";
+      reviewQuote.textContent = "„" + offer.reviews[0].text + "“ – " + offer.reviews[0].author;
+      body.appendChild(reviewQuote);
+    }
 
     var viewers = document.createElement("div");
     viewers.className = "offer-viewers";
@@ -471,6 +522,27 @@
     var heading = document.createElement("h3");
     heading.textContent = "Feedback geben · " + offer.title;
     content.appendChild(heading);
+
+    if (offer.reviews && offer.reviews.length > 0) {
+      var reviewsList = document.createElement("div");
+      reviewsList.className = "existing-reviews";
+      var reviewsLabel = document.createElement("p");
+      reviewsLabel.className = "existing-reviews-label";
+      reviewsLabel.textContent = "Das sagen andere Kunden:";
+      reviewsList.appendChild(reviewsLabel);
+      offer.reviews.forEach(function (review) {
+        var reviewEl = document.createElement("div");
+        reviewEl.className = "existing-review";
+        var reviewText = document.createElement("p");
+        reviewText.textContent = "„" + review.text + "“";
+        var reviewAuthor = document.createElement("span");
+        reviewAuthor.textContent = "– " + review.author;
+        reviewEl.appendChild(reviewText);
+        reviewEl.appendChild(reviewAuthor);
+        reviewsList.appendChild(reviewEl);
+      });
+      content.appendChild(reviewsList);
+    }
 
     var picker = document.createElement("div");
     picker.className = "stars-picker";
