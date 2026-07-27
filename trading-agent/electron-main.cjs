@@ -148,6 +148,16 @@ ipcMain.handle('start-agent', (_event, settings) => {
 
   agentProcess.stdout.on('data', (chunk) => sendLog(chunk.toString()));
   agentProcess.stderr.on('data', (chunk) => sendLog(chunk.toString()));
+  agentProcess.on('error', (err) => {
+    sendLog(
+      `\n[desktop] Agent-Prozess konnte nicht gestartet werden: ${err.message}\n` +
+        '[desktop] Häufigste Ursache: Antivirus/Windows Defender hat die .exe nach dem Start ' +
+        'unter Quarantäne gestellt (typisch bei unsignierten Apps). Prüfe den Schutzverlauf ' +
+        'deines Antivirenprogramms und füge ggf. eine Ausnahme für den Installationsordner hinzu.\n'
+    );
+    agentProcess = null;
+    sendRunState(false);
+  });
   agentProcess.on('exit', (code) => {
     sendLog(`\n[desktop] Agent-Prozess beendet (code ${code}).\n`);
     agentProcess = null;
@@ -191,6 +201,10 @@ ipcMain.handle('withdraw', (_event, settings, amount, confirmPhrase) => {
     child.stderr.on('data', (chunk) => {
       output += chunk.toString();
       sendLog(chunk.toString());
+    });
+    child.on('error', (err) => {
+      output += `Auszahlungsprozess konnte nicht gestartet werden: ${err.message}\n`;
+      resolve({ ok: false, output });
     });
     child.on('exit', (code) => {
       resolve({ ok: code === 0, output });

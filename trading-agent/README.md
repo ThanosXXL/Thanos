@@ -345,12 +345,18 @@ single screen shows both settings and live status.
   signing config (keystore + `android/gradle.properties` /
   `android/app/build.gradle` `signingConfigs.release`) before distributing
   more broadly.
-- **CI build unverified**: `.github/workflows/trading-agent-release.yml` was
-  written to mirror the existing Dozenten Dashboard release workflow, but
-  has not actually been run — the Windows and Android SDK toolchains aren't
-  available in the sandbox this was developed in. Run it once (via
-  `workflow_dispatch` or a `freshtrades-v*` tag) and check both jobs succeed
-  before relying on it.
+- **The Windows installer is not code-signed** (no code-signing certificate
+  for a personal project). Windows SmartScreen or antivirus software may
+  flag it, and — more importantly — some antivirus products quarantine the
+  installed `.exe` shortly after first launch specifically because the app
+  re-spawns its own binary as a plain Node process (`ELECTRON_RUN_AS_NODE`)
+  to run the trading agent without bundling a separate Node runtime; that
+  self-respawn pattern reads as suspicious to some heuristics. If clicking
+  "Starten" fails with a `spawn ... ENOENT` pointing at the app's own
+  install path, check your antivirus's quarantine/protection history first
+  and add an exclusion for the install folder if needed. The app itself
+  now catches this failure gracefully (a status message instead of a
+  crash), but can't prevent the antivirus action itself.
 - **Withdrawal API is untested against real Binance** in this session (no
   network access to Binance from this sandbox — see the Downloads section).
   `/sapi/v1/capital/withdraw/apply` is Binance's documented endpoint, but
