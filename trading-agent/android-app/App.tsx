@@ -39,7 +39,7 @@ const FIELD_ROWS: Array<{ key: keyof typeof DEFAULT_SETTINGS; label: string; key
   { key: 'interval', label: 'Intervall (z.B. 1m, 5m, 1h)' },
   { key: 'fastMaPeriod', label: 'Fast-MA-Periode', keyboard: 'numeric' },
   { key: 'slowMaPeriod', label: 'Slow-MA-Periode', keyboard: 'numeric' },
-  { key: 'riskPerTradePct', label: 'Risiko pro Trade (z.B. 0.01 = 1%)', keyboard: 'numeric' },
+  { key: 'riskPerTradePct', label: 'Risiko pro Trade (z.B. 0.03 = 3%)', keyboard: 'numeric' },
   { key: 'stopLossPct', label: 'Stop-Loss (z.B. 0.006 = 0,6%)', keyboard: 'numeric' },
   { key: 'takeProfitPct', label: 'Take-Profit (z.B. 0.012 = 1,2%)', keyboard: 'numeric' },
   { key: 'maxDailyLossPct', label: 'Max. Tagesverlust (z.B. 0.03 = 3%)', keyboard: 'numeric' },

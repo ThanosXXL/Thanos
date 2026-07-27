@@ -14,7 +14,7 @@ export const DEFAULT_SETTINGS = {
   interval: '1m',
   fastMaPeriod: 5,
   slowMaPeriod: 13,
-  riskPerTradePct: 0.01,
+  riskPerTradePct: 0.03,
   stopLossPct: 0.006,
   takeProfitPct: 0.012,
   maxDailyLossPct: 0.03,
