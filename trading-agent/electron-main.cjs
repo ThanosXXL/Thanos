@@ -131,13 +131,8 @@ ipcMain.handle('get-demo-mode', () => DEMO_MODE);
 
 ipcMain.handle('save-settings', (_event, settings) => saveSettings(settings));
 
-ipcMain.handle('start-agent', (_event, settings) => {
-  if (agentProcess) {
-    return { ok: false, error: 'Agent läuft bereits.' };
-  }
-  const clean = saveSettings(settings);
-
-  agentProcess = spawn(process.execPath, [path.join(__dirname, 'electron-run.js')], {
+function spawnAgentProcess(clean) {
+  return spawn(process.execPath, [path.join(__dirname, 'electron-run.js')], {
     cwd: __dirname,
     env: {
       ...process.env,
@@ -145,15 +140,32 @@ ipcMain.handle('start-agent', (_event, settings) => {
       ELECTRON_RUN_AS_NODE: '1',
     },
   });
+}
 
+function wireAgentProcess(clean, isRetry) {
   agentProcess.stdout.on('data', (chunk) => sendLog(chunk.toString()));
   agentProcess.stderr.on('data', (chunk) => sendLog(chunk.toString()));
   agentProcess.on('error', (err) => {
+    if (!isRetry) {
+      // A brand-new install's .exe can briefly be locked by an antivirus/
+      // endpoint-security scan right after extraction. One short delayed
+      // retry costs nothing and resolves that specific race on its own.
+      sendLog(`\n[desktop] Start fehlgeschlagen (${err.message}), versuche erneut...\n`);
+      agentProcess = null;
+      setTimeout(() => {
+        agentProcess = spawnAgentProcess(clean);
+        wireAgentProcess(clean, true);
+      }, 1500);
+      return;
+    }
     sendLog(
       `\n[desktop] Agent-Prozess konnte nicht gestartet werden: ${err.message}\n` +
-        '[desktop] Häufigste Ursache: Antivirus/Windows Defender hat die .exe nach dem Start ' +
-        'unter Quarantäne gestellt (typisch bei unsignierten Apps). Prüfe den Schutzverlauf ' +
-        'deines Antivirenprogramms und füge ggf. eine Ausnahme für den Installationsordner hinzu.\n'
+        '[desktop] Mögliche Ursachen: (1) Antivirus/Windows Defender hat die .exe nach dem ' +
+        'Start unter Quarantäne gestellt (typisch bei unsignierten Apps) — prüfe den ' +
+        'Schutzverlauf deines Antivirenprogramms. (2) HP Wolf Security / Sure Click oder ein ' +
+        'ähnliches Isolationsprogramm verhindert, dass die App einen weiteren Prozess startet ' +
+        '— prüfe dort die Einstellungen zur Anwendungsisolierung bzw. wende dich an deine ' +
+        'IT-Abteilung, falls dieser Rechner verwaltet wird.\n'
     );
     agentProcess = null;
     sendRunState(false);
@@ -163,6 +175,16 @@ ipcMain.handle('start-agent', (_event, settings) => {
     agentProcess = null;
     sendRunState(false);
   });
+}
+
+ipcMain.handle('start-agent', (_event, settings) => {
+  if (agentProcess) {
+    return { ok: false, error: 'Agent läuft bereits.' };
+  }
+  const clean = saveSettings(settings);
+
+  agentProcess = spawnAgentProcess(clean);
+  wireAgentProcess(clean, false);
 
   sendRunState(true);
   return { ok: true, dashboardPort: Number(clean.DASHBOARD_PORT) };
