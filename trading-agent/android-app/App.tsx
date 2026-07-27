@@ -42,7 +42,7 @@ const FIELD_ROWS: Array<{ key: keyof typeof DEFAULT_SETTINGS; label: string; key
   { key: 'riskPerTradePct', label: 'Risiko pro Trade (z.B. 0.03 = 3%)', keyboard: 'numeric' },
   { key: 'stopLossPct', label: 'Stop-Loss (z.B. 0.006 = 0,6%)', keyboard: 'numeric' },
   { key: 'takeProfitPct', label: 'Take-Profit (z.B. 0.012 = 1,2%)', keyboard: 'numeric' },
-  { key: 'maxDailyLossPct', label: 'Max. Tagesverlust (z.B. 0.03 = 3%)', keyboard: 'numeric' },
+  { key: 'maxDailyLossPct', label: 'Max. Tagesverlust (z.B. 0.09 = 9%)', keyboard: 'numeric' },
   { key: 'maxOpenPositions', label: 'Max. offene Positionen', keyboard: 'numeric' },
   { key: 'paperStartingBalance', label: 'Startkapital Paper-Modus (€)', keyboard: 'numeric' },
   { key: 'minLiveBalance', label: 'Mindestguthaben für Live-Modus (€)', keyboard: 'numeric' },

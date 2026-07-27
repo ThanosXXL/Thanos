@@ -17,7 +17,7 @@ export const DEFAULT_SETTINGS = {
   riskPerTradePct: 0.03,
   stopLossPct: 0.006,
   takeProfitPct: 0.012,
-  maxDailyLossPct: 0.03,
+  maxDailyLossPct: 0.09,
   maxOpenPositions: 1,
   paperStartingBalance: 1000,
   // Live mode refuses to start below this balance, in EUR given the default
