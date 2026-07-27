@@ -249,19 +249,30 @@
       }
     }
 
-    async function refreshBook() {
-      try {
-        const res = await fetch('/api/book');
-        const book = await res.json();
-        if (book.error) throw new Error(book.error);
-        document.getElementById('bookSymbolLabel').textContent = `Kaufpreis ${book.symbol} (live)`;
-        document.getElementById('bookSymbolLabel2').textContent = `Verkaufspreis ${book.symbol} (live)`;
-        document.getElementById('bookAsk').textContent = formatMarketPrice(book.askPrice);
-        document.getElementById('bookBid').textContent = formatMarketPrice(book.bidPrice);
-      } catch {
+    function applyBookUpdate(book) {
+      document.getElementById('bookSymbolLabel').textContent = `Kaufpreis ${book.symbol} (live)`;
+      document.getElementById('bookSymbolLabel2').textContent = `Verkaufspreis ${book.symbol} (live)`;
+      document.getElementById('bookAsk').textContent = formatMarketPrice(book.askPrice);
+      document.getElementById('bookBid').textContent = formatMarketPrice(book.bidPrice);
+    }
+
+    // Pushed continuously by the server the instant Binance reports a
+    // best-bid/best-ask change — no polling delay, near-instant updates.
+    function connectBookStream() {
+      const source = new EventSource('/api/book/stream');
+      source.onmessage = (event) => {
+        try {
+          applyBookUpdate(JSON.parse(event.data));
+        } catch {
+          // ignore malformed event
+        }
+      };
+      source.onerror = () => {
+        // EventSource retries the connection on its own; just reflect that
+        // the price is momentarily stale rather than tearing anything down.
         document.getElementById('bookAsk').textContent = 'n/a';
         document.getElementById('bookBid').textContent = 'n/a';
-      }
+      };
     }
 
     async function refreshMarkets() {
@@ -365,11 +376,10 @@
 
     refresh();
     refreshFx();
-    refreshBook();
+    connectBookStream();
     refreshMarkets();
     setInterval(refresh, 3000);
     setInterval(refreshFx, 60000);
-    setInterval(refreshBook, 3000);
     setInterval(refreshMarkets, 10000);
   </script>
 </body>

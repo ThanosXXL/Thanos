@@ -155,3 +155,48 @@ export function subscribeKlines(symbol, interval, onCandle) {
 
   return () => ws.close();
 }
+
+/**
+ * Subscribes to the live best-bid/best-ask stream for one symbol — pushes an
+ * update the instant the top of the order book changes (sub-second), unlike
+ * a REST poll. Used to drive a near-real-time buy/sell price display instead
+ * of refreshing on a fixed interval. Self-reconnects if Binance drops the
+ * connection (it periodically closes long-lived streams), so a caller meant
+ * to run for hours doesn't need its own retry logic. Returns an unsubscribe
+ * function that stops reconnecting and closes the socket for good.
+ */
+export function subscribeBookTicker(symbol, onUpdate) {
+  const streamName = `${symbol.toLowerCase()}@bookTicker`;
+  let stopped = false;
+  let ws;
+
+  function connect() {
+    ws = new WebSocket(`${config.binance.wsBaseUrl}/${streamName}`);
+
+    ws.on('message', (raw) => {
+      let msg;
+      try {
+        msg = JSON.parse(raw.toString());
+      } catch {
+        return;
+      }
+      if (!msg.b || !msg.a) return;
+      onUpdate({ symbol: msg.s, bidPrice: Number(msg.b), askPrice: Number(msg.a) });
+    });
+
+    ws.on('error', (err) => {
+      console.error(`[binance ws] error on ${streamName}:`, err.message);
+    });
+
+    ws.on('close', () => {
+      if (!stopped) setTimeout(connect, 2000);
+    });
+  }
+
+  connect();
+
+  return () => {
+    stopped = true;
+    ws.close();
+  };
+}

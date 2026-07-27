@@ -4,7 +4,7 @@ import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { config } from '../config.js';
 import { getUsdEurRate } from '../fxRate.js';
-import { getExchangeInfo, getTicker24hr, getBookTicker } from '../binanceClient.js';
+import { getExchangeInfo, getTicker24hr, subscribeBookTicker } from '../binanceClient.js';
 import { readWithdrawalHistory } from '../withdrawal.js';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
@@ -20,10 +20,21 @@ const MARKETS_CACHE_MS = 60 * 60 * 1000;
 let tickerCache = { bySymbol: new Map(), fetchedAt: 0 };
 const TICKER_CACHE_MS = 8 * 1000;
 
-// Live buy/sell (ask/bid) price for the currently-traded symbol only —
-// separate from the full markets ticker, refreshed just as briefly.
-let bookCache = { book: null, fetchedAt: 0 };
-const BOOK_CACHE_MS = 2 * 1000;
+// Live buy/sell (ask/bid) price for the currently-traded symbol, pushed by a
+// standing Binance WebSocket subscription (sub-second updates) rather than
+// polled — kept as the last known value and fanned out to browser clients
+// over Server-Sent Events the instant it changes.
+let latestBook = null;
+const bookStreamClients = new Set();
+
+function broadcastBook(book) {
+  latestBook = book;
+  const payload = `data: ${JSON.stringify(book)}\n\n`;
+  for (const res of bookStreamClients) res.write(payload);
+}
+
+// subscribeBookTicker reconnects on its own if Binance drops the stream.
+subscribeBookTicker(config.market.symbol, broadcastBook);
 
 const app = express();
 app.use(express.static(path.join(__dirname, 'public')));
@@ -70,19 +81,26 @@ app.get('/api/fx', async (req, res) => {
   res.json(fx);
 });
 
-app.get('/api/book', async (req, res) => {
-  const age = Date.now() - bookCache.fetchedAt;
-  if (!bookCache.book || age > BOOK_CACHE_MS) {
-    try {
-      bookCache = { book: await getBookTicker(config.market.symbol), fetchedAt: Date.now() };
-    } catch (err) {
-      if (!bookCache.book) {
-        return res.status(502).json({ error: err.message });
-      }
-      // serve the last known price rather than erroring out on a hiccup
-    }
-  }
-  res.json(bookCache.book);
+// One-off snapshot of the last known live price — a REST fallback for any
+// client that isn't using the push stream below.
+app.get('/api/book', (req, res) => {
+  if (!latestBook) return res.status(503).json({ error: 'Noch keine Live-Preisdaten empfangen.' });
+  res.json(latestBook);
+});
+
+// Continuous push feed: emits a new event the instant Binance reports a
+// best-bid/best-ask change, instead of the client polling on a timer.
+app.get('/api/book/stream', (req, res) => {
+  res.writeHead(200, {
+    'Content-Type': 'text/event-stream',
+    'Cache-Control': 'no-cache',
+    Connection: 'keep-alive',
+  });
+  res.write(': connected\n\n');
+  if (latestBook) res.write(`data: ${JSON.stringify(latestBook)}\n\n`);
+
+  bookStreamClients.add(res);
+  req.on('close', () => bookStreamClients.delete(res));
 });
 
 app.get('/api/markets', async (req, res) => {
