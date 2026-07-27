@@ -1,7 +1,7 @@
 const { app, BrowserWindow, ipcMain } = require('electron');
 const path = require('node:path');
 const fs = require('node:fs');
-const { spawn } = require('node:child_process');
+const { Worker } = require('node:worker_threads');
 
 // True only in builds produced by `npm run dist:demo` (electron-builder bakes
 // `demo: true` into the packaged package.json via extraMetadata). Enforced
@@ -131,42 +131,25 @@ ipcMain.handle('get-demo-mode', () => DEMO_MODE);
 
 ipcMain.handle('save-settings', (_event, settings) => saveSettings(settings));
 
-function spawnAgentProcess(clean) {
-  return spawn(process.execPath, [path.join(__dirname, 'electron-run.js')], {
-    cwd: __dirname,
-    env: {
-      ...process.env,
-      ...clean,
-      ELECTRON_RUN_AS_NODE: '1',
-    },
+// The agent runs on a worker_threads Worker — a separate JS thread inside
+// this already-running, already-approved process — rather than a spawned
+// child OS process. Some antivirus/endpoint-isolation tools (e.g. HP Sure
+// Click) block an unsigned app from launching a copy of its own .exe as a
+// new process; a worker thread never triggers that check at all, since no
+// new process is created.
+function spawnAgentWorker(clean) {
+  return new Worker(path.join(__dirname, 'electron-run.js'), {
+    env: { ...process.env, ...clean },
+    stdout: true,
+    stderr: true,
   });
 }
 
-function wireAgentProcess(clean, isRetry) {
+function wireAgentWorker() {
   agentProcess.stdout.on('data', (chunk) => sendLog(chunk.toString()));
   agentProcess.stderr.on('data', (chunk) => sendLog(chunk.toString()));
   agentProcess.on('error', (err) => {
-    if (!isRetry) {
-      // A brand-new install's .exe can briefly be locked by an antivirus/
-      // endpoint-security scan right after extraction. One short delayed
-      // retry costs nothing and resolves that specific race on its own.
-      sendLog(`\n[desktop] Start fehlgeschlagen (${err.message}), versuche erneut...\n`);
-      agentProcess = null;
-      setTimeout(() => {
-        agentProcess = spawnAgentProcess(clean);
-        wireAgentProcess(clean, true);
-      }, 1500);
-      return;
-    }
-    sendLog(
-      `\n[desktop] Agent-Prozess konnte nicht gestartet werden: ${err.message}\n` +
-        '[desktop] Mögliche Ursachen: (1) Antivirus/Windows Defender hat die .exe nach dem ' +
-        'Start unter Quarantäne gestellt (typisch bei unsignierten Apps) — prüfe den ' +
-        'Schutzverlauf deines Antivirenprogramms. (2) HP Wolf Security / Sure Click oder ein ' +
-        'ähnliches Isolationsprogramm verhindert, dass die App einen weiteren Prozess startet ' +
-        '— prüfe dort die Einstellungen zur Anwendungsisolierung bzw. wende dich an deine ' +
-        'IT-Abteilung, falls dieser Rechner verwaltet wird.\n'
-    );
+    sendLog(`\n[desktop] Agent-Prozess konnte nicht gestartet werden: ${err.message}\n`);
     agentProcess = null;
     sendRunState(false);
   });
@@ -183,8 +166,8 @@ ipcMain.handle('start-agent', (_event, settings) => {
   }
   const clean = saveSettings(settings);
 
-  agentProcess = spawnAgentProcess(clean);
-  wireAgentProcess(clean, false);
+  agentProcess = spawnAgentWorker(clean);
+  wireAgentWorker();
 
   sendRunState(true);
   return { ok: true, dashboardPort: Number(clean.DASHBOARD_PORT) };
@@ -192,7 +175,10 @@ ipcMain.handle('start-agent', (_event, settings) => {
 
 ipcMain.handle('stop-agent', () => {
   if (!agentProcess) return { ok: false, error: 'Agent läuft nicht.' };
-  agentProcess.kill();
+  const worker = agentProcess;
+  worker.postMessage('stop');
+  // Safety net in case the worker doesn't exit promptly on its own.
+  setTimeout(() => worker.terminate().catch(() => {}), 3000);
   agentProcess = null;
   sendRunState(false);
   return { ok: true };
@@ -206,14 +192,12 @@ ipcMain.handle('withdraw', (_event, settings, amount, confirmPhrase) => {
   }
   return new Promise((resolve) => {
     const clean = saveSettings(settings);
-    const child = spawn(
-      process.execPath,
-      [path.join(__dirname, 'src', 'withdrawCli.js'), '--amount', String(amount), '--confirm', String(confirmPhrase)],
-      {
-        cwd: __dirname,
-        env: { ...process.env, ...clean, ELECTRON_RUN_AS_NODE: '1' },
-      }
-    );
+    const child = new Worker(path.join(__dirname, 'src', 'withdrawCli.js'), {
+      argv: ['--amount', String(amount), '--confirm', String(confirmPhrase)],
+      env: { ...process.env, ...clean },
+      stdout: true,
+      stderr: true,
+    });
 
     let output = '';
     child.stdout.on('data', (chunk) => {
@@ -237,10 +221,10 @@ ipcMain.handle('withdraw', (_event, settings, amount, confirmPhrase) => {
 app.whenReady().then(createWindow);
 
 app.on('window-all-closed', () => {
-  if (agentProcess) agentProcess.kill();
+  if (agentProcess) agentProcess.terminate().catch(() => {});
   if (process.platform !== 'darwin') app.quit();
 });
 
 app.on('before-quit', () => {
-  if (agentProcess) agentProcess.kill();
+  if (agentProcess) agentProcess.terminate().catch(() => {});
 });

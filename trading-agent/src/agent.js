@@ -118,5 +118,5 @@ export async function startAgent() {
     process.exit(0);
   });
 
-  return { portfolio, riskManager, strategy };
+  return { portfolio, riskManager, strategy, stop: unsubscribe };
 }
