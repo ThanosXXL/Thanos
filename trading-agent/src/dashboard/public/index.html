@@ -133,6 +133,7 @@
       <button data-days="5" class="active">Letzte 5 Tage</button>
       <button data-days="30">Letzte 30 Tage</button>
       <button data-days="90">Letzte 3 Monate</button>
+      <button data-days="0">Live</button>
     </div>
     <div id="withdrawalLog"></div>
   </section>
@@ -189,7 +190,8 @@
     }
 
     function renderWithdrawals(withdrawals) {
-      const cutoff = Date.now() - withdrawRangeDays * 24 * 60 * 60 * 1000;
+      // withdrawRangeDays === 0 means "Live" — no cutoff, show the full history.
+      const cutoff = withdrawRangeDays === 0 ? 0 : Date.now() - withdrawRangeDays * 24 * 60 * 60 * 1000;
       const filtered = (withdrawals || []).filter((w) => new Date(w.time).getTime() >= cutoff).reverse();
       const wrap = document.getElementById('withdrawalLog');
       if (filtered.length === 0) {
