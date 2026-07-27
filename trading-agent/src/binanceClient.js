@@ -80,6 +80,16 @@ export async function getTicker24hr() {
   }));
 }
 
+/**
+ * Public, unsigned: best current bid/ask for one symbol — the actual price
+ * you'd sell at (bid) or buy at (ask) right now, distinct from lastPrice
+ * (the last *executed* trade, which can already be stale by comparison).
+ */
+export async function getBookTicker(symbol) {
+  const t = await request('GET', '/api/v3/ticker/bookTicker', { symbol });
+  return { symbol: t.symbol, bidPrice: Number(t.bidPrice), askPrice: Number(t.askPrice) };
+}
+
 /** Signed: account balances. Requires API credentials (testnet or live). */
 export async function getAccount() {
   return request('GET', '/api/v3/account', {}, { signed: true });

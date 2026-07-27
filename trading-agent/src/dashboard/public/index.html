@@ -53,6 +53,7 @@
   .card .sub { font-size: 0.7rem; color: var(--muted); margin-top: 2px; }
   .value.pos { color: var(--green); }
   .value.neg { color: var(--red); }
+  .price-cell { font-weight: 700; font-variant-numeric: tabular-nums; }
   table { width: 100%; border-collapse: collapse; background: var(--panel); border: 1px solid var(--border); border-radius: 10px; overflow: hidden; color: var(--text); }
   th, td { padding: 8px 12px; text-align: left; font-size: 0.85rem; border-bottom: 1px solid var(--border); color: var(--text); }
   th { font-weight: 600; }
@@ -98,6 +99,16 @@
       <div class="label">USD → EUR (live)</div>
       <div class="value" id="fxRate">–</div>
       <div class="sub" id="fxAsOf"></div>
+    </div>
+    <div class="card">
+      <div class="label" id="bookSymbolLabel">Kaufpreis (live)</div>
+      <div class="value" id="bookAsk">–</div>
+      <div class="sub">was du jetzt für 1 Einheit zahlen würdest</div>
+    </div>
+    <div class="card">
+      <div class="label" id="bookSymbolLabel2">Verkaufspreis (live)</div>
+      <div class="value" id="bookBid">–</div>
+      <div class="sub">was du jetzt für 1 Einheit bekommen würdest</div>
     </div>
   </div>
 
@@ -164,8 +175,16 @@
           <div class="value ${totalPnl > 0 ? 'pos' : totalPnl < 0 ? 'neg' : ''}">${fmt(totalPnl)}</div>
         </div>` +
         renderTable(
-          ['Seite', 'Menge', 'Einstieg', 'Ausstieg', 'Grund', 'P&L', 'Zeit'],
-          today.map((t) => [t.side, t.quantity, fmt(t.entryPrice), fmt(t.exitPrice), t.reason, fmt(t.pnl), t.exitTime])
+          ['Seite', 'Menge', 'Einstiegspreis', 'Ausstiegspreis', 'Grund', 'P&L', 'Zeit'],
+          today.map((t) => [
+            t.side,
+            t.quantity,
+            `<span class="price-cell">${fmt(t.entryPrice)}</span>`,
+            `<span class="price-cell">${fmt(t.exitPrice)}</span>`,
+            t.reason,
+            fmt(t.pnl),
+            t.exitTime,
+          ])
         );
     }
 
@@ -230,6 +249,21 @@
       }
     }
 
+    async function refreshBook() {
+      try {
+        const res = await fetch('/api/book');
+        const book = await res.json();
+        if (book.error) throw new Error(book.error);
+        document.getElementById('bookSymbolLabel').textContent = `Kaufpreis ${book.symbol} (live)`;
+        document.getElementById('bookSymbolLabel2').textContent = `Verkaufspreis ${book.symbol} (live)`;
+        document.getElementById('bookAsk').textContent = formatMarketPrice(book.askPrice);
+        document.getElementById('bookBid').textContent = formatMarketPrice(book.bidPrice);
+      } catch {
+        document.getElementById('bookAsk').textContent = 'n/a';
+        document.getElementById('bookBid').textContent = 'n/a';
+      }
+    }
+
     async function refreshMarkets() {
       try {
         const res = await fetch('/api/markets');
@@ -281,8 +315,15 @@
         openWrap.innerHTML = '<div class="empty">Keine offenen Positionen.</div>';
       } else {
         openWrap.innerHTML = renderTable(
-          ['Seite', 'Menge', 'Einstieg', 'Stop-Loss', 'Take-Profit', 'Eröffnet'],
-          data.openPositions.map((p) => [p.side, p.quantity, fmt(p.entryPrice), fmt(p.stopLoss), fmt(p.takeProfit), p.openTime])
+          ['Seite', 'Menge', 'Einstiegspreis', 'Stop-Loss', 'Take-Profit', 'Eröffnet'],
+          data.openPositions.map((p) => [
+            p.side,
+            p.quantity,
+            `<span class="price-cell">${fmt(p.entryPrice)}</span>`,
+            fmt(p.stopLoss),
+            fmt(p.takeProfit),
+            p.openTime,
+          ])
         );
       }
 
@@ -291,12 +332,12 @@
         tradeWrap.innerHTML = '<div class="empty">Noch keine abgeschlossenen Trades.</div>';
       } else {
         tradeWrap.innerHTML = renderTable(
-          ['Seite', 'Menge', 'Einstieg', 'Ausstieg', 'Grund', 'P&L', 'Geschlossen'],
+          ['Seite', 'Menge', 'Einstiegspreis', 'Ausstiegspreis', 'Grund', 'P&L', 'Geschlossen'],
           data.trades.map((t) => [
             t.side,
             t.quantity,
-            fmt(t.entryPrice),
-            fmt(t.exitPrice),
+            `<span class="price-cell">${fmt(t.entryPrice)}</span>`,
+            `<span class="price-cell">${fmt(t.exitPrice)}</span>`,
             t.reason,
             fmt(t.pnl),
             t.exitTime,
@@ -324,9 +365,11 @@
 
     refresh();
     refreshFx();
+    refreshBook();
     refreshMarkets();
     setInterval(refresh, 3000);
     setInterval(refreshFx, 60000);
+    setInterval(refreshBook, 3000);
     setInterval(refreshMarkets, 10000);
   </script>
 </body>
