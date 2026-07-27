@@ -1,6 +1,6 @@
 {
   "name": "freshtrades",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "FreshTrades: an autonomous crypto trading agent (Binance) with paper-trading default, risk management, and backtesting. Makes no profit guarantees.",
   "type": "module",
   "private": true,
