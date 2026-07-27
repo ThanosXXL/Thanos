@@ -66,6 +66,20 @@ export async function getExchangeInfo() {
     .map((s) => ({ symbol: s.symbol, baseAsset: s.baseAsset, quoteAsset: s.quoteAsset }));
 }
 
+/**
+ * Public, unsigned: current price + 24h change for every symbol in one
+ * batch call. Used to show live prices in the markets browser without a
+ * per-symbol request.
+ */
+export async function getTicker24hr() {
+  const body = await request('GET', '/api/v3/ticker/24hr');
+  return body.map((t) => ({
+    symbol: t.symbol,
+    lastPrice: Number(t.lastPrice),
+    priceChangePercent: Number(t.priceChangePercent),
+  }));
+}
+
 /** Signed: account balances. Requires API credentials (testnet or live). */
 export async function getAccount() {
   return request('GET', '/api/v3/account', {}, { signed: true });

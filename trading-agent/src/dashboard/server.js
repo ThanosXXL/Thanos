@@ -4,7 +4,7 @@ import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { config } from '../config.js';
 import { getUsdEurRate } from '../fxRate.js';
-import { getExchangeInfo } from '../binanceClient.js';
+import { getExchangeInfo, getTicker24hr } from '../binanceClient.js';
 import { readWithdrawalHistory } from '../withdrawal.js';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
@@ -14,6 +14,11 @@ const TRADES_FILE = path.join(DATA_DIR, 'trades.log');
 
 let marketsCache = { markets: [], fetchedAt: 0 };
 const MARKETS_CACHE_MS = 60 * 60 * 1000;
+
+// Prices move constantly, unlike the symbol list itself, so this is cached
+// far more briefly — just long enough to absorb the dashboard's own polling.
+let tickerCache = { bySymbol: new Map(), fetchedAt: 0 };
+const TICKER_CACHE_MS = 8 * 1000;
 
 const app = express();
 app.use(express.static(path.join(__dirname, 'public')));
@@ -72,7 +77,27 @@ app.get('/api/markets', async (req, res) => {
       // serve stale cache on a refresh failure rather than erroring out
     }
   }
-  res.json({ markets: marketsCache.markets });
+
+  const tickerAge = Date.now() - tickerCache.fetchedAt;
+  if (tickerAge > TICKER_CACHE_MS) {
+    try {
+      const tickers = await getTicker24hr();
+      tickerCache = { bySymbol: new Map(tickers.map((t) => [t.symbol, t])), fetchedAt: Date.now() };
+    } catch {
+      // keep serving the symbol list without live prices rather than erroring out
+    }
+  }
+
+  const markets = marketsCache.markets.map((m) => {
+    const ticker = tickerCache.bySymbol.get(m.symbol);
+    return {
+      ...m,
+      lastPrice: ticker ? ticker.lastPrice : null,
+      priceChangePercent: ticker ? ticker.priceChangePercent : null,
+    };
+  });
+
+  res.json({ markets });
 });
 
 app.listen(config.dashboard.port, () => {
