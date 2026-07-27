@@ -176,8 +176,9 @@
           <div class="value ${totalPnl > 0 ? 'pos' : totalPnl < 0 ? 'neg' : ''}">${fmt(totalPnl)}</div>
         </div>` +
         renderTable(
-          ['Seite', 'Menge', 'Einstiegspreis', 'Ausstiegspreis', 'Grund', 'P&L', 'Zeit'],
+          ['Symbol', 'Seite', 'Menge', 'Einstiegspreis', 'Ausstiegspreis', 'Grund', 'P&L', 'Zeit'],
           today.map((t) => [
+            t.symbol,
             t.side,
             t.quantity,
             `<span class="price-cell">${fmt(t.entryPrice)}</span>`,
@@ -293,8 +294,9 @@
       const data = await res.json();
       latestData = data;
 
+      const symbolsLabel = (data.symbols && data.symbols.length > 0 ? data.symbols : [data.symbol]).join(', ');
       document.getElementById('subtitle').textContent =
-        `${data.symbol} · ${data.interval} · zuletzt aktualisiert: ${data.updatedAt || '–'}`;
+        `${symbolsLabel} · ${data.interval} · zuletzt aktualisiert: ${data.updatedAt || '–'}`;
 
       const banner = document.getElementById('banner');
       if (data.mode === 'live') {
@@ -328,8 +330,9 @@
         openWrap.innerHTML = '<div class="empty">Keine offenen Positionen.</div>';
       } else {
         openWrap.innerHTML = renderTable(
-          ['Seite', 'Menge', 'Einstiegspreis', 'Stop-Loss', 'Take-Profit', 'Eröffnet'],
+          ['Symbol', 'Seite', 'Menge', 'Einstiegspreis', 'Stop-Loss', 'Take-Profit', 'Eröffnet'],
           data.openPositions.map((p) => [
+            p.symbol,
             p.side,
             p.quantity,
             `<span class="price-cell">${fmt(p.entryPrice)}</span>`,
@@ -345,8 +348,9 @@
         tradeWrap.innerHTML = '<div class="empty">Noch keine abgeschlossenen Trades.</div>';
       } else {
         tradeWrap.innerHTML = renderTable(
-          ['Seite', 'Menge', 'Einstiegspreis', 'Ausstiegspreis', 'Grund', 'P&L', 'Geschlossen'],
+          ['Symbol', 'Seite', 'Menge', 'Einstiegspreis', 'Ausstiegspreis', 'Grund', 'P&L', 'Geschlossen'],
           data.trades.map((t) => [
+            t.symbol,
             t.side,
             t.quantity,
             `<span class="price-cell">${fmt(t.entryPrice)}</span>`,

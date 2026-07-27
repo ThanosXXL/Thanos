@@ -69,9 +69,10 @@ export class Portfolio {
     return position;
   }
 
-  findTriggeredExits(currentPrice) {
+  findTriggeredExits(symbol, currentPrice) {
     const triggered = [];
     for (const position of this.openPositions) {
+      if (position.symbol !== symbol) continue;
       if (position.side === 'BUY') {
         if (currentPrice <= position.stopLoss) triggered.push({ position, reason: 'stop_loss' });
         else if (currentPrice >= position.takeProfit) triggered.push({ position, reason: 'take_profit' });

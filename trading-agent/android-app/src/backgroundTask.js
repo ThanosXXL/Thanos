@@ -30,7 +30,7 @@ function buildOptions(settings) {
   return {
     taskName: 'TradingAgent',
     taskTitle: 'FreshTrades aktiv',
-    taskDesc: `${settings.symbol} · ${String(settings.tradingMode).toUpperCase()}`,
+    taskDesc: `${settings.symbols} · ${String(settings.tradingMode).toUpperCase()}`,
     taskIcon: { name: 'ic_launcher', type: 'mipmap' },
     color: '#3b82f6',
     foregroundServiceType: ['dataSync'],

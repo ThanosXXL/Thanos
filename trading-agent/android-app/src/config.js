@@ -2,6 +2,19 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const SETTINGS_KEY = '@trading_agent_settings_v1';
 
+const KNOWN_QUOTE_ASSETS = ['USDT', 'BUSD', 'USDC', 'FDUSD', 'TRY', 'EUR', 'GBP', 'BTC', 'ETH', 'BNB'];
+
+/** Best-effort quote-asset guess from a Binance symbol, e.g. 'BTCEUR' -> 'EUR'. */
+export function extractQuoteAsset(symbol) {
+  const match = KNOWN_QUOTE_ASSETS.find((q) => symbol.endsWith(q));
+  return match || symbol.slice(-4);
+}
+
+/** Parses the comma-separated `symbols` settings field into a clean symbol array. */
+export function parseSymbols(symbolsField) {
+  return [...new Set(String(symbolsField || '').split(',').map((s) => s.trim().toUpperCase()).filter(Boolean))];
+}
+
 export const LIVE_CONFIRM_PHRASE = 'I_UNDERSTAND_THE_RISK';
 export const WITHDRAWAL_CONFIRM_PHRASE = 'I_CONFIRM_THIS_WITHDRAWAL';
 
@@ -10,7 +23,9 @@ export const DEFAULT_SETTINGS = {
   binanceApiSecret: '',
   tradingMode: 'paper', // 'paper' | 'testnet' | 'live'
   liveConfirm: '',
-  symbol: 'BTCEUR',
+  // Comma-separated for simultaneous trading, e.g. "BTCEUR,ETHEUR" — all
+  // symbols must share the same quote asset (validated below).
+  symbols: 'BTCEUR',
   interval: '1m',
   fastMaPeriod: 5,
   slowMaPeriod: 13,
@@ -42,7 +57,11 @@ export async function loadSettings() {
   try {
     const raw = await AsyncStorage.getItem(SETTINGS_KEY);
     if (!raw) return { ...DEFAULT_SETTINGS };
-    return { ...DEFAULT_SETTINGS, ...JSON.parse(raw) };
+    const parsed = JSON.parse(raw);
+    const merged = { ...DEFAULT_SETTINGS, ...parsed };
+    // Back-fill: settings saved before multi-symbol support only have `symbol`.
+    if (!parsed.symbols && parsed.symbol) merged.symbols = parsed.symbol;
+    return merged;
   } catch {
     return { ...DEFAULT_SETTINGS };
   }
@@ -66,6 +85,12 @@ export function validateSettings(settings) {
   }
   if (Number(settings.fastMaPeriod) >= Number(settings.slowMaPeriod)) {
     errors.push('Fast-MA-Periode muss kleiner als Slow-MA-Periode sein.');
+  }
+  const symbols = parseSymbols(settings.symbols);
+  if (symbols.length === 0) {
+    errors.push('Mindestens ein Symbol erforderlich.');
+  } else if (new Set(symbols.map(extractQuoteAsset)).size > 1) {
+    errors.push('Alle Symbole müssen dieselbe Quote-Währung haben (z.B. nur *EUR-Paare).');
   }
   if (Number(settings.maxTradableCapital) < Number(settings.minLiveBalance)) {
     errors.push('Maximales Handelskapital muss mindestens dem Mindestguthaben entsprechen.');

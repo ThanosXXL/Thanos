@@ -31,6 +31,14 @@ if (!['paper', 'testnet', 'live'].includes(mode)) {
   throw new Error(`TRADING_MODE must be one of paper|testnet|live, got: ${mode}`);
 }
 
+const KNOWN_QUOTE_ASSETS = ['USDT', 'BUSD', 'USDC', 'FDUSD', 'TRY', 'EUR', 'GBP', 'BTC', 'ETH', 'BNB'];
+
+/** Best-effort quote-asset guess from a Binance symbol, e.g. 'BTCEUR' -> 'EUR'. */
+export function extractQuoteAsset(symbol) {
+  const match = KNOWN_QUOTE_ASSETS.find((q) => symbol.endsWith(q));
+  return match || symbol.slice(-4);
+}
+
 export const LIVE_CONFIRM_PHRASE = 'I_UNDERSTAND_THE_RISK';
 export const WITHDRAWAL_CONFIRM_PHRASE = process.env.WITHDRAWAL_CONFIRM_PHRASE || 'I_CONFIRM_THIS_WITHDRAWAL';
 
@@ -62,7 +70,20 @@ export const config = {
     signedRestBaseUrl: mode === 'live' ? 'https://api.binance.com' : 'https://testnet.binance.vision',
   },
   market: {
-    symbol: (process.env.SYMBOL || 'BTCEUR').toUpperCase(),
+    // SYMBOLS (comma-separated) lets the agent trade several pairs at once; a
+    // single SYMBOL is still accepted for backward compatibility. `symbol` is
+    // kept as the first entry for callers/UI that only care about one primary pair.
+    symbols: [
+      ...new Set(
+        (process.env.SYMBOLS || process.env.SYMBOL || 'BTCEUR')
+          .split(',')
+          .map((s) => s.trim().toUpperCase())
+          .filter(Boolean)
+      ),
+    ],
+    get symbol() {
+      return this.symbols[0];
+    },
     interval: process.env.INTERVAL || '5m',
   },
   strategy: {
@@ -112,6 +133,16 @@ export const config = {
     enabled: Boolean(process.env.SMTP_HOST && process.env.NOTIFY_EMAIL),
   },
 };
+
+if (config.market.symbols.length > 1) {
+  const quoteAssets = new Set(config.market.symbols.map(extractQuoteAsset));
+  if (quoteAssets.size > 1) {
+    throw new Error(
+      `All SYMBOLS must share the same quote asset so the account balance stays in one ` +
+        `currency; got ${config.market.symbols.join(', ')} (quote assets: ${[...quoteAssets].join(', ')}).`
+    );
+  }
+}
 
 if (config.strategy.fastMaPeriod >= config.strategy.slowMaPeriod) {
   throw new Error('FAST_MA_PERIOD must be smaller than SLOW_MA_PERIOD');

@@ -64,6 +64,7 @@ app.get('/api/status', (req, res) => {
   res.json({
     mode: config.mode,
     symbol: config.market.symbol,
+    symbols: config.market.symbols,
     interval: config.market.interval,
     balance: state.balance,
     startingBalance: state.startingBalance,

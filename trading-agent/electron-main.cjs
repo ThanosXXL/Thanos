@@ -14,7 +14,7 @@ const SETTINGS_FIELDS = [
   'BINANCE_API_SECRET',
   'TRADING_MODE',
   'LIVE_CONFIRM',
-  'SYMBOL',
+  'SYMBOLS',
   'INTERVAL',
   'FAST_MA_PERIOD',
   'SLOW_MA_PERIOD',
@@ -43,7 +43,7 @@ const DEFAULT_SETTINGS = {
   BINANCE_API_SECRET: '',
   TRADING_MODE: 'paper',
   LIVE_CONFIRM: '',
-  SYMBOL: 'BTCEUR',
+  SYMBOLS: 'BTCEUR',
   INTERVAL: '1m',
   FAST_MA_PERIOD: '5',
   SLOW_MA_PERIOD: '13',
@@ -77,7 +77,10 @@ function settingsPath() {
 function loadSettings() {
   try {
     const raw = JSON.parse(fs.readFileSync(settingsPath(), 'utf8'));
-    return { ...DEFAULT_SETTINGS, ...raw };
+    const merged = { ...DEFAULT_SETTINGS, ...raw };
+    // Back-fill: settings saved before multi-symbol support only have SYMBOL.
+    if (!raw.SYMBOLS && raw.SYMBOL) merged.SYMBOLS = raw.SYMBOL;
+    return merged;
   } catch {
     return { ...DEFAULT_SETTINGS };
   }

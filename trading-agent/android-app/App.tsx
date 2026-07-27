@@ -35,7 +35,7 @@ const WITHDRAW_RANGES = [
 ];
 
 const FIELD_ROWS: Array<{ key: keyof typeof DEFAULT_SETTINGS; label: string; keyboard?: 'numeric' }> = [
-  { key: 'symbol', label: 'Symbol (EUR-Paar empfohlen, z.B. BTCEUR, damit Guthaben in Euro ist)' },
+  { key: 'symbols', label: 'Symbole (kommagetrennt für gleichzeitigen Handel, z.B. BTCEUR,ETHEUR — gleiche Quote-Währung, EUR-Paare empfohlen)' },
   { key: 'interval', label: 'Intervall (z.B. 1m, 5m, 1h)' },
   { key: 'fastMaPeriod', label: 'Fast-MA-Periode', keyboard: 'numeric' },
   { key: 'slowMaPeriod', label: 'Slow-MA-Periode', keyboard: 'numeric' },

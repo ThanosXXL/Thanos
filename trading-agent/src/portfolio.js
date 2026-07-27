@@ -77,10 +77,16 @@ export class Portfolio {
     return position;
   }
 
-  /** Positions whose stop-loss or take-profit level has been crossed at currentPrice. */
-  findTriggeredExits(currentPrice) {
+  /**
+   * Positions on `symbol` whose stop-loss or take-profit level has been
+   * crossed at currentPrice. Scoped to one symbol because currentPrice comes
+   * from that symbol's own candle stream and has no bearing on other symbols'
+   * open positions.
+   */
+  findTriggeredExits(symbol, currentPrice) {
     const triggered = [];
     for (const position of this.openPositions) {
+      if (position.symbol !== symbol) continue;
       if (position.side === 'BUY') {
         if (currentPrice <= position.stopLoss) triggered.push({ position, reason: 'stop_loss' });
         else if (currentPrice >= position.takeProfit) triggered.push({ position, reason: 'take_profit' });

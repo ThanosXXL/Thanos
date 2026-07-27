@@ -1,15 +1,8 @@
-import { config } from './config.js';
+import { config, extractQuoteAsset } from './config.js';
 import { getKlines, getAccount, placeOrder, subscribeKlines } from './binanceClient.js';
 import { RiskManager } from './riskManager.js';
 import { createDefaultStrategy } from './strategy/index.js';
 import { Portfolio } from './portfolio.js';
-
-const KNOWN_QUOTE_ASSETS = ['USDT', 'BUSD', 'USDC', 'FDUSD', 'TRY', 'EUR', 'GBP', 'BTC', 'ETH', 'BNB'];
-
-function extractQuoteAsset(symbol) {
-  const match = KNOWN_QUOTE_ASSETS.find((q) => symbol.endsWith(q));
-  return match || symbol.slice(-4);
-}
 
 async function getStartingBalance(symbol) {
   if (config.mode === 'paper') return config.paper.startingBalance;
@@ -25,6 +18,12 @@ async function getStartingBalance(symbol) {
  * tracking into a running agent. Places real orders only when
  * config.mode is 'testnet' or 'live' (never in 'paper').
  *
+ * Supports one or several symbols (config.market.symbols) traded concurrently:
+ * each symbol gets its own strategy instance and kline subscription, but all
+ * of them share one Portfolio and one RiskManager, so MAX_OPEN_POSITIONS and
+ * MAX_DAILY_LOSS_PCT are enforced account-wide, not per symbol — trading more
+ * symbols means more chances to enter a trade, not a bigger risk budget.
+ *
  * KNOWN LIMITATION: order quantities are rounded to a fixed precision and
  * do not query Binance's exchangeInfo LOT_SIZE/MIN_NOTIONAL filters. Before
  * running this against testnet or live with a real symbol, verify the
@@ -32,13 +31,13 @@ async function getStartingBalance(symbol) {
  * binanceClient.js to fetch and apply them.
  */
 export async function startAgent() {
-  const { symbol, interval } = config.market;
-  console.log(`[agent] starting in ${config.mode.toUpperCase()} mode for ${symbol} @ ${interval}`);
+  const { symbols, interval } = config.market;
+  console.log(`[agent] starting in ${config.mode.toUpperCase()} mode for ${symbols.join(', ')} @ ${interval}`);
   if (config.mode === 'paper') {
     console.log('[agent] paper mode: no real orders will be sent, fills are simulated.');
   }
 
-  const startingBalance = await getStartingBalance(symbol);
+  const startingBalance = await getStartingBalance(symbols[0]);
 
   if (config.mode === 'live' && startingBalance < config.minLiveBalance) {
     throw new Error(
@@ -50,18 +49,22 @@ export async function startAgent() {
 
   const portfolio = new Portfolio(startingBalance);
   const riskManager = new RiskManager();
-  const strategy = createDefaultStrategy();
 
-  const warmupCount = config.strategy.slowMaPeriod * 3;
-  console.log(`[agent] warming up strategy with ${warmupCount} historical candles...`);
-  const history = await getKlines(symbol, interval, warmupCount);
-  for (const candle of history) {
-    strategy.onClosedCandle(candle);
+  const strategies = new Map();
+  for (const symbol of symbols) {
+    const strategy = createDefaultStrategy();
+    const warmupCount = config.strategy.slowMaPeriod * 3;
+    console.log(`[agent] warming up ${symbol} strategy with ${warmupCount} historical candles...`);
+    const history = await getKlines(symbol, interval, warmupCount);
+    for (const candle of history) {
+      strategy.onClosedCandle(candle);
+    }
+    strategies.set(symbol, strategy);
   }
   riskManager.rollDailyWindow(portfolio.balance);
 
-  async function handleTick(candle, isFinal) {
-    const triggered = portfolio.findTriggeredExits(candle.close);
+  async function handleTick(symbol, candle, isFinal) {
+    const triggered = portfolio.findTriggeredExits(symbol, candle.close);
     for (const { position, reason } of triggered) {
       if (config.mode !== 'paper') {
         const closingSide = position.side === 'BUY' ? 'SELL' : 'BUY';
@@ -78,8 +81,13 @@ export async function startAgent() {
     if (!isFinal) return;
 
     riskManager.rollDailyWindow(portfolio.balance);
-    const signal = strategy.onClosedCandle(candle);
+    const signal = strategies.get(symbol).onClosedCandle(candle);
     if (signal === 'HOLD') return;
+
+    // One open position per symbol at a time — a symbol that reverses signal
+    // while its existing position is still open waits for that exit first,
+    // rather than stacking a second, opposite-direction position on top.
+    if (portfolio.openPositions.some((p) => p.symbol === symbol)) return;
 
     if (!riskManager.canOpenNewPosition(portfolio.openPositions.length)) {
       if (riskManager.isKillSwitchTriggered()) {
@@ -107,16 +115,21 @@ export async function startAgent() {
     );
   }
 
-  console.log('[agent] subscribing to live price stream...');
-  const unsubscribe = subscribeKlines(symbol, interval, (candle, isFinal) => {
-    handleTick(candle, isFinal).catch((err) => console.error('[agent] error handling tick:', err.message));
-  });
+  console.log('[agent] subscribing to live price streams...');
+  const unsubscribes = symbols.map((symbol) =>
+    subscribeKlines(symbol, interval, (candle, isFinal) => {
+      handleTick(symbol, candle, isFinal).catch((err) =>
+        console.error(`[agent] error handling tick for ${symbol}:`, err.message)
+      );
+    })
+  );
+  const stop = () => unsubscribes.forEach((unsubscribe) => unsubscribe());
 
   process.on('SIGINT', () => {
     console.log('\n[agent] shutting down...');
-    unsubscribe();
+    stop();
     process.exit(0);
   });
 
-  return { portfolio, riskManager, strategy, stop: unsubscribe };
+  return { portfolio, riskManager, strategies, stop };
 }
