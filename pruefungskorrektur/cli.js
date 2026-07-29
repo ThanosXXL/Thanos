@@ -8,6 +8,7 @@ const { loadExam } = require('./lib/exam');
 const { loadSubmissions } = require('./lib/submissions');
 const { gradeExam } = require('./lib/grader');
 const { toCsv } = require('./lib/csv');
+const { renderHtmlReport } = require('./lib/htmlReport');
 
 function parseArgs(argv) {
   const args = { outDir: 'ergebnisse' };
@@ -72,7 +73,10 @@ function writeReports(exam, results, outDir) {
   const detailPath = path.join(outDir, 'ergebnisse_detail.csv');
   fs.writeFileSync(detailPath, toCsv(detailColumns, detailRows), 'utf8');
 
-  return { jsonPath, summaryPath, detailPath };
+  const htmlPath = path.join(outDir, 'ergebnisse.html');
+  fs.writeFileSync(htmlPath, renderHtmlReport(exam, results), 'utf8');
+
+  return { jsonPath, summaryPath, detailPath, htmlPath };
 }
 
 function main() {
@@ -88,7 +92,7 @@ function main() {
   const submissions = loadSubmissions(args.submissions, exam);
   const results = gradeExam(exam, submissions);
 
-  const { jsonPath, summaryPath, detailPath } = writeReports(exam, results, args.outDir);
+  const { jsonPath, summaryPath, detailPath, htmlPath } = writeReports(exam, results, args.outDir);
 
   const reviewCount = results.filter((r) => r.needsReview).length;
   const passedCount = results.filter((r) => r.passed).length;
@@ -99,6 +103,7 @@ function main() {
   console.log(`  ${jsonPath}`);
   console.log(`  ${summaryPath}`);
   console.log(`  ${detailPath}`);
+  console.log(`  ${htmlPath}`);
 
   if (reviewCount > 0) {
     console.log(

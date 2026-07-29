@@ -19,6 +19,7 @@ Ergebnisse landen im angegebenen Ordner:
 - `ergebnisse.json` — vollstaendiges Detailergebnis pro Teilnehmer und Frage
 - `ergebnisse.csv` — Zusammenfassung pro Teilnehmer (Punkte, Prozent, bestanden, needsReview)
 - `ergebnisse_detail.csv` — eine Zeile pro Teilnehmer und Frage
+- `ergebnisse.html` — visueller Report (frisches Gruen als Gestaltungsfarbe) zum Oeffnen im Browser oder Weiterleiten an Kolleg:innen
 
 ## Prüfungsdefinition (`--exam`, JSON)
 
