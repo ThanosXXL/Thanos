@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<title>Office Plattform</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <header class="app-header">
+    <h1>Office Plattform</h1>
+  </header>
+
+  <nav class="section-tabs" id="sectionTabs">
+    <button class="section-tab" data-section="email">E-Mail</button>
+    <button class="section-tab" data-section="word">Word</button>
+    <button class="section-tab" data-section="pptx">Präsentation</button>
+  </nav>
+
+  <main id="content"></main>
+
+  <!-- Modal: E-Mail-Konto hinzufügen/bearbeiten -->
+  <div class="modal-overlay" id="accountModal">
+    <div class="modal modal-wide">
+      <h2 id="accountModalTitle">E-Mail-Konto hinzufügen</h2>
+      <div class="form-grid">
+        <label>Anzeigename
+          <input type="text" id="accName" placeholder="z.B. Büro-Postfach" maxlength="60">
+        </label>
+        <label>E-Mail-Adresse
+          <input type="email" id="accEmail" placeholder="name@beispiel.de">
+        </label>
+        <label>Benutzername (Login)
+          <input type="text" id="accUsername" placeholder="meist identisch mit E-Mail-Adresse">
+        </label>
+        <label>Passwort
+          <input type="password" id="accPassword" placeholder="Passwort / App-Passwort">
+        </label>
+        <label>IMAP-Server (Posteingang)
+          <input type="text" id="accImapHost" placeholder="imap.beispiel.de">
+        </label>
+        <label>IMAP-Port
+          <input type="number" id="accImapPort" placeholder="993" value="993">
+        </label>
+        <label class="checkbox-label"><input type="checkbox" id="accImapSecure" checked> IMAP SSL/TLS</label>
+        <label>SMTP-Server (Postausgang)
+          <input type="text" id="accSmtpHost" placeholder="smtp.beispiel.de">
+        </label>
+        <label>SMTP-Port
+          <input type="number" id="accSmtpPort" placeholder="587" value="587">
+        </label>
+        <label class="checkbox-label"><input type="checkbox" id="accSmtpSecure"> SMTP SSL/TLS</label>
+      </div>
+      <p class="hint-text" id="accountTestResult"></p>
+      <div class="modal-actions">
+        <button id="testAccountBtn" class="btn-secondary">Verbindung testen</button>
+        <button id="cancelAccountBtn" class="btn-secondary">Abbrechen</button>
+        <button id="saveAccountBtn" class="btn-primary">Speichern</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal: Neue E-Mail verfassen -->
+  <div class="modal-overlay" id="composeModal">
+    <div class="modal modal-wide">
+      <h2>Neue E-Mail</h2>
+      <div class="form-grid">
+        <label>An
+          <input type="text" id="composeTo" placeholder="empfaenger@beispiel.de">
+        </label>
+        <label>Cc
+          <input type="text" id="composeCc" placeholder="optional">
+        </label>
+        <label>Betreff
+          <input type="text" id="composeSubject" placeholder="Betreff">
+        </label>
+      </div>
+      <textarea id="composeBody" rows="10" placeholder="Nachrichtentext..."></textarea>
+      <p class="hint-text" id="composeResult"></p>
+      <div class="modal-actions">
+        <button id="cancelComposeBtn" class="btn-secondary">Abbrechen</button>
+        <button id="sendComposeBtn" class="btn-primary">Senden</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal: generische Löschbestätigung -->
+  <div class="modal-overlay" id="deleteModal">
+    <div class="modal">
+      <h2>Wirklich entfernen?</h2>
+      <p id="deleteModalText"></p>
+      <div class="modal-actions">
+        <button id="cancelDeleteBtn" class="btn-secondary">Abbrechen</button>
+        <button id="confirmDeleteBtn" class="btn-danger">Entfernen</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="renderer.js"></script>
+</body>
+</html>

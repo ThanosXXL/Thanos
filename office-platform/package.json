@@ -1,0 +1,50 @@
+{
+  "name": "office-platform",
+  "version": "1.0.0",
+  "description": "Desktop-Plattform für E-Mail (Ein- & Ausgang), Word-Dokumente und PowerPoint-Präsentationen",
+  "main": "main.js",
+  "author": "",
+  "license": "MIT",
+  "scripts": {
+    "start": "electron .",
+    "dist": "electron-builder"
+  },
+  "devDependencies": {
+    "electron": "^31.0.0",
+    "electron-builder": "^24.13.3"
+  },
+  "dependencies": {
+    "docx": "^8.5.0",
+    "imapflow": "^1.0.152",
+    "mailparser": "^3.7.1",
+    "nodemailer": "^6.9.14",
+    "pptxgenjs": "^3.12.0"
+  },
+  "build": {
+    "appId": "com.office.platform",
+    "productName": "Office Plattform",
+    "files": [
+      "main.js",
+      "preload.js",
+      "renderer/**/*",
+      "package.json"
+    ],
+    "directories": {
+      "output": "dist"
+    },
+    "win": {
+      "target": "nsis"
+    },
+    "mac": {
+      "target": "dmg"
+    },
+    "linux": {
+      "target": "AppImage"
+    },
+    "publish": [
+      {
+        "provider": "github"
+      }
+    ]
+  }
+}
