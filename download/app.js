@@ -35,7 +35,7 @@
     let anyFound = false;
 
     buttons.forEach((btn) => {
-      const appPattern = btn.dataset.app === 'dozenten' ? /dozenten/i : /office/i;
+      const appPattern = btn.dataset.app === 'dozenten' ? /dozenten/i : /(weiterbildung|office)/i;
       const ext = (btn.dataset.ext || '').toLowerCase();
       const asset = assets.find((a) => appPattern.test(a.name) && a.name.toLowerCase().endsWith(ext));
       if (asset) {

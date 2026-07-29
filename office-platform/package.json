@@ -1,7 +1,7 @@
 {
   "name": "office-platform",
   "version": "1.0.0",
-  "description": "Desktop-Plattform für E-Mail (Ein- & Ausgang), Word-Dokumente und PowerPoint-Präsentationen",
+  "description": "Mein Weiterbildungs Off!ce – Desktop-Plattform für E-Mail (Ein- & Ausgang), Word-Dokumente und PowerPoint-Präsentationen",
   "main": "main.js",
   "author": "",
   "license": "MIT",
@@ -22,7 +22,7 @@
   },
   "build": {
     "appId": "com.office.platform",
-    "productName": "Office Plattform",
+    "productName": "Mein Weiterbildungs Office",
     "files": [
       "main.js",
       "preload.js",
