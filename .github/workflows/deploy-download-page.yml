@@ -1,0 +1,40 @@
+name: Deploy Download-Seite (GitHub Pages)
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - "download/**"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: true
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: Repository auschecken
+        uses: actions/checkout@v4
+
+      - name: GitHub Pages einrichten
+        uses: actions/configure-pages@v5
+
+      - name: Download-Seite als Artifact hochladen
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: download
+
+      - name: Auf GitHub Pages veröffentlichen
+        id: deployment
+        uses: actions/deploy-pages@v4
