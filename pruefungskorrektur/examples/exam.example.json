@@ -1,0 +1,33 @@
+{
+  "title": "Zwischenpruefung Modul 1 - Grundlagen",
+  "passThreshold": 60,
+  "questions": [
+    {
+      "id": "q1",
+      "type": "single-choice",
+      "prompt": "Wofuer steht die Abkuerzung RAM?",
+      "points": 1,
+      "correct": "b"
+    },
+    {
+      "id": "q2",
+      "type": "multiple-choice",
+      "prompt": "Welche der folgenden sind Programmiersprachen? (Mehrfachauswahl)",
+      "points": 2,
+      "correct": ["a", "c", "d"]
+    },
+    {
+      "id": "q3",
+      "type": "text",
+      "prompt": "Erklaeren Sie kurz, was ein Arbeitsspeicher (RAM) macht.",
+      "points": 3,
+      "acceptedAnswers": [
+        "Der Arbeitsspeicher speichert Daten fluechtig waehrend das Programm laeuft",
+        "RAM speichert temporaere Daten, die verloren gehen wenn der Strom ausfaellt"
+      ],
+      "keywords": ["speicher", "fluechtig", "temporaer"],
+      "minMatchRatio": 0.5,
+      "similarityThreshold": 0.7
+    }
+  ]
+}

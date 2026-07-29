@@ -1,0 +1,15 @@
+{
+  "name": "pruefungskorrektur",
+  "version": "1.0.0",
+  "description": "Standalone CLI zur automatisierten Korrektur von Tests und Pruefungen (Multiple-Choice und Freitext) fuer Online-Weiterbildungsmassnahmen.",
+  "main": "cli.js",
+  "bin": {
+    "pruefungskorrektur": "./cli.js"
+  },
+  "scripts": {
+    "test": "node test.js",
+    "start": "node cli.js"
+  },
+  "license": "UNLICENSED",
+  "private": true
+}
