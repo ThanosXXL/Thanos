@@ -1,28 +1,50 @@
-# Dozenten Dashboard
+# Buchhaltung!
 
-Desktop-Dashboard (Electron) zur Verwaltung von bis zu vier Dozenten. Jeder Dozent hat drei Listen:
+Desktop- und Web-App (Electron + PWA) zur monatlichen Buchhaltung für bis zu **vier Administratoren**.
 
-1. **Liste 1 – To-Do-Liste** (Aufgabenliste)
-2. **Liste 2 – Offene Projekte**
-3. **Liste 3 – Erledigte Projekte**
+Jeder Administrator führt eine eigene Buchhaltung mit zwölf Monaten (Januar–Dezember), unterteilt in:
 
-Projekte lassen sich per Klick von "Offene Projekte" nach "Erledigte Projekte" verschieben (und zurück).
-Alle Daten werden lokal gespeichert (im Benutzerdatenverzeichnis der App) und bleiben nach dem Neustart erhalten.
+- **Einnahmen** (Datum, Beschreibung, Kategorie, Zahlungsart, Beleg-Nr., Betrag)
+- **Ausgaben** (gleiche Felder)
+
+Jeder Monat kann als **„abgeschlossen“** markiert werden. Ab dem **28. jeden Monats** erscheint täglich um
+**11:30 Uhr** eine Erinnerung, solange ein Monat nicht abgeschlossen wurde.
+
+Alle Daten werden lokal gespeichert (Desktop: Benutzerdatenverzeichnis der App / Web: Browser-Speicher) und
+bleiben nach dem Neustart erhalten.
+
+Ein ausführliches **Handbuch mit Beispielbildern** für Administratoren liegt unter [`HANDBUCH.md`](HANDBUCH.md).
+
+## Plattformen
+
+| Plattform | Wie |
+|---|---|
+| Windows | Installer (`.exe`) über [Releases](../../releases) |
+| macOS | `.dmg` über [Releases](../../releases) |
+| Linux | `.AppImage` über [Releases](../../releases) |
+| Android / iOS | Web-App (PWA) im Browser öffnen und „Zum Startbildschirm hinzufügen“ |
+
+Beim Öffnen der Web-App zeigt ein Banner automatisch den passenden Download-Button für das erkannte
+Betriebssystem an (ein Klick lädt direkt den richtigen Installer herunter).
 
 ## Fertigen Installer herunterladen (ohne Terminal)
 
 Unter **[Releases](../../releases)** stehen fertig gebaute Installationsdateien zum Anklicken bereit:
 
-- Windows: `.exe` (Installer)
-- macOS: `.dmg`
-- Linux: `.AppImage`
-
-Einfach die passende Datei für dein Betriebssystem herunterladen und ausführen – kein `npm install`,
-kein Terminal nötig.
+- Windows: `Buchhaltung-Windows-Setup.exe`
+- macOS: `Buchhaltung-macOS.dmg`
+- Linux: `Buchhaltung-Linux.AppImage`
 
 Neue Installer werden automatisch von GitHub Actions gebaut, sobald ein neuer Versions-Tag
 (z. B. `v1.0.0`) gepusht wird, oder manuell über den Button **"Run workflow"** im Tab
 **Actions → Build & Release Desktop App**.
+
+## Web-App / PWA (Android, iOS, Browser)
+
+Die Web-Version liegt im Ordner [`docs/`](docs) (automatisch aus `renderer/` synchronisiert) und wird über
+GitHub Pages ausgeliefert, sobald **Settings → Pages → Source: GitHub Actions** einmalig im Repository
+aktiviert wird. Der Workflow `.github/workflows/deploy-pages.yml` veröffentlicht die App danach automatisch
+bei jeder Änderung an `renderer/`.
 
 ## Installation (für Entwicklung)
 
@@ -43,3 +65,11 @@ npm run dist
 ```
 
 Erzeugt eine installierbare Desktop-Anwendung (Windows/macOS/Linux) im Ordner `dist/`.
+
+## Web-Version aktualisieren
+
+```bash
+npm run build:web
+```
+
+Synchronisiert `renderer/` nach `docs/` für GitHub Pages.

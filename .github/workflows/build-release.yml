@@ -43,7 +43,7 @@ jobs:
       - name: Installer als Artifact hochladen
         uses: actions/upload-artifact@v4
         with:
-          name: dozenten-dashboard-${{ matrix.os }}
+          name: buchhaltung-${{ matrix.os }}
           path: |
             dist/*.exe
             dist/*.dmg
