@@ -176,6 +176,24 @@ einen **Ein-Klick-Download-Button** für den passenden Installer an.
 *Die Web-/PWA-Version erkennt das Betriebssystem automatisch (hier: Linux) und bietet den passenden
 Download per Klick an – identische Optik wie die Desktop-App.*
 
+### Das Banner auf allen fünf Plattformen
+
+Die folgenden Aufnahmen zeigen das automatisch erkannte Banner, wie es sich für jedes Betriebssystem
+unterscheidet (Text und Aktion passen sich jeweils an):
+
+| Windows | macOS |
+|---|---|
+| ![Download-Banner Windows](handbuch/bilder/08-download-windows.png) | ![Download-Banner macOS](handbuch/bilder/09-download-macos.png) |
+
+| Linux | Android | iPhone/iPad |
+|---|---|---|
+| ![Download-Banner Linux](handbuch/bilder/10-download-linux.png) | ![Installations-Banner Android](handbuch/bilder/11-install-android.png) | ![Installations-Banner iOS](handbuch/bilder/12-install-ios.png) |
+
+- **Windows / macOS / Linux**: Button „⬇ Jetzt herunterladen“ lädt direkt die passende Installationsdatei.
+- **Android**: Button „📲 App installieren“ nutzt die native Installations-Aufforderung des Browsers.
+- **iPhone/iPad**: Da Safari kein automatisches Installieren per Klick erlaubt, zeigt das Banner die
+  Anleitung „Teilen“ → „Zum Home-Bildschirm“.
+
 ---
 
 ## 11. Häufige Fragen (FAQ)
