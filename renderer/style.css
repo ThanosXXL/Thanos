@@ -547,6 +547,35 @@ ul.item-list li span.item-text {
   font-size: 18px;
 }
 
+.room-connect-bar {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+  padding: 10px 16px;
+  background: var(--pale-blue);
+  border-bottom: 1px solid var(--light-blue);
+  font-size: 13px;
+}
+
+.room-status {
+  font-weight: 600;
+  color: var(--dark-blue);
+  margin-right: auto;
+}
+
+.room-status.connected {
+  color: #1e7a3a;
+}
+
+.room-connect-bar input {
+  padding: 6px 8px;
+  border: 1px solid #b9c6d9;
+  border-radius: 6px;
+  font-size: 12px;
+  width: 160px;
+}
+
 .video-tiles {
   display: grid;
   grid-template-columns: 1fr 1fr;

@@ -27,6 +27,10 @@
   document.getElementById('videoToggleAudio').addEventListener('click', toggleAudio);
   document.getElementById('videoToggleVideo').addEventListener('click', toggleVideo);
 
+  // Echter Mehrgeräte-Video-Chat: Verbindung zum Signaling-Server
+  document.getElementById('roomConnectBtn').addEventListener('click', connectToRoom);
+  document.getElementById('roomDisconnectBtn').addEventListener('click', disconnectFromRoom);
+
   // Moderation: Melden / Alle stummschalten
   document.getElementById('raiseHandBtn').addEventListener('click', raiseLocalHand);
   document.getElementById('muteAllBtn').addEventListener('click', toggleMuteAll);

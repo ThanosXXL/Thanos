@@ -9,10 +9,12 @@
     "start": "electron .",
     "dist": "electron-builder",
     "serve": "node scripts/serve.js",
+    "signaling": "node server/signaling-server.js",
     "postinstall": "electron-builder install-app-deps"
   },
   "dependencies": {
-    "keytar": "^7.9.0"
+    "keytar": "^7.9.0",
+    "ws": "^8.18.0"
   },
   "devDependencies": {
     "electron": "^31.0.0",

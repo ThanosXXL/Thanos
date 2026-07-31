@@ -102,6 +102,15 @@
         <button id="closeVideoChat" class="icon-btn danger" title="Schließen">✕</button>
       </div>
 
+      <!-- Netzwerk-Verbindung: echter Mehrgeräte-Video-Chat über einen Signaling-Server -->
+      <div class="room-connect-bar">
+        <span class="room-status" id="roomStatus">🔌 Nicht verbunden (nur lokale Ansicht)</span>
+        <input id="roomServerInput" type="text" placeholder="ws://server-adresse:8787" value="ws://localhost:8787">
+        <input id="roomCodeInput" type="text" placeholder="Raum-Code (z. B. Dozentenname)">
+        <button id="roomConnectBtn" class="btn-secondary btn-sm">Verbinden</button>
+        <button id="roomDisconnectBtn" class="btn-secondary btn-sm" hidden>Trennen</button>
+      </div>
+
       <!-- Teilnehmer-Leiste: kleine Live-Kacheln mit Namen + Gesamtanzahl -->
       <div class="participant-strip">
         <div class="participant-strip-head">
@@ -215,6 +224,7 @@
   <script src="js/toast.js"></script>
   <script src="js/dozenten.js"></script>
   <script src="js/toolbar-screenshot.js"></script>
+  <script src="js/room-client.js"></script>
   <script src="js/video-chat.js"></script>
   <script src="js/file-share.js"></script>
   <script src="js/presentation.js"></script>

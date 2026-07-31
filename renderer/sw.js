@@ -4,7 +4,7 @@
  * und auch offline (bzw. bei wackliger Verbindung) startet. Daten selbst
  * liegen weiterhin im localStorage des Browsers (siehe browser-demo.js).
  */
-const CACHE_NAME = 'it-schulung-pwa-v2';
+const CACHE_NAME = 'it-schulung-pwa-v3';
 const PRECACHE_URLS = [
   './index.html',
   './style.css',
@@ -14,6 +14,7 @@ const PRECACHE_URLS = [
   './js/toast.js',
   './js/dozenten.js',
   './js/toolbar-screenshot.js',
+  './js/room-client.js',
   './js/video-chat.js',
   './js/file-share.js',
   './js/presentation.js',

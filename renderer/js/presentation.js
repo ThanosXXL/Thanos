@@ -39,6 +39,15 @@
     persist();
     render();
     updateLessonPresentationLabel(dozent);
+    if (roomClient.connected) {
+      roomClient.broadcast({
+        kind: 'presentation-start',
+        dozentId: dozent.id,
+        name: dozent.presentation.name,
+        presenter: dozent.presentation.presenter,
+        time: dozent.presentation.time
+      });
+    }
     showToast(`"${fileName}" wird von ${presenter} auf allen Bildschirmen geteilt.`);
   }
 
@@ -47,6 +56,9 @@
     persist();
     render();
     updateLessonPresentationLabel(dozent);
+    if (roomClient.connected) {
+      roomClient.broadcast({ kind: 'presentation-stop', dozentId: dozent.id });
+    }
     showToast('Präsentation beendet.');
   }
 

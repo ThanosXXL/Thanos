@@ -73,6 +73,139 @@ const LOCAL_ID = 'me';
     }
     if (lessonVideo) lessonVideo.srcObject = null;
     overlay.classList.remove('visible');
+    disconnectFromRoom();
+  }
+
+  // ===== Netzwerk: echter Mehrgeräte-Video-Chat über den Signaling-Server =====
+  // Ohne Verbindung bleibt der Video-Chat wie bisher rein lokal (keine Regression).
+  // Verbunden werden echte Teilnehmer auf anderen Geräten automatisch als Teilnehmer
+  // ergänzt (mit echtem WebRTC-Audio/Video), zusätzlich zu evtl. manuell hinzugefügten
+  // lokalen Platzhalter-Teilnehmern.
+
+  function updateRoomStatusUI(connected) {
+    const status = document.getElementById('roomStatus');
+    const connectBtn = document.getElementById('roomConnectBtn');
+    const disconnectBtn = document.getElementById('roomDisconnectBtn');
+    if (!status) return;
+    if (connected) {
+      status.textContent = `🟢 Verbunden (Raum „${roomClient.roomCode}")`;
+      status.classList.add('connected');
+      connectBtn.hidden = true;
+      disconnectBtn.hidden = false;
+    } else {
+      status.textContent = '🔌 Nicht verbunden (nur lokale Ansicht)';
+      status.classList.remove('connected');
+      connectBtn.hidden = false;
+      disconnectBtn.hidden = true;
+    }
+  }
+
+  async function connectToRoom() {
+    const serverUrl = document.getElementById('roomServerInput').value.trim();
+    const roomCode = document.getElementById('roomCodeInput').value.trim() || (activeVideoDozent && activeVideoDozent.name) || 'default';
+    if (!serverUrl) {
+      showToast('Bitte eine Server-Adresse eingeben (z. B. ws://localhost:8787).', true);
+      return;
+    }
+    const myName = activeVideoDozent && participants.find((p) => p.isLocal)
+      ? participants.find((p) => p.isLocal).name
+      : 'Ich';
+
+    roomClient.onPeerJoined = (peerId, name) => {
+      if (!participants.some((p) => p.id === peerId)) {
+        participants.push({ id: peerId, name, isLocal: false, isRemote: true, audioOn: true, videoOn: true });
+      }
+      renderParticipants();
+      if (groupBuilderActive) renderGroupMembers();
+      showToast(`${name} ist dem Raum beigetreten.`);
+    };
+    roomClient.onPeerLeft = (peerId) => {
+      const p = participants.find((x) => x.id === peerId);
+      removeParticipant(peerId);
+      if (p) showToast(`${p.name} hat den Raum verlassen.`);
+    };
+    roomClient.onRemoteStream = (peerId, stream) => {
+      const p = participants.find((x) => x.id === peerId);
+      if (p) p.stream = stream;
+      renderParticipants();
+    };
+    roomClient.onBroadcast = handleRoomBroadcast;
+    roomClient.onConnectionChange = updateRoomStatusUI;
+
+    try {
+      await roomClient.connect(serverUrl, roomCode, myName, mediaStream);
+      showToast(`Mit Raum „${roomCode}" verbunden.`);
+    } catch (err) {
+      showToast('Verbindung zum Server fehlgeschlagen: ' + err.message, true);
+    }
+  }
+
+  function disconnectFromRoom() {
+    if (!roomClient.connected) return;
+    // Echte Netzwerk-Teilnehmer aus der lokalen Ansicht entfernen, lokale Platzhalter bleiben.
+    participants = participants.filter((p) => !p.isRemote);
+    roomClient.disconnect();
+    updateRoomStatusUI(false);
+    renderParticipants();
+  }
+
+  function handleRoomBroadcast(fromPeerId, payload) {
+    if (payload.kind === 'lesson-chat') {
+      lessonChat.push(payload.entry);
+      renderLessonChat();
+      return;
+    }
+
+    if (payload.kind === 'mute-all') {
+      allMuted = payload.allMuted;
+      setMuteAllButtonLabel();
+      mediaState.audioOn = !allMuted;
+      applyMediaState();
+      const me = participants.find((p) => p.id === LOCAL_ID);
+      if (me) {
+        me.audioOn = !allMuted;
+        if (!allMuted) me.handRaised = false;
+      }
+      renderParticipants();
+      showToast(allMuted ? 'Der Dozent hat alle stummgeschaltet.' : 'Stummschaltung aufgehoben.');
+      return;
+    }
+
+    if (payload.kind === 'freischalten' && payload.targetPeerId === roomClient.peerId) {
+      mediaState.audioOn = true;
+      applyMediaState();
+      const me = participants.find((p) => p.id === LOCAL_ID);
+      if (me) {
+        me.audioOn = true;
+        me.handRaised = false;
+      }
+      renderParticipants();
+      showToast('Du wurdest freigeschaltet und kannst jetzt sprechen.');
+      return;
+    }
+
+    if (payload.kind === 'hand-raise') {
+      const p = participants.find((x) => x.id === fromPeerId);
+      if (p) {
+        p.handRaised = payload.raised;
+        renderParticipants();
+      }
+      return;
+    }
+
+    if (payload.kind === 'presentation-start' || payload.kind === 'presentation-stop') {
+      const dozent =
+        findDozent(payload.dozentId) ||
+        (activeVideoDozent && activeVideoDozent.id === payload.dozentId ? activeVideoDozent : null);
+      if (!dozent) return;
+      dozent.presentation =
+        payload.kind === 'presentation-start'
+          ? { name: payload.name, presenter: payload.presenter, time: payload.time }
+          : null;
+      render();
+      updateLessonPresentationLabel(dozent);
+      return;
+    }
   }
 
   // ===== Teilnehmer-Leiste =====
@@ -119,6 +252,13 @@ const LOCAL_ID = 'me';
         video.autoplay = true;
         video.playsInline = true;
         video.muted = true;
+        videoBox.appendChild(video);
+      } else if (p.isRemote && p.stream) {
+        // Echter Video/Audio-Stream eines anderen Geräts (WebRTC, Peer-zu-Peer)
+        const video = document.createElement('video');
+        video.autoplay = true;
+        video.playsInline = true;
+        video.srcObject = p.stream;
         videoBox.appendChild(video);
       }
 
@@ -210,6 +350,9 @@ const LOCAL_ID = 'me';
     applyMediaState();
     setMuteAllButtonLabel();
     renderParticipants();
+    if (roomClient.connected) {
+      roomClient.broadcast({ kind: 'mute-all', allMuted });
+    }
     showToast(
       allMuted
         ? 'Alle Teilnehmer stummgeschaltet – nur der Dozent ist zu hören.'
@@ -222,6 +365,9 @@ const LOCAL_ID = 'me';
     if (!p) return;
     p.handRaised = !p.handRaised;
     renderParticipants();
+    if (id === LOCAL_ID && roomClient.connected) {
+      roomClient.broadcast({ kind: 'hand-raise', raised: p.handRaised });
+    }
     if (p.handRaised) {
       showToast(`${p.name} meldet sich zu Wort.`);
     }
@@ -240,6 +386,9 @@ const LOCAL_ID = 'me';
     if (p.isLocal) {
       mediaState.audioOn = true;
       applyMediaState();
+    }
+    if (p.isRemote && roomClient.connected && roomClient.peers.has(id)) {
+      roomClient.broadcast({ kind: 'freischalten', targetPeerId: id });
     }
     renderParticipants();
     showToast(`${p.name} wurde freigeschaltet und kann jetzt sprechen.`);
@@ -318,20 +467,22 @@ const LOCAL_ID = 'me';
   }
 
   function pushLessonMessage(entry) {
-    lessonChat.push(
-      Object.assign(
-        {
-          id: uid(),
-          author: 'Ich',
-          time: new Date().toLocaleTimeString('de-DE', {
-            hour: '2-digit',
-            minute: '2-digit'
-          })
-        },
-        entry
-      )
+    const fullEntry = Object.assign(
+      {
+        id: uid(),
+        author: 'Ich',
+        time: new Date().toLocaleTimeString('de-DE', {
+          hour: '2-digit',
+          minute: '2-digit'
+        })
+      },
+      entry
     );
+    lessonChat.push(fullEntry);
     renderLessonChat();
+    if (roomClient.connected) {
+      roomClient.broadcast({ kind: 'lesson-chat', entry: fullEntry });
+    }
   }
 
   function sendLessonMessage() {

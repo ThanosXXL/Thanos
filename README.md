@@ -114,6 +114,43 @@ node scripts/build-materials.js
 > erreichbar ist, muss sie öffentlich gehostet werden (z. B. über die PWA auf GitHub Pages,
 > sobald dort aktiviert).
 
+## Echter Mehrgeräte-Video-Chat (Signaling-Server + WebRTC)
+
+Ohne einen laufenden Signaling-Server sind "Teilnehmer" im Video-Chat nur **lokale
+Platzhalter auf einem einzelnen Gerät** – Dozent und Teilnehmer auf verschiedenen Rechnern
+sehen sich sonst nicht. Mit `server/signaling-server.js` werden mehrere echte Geräte in
+einem gemeinsamen Raum verbunden: WebRTC-Signaling (Angebot/Antwort/ICE) läuft über den
+Server, Audio/Video fließen anschließend **direkt Peer-zu-Peer** zwischen den Geräten.
+Zusätzlich werden Unterrichts-Chat, Alle-Stummschalten, Melden/Freischalten und
+PowerPoint-Präsentationen in Echtzeit an alle verbundenen Geräte verteilt.
+
+**Server starten** (auf einem Rechner, z. B. dem des Dozenten, oder zentral im Netzwerk):
+
+```
+pwsh ./scripts/start-signaling-server.ps1        # Standard-Port 8787
+# oder plattformunabhängig:
+npm run signaling
+```
+
+**Verbinden** (im Video-Chat-Fenster, oberhalb der Teilnehmer-Leiste): Server-Adresse
+eintragen (z. B. `ws://192.168.1.10:8787` für dasselbe Netzwerk, `ws://localhost:8787` für
+denselben Rechner) und einen Raum-Code (z. B. den Dozentennamen), auf den sich alle
+Teilnehmer geräteübergreifend einigen, dann **„Verbinden"** klicken.
+
+> Ohne aktive Verbindung funktioniert die Video-Chat-Ansicht unverändert wie zuvor rein
+> lokal (manuell hinzugefügte Teilnehmer zum Demonstrieren ohne Zweitgerät). Für Verbindungen
+> über das Internet (nicht nur im selben Netzwerk) muss der Server öffentlich erreichbar sein
+> (Portfreigabe/Firewall bzw. Hosting auf einem erreichbaren Server) – das ist bewusst nicht
+> Teil dieses Skripts. `ws` (die Server-Bibliothek) ist reines JavaScript ohne native
+> Kompilierung, im Gegensatz zu `keytar` also unkompliziert per `npm install` nutzbar.
+
+Verifiziert wurde diese Funktion mit zwei vollständig unabhängigen Chromium-Prozessen
+(simulierte Kamera/Mikrofon), die sich über einen lokal laufenden Signaling-Server
+verbunden haben: echter WebRTC-Medienfluss (`readyState` der Video-Elemente = Daten
+vorhanden), Teilnehmerzahl-Synchronisation, geräteübergreifender Unterrichts-Chat, eine
+über das Netzwerk wirksame Stummschaltung sowie korrekte Erkennung, wenn ein Gerät den
+Raum verlässt.
+
 ## PWA – echte installierbare App für Android &amp; iOS
 
 Da Electron nicht auf Mobilgeräten läuft, gibt es die Oberfläche zusätzlich als **PWA**
@@ -276,13 +313,14 @@ solange keine Datei sie in einer eigenen Closure versteckt). Ladereihenfolge in 
 2. `toast.js` – Kurzmeldungen
 3. `dozenten.js` – Tabs, Listen, Chat-Panel, Panel-Rendering
 4. `toolbar-screenshot.js` – Werkzeugleiste, Screenshot & Sniping
-5. `video-chat.js` – Video-Live-Chat/Unterricht: Teilnehmer, Moderation, Lektions-Chat, Privat-/Gruppenchat
-6. `file-share.js` – Dateifreigabe im Video-Chat-Fenster
-7. `presentation.js` – PowerPoint-Präsentation teilen
-8. `drive-settings.js` – Google-Drive-Einstellungen
-9. `homework.js` – Ordner: Hausaufgaben
-10. `calendar.js` – Ordner: Kalender
-11. `app-init.js` – **muss zuletzt geladen werden**: Event-Verdrahtung und App-Start (`init()`)
+5. `room-client.js` – Netzwerk-Client für den echten Mehrgeräte-Video-Chat (WebSocket + WebRTC)
+6. `video-chat.js` – Video-Live-Chat/Unterricht: Teilnehmer, Moderation, Lektions-Chat, Privat-/Gruppenchat
+7. `file-share.js` – Dateifreigabe im Video-Chat-Fenster
+8. `presentation.js` – PowerPoint-Präsentation teilen
+9. `drive-settings.js` – Google-Drive-Einstellungen
+10. `homework.js` – Ordner: Hausaufgaben
+11. `calendar.js` – Ordner: Kalender
+12. `app-init.js` – **muss zuletzt geladen werden**: Event-Verdrahtung und App-Start (`init()`)
 
 > Wird eine neue Datei ergänzt, unbedingt vor `app-init.js` in `index.html` einbinden (und ggf.
 > in `renderer/sw.js`s `PRECACHE_URLS` sowie den entsprechenden CACHE_NAME-Versionszähler pflegen).
