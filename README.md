@@ -67,6 +67,38 @@ Neue Installer werden automatisch von GitHub Actions gebaut, sobald ein neuer Ve
 (z. B. `v1.0.0`) gepusht wird, oder manuell über den Button **"Run workflow"** im Tab
 **Actions → Build & Release Desktop App**.
 
+## Download-Seite (alle 5 Plattformen, 1-Klick)
+
+`renderer/download.html` ist eine eigenständige Landingpage im gleichen Farbschema wie das
+Dashboard (Sandton/Beige, dunkelrotes Header-Gradient). Sie erkennt die Plattform des
+Besuchers automatisch und bietet **1-Klick-Download-Buttons** für **Windows, Mac, Linux,
+Android und iOS** – gedacht für Teilnehmer, Dozenten und Admins, *bevor* sie sich zum
+Unterricht anmelden.
+
+- In der App: Button **„⬇ App herunterladen (alle Plattformen)"** oben rechts im Header.
+- Direkt: `http://localhost:4173/download.html` (nach `npm run serve` bzw. `start-browser.ps1`).
+
+Enthält zusätzlich Download-Links für:
+- **Handzettel für Teilnehmer** (weiche Farben, Hochglanz-3D) – `downloads/Handzettel-Teilnehmer.pdf`
+- **Installationshandbücher** je Plattform (inkl. dem jeweiligen PowerShell-Skript im Wortlaut) –
+  `downloads/Installationshandbuch-{Windows,Mac,Linux,Android,iOS}.pdf`
+
+Alle Dateien in `downloads/` werden per Node-Skript erzeugt (kein PowerShell nötig, nur ein
+lokal vorhandener Chromium/Chrome/Edge):
+
+```
+node scripts/build-materials.js
+```
+
+> **Wichtiger Hinweis:** Aus Sicherheitsgründen können Webseiten eine heruntergeladene Datei
+> nicht automatisch auf dem Desktop speichern – sie landet im üblichen Download-Ordner des
+> Browsers. Für Windows/Mac/Linux lädt der Button das **Start-Skript** der Vollversion herunter
+> (kein kompiliertes Installer-Programm, da dafür ein Versions-Tag-Release über
+> `build-release.yml` nötig wäre); für Android/iOS lädt er die **Vollversion-PDF**, da Electron
+> dort nicht nativ läuft. Damit die Seite auch für entfernte Teilnehmer über das Internet
+> erreichbar ist, muss sie öffentlich gehostet werden (z. B. über die PWA auf GitHub Pages,
+> sobald dort aktiviert).
+
 ## PWA – echte installierbare App für Android &amp; iOS
 
 Da Electron nicht auf Mobilgeräten läuft, gibt es die Oberfläche zusätzlich als **PWA**

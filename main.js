@@ -289,6 +289,25 @@ ipcMain.handle('open-file-dialog', async (event, options) => {
   return { canceled: false, files };
 });
 
+// Öffnet die Download-Seite (renderer/download.html) in einem eigenen Fenster.
+// Nötig, weil target="_blank"-Links in Electron standardmäßig nicht funktionieren.
+ipcMain.handle('open-download-page', () => {
+  const win = new BrowserWindow({
+    width: 1000,
+    height: 800,
+    minWidth: 700,
+    minHeight: 500,
+    backgroundColor: '#f2ead9',
+    webPreferences: {
+      contextIsolation: true,
+      nodeIntegration: false
+    }
+  });
+  win.setMenuBarVisibility(false);
+  win.loadFile(path.join(__dirname, 'renderer', 'download.html'));
+  return true;
+});
+
 app.whenReady().then(() => {
   // Kamera-/Mikrofon-Zugriff für den Video-Live-Chat erlauben.
   session.defaultSession.setPermissionRequestHandler((webContents, permission, callback) => {

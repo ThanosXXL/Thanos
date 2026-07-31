@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>IT Schulungsmaßnahmen – Herunterladen</title>
+<link rel="icon" href="icons/icon-192.png" type="image/png">
+<style>
+  :root { --dark-blue:#0b1f4d; --mid-blue:#14367a; --light-blue:#5b9bd5; --pale-blue:#dceaf7;
+          --white:#fff; --black:#111; --sand:#f2ead9; --sand-deep:#e7dcc3; --soft-dark-red:#8c3b3b; }
+  * { box-sizing: border-box; }
+  body { margin:0; font-family:"Segoe UI", Arial, sans-serif; background:var(--sand); color:var(--black); }
+  .app-header { background: linear-gradient(90deg, #6f2d2d, var(--soft-dark-red)); color:var(--white); padding:22px 24px; }
+  .app-header h1 { margin:0 0 6px 0; font-size:26px; }
+  .app-header p { margin:0; color:#f3e2e2; font-size:14px; }
+  main { max-width: 980px; margin: 0 auto; padding: 28px 20px 60px 20px; }
+  h2 { color: var(--soft-dark-red); border-bottom: 3px solid var(--soft-dark-red); padding-bottom: 8px; }
+  .hint { color:#55606f; font-size:14px; }
+  .platform-grid { display:grid; grid-template-columns: repeat(auto-fit, minmax(220px,1fr)); gap:18px; margin-top:18px; }
+  .platform-card { position:relative; overflow:hidden; background:var(--white); border:1px solid var(--sand-deep);
+                    border-radius:14px; padding:20px; box-shadow:0 4px 14px rgba(0,0,0,0.08); text-align:center; }
+  .platform-card.detected { border-color: var(--soft-dark-red); box-shadow: 0 0 0 2px var(--soft-dark-red), 0 4px 14px rgba(0,0,0,0.08); }
+  .platform-card::after {
+    content:""; position:absolute; top:-60%; left:-25%; width:55%; height:220%;
+    background: linear-gradient(120deg, rgba(255,255,255,0) 0%, rgba(255,255,255,0.55) 45%, rgba(255,255,255,0) 62%);
+    transform: rotate(18deg); pointer-events:none;
+  }
+  .platform-icon { font-size:40px; margin-bottom:8px; }
+  .platform-card h3 { margin:6px 0 4px 0; color:var(--dark-blue); }
+  .detected-badge { display:inline-block; font-size:11px; background:var(--soft-dark-red); color:var(--white);
+                     padding:2px 8px; border-radius:10px; margin-bottom:8px; }
+  .dl-btn { display:inline-block; width:100%; background:var(--dark-blue); color:var(--white); border:none;
+            padding:10px 14px; border-radius:8px; cursor:pointer; font-size:14px; text-decoration:none; margin-top:8px; }
+  .dl-btn:hover { background: var(--mid-blue); }
+  .dl-btn.secondary { background:var(--white); color:var(--dark-blue); border:1px solid var(--dark-blue); }
+  .platform-note { font-size:12px; color:#55606f; margin-top:8px; min-height: 32px; }
+  .extras { margin-top: 32px; }
+  .extras-grid { display:grid; grid-template-columns: repeat(auto-fit, minmax(240px,1fr)); gap: 14px; margin-top: 14px; }
+  .extra-card { background:var(--white); border:1px solid var(--pale-blue); border-radius:10px; padding:16px; }
+  .extra-card h4 { margin:0 0 6px 0; color:var(--dark-blue); }
+  .note-box { background: var(--pale-blue); border-radius: 10px; padding: 14px 16px; font-size: 13px; margin-top: 24px; }
+  footer { text-align:center; color:var(--soft-dark-red); font-size:12px; padding: 20px; }
+</style>
+</head>
+<body>
+  <header class="app-header">
+    <h1>IT Schulungsmaßnahmen</h1>
+    <p>App herunterladen &ndash; für Teilnehmer, Dozenten und Admins, noch bevor du dich zum Unterricht anmeldest.</p>
+  </header>
+
+  <main>
+    <h2>1-Klick-Download nach Plattform</h2>
+    <p class="hint">Deine Plattform wird automatisch erkannt und hervorgehoben. Für Windows/Mac/Linux lädt der Button das
+      Start-Skript der Vollversion herunter (Node.js muss einmalig installiert sein); für Android/iOS lädt er die
+      Vollversion-Broschüre als PDF, da die App dort nicht nativ läuft.</p>
+
+    <div class="platform-grid" id="platformGrid"></div>
+
+    <div class="note-box">
+      Hinweis: Diese Seite funktioniert auf jedem Rechner, auf dem sie lokal ausgeliefert wird
+      (<code>pwsh ./scripts/start-browser.ps1</code> bzw. <code>npm run serve</code> &rarr;
+      <code>http://localhost:4173/download.html</code>). Für Teilnehmer, Dozenten und Admins über das Internet
+      muss diese Seite zusätzlich öffentlich gehostet werden (z. B. über die PWA auf GitHub Pages, sobald aktiviert).
+      Aus Sicherheitsgründen können Browser eine heruntergeladene Datei nicht automatisch auf dem Desktop
+      speichern &ndash; sie landet im üblichen Download-Ordner und kann von dort auf den Desktop verschoben werden.
+    </div>
+
+    <div class="extras">
+      <h2>Handbücher &amp; Handzettel</h2>
+      <div class="extras-grid" id="extrasGrid"></div>
+    </div>
+  </main>
+
+  <footer>© <span id="year"></span> IT Schulungsmaßnahmen – Alle Rechte vorbehalten.</footer>
+
+<script>
+  document.getElementById('year').textContent = new Date().getFullYear();
+
+  const platforms = [
+    { key: 'windows', label: 'Windows', icon: '🪟',
+      match: () => /Win/i.test(navigator.platform) || /Windows/i.test(navigator.userAgent),
+      file: 'scripts/start-windows.ps1', kind: 'Start-Skript (.ps1)',
+      note: 'powershell -ExecutionPolicy Bypass -File start-windows.ps1' },
+    { key: 'mac', label: 'Mac', icon: '🍎',
+      match: () => /Mac/i.test(navigator.platform) && !/iPhone|iPad/i.test(navigator.userAgent),
+      file: 'scripts/start-macos.ps1', kind: 'Start-Skript (.ps1)',
+      note: 'pwsh ./start-macos.ps1 (PowerShell 7+)' },
+    { key: 'linux', label: 'Linux', icon: '🐧',
+      match: () => /Linux/i.test(navigator.platform) && !/Android/i.test(navigator.userAgent),
+      file: 'scripts/start-linux.ps1', kind: 'Start-Skript (.ps1)',
+      note: 'pwsh ./start-linux.ps1 (PowerShell 7+)' },
+    { key: 'android', label: 'Android', icon: '🤖',
+      match: () => /Android/i.test(navigator.userAgent),
+      file: 'downloads/IT-Schulungsmassnahmen-Vollversion-Android.pdf', kind: 'Vollversion-PDF',
+      note: 'Alternativ als installierbare PWA über den Browser (Menü → App installieren).' },
+    { key: 'ios', label: 'iOS', icon: '📱',
+      match: () => /iPhone|iPad|iPod/i.test(navigator.userAgent),
+      file: 'downloads/IT-Schulungsmassnahmen-Vollversion-iOS.pdf', kind: 'Vollversion-PDF',
+      note: 'Alternativ als installierbare PWA über Safari (Teilen → Zum Home-Bildschirm).' }
+  ];
+
+  const grid = document.getElementById('platformGrid');
+  let detectedKey = null;
+  for (const p of platforms) {
+    try { if (p.match()) { detectedKey = p.key; break; } } catch (e) { /* ignore */ }
+  }
+
+  platforms.forEach((p) => {
+    const card = document.createElement('div');
+    card.className = 'platform-card' + (p.key === detectedKey ? ' detected' : '');
+    card.innerHTML = `
+      ${p.key === detectedKey ? '<span class="detected-badge">Dein Gerät</span><br>' : ''}
+      <div class="platform-icon">${p.icon}</div>
+      <h3>${p.label}</h3>
+      <div class="platform-note">${p.kind}</div>
+      <a class="dl-btn" href="${p.file}" download>⬇ Herunterladen</a>
+      <div class="platform-note">${p.note}</div>
+    `;
+    grid.appendChild(card);
+  });
+
+  const extras = [
+    { title: '📄 Handzettel für Teilnehmer', file: 'downloads/Handzettel-Teilnehmer.pdf' },
+    { title: '🪟 Installationshandbuch Windows', file: 'downloads/Installationshandbuch-Windows.pdf' },
+    { title: '🍎 Installationshandbuch Mac', file: 'downloads/Installationshandbuch-Mac.pdf' },
+    { title: '🐧 Installationshandbuch Linux', file: 'downloads/Installationshandbuch-Linux.pdf' },
+    { title: '🤖 Installationshandbuch Android', file: 'downloads/Installationshandbuch-Android.pdf' },
+    { title: '📱 Installationshandbuch iOS', file: 'downloads/Installationshandbuch-iOS.pdf' }
+  ];
+  const extrasGrid = document.getElementById('extrasGrid');
+  extras.forEach((e) => {
+    const card = document.createElement('div');
+    card.className = 'extra-card';
+    card.innerHTML = `<h4>${e.title}</h4><a class="dl-btn secondary" href="${e.file}" download>⬇ PDF herunterladen</a>`;
+    extrasGrid.appendChild(card);
+  });
+</script>
+</body>
+</html>

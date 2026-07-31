@@ -1723,6 +1723,16 @@
     updateMediaButtons();
   }
 
+  // Download-Seite: in Electron über ein eigenes Fenster öffnen (target="_blank"
+  // funktioniert dort standardmäßig nicht); im echten Browser normal per Link/Tab.
+  const headerDownloadLink = document.querySelector('.header-download-link');
+  if (headerDownloadLink && !window.__isBrowserFallback && window.dashboardAPI && window.dashboardAPI.openDownloadPage) {
+    headerDownloadLink.addEventListener('click', (e) => {
+      e.preventDefault();
+      window.dashboardAPI.openDownloadPage();
+    });
+  }
+
   document.getElementById('addDozentEmptyBtn').addEventListener('click', openAddDozentModal);
   document.getElementById('cancelAddDozent').addEventListener('click', closeAddDozentModal);
   document.getElementById('confirmAddDozent').addEventListener('click', confirmAddDozent);

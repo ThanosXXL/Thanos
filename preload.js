@@ -7,5 +7,6 @@ contextBridge.exposeInMainWorld('dashboardAPI', {
   saveSettings: (settings) => ipcRenderer.invoke('save-settings', settings),
   captureScreen: () => ipcRenderer.invoke('capture-screen'),
   saveScreenshot: (payload) => ipcRenderer.invoke('save-screenshot', payload),
-  openFileDialog: (options) => ipcRenderer.invoke('open-file-dialog', options)
+  openFileDialog: (options) => ipcRenderer.invoke('open-file-dialog', options),
+  openDownloadPage: () => ipcRenderer.invoke('open-download-page')
 });
