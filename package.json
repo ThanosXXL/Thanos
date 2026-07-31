@@ -8,7 +8,11 @@
   "scripts": {
     "start": "electron .",
     "dist": "electron-builder",
-    "serve": "node scripts/serve.js"
+    "serve": "node scripts/serve.js",
+    "postinstall": "electron-builder install-app-deps"
+  },
+  "dependencies": {
+    "keytar": "^7.9.0"
   },
   "devDependencies": {
     "electron": "^31.0.0",
@@ -21,7 +25,8 @@
       "main.js",
       "preload.js",
       "renderer/**/*",
-      "package.json"
+      "package.json",
+      "node_modules/**/*"
     ],
     "directories": {
       "output": "dist"

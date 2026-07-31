@@ -11,6 +11,20 @@ const path = require('path');
 const fs = require('fs');
 const https = require('https');
 
+// Google-Drive-Token sicher im OS-Schlüsselbund speichern (Windows Credential Manager /
+// macOS Keychain / Linux Secret Service via libsecret). keytar ist ein natives Modul und
+// kann auf manchen Systemen fehlen oder fehlschlagen (z. B. Linux ohne libsecret) – der
+// require() selbst kann dabei bereits werfen, deshalb hier abgesichert. In diesem Fall
+// fällt die App automatisch auf die bisherige Klartext-Datei zurück, statt abzustürzen.
+let keytar = null;
+try {
+  keytar = require('keytar');
+} catch (err) {
+  keytar = null;
+}
+const KEYTAR_SERVICE = 'it-schulungsmassnahmen';
+const KEYTAR_ACCOUNT = 'google-drive-token';
+
 // Demo-Modus: eigene Datendatei + vorbefüllte Beispieldaten (DASHBOARD_DEMO=1)
 const DEMO = process.env.DASHBOARD_DEMO === '1';
 const dataFilePath = path.join(
@@ -104,7 +118,7 @@ function saveData(data) {
   fs.writeFileSync(dataFilePath, JSON.stringify(data, null, 2), 'utf-8');
 }
 
-function loadSettings() {
+function loadSettingsFile() {
   try {
     const raw = fs.readFileSync(settingsFilePath, 'utf-8');
     return JSON.parse(raw);
@@ -113,8 +127,57 @@ function loadSettings() {
   }
 }
 
-function saveSettings(settings) {
+function saveSettingsFile(settings) {
   fs.writeFileSync(settingsFilePath, JSON.stringify(settings, null, 2), 'utf-8');
+}
+
+// Liefert die Einstellungen. Der Google-Drive-Token wird nach Möglichkeit sicher aus dem
+// OS-Schlüsselbund gelesen statt aus der Klartext-Datei; ein evtl. noch vorhandener
+// Klartext-Token wird dabei einmalig in den Schlüsselbund migriert. `driveTokenSecure`
+// zeigt an, ob der Token aktuell sicher gespeichert ist (Anzeige im Einstellungen-Dialog).
+async function loadSettings() {
+  const fileSettings = loadSettingsFile();
+
+  if (!keytar) {
+    return { ...fileSettings, driveTokenSecure: false };
+  }
+
+  try {
+    let token = await keytar.getPassword(KEYTAR_SERVICE, KEYTAR_ACCOUNT);
+
+    if (!token && fileSettings.googleDriveToken) {
+      token = fileSettings.googleDriveToken;
+      await keytar.setPassword(KEYTAR_SERVICE, KEYTAR_ACCOUNT, token);
+      const cleaned = { ...fileSettings };
+      delete cleaned.googleDriveToken;
+      saveSettingsFile(cleaned);
+    }
+
+    const { googleDriveToken, ...rest } = fileSettings;
+    return { ...rest, googleDriveToken: token || '', driveTokenSecure: true };
+  } catch (err) {
+    // Schlüsselbund-Backend nicht verfügbar (z. B. libsecret fehlt unter Linux) -> Fallback
+    return { ...fileSettings, driveTokenSecure: false };
+  }
+}
+
+async function saveSettings(settings) {
+  const { googleDriveToken, ...rest } = settings || {};
+
+  if (keytar) {
+    try {
+      if (googleDriveToken) {
+        await keytar.setPassword(KEYTAR_SERVICE, KEYTAR_ACCOUNT, googleDriveToken);
+      } else {
+        await keytar.deletePassword(KEYTAR_SERVICE, KEYTAR_ACCOUNT).catch(() => {});
+      }
+      saveSettingsFile(rest); // Token nicht mehr im Klartext in der Datei speichern
+      return;
+    } catch (err) {
+      // Schlüsselbund-Backend nicht verfügbar -> Fallback auf die Datei
+    }
+  }
+  saveSettingsFile(settings);
 }
 
 // Lädt den kompletten Bildschirm als Screenshot (Basis für den Sniping-Zuschnitt).
@@ -135,15 +198,14 @@ async function captureScreen() {
 
 // Lädt ein PNG (Buffer) per Multipart-Upload in Google Drive hoch.
 // Benötigt einen gültigen OAuth-Access-Token mit Drive-Berechtigung.
-function uploadToGoogleDrive(buffer, filename) {
-  return new Promise((resolve) => {
-    const settings = loadSettings();
-    const token = settings.googleDriveToken;
-    if (!token) {
-      resolve({ ok: false, reason: 'no-token' });
-      return;
-    }
+async function uploadToGoogleDrive(buffer, filename) {
+  const settings = await loadSettings();
+  const token = settings.googleDriveToken;
+  if (!token) {
+    return { ok: false, reason: 'no-token' };
+  }
 
+  return new Promise((resolve) => {
     const boundary = '----drive-boundary-' + Date.now();
     const metadata = JSON.stringify({ name: filename });
     const multipartBody = Buffer.concat([
@@ -228,8 +290,8 @@ ipcMain.handle('get-settings', () => {
   return loadSettings();
 });
 
-ipcMain.handle('save-settings', (event, settings) => {
-  saveSettings(settings);
+ipcMain.handle('save-settings', async (event, settings) => {
+  await saveSettings(settings);
   return true;
 });
 

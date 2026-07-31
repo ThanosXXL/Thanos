@@ -52,6 +52,21 @@ Im Video-Chat-Fenster gibt es außerdem eine **Dateifreigabe**:
 > Hinweis: Der Google-Drive-Upload nutzt einen manuell hinterlegten OAuth-Access-Token; ohne Token
 > wird der Screenshot ausschließlich lokal gespeichert.
 
+**Sichere Token-Speicherung:** Der Google-Drive-Token wird über
+[`keytar`](https://www.npmjs.com/package/keytar) im **OS-Schlüsselbund** gespeichert (Windows
+Credential Manager, macOS Keychain, Linux Secret Service via libsecret) statt im Klartext. Ein
+evtl. vorhandener alter Klartext-Token wird beim ersten Start automatisch migriert. Ist auf einem
+System kein Schlüsselbund-Backend verfügbar (z. B. Linux ohne libsecret), fällt die App
+automatisch auf die bisherige Klartext-Datei zurück – das Einstellungen-Fenster zeigt in diesem
+Fall eine Warnung (🔒 sicher / ⚠ Klartext) an.
+
+> `keytar` ist ein natives Modul. `npm install` lädt für gängige Plattformen vorkompilierte
+> Binärdateien; auf ungewöhnlichen Systemen kann der Download/Build fehlschlagen. Der `postinstall`-
+> Schritt (`electron-builder install-app-deps`) baut es automatisch passend zur Electron-Version
+> neu. Sollte die Installation dennoch Probleme machen, kann die Zeile `"keytar"` aus den
+> `dependencies` in `package.json` entfernt werden – die App läuft dann unverändert weiter, nur
+> ohne die sichere Schlüsselbund-Speicherung.
+
 ## Fertigen Installer herunterladen (ohne Terminal)
 
 Unter **[Releases](../../releases)** stehen fertig gebaute Installationsdateien zum Anklicken bereit:
