@@ -150,3 +150,9 @@
     return folder;
   }
 
+// Nur für automatisierte Tests (node:test) per require() nutzbar; im Browser als
+// klassisches <script> ist "module" nicht definiert und dieser Block wird übersprungen.
+if (typeof module !== 'undefined' && module.exports) {
+  module.exports = { examCountdown };
+}
+

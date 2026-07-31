@@ -1,0 +1,39 @@
+name: CI – Syntax-Check & Tests
+
+# Schneller Sicherheitsnetz-Check bei jedem Push/PR: Syntax aller JS-Dateien +
+# automatisierte Tests (node:test). Getrennt vom Release-Build (build-release.yml,
+# läuft nur bei Versions-Tags) und vom PWA-Pages-Deploy (pages.yml).
+on:
+  push:
+  pull_request:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Repository auschecken
+        uses: actions/checkout@v4
+
+      - name: Node.js einrichten
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      - name: Abhängigkeiten installieren
+        run: npm ci --ignore-scripts
+
+      - name: Syntax-Check aller JavaScript-Dateien
+        run: |
+          set -e
+          for f in $(find . -name "*.js" \
+              -not -path "./node_modules/*" \
+              -not -path "./dist/*"); do
+            node --check "$f"
+          done
+
+      - name: package.json validieren
+        run: node -e "JSON.parse(require('fs').readFileSync('package.json','utf8'))"
+
+      - name: Automatisierte Tests (node:test)
+        run: npm test

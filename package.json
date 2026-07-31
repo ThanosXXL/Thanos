@@ -10,6 +10,7 @@
     "dist": "electron-builder",
     "serve": "node scripts/serve.js",
     "signaling": "node server/signaling-server.js",
+    "test": "node --test",
     "postinstall": "electron-builder install-app-deps"
   },
   "dependencies": {
