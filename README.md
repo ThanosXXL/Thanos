@@ -37,6 +37,10 @@ So bekommt sie einen öffentlichen Link über GitHub Pages:
 3. Branch auf diesen Branch (bzw. nach dem Merge auf den Standard-Branch) und Ordner **`/docs`** stellen
 4. Speichern – GitHub zeigt danach die Demo-URL an (z. B. `https://<user>.github.io/<repo>/`)
 
+`docs/index.html` ist die Landingpage dieser URL: kurzer Auto-Loop-Vorschau-Clip
+(`docs/assets/bauplanphase-demo.webm`, automatisiert mit einem Headless-Browser aufgenommen) plus einem
+großen, glänzenden 3D-Button „Demo starten“, der mit einem Klick direkt zu `demo.html` führt.
+
 ## Handbücher (PDF)
 
 Unter [`docs/handbuecher/`](docs/handbuecher/) liegen die HTML-Quellen der PDF-Handbücher (PowerShell-
