@@ -71,6 +71,19 @@
     </div>
   </div>
 
+  <!-- Modal: PowerPoint-Präsentation teilen -->
+  <div class="modal-overlay" id="presentModal">
+    <div class="modal">
+      <h2>Präsentation teilen</h2>
+      <p class="modal-hint" id="presentFileName"></p>
+      <input type="text" id="presenterNameInput" placeholder="Name des Vortragenden (Dozent oder Teilnehmer)" maxlength="60">
+      <div class="modal-actions">
+        <button id="cancelPresent" class="btn-secondary">Abbrechen</button>
+        <button id="confirmPresent" class="btn-primary">Auf allen Bildschirmen teilen</button>
+      </div>
+    </div>
+  </div>
+
   <!-- Sniping-Overlay: Bereichsauswahl auf dem eingefrorenen Screenshot -->
   <div class="snip-overlay" id="snipOverlay">
     <img id="snipImage" class="snip-image" alt="">
@@ -109,7 +122,7 @@
         <div class="lesson-video">
           <video id="lessonVideo" autoplay playsinline muted></video>
           <div class="tile-status" id="localStatus"></div>
-          <div class="lesson-video-label">Live-Übertragung – Unterricht</div>
+          <div class="lesson-video-label" id="lessonVideoLabel">Live-Übertragung – Unterricht</div>
         </div>
         <div class="lesson-chat">
           <div class="lesson-chat-head">

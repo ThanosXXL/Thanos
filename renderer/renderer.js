@@ -24,6 +24,10 @@
   let activeVideoDozent = null;
   let toastTimer = null;
 
+  // Zustand für PowerPoint-Präsentationen (auf allen Bildschirmen teilen)
+  let pendingPresentationFile = null;
+  let presentTargetDozentId = null;
+
   // Unterricht/Teilnehmer, Unterrichts-Chat und Privat-/Gruppenchats
   let participants = [];
   let lessonChat = [];
@@ -69,7 +73,8 @@
       doneProjects: [],
       chat: [],
       homework: [],
-      exams: []
+      exams: [],
+      presentation: null
     };
     state.dozenten.push(dozent);
     activeDozentId = dozent.id;
@@ -251,6 +256,10 @@
     header.appendChild(h2);
     header.appendChild(buildToolbar(dozent));
     panel.appendChild(header);
+
+    if (dozent.presentation) {
+      panel.appendChild(buildPresentationBanner(dozent));
+    }
 
     const grid = document.createElement('div');
     grid.className = 'lists-grid';
@@ -438,6 +447,12 @@
 
     bar.appendChild(mkToolBtn('📷 Screenshot', 'Ganzen Bildschirm aufnehmen', () => takeScreenshot(false)));
     bar.appendChild(mkToolBtn('✂️ Sniping', 'Bereichsauswahl-Screenshot', () => takeScreenshot(true)));
+    bar.appendChild(
+      mkToolBtn('📊 PowerPoint', 'PowerPoint-Präsentation auf allen Bildschirmen teilen', () =>
+        sharePowerPoint(dozent)
+      )
+    );
+    bar.appendChild(mkToolBtn('⚙ Drive', 'Google Drive verbinden', openSettingsModal));
     bar.appendChild(mkToolBtn('🎥 Video-Chat', 'Video-Live-Chat öffnen', () => openVideoChat(dozent)));
 
     const audioToggle = mkToolBtn('🎤 Audio', 'Audio an/aus', toggleAudio);
@@ -448,11 +463,26 @@
     videoToggle.dataset.mediaToggle = 'video';
     bar.appendChild(videoToggle);
 
-    bar.appendChild(mkToolBtn('⚙ Drive', 'Google Drive verbinden', openSettingsModal));
-
     // Zustände der Umschalter nach dem Neuzeichnen anwenden
     updateMediaButtons();
     return bar;
+  }
+
+  function buildPresentationBanner(dozent) {
+    const banner = document.createElement('div');
+    banner.className = 'presentation-banner';
+
+    const text = document.createElement('span');
+    text.textContent = `📊 "${dozent.presentation.name}" wird von ${dozent.presentation.presenter} auf allen Bildschirmen geteilt (seit ${dozent.presentation.time})`;
+
+    const stopBtn = document.createElement('button');
+    stopBtn.className = 'btn-secondary btn-sm';
+    stopBtn.textContent = 'Beenden';
+    stopBtn.addEventListener('click', () => stopPresenting(dozent));
+
+    banner.appendChild(text);
+    banner.appendChild(stopBtn);
+    return banner;
   }
 
   // ===== Screenshot / Sniping =====
@@ -620,6 +650,7 @@
     setMuteAllButtonLabel();
     renderLessonChat();
     renderConversations();
+    updateLessonPresentationLabel(activeVideoDozent);
 
     const lessonVideo = document.getElementById('lessonVideo');
     const localStatus = document.getElementById('localStatus');
@@ -1240,6 +1271,67 @@
     });
   }
 
+  // ===== PowerPoint-Präsentation teilen (auf allen Bildschirmen) =====
+
+  async function sharePowerPoint(dozent) {
+    const result = await window.dashboardAPI.openFileDialog({
+      title: 'PowerPoint-Präsentation auswählen',
+      filters: [{ name: 'PowerPoint', extensions: ['pptx', 'ppt', 'ppsx', 'pps'] }],
+      multiSelections: false
+    });
+    if (result.canceled || !result.files.length) return;
+
+    pendingPresentationFile = result.files[0];
+    presentTargetDozentId = dozent.id;
+    document.getElementById('presentFileName').textContent = '📊 ' + pendingPresentationFile.name;
+    const input = document.getElementById('presenterNameInput');
+    input.value = '';
+    document.getElementById('presentModal').classList.add('visible');
+    input.focus();
+  }
+
+  function closePresentModal() {
+    pendingPresentationFile = null;
+    presentTargetDozentId = null;
+    document.getElementById('presentModal').classList.remove('visible');
+  }
+
+  function confirmPresent() {
+    if (!pendingPresentationFile || !presentTargetDozentId) return;
+    const dozent = findDozent(presentTargetDozentId);
+    if (!dozent) return;
+    const presenter = document.getElementById('presenterNameInput').value.trim() || 'Unbekannt';
+
+    dozent.presentation = {
+      name: pendingPresentationFile.name,
+      presenter,
+      time: nowStr()
+    };
+    const fileName = dozent.presentation.name;
+    closePresentModal();
+    persist();
+    render();
+    updateLessonPresentationLabel(dozent);
+    showToast(`"${fileName}" wird von ${presenter} auf allen Bildschirmen geteilt.`);
+  }
+
+  function stopPresenting(dozent) {
+    dozent.presentation = null;
+    persist();
+    render();
+    updateLessonPresentationLabel(dozent);
+    showToast('Präsentation beendet.');
+  }
+
+  // Aktualisiert die Anzeige im Video-Chat-Fenster, falls es gerade für diesen Dozenten offen ist.
+  function updateLessonPresentationLabel(dozent) {
+    const label = document.getElementById('lessonVideoLabel');
+    if (!label || !activeVideoDozent || activeVideoDozent.id !== dozent.id) return;
+    label.textContent = dozent.presentation
+      ? `📊 ${dozent.presentation.presenter} präsentiert: ${dozent.presentation.name}`
+      : 'Live-Übertragung – Unterricht';
+  }
+
   // ===== Google-Drive-Einstellungen =====
 
   async function openSettingsModal() {
@@ -1681,6 +1773,14 @@
   document.getElementById('cancelSettings').addEventListener('click', closeSettingsModal);
   document.getElementById('saveSettingsBtn').addEventListener('click', saveSettingsFromModal);
 
+  // PowerPoint-Präsentation teilen
+  document.getElementById('cancelPresent').addEventListener('click', closePresentModal);
+  document.getElementById('confirmPresent').addEventListener('click', confirmPresent);
+  document.getElementById('presenterNameInput').addEventListener('keydown', (e) => {
+    if (e.key === 'Enter') confirmPresent();
+    if (e.key === 'Escape') closePresentModal();
+  });
+
   async function init() {
     const loaded = await window.dashboardAPI.loadData();
     state = loaded && Array.isArray(loaded.dozenten) ? loaded : { dozenten: [] };
@@ -1688,6 +1788,7 @@
       if (!Array.isArray(d.chat)) d.chat = [];
       if (!Array.isArray(d.homework)) d.homework = [];
       if (!Array.isArray(d.exams)) d.exams = [];
+      if (d.presentation === undefined) d.presentation = null;
     });
     activeDozentId = state.dozenten.length ? state.dozenten[0].id : null;
     setFileShareEnabled(document.getElementById('fileShareToggle').checked);

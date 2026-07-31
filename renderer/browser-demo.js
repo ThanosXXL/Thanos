@@ -135,11 +135,18 @@
     });
   }
 
-  function openFileDialog() {
+  function openFileDialog(options) {
+    const { filters, multiSelections = true } = options || {};
     return new Promise((resolve) => {
       const input = document.createElement('input');
       input.type = 'file';
-      input.multiple = true;
+      input.multiple = multiSelections;
+      if (Array.isArray(filters) && filters.length) {
+        input.accept = filters
+          .flatMap((f) => f.extensions || [])
+          .map((ext) => '.' + ext)
+          .join(',');
+      }
       input.style.display = 'none';
       document.body.appendChild(input);
       input.addEventListener('change', () => {

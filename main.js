@@ -262,11 +262,17 @@ ipcMain.handle('save-screenshot', async (event, payload) => {
 });
 
 // Öffnet den Datei-Dialog des Geräts, um eine Datei aus einem Ordner zur Freigabe auszuwählen.
-ipcMain.handle('open-file-dialog', async () => {
+// Optionale "filters" (Electron-Dateityp-Filter) und "multiSelections" (Standard: an) lassen
+// sich vom Renderer übergeben, z. B. um den Dialog auf PowerPoint-Dateien einzuschränken.
+ipcMain.handle('open-file-dialog', async (event, options) => {
+  const { filters, multiSelections = true, title } = options || {};
   const win = BrowserWindow.getFocusedWindow() || BrowserWindow.getAllWindows()[0];
+  const properties = ['openFile'];
+  if (multiSelections) properties.push('multiSelections');
   const result = await dialog.showOpenDialog(win, {
-    title: 'Datei zur Freigabe auswählen',
-    properties: ['openFile', 'multiSelections']
+    title: title || 'Datei zur Freigabe auswählen',
+    properties,
+    ...(Array.isArray(filters) && filters.length ? { filters } : {})
   });
   if (result.canceled || !result.filePaths.length) {
     return { canceled: true, files: [] };
