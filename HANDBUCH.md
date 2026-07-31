@@ -8,6 +8,10 @@ gestattet, ausgenommen zum internen Gebrauch durch die Administratoren dieser An
 
 *Stand: Juli 2026 · Version 1.0.0*
 
+**Video-Demo:** Ein kurzer Rundgang durch die App (Eintrag erfassen, Jahresübersicht, zweiter
+Administrator, Erinnerung, Einstellungen, Download-Seite) liegt unter
+[`handbuch/video/buchhaltung-demo.mp4`](video/buchhaltung-demo.mp4).
+
 ---
 
 ## Inhalt

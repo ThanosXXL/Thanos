@@ -13,7 +13,9 @@ Jeder Monat kann als **„abgeschlossen“** markiert werden. Ab dem **28. jeden
 Alle Daten werden lokal gespeichert (Desktop: Benutzerdatenverzeichnis der App / Web: Browser-Speicher) und
 bleiben nach dem Neustart erhalten.
 
-Ein ausführliches **Handbuch mit Beispielbildern** für Administratoren liegt unter [`HANDBUCH.md`](HANDBUCH.md).
+Ein ausführliches **Handbuch mit Beispielbildern** für Administratoren liegt unter [`HANDBUCH.md`](HANDBUCH.md)
+(bzw. fertig als PDF unter [`handbuch/HANDBUCH.pdf`](handbuch/HANDBUCH.pdf)). Ein kurzes **Video-Demo** der
+App liegt unter [`handbuch/video/buchhaltung-demo.mp4`](handbuch/video/buchhaltung-demo.mp4).
 
 ## Plattformen
 
