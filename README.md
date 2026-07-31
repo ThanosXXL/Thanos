@@ -264,6 +264,29 @@ npm install
 npm start
 ```
 
+## Code-Struktur (renderer/js/)
+
+Die Oberflächen-Logik ist in `renderer/js/` in fachliche Module aufgeteilt (keine einzelne
+1800-Zeilen-Datei mehr). Es sind klassische `<script>`-Dateien ohne `type="module"` und ohne
+eigene IIFE-Klammer je Datei – sie teilen sich dadurch bewusst dieselbe globale Umgebung
+(`let`/`const`/Funktionsdeklarationen auf Top-Level sind über Dateigrenzen hinweg sichtbar,
+solange keine Datei sie in einer eigenen Closure versteckt). Ladereihenfolge in `index.html`:
+
+1. `state.js` – gemeinsamer Grundzustand (Dozenten-Daten, DOM-Referenzen, `persist()`, `findDozent()`, …)
+2. `toast.js` – Kurzmeldungen
+3. `dozenten.js` – Tabs, Listen, Chat-Panel, Panel-Rendering
+4. `toolbar-screenshot.js` – Werkzeugleiste, Screenshot & Sniping
+5. `video-chat.js` – Video-Live-Chat/Unterricht: Teilnehmer, Moderation, Lektions-Chat, Privat-/Gruppenchat
+6. `file-share.js` – Dateifreigabe im Video-Chat-Fenster
+7. `presentation.js` – PowerPoint-Präsentation teilen
+8. `drive-settings.js` – Google-Drive-Einstellungen
+9. `homework.js` – Ordner: Hausaufgaben
+10. `calendar.js` – Ordner: Kalender
+11. `app-init.js` – **muss zuletzt geladen werden**: Event-Verdrahtung und App-Start (`init()`)
+
+> Wird eine neue Datei ergänzt, unbedingt vor `app-init.js` in `index.html` einbinden (und ggf.
+> in `renderer/sw.js`s `PRECACHE_URLS` sowie den entsprechenden CACHE_NAME-Versionszähler pflegen).
+
 ## Desktop-Anwendung bauen
 
 ```bash

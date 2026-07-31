@@ -4,12 +4,23 @@
  * und auch offline (bzw. bei wackliger Verbindung) startet. Daten selbst
  * liegen weiterhin im localStorage des Browsers (siehe browser-demo.js).
  */
-const CACHE_NAME = 'it-schulung-pwa-v1';
+const CACHE_NAME = 'it-schulung-pwa-v2';
 const PRECACHE_URLS = [
   './index.html',
   './style.css',
-  './renderer.js',
   './browser-demo.js',
+  './pwa-register.js',
+  './js/state.js',
+  './js/toast.js',
+  './js/dozenten.js',
+  './js/toolbar-screenshot.js',
+  './js/video-chat.js',
+  './js/file-share.js',
+  './js/presentation.js',
+  './js/drive-settings.js',
+  './js/homework.js',
+  './js/calendar.js',
+  './js/app-init.js',
   './manifest.webmanifest',
   './icons/icon-192.png',
   './icons/icon-512.png',

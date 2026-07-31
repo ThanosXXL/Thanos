@@ -203,6 +203,24 @@
   <script src="browser-demo.js"></script>
   <!-- PWA: registriert den Service Worker nur im echten Browser (nicht in Electron) -->
   <script src="pwa-register.js"></script>
-  <script src="renderer.js"></script>
+
+  <!--
+    App-Module (klassische Scripts, kein type="module"): jede Datei deklariert ihre
+    Top-Level-Variablen/Funktionen mit let/const/function OHNE eigene IIFE-Klammer,
+    damit sie sich die gemeinsame globale Umgebung teilen (verifiziert: let/const auf
+    Top-Level klassischer <script>-Tags sind über Dateigrenzen hinweg sichtbar, auch
+    ohne an window zu hängen). app-init.js muss deshalb als LETZTES geladen werden.
+  -->
+  <script src="js/state.js"></script>
+  <script src="js/toast.js"></script>
+  <script src="js/dozenten.js"></script>
+  <script src="js/toolbar-screenshot.js"></script>
+  <script src="js/video-chat.js"></script>
+  <script src="js/file-share.js"></script>
+  <script src="js/presentation.js"></script>
+  <script src="js/drive-settings.js"></script>
+  <script src="js/homework.js"></script>
+  <script src="js/calendar.js"></script>
+  <script src="js/app-init.js"></script>
 </body>
 </html>
