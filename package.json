@@ -1,6 +1,6 @@
 {
   "name": "music-heaven",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Music Heaven - Musik hochladen & automatisch mixen, eigene Musikstücke kreieren",
   "main": "main.js",
   "author": "",
