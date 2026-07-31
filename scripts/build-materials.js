@@ -219,12 +219,16 @@ function renderPdf(chrome, html, outPath) {
   fs.unlinkSync(tmpHtml);
 }
 
-// ---------- 1) Vollversion-Broschüre je Plattform ----------
-function vollversionHtml(platformKey) {
-  return shell(`IT Schulungsmaßnahmen – Vollversion (${platformKey})`, `
+// ---------- 1) Broschüre je Plattform (Vollversion oder Demo) ----------
+function brochureHtml(platformKey, edition) {
+  const editionNote =
+    edition === 'Demo'
+      ? 'Demo-Broschüre · mit vorbefüllten Beispieldaten zum Ausprobieren'
+      : 'Vollversion-Broschüre · Desktop-Dashboard für Dozenten, Teilnehmende und Unterricht';
+  return shell(`IT Schulungsmaßnahmen – ${edition} (${platformKey})`, `
     <div class="hero">
       <h1>IT Schulungsmaßnahmen</h1>
-      <p class="subtitle">Vollversion-Broschüre · Desktop-Dashboard für Dozenten, Teilnehmende und Unterricht &middot; Ausgabe für ${esc(platformKey)}</p>
+      <p class="subtitle">${editionNote} &middot; Ausgabe für ${esc(platformKey)}</p>
     </div>
     <div class="card">
       <h2>Dashboard &amp; Listen</h2>
@@ -334,8 +338,12 @@ function main() {
 
   for (const p of PLATFORMS) {
     const vFile = path.join(OUT_DIR, `IT-Schulungsmassnahmen-Vollversion-${p.key}.pdf`);
-    renderPdf(chrome, vollversionHtml(p.key), vFile);
+    renderPdf(chrome, brochureHtml(p.key, 'Vollversion'), vFile);
     console.log('Erzeugt:', vFile);
+
+    const dFile = path.join(OUT_DIR, `IT-Schulungsmassnahmen-Demo-${p.key}.pdf`);
+    renderPdf(chrome, brochureHtml(p.key, 'Demo'), dFile);
+    console.log('Erzeugt:', dFile);
 
     const mFile = path.join(OUT_DIR, `Installationshandbuch-${p.key}.pdf`);
     renderPdf(chrome, manualHtml(p), mFile);
