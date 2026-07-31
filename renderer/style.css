@@ -52,6 +52,9 @@ body {
   background: linear-gradient(180deg, var(--yellow) 0%, var(--orange) 60%, var(--orange-deep) 100%);
   box-shadow: 0 4px 0 var(--orange-deep), 0 6px 12px rgba(150, 70, 0, 0.35), inset 0 1px 0 rgba(255, 255, 255, 0.6);
   transition: transform 0.08s ease, box-shadow 0.08s ease, filter 0.15s ease;
+  display: inline-block;
+  text-decoration: none;
+  text-align: center;
 }
 
 .btn:hover {

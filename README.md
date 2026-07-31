@@ -25,7 +25,9 @@ Ein ausführliches **Handbuch mit Beispielbildern** für Administratoren liegt u
 | Android / iOS | Web-App (PWA) im Browser öffnen und „Zum Startbildschirm hinzufügen“ |
 
 Beim Öffnen der Web-App zeigt ein Banner automatisch den passenden Download-Button für das erkannte
-Betriebssystem an (ein Klick lädt direkt den richtigen Installer herunter).
+Betriebssystem an (ein Klick lädt direkt den richtigen Installer herunter). Unter [`renderer/download.html`](renderer/download.html)
+(bzw. `download.html` neben der Web-App) gibt es zusätzlich eine Übersichtsseite mit einem Ein-Klick-Button
+für **alle fünf Plattformen gleichzeitig** – praktisch, um einen einzigen Link an das ganze Team zu senden.
 
 ## Fertigen Installer herunterladen (ohne Terminal)
 

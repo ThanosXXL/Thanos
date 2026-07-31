@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; style-src 'self' 'unsafe-inline'; script-src 'self'; img-src 'self' data:" />
+  <meta name="theme-color" content="#ff8a00" />
+  <meta name="description" content="Buchhaltung! herunterladen für Windows, macOS, Linux, Android und iOS." />
+  <link rel="icon" href="icons/icon-192.png" />
+  <title>Buchhaltung! – Download</title>
+  <link rel="stylesheet" href="style.css" />
+  <style>
+    #dl-page {
+      max-width: 980px;
+      margin: 0 auto;
+      padding: 36px 24px 60px;
+    }
+    #dl-header {
+      text-align: center;
+      margin-bottom: 36px;
+    }
+    #dl-header .brand-orb {
+      margin: 0 auto 14px;
+    }
+    #dl-header h1 {
+      margin: 0 0 6px;
+      font-size: 2rem;
+      color: var(--ink);
+    }
+    #dl-header p {
+      color: var(--ink-soft);
+      margin: 0;
+    }
+    .dl-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+      gap: 20px;
+    }
+    .dl-card {
+      background: linear-gradient(160deg, #fffdf6 0%, #fff3d6 100%);
+      border-radius: 20px;
+      padding: 26px 22px;
+      box-shadow: var(--shadow-soft), inset 0 1px 0 #fff;
+      text-align: center;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 10px;
+    }
+    .dl-icon {
+      width: 56px;
+      height: 56px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.8rem;
+      background: radial-gradient(circle at 32% 28%, #fffbe8 0%, var(--yellow) 30%, var(--orange) 70%, var(--orange-deep) 100%);
+      box-shadow: inset -3px -4px 6px rgba(150, 60, 0, 0.45), inset 3px 3px 5px rgba(255, 255, 255, 0.7), 0 3px 6px rgba(120, 60, 0, 0.4);
+      color: #fff;
+      margin-bottom: 4px;
+    }
+    .dl-card h2 {
+      margin: 0;
+      font-size: 1.15rem;
+      color: var(--ink);
+    }
+    .dl-card .dl-hint {
+      font-size: 0.82rem;
+      color: var(--ink-soft);
+      min-height: 32px;
+    }
+    .dl-card .btn {
+      width: 100%;
+      margin-top: 4px;
+    }
+    #dl-note {
+      margin-top: 36px;
+      text-align: center;
+      font-size: 0.85rem;
+      color: var(--ink-soft);
+    }
+    #dl-note a {
+      color: var(--orange-deep);
+      font-weight: 600;
+    }
+  </style>
+</head>
+<body>
+  <div id="dl-page">
+    <div id="dl-header">
+      <div class="brand-orb"></div>
+      <h1>Buchhaltung<span class="bang">!</span> herunterladen</h1>
+      <p>Ein Klick genügt – wähle dein Gerät.</p>
+    </div>
+
+    <div class="dl-grid">
+      <div class="dl-card">
+        <div class="dl-icon">🖥</div>
+        <h2>Windows</h2>
+        <div class="dl-hint">Installer (.exe) ausführen und den Anweisungen folgen.</div>
+        <a class="btn btn-primary" href="https://github.com/ThanosXXL/Thanos/releases/latest/download/Buchhaltung-Windows-Setup.exe">⬇ Jetzt herunterladen</a>
+      </div>
+
+      <div class="dl-card">
+        <div class="dl-icon">🍎</div>
+        <h2>macOS</h2>
+        <div class="dl-hint">.dmg öffnen und in den Programme-Ordner ziehen.</div>
+        <a class="btn btn-primary" href="https://github.com/ThanosXXL/Thanos/releases/latest/download/Buchhaltung-macOS.dmg">⬇ Jetzt herunterladen</a>
+      </div>
+
+      <div class="dl-card">
+        <div class="dl-icon">🐧</div>
+        <h2>Linux</h2>
+        <div class="dl-hint">.AppImage herunterladen, ausführbar machen und starten.</div>
+        <a class="btn btn-primary" href="https://github.com/ThanosXXL/Thanos/releases/latest/download/Buchhaltung-Linux.AppImage">⬇ Jetzt herunterladen</a>
+      </div>
+
+      <div class="dl-card">
+        <div class="dl-icon">📱</div>
+        <h2>Android</h2>
+        <div class="dl-hint">Öffnet die Web-App – danach im Banner auf „App installieren“ tippen.</div>
+        <a class="btn btn-primary" href="index.html">📲 App öffnen &amp; installieren</a>
+      </div>
+
+      <div class="dl-card">
+        <div class="dl-icon">📱</div>
+        <h2>iPhone / iPad</h2>
+        <div class="dl-hint">Öffnet die Web-App – danach „Teilen“ → „Zum Home-Bildschirm“.</div>
+        <a class="btn btn-primary" href="index.html">📲 App öffnen &amp; installieren</a>
+      </div>
+    </div>
+
+    <p id="dl-note">
+      Buchhaltung! erkennt dein Betriebssystem auch automatisch – öffne einfach die
+      <a href="index.html">Web-App</a>, ein Banner zeigt dir dann direkt den passenden Download an.
+    </p>
+  </div>
+</body>
+</html>

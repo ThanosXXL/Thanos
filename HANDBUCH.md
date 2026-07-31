@@ -194,6 +194,16 @@ unterscheidet (Text und Aktion passen sich jeweils an):
 - **iPhone/iPad**: Da Safari kein automatisches Installieren per Klick erlaubt, zeigt das Banner die
   Anleitung „Teilen“ → „Zum Home-Bildschirm“.
 
+### Eine Download-Seite für alle Geräte gleichzeitig
+
+Wer den Link nicht nur an ein bestimmtes Gerät, sondern allgemein weitergeben möchte (z. B. per Mail an
+das ganze Team), findet unter **`download.html`** eine eigene Übersichtsseite mit **einem Klick-Button für
+jede der fünf Plattformen gleichzeitig** – der Empfänger wählt einfach selbst sein Gerät aus. In der
+Web-App führt der Header-Button **„⬇ Alle Downloads“** direkt dorthin.
+
+![Download-Seite mit allen fünf Plattformen](handbuch/bilder/13-download-page.png)
+*Eine einzige Seite mit Direkt-Download-Buttons für Windows, macOS, Linux, Android und iPhone/iPad.*
+
 ---
 
 ## 11. Häufige Fragen (FAQ)
