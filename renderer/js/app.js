@@ -760,6 +760,36 @@
     }
   });
 
+  // =====================================================================
+  // Music Heaven herunterladen (1-Klick-Download Desktop, Installation Mobile)
+  // =====================================================================
+  const downloadStatusEl = document.getElementById('download-status');
+  function setDownloadStatus(text) { downloadStatusEl.textContent = text; }
+
+  const dlAndroidBtn = document.getElementById('dl-android');
+  if (dlAndroidBtn) {
+    dlAndroidBtn.addEventListener('click', async () => {
+      const promptEvent = window.__deferredInstallPrompt;
+      if (promptEvent) {
+        promptEvent.prompt();
+        const choice = await promptEvent.userChoice;
+        window.__deferredInstallPrompt = null;
+        setDownloadStatus(choice.outcome === 'accepted'
+          ? 'Installation gestartet…'
+          : 'Installation abgebrochen.');
+      } else {
+        setDownloadStatus('Diese Seite auf dem Android-Handy in Chrome öffnen, dann Menü ⋮ → „App installieren“.');
+      }
+    });
+  }
+
+  const dlIosBtn = document.getElementById('dl-ios');
+  if (dlIosBtn) {
+    dlIosBtn.addEventListener('click', () => {
+      setDownloadStatus('iOS (Safari): Teilen-Symbol antippen → „Zum Home-Bildschirm“ auswählen.');
+    });
+  }
+
   // ---- Init ----
   refreshUploads();
   window.musicHeaven.listLibrary().then(renderLibrary);

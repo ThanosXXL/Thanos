@@ -390,6 +390,39 @@ input[type="range"] { accent-color: var(--green); }
 
 .library-card { max-width: 1280px; margin: 20px auto 0; }
 
+.download-card { max-width: 1280px; margin: 0 auto 20px; }
+
+.download-row {
+  display: flex;
+  gap: 14px;
+  flex-wrap: wrap;
+  margin-top: 14px;
+}
+
+.download-pad {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex: 1;
+  min-width: 180px;
+  text-decoration: none;
+  font-family: inherit;
+}
+
+.download-icon { font-size: 26px; line-height: 1; }
+
+.download-label {
+  display: block;
+  text-align: left;
+  line-height: 1.5;
+}
+
+.download-sub {
+  font-weight: 400;
+  color: var(--text-dim);
+  font-size: 11px;
+}
+
 .toast {
   position: fixed;
   bottom: 24px;

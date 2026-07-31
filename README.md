@@ -68,20 +68,24 @@ Der MP3-Export läuft komplett lokal im Browser/in der App über die mitgeliefer
 `renderer/vendor/lame.min.js` (JavaScript-Port des LAME-Encoders, LGPL-lizenziert) – ganz ohne
 Internetverbindung oder externen Dienst.
 
-## Fertigen Installer herunterladen (ohne Terminal)
+## 1-Klick-Download direkt in der App
 
-Unter **[Releases](../../releases)** stehen fertig gebaute Installationsdateien zum Anklicken bereit:
+Ganz oben in Music Heaven (Electron & Browser/PWA) steht eine eigene Sektion
+**„Music Heaven herunterladen"** mit fünf Schaltflächen im selben grün-schwarzen 3D-Hochglanz-Look
+wie der Rest der App:
 
-- Windows: `.exe` (Installer)
-- macOS: `.dmg`
-- Linux: `.AppImage`
-
-Einfach die passende Datei für dein Betriebssystem herunterladen und ausführen – kein `npm install`,
-kein Terminal nötig.
+- **🪟 Windows** (.exe), **🍎 macOS** (.dmg) und **🐧 Linux** (.AppImage) – jeweils ein direkter
+  Download-Link auf die fertig gebaute Installationsdatei aus den GitHub Releases dieses Repos.
+- **🤖 Android** – löst den nativen „App installieren"-Dialog des Browsers aus (PWA-Installation,
+  kein separater Datei-Download). Ist der Dialog (noch) nicht verfügbar, erscheint eine kurze
+  Anleitung, wie die Installation manuell über das Chrome-Menü angestoßen wird.
+- **📱 iOS** – zeigt die Anleitung „Teilen-Symbol → Zum Home-Bildschirm", da iOS (Safari) keine
+  automatische Installation per API erlaubt.
 
 Neue Installer werden automatisch von GitHub Actions gebaut, sobald ein neuer Versions-Tag
 (z. B. `v1.0.0`) gepusht wird, oder manuell über den Button **"Run workflow"** im Tab
-**Actions → Build & Release Desktop App**.
+**Actions → Build & Release Desktop App**. Alternativ stehen alle Installationsdateien auch direkt
+unter **[Releases](../../releases)** zum Anklicken bereit.
 
 ## PWA – echte installierbare App für Android &amp; iOS
 
