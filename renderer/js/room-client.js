@@ -20,6 +20,16 @@ const roomClient = {
   onRemoteStream: null, // (peerId, stream) => {}
   onBroadcast: null, // (fromPeerId, payload) => {}
   onConnectionChange: null, // (connected) => {}
+  onDataFull: null, // (state|null) => {} – Dozenten-Daten-Synchronisation
+
+  requestData() {
+    this._send({ type: 'data-request' });
+  },
+
+  pushData(state) {
+    if (!this.connected) return;
+    this._send({ type: 'data-update', state });
+  },
 
   connect(serverUrl, roomCode, myName, localStream) {
     return new Promise((resolve, reject) => {
@@ -100,7 +110,13 @@ const roomClient = {
         if (this.onPeerJoined) this.onPeerJoined(p.peerId, p.name);
         this._createPeerConnection(p.peerId, true);
       });
+      this.requestData();
       resolveConnect();
+      return;
+    }
+
+    if (msg.type === 'data-full') {
+      if (this.onDataFull) this.onDataFull(msg.state);
       return;
     }
 

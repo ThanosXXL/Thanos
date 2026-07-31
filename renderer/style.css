@@ -576,6 +576,23 @@ ul.item-list li span.item-text {
   width: 160px;
 }
 
+.room-code-display {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 16px;
+  background: var(--sand);
+  border-bottom: 1px solid var(--light-blue);
+  font-size: 13px;
+  color: var(--dark-blue);
+}
+
+.room-code-display strong {
+  font-size: 16px;
+  letter-spacing: 1px;
+  color: var(--soft-dark-red);
+}
+
 .video-tiles {
   display: grid;
   grid-template-columns: 1fr 1fr;

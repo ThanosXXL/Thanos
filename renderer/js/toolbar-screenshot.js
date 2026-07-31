@@ -74,16 +74,21 @@
     }
 
     let msg = `Screenshot gespeichert: ${result.filePath}`;
+    let isDriveError = false;
     if (result.drive) {
       if (result.drive.ok) {
         msg += ' · in Google Drive hochgeladen ✓';
       } else if (result.drive.reason === 'no-token') {
         msg += ' · Google Drive: kein Token hinterlegt (⚙ Drive)';
+      } else if (result.drive.reason === 'token-expired') {
+        msg += ' · Google-Drive-Token abgelaufen oder ungültig – bitte im ⚙ Drive-Fenster einen neuen Token eintragen.';
+        isDriveError = true;
       } else {
         msg += ` · Google Drive fehlgeschlagen (${result.drive.reason})`;
+        isDriveError = true;
       }
     }
-    showToast(msg);
+    showToast(msg, isDriveError);
   }
 
   function runSnipSelection(dataUrl) {

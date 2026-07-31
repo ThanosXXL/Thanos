@@ -30,6 +30,8 @@
   // Echter Mehrgeräte-Video-Chat: Verbindung zum Signaling-Server
   document.getElementById('roomConnectBtn').addEventListener('click', connectToRoom);
   document.getElementById('roomDisconnectBtn').addEventListener('click', disconnectFromRoom);
+  document.getElementById('roomCodeInput').addEventListener('input', updateRoomCodeDisplay);
+  document.getElementById('copyRoomCodeBtn').addEventListener('click', copyRoomCode);
 
   // Moderation: Melden / Alle stummschalten
   document.getElementById('raiseHandBtn').addEventListener('click', raiseLocalHand);
@@ -75,13 +77,7 @@
 
   async function init() {
     const loaded = await window.dashboardAPI.loadData();
-    state = loaded && Array.isArray(loaded.dozenten) ? loaded : { dozenten: [] };
-    state.dozenten.forEach((d) => {
-      if (!Array.isArray(d.chat)) d.chat = [];
-      if (!Array.isArray(d.homework)) d.homework = [];
-      if (!Array.isArray(d.exams)) d.exams = [];
-      if (d.presentation === undefined) d.presentation = null;
-    });
+    state = normalizeState(loaded);
     activeDozentId = state.dozenten.length ? state.dozenten[0].id : null;
     setFileShareEnabled(document.getElementById('fileShareToggle').checked);
     startClock();

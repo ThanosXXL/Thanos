@@ -240,6 +240,9 @@ async function uploadToGoogleDrive(buffer, filename) {
               /* Antwort ohne JSON-Body ignorieren */
             }
             resolve({ ok: true, file });
+          } else if (res.statusCode === 401) {
+            // Google-OAuth-Access-Tokens sind typischerweise nur ~1 Stunde gültig.
+            resolve({ ok: false, reason: 'token-expired' });
           } else {
             resolve({ ok: false, reason: 'http-' + res.statusCode });
           }

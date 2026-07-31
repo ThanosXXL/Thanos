@@ -19,6 +19,12 @@ const LOCAL_ID = 'me';
 
   // ===== Video-Live-Chat =====
 
+  // Kurzer, stabiler Raum-Code je Dozent, gut vorlesbar/teilbar.
+  function shortRoomCode(dozent) {
+    const base = (dozent && dozent.id ? dozent.id : 'raum').replace(/[^a-z0-9]/gi, '');
+    return (base.slice(-6) || 'RAUM01').toUpperCase();
+  }
+
   async function openVideoChat(dozent) {
     activeVideoDozent = dozent || activeVideoDozent;
     const overlay = document.getElementById('videoOverlay');
@@ -26,6 +32,17 @@ const LOCAL_ID = 'me';
     const dozentName = activeVideoDozent ? activeVideoDozent.name : 'Dozent';
     title.textContent = `Video-Live-Chat – Unterricht bei ${dozentName}`;
     overlay.classList.add('visible');
+
+    // Server-Adresse (zuletzt verwendet) und Raum-Code vorschlagen, ohne eine bestehende
+    // Verbindung oder eine bereits begonnene Eingabe zu überschreiben.
+    if (!roomClient.connected) {
+      const serverInput = document.getElementById('roomServerInput');
+      const roomInput = document.getElementById('roomCodeInput');
+      const rememberedServer = localStorage.getItem('itschulung-room-server');
+      if (rememberedServer && !serverInput.value) serverInput.value = rememberedServer;
+      if (!roomInput.value && activeVideoDozent) roomInput.value = shortRoomCode(activeVideoDozent);
+    }
+    updateRoomCodeDisplay();
 
     // Teilnehmerliste initialisieren: Dozent (Übertragung) + eigener Zugang
     if (!participants.length) {
@@ -98,6 +115,27 @@ const LOCAL_ID = 'me';
       connectBtn.hidden = false;
       disconnectBtn.hidden = true;
     }
+    updateRoomCodeDisplay();
+  }
+
+  // Zeigt den aktuell im Eingabefeld stehenden (oder tatsächlich verbundenen) Raum-Code
+  // groß und gut lesbar an, damit der Dozent ihn mündlich an Teilnehmer weitergeben kann.
+  function updateRoomCodeDisplay() {
+    const big = document.getElementById('roomCodeBig');
+    if (!big) return;
+    const code = roomClient.connected
+      ? roomClient.roomCode
+      : document.getElementById('roomCodeInput').value.trim();
+    big.textContent = code || '–';
+  }
+
+  function copyRoomCode() {
+    const code = document.getElementById('roomCodeBig').textContent;
+    if (!code || code === '–') return;
+    navigator.clipboard.writeText(code).then(
+      () => showToast(`Raum-Code „${code}" kopiert.`),
+      () => showToast('Kopieren nicht möglich – Code manuell markieren.', true)
+    );
   }
 
   async function connectToRoom() {
@@ -131,13 +169,33 @@ const LOCAL_ID = 'me';
     };
     roomClient.onBroadcast = handleRoomBroadcast;
     roomClient.onConnectionChange = updateRoomStatusUI;
+    roomClient.onDataFull = handleDataFull;
 
     try {
       await roomClient.connect(serverUrl, roomCode, myName, mediaStream);
+      localStorage.setItem('itschulung-room-server', serverUrl);
       showToast(`Mit Raum „${roomCode}" verbunden.`);
     } catch (err) {
       showToast('Verbindung zum Server fehlgeschlagen: ' + err.message, true);
     }
+  }
+
+  // Empfängt den serverweiten Dozenten-Datenstand (Listen, Hausaufgaben, Kalender, Chat)
+  // und übernimmt ihn lokal. "Letzter Stand gewinnt" – kein Konfliktmanagement für
+  // gleichzeitige Änderungen auf mehreren Geräten.
+  function handleDataFull(receivedState) {
+    if (receivedState === null) {
+      // Server hat noch keine Daten gespeichert – unser aktueller Stand wird zur Quelle.
+      roomClient.pushData(state);
+      return;
+    }
+    state = normalizeState(receivedState);
+    if (!findDozent(activeDozentId)) {
+      activeDozentId = state.dozenten.length ? state.dozenten[0].id : null;
+    }
+    window.dashboardAPI.saveData(state); // lokal übernehmen, ohne den Server erneut anzustoßen
+    render();
+    showToast('Dozenten-Daten mit dem Server synchronisiert.');
   }
 
   function disconnectFromRoom() {

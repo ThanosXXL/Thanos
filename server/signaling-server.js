@@ -1,23 +1,56 @@
 /*
- * IT Schulungsmaßnahmen – Signaling-Server für den echten Mehrgeräte-Video-Chat.
+ * IT Schulungsmaßnahmen – Signaling-Server für den echten Mehrgeräte-Video-Chat
+ * UND für die geräteübergreifende Synchronisation der Dozenten-Daten.
  *
  * Ohne diesen Server sind "Teilnehmer" im Video-Chat nur lokale Platzhalter auf einem
- * einzelnen Gerät. Dieser Server verbindet mehrere echte Geräte (Dozent + Teilnehmer)
- * in einem gemeinsamen "Raum": er reicht WebRTC-Signaling (Angebot/Antwort/ICE) zwischen
- * den Teilnehmern durch und verteilt Anwendungs-Ereignisse (Teilnehmerliste, Unterrichts-
- * Chat, Moderation wie Stummschalten/Melden, PowerPoint-Präsentation) an alle im selben
- * Raum. Die eigentlichen Audio/Video-Daten fließen anschließend direkt (Peer-zu-Peer)
- * zwischen den Geräten über WebRTC – nicht über diesen Server.
+ * einzelnen Gerät, und die Dozenten-Daten (Listen, Hausaufgaben, Kalender, Chat) liegen
+ * getrennt auf jedem Gerät. Dieser Server:
+ *   1. reicht WebRTC-Signaling (Angebot/Antwort/ICE) zwischen Teilnehmern im selben "Raum"
+ *      durch und verteilt Anwendungs-Ereignisse (Teilnehmerliste, Unterrichts-Chat,
+ *      Moderation, PowerPoint-Präsentation) an alle im selben Raum. Audio/Video fließen
+ *      danach direkt Peer-zu-Peer zwischen den Geräten – nicht über diesen Server.
+ *   2. hält eine gemeinsame, serverweite Kopie der Dozenten-Daten (nicht raumgebunden,
+ *      da die App insgesamt bis zu 4 Dozenten verwaltet) und verteilt Änderungen an alle
+ *      verbundenen Geräte ("letzter Stand gewinnt" – kein Konfliktmanagement für
+ *      gleichzeitige Änderungen, ausreichend für den Klassenzimmer-Maßstab dieser App).
  *
  * Start:  node server/signaling-server.js   (Port über Umgebungsvariable PORT, Standard 8787)
  */
 const { WebSocketServer } = require('ws');
+const fs = require('fs');
+const path = require('path');
 
 const PORT = Number(process.env.PORT) || 8787;
 const wss = new WebSocketServer({ port: PORT });
 
 // room code -> Map<peerId, { ws, name }>
 const rooms = new Map();
+
+// Alle verbundenen Clients (serverweit, unabhängig vom Video-Chat-Raum) für die
+// Dozenten-Daten-Synchronisation.
+const allClients = new Set();
+
+const DATA_STORE_PATH = path.join(__dirname, 'data-store.json');
+let appData = null; // null = noch keine Daten bekannt; erster Client mit echten Daten "gewinnt"
+
+function loadDataStore() {
+  try {
+    appData = JSON.parse(fs.readFileSync(DATA_STORE_PATH, 'utf-8'));
+    console.log('Gespeicherte Dozenten-Daten geladen:', DATA_STORE_PATH);
+  } catch (err) {
+    appData = null;
+  }
+}
+
+function saveDataStore() {
+  try {
+    fs.writeFileSync(DATA_STORE_PATH, JSON.stringify(appData, null, 2), 'utf-8');
+  } catch (err) {
+    console.error('Konnte Dozenten-Daten nicht speichern:', err.message);
+  }
+}
+
+loadDataStore();
 
 function uid() {
   return Date.now().toString(36) + Math.random().toString(36).slice(2, 8);
@@ -37,6 +70,7 @@ function roomOf(code) {
 wss.on('connection', (ws) => {
   let currentRoom = null;
   let peerId = null;
+  allClients.add(ws);
 
   ws.on('message', (raw) => {
     let msg;
@@ -44,6 +78,20 @@ wss.on('connection', (ws) => {
       msg = JSON.parse(raw);
     } catch (err) {
       return; // ungültige Nachricht ignorieren
+    }
+
+    if (msg.type === 'data-request') {
+      send(ws, { type: 'data-full', state: appData });
+      return;
+    }
+
+    if (msg.type === 'data-update') {
+      appData = msg.state;
+      saveDataStore();
+      allClients.forEach((client) => {
+        if (client !== ws) send(client, { type: 'data-full', state: appData });
+      });
+      return;
     }
 
     if (msg.type === 'join') {
@@ -85,6 +133,7 @@ wss.on('connection', (ws) => {
   });
 
   ws.on('close', () => {
+    allClients.delete(ws);
     if (currentRoom && peerId) {
       currentRoom.delete(peerId);
       currentRoom.forEach((p) => send(p.ws, { type: 'peer-left', peerId }));

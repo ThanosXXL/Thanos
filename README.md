@@ -67,6 +67,13 @@ Fall eine Warnung (🔒 sicher / ⚠ Klartext) an.
 > `dependencies` in `package.json` entfernt werden – die App läuft dann unverändert weiter, nur
 > ohne die sichere Schlüsselbund-Speicherung.
 
+**Token-Ablauf:** Google-OAuth-Access-Tokens sind typischerweise nur **~1 Stunde gültig**. Schlägt
+der Upload mit HTTP 401 fehl, zeigt die App gezielt „Google-Drive-Token abgelaufen oder ungültig –
+bitte im ⚙ Drive-Fenster einen neuen Token eintragen" statt einer allgemeinen Fehlermeldung. Ein
+vollständiger OAuth-Anmelde-Flow (mit automatischer Token-Erneuerung) würde ein eigenes
+Google-Cloud-Projekt mit OAuth-Client-ID benötigen, das nur der Repository-Betreiber einrichten
+kann – das ist bewusst nicht Teil dieser App.
+
 ## Fertigen Installer herunterladen (ohne Terminal)
 
 Unter **[Releases](../../releases)** stehen fertig gebaute Installationsdateien zum Anklicken bereit:
@@ -134,8 +141,9 @@ npm run signaling
 
 **Verbinden** (im Video-Chat-Fenster, oberhalb der Teilnehmer-Leiste): Server-Adresse
 eintragen (z. B. `ws://192.168.1.10:8787` für dasselbe Netzwerk, `ws://localhost:8787` für
-denselben Rechner) und einen Raum-Code (z. B. den Dozentennamen), auf den sich alle
-Teilnehmer geräteübergreifend einigen, dann **„Verbinden"** klicken.
+denselben Rechner; wird für nächste Verbindungen gemerkt) und einen **Raum-Code** – wird
+beim Öffnen automatisch pro Dozent vorgeschlagen und groß mit 📋-Kopieren-Button angezeigt,
+damit er einfach an Teilnehmer weitergegeben werden kann – dann **„Verbinden"** klicken.
 
 > Ohne aktive Verbindung funktioniert die Video-Chat-Ansicht unverändert wie zuvor rein
 > lokal (manuell hinzugefügte Teilnehmer zum Demonstrieren ohne Zweitgerät). Für Verbindungen
@@ -143,6 +151,24 @@ Teilnehmer geräteübergreifend einigen, dann **„Verbinden"** klicken.
 > (Portfreigabe/Firewall bzw. Hosting auf einem erreichbaren Server) – das ist bewusst nicht
 > Teil dieses Skripts. `ws` (die Server-Bibliothek) ist reines JavaScript ohne native
 > Kompilierung, im Gegensatz zu `keytar` also unkompliziert per `npm install` nutzbar.
+
+### Dozenten-Daten geräteübergreifend synchronisieren
+
+Der Signaling-Server hält zusätzlich einen **serverweiten** Stand der Dozenten-Daten
+(Listen, Hausaufgaben, Kalender, Chat/Notizen – nicht raumgebunden, da die App insgesamt
+bis zu 4 Dozenten verwaltet) und verteilt Änderungen an alle verbundenen Geräte:
+
+- Beim Verbinden fragt das Gerät den aktuellen Stand ab. Kennt der Server noch keine Daten,
+  wird der eigene lokale Stand zur neuen Quelle. Kennt der Server bereits Daten, übernimmt
+  das Gerät sie (lokale Daten werden dabei ersetzt).
+- Jede Änderung (Aufgabe hinzufügen, Hausaufgabe korrigieren, Termin eintragen, …) wird
+  danach automatisch an alle anderen verbundenen Geräte weitergegeben.
+- **Wichtige Einschränkung:** Es gilt "letzter Stand gewinnt" – es gibt kein
+  Konfliktmanagement für zeitgleiche Änderungen auf zwei Geräten. Für den
+  Klassenzimmer-Maßstab dieser App (wenige gleichzeitige Bearbeiter) ist das ausreichend,
+  für sehr viele gleichzeitige Schreibzugriffe wäre ein echtes Merge-Verfahren nötig.
+- Der Server speichert den Stand zusätzlich in `server/data-store.json`, damit er einen
+  Server-Neustart übersteht (Datei ist über `.gitignore` ausgeschlossen).
 
 Verifiziert wurde diese Funktion mit zwei vollständig unabhängigen Chromium-Prozessen
 (simulierte Kamera/Mikrofon), die sich über einen lokal laufenden Signaling-Server
@@ -288,6 +314,25 @@ pwsh ./scripts/create-pdf.ps1
 Das Skript baut eine HTML-Datei und rendert sie über einen vorhandenen Chromium/Chrome/Edge
 headless zu `IT-Schulungsmassnahmen-Demo.pdf`. Ist kein Browser vorhanden, bleibt die
 HTML-Datei erhalten und kann manuell über „Drucken → Als PDF speichern" exportiert werden.
+
+## Tests & CI
+
+Automatisierte Tests laufen mit dem in Node eingebauten Test-Runner (`node:test`, keine
+Zusatz-Abhängigkeit nötig):
+
+```bash
+npm test
+```
+
+Enthalten sind reine Logik-Tests (`test/state.test.js`, `test/calendar.test.js`) sowie ein
+**echter Integrationstest** für den Signaling-Server (`test/signaling-server.test.js`): er
+startet den echten Serverprozess und verbindet echte WebSocket-Clients, um Beitritt,
+Signaling-Weiterleitung, Broadcast und die Dozenten-Daten-Synchronisation zu prüfen – keine
+Mocks der Serverlogik.
+
+`.github/workflows/ci.yml` führt bei jedem Push/PR automatisch Syntax-Checks aller
+JavaScript-Dateien sowie `npm test` aus – getrennt vom Versions-Tag-Release-Workflow
+(`build-release.yml`) und vom PWA-Pages-Deploy (`pages.yml`).
 
 ## Installation (für Entwicklung)
 
