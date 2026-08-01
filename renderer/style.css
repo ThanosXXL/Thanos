@@ -470,6 +470,28 @@ body.mode-inventar .app-header {
   50% { box-shadow: 0 6px 22px rgba(179, 38, 30, 0.45), inset 0 1px 0 rgba(255, 255, 255, 0.6); }
 }
 
+/* Kein Blau im Inventar-Modus: geteilte Modal-/Button-Stile auf Gold/Braun umstellen */
+body.mode-inventar .btn-secondary {
+  color: var(--bronze-dark);
+  border-color: var(--bronze);
+}
+
+body.mode-inventar .modal-overlay {
+  background: rgba(59, 36, 16, 0.5);
+}
+
+body.mode-inventar .icon-btn {
+  color: var(--bronze-dark);
+}
+
+body.mode-inventar .icon-btn:hover {
+  background: var(--gold-light);
+}
+
+body.mode-inventar .icon-btn.danger {
+  color: var(--danger);
+}
+
 .admin-panel {
   background: linear-gradient(180deg, #fffdf6, var(--gold-light) 160%);
   border: 2px solid var(--gold);

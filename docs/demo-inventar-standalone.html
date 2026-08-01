@@ -2,8 +2,8 @@
 <html lang="de">
 <head>
 <meta charset="UTF-8">
-<title>Dozenten Dashboard – Demo (Offline)</title>
-<meta name="description" content="Interaktive Demo des Dozenten- und Inventar-Dashboards mit Beispieldaten – läuft direkt im Browser, keine Installation nötig.">
+<title>Inventar - Dashboard – Demo (Offline)</title>
+<meta name="description" content="Interaktive Demo des Inventar - Dashboards mit Beispieldaten – läuft direkt im Browser, keine Installation nötig.">
 <style>
 :root {
   --dark-blue: #0b1f4d;
@@ -956,6 +956,10 @@ body.mode-inventar main#content {
 
 </style>
 <style>
+  /* Reine Inventar-Demo: kein Moduswechsel, kein Dozenten-Modus erreichbar */
+  .mode-switch {
+    display: none;
+  }
   .demo-toolbar {
     position: fixed;
     left: 12px;
@@ -980,20 +984,20 @@ body.mode-inventar main#content {
   }
 </style>
 </head>
-<body>
+<body class="mode-inventar">
   <header class="app-header">
-    <h1 id="appTitle">Dozenten Dashboard</h1>
+    <h1 id="appTitle">Inventar - Dashboard</h1>
     <div class="mode-switch">
       <button type="button" class="mode-btn active" id="modeDozentenBtn">👤 Dozenten</button>
       <button type="button" class="mode-btn" id="modeInventarBtn">📦 Inventar - Dashboard</button>
     </div>
   </header>
 
-  <nav class="dozent-tabs" id="dozentTabs">
-    <!-- Dozenten-Tabs werden hier eingefügt -->
+  <nav class="dozent-tabs" id="dozentTabs" hidden>
+    <!-- Dozenten-Tabs werden hier eingefügt, in dieser Demo nicht erreichbar -->
   </nav>
 
-  <nav class="inventar-toolbar" id="inventarToolbar" hidden>
+  <nav class="inventar-toolbar" id="inventarToolbar">
     <button type="button" class="btn-gold" id="addInventarBtn">+ Neues Gerät</button>
     <span class="inventar-toolbar-hint">Erfassung per Tastatur, Mikrofon 🎤 oder Foto 📷</span>
     <button type="button" class="btn-gold-outline admin-toggle-btn" id="adminModeBtn">🔒 Admin-Modus</button>
@@ -1006,7 +1010,7 @@ body.mode-inventar main#content {
     </div>
   </main>
 
-  <!-- Modal: Dozent hinzufügen -->
+  <!-- Modal: Dozent hinzufügen (in dieser Demo nicht erreichbar, für renderer.js benötigt) -->
   <div class="modal-overlay" id="addDozentModal">
     <div class="modal">
       <h2>Neuen Dozenten hinzufügen</h2>
@@ -1018,7 +1022,7 @@ body.mode-inventar main#content {
     </div>
   </div>
 
-  <!-- Modal: Dozent löschen bestätigen -->
+  <!-- Modal: Dozent löschen bestätigen (in dieser Demo nicht erreichbar) -->
   <div class="modal-overlay" id="deleteDozentModal">
     <div class="modal">
       <h2>Dozenten entfernen?</h2>
@@ -1146,14 +1150,14 @@ body.mode-inventar main#content {
   </div>
 
   <script>
-// Browser-Demo-Shim: ersetzt window.dashboardAPI (normalerweise von preload.js über
-// Electron IPC bereitgestellt) durch eine Version, die im localStorage des Browsers
-// speichert. So läuft renderer.js unverändert auch außerhalb von Electron.
-// KEINE echte Datenspeicherung – alles bleibt lokal im Browser dieses Tabs/Geräts.
+// Browser-Demo-Shim für die reine Inventar-Demo (kein Dozenten-Modus).
+// Ersetzt window.dashboardAPI wie demo-shim.js, speichert aber unter einem eigenen
+// localStorage-Schlüssel und seedet ausschließlich Inventar-Beispieldaten
+// (dozenten bleibt absichtlich leer, die Dozenten-Ansicht wird nie angezeigt).
 (function () {
   window.__DASHBOARD_DEMO__ = true;
 
-  const STORAGE_KEY = 'dozentenDashboardDemoState';
+  const STORAGE_KEY = 'dozentenDashboardDemoInventarState';
 
   function uid() {
     return Date.now().toString(36) + Math.random().toString(36).slice(2, 8);
@@ -1168,29 +1172,9 @@ body.mode-inventar main#content {
     });
 
     return {
-      dozenten: [
-        {
-          id: uid(),
-          name: 'Frau Bergmann',
-          todos: [
-            { id: uid(), text: 'Foliensatz Kapitel 4 überarbeiten', done: false },
-            { id: uid(), text: 'Rückmeldungen der Teilnehmer sichten', done: true }
-          ],
-          openProjects: [{ id: uid(), text: 'Praxisworkshop "Datenanalyse" planen', done: false }],
-          doneProjects: [{ id: uid(), text: 'Einführungskurs Q1 abgeschlossen', done: false }],
-          chat: [{ id: uid(), text: 'Materialien liegen im gemeinsamen Ordner bereit.', time: now }]
-        },
-        {
-          id: uid(),
-          name: 'Herr Keller',
-          todos: [{ id: uid(), text: 'Raumbuchung für nächste Woche prüfen', done: false }],
-          openProjects: [{ id: uid(), text: 'Zertifikatskurs Netzwerktechnik', done: false }],
-          doneProjects: [],
-          chat: []
-        }
-      ],
+      dozenten: [],
       inventar: [
-        { id: uid(), geraet: 'Laptop', hersteller: 'Dell', zustand: 'OVP', stueckzahl: 8, photo: null, ausgaben: [] },
+        { id: uid(), geraet: 'Laptop', hersteller: 'Dell', zustand: 'OVP', stueckzahl: 8, photo: null, ausgaben: [], nachbestellungen: [] },
         {
           id: uid(),
           geraet: 'Beamer',
@@ -1198,10 +1182,11 @@ body.mode-inventar main#content {
           zustand: 'Gebraucht',
           stueckzahl: 2,
           photo: null,
-          ausgaben: [{ id: uid(), menge: 2, empfaenger: 'Max Mustermann', datum: now }]
+          ausgaben: [{ id: uid(), menge: 2, empfaenger: 'Max Mustermann', datum: now }],
+          nachbestellungen: []
         },
-        { id: uid(), geraet: 'Tastatur', hersteller: 'Logitech', zustand: 'OVP', stueckzahl: 15, photo: null, ausgaben: [] },
-        { id: uid(), geraet: 'Smartphone', hersteller: 'Samsung', zustand: 'Gebraucht', stueckzahl: 1, photo: null, ausgaben: [] }
+        { id: uid(), geraet: 'Tastatur', hersteller: 'Logitech', zustand: 'OVP', stueckzahl: 15, photo: null, ausgaben: [], nachbestellungen: [] },
+        { id: uid(), geraet: 'Smartphone', hersteller: 'Samsung', zustand: 'Gebraucht', stueckzahl: 1, photo: null, ausgaben: [], nachbestellungen: [] }
       ]
     };
   }
@@ -2547,8 +2532,16 @@ body.mode-inventar main#content {
 
 </script>
   <script>
+    // Sofort und ausschließlich in den Inventar-Modus wechseln, bevor der erste
+    // asynchrone Render mit geladenen Daten läuft – so ist das Dozenten-Dashboard
+    // zu keinem Zeitpunkt sichtbar.
+    document.getElementById('modeInventarBtn').click();
+    // renderer.js setzt den Tab-Titel beim Start pauschal auf "Dozenten Dashboard – DEMO";
+    // hier für die reine Inventar-Demo korrigieren.
+    document.title = 'Inventar - Dashboard – Demo';
+
     document.getElementById('demoResetBtn').addEventListener('click', function () {
-      localStorage.removeItem('dozentenDashboardDemoState');
+      localStorage.removeItem('dozentenDashboardDemoInventarState');
       location.reload();
     });
   </script>

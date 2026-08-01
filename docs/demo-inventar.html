@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<title>Inventar - Dashboard – Demo</title>
+<meta name="description" content="Interaktive Demo des Inventar - Dashboards mit Beispieldaten – läuft direkt im Browser, keine Installation nötig.">
+<link rel="stylesheet" href="../renderer/style.css">
+<style>
+  /* Reine Inventar-Demo: kein Moduswechsel, kein Dozenten-Modus erreichbar */
+  .mode-switch {
+    display: none;
+  }
+  .demo-toolbar {
+    position: fixed;
+    left: 12px;
+    bottom: 12px;
+    z-index: 60;
+    display: flex;
+    gap: 8px;
+  }
+  .demo-toolbar a,
+  .demo-toolbar button {
+    font-family: inherit;
+    font-size: 12px;
+    font-weight: 600;
+    padding: 8px 14px;
+    border-radius: 20px;
+    border: none;
+    cursor: pointer;
+    text-decoration: none;
+    background: linear-gradient(180deg, #fffdf6, #f4e2a8);
+    color: #3b2410;
+    box-shadow: 0 3px 8px rgba(59, 36, 16, 0.35), inset 0 1px 0 rgba(255, 255, 255, 0.8);
+  }
+</style>
+</head>
+<body class="mode-inventar">
+  <header class="app-header">
+    <h1 id="appTitle">Inventar - Dashboard</h1>
+    <div class="mode-switch">
+      <button type="button" class="mode-btn active" id="modeDozentenBtn">👤 Dozenten</button>
+      <button type="button" class="mode-btn" id="modeInventarBtn">📦 Inventar - Dashboard</button>
+    </div>
+  </header>
+
+  <nav class="dozent-tabs" id="dozentTabs" hidden>
+    <!-- Dozenten-Tabs werden hier eingefügt, in dieser Demo nicht erreichbar -->
+  </nav>
+
+  <nav class="inventar-toolbar" id="inventarToolbar">
+    <button type="button" class="btn-gold" id="addInventarBtn">+ Neues Gerät</button>
+    <span class="inventar-toolbar-hint">Erfassung per Tastatur, Mikrofon 🎤 oder Foto 📷</span>
+    <button type="button" class="btn-gold-outline admin-toggle-btn" id="adminModeBtn">🔒 Admin-Modus</button>
+  </nav>
+
+  <main id="content">
+    <div class="empty-state" id="emptyState">
+      <p>Noch keine Dozenten angelegt.</p>
+      <button id="addDozentEmptyBtn" class="btn-primary">+ Dozent hinzufügen</button>
+    </div>
+  </main>
+
+  <!-- Modal: Dozent hinzufügen (in dieser Demo nicht erreichbar, für renderer.js benötigt) -->
+  <div class="modal-overlay" id="addDozentModal">
+    <div class="modal">
+      <h2>Neuen Dozenten hinzufügen</h2>
+      <input type="text" id="newDozentName" placeholder="Name des Dozenten" maxlength="60">
+      <div class="modal-actions">
+        <button id="cancelAddDozent" class="btn-secondary">Abbrechen</button>
+        <button id="confirmAddDozent" class="btn-primary">Hinzufügen</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal: Dozent löschen bestätigen (in dieser Demo nicht erreichbar) -->
+  <div class="modal-overlay" id="deleteDozentModal">
+    <div class="modal">
+      <h2>Dozenten entfernen?</h2>
+      <p id="deleteDozentText"></p>
+      <div class="modal-actions">
+        <button id="cancelDeleteDozent" class="btn-secondary">Abbrechen</button>
+        <button id="confirmDeleteDozent" class="btn-danger">Entfernen</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal: Neues Inventar-Gerät erfassen -->
+  <div class="modal-overlay" id="addInventarModal">
+    <div class="modal modal-gold modal-wide">
+      <h2>Neues Gerät erfassen</h2>
+
+      <div class="inventar-form-grid">
+        <label>Gerät
+          <div class="input-with-mic">
+            <input type="text" id="invGeraet" placeholder="z. B. Laptop" maxlength="80">
+            <button type="button" class="mic-btn" id="invGeraetMic" title="Diktieren">🎤</button>
+          </div>
+        </label>
+
+        <label>Hersteller
+          <div class="input-with-mic">
+            <input type="text" id="invHersteller" placeholder="z. B. Dell" maxlength="80">
+            <button type="button" class="mic-btn" id="invHerstellerMic" title="Diktieren">🎤</button>
+          </div>
+        </label>
+
+        <label>Zustand
+          <select id="invZustand">
+            <option value="OVP">OVP (originalverpackt)</option>
+            <option value="Gebraucht">Gebraucht</option>
+          </select>
+        </label>
+
+        <label>Stückzahl
+          <input type="number" id="invStueckzahl" min="0" step="1" value="1">
+        </label>
+      </div>
+
+      <div class="foto-section">
+        <div class="foto-section-head">
+          <span>Foto-Erkennung</span>
+          <button type="button" class="btn-gold-outline" id="invStartCamera">📷 Kamera starten</button>
+        </div>
+        <video id="invCameraPreview" autoplay playsinline hidden></video>
+        <canvas id="invCameraCanvas" hidden></canvas>
+        <img id="invCapturedPhoto" alt="Aufgenommenes Foto" hidden>
+        <div class="foto-actions" id="invCameraActions" hidden>
+          <button type="button" class="btn-gold-outline" id="invCapturePhoto">Foto aufnehmen</button>
+          <button type="button" class="btn-secondary" id="invCancelCamera">Abbrechen</button>
+        </div>
+        <div class="recognition-box" id="invRecognitionBox" hidden>
+          <p id="invRecognitionText"></p>
+          <div class="modal-actions">
+            <button type="button" class="btn-secondary" id="invRecognitionNo">Nein, korrigieren</button>
+            <button type="button" class="btn-gold" id="invRecognitionYes">Ja, übernehmen</button>
+          </div>
+        </div>
+        <p class="foto-status" id="invFotoStatus"></p>
+      </div>
+
+      <div class="modal-actions">
+        <button id="cancelAddInventar" class="btn-secondary">Abbrechen</button>
+        <button id="confirmAddInventar" class="btn-gold">Gerät speichern</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal: Gerät an Kollegen/Kunden ausgeben -->
+  <div class="modal-overlay" id="ausgabeModal">
+    <div class="modal modal-gold">
+      <h2>Gerät ausgeben</h2>
+      <p id="ausgabeGeraetText"></p>
+      <label>Menge
+        <input type="number" id="ausgabeMenge" min="1" step="1" value="1">
+      </label>
+      <label>Ausgegeben an (Kollege/Kunde)
+        <input type="text" id="ausgabeEmpfaenger" placeholder="Name (optional)" maxlength="80">
+      </label>
+      <div class="modal-actions">
+        <button id="cancelAusgabe" class="btn-secondary">Abbrechen</button>
+        <button id="confirmAusgabe" class="btn-gold">Ausgeben</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal: Inventar-Gerät löschen bestätigen -->
+  <div class="modal-overlay" id="deleteInventarModal">
+    <div class="modal modal-gold">
+      <h2>Gerät entfernen?</h2>
+      <p id="deleteInventarText"></p>
+      <div class="modal-actions">
+        <button id="cancelDeleteInventar" class="btn-secondary">Abbrechen</button>
+        <button id="confirmDeleteInventar" class="btn-danger">Entfernen</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal: Admin-PIN einrichten/eingeben -->
+  <div class="modal-overlay" id="adminPinModal">
+    <div class="modal modal-gold">
+      <h2 id="adminPinTitle">Admin-PIN eingeben</h2>
+      <p id="adminPinHint" class="foto-status"></p>
+      <label>PIN
+        <input type="password" id="adminPinInput" maxlength="20" inputmode="numeric" autocomplete="off">
+      </label>
+      <label id="adminPinConfirmLabel" hidden>PIN bestätigen
+        <input type="password" id="adminPinConfirmInput" maxlength="20" inputmode="numeric" autocomplete="off">
+      </label>
+      <p class="foto-status" id="adminPinError" style="color: var(--danger);"></p>
+      <div class="modal-actions">
+        <button id="cancelAdminPin" class="btn-secondary">Abbrechen</button>
+        <button id="confirmAdminPin" class="btn-gold">Bestätigen</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="demo-toolbar">
+    <a href="download.html">⬇ Zur Download-Seite</a>
+    <button type="button" id="demoResetBtn">🔄 Demo zurücksetzen</button>
+  </div>
+
+  <script src="demo-inventar-shim.js"></script>
+  <script src="../renderer/renderer.js"></script>
+  <script>
+    // Sofort und ausschließlich in den Inventar-Modus wechseln, bevor der erste
+    // asynchrone Render mit geladenen Daten läuft – so ist das Dozenten-Dashboard
+    // zu keinem Zeitpunkt sichtbar.
+    document.getElementById('modeInventarBtn').click();
+    // renderer.js setzt den Tab-Titel beim Start pauschal auf "Dozenten Dashboard – DEMO";
+    // hier für die reine Inventar-Demo korrigieren.
+    document.title = 'Inventar - Dashboard – Demo';
+
+    document.getElementById('demoResetBtn').addEventListener('click', function () {
+      localStorage.removeItem('dozentenDashboardDemoInventarState');
+      location.reload();
+    });
+  </script>
+</body>
+</html>
