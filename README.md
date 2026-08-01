@@ -37,6 +37,27 @@ Neue Installer werden automatisch von GitHub Actions gebaut, sobald ein neuer Ve
 (z. B. `v1.0.0`) gepusht wird, oder manuell über den Button **"Run workflow"** im Tab
 **Actions → Build & Release Desktop App**.
 
+## Download-Center, Demo & Handbuch (`docs/`)
+
+- **`docs/download.html`** – gestylte Download-Seite (Gold/Braun-3D) mit direktem Installer-Download
+  pro Betriebssystem sowie dem vollautomatischen PowerShell-Download für Windows (siehe unten).
+- **`docs/demo.html`** – interaktive Demo im Browser mit Beispieldaten, ohne Installation nutzbar
+  (Speicherung nur lokal im Browser via `localStorage`, keine echten Daten).
+- **`docs/handbuch.html`** – Benutzerhandbuch mit Screenshots für beide Modi.
+- **`scripts/Install-DozentenDashboard.ps1`** – PowerShell-Skript, das die neueste Version automatisch
+  auf den Desktop lädt und installiert (`powershell -ExecutionPolicy Bypass -File .\Install-DozentenDashboard.ps1`).
+  Die Kommentare im Skript dienen zugleich als technische Kurzanleitung für IT/Admins.
+
+## Demo-Modus (mit Beispieldaten)
+
+```bash
+npm run start:demo
+```
+
+Startet die App mit vorbefüllten Beispiel-Dozenten und -Geräten in einer eigenen Datendatei
+(`dozenten-data-demo.json`), damit echte Nutzerdaten nie überschrieben werden. Im Fenster erscheint
+ein „DEMO-VERSION"-Hinweisbanner.
+
 ## Installation (für Entwicklung)
 
 ```bash

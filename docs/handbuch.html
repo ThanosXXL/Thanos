@@ -1,0 +1,285 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<title>Dozenten Dashboard – Benutzerhandbuch</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="description" content="Benutzerhandbuch für das Dozenten Dashboard und das Inventar - Dashboard.">
+<style>
+  :root {
+    --gold: #d4af37;
+    --gold-light: #f4e2a8;
+    --gold-bright: #f7d774;
+    --bronze: #8a5a2b;
+    --bronze-dark: #5c3a1a;
+    --dark-brown: #3b2410;
+    --dark-blue: #0b1f4d;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    font-family: "Segoe UI", Arial, sans-serif;
+    color: #2a2a2a;
+    background: linear-gradient(160deg, #fbf6e9, #ffffff 40%, #f3e6c8 100%);
+    line-height: 1.6;
+  }
+  .hero {
+    background: linear-gradient(135deg, var(--bronze-dark), var(--bronze) 45%, var(--gold) 100%);
+    color: #fffdf6;
+    padding: 46px 20px 60px;
+    text-align: center;
+    box-shadow: 0 3px 10px rgba(59, 36, 16, 0.4), inset 0 -2px 0 rgba(255, 255, 255, 0.25);
+  }
+  .hero h1 { margin: 0 0 8px; font-size: 30px; }
+  .hero p { margin: 0; opacity: 0.95; font-size: 14px; }
+
+  .wrap { max-width: 860px; margin: -30px auto 0; padding: 0 20px 60px; }
+
+  nav.toc {
+    background: linear-gradient(180deg, #fffdf6, var(--gold-light) 160%);
+    border: 1px solid var(--gold);
+    border-radius: 14px;
+    padding: 20px 26px;
+    margin-bottom: 26px;
+    box-shadow: 0 10px 26px rgba(59, 36, 16, 0.25), inset 0 1px 0 rgba(255, 255, 255, 0.85);
+  }
+  nav.toc h2 { margin-top: 0; font-size: 16px; color: var(--bronze-dark); }
+  nav.toc ol { margin: 0; padding-left: 20px; }
+  nav.toc a { color: var(--bronze-dark); font-weight: 600; text-decoration: none; }
+  nav.toc a:hover { text-decoration: underline; }
+
+  section.card {
+    background: #ffffff;
+    border: 1px solid var(--gold-light);
+    border-radius: 14px;
+    padding: 28px 30px;
+    margin-bottom: 26px;
+    box-shadow: 0 8px 20px rgba(59, 36, 16, 0.12);
+    scroll-margin-top: 20px;
+  }
+  section.card h2 {
+    margin-top: 0;
+    color: var(--bronze-dark);
+    border-bottom: 3px solid var(--gold);
+    padding-bottom: 8px;
+    font-size: 22px;
+  }
+  section.card h3 { color: var(--dark-blue); font-size: 16px; margin-top: 24px; }
+
+  figure {
+    margin: 18px 0;
+    text-align: center;
+  }
+  figure img {
+    max-width: 100%;
+    border-radius: 10px;
+    border: 1px solid #ddd;
+    box-shadow: 0 6px 18px rgba(59, 36, 16, 0.25);
+  }
+  figcaption {
+    margin-top: 8px;
+    font-size: 12px;
+    color: #777;
+    font-style: italic;
+  }
+
+  .badge {
+    display: inline-block;
+    padding: 3px 10px;
+    border-radius: 10px;
+    font-size: 11px;
+    font-weight: 700;
+    background: linear-gradient(180deg, var(--gold-bright), var(--gold));
+    color: var(--dark-brown);
+    margin-right: 6px;
+  }
+
+  .tip {
+    background: var(--gold-light);
+    border-left: 4px solid var(--gold);
+    padding: 10px 14px;
+    border-radius: 6px;
+    font-size: 14px;
+    margin: 14px 0;
+  }
+  .privacy {
+    background: #fdecea;
+    border-left: 4px solid #b3261e;
+    padding: 10px 14px;
+    border-radius: 6px;
+    font-size: 14px;
+    margin: 14px 0;
+  }
+
+  a.btn-gold-outline {
+    display: inline-block;
+    text-decoration: none;
+    border-radius: 8px;
+    padding: 10px 18px;
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--bronze-dark);
+    background: linear-gradient(180deg, #ffffff, var(--gold-light) 100%);
+    box-shadow: 0 3px 0 var(--bronze), 0 5px 8px rgba(59, 36, 16, 0.25), inset 0 1px 0 rgba(255, 255, 255, 0.8);
+  }
+
+  table { width: 100%; border-collapse: collapse; margin: 14px 0; font-size: 14px; }
+  table th, table td { text-align: left; padding: 8px 10px; border-bottom: 1px solid #eee; }
+  table th { color: var(--bronze-dark); }
+
+  footer {
+    text-align: center;
+    padding: 30px 20px 50px;
+    font-size: 12px;
+    color: var(--bronze-dark);
+  }
+  footer a { color: var(--bronze-dark); }
+</style>
+</head>
+<body>
+
+  <div class="hero">
+    <h1>📖 Benutzerhandbuch</h1>
+    <p>Dozenten Dashboard &amp; Inventar - Dashboard – Version 1.0</p>
+  </div>
+
+  <div class="wrap">
+
+    <nav class="toc" id="top">
+      <h2>Inhalt</h2>
+      <ol>
+        <li><a href="#ueberblick">Überblick</a></li>
+        <li><a href="#dozenten">Dozenten-Modus</a></li>
+        <li><a href="#inventar">Inventar - Dashboard</a></li>
+        <li><a href="#installation">Installation</a></li>
+        <li><a href="#datenschutz">Datenschutz-Hinweise</a></li>
+        <li><a href="#faq">Häufige Fragen</a></li>
+      </ol>
+    </nav>
+
+    <section class="card" id="ueberblick">
+      <h2>1. Überblick</h2>
+      <p>
+        Das Dozenten Dashboard ist eine Desktop-App für bis zu vier Dozenten. Jeder Dozent hat
+        eine To-Do-Liste, offene und erledigte Projekte sowie einen Chat/Notiz-Bereich. Über den
+        Umschalter oben rechts im Header wechselst du in das <strong>Inventar - Dashboard</strong> –
+        eine Geräteliste mit Foto- und Spracherkennung im eigenen Gold/Braun-Design.
+        Alle Daten werden ausschließlich lokal auf deinem Rechner gespeichert.
+      </p>
+      <div class="tip">💡 Du kannst beide Modi jederzeit über die Buttons „👤 Dozenten" / „📦 Inventar - Dashboard" oben rechts wechseln.</div>
+    </section>
+
+    <section class="card" id="dozenten">
+      <h2>2. Dozenten-Modus</h2>
+      <p>Pro Dozent gibt es drei Listen sowie einen Chat-Bereich:</p>
+      <table>
+        <tr><th>Liste</th><th>Zweck</th></tr>
+        <tr><td>Liste 1 – To-Do-Liste</td><td>Aufgaben mit Checkbox zum Abhaken</td></tr>
+        <tr><td>Liste 2 – Offene Projekte</td><td>Laufende Projekte, per ✓ nach „Erledigt" verschiebbar</td></tr>
+        <tr><td>Liste 3 – Erledigte Projekte</td><td>Abgeschlossene Projekte, per ↺ zurückholbar</td></tr>
+      </table>
+      <figure>
+        <img src="images/01-dozenten-dashboard.png" alt="Dozenten-Dashboard mit To-Do-Liste, offenen und erledigten Projekten sowie Chat">
+        <figcaption>Beispielansicht: Dozent mit Aufgaben, Projekten und Chat/Notizen.</figcaption>
+      </figure>
+      <h3>Dozent hinzufügen / entfernen</h3>
+      <p>
+        Über „+ Dozent hinzufügen" oben rechts legst du einen neuen Dozenten an (maximal 4). Über das
+        „×" auf einem Tab entfernst du einen Dozenten inklusive aller zugehörigen Listen –
+        das erfordert eine Bestätigung.
+      </p>
+    </section>
+
+    <section class="card" id="inventar">
+      <h2>3. Inventar - Dashboard</h2>
+      <p>
+        Die Geräteliste zeigt <strong>Gerät, Hersteller, Zustand (OVP/Gebraucht) und Stückzahl</strong>
+        in der oberen Leiste. Neue Geräte erfasst du über „+ Neues Gerät".
+      </p>
+      <figure>
+        <img src="images/03-inventar-tabelle.png" alt="Inventar-Tabelle mit Gerät, Hersteller, Zustand und Stückzahl">
+        <figcaption>Geräteliste mit farblich hervorgehobener Nachbestell-Warnung bei niedrigem Bestand.</figcaption>
+      </figure>
+
+      <h3>Gerät per Tastatur, Mikrofon oder Foto erfassen</h3>
+      <p>Im Erfassungs-Dialog stehen drei Eingabewege zur Wahl, auch kombinierbar:</p>
+      <ul>
+        <li><span class="badge">⌨ Tastatur</span> Gerät, Hersteller, Zustand und Stückzahl direkt eintippen.</li>
+        <li><span class="badge">🎤 Mikrofon</span> Auf das Mikrofon-Symbol neben „Gerät" bzw. „Hersteller" klicken und den Namen diktieren.</li>
+        <li><span class="badge">📷 Foto</span> „Kamera starten" → Gerät fotografieren → die App schlägt automatisch einen erkannten Gerätenamen vor.</li>
+      </ul>
+      <figure>
+        <img src="images/04-inventar-neues-geraet.png" alt="Dialog zum Erfassen eines neuen Geräts mit Mikrofon- und Kamera-Option">
+        <figcaption>Erfassungs-Dialog: Tastatur, Mikrofon-Diktat und Foto-Erkennung in einem Formular.</figcaption>
+      </figure>
+      <p>
+        Nach der Fotoaufnahme zeigt die App einen Vorschlag: <em>„Erkannt: '…' – ist das richtig?"</em>
+        Bei „Ja, übernehmen" wird der Gerätename automatisch eingesetzt und der Fokus springt direkt
+        in das Stückzahl-Feld, damit du nur noch die Menge ergänzen musst. Bei „Nein, korrigieren"
+        trägst du den Namen einfach selbst ein.
+      </p>
+      <div class="tip">💡 Die Fotoerkennung und das Mikrofon-Diktat benötigen eine Internetverbindung (siehe Datenschutz-Hinweise).</div>
+
+      <h3>Gerät an Kollegen/Kunden ausgeben</h3>
+      <p>
+        Über den Button „Ausgeben" in einer Zeile öffnest du den Ausgabe-Dialog: Menge und optional
+        den Namen des Empfängers eintragen. Die Stückzahl wird automatisch reduziert und die Ausgabe
+        protokolliert. Fällt der Bestand auf 3 Stück oder weniger, erscheint automatisch eine
+        Erinnerung zur Nachbestellung – sowohl als Hinweis-Badge in der Tabelle als auch als
+        Meldung nach der Ausgabe.
+      </p>
+      <figure>
+        <img src="images/06-reminder-toast.png" alt="Erinnerungsmeldung nach der Ausgabe eines Geräts bei niedrigem Bestand">
+        <figcaption>Erinnerung nach der Ausgabe: Bestand ist niedrig, Nachbestellung wird empfohlen.</figcaption>
+      </figure>
+      <p>Die Stückzahl lässt sich außerdem jederzeit direkt in der Tabelle über das Zahlenfeld anpassen.</p>
+    </section>
+
+    <section class="card" id="installation">
+      <h2>4. Installation</h2>
+      <p>
+        Fertige Installationsdateien für Windows, macOS und Linux gibt es auf der Download-Seite –
+        entweder als direkter Download oder, für Windows, als vollautomatisches
+        PowerShell-Skript, das die App direkt auf den Desktop lädt.
+      </p>
+      <a class="btn-gold-outline" href="download.html">⬇ Zur Download-Seite</a>
+    </section>
+
+    <section class="card" id="datenschutz">
+      <h2>5. Datenschutz-Hinweise</h2>
+      <div class="privacy">
+        🔒 Alle Dozenten- und Inventardaten werden ausschließlich lokal auf deinem Rechner
+        gespeichert (nicht in einer Cloud).
+      </div>
+      <div class="privacy">
+        🎤 Das Mikrofon-Diktat nutzt die in Chromium eingebaute Spracherkennung, die kurzzeitig
+        eine Verbindung zu einem externen Spracherkennungsdienst herstellt. Ohne Internetverbindung
+        funktioniert das Diktat nicht.
+      </div>
+      <div class="privacy">
+        📷 Die Fotoerkennung lädt bei der ersten Nutzung ein Erkennungsmodell aus dem Internet nach.
+        Aufgenommene Fotos selbst verlassen deinen Rechner nicht – sie werden nur lokal analysiert
+        und lokal gespeichert.
+      </div>
+    </section>
+
+    <section class="card" id="faq">
+      <h2>6. Häufige Fragen</h2>
+      <h3>Die Fotoerkennung schlägt das falsche Gerät vor – was tun?</h3>
+      <p>Einfach auf „Nein, korrigieren" klicken und den Gerätenamen manuell eintragen.</p>
+      <h3>Kann ich die App ohne Internet nutzen?</h3>
+      <p>Ja – alle Grundfunktionen (Listen, Inventar, Tastatureingabe) funktionieren offline. Nur
+        Mikrofon-Diktat und Foto-Erkennung benötigen eine Internetverbindung.</p>
+      <h3>Wo werden meine Daten gespeichert?</h3>
+      <p>In einer lokalen Datei im Benutzerverzeichnis der App, nie auf einem externen Server.</p>
+    </section>
+
+  </div>
+
+  <footer>
+    © 2026 Dozenten Dashboard – Alle Rechte vorbehalten.<br>
+    <a href="#top">↑ Nach oben</a> · <a href="download.html">Download</a> · <a href="demo.html">Demo</a>
+  </footer>
+
+</body>
+</html>

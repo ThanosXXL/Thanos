@@ -11,9 +11,10 @@ The app also has a second mode, the **Inventar - Dashboard**, toggled via the he
 ## Commands
 
 ```bash
-npm install     # install dependencies
-npm start        # run the app in development (electron .)
-npm run dist     # build installers into dist/ via electron-builder (win: nsis, mac: dmg, linux: AppImage)
+npm install       # install dependencies
+npm start          # run the app in development (electron .)
+npm run start:demo # run with seeded sample data in a separate data file (electron . --demo)
+npm run dist       # build installers into dist/ via electron-builder (win: nsis, mac: dmg, linux: AppImage)
 ```
 
 There is no test suite, linter, or build/transpile step — the renderer is plain HTML/CSS/vanilla JS loaded directly, and the main process is plain Node. Changes are verified by running `npm start`.
@@ -25,6 +26,13 @@ Standard Electron three-process split with `contextIsolation: true` and `nodeInt
 - **`main.js`** (main process) — creates the `BrowserWindow`, and owns all persistence. Registers two IPC handlers, `load-data` and `save-data`, that read/write a single JSON file at `app.getPath('userData')/dozenten-data.json`. `loadData()` returns `{ dozenten: [], inventar: [] }` on any read/parse failure, so a missing or corrupt file degrades gracefully. Also installs a `setPermissionRequestHandler` that allows `media` (camera/microphone) requests, needed for the Inventar mode's photo recognition and voice dictation.
 - **`preload.js`** — the only bridge. Exposes `window.dashboardAPI` with `loadData()` and `saveData(data)`, each forwarding to `ipcRenderer.invoke`. Any new main↔renderer capability must be added here; the renderer has no direct Node/Electron access.
 - **`renderer/`** — the entire UI. `index.html` is the static shell (header with mode switch, tab nav, inventar toolbar, `#content`, and modals for add/delete in both Dozenten and Inventar modes). `renderer.js` is a single IIFE holding all app logic and state. `style.css` is the styling, including the separate `body.mode-inventar` theme.
+- **`demo-data.js`** — sample Dozenten/Inventar seed data, used only by the `--demo` launch flag (see below).
+- **`docs/`** — static, standalone HTML pages (not part of the Electron app bundle): `download.html` (styled download/install landing page), `handbuch.html` (user manual with screenshots from `docs/images/`), and `demo.html` (a browser-only copy of the UI that runs without Electron via a `localStorage`-backed `dashboardAPI` shim in `demo-shim.js`, so it reuses `renderer/renderer.js` unmodified).
+- **`scripts/Install-DozentenDashboard.ps1`** — PowerShell script that downloads the latest Windows installer from GitHub Releases straight to the user's Desktop and launches it; its comment-based help doubles as the admin/technical documentation for that automation.
+
+### Demo mode
+
+`electron . --demo` (or `npm run start:demo`) makes `main.js` use a separate data file (`dozenten-data-demo.json` instead of `dozenten-data.json`) and seed it from `demo-data.js` on first run, so it never touches real user data. The renderer detects demo mode (via a `?demo=1` load-file query param, or `window.__DASHBOARD_DEMO__` set by `docs/demo-shim.js` for the browser demo) and shows a gold "DEMO-VERSION" ribbon above the header.
 
 ### State and data flow
 

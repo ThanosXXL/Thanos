@@ -64,6 +64,16 @@
   let capturedPhotoDataUrl = null;
   let recognizedLabel = null;
 
+  const isDemoMode =
+    new URLSearchParams(window.location.search).get('demo') === '1' || window.__DASHBOARD_DEMO__ === true;
+  if (isDemoMode) {
+    document.title = 'Dozenten Dashboard – DEMO';
+    const ribbon = document.createElement('div');
+    ribbon.className = 'demo-ribbon';
+    ribbon.textContent = '🧪 DEMO-VERSION – Beispieldaten, keine echten Daten';
+    document.body.insertBefore(ribbon, document.body.firstChild);
+  }
+
   function uid() {
     return Date.now().toString(36) + Math.random().toString(36).slice(2, 8);
   }

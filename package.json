@@ -7,6 +7,7 @@
   "license": "MIT",
   "scripts": {
     "start": "electron .",
+    "start:demo": "electron . --demo",
     "dist": "electron-builder"
   },
   "devDependencies": {
@@ -19,6 +20,7 @@
     "files": [
       "main.js",
       "preload.js",
+      "demo-data.js",
       "renderer/**/*",
       "package.json"
     ],
@@ -26,13 +28,16 @@
       "output": "dist"
     },
     "win": {
-      "target": "nsis"
+      "target": "nsis",
+      "artifactName": "DozentenDashboard-Setup.${ext}"
     },
     "mac": {
-      "target": "dmg"
+      "target": "dmg",
+      "artifactName": "DozentenDashboard.${ext}"
     },
     "linux": {
-      "target": "AppImage"
+      "target": "AppImage",
+      "artifactName": "DozentenDashboard.${ext}"
     },
     "publish": [
       {
