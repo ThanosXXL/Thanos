@@ -13,26 +13,29 @@
         <div class="brand-mark">MSR</div>
         <div class="brand-text">
           <strong>MSR175</strong>
-          <span>Dashboard Demo</span>
+          <span>Anlagendashboard Demo</span>
         </div>
       </div>
       <nav class="nav">
-        <button class="nav-item active" data-view="overview">
+        <button class="nav-item active" data-view="home">
           <span class="nav-icon">◈</span> Übersicht
         </button>
-        <button class="nav-item" data-view="history">
-          <span class="nav-icon">◱</span> Verlauf
+        <button class="nav-item" data-view="operative">
+          <span class="nav-icon">⏻</span> Operativ
         </button>
-        <button class="nav-item" data-view="events">
-          <span class="nav-icon">◉</span> Ereignisse
+        <button class="nav-item" data-view="analytics">
+          <span class="nav-icon">📈</span> Analytisch
         </button>
-        <button class="nav-item" data-view="device">
-          <span class="nav-icon">⬡</span> Gerät
+        <button class="nav-item" data-view="plant">
+          <span class="nav-icon">⬡</span> System &amp; Anlagen
+        </button>
+        <button class="nav-item" data-view="strategic">
+          <span class="nav-icon">◉</span> Strategisch
         </button>
       </nav>
       <div class="sidebar-footer">
         <div class="battery-pill">
-          <span class="dot"></span> Akku 87%
+          <span class="dot"></span> 4 Anlagen online
         </div>
       </div>
     </aside>
@@ -40,8 +43,8 @@
     <main class="main">
       <header class="topbar">
         <div class="topbar-title">
-          <h1>Geräte-Übersicht</h1>
-          <p>MSR175 Datenlogger · Standort: Halle 2, Sensorpunkt A</p>
+          <h1 id="view-title">Übersicht</h1>
+          <p id="view-subtitle">Persönliches Dashboard · Gebäude West, alle Anlagen</p>
         </div>
         <div class="topbar-status">
           <div class="status-pill online">
@@ -51,62 +54,128 @@
         </div>
       </header>
 
-      <section class="view" id="view-overview">
-        <div class="kpi-grid" id="kpi-grid"></div>
+      <!-- ================= HOME (Persönliches Dashboard) ================= -->
+      <section class="view" id="view-home">
+        <div class="kpi-grid" id="home-kpi-grid"></div>
 
         <div class="panel-grid">
-          <div class="panel chart-panel">
+          <div class="panel">
             <div class="panel-head">
-              <h2>Messverlauf</h2>
-              <div class="legend" id="chart-legend"></div>
+              <h2>Aktive Alarme</h2>
+              <span class="badge danger" id="home-alarm-count">–</span>
             </div>
-            <canvas id="chart" height="220"></canvas>
+            <ul class="event-list" id="home-alarm-list"></ul>
           </div>
-
-          <div class="panel events-panel">
+          <div class="panel">
             <div class="panel-head">
-              <h2>Letzte Ereignisse</h2>
-              <span class="badge">3 neu</span>
+              <h2>Anlagenstatus</h2>
             </div>
-            <ul class="event-list" id="event-list"></ul>
+            <ul class="mini-status-list" id="home-plant-status"></ul>
           </div>
         </div>
       </section>
 
-      <section class="view hidden" id="view-history">
+      <!-- ================= OPERATIV ================= -->
+      <section class="view hidden" id="view-operative">
+        <div class="panel" style="margin-bottom: 18px;">
+          <div class="panel-head">
+            <h2>Echtzeit-Überwachung</h2>
+            <span class="badge">Aktualisiert alle 2 s</span>
+          </div>
+          <div class="status-grid" id="plant-status-grid"></div>
+        </div>
+
         <div class="panel">
           <div class="panel-head">
-            <h2>Verlauf (Demo)</h2>
+            <h2>Alarm- &amp; Störungsmanagement</h2>
+            <span class="badge danger" id="operative-alarm-count">–</span>
           </div>
-          <p class="placeholder-text">
-            Hier würde der vollständige historische Messverlauf mit Zeitraum-Auswahl,
-            Export (CSV/PDF) und Vergleich mehrerer Sensorpunkte erscheinen.
-          </p>
+          <table class="data-table" id="alarm-table">
+            <thead>
+              <tr><th>Schwere</th><th>Anlage</th><th>Meldung</th><th>Zeit</th><th></th></tr>
+            </thead>
+            <tbody id="alarm-table-body"></tbody>
+          </table>
         </div>
       </section>
 
-      <section class="view hidden" id="view-events">
-        <div class="panel">
+      <!-- ================= ANALYTISCH ================= -->
+      <section class="view hidden" id="view-analytics">
+        <div class="panel" style="margin-bottom: 18px;">
           <div class="panel-head">
-            <h2>Alle Ereignisse (Demo)</h2>
+            <h2>Historische Auswertung – Lastganglinie</h2>
+            <div class="segmented" id="range-select">
+              <button class="active" data-range="day">Tag</button>
+              <button data-range="week">Woche</button>
+              <button data-range="month">Monat</button>
+            </div>
           </div>
-          <ul class="event-list" id="event-list-full"></ul>
+          <div class="legend" id="analytics-legend" style="margin-bottom:10px;"></div>
+          <canvas id="load-chart" height="240"></canvas>
+        </div>
+
+        <div class="panel-grid">
+          <div class="panel">
+            <div class="panel-head"><h2>Energieverbrauch</h2></div>
+            <canvas id="energy-chart" height="180"></canvas>
+          </div>
+          <div class="panel insight-panel">
+            <div class="panel-head"><h2>Fehlersuche &amp; Optimierung</h2></div>
+            <div class="insight-card">
+              <strong>Ineffizientes Regelverhalten erkannt</strong>
+              <p>Heizkreis B taktet auffällig häufig zwischen 06:00–08:00 Uhr –
+              mögliches Optimierungspotenzial durch angepasste Hysterese.</p>
+            </div>
+            <div class="insight-card ok">
+              <strong>Kältemaschine 1 optimiert</strong>
+              <p>Laufzeit seit letzter Anpassung um 12% reduziert bei gleicher Kühlleistung.</p>
+            </div>
+          </div>
         </div>
       </section>
 
-      <section class="view hidden" id="view-device">
+      <!-- ================= SYSTEM & ANLAGEN ================= -->
+      <section class="view hidden" id="view-plant">
+        <div class="panel" style="margin-bottom: 18px;">
+          <div class="panel-head">
+            <h2>Anlagengrafik (R&amp;I-Schema, vereinfacht)</h2>
+            <span class="badge">Heizkreis A</span>
+          </div>
+          <div class="schema-wrap" id="schema-wrap"></div>
+        </div>
+
+        <div class="panel-grid">
+          <div class="panel">
+            <div class="panel-head"><h2>Messwerttabelle</h2></div>
+            <table class="data-table" id="measure-table">
+              <thead>
+                <tr><th>Messpunkt</th><th>Wert</th><th>Sollbereich</th><th>Status</th></tr>
+              </thead>
+              <tbody id="measure-table-body"></tbody>
+            </table>
+          </div>
+          <div class="panel">
+            <div class="panel-head"><h2>Schalthistorie</h2></div>
+            <table class="data-table" id="switch-table">
+              <thead>
+                <tr><th>Zeit</th><th>Anlage</th><th>Aktion</th><th>Ausgeführt von</th></tr>
+              </thead>
+              <tbody id="switch-table-body"></tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <!-- ================= STRATEGISCH ================= -->
+      <section class="view hidden" id="view-strategic">
+        <div class="kpi-grid gauges" id="strategic-gauges"></div>
+
         <div class="panel">
           <div class="panel-head">
-            <h2>Gerätedetails</h2>
+            <h2>Langzeit-Trend – Energiekosten &amp; CO₂</h2>
+            <div class="legend" id="strategic-legend"></div>
           </div>
-          <div class="device-info">
-            <div><span>Modell</span><strong>MSR175</strong></div>
-            <div><span>Seriennummer</span><strong>MS175-DEMO-0042</strong></div>
-            <div><span>Firmware</span><strong>v2.3.1</strong></div>
-            <div><span>Aufzeichnungsintervall</span><strong>10 s</strong></div>
-            <div><span>Speicherbelegung</span><strong>34%</strong></div>
-            <div><span>Letzte Synchronisierung</span><strong>vor 2 Minuten</strong></div>
-          </div>
+          <canvas id="strategic-chart" height="220"></canvas>
         </div>
       </section>
     </main>
