@@ -7,6 +7,9 @@ einer Chat-Session zu existieren.
 - **msr-deluxe-dashboard-demo-with-music.mp4** – Video-Walkthrough des
   Dashboards (alle fünf Ansichten), mit Klavier/Streicher-Begleitmusik
   unterlegt.
+- **msr-deluxe-video-player.html** – interaktive, eigenständige Quelldatei
+  mit eingebettetem Video-Player (Poster-Frame, Download-Button) für das
+  Demo-Video. Einfach im Browser öffnen.
 - **msr-deluxe-flyer.png** (1080×1080) – Social-Media-Poster im
   Navy/Gold-Hochglanz-3D-Look: großes Wordmark mit changierendem
   Glanz-Effekt, ein selbst gezeichnetes Instrumenten-Zifferblatt
