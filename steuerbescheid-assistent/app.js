@@ -1,0 +1,402 @@
+(function () {
+  'use strict';
+
+  const STORAGE_KEY = 'steuerbescheid-assistent-state-v1';
+  const MAX_FILE_BYTES = 1.5 * 1024 * 1024; // localStorage-Schutz
+
+  /** @type {any} */
+  let state = loadState() || freshState();
+
+  function freshState() {
+    return {
+      screen: 'start',
+      year: null,
+      familyStatus: null,
+      situations: [],
+      stepIndex: 0,
+      docs: {}, // { [stepId]: { [docLabel]: { checked, fileName, fileData, tooBig } } }
+    };
+  }
+
+  function loadState() {
+    try {
+      const raw = localStorage.getItem(STORAGE_KEY);
+      return raw ? JSON.parse(raw) : null;
+    } catch (e) {
+      return null;
+    }
+  }
+
+  function persist() {
+    try {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+    } catch (e) {
+      showToast('Speicher voll – letzte Datei wurde nicht dauerhaft gespeichert.');
+    }
+  }
+
+  function hasSavedProgress() {
+    return !!(state.year && state.familyStatus);
+  }
+
+  // ---------- kleiner DOM-Helper (kein innerHTML für Nutzerdaten) ----------
+  function h(tag, attrs, ...children) {
+    const e = document.createElement(tag);
+    attrs = attrs || {};
+    for (const [k, v] of Object.entries(attrs)) {
+      if (v === null || v === undefined) continue;
+      if (k === 'class') e.className = v;
+      else if (k === 'html') e.innerHTML = v; // nur für statische, selbst erzeugte SVGs
+      else if (k.startsWith('on') && typeof v === 'function') e.addEventListener(k.slice(2), v);
+      else e.setAttribute(k, v);
+    }
+    for (const c of children.flat(Infinity)) {
+      if (c === null || c === undefined || c === false) continue;
+      e.appendChild(typeof c === 'string' || typeof c === 'number' ? document.createTextNode(String(c)) : c);
+    }
+    return e;
+  }
+
+  function showToast(msg) {
+    const t = document.getElementById('toast');
+    t.textContent = msg;
+    t.hidden = false;
+    clearTimeout(showToast._timer);
+    showToast._timer = setTimeout(() => { t.hidden = true; }, 3200);
+  }
+
+  // ---------- Beispielbild (schematisches SVG, keine amtliche Vorlage) ----------
+  const EXAMPLES = {
+    persoenlich: { icon: '🪪', label: 'Hauptvordruck – Persönliche Daten', field: 'Steuer-Identifikationsnummer' },
+    partner: { icon: '💍', label: 'Hauptvordruck – Partnerangaben', field: 'Steuer-ID der Partnerin/des Partners' },
+    getrennt: { icon: '✍️', label: 'Hauptvordruck – Trennung', field: 'Datum der Trennung' },
+    verwitwet: { icon: '🕊️', label: 'Hauptvordruck – Verwitwet', field: 'Sterbedatum' },
+    anlage_n: { icon: '💼', label: 'Anlage N', field: 'Bruttoarbeitslohn lt. Lohnsteuerbescheinigung' },
+    homeoffice: { icon: '💻', label: 'Anlage N – Werbungskosten', field: 'Anzahl Homeoffice-Tage' },
+    anlage_kind: { icon: '👶', label: 'Anlage Kind', field: 'Kindergeld-Bezugsmonate' },
+    ausbildung_erst: { icon: '🎓', label: 'Sonderausgaben – Erstausbildung', field: 'Studien-/Ausbildungsgebühren' },
+    ausbildung_zweit: { icon: '🎓', label: 'Anlage N – Zweitausbildung', field: 'Studien-/Ausbildungsgebühren' },
+    anlage_kap: { icon: '💶', label: 'Anlage KAP', field: 'Kapitalertragsteuer lt. Bank' },
+    anlage_v: { icon: '🏠', label: 'Anlage V', field: 'Mieteinnahmen (kalt)' },
+    anlage_sg: { icon: '🧮', label: 'Anlage S/G + EÜR', field: 'Betriebseinnahmen/-ausgaben' },
+    anlage_vorsorge: { icon: '🐷', label: 'Anlage Vorsorgeaufwand', field: 'Beiträge Kranken-/Rentenversicherung' },
+    sonderausgaben_spenden: { icon: '🎁', label: 'Sonderausgaben – Spenden', field: 'Summe Spenden lt. Bescheinigung' },
+    aussergewoehnliche_belastungen: { icon: '🏥', label: 'Außergewöhnliche Belastungen', field: 'Eigenanteil Krankheitskosten' },
+    anlage_u: { icon: '🤝', label: 'Anlage U / Unterhalt', field: 'Gezahlter Unterhaltsbetrag' },
+    abschluss: { icon: '✅', label: 'Zusammenfassung', field: 'Alle Unterlagen vollständig?' },
+  };
+
+  function buildExampleSvg(stepId) {
+    const ex = EXAMPLES[stepId] || EXAMPLES.abschluss;
+    const lines = [1, 2, 3, 4].map((n) => {
+      const y = 92 + n * 26;
+      const isHighlight = n === 2;
+      return `
+        <rect x="30" y="${y - 14}" width="340" height="22" rx="6"
+          fill="${isHighlight ? '#ffe08a' : '#fff7e6'}" stroke="${isHighlight ? '#ff8a00' : '#f0d9a8'}" stroke-width="${isHighlight ? 2 : 1}"/>
+        ${isHighlight ? `<text x="380" y="${y + 2}" font-size="11" fill="#a34500" font-weight="700" text-anchor="end"></text>` : ''}
+      `;
+    }).join('');
+    return `
+      <svg viewBox="0 0 400 260" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Beispielhafte, schematische Formularansicht">
+        <defs>
+          <linearGradient id="hdr-${stepId}" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0" stop-color="#ffd166"/>
+            <stop offset="1" stop-color="#ff8a00"/>
+          </linearGradient>
+        </defs>
+        <rect x="4" y="4" width="392" height="252" rx="18" fill="#ffffff" stroke="#f0d9a8"/>
+        <rect x="4" y="4" width="392" height="56" rx="18" fill="url(#hdr-${stepId})"/>
+        <rect x="4" y="34" width="392" height="26" fill="url(#hdr-${stepId})"/>
+        <text x="24" y="38" font-size="26">${ex.icon}</text>
+        <text x="60" y="38" font-size="14" font-weight="700" fill="#4a2500">${escapeXml(ex.label)}</text>
+        ${lines}
+        <path d="M 320 172 q 40 -4 46 -20" stroke="#a34500" stroke-width="2" fill="none" marker-end="url(#arrow-${stepId})"/>
+        <defs>
+          <marker id="arrow-${stepId}" markerWidth="8" markerHeight="8" refX="4" refY="4" orient="auto">
+            <path d="M0,0 L8,4 L0,8 z" fill="#a34500"/>
+          </marker>
+        </defs>
+        <rect x="200" y="140" width="176" height="26" rx="6" fill="#fff3cf" stroke="#ff8a00"/>
+        <text x="288" y="157" font-size="11" fill="#a34500" font-weight="700" text-anchor="middle">${escapeXml(ex.field)}</text>
+        <text x="200" y="238" font-size="12" fill="#c62828" font-weight="700" text-anchor="middle">BEISPIEL – SCHEMATISCH, KEIN AMTLICHES FORMULAR</text>
+      </svg>
+    `;
+  }
+
+  function escapeXml(str) {
+    return String(str).replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+  }
+
+  // ---------- Rendering ----------
+  function render() {
+    const root = document.getElementById('content');
+    root.replaceChildren();
+    updateProgress();
+
+    if (state.screen === 'start') root.appendChild(renderStart());
+    else if (state.screen === 'year') root.appendChild(renderYear());
+    else if (state.screen === 'family') root.appendChild(renderFamily());
+    else if (state.screen === 'situations') root.appendChild(renderSituations());
+    else if (state.screen === 'wizard') root.appendChild(renderWizard());
+    else if (state.screen === 'summary') root.appendChild(renderSummary());
+  }
+
+  function updateProgress() {
+    const wrap = document.getElementById('progress-wrap');
+    const fill = document.getElementById('progress-fill');
+    const label = document.getElementById('progress-label');
+    if (state.screen === 'start') { wrap.hidden = true; return; }
+    wrap.hidden = false;
+
+    const phaseOrder = ['year', 'family', 'situations', 'wizard', 'summary'];
+    let done = phaseOrder.indexOf(state.screen);
+    let total = 4; // year, family, situations, wizard(gesamt), + summary als Ende
+    let pct = 0;
+    if (state.screen === 'wizard') {
+      const steps = currentSteps();
+      pct = ((2 + (state.stepIndex + 1) / steps.length) / total) * 100;
+      label.textContent = `Schritt ${state.stepIndex + 1} von ${steps.length}`;
+    } else if (state.screen === 'summary') {
+      pct = 100;
+      label.textContent = 'Fertig';
+    } else {
+      pct = ((done) / total) * 100;
+      label.textContent = { year: 'Jahr wählen', family: 'Familienstand', situations: 'Deine Situation' }[state.screen] || '';
+    }
+    fill.style.width = Math.min(100, Math.max(4, pct)) + '%';
+  }
+
+  function currentSteps() {
+    return buildSteps(state.year, state.familyStatus, state.situations);
+  }
+
+  function disclaimerBanner() {
+    return h('div', { class: 'disclaimer' },
+      '⚠️ Dieser Assistent ist ein Organisations- und Lernwerkzeug. Er berechnet keine Steuer, prüft keine Rechtslage und sendet nichts an das Finanzamt. Alle Beträge sind Richtwerte. Bitte trage die Werte selbst in ELSTER ein oder lass dich von einer steuerberatenden Person unterstützen.'
+    );
+  }
+
+  function renderStart() {
+    const card = h('div', { class: 'card' },
+      h('h2', {}, 'Willkommen beim Steuerbescheid-Assistenten'),
+      h('p', {}, 'In wenigen Schritten zeigt dir dieser Assistent, welche Formulare (Anlagen) für deine Situation relevant sind, welche Angaben dort gefragt sind und welche Unterlagen du als Foto oder Scan bereitlegen solltest – rückwirkend ab dem Steuerjahr 2023.'),
+      disclaimerBanner(),
+      h('div', { class: 'btn-row' },
+        h('button', {
+          class: 'btn', onclick: () => {
+            const resume = hasSavedProgress();
+            if (!resume) state = freshState();
+            state.screen = resume ? 'wizard' : 'year';
+            persist(); render();
+          },
+        }, hasSavedProgress() ? 'Weiter wo ich aufgehört habe' : 'Los geht’s'),
+        hasSavedProgress() ? h('button', { class: 'btn secondary', onclick: () => { state = freshState(); persist(); state.screen = 'year'; render(); } }, 'Neu starten') : null
+      )
+    );
+    return card;
+  }
+
+  function renderYear() {
+    return h('div', { class: 'card' },
+      h('h2', {}, 'Für welches Steuerjahr möchtest du deine Erklärung vorbereiten?'),
+      h('p', {}, 'Rückwirkend einreichbar sind in der Regel die letzten vier Jahre.'),
+      h('div', { class: 'tile-grid' },
+        TAX_YEARS.map((y) => h('button', {
+          class: 'tile' + (state.year === y ? ' selected' : ''),
+          onclick: () => { state.year = y; state.screen = 'family'; persist(); render(); },
+        }, h('span', { class: 'tile-title' }, String(y)), h('span', { class: 'tile-hint' }, `Erklärung für das Jahr ${y}`)))
+      )
+    );
+  }
+
+  function renderFamily() {
+    return h('div', { class: 'card' },
+      h('h2', {}, 'Wie war dein Familienstand im Steuerjahr ' + state.year + '?'),
+      h('div', { class: 'tile-grid' },
+        FAMILY_STATUS.map((f) => h('button', {
+          class: 'tile' + (state.familyStatus === f.id ? ' selected' : ''),
+          onclick: () => { state.familyStatus = f.id; state.screen = 'situations'; persist(); render(); },
+        }, h('span', { class: 'tile-title' }, f.label), h('span', { class: 'tile-hint' }, f.hint)))
+      ),
+      h('div', { class: 'btn-row' },
+        h('button', { class: 'btn ghost', onclick: () => { state.screen = 'year'; render(); } }, '← Zurück')
+      )
+    );
+  }
+
+  function renderSituations() {
+    return h('div', { class: 'card' },
+      h('h2', {}, 'Was trifft auf dich im Steuerjahr ' + state.year + ' zu?'),
+      h('p', {}, 'Wähle alles aus, was zutrifft – egal ob angestellt, Studium, Kinder, Vermietung oder Kapitalerträge. Du kannst mehrere Punkte auswählen.'),
+      h('div', { class: 'tile-grid' },
+        SITUATIONS.map((s) => {
+          const selected = state.situations.includes(s.id);
+          return h('button', {
+            class: 'tile' + (selected ? ' selected' : ''),
+            onclick: () => {
+              state.situations = selected ? state.situations.filter((x) => x !== s.id) : [...state.situations, s.id];
+              persist(); render();
+            },
+          }, h('span', { class: 'tile-title' }, s.label));
+        })
+      ),
+      h('div', { class: 'btn-row' },
+        h('button', { class: 'btn ghost', onclick: () => { state.screen = 'family'; render(); } }, '← Zurück'),
+        h('button', { class: 'btn', onclick: () => { state.stepIndex = 0; state.screen = 'wizard'; persist(); render(); } }, 'Checkliste erstellen →')
+      )
+    );
+  }
+
+  function factGrid() {
+    const facts = YEAR_FACTS[state.year];
+    const items = [
+      ['Grundfreibetrag (ledig)', facts.grundfreibetragSingle],
+      ['Grundfreibetrag (zusammen)', facts.grundfreibetragVerheiratet],
+      ['Arbeitnehmerpauschbetrag', facts.arbeitnehmerpauschbetrag],
+      ['Sparerpauschbetrag (ledig)', facts.sparerpauschbetragSingle],
+      ['Homeoffice-Pauschale', facts.homeofficePauschaleMax],
+    ];
+    return h('div', { class: 'fact-grid' },
+      items.map(([lbl, val]) => h('div', { class: 'fact-tile' }, h('span', { class: 'val' }, val), h('span', { class: 'lbl' }, lbl)))
+    );
+  }
+
+  function docKey(stepId, label) {
+    if (!state.docs[stepId]) state.docs[stepId] = {};
+    if (!state.docs[stepId][label]) state.docs[stepId][label] = { checked: false, fileName: null, fileData: null, tooBig: false };
+    return state.docs[stepId][label];
+  }
+
+  function renderDocItem(step, doc) {
+    const entry = docKey(step.id, doc.label);
+    const inputId = 'file-' + step.id + '-' + doc.label.replace(/[^a-z0-9]+/gi, '');
+    const checkboxId = 'chk-' + step.id + '-' + doc.label.replace(/[^a-z0-9]+/gi, '');
+
+    const row = h('div', { class: 'doc-item-row' },
+      h('input', {
+        type: 'checkbox', id: checkboxId, checked: entry.checked || null,
+        onchange: (e) => { entry.checked = e.target.checked; persist(); },
+      }),
+      h('label', { for: checkboxId }, doc.label),
+      doc.required ? h('span', { class: 'required-tag' }, 'nötig') : null
+    );
+
+    const attach = h('div', { class: 'file-attach' },
+      h('label', { class: 'file-attach-label', for: inputId }, entry.fileName ? '📎 Foto/Scan ersetzen' : '📎 Foto/Scan hinzufügen'),
+      h('input', {
+        type: 'file', id: inputId, accept: 'image/*,application/pdf', capture: 'environment',
+        onchange: (e) => onFileSelected(e, entry),
+      }),
+      entry.fileName ? h('span', { class: 'file-name' }, entry.fileName) : null,
+      entry.fileData && entry.fileData.startsWith('data:image') ? h('img', { class: 'file-preview', src: entry.fileData, alt: '' }) : null,
+      entry.tooBig ? h('span', { class: 'file-name' }, 'nur Name gespeichert (Datei zu groß)') : null
+    );
+
+    return h('div', { class: 'doc-item' + (doc.required ? ' required' : '') }, row, attach);
+  }
+
+  function onFileSelected(e, entry) {
+    const file = e.target.files && e.target.files[0];
+    if (!file) return;
+    entry.fileName = file.name;
+    entry.tooBig = false;
+    if (file.size > MAX_FILE_BYTES) {
+      entry.fileData = null;
+      entry.tooBig = true;
+      persist(); render();
+      showToast('Datei ist groß – es wird nur der Dateiname gemerkt.');
+      return;
+    }
+    const reader = new FileReader();
+    reader.onload = () => {
+      entry.fileData = reader.result;
+      persist();
+      render();
+    };
+    reader.readAsDataURL(file);
+  }
+
+  function renderWizard() {
+    const steps = currentSteps();
+    const step = steps[state.stepIndex];
+    const isFirst = state.stepIndex === 0;
+    const isLast = state.stepIndex === steps.length - 1;
+
+    const card = h('div', { class: 'card' },
+      h('span', { class: 'step-badge' }, `Schritt ${state.stepIndex + 1} / ${steps.length}`),
+      h('h2', {}, step.title),
+      h('div', { class: 'form-name' }, step.form),
+      h('p', {}, step.description),
+      step.id === 'persoenlich' ? factGrid() : null,
+      h('div', { class: 'example-figure', html: buildExampleSvg(step.id) }),
+      h('p', { class: 'example-caption' }, 'Schematische Beispielansicht zur Orientierung – kein amtliches Formular.'),
+      step.fields && step.fields.length ? h('div', {},
+        h('strong', {}, 'Diese Angaben werden gebraucht:'),
+        h('ul', { class: 'field-list' }, step.fields.map((f) => h('li', {}, f)))
+      ) : null,
+      step.documents && step.documents.length ? h('div', {},
+        h('strong', {}, 'Unterlagen (Foto/Scan hochladen und abhaken):'),
+        h('div', {}, step.documents.map((d) => renderDocItem(step, d)))
+      ) : null,
+      step.note ? h('div', { class: 'note-box' }, step.note) : null,
+      h('div', { class: 'btn-row' },
+        h('button', {
+          class: 'btn ghost',
+          onclick: () => {
+            if (isFirst) { state.screen = 'situations'; } else { state.stepIndex -= 1; }
+            persist(); render();
+          },
+        }, '← Zurück'),
+        h('button', {
+          class: 'btn',
+          onclick: () => {
+            if (isLast) { state.screen = 'summary'; } else { state.stepIndex += 1; }
+            persist(); render(); window.scrollTo(0, 0);
+          },
+        }, isLast ? 'Zur Zusammenfassung →' : 'Weiter →')
+      )
+    );
+    return card;
+  }
+
+  function renderSummary() {
+    const steps = currentSteps();
+    let totalDocs = 0, checkedDocs = 0;
+    steps.forEach((s) => (s.documents || []).forEach((d) => {
+      totalDocs += 1;
+      const e = state.docs[s.id] && state.docs[s.id][d.label];
+      if (e && e.checked) checkedDocs += 1;
+    }));
+
+    const overview = steps.map((s) => {
+      const docs = s.documents || [];
+      const doneCount = docs.filter((d) => state.docs[s.id] && state.docs[s.id][d.label] && state.docs[s.id][d.label].checked).length;
+      return h('li', {},
+        h('strong', {}, s.title), ' — ', s.form,
+        docs.length ? h('span', {}, ` (${doneCount}/${docs.length} Unterlagen abgehakt)`) : null
+      );
+    });
+
+    return h('div', { class: 'card' },
+      h('h2', {}, '🎉 Deine Checkliste für ' + state.year + ' ist fertig'),
+      h('p', {}, `Insgesamt hast du ${checkedDocs} von ${totalDocs} Unterlagen als vorhanden markiert.`),
+      disclaimerBanner(),
+      h('ul', { class: 'checklist' }, overview.map((li) => h('li', {}, li))),
+      h('div', { class: 'btn-row' },
+        h('button', { class: 'btn ghost', onclick: () => { state.screen = 'wizard'; state.stepIndex = steps.length - 1; render(); } }, '← Zurück zu den Schritten'),
+        h('button', { class: 'btn secondary', onclick: () => window.print() }, '🖨️ Checkliste drucken/als PDF'),
+        h('button', { class: 'btn', onclick: () => { state = freshState(); persist(); render(); window.scrollTo(0, 0); } }, 'Neue Erklärung starten')
+      )
+    );
+  }
+
+  // ---------- PWA: Service Worker ----------
+  if ('serviceWorker' in navigator) {
+    window.addEventListener('load', () => {
+      navigator.serviceWorker.register('sw.js').catch(() => {});
+    });
+  }
+
+  render();
+})();

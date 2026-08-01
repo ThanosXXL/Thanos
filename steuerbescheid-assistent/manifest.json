@@ -1,0 +1,16 @@
+{
+  "name": "Steuerbescheid-Assistent",
+  "short_name": "Steuer-Assistent",
+  "description": "Geführter Assistent und Unterlagen-Checkliste für die eigene Steuererklärung (ab Steuerjahr 2023) – ersetzt keine Steuerberatung.",
+  "start_url": "./index.html",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "any",
+  "background_color": "#ffe08a",
+  "theme_color": "#ff8a00",
+  "lang": "de",
+  "icons": [
+    { "src": "icons/icon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any" },
+    { "src": "icons/icon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "maskable" }
+  ]
+}
