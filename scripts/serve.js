@@ -24,7 +24,8 @@ const contentTypes = {
   '.svg': 'image/svg+xml',
   '.ico': 'image/x-icon',
   '.ps1': 'text/plain; charset=utf-8',
-  '.pdf': 'application/pdf'
+  '.pdf': 'application/pdf',
+  '.webm': 'video/webm'
 };
 
 // Die App selbst (renderer/) wird komplett ausgeliefert. Für die Download-Seite
@@ -33,7 +34,7 @@ const contentTypes = {
 // erzeugten PDFs aus dem Projekt-Root freigegeben.
 const EXTRA_MOUNTS = [
   { prefix: '/scripts/', root: path.join(repoRoot, 'scripts'), allow: ['.ps1'] },
-  { prefix: '/downloads/', root: path.join(repoRoot, 'downloads'), allow: ['.pdf'] }
+  { prefix: '/downloads/', root: path.join(repoRoot, 'downloads'), allow: ['.pdf', '.png', '.webm'] }
 ];
 
 function resolveSafe(root, relativePath) {

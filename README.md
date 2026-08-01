@@ -315,6 +315,27 @@ Das Skript baut eine HTML-Datei und rendert sie über einen vorhandenen Chromium
 headless zu `IT-Schulungsmassnahmen-Demo.pdf`. Ist kein Browser vorhanden, bleibt die
 HTML-Datei erhalten und kann manuell über „Drucken → Als PDF speichern" exportiert werden.
 
+## Demo-Video &amp; 3D-Collage erzeugen
+
+Auf der Download-Seite (Abschnitt „Demo ansehen") gibt es zusätzlich ein kurzes **Video**
+und eine große **3D-Glanz-Collage** – beide zum Anschauen direkt auf der Seite und zum
+Herunterladen:
+
+```bash
+node scripts/build-demo-collage.js   # -> downloads/IT-Schulungsmassnahmen-Demo-Collage.png
+node scripts/build-demo-video.js     # -> downloads/IT-Schulungsmassnahmen-Demo.webm
+```
+
+- **Collage**: hochauflösendes Sammelbild aus Laptop-/Handy-Rahmen mit den App-Ansichten,
+  im bekannten Sandton/Dunkelrot-Farbschema mit Hochglanz-Lichtstreifen.
+- **Video**: `build-demo-video.js` braucht **kein ffmpeg** – Chromium nimmt eine animierte
+  Canvas-Sequenz direkt über die im Browser eingebaute `MediaRecorder`-API (VP9-Encoder) auf
+  und lädt das Ergebnis als `.webm` herunter. Die Aufnahme läuft in Echtzeit (~15 Sekunden).
+  **Ohne Ton** – es stand keine Hintergrundmusik zur Verfügung.
+
+Beide Skripte benötigen nur einen lokal vorhandenen Chromium/Chrome (`CHROME_PATH` env var
+zum Überschreiben des Auto-Erkennungspfads).
+
 ## Tests & CI
 
 Automatisierte Tests laufen mit dem in Node eingebauten Test-Runner (`node:test`, keine

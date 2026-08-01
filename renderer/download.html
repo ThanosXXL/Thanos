@@ -46,6 +46,14 @@
   .extra-cover { margin-bottom: 10px; border-radius: 8px; overflow: hidden; }
   .note-box { background: var(--pale-blue); border-radius: 10px; padding: 14px 16px; font-size: 13px; margin-top: 24px; }
   footer { text-align:center; color:var(--soft-dark-red); font-size:12px; padding: 20px; }
+
+  .demo-showcase { display:grid; grid-template-columns: 1.3fr 1fr; gap: 18px; margin-top: 14px; }
+  .demo-video-card, .demo-collage-card {
+    background: var(--white); border: 1px solid var(--pale-blue); border-radius: 12px;
+    padding: 14px; box-shadow: 0 4px 14px rgba(0,0,0,0.08); text-align: center;
+  }
+  .demo-video-card video, .demo-collage-card img { width: 100%; border-radius: 8px; display: block; margin-bottom: 10px; }
+  @media (max-width: 800px) { .demo-showcase { grid-template-columns: 1fr; } }
 </style>
 </head>
 <body>
@@ -69,6 +77,24 @@
       muss diese Seite zusätzlich öffentlich gehostet werden (z. B. über die PWA auf GitHub Pages, sobald aktiviert).
       Aus Sicherheitsgründen können Browser eine heruntergeladene Datei nicht automatisch auf dem Desktop
       speichern &ndash; sie landet im üblichen Download-Ordner und kann von dort auf den Desktop verschoben werden.
+    </div>
+
+    <div class="extras">
+      <h2>Demo ansehen</h2>
+      <p class="hint">Kurzer Video-Rundgang (ohne Ton) und eine große Übersichts-Collage – beide zum direkten
+        Anschauen und Herunterladen.</p>
+      <div class="demo-showcase">
+        <div class="demo-video-card">
+          <video controls preload="metadata" poster="downloads/IT-Schulungsmassnahmen-Demo-Collage.png">
+            <source src="downloads/IT-Schulungsmassnahmen-Demo.webm" type="video/webm">
+          </video>
+          <a class="dl-btn secondary" href="downloads/IT-Schulungsmassnahmen-Demo.webm" download>⬇ Video herunterladen (.webm)</a>
+        </div>
+        <div class="demo-collage-card">
+          <img src="downloads/IT-Schulungsmassnahmen-Demo-Collage.png" alt="3D-Collage der App-Ansichten">
+          <a class="dl-btn secondary" href="downloads/IT-Schulungsmassnahmen-Demo-Collage.png" download>⬇ Collage herunterladen (.png)</a>
+        </div>
+      </div>
     </div>
 
     <div class="extras">
