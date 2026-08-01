@@ -2,12 +2,23 @@
 <html lang="de">
 <head>
 <meta charset="UTF-8">
-<title>Dozenten Dashboard</title>
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>IT Schulungsmaßnahmen</title>
 <link rel="stylesheet" href="style.css">
+
+<!-- PWA: installierbar auf Android/iOS und Desktop -->
+<link rel="manifest" href="manifest.webmanifest">
+<meta name="theme-color" content="#8c3b3b">
+<link rel="icon" href="icons/icon-192.png" type="image/png">
+<link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="IT Schulung">
 </head>
 <body>
   <header class="app-header">
-    <h1>Dozenten Dashboard</h1>
+    <h1>IT Schulungsmaßnahmen</h1>
+    <a class="header-download-link" href="download.html" target="_blank" rel="noopener">⬇ App herunterladen (alle Plattformen)</a>
   </header>
 
   <nav class="dozent-tabs" id="dozentTabs">
@@ -45,6 +56,185 @@
     </div>
   </div>
 
-  <script src="renderer.js"></script>
+  <!-- Modal: Google-Drive-Einstellungen -->
+  <div class="modal-overlay" id="settingsModal">
+    <div class="modal">
+      <h2>Google Drive verbinden</h2>
+      <p class="modal-hint">
+        Füge einen gültigen OAuth-Access-Token mit Drive-Berechtigung ein.
+        Screenshots werden dann beim Speichern automatisch nach Google Drive hochgeladen.
+      </p>
+      <input type="text" id="driveTokenInput" placeholder="Google Drive Access-Token" autocomplete="off">
+      <p class="token-security-note" id="tokenSecurityNote"></p>
+      <div class="modal-actions">
+        <button id="cancelSettings" class="btn-secondary">Abbrechen</button>
+        <button id="saveSettingsBtn" class="btn-primary">Speichern</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal: PowerPoint-Präsentation teilen -->
+  <div class="modal-overlay" id="presentModal">
+    <div class="modal">
+      <h2>Präsentation teilen</h2>
+      <p class="modal-hint" id="presentFileName"></p>
+      <input type="text" id="presenterNameInput" placeholder="Name des Vortragenden (Dozent oder Teilnehmer)" maxlength="60">
+      <div class="modal-actions">
+        <button id="cancelPresent" class="btn-secondary">Abbrechen</button>
+        <button id="confirmPresent" class="btn-primary">Auf allen Bildschirmen teilen</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Sniping-Overlay: Bereichsauswahl auf dem eingefrorenen Screenshot -->
+  <div class="snip-overlay" id="snipOverlay">
+    <img id="snipImage" class="snip-image" alt="">
+    <div class="snip-dim"></div>
+    <div class="snip-selection" id="snipSelection"></div>
+    <div class="snip-hint">Bereich mit der Maus aufziehen &middot; ESC zum Abbrechen</div>
+  </div>
+
+  <!-- Video-Live-Chat-Fenster -->
+  <div class="video-overlay" id="videoOverlay">
+    <div class="video-window">
+      <div class="video-window-header">
+        <h2 id="videoChatTitle">Video-Live-Chat</h2>
+        <button id="closeVideoChat" class="icon-btn danger" title="Schließen">✕</button>
+      </div>
+
+      <!-- Netzwerk-Verbindung: echter Mehrgeräte-Video-Chat über einen Signaling-Server -->
+      <div class="room-connect-bar">
+        <span class="room-status" id="roomStatus">🔌 Nicht verbunden (nur lokale Ansicht)</span>
+        <input id="roomServerInput" type="text" placeholder="ws://server-adresse:8787" value="ws://localhost:8787">
+        <input id="roomCodeInput" type="text" placeholder="Raum-Code (z. B. Dozentenname)">
+        <button id="roomConnectBtn" class="btn-secondary btn-sm">Verbinden</button>
+        <button id="roomDisconnectBtn" class="btn-secondary btn-sm" hidden>Trennen</button>
+      </div>
+      <div class="room-code-display" id="roomCodeDisplay">
+        Raum-Code zum Teilen: <strong id="roomCodeBig">–</strong>
+        <button id="copyRoomCodeBtn" class="icon-btn" title="Raum-Code kopieren">📋</button>
+      </div>
+
+      <!-- Teilnehmer-Leiste: kleine Live-Kacheln mit Namen + Gesamtanzahl -->
+      <div class="participant-strip">
+        <div class="participant-strip-head">
+          <span>Teilnehmer (<span id="participantCount">0</span>)</span>
+          <span class="strip-hint">Teilnahme nur mit Videochat</span>
+          <button id="raiseHandBtn" class="btn-secondary btn-sm" title="Zum Sprechen melden">✋ Melden</button>
+          <button id="muteAllBtn" class="btn-secondary btn-sm" title="Alle Teilnehmer stummschalten (nur Dozent)">🔇 Alle stummschalten</button>
+          <button id="addParticipantBtn" class="btn-secondary btn-sm">+ Teilnehmer</button>
+        </div>
+        <div class="participant-add" id="participantAdd" hidden>
+          <input id="newParticipantName" type="text" placeholder="Name des Teilnehmers" maxlength="40">
+          <button id="confirmParticipantBtn" class="btn-primary btn-sm">Hinzufügen</button>
+          <button id="cancelParticipantBtn" class="btn-secondary btn-sm">Abbrechen</button>
+        </div>
+        <div class="participant-thumbs" id="participantThumbs"></div>
+      </div>
+
+      <!-- Unterricht: links Live-Übertragung, rechts Chat für alle Teilnehmer -->
+      <div class="lesson-area">
+        <div class="lesson-video">
+          <video id="lessonVideo" autoplay playsinline muted></video>
+          <div class="tile-status" id="localStatus"></div>
+          <div class="lesson-video-label" id="lessonVideoLabel">Live-Übertragung – Unterricht</div>
+        </div>
+        <div class="lesson-chat">
+          <div class="lesson-chat-head">
+            <span>Unterrichts-Chat</span>
+            <button id="pauseBtn" class="btn-secondary btn-sm" title="Pause eintragen">⏸ Pause</button>
+          </div>
+          <div class="lesson-chat-messages" id="lessonChatMessages"></div>
+          <div class="add-item-row lesson-chat-input">
+            <input id="lessonChatInput" type="text" placeholder="Frage oder Nachricht an alle…">
+            <button id="lessonChatSend">Senden</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Privat- und Gruppenchat -->
+      <div class="direct-chat">
+        <div class="direct-chat-head">
+          <span>Privat- &amp; Gruppenchat</span>
+          <button id="newGroupBtn" class="btn-secondary btn-sm">+ Gruppe</button>
+        </div>
+
+        <div class="group-builder" id="groupBuilder" hidden>
+          <input id="groupNameInput" type="text" placeholder="Gruppenname">
+          <div class="group-members" id="groupMembers"></div>
+          <div class="group-builder-actions">
+            <button id="createGroupBtn" class="btn-primary btn-sm">Gruppe erstellen</button>
+            <button id="cancelGroupBtn" class="btn-secondary btn-sm">Abbrechen</button>
+          </div>
+        </div>
+
+        <div class="direct-chat-body">
+          <ul class="conversation-list" id="conversationList"></ul>
+          <div class="conversation-view" id="conversationView">
+            <div class="conversation-empty">Teilnehmer oder Gruppe anklicken, um zu chatten.</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Dateifreigabe -->
+      <div class="file-share" id="fileShare">
+        <div class="file-share-head">
+          <label class="switch">
+            <input type="checkbox" id="fileShareToggle">
+            <span class="switch-slider"></span>
+          </label>
+          <span class="file-share-title">Dateifreigabe</span>
+          <button id="openFileBtn" class="btn-secondary btn-sm" disabled>📁 Datei aus Ordner öffnen</button>
+        </div>
+
+        <div class="file-share-pending" id="fileSharePending" hidden>
+          <span class="pending-name" id="pendingFileName"></span>
+          <select id="shareTargetSelect">
+            <option value="dozent">Nur Dozent</option>
+            <option value="alle">Alle Teilnehmer</option>
+          </select>
+          <button id="confirmShareBtn" class="btn-primary btn-sm">Teilen</button>
+          <button id="cancelShareBtn" class="btn-secondary btn-sm">Verwerfen</button>
+        </div>
+
+        <ul class="shared-file-list" id="sharedFileList"></ul>
+      </div>
+
+      <div class="video-controls">
+        <button id="videoToggleAudio" class="btn-secondary" data-media-toggle="audio">🎤 Audio aus</button>
+        <button id="videoToggleVideo" class="btn-secondary" data-media-toggle="video">📹 Video aus</button>
+        <button id="videoShareFile" class="btn-secondary" title="Datei teilen">📎</button>
+        <button id="videoHangup" class="btn-danger">Auflegen</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Kurzmeldungen -->
+  <div class="toast" id="toast"></div>
+
+  <!-- Browser-Demo-Fallback: definiert window.dashboardAPI nur, wenn kein Electron-preload aktiv ist -->
+  <script src="browser-demo.js"></script>
+  <!-- PWA: registriert den Service Worker nur im echten Browser (nicht in Electron) -->
+  <script src="pwa-register.js"></script>
+
+  <!--
+    App-Module (klassische Scripts, kein type="module"): jede Datei deklariert ihre
+    Top-Level-Variablen/Funktionen mit let/const/function OHNE eigene IIFE-Klammer,
+    damit sie sich die gemeinsame globale Umgebung teilen (verifiziert: let/const auf
+    Top-Level klassischer <script>-Tags sind über Dateigrenzen hinweg sichtbar, auch
+    ohne an window zu hängen). app-init.js muss deshalb als LETZTES geladen werden.
+  -->
+  <script src="js/state.js"></script>
+  <script src="js/toast.js"></script>
+  <script src="js/dozenten.js"></script>
+  <script src="js/toolbar-screenshot.js"></script>
+  <script src="js/room-client.js"></script>
+  <script src="js/video-chat.js"></script>
+  <script src="js/file-share.js"></script>
+  <script src="js/presentation.js"></script>
+  <script src="js/drive-settings.js"></script>
+  <script src="js/homework.js"></script>
+  <script src="js/calendar.js"></script>
+  <script src="js/app-init.js"></script>
 </body>
 </html>

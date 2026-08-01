@@ -1,31 +1,4 @@
-(function () {
-  const MAX_DOZENTEN = 4;
-
-  let state = { dozenten: [] };
-  let activeDozentId = null;
-
-  const dozentTabs = document.getElementById('dozentTabs');
-  const content = document.getElementById('content');
-  const emptyState = document.getElementById('emptyState');
-
-  const addDozentModal = document.getElementById('addDozentModal');
-  const newDozentNameInput = document.getElementById('newDozentName');
-  const deleteDozentModal = document.getElementById('deleteDozentModal');
-  const deleteDozentText = document.getElementById('deleteDozentText');
-
-  let pendingDeleteId = null;
-
-  function uid() {
-    return Date.now().toString(36) + Math.random().toString(36).slice(2, 8);
-  }
-
-  function persist() {
-    window.dashboardAPI.saveData(state);
-  }
-
-  function findDozent(id) {
-    return state.dozenten.find((d) => d.id === id);
-  }
+// ===== Dozenten-Verwaltung: Tabs, Listen, Chat-Panel, Panel-Rendering =====
 
   function openAddDozentModal() {
     if (state.dozenten.length >= MAX_DOZENTEN) return;
@@ -49,7 +22,10 @@
       todos: [],
       openProjects: [],
       doneProjects: [],
-      chat: []
+      chat: [],
+      homework: [],
+      exams: [],
+      presentation: null
     };
     state.dozenten.push(dozent);
     activeDozentId = dozent.id;
@@ -226,9 +202,15 @@
 
     const header = document.createElement('div');
     header.className = 'panel-header';
-    header.innerHTML = `<h2></h2>`;
-    header.querySelector('h2').textContent = dozent.name;
+    const h2 = document.createElement('h2');
+    h2.textContent = dozent.name;
+    header.appendChild(h2);
+    header.appendChild(buildToolbar(dozent));
     panel.appendChild(header);
+
+    if (dozent.presentation) {
+      panel.appendChild(buildPresentationBanner(dozent));
+    }
 
     const grid = document.createElement('div');
     grid.className = 'lists-grid';
@@ -331,6 +313,8 @@
     panel.appendChild(grid);
 
     panel.appendChild(buildChatPanel(dozent));
+    panel.appendChild(buildHomeworkFolder(dozent));
+    panel.appendChild(buildCalendarFolder(dozent));
 
     content.appendChild(panel);
   }
@@ -397,30 +381,9 @@
     return panel;
   }
 
+
   function render() {
     renderTabs();
     renderPanel();
+    updateMediaButtons();
   }
-
-  document.getElementById('addDozentEmptyBtn').addEventListener('click', openAddDozentModal);
-  document.getElementById('cancelAddDozent').addEventListener('click', closeAddDozentModal);
-  document.getElementById('confirmAddDozent').addEventListener('click', confirmAddDozent);
-  newDozentNameInput.addEventListener('keydown', (e) => {
-    if (e.key === 'Enter') confirmAddDozent();
-  });
-
-  document.getElementById('cancelDeleteDozent').addEventListener('click', closeDeleteDozentModal);
-  document.getElementById('confirmDeleteDozent').addEventListener('click', confirmDeleteDozent);
-
-  async function init() {
-    const loaded = await window.dashboardAPI.loadData();
-    state = loaded && Array.isArray(loaded.dozenten) ? loaded : { dozenten: [] };
-    state.dozenten.forEach((d) => {
-      if (!Array.isArray(d.chat)) d.chat = [];
-    });
-    activeDozentId = state.dozenten.length ? state.dozenten[0].id : null;
-    render();
-  }
-
-  init();
-})();

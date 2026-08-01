@@ -7,7 +7,15 @@
   "license": "MIT",
   "scripts": {
     "start": "electron .",
-    "dist": "electron-builder"
+    "dist": "electron-builder",
+    "serve": "node scripts/serve.js",
+    "signaling": "node server/signaling-server.js",
+    "test": "node --test",
+    "postinstall": "electron-builder install-app-deps"
+  },
+  "dependencies": {
+    "keytar": "^7.9.0",
+    "ws": "^8.18.0"
   },
   "devDependencies": {
     "electron": "^31.0.0",
@@ -20,7 +28,8 @@
       "main.js",
       "preload.js",
       "renderer/**/*",
-      "package.json"
+      "package.json",
+      "node_modules/**/*"
     ],
     "directories": {
       "output": "dist"

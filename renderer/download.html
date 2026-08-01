@@ -1,0 +1,238 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>IT Schulungsmaßnahmen – Herunterladen</title>
+<link rel="icon" href="icons/icon-192.png" type="image/png">
+<style>
+  :root { --dark-blue:#0b1f4d; --mid-blue:#14367a; --light-blue:#5b9bd5; --pale-blue:#dceaf7;
+          --white:#fff; --black:#111; --sand:#f2ead9; --sand-deep:#e7dcc3; --soft-dark-red:#8c3b3b; }
+  * { box-sizing: border-box; }
+  body { margin:0; font-family:"Segoe UI", Arial, sans-serif; background:var(--sand); color:var(--black); }
+  .app-header { background: linear-gradient(90deg, #6f2d2d, var(--soft-dark-red)); color:var(--white); padding:22px 24px; }
+  .app-header h1 { margin:0 0 6px 0; font-size:26px; }
+  .app-header p { margin:0; color:#f3e2e2; font-size:14px; }
+  main { max-width: 980px; margin: 0 auto; padding: 28px 20px 60px 20px; }
+  h2 { color: var(--soft-dark-red); border-bottom: 3px solid var(--soft-dark-red); padding-bottom: 8px; }
+  .hint { color:#55606f; font-size:14px; }
+  .platform-grid { display:grid; grid-template-columns: repeat(auto-fit, minmax(220px,1fr)); gap:18px; margin-top:18px; }
+  .platform-card { position:relative; overflow:hidden; background:var(--white); border:1px solid var(--sand-deep);
+                    border-radius:14px; padding:20px; box-shadow:0 4px 14px rgba(0,0,0,0.08); text-align:center; }
+  .platform-card.detected { border-color: var(--soft-dark-red); box-shadow: 0 0 0 2px var(--soft-dark-red), 0 4px 14px rgba(0,0,0,0.08); }
+  .platform-card::after {
+    content:""; position:absolute; top:-60%; left:-25%; width:55%; height:220%;
+    background: linear-gradient(120deg, rgba(255,255,255,0) 0%, rgba(255,255,255,0.55) 45%, rgba(255,255,255,0) 62%);
+    transform: rotate(18deg); pointer-events:none;
+  }
+  .platform-icon { font-size:40px; margin-bottom:8px; }
+  .platform-card h3 { margin:6px 0 4px 0; color:var(--dark-blue); }
+  .detected-badge { display:inline-block; font-size:11px; background:var(--soft-dark-red); color:var(--white);
+                     padding:2px 8px; border-radius:10px; margin-bottom:8px; }
+  .dl-btn { display:inline-block; width:100%; background:var(--dark-blue); color:var(--white); border:none;
+            padding:10px 14px; border-radius:8px; cursor:pointer; font-size:14px; text-decoration:none; margin-top:8px; }
+  .dl-btn:hover { background: var(--mid-blue); }
+  .dl-btn.secondary { background:var(--white); color:var(--dark-blue); border:1px solid var(--dark-blue); }
+  .platform-note { font-size:12px; color:#55606f; margin-top:8px; min-height: 32px; }
+  .extras { margin-top: 32px; }
+  .extras-grid { display:grid; grid-template-columns: repeat(auto-fit, minmax(240px,1fr)); gap: 16px; margin-top: 14px; }
+  .extra-card { position:relative; overflow:hidden; background:var(--white); border:1px solid var(--pale-blue); border-radius:10px; padding:16px; }
+  .extra-card::after {
+    content:""; position:absolute; top:-60%; left:-25%; width:55%; height:220%;
+    background: linear-gradient(120deg, rgba(255,255,255,0) 0%, rgba(255,255,255,0.5) 45%, rgba(255,255,255,0) 62%);
+    transform: rotate(18deg); pointer-events:none;
+  }
+  .extra-card h4 { margin:0 0 6px 0; color:var(--dark-blue); }
+  .extra-cover { margin-bottom: 10px; border-radius: 8px; overflow: hidden; }
+  .note-box { background: var(--pale-blue); border-radius: 10px; padding: 14px 16px; font-size: 13px; margin-top: 24px; }
+  footer { text-align:center; color:var(--soft-dark-red); font-size:12px; padding: 20px; }
+
+  .demo-showcase { display:grid; grid-template-columns: 1.3fr 1fr; gap: 18px; margin-top: 14px; }
+  .demo-video-card, .demo-collage-card {
+    background: var(--white); border: 1px solid var(--pale-blue); border-radius: 12px;
+    padding: 14px; box-shadow: 0 4px 14px rgba(0,0,0,0.08); text-align: center;
+  }
+  .demo-video-card video, .demo-collage-card img { width: 100%; border-radius: 8px; display: block; margin-bottom: 10px; }
+  @media (max-width: 800px) { .demo-showcase { grid-template-columns: 1fr; } }
+</style>
+</head>
+<body>
+  <header class="app-header">
+    <h1>IT Schulungsmaßnahmen</h1>
+    <p>App herunterladen &ndash; für Teilnehmer, Dozenten und Admins, noch bevor du dich zum Unterricht anmeldest.</p>
+  </header>
+
+  <main>
+    <h2>1-Klick-Download nach Plattform</h2>
+    <p class="hint">Deine Plattform wird automatisch erkannt und hervorgehoben. Für Windows/Mac/Linux lädt der Button das
+      Start-Skript der Vollversion herunter (Node.js muss einmalig installiert sein); für Android/iOS lädt er die
+      Vollversion-Broschüre als PDF, da die App dort nicht nativ läuft.</p>
+
+    <div class="platform-grid" id="platformGrid"></div>
+
+    <div class="note-box">
+      Hinweis: Diese Seite funktioniert auf jedem Rechner, auf dem sie lokal ausgeliefert wird
+      (<code>pwsh ./scripts/start-browser.ps1</code> bzw. <code>npm run serve</code> &rarr;
+      <code>http://localhost:4173/download.html</code>). Für Teilnehmer, Dozenten und Admins über das Internet
+      muss diese Seite zusätzlich öffentlich gehostet werden (z. B. über die PWA auf GitHub Pages, sobald aktiviert).
+      Aus Sicherheitsgründen können Browser eine heruntergeladene Datei nicht automatisch auf dem Desktop
+      speichern &ndash; sie landet im üblichen Download-Ordner und kann von dort auf den Desktop verschoben werden.
+    </div>
+
+    <div class="extras">
+      <h2>Demo ansehen</h2>
+      <p class="hint">Kurzer Video-Rundgang (ohne Ton) und eine große Übersichts-Collage – beide zum direkten
+        Anschauen und Herunterladen.</p>
+      <div class="demo-showcase">
+        <div class="demo-video-card">
+          <video controls preload="metadata" poster="downloads/IT-Schulungsmassnahmen-Demo-Collage.png">
+            <source src="downloads/IT-Schulungsmassnahmen-Demo.webm" type="video/webm">
+          </video>
+          <a class="dl-btn secondary" href="downloads/IT-Schulungsmassnahmen-Demo.webm" download>⬇ Video herunterladen (.webm)</a>
+        </div>
+        <div class="demo-collage-card">
+          <img src="downloads/IT-Schulungsmassnahmen-Demo-Collage.png" alt="3D-Collage der App-Ansichten">
+          <a class="dl-btn secondary" href="downloads/IT-Schulungsmassnahmen-Demo-Collage.png" download>⬇ Collage herunterladen (.png)</a>
+        </div>
+      </div>
+    </div>
+
+    <div class="extras">
+      <h2>Handbücher &amp; Handzettel</h2>
+      <div class="extras-grid" id="extrasGrid"></div>
+    </div>
+  </main>
+
+  <footer>© <span id="year"></span> IT Schulungsmaßnahmen – Alle Rechte vorbehalten.</footer>
+
+<script>
+  document.getElementById('year').textContent = new Date().getFullYear();
+
+  const platforms = [
+    { key: 'windows', label: 'Windows', icon: '🪟',
+      match: () => /Win/i.test(navigator.platform) || /Windows/i.test(navigator.userAgent),
+      kind: 'Start-Skript (.ps1)',
+      fullFile: 'scripts/start-windows.ps1', fullNote: 'powershell -ExecutionPolicy Bypass -File start-windows.ps1',
+      demoFile: 'scripts/demo-windows.ps1', demoNote: 'powershell -ExecutionPolicy Bypass -File demo-windows.ps1' },
+    { key: 'mac', label: 'Mac', icon: '🍎',
+      match: () => /Mac/i.test(navigator.platform) && !/iPhone|iPad/i.test(navigator.userAgent),
+      kind: 'Start-Skript (.ps1)',
+      fullFile: 'scripts/start-macos.ps1', fullNote: 'pwsh ./start-macos.ps1 (PowerShell 7+)',
+      demoFile: 'scripts/demo-macos.ps1', demoNote: 'pwsh ./demo-macos.ps1 (PowerShell 7+)' },
+    { key: 'linux', label: 'Linux', icon: '🐧',
+      match: () => /Linux/i.test(navigator.platform) && !/Android/i.test(navigator.userAgent),
+      kind: 'Start-Skript (.ps1)',
+      fullFile: 'scripts/start-linux.ps1', fullNote: 'pwsh ./start-linux.ps1 (PowerShell 7+)',
+      demoFile: 'scripts/demo-linux.ps1', demoNote: 'pwsh ./demo-linux.ps1 (PowerShell 7+)' },
+    { key: 'android', label: 'Android', icon: '🤖',
+      match: () => /Android/i.test(navigator.userAgent),
+      kind: 'PDF-Broschüre',
+      fullFile: 'downloads/IT-Schulungsmassnahmen-Vollversion-Android.pdf',
+      demoFile: 'downloads/IT-Schulungsmassnahmen-Demo-Android.pdf',
+      fullNote: 'Alternativ als installierbare PWA über den Browser (Menü → App installieren).',
+      demoNote: 'Demo-Broschüre mit Beispieldaten.' },
+    { key: 'ios', label: 'iOS', icon: '📱',
+      match: () => /iPhone|iPad|iPod/i.test(navigator.userAgent),
+      kind: 'PDF-Broschüre',
+      fullFile: 'downloads/IT-Schulungsmassnahmen-Vollversion-iOS.pdf',
+      demoFile: 'downloads/IT-Schulungsmassnahmen-Demo-iOS.pdf',
+      fullNote: 'Alternativ als installierbare PWA über Safari (Teilen → Zum Home-Bildschirm).',
+      demoNote: 'Demo-Broschüre mit Beispieldaten.' }
+  ];
+
+  const grid = document.getElementById('platformGrid');
+  let detectedKey = null;
+  for (const p of platforms) {
+    try { if (p.match()) { detectedKey = p.key; break; } } catch (e) { /* ignore */ }
+  }
+
+  platforms.forEach((p) => {
+    const card = document.createElement('div');
+    card.className = 'platform-card' + (p.key === detectedKey ? ' detected' : '');
+    card.innerHTML = `
+      ${p.key === detectedKey ? '<span class="detected-badge">Dein Gerät</span><br>' : ''}
+      <div class="platform-icon">${p.icon}</div>
+      <h3>${p.label}</h3>
+      <div class="platform-note">${p.kind}</div>
+      <a class="dl-btn" href="${p.fullFile}" download>⬇ Vollversion</a>
+      <div class="platform-note">${p.fullNote}</div>
+      <a class="dl-btn secondary" href="${p.demoFile}" download>⬇ Demoversion</a>
+      <div class="platform-note">${p.demoNote}</div>
+    `;
+    grid.appendChild(card);
+  });
+
+  // Hochglanz-3D-Vorschaubild für die Installationshandbücher (gleiche Optik wie die PDF-Beispielbilder)
+  function manualCoverSvg(icon, label) {
+    return `
+    <svg viewBox="0 0 300 170" xmlns="http://www.w3.org/2000/svg" width="100%">
+      <defs>
+        <linearGradient id="mc-red" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#6f2d2d"/><stop offset="1" stop-color="#8c3b3b"/></linearGradient>
+        <filter id="mc-ds" x="-30%" y="-30%" width="160%" height="170%"><feDropShadow dx="0" dy="6" stdDeviation="6" flood-color="#3a2a10" flood-opacity="0.30"/></filter>
+        <clipPath id="mc-clip"><rect x="0" y="0" width="260" height="128" rx="10"/></clipPath>
+      </defs>
+      <g transform="translate(20,14) skewY(-4)" filter="url(#mc-ds)">
+        <rect x="0" y="8" width="260" height="128" rx="10" fill="#c9b98f"/>
+        <rect x="0" y="0" width="260" height="128" rx="10" fill="#ffffff" stroke="#e7dcc3"/>
+        <g clip-path="url(#mc-clip)">
+          <rect x="0" y="0" width="260" height="30" fill="url(#mc-red)"/>
+          <text x="10" y="20" fill="#fff" font-family="Segoe UI, Arial" font-size="12" font-weight="700">Installationshandbuch</text>
+          <text x="12" y="48" font-family="Segoe UI, Arial" font-size="22">${icon}</text>
+          <text x="46" y="50" fill="#111" font-family="Segoe UI, Arial" font-size="13" font-weight="700">${label}</text>
+          <rect x="12" y="64" width="236" height="46" rx="6" fill="#0b1f4d"/>
+          <text x="20" y="80" fill="#eaf1fb" font-family="Consolas, monospace" font-size="8">$ErrorActionPreference = 'Stop'</text>
+          <text x="20" y="92" fill="#eaf1fb" font-family="Consolas, monospace" font-size="8">npm install; npm start</text>
+          <text x="20" y="104" fill="#eaf1fb" font-family="Consolas, monospace" font-size="8"># Vollversion, kein Demo-Modus</text>
+          <!-- Hochglanz-Lichtstreifen -->
+          <polygon points="0,0 60,0 10,128 -50,128" fill="rgba(255,255,255,0.35)"/>
+        </g>
+      </g>
+    </svg>`;
+  }
+
+  // Hochglanz-3D-Vorschaubild für den Teilnehmer-Handzettel ("Willkommen…")
+  function welcomeCoverSvg() {
+    return `
+    <svg viewBox="0 0 300 170" xmlns="http://www.w3.org/2000/svg" width="100%">
+      <defs>
+        <linearGradient id="wc-pink" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#b98a8a"/><stop offset="1" stop-color="#d9a9a9"/></linearGradient>
+        <filter id="wc-ds" x="-30%" y="-30%" width="160%" height="170%"><feDropShadow dx="0" dy="6" stdDeviation="6" flood-color="#3a2a10" flood-opacity="0.28"/></filter>
+        <clipPath id="wc-clip"><rect x="0" y="0" width="260" height="128" rx="10"/></clipPath>
+      </defs>
+      <g transform="translate(20,14) skewY(4)" filter="url(#wc-ds)">
+        <rect x="0" y="8" width="260" height="128" rx="10" fill="#e6cfae"/>
+        <rect x="0" y="0" width="260" height="128" rx="10" fill="#fffaf2" stroke="#f0dfc4"/>
+        <g clip-path="url(#wc-clip)">
+          <rect x="0" y="0" width="260" height="46" fill="url(#wc-pink)"/>
+          <text x="10" y="20" fill="#4a2020" font-family="Segoe UI, Arial" font-size="13" font-weight="700">Willkommen bei</text>
+          <text x="10" y="36" fill="#4a2020" font-family="Segoe UI, Arial" font-size="13" font-weight="700">IT Schulungsmaßnahmen</text>
+          <g font-family="Segoe UI, Arial" font-size="9" fill="#333">
+            <text x="12" y="64">1. Gerät wählen (Win/Mac/Linux/Android/iOS)</text>
+            <text x="12" y="78">2. Immer per Videochat anmelden</text>
+            <text x="12" y="92">3. 🎤 Audio / 📹 Video jederzeit umschaltbar</text>
+            <text x="12" y="106">4. ✋ Melden, wenn du sprechen möchtest</text>
+          </g>
+          <polygon points="0,0 60,0 10,128 -50,128" fill="rgba(255,255,255,0.4)"/>
+        </g>
+      </g>
+    </svg>`;
+  }
+
+  const extras = [
+    { title: '📄 Handzettel für Teilnehmer', file: 'downloads/Handzettel-Teilnehmer.pdf', cover: welcomeCoverSvg() },
+    { title: '🪟 Installationshandbuch Windows', file: 'downloads/Installationshandbuch-Windows.pdf', cover: manualCoverSvg('🪟', 'Windows') },
+    { title: '🍎 Installationshandbuch Mac', file: 'downloads/Installationshandbuch-Mac.pdf', cover: manualCoverSvg('🍎', 'Mac') },
+    { title: '🐧 Installationshandbuch Linux', file: 'downloads/Installationshandbuch-Linux.pdf', cover: manualCoverSvg('🐧', 'Linux') },
+    { title: '🤖 Installationshandbuch Android', file: 'downloads/Installationshandbuch-Android.pdf', cover: manualCoverSvg('🤖', 'Android') },
+    { title: '📱 Installationshandbuch iOS', file: 'downloads/Installationshandbuch-iOS.pdf', cover: manualCoverSvg('📱', 'iOS') }
+  ];
+  const extrasGrid = document.getElementById('extrasGrid');
+  extras.forEach((e) => {
+    const card = document.createElement('div');
+    card.className = 'extra-card';
+    card.innerHTML = `<div class="extra-cover">${e.cover}</div><h4>${e.title}</h4><a class="dl-btn secondary" href="${e.file}" download>⬇ PDF herunterladen</a>`;
+    extrasGrid.appendChild(card);
+  });
+</script>
+</body>
+</html>
