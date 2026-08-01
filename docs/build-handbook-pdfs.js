@@ -1,4 +1,4 @@
-// Rendert die drei Handbücher (voller Gold/Braun-3D-Hochglanz-Stil, inkl. Screenshots)
+// Rendert alle vier Handbücher (voller Gold/Braun-3D-Hochglanz-Stil, inkl. Screenshots)
 // als echte PDF-Dateien, per Electron/Chromium-Druckfunktion.
 //
 // Manuell ausführen, nachdem sich einer der Handbuch-HTML-Dateien geändert hat:
@@ -14,6 +14,7 @@ const ROOT = path.join(__dirname, '..');
 const HANDBOOKS = [
   { html: 'handbuch.html', pdf: 'handbuch.pdf' },
   { html: 'handbuch-inventar.html', pdf: 'handbuch-inventar.pdf' },
+  { html: 'skript-handbuch.html', pdf: 'skript-handbuch.pdf' },
   { html: 'admin-handbuch.html', pdf: 'admin-handbuch.pdf' }
 ];
 

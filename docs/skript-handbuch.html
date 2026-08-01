@@ -1,0 +1,231 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<title>Dozenten Dashboard – Skript-Handbuch</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="description" content="Technisches Handbuch zum PowerShell-Installationsskript und zur Downloader-App, mit Beispielbildern.">
+<style>
+  :root {
+    --gold: #d4af37;
+    --gold-light: #f4e2a8;
+    --gold-bright: #f7d774;
+    --bronze: #8a5a2b;
+    --bronze-dark: #5c3a1a;
+    --dark-brown: #3b2410;
+    --dark-blue: #0b1f4d;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    font-family: "Segoe UI", Arial, sans-serif;
+    color: #2a2a2a;
+    background: linear-gradient(160deg, #fbf6e9, #ffffff 40%, #f3e6c8 100%);
+    line-height: 1.6;
+  }
+  .hero {
+    background: linear-gradient(135deg, var(--bronze-dark), var(--bronze) 45%, var(--gold) 100%);
+    color: #fffdf6;
+    padding: 46px 20px 60px;
+    text-align: center;
+    box-shadow: 0 3px 10px rgba(59, 36, 16, 0.4), inset 0 -2px 0 rgba(255, 255, 255, 0.25);
+  }
+  .hero h1 { margin: 0 0 8px; font-size: 28px; }
+  .hero p { margin: 0; opacity: 0.95; font-size: 14px; }
+
+  .wrap { max-width: 860px; margin: -30px auto 0; padding: 0 20px 60px; }
+
+  nav.toc {
+    background: linear-gradient(180deg, #fffdf6, var(--gold-light) 160%);
+    border: 1px solid var(--gold);
+    border-radius: 14px;
+    padding: 20px 26px;
+    margin-bottom: 26px;
+    box-shadow: 0 10px 26px rgba(59, 36, 16, 0.25), inset 0 1px 0 rgba(255, 255, 255, 0.85);
+  }
+  nav.toc h2 { margin-top: 0; font-size: 16px; color: var(--bronze-dark); }
+  nav.toc ol { margin: 0; padding-left: 20px; }
+  nav.toc a { color: var(--bronze-dark); font-weight: 600; text-decoration: none; }
+  nav.toc a:hover { text-decoration: underline; }
+
+  section.card {
+    background: #ffffff;
+    border: 1px solid var(--gold-light);
+    border-radius: 14px;
+    padding: 28px 30px;
+    margin-bottom: 26px;
+    box-shadow: 0 8px 20px rgba(59, 36, 16, 0.12);
+    scroll-margin-top: 20px;
+  }
+  section.card h2 {
+    margin-top: 0;
+    color: var(--bronze-dark);
+    border-bottom: 3px solid var(--gold);
+    padding-bottom: 8px;
+    font-size: 22px;
+  }
+  section.card h3 { color: var(--dark-blue); font-size: 16px; margin-top: 24px; }
+
+  figure { margin: 18px 0; text-align: center; }
+  figure img {
+    max-width: 100%;
+    border-radius: 10px;
+    border: 1px solid #ddd;
+    box-shadow: 0 6px 18px rgba(59, 36, 16, 0.25);
+  }
+  figcaption { margin-top: 8px; font-size: 12px; color: #777; font-style: italic; }
+
+  code, pre { font-family: "Cascadia Code", "Consolas", monospace; }
+  .code-block {
+    background: var(--dark-brown);
+    color: #f7e9c4;
+    border-radius: 8px;
+    padding: 12px 14px;
+    font-size: 13px;
+    overflow-x: auto;
+    box-shadow: inset 0 2px 6px rgba(0, 0, 0, 0.4);
+    white-space: pre;
+    margin: 12px 0;
+  }
+
+  table { width: 100%; border-collapse: collapse; margin: 14px 0; font-size: 14px; }
+  table th, table td { text-align: left; padding: 8px 10px; border-bottom: 1px solid #eee; vertical-align: top; }
+  table th { color: var(--bronze-dark); }
+
+  .tip {
+    background: var(--gold-light);
+    border-left: 4px solid var(--gold);
+    padding: 10px 14px;
+    border-radius: 6px;
+    font-size: 14px;
+    margin: 14px 0;
+  }
+  .warn {
+    background: #fdecea;
+    border-left: 4px solid #b3261e;
+    padding: 10px 14px;
+    border-radius: 6px;
+    font-size: 14px;
+    margin: 14px 0;
+  }
+
+  a.btn-gold-outline {
+    display: inline-block;
+    text-decoration: none;
+    border-radius: 8px;
+    padding: 10px 18px;
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--bronze-dark);
+    background: linear-gradient(180deg, #ffffff, var(--gold-light) 100%);
+    box-shadow: 0 3px 0 var(--bronze), 0 5px 8px rgba(59, 36, 16, 0.25), inset 0 1px 0 rgba(255, 255, 255, 0.8);
+    margin: 4px 6px 4px 0;
+  }
+
+  footer { text-align: center; padding: 30px 20px 50px; font-size: 12px; color: var(--bronze-dark); }
+  footer a { color: var(--bronze-dark); }
+</style>
+</head>
+<body>
+
+  <div class="hero">
+    <h1>📜 Skript-Handbuch</h1>
+    <p>PowerShell-Installationsskript &amp; Downloader-App im Detail</p>
+  </div>
+
+  <div class="wrap">
+
+    <nav class="toc" id="top">
+      <h2>Inhalt</h2>
+      <ol>
+        <li><a href="#ueberblick">Überblick: zwei automatisierte Wege</a></li>
+        <li><a href="#powershell">PowerShell-Installationsskript</a></li>
+        <li><a href="#downloader">Downloader-App (1-Klick, portable .exe)</a></li>
+        <li><a href="#sicherheit">Sicherheitshinweise</a></li>
+      </ol>
+    </nav>
+
+    <section class="card" id="ueberblick">
+      <h2>1. Überblick: zwei automatisierte Wege</h2>
+      <p>
+        Für den Rollout im Unternehmen/Kollegium stehen zwei automatisierte Wege zur Verfügung, jeweils für
+        Windows optimiert:
+      </p>
+      <table>
+        <tr><th>Weg</th><th>Für wen</th><th>Ablauf</th></tr>
+        <tr><td><strong>PowerShell-Skript</strong></td><td>IT-Admins, Skripting-erfahrene Nutzer</td>
+            <td>Einmalig ausführen (lokal oder per Ein-Zeiler) → lädt automatisch herunter und installiert</td></tr>
+        <tr><td><strong>Downloader-App</strong></td><td>Alle Nutzer</td>
+            <td>Kleine, portable .exe einmal verteilen → ein Klick im Programm erledigt den Rest</td></tr>
+      </table>
+      <div class="tip">💡 Beide Wege laden immer automatisch die aktuellste veröffentlichte Version von GitHub Releases – es muss nichts manuell aktualisiert werden.</div>
+      <figure>
+        <img src="images/14-download-seite.png" alt="Download-Seite mit beiden automatisierten Installationswegen">
+        <figcaption>Ausgangspunkt für beide Wege: die Download-Seite.</figcaption>
+      </figure>
+    </section>
+
+    <section class="card" id="powershell">
+      <h2>2. PowerShell-Installationsskript</h2>
+      <p>
+        Datei: <code>scripts/Install-DozentenDashboard.ps1</code>. Fragt die GitHub-API nach der neuesten
+        Version, lädt die Windows-Installationsdatei direkt auf den Desktop des aktuellen Benutzers und
+        startet sie. Die vollständige technische Doku steht als PowerShell-„Comment-Based Help" im Skript
+        selbst (<code>Get-Help .\Install-DozentenDashboard.ps1 -Full</code>).
+      </p>
+      <h3>Ausführen</h3>
+      <div class="code-block">powershell -ExecutionPolicy Bypass -File .\Install-DozentenDashboard.ps1</div>
+      <p>Parameter:</p>
+      <table>
+        <tr><th>Parameter</th><th>Wirkung</th></tr>
+        <tr><td><code>-Silent</code></td><td>Installiert vollständig unbeaufsichtigt (NSIS <code>/S</code>) – z. B. für IT-Rollouts</td></tr>
+        <tr><td><code>-NoRun</code></td><td>Lädt nur herunter, startet den Installer nicht automatisch</td></tr>
+        <tr><td><code>-Repo</code></td><td>Anderes GitHub-Repository ansprechen (Standard: <code>ThanosXXL/Thanos</code>)</td></tr>
+      </table>
+      <figure>
+        <img src="images/07-powershell-skript.png" alt="Beispielhafter Ablauf des PowerShell-Installationsskripts im Terminal">
+        <figcaption>Beispielhafter Ablauf (Terminal-Nachbildung): Version suchen, herunterladen, Installer starten.</figcaption>
+      </figure>
+      <div class="warn">⚠️ Ein Skript, das ein Nutzer bewusst startet, darf automatisch Dateien schreiben und ausführen. Eine Webseite darf das aus Sicherheitsgründen nicht – deshalb gibt es keinen Weg, das Skript "unsichtbar" per Website-Klick auszulösen.</div>
+    </section>
+
+    <section class="card" id="downloader">
+      <h2>3. Downloader-App (1-Klick, portable .exe)</h2>
+      <p>
+        Für Nutzer ohne PowerShell-Erfahrung gibt es <code>Dozenten Dashboard Downloader</code> – eine winzige,
+        portable Windows-App (kein Installationsschritt nötig, einfach doppelklicken). Sie zeigt genau einen
+        Button; ein Klick lädt automatisch die neueste Version herunter, speichert sie auf dem Desktop und
+        startet den Installer.
+      </p>
+      <figure>
+        <img src="images/08-downloader-app.png" alt="Downloader-App mit einem großen Button für die 1-Klick-Installation">
+        <figcaption>Downloader-App im Ruhezustand: ein Button, keine weitere Konfiguration nötig.</figcaption>
+      </figure>
+      <figure>
+        <img src="images/09-downloader-app-fertig.png" alt="Downloader-App nach erfolgreichem Download und Start des Installers">
+        <figcaption>Nach Abschluss: Installer liegt auf dem Desktop und wurde automatisch gestartet.</figcaption>
+      </figure>
+      <p>Quellcode: <code>downloader/</code> (eigenes kleines Electron-Projekt, wird zusammen mit der Hauptanwendung im CI-Workflow gebaut und veröffentlicht).</p>
+    </section>
+
+    <section class="card" id="sicherheit">
+      <h2>4. Sicherheitshinweise</h2>
+      <div class="tip">
+        💡 Sowohl das PowerShell-Skript als auch die Downloader-App laden ausschließlich von den offiziellen
+        GitHub Releases des Projekts – es werden keine Drittanbieter-Server verwendet.
+      </div>
+      <p>Details zur Nutzung des Admin-Modus in der App selbst (PIN, Nachbestellungen) stehen im eigenen Admin-Handbuch.</p>
+      <a class="btn-gold-outline" href="admin-handbuch.html">🔑 Zum Admin-Handbuch</a>
+      <a class="btn-gold-outline" href="handbuch.html">📖 Zum Benutzerhandbuch</a>
+      <a class="btn-gold-outline" href="handbuch-inventar.html">📦 Zum Inventar-Handbuch</a>
+    </section>
+
+  </div>
+
+  <footer>
+    © 2026 Dozenten Dashboard – Alle Rechte vorbehalten.<br>
+    <a href="#top">↑ Nach oben</a> · <a href="download.html">Download</a> · <a href="demo-inventar.html">Demo</a>
+  </footer>
+
+</body>
+</html>

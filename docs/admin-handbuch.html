@@ -2,9 +2,9 @@
 <html lang="de">
 <head>
 <meta charset="UTF-8">
-<title>Dozenten Dashboard – Admin-/Skript-Handbuch</title>
+<title>Dozenten Dashboard – Admin-Handbuch</title>
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<meta name="description" content="Technisches Handbuch für Admins: PowerShell-Installationsskript und Downloader-App.">
+<meta name="description" content="Handbuch für alle Admins: Nutzung und Umgang mit dem Admin-Modus, inklusive Beispielbildern.">
 <style>
   :root {
     --gold: #d4af37;
@@ -76,21 +76,21 @@
   figcaption { margin-top: 8px; font-size: 12px; color: #777; font-style: italic; }
 
   code, pre { font-family: "Cascadia Code", "Consolas", monospace; }
-  .code-block {
-    background: var(--dark-brown);
-    color: #f7e9c4;
-    border-radius: 8px;
-    padding: 12px 14px;
-    font-size: 13px;
-    overflow-x: auto;
-    box-shadow: inset 0 2px 6px rgba(0, 0, 0, 0.4);
-    white-space: pre;
-    margin: 12px 0;
-  }
 
   table { width: 100%; border-collapse: collapse; margin: 14px 0; font-size: 14px; }
   table th, table td { text-align: left; padding: 8px 10px; border-bottom: 1px solid #eee; vertical-align: top; }
   table th { color: var(--bronze-dark); }
+
+  .badge {
+    display: inline-block;
+    padding: 3px 10px;
+    border-radius: 10px;
+    font-size: 11px;
+    font-weight: 700;
+    background: linear-gradient(180deg, var(--gold-bright), var(--gold));
+    color: var(--dark-brown);
+    margin-right: 6px;
+  }
 
   .tip {
     background: var(--gold-light);
@@ -119,6 +119,7 @@
     color: var(--bronze-dark);
     background: linear-gradient(180deg, #ffffff, var(--gold-light) 100%);
     box-shadow: 0 3px 0 var(--bronze), 0 5px 8px rgba(59, 36, 16, 0.25), inset 0 1px 0 rgba(255, 255, 255, 0.8);
+    margin: 4px 6px 4px 0;
   }
 
   footer { text-align: center; padding: 30px 20px 50px; font-size: 12px; color: var(--bronze-dark); }
@@ -128,8 +129,8 @@
 <body>
 
   <div class="hero">
-    <h1>🛠️ Admin-/Skript-Handbuch</h1>
-    <p>Technische Anleitung zum automatischen Rollout: PowerShell-Skript, Downloader-App &amp; Admin-Modus</p>
+    <h1>🔑 Admin-Handbuch</h1>
+    <p>Nutzung &amp; Umgang mit dem Admin-Modus – für alle vier Admins</p>
   </div>
 
   <div class="wrap">
@@ -137,107 +138,71 @@
     <nav class="toc" id="top">
       <h2>Inhalt</h2>
       <ol>
-        <li><a href="#ueberblick">Überblick für Admins</a></li>
-        <li><a href="#powershell">PowerShell-Installationsskript</a></li>
-        <li><a href="#downloader">Downloader-App (1-Klick, portable .exe)</a></li>
-        <li><a href="#adminmodus">Admin-Modus &amp; Nachbestellungen in der App</a></li>
+        <li><a href="#entsperren">Admin-Modus entsperren</a></li>
+        <li><a href="#bereich">Der Admin-Bereich</a></li>
+        <li><a href="#downloads">Alle Download-Versionen</a></li>
+        <li><a href="#nachbestellungen">Nachbestellungen verwalten</a></li>
         <li><a href="#sicherheit">Sicherheitshinweise</a></li>
       </ol>
     </nav>
 
-    <section class="card" id="ueberblick">
-      <h2>1. Überblick für Admins</h2>
-      <p>
-        Für den Rollout im Unternehmen/Kollegium stehen zwei automatisierte Wege zur Verfügung, jeweils für
-        Windows optimiert:
-      </p>
-      <table>
-        <tr><th>Weg</th><th>Für wen</th><th>Ablauf</th></tr>
-        <tr><td><strong>PowerShell-Skript</strong></td><td>IT-Admins, Skripting-erfahrene Nutzer</td>
-            <td>Einmalig ausführen (lokal oder per Ein-Zeiler) → lädt automatisch herunter und installiert</td></tr>
-        <tr><td><strong>Downloader-App</strong></td><td>Alle Nutzer</td>
-            <td>Kleine, portable .exe einmal verteilen → ein Klick im Programm erledigt den Rest</td></tr>
-      </table>
-      <div class="tip">💡 Beide Wege laden immer automatisch die aktuellste veröffentlichte Version von GitHub Releases – es muss nichts manuell aktualisiert werden.</div>
-      <figure>
-        <img src="images/14-download-seite.png" alt="Download-Seite mit beiden automatisierten Installationswegen">
-        <figcaption>Ausgangspunkt für beide Wege: die Download-Seite.</figcaption>
-      </figure>
-    </section>
-
-    <section class="card" id="powershell">
-      <h2>2. PowerShell-Installationsskript</h2>
-      <p>
-        Datei: <code>scripts/Install-DozentenDashboard.ps1</code>. Fragt die GitHub-API nach der neuesten
-        Version, lädt die Windows-Installationsdatei direkt auf den Desktop des aktuellen Benutzers und
-        startet sie. Die vollständige technische Doku steht als PowerShell-„Comment-Based Help" im Skript
-        selbst (<code>Get-Help .\Install-DozentenDashboard.ps1 -Full</code>).
-      </p>
-      <h3>Ausführen</h3>
-      <div class="code-block">powershell -ExecutionPolicy Bypass -File .\Install-DozentenDashboard.ps1</div>
-      <p>Parameter:</p>
-      <table>
-        <tr><th>Parameter</th><th>Wirkung</th></tr>
-        <tr><td><code>-Silent</code></td><td>Installiert vollständig unbeaufsichtigt (NSIS <code>/S</code>) – z. B. für IT-Rollouts</td></tr>
-        <tr><td><code>-NoRun</code></td><td>Lädt nur herunter, startet den Installer nicht automatisch</td></tr>
-        <tr><td><code>-Repo</code></td><td>Anderes GitHub-Repository ansprechen (Standard: <code>ThanosXXL/Thanos</code>)</td></tr>
-      </table>
-      <figure>
-        <img src="images/07-powershell-skript.png" alt="Beispielhafter Ablauf des PowerShell-Installationsskripts im Terminal">
-        <figcaption>Beispielhafter Ablauf (Terminal-Nachbildung): Version suchen, herunterladen, Installer starten.</figcaption>
-      </figure>
-      <div class="warn">⚠️ Ein Skript, das ein Nutzer bewusst startet, darf automatisch Dateien schreiben und ausführen. Eine Webseite darf das aus Sicherheitsgründen nicht – deshalb gibt es keinen Weg, das Skript "unsichtbar" per Website-Klick auszulösen.</div>
-    </section>
-
-    <section class="card" id="downloader">
-      <h2>3. Downloader-App (1-Klick, portable .exe)</h2>
-      <p>
-        Für Nutzer ohne PowerShell-Erfahrung gibt es <code>Dozenten Dashboard Downloader</code> – eine winzige,
-        portable Windows-App (kein Installationsschritt nötig, einfach doppelklicken). Sie zeigt genau einen
-        Button; ein Klick lädt automatisch die neueste Version herunter, speichert sie auf dem Desktop und
-        startet den Installer.
-      </p>
-      <figure>
-        <img src="images/08-downloader-app.png" alt="Downloader-App mit einem großen Button für die 1-Klick-Installation">
-        <figcaption>Downloader-App im Ruhezustand: ein Button, keine weitere Konfiguration nötig.</figcaption>
-      </figure>
-      <figure>
-        <img src="images/09-downloader-app-fertig.png" alt="Downloader-App nach erfolgreichem Download und Start des Installers">
-        <figcaption>Nach Abschluss: Installer liegt auf dem Desktop und wurde automatisch gestartet.</figcaption>
-      </figure>
-      <p>Quellcode: <code>downloader/</code> (eigenes kleines Electron-Projekt, wird zusammen mit der Hauptanwendung im CI-Workflow gebaut und veröffentlicht).</p>
-    </section>
-
-    <section class="card" id="adminmodus">
-      <h2>4. Admin-Modus &amp; Nachbestellungen in der App</h2>
+    <section class="card" id="entsperren">
+      <h2>1. Admin-Modus entsperren</h2>
       <p>
         Im Inventar - Dashboard gibt es oben rechts den Button „🔒 Admin-Modus". Es gibt vier feste,
-        vordefinierte PINs – eine pro Administrator/in. Jede der vier PINs schaltet den Admin-Bereich
-        frei; es gibt keinen Einrichtungsschritt. Die genauen Codes werden nicht in diesem öffentlich
-        zugänglichen Handbuch aufgeführt, sondern separat an die vier Admins weitergegeben (hinterlegt
-        in <code>renderer/renderer.js</code>, Konstante <code>ADMIN_PINS</code>).
+        vordefinierte PINs – eine pro Administrator/in <span class="badge">Admin 1–4</span>. Jede der
+        vier PINs schaltet den Admin-Bereich frei; es gibt keinen Einrichtungsschritt, einfach die
+        eigene PIN eingeben.
       </p>
       <figure>
         <img src="images/12-admin-pin.png" alt="PIN-Abfrage zum Entsperren des Admin-Modus">
         <figcaption>PIN-Abfrage: ohne korrekte PIN bleibt der Admin-Bereich gesperrt.</figcaption>
       </figure>
+      <div class="tip">
+        💡 Die eigene PIN kennst du bereits (separat von der Projektleitung erhalten). Falsch eingegebene
+        PINs zeigen „Falsche PIN." – einfach erneut versuchen.
+      </div>
+      <p>Über denselben Button („🔓 Admin-Modus verlassen") schließt du den Admin-Bereich wieder.</p>
+    </section>
+
+    <section class="card" id="bereich">
+      <h2>2. Der Admin-Bereich</h2>
       <p>Im entsperrten Zustand erscheint oben im Inventar - Dashboard ein Admin-Bereich mit zwei Karten:</p>
       <figure>
         <img src="images/10-admin-bereich.png" alt="Admin-Bereich mit Download-Versionen und Nachbestellungen">
         <figcaption>Admin-Bereich: alle Download-Versionen links, Nachbestellungen-Verwaltung rechts.</figcaption>
       </figure>
-      <h3>Alle Download-Versionen</h3>
-      <p>Direkte Links zu Windows-Installer, Downloader-App, macOS- und Linux-Build – praktisch, um Kolleg:innen schnell die passende Datei zuzuschicken.</p>
-      <h3>Nachbestellungen</h3>
+    </section>
+
+    <section class="card" id="downloads">
+      <h2>3. Alle Download-Versionen</h2>
       <p>
-        Für jedes Gerät lässt sich eine Nachbestellung mit Menge anlegen; der Status (<em>Offen</em>,
-        <em>Bestellt</em>, <em>Erledigt</em>) kann jederzeit geändert werden. Diese Funktion ist bewusst nur im
-        Admin-Modus sichtbar und bedienbar, damit reguläre Nutzer keine Bestellungen auslösen können.
+        Direkte Links zu Windows-Installer, Downloader-App, macOS- und Linux-Build – praktisch, um
+        Kolleg:innen oder Kund:innen schnell die passende Datei zuzuschicken, ohne selbst erst auf der
+        Download-Seite suchen zu müssen.
+      </p>
+    </section>
+
+    <section class="card" id="nachbestellungen">
+      <h2>4. Nachbestellungen verwalten</h2>
+      <p>
+        Für jedes Gerät lässt sich eine Nachbestellung mit Menge anlegen: Gerät im Dropdown wählen, Menge
+        eintragen, „+ Nachbestellung anlegen" klicken.
+      </p>
+      <h3>Status ändern</h3>
+      <p>
+        Der Status (<em>Offen</em>, <em>Bestellt</em>, <em>Erledigt</em>) lässt sich jederzeit über das
+        Dropdown in der Tabelle ändern. Diese Funktion ist bewusst nur im Admin-Modus sichtbar und
+        bedienbar, damit reguläre Nutzer keine Bestellungen auslösen können.
       </p>
       <figure>
         <img src="images/11-nachbestellungen.png" alt="Nachbestellung mit Statusänderung auf 'Bestellt'">
         <figcaption>Nachbestellung anlegen und Status auf „Bestellt" setzen.</figcaption>
       </figure>
+      <div class="tip">
+        💡 Dienstags und freitags ab 10 Uhr erinnert ein Banner ganz oben im Inventar - Dashboard
+        automatisch an alle noch offenen Nachbestellungen – bis sie auf „Erledigt" gesetzt werden.
+      </div>
     </section>
 
     <section class="card" id="sicherheit">
@@ -248,10 +213,8 @@
         Datendatei gespeichert. Für echten Zugriffsschutz (mehrere Nutzer, Netzwerk) ist die App nicht
         ausgelegt, da sie als lokale Einzelplatz-Anwendung konzipiert ist.
       </div>
-      <div class="tip">
-        💡 Sowohl das PowerShell-Skript als auch die Downloader-App laden ausschließlich von den offiziellen
-        GitHub Releases des Projekts – es werden keine Drittanbieter-Server verwendet.
-      </div>
+      <p>Technische Details zum PowerShell-Skript und zur Downloader-App stehen im eigenen Skript-Handbuch.</p>
+      <a class="btn-gold-outline" href="skript-handbuch.html">📜 Zum Skript-Handbuch</a>
       <a class="btn-gold-outline" href="handbuch.html">📖 Zum Benutzerhandbuch</a>
       <a class="btn-gold-outline" href="handbuch-inventar.html">📦 Zum Inventar-Handbuch</a>
     </section>
