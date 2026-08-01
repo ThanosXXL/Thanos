@@ -8,6 +8,7 @@
   "scripts": {
     "start": "electron .",
     "start:demo": "electron . --demo",
+    "build:demo-standalone": "node docs/build-standalone-demo.js",
     "dist": "electron-builder"
   },
   "devDependencies": {

@@ -144,6 +144,38 @@
     opacity: 0.9;
   }
 
+  .doc-list {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    margin-top: 16px;
+  }
+  .doc-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    background: rgba(255, 255, 255, 0.6);
+    border: 1px solid var(--gold);
+    border-radius: 10px;
+    padding: 10px 14px;
+    flex-wrap: wrap;
+  }
+  .doc-row .doc-label {
+    font-weight: 600;
+    font-size: 14px;
+    color: var(--dark-brown);
+  }
+  .doc-row .doc-actions {
+    display: flex;
+    gap: 8px;
+  }
+  .btn-gold-outline.small {
+    padding: 6px 12px;
+    font-size: 12px;
+    margin-top: 0;
+  }
+
   footer {
     text-align: center;
     padding: 30px 20px 50px;
@@ -200,11 +232,46 @@
     </div>
 
     <div class="card">
-      <h2>🔍 Vor dem Download</h2>
-      <p>Nicht sicher, ob die App das Richtige für dich ist? Zwei Möglichkeiten, ganz ohne Installation:</p>
-      <a class="btn-gold-outline" href="demo.html">▶ Interaktive Demo im Browser ausprobieren</a>
-      <a class="btn-gold-outline" href="handbuch.html">📖 Benutzerhandbuch ansehen</a>
-      <a class="btn-gold-outline" href="handbuch-inventar.html">📦 Inventar-Handbuch ansehen</a>
+      <h2>🎬 Demoversion</h2>
+      <p>Alles ausprobieren, ganz ohne Installation – mit Beispieldaten, im gleichen Gold/Braun-3D-Hochglanz-Stil wie die App.</p>
+      <div class="doc-list">
+        <div class="doc-row">
+          <span class="doc-label">Interaktive Demo</span>
+          <div class="doc-actions">
+            <a class="btn-gold-outline small" href="demo.html">▶ Im Browser ansehen</a>
+            <a class="btn-gold-outline small" href="demo-standalone.html" download>⬇ Herunterladen</a>
+          </div>
+        </div>
+      </div>
+      <p class="note">Die heruntergeladene Datei ist eigenständig (alle Stile &amp; Skripte eingebettet) und lässt sich offline im Browser öffnen.</p>
+    </div>
+
+    <div class="card">
+      <h2>📖 Handbücher</h2>
+      <p>Alle Anleitungen mit Beispielbildern – zum Ansehen im Browser oder als Datei zum Herunterladen.</p>
+      <div class="doc-list">
+        <div class="doc-row">
+          <span class="doc-label">Benutzerhandbuch</span>
+          <div class="doc-actions">
+            <a class="btn-gold-outline small" href="handbuch.html">👁 Ansehen</a>
+            <a class="btn-gold-outline small" href="handbuch.html" download>⬇ Herunterladen</a>
+          </div>
+        </div>
+        <div class="doc-row">
+          <span class="doc-label">Inventar-Handbuch</span>
+          <div class="doc-actions">
+            <a class="btn-gold-outline small" href="handbuch-inventar.html">👁 Ansehen</a>
+            <a class="btn-gold-outline small" href="handbuch-inventar.html" download>⬇ Herunterladen</a>
+          </div>
+        </div>
+        <div class="doc-row">
+          <span class="doc-label">Admin-/Skript-Handbuch</span>
+          <div class="doc-actions">
+            <a class="btn-gold-outline small" href="admin-handbuch.html">👁 Ansehen</a>
+            <a class="btn-gold-outline small" href="admin-handbuch.html" download>⬇ Herunterladen</a>
+          </div>
+        </div>
+      </div>
     </div>
 
   </div>

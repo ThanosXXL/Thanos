@@ -1,3 +1,1191 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<title>Dozenten Dashboard – Demo (Offline)</title>
+<meta name="description" content="Interaktive Demo des Dozenten- und Inventar-Dashboards mit Beispieldaten – läuft direkt im Browser, keine Installation nötig.">
+<style>
+:root {
+  --dark-blue: #0b1f4d;
+  --mid-blue: #14367a;
+  --light-blue: #5b9bd5;
+  --pale-blue: #dceaf7;
+  --white: #ffffff;
+  --black: #111111;
+  --danger: #b3261e;
+
+  /* Inventar-Dashboard: Gold/Braun, glänzend, 3D */
+  --gold: #d4af37;
+  --gold-light: #f4e2a8;
+  --gold-bright: #f7d774;
+  --bronze: #8a5a2b;
+  --bronze-dark: #5c3a1a;
+  --dark-brown: #3b2410;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+[hidden] {
+  display: none !important;
+}
+
+body {
+  margin: 0;
+  font-family: "Segoe UI", Arial, sans-serif;
+  background: var(--white);
+  color: var(--black);
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.app-header {
+  background: linear-gradient(90deg, var(--dark-blue), var(--light-blue));
+  color: var(--white);
+  padding: 16px 24px;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  transition: background 0.3s ease;
+}
+
+.app-header h1 {
+  margin: 0;
+  font-size: 22px;
+  letter-spacing: 0.5px;
+}
+
+.mode-switch {
+  display: flex;
+  gap: 8px;
+  flex-shrink: 0;
+}
+
+.mode-btn {
+  background: rgba(255, 255, 255, 0.12);
+  color: var(--white);
+  border: 1px solid rgba(255, 255, 255, 0.4);
+  padding: 8px 14px;
+  border-radius: 20px;
+  cursor: pointer;
+  font-size: 13px;
+  white-space: nowrap;
+}
+
+.mode-btn.active {
+  background: var(--white);
+  color: var(--dark-blue);
+  font-weight: 600;
+}
+
+body.mode-inventar .mode-btn.active {
+  color: var(--bronze-dark);
+}
+
+.dozent-tabs {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: var(--pale-blue);
+  padding: 10px 16px;
+  border-bottom: 2px solid var(--mid-blue);
+  flex-shrink: 0;
+  overflow-x: auto;
+}
+
+.dozent-tab {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: var(--white);
+  border: 1px solid var(--light-blue);
+  color: var(--black);
+  padding: 8px 14px;
+  border-radius: 20px;
+  cursor: pointer;
+  font-size: 14px;
+  white-space: nowrap;
+}
+
+.dozent-tab.active {
+  background: var(--mid-blue);
+  color: var(--white);
+  border-color: var(--dark-blue);
+}
+
+.dozent-tab .remove-x {
+  font-weight: bold;
+  padding: 0 4px;
+  border-radius: 50%;
+}
+
+.dozent-tab .remove-x:hover {
+  background: var(--danger);
+  color: var(--white);
+}
+
+.add-dozent-btn {
+  background: var(--dark-blue);
+  color: var(--white);
+  border: none;
+  padding: 8px 16px;
+  border-radius: 20px;
+  cursor: pointer;
+  font-size: 14px;
+  margin-left: auto;
+}
+
+.add-dozent-btn:disabled {
+  background: #9aa7bd;
+  cursor: not-allowed;
+}
+
+main#content {
+  flex: 1;
+  overflow-y: auto;
+  padding: 24px;
+  background: var(--white);
+}
+
+.empty-state {
+  text-align: center;
+  margin-top: 100px;
+  color: #444;
+}
+
+.dozent-panel h2 {
+  color: var(--dark-blue);
+  border-bottom: 3px solid var(--light-blue);
+  padding-bottom: 8px;
+}
+
+.lists-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 20px;
+  margin-top: 16px;
+}
+
+.list-column {
+  background: var(--white);
+  border: 1px solid var(--pale-blue);
+  border-radius: 10px;
+  padding: 14px;
+  box-shadow: 0 2px 6px rgba(11, 31, 77, 0.08);
+  display: flex;
+  flex-direction: column;
+  min-height: 300px;
+}
+
+.list-column h3 {
+  margin: 0 0 12px 0;
+  color: var(--white);
+  background: var(--mid-blue);
+  padding: 8px 10px;
+  border-radius: 6px;
+  font-size: 15px;
+}
+
+.list-column.open h3 {
+  background: var(--light-blue);
+}
+
+.list-column.done h3 {
+  background: var(--dark-blue);
+}
+
+.add-item-row {
+  display: flex;
+  gap: 6px;
+  margin-bottom: 10px;
+}
+
+.add-item-row input {
+  flex: 1;
+  padding: 7px 8px;
+  border: 1px solid #b9c6d9;
+  border-radius: 6px;
+  font-size: 13px;
+  color: var(--black);
+  background: var(--white);
+}
+
+.add-item-row button {
+  background: var(--dark-blue);
+  color: var(--white);
+  border: none;
+  border-radius: 6px;
+  padding: 7px 12px;
+  cursor: pointer;
+  font-size: 13px;
+}
+
+ul.item-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  overflow-y: auto;
+  flex: 1;
+}
+
+ul.item-list li {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 7px 6px;
+  border-bottom: 1px solid #eef2f8;
+  font-size: 14px;
+  color: var(--black);
+}
+
+ul.item-list li.completed span.item-text {
+  text-decoration: line-through;
+  color: #777;
+}
+
+ul.item-list li span.item-text {
+  flex: 1;
+  word-break: break-word;
+}
+
+.icon-btn {
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-size: 14px;
+  padding: 2px 6px;
+  border-radius: 4px;
+  color: var(--mid-blue);
+}
+
+.icon-btn.danger {
+  color: var(--danger);
+}
+
+.icon-btn:hover {
+  background: var(--pale-blue);
+}
+
+.btn-primary {
+  background: var(--dark-blue);
+  color: var(--white);
+  border: none;
+  padding: 9px 18px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 14px;
+}
+
+.btn-secondary {
+  background: var(--white);
+  color: var(--dark-blue);
+  border: 1px solid var(--dark-blue);
+  padding: 9px 18px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 14px;
+}
+
+.btn-danger {
+  background: var(--danger);
+  color: var(--white);
+  border: none;
+  padding: 9px 18px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 14px;
+}
+
+.panel-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.modal-overlay {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(11, 31, 77, 0.45);
+  align-items: center;
+  justify-content: center;
+  z-index: 10;
+}
+
+.modal-overlay.visible {
+  display: flex;
+}
+
+.modal {
+  background: var(--white);
+  color: var(--black);
+  border-radius: 10px;
+  padding: 24px;
+  width: 360px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.25);
+}
+
+.modal h2 {
+  margin-top: 0;
+  color: var(--dark-blue);
+}
+
+.modal input {
+  width: 100%;
+  padding: 9px 10px;
+  border: 1px solid #b9c6d9;
+  border-radius: 6px;
+  font-size: 14px;
+  margin-bottom: 14px;
+}
+
+.modal-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+}
+
+.chat-panel {
+  margin-top: 20px;
+  background: var(--white);
+  border: 1px solid var(--pale-blue);
+  border-radius: 10px;
+  padding: 14px;
+  box-shadow: 0 2px 6px rgba(11, 31, 77, 0.08);
+}
+
+.chat-panel h3 {
+  margin: 0 0 12px 0;
+  color: var(--white);
+  background: linear-gradient(90deg, var(--dark-blue), var(--light-blue));
+  padding: 8px 10px;
+  border-radius: 6px;
+  font-size: 15px;
+}
+
+.chat-messages {
+  max-height: 220px;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-bottom: 10px;
+  padding-right: 4px;
+}
+
+.chat-bubble {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  background: var(--pale-blue);
+  color: var(--black);
+  border-radius: 8px;
+  padding: 8px 12px;
+  align-self: flex-start;
+  max-width: 80%;
+}
+
+.chat-bubble .chat-text {
+  flex: 1;
+  font-size: 14px;
+  word-break: break-word;
+}
+
+.chat-bubble .chat-time {
+  font-size: 11px;
+  color: #55606f;
+  white-space: nowrap;
+}
+
+.chat-bubble .chat-delete {
+  font-size: 12px;
+}
+
+.chat-input-row {
+  margin-bottom: 0;
+}
+
+@media (max-width: 900px) {
+  .lists-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* ============================================================
+   Inventar - Dashboard: Gold/Braun, glänzend weiß, 3D-Stil
+   ============================================================ */
+
+body.mode-inventar {
+  background: linear-gradient(160deg, #fbf6e9, var(--white) 45%, #f3e6c8 100%);
+}
+
+body.mode-inventar .app-header {
+  background: linear-gradient(135deg, var(--bronze-dark), var(--bronze) 45%, var(--gold) 100%);
+  box-shadow: 0 3px 10px rgba(59, 36, 16, 0.4), inset 0 -2px 0 rgba(255, 255, 255, 0.25);
+}
+
+.inventar-toolbar {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  background: linear-gradient(180deg, var(--gold-light), var(--gold) 100%);
+  padding: 12px 16px;
+  border-bottom: 2px solid var(--bronze);
+  flex-shrink: 0;
+}
+
+.inventar-toolbar-hint {
+  color: var(--bronze-dark);
+  font-size: 13px;
+  font-style: italic;
+}
+
+.admin-toggle-btn {
+  margin-left: auto;
+}
+
+.admin-toggle-btn.active {
+  background: linear-gradient(180deg, #d9f0d9, #a8dba8 100%);
+  box-shadow: 0 3px 0 #4b7a4b, 0 5px 8px rgba(59, 36, 16, 0.25), inset 0 1px 0 rgba(255, 255, 255, 0.8);
+}
+
+.admin-panel {
+  background: linear-gradient(180deg, #fffdf6, var(--gold-light) 160%);
+  border: 2px solid var(--gold);
+  border-radius: 12px;
+  padding: 18px 20px;
+  margin-bottom: 22px;
+  box-shadow: 0 8px 22px rgba(59, 36, 16, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.85);
+}
+
+.admin-panel h2 {
+  margin: 0 0 14px;
+  color: var(--bronze-dark);
+  font-size: 17px;
+}
+
+.admin-grid {
+  display: grid;
+  grid-template-columns: 1fr 1.6fr;
+  gap: 18px;
+}
+
+.admin-card {
+  background: rgba(255, 255, 255, 0.7);
+  border: 1px solid var(--gold);
+  border-radius: 10px;
+  padding: 14px 16px;
+}
+
+.admin-card h3 {
+  margin: 0 0 10px;
+  color: var(--bronze-dark);
+  font-size: 14px;
+}
+
+.admin-download-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  font-size: 13px;
+}
+
+.admin-download-list li {
+  margin-bottom: 8px;
+}
+
+.admin-download-list a {
+  color: var(--bronze-dark);
+  font-weight: 600;
+  text-decoration: none;
+}
+
+.admin-download-list a:hover {
+  text-decoration: underline;
+}
+
+.admin-nb-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13px;
+  margin-bottom: 12px;
+}
+
+.admin-nb-table th,
+.admin-nb-table td {
+  text-align: left;
+  padding: 6px 8px;
+  border-bottom: 1px solid var(--gold-light);
+}
+
+.admin-nb-table select {
+  padding: 4px 6px;
+  border-radius: 6px;
+  border: 1px solid var(--bronze);
+  font-size: 12px;
+}
+
+.admin-nb-add-row {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+.admin-nb-add-row select {
+  flex: 1;
+  min-width: 140px;
+  padding: 7px 8px;
+  border-radius: 6px;
+  border: 1px solid var(--bronze);
+  font-size: 13px;
+}
+
+@media (max-width: 900px) {
+  .admin-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+body.mode-inventar main#content {
+  background: transparent;
+}
+
+/* Glänzende 3D-Buttons im Gold/Braun-Stil */
+.btn-gold,
+.btn-gold-outline {
+  border: none;
+  border-radius: 8px;
+  padding: 9px 18px;
+  font-size: 14px;
+  cursor: pointer;
+  position: relative;
+}
+
+.btn-gold {
+  color: var(--dark-brown);
+  font-weight: 600;
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.75) 0%, rgba(255, 255, 255, 0.05) 45%, rgba(255, 255, 255, 0) 100%),
+    linear-gradient(135deg, var(--gold-bright), var(--gold) 55%, var(--bronze) 100%);
+  box-shadow:
+    0 4px 0 var(--bronze-dark),
+    0 6px 10px rgba(59, 36, 16, 0.35),
+    inset 0 1px 0 rgba(255, 255, 255, 0.6);
+  transition: transform 0.08s ease, box-shadow 0.08s ease;
+}
+
+.btn-gold:hover {
+  filter: brightness(1.05);
+}
+
+.btn-gold:active {
+  transform: translateY(3px);
+  box-shadow: 0 1px 0 var(--bronze-dark), 0 2px 4px rgba(59, 36, 16, 0.35), inset 0 1px 0 rgba(255, 255, 255, 0.6);
+}
+
+.btn-gold-outline {
+  color: var(--bronze-dark);
+  font-weight: 600;
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.9), var(--gold-light) 100%);
+  box-shadow: 0 3px 0 var(--bronze), 0 5px 8px rgba(59, 36, 16, 0.25), inset 0 1px 0 rgba(255, 255, 255, 0.8);
+  transition: transform 0.08s ease, box-shadow 0.08s ease;
+}
+
+.btn-gold-outline:hover {
+  filter: brightness(1.03);
+}
+
+.btn-gold-outline:active {
+  transform: translateY(2px);
+  box-shadow: 0 1px 0 var(--bronze), 0 2px 4px rgba(59, 36, 16, 0.25), inset 0 1px 0 rgba(255, 255, 255, 0.8);
+}
+
+.btn-gold-outline.small {
+  padding: 6px 12px;
+  font-size: 12px;
+}
+
+.btn-gold-outline:disabled,
+.btn-gold:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  filter: none;
+}
+
+/* Inventar-Tabelle */
+.inventar-table {
+  width: 100%;
+  border-collapse: separate;
+  border-spacing: 0 10px;
+}
+
+.inventar-table thead th {
+  text-align: left;
+  color: var(--dark-brown);
+  background: linear-gradient(180deg, var(--gold-bright), var(--gold) 100%);
+  padding: 10px 14px;
+  font-size: 13px;
+  letter-spacing: 0.3px;
+  border-bottom: 2px solid var(--bronze);
+}
+
+.inventar-table thead th:first-child {
+  border-top-left-radius: 8px;
+  border-bottom-left-radius: 8px;
+}
+
+.inventar-table thead th:last-child {
+  border-top-right-radius: 8px;
+  border-bottom-right-radius: 8px;
+}
+
+.inventar-table tbody tr {
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.85) 0%, rgba(255, 255, 255, 0.1) 60%, rgba(255, 255, 255, 0) 100%),
+    var(--white);
+  box-shadow: 0 3px 8px rgba(59, 36, 16, 0.15), inset 0 1px 0 rgba(255, 255, 255, 0.9);
+}
+
+.inventar-table tbody tr.low-stock {
+  box-shadow: 0 3px 8px rgba(179, 38, 30, 0.25), inset 0 0 0 2px rgba(179, 38, 30, 0.35);
+}
+
+.inventar-table td {
+  padding: 12px 14px;
+  color: var(--black);
+  font-size: 14px;
+}
+
+.inventar-table tbody tr td:first-child {
+  border-top-left-radius: 8px;
+  border-bottom-left-radius: 8px;
+}
+
+.inventar-table tbody tr td:last-child {
+  border-top-right-radius: 8px;
+  border-bottom-right-radius: 8px;
+}
+
+.geraet-cell {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.geraet-thumb {
+  width: 40px;
+  height: 40px;
+  object-fit: cover;
+  border-radius: 6px;
+  box-shadow: 0 2px 4px rgba(59, 36, 16, 0.35), inset 0 0 0 1px rgba(255, 255, 255, 0.6);
+}
+
+.zustand-badge {
+  display: inline-block;
+  padding: 4px 10px;
+  border-radius: 12px;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.zustand-badge.ovp {
+  background: linear-gradient(180deg, var(--gold-bright), var(--gold));
+  color: var(--dark-brown);
+}
+
+.zustand-badge.gebraucht {
+  background: #e6d9c2;
+  color: var(--bronze-dark);
+}
+
+.stueckzahl-input {
+  width: 64px;
+  padding: 6px 8px;
+  border: 1px solid var(--bronze);
+  border-radius: 6px;
+  font-size: 14px;
+  text-align: center;
+}
+
+.low-stock-badge {
+  display: inline-block;
+  margin-left: 8px;
+  padding: 3px 8px;
+  border-radius: 10px;
+  background: var(--danger);
+  color: var(--white);
+  font-size: 11px;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.actions-cell {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+/* Modal im Gold-Stil */
+.modal-gold {
+  background: linear-gradient(180deg, #fffdf6, var(--gold-light) 130%);
+  box-shadow: 0 10px 30px rgba(59, 36, 16, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.9);
+  border: 1px solid var(--gold);
+}
+
+.modal-gold h2 {
+  color: var(--bronze-dark);
+}
+
+.modal-wide {
+  width: 460px;
+  max-height: 88vh;
+  overflow-y: auto;
+}
+
+.inventar-form-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px 14px;
+  margin-bottom: 16px;
+}
+
+.inventar-form-grid label,
+.modal-gold label {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  font-size: 13px;
+  color: var(--bronze-dark);
+  font-weight: 600;
+  margin-bottom: 10px;
+}
+
+.inventar-form-grid input,
+.inventar-form-grid select,
+.modal-gold input {
+  font-family: inherit;
+  padding: 8px 10px;
+  border: 1px solid var(--bronze);
+  border-radius: 6px;
+  font-size: 14px;
+  font-weight: 400;
+  color: var(--black);
+}
+
+.input-with-mic {
+  display: flex;
+  gap: 6px;
+}
+
+.input-with-mic input {
+  flex: 1;
+}
+
+.mic-btn {
+  border: 1px solid var(--bronze);
+  background: linear-gradient(180deg, #fff, var(--gold-light));
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 15px;
+  padding: 0 10px;
+}
+
+.mic-btn.listening {
+  background: linear-gradient(180deg, var(--danger), #7d1a14);
+  color: var(--white);
+  animation: mic-pulse 1s infinite;
+}
+
+@keyframes mic-pulse {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(179, 38, 30, 0.5); }
+  50% { box-shadow: 0 0 0 6px rgba(179, 38, 30, 0); }
+}
+
+.foto-section {
+  border-top: 1px dashed var(--bronze);
+  padding-top: 14px;
+  margin-bottom: 8px;
+}
+
+.foto-section-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 10px;
+  font-weight: 600;
+  color: var(--bronze-dark);
+  font-size: 13px;
+}
+
+#invCameraPreview,
+#invCapturedPhoto {
+  width: 100%;
+  max-height: 240px;
+  object-fit: cover;
+  border-radius: 8px;
+  box-shadow: 0 4px 10px rgba(59, 36, 16, 0.3), inset 0 0 0 1px rgba(255, 255, 255, 0.6);
+  margin-bottom: 10px;
+  background: #000;
+}
+
+.foto-actions {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 10px;
+}
+
+.recognition-box {
+  background: linear-gradient(180deg, #fffdf6, var(--gold-light));
+  border: 1px solid var(--gold);
+  border-radius: 8px;
+  padding: 12px;
+  margin-bottom: 10px;
+}
+
+.recognition-box p {
+  margin: 0 0 10px 0;
+  color: var(--dark-brown);
+  font-size: 14px;
+}
+
+.foto-status {
+  font-size: 12px;
+  color: var(--bronze-dark);
+  min-height: 16px;
+}
+
+/* Erinnerungs-Toast nach Ausgabe */
+.toast-reminder {
+  position: fixed;
+  bottom: 24px;
+  right: 24px;
+  max-width: 340px;
+  background: linear-gradient(135deg, var(--gold-bright), var(--gold) 60%, var(--bronze) 100%);
+  color: var(--dark-brown);
+  font-weight: 600;
+  font-size: 13px;
+  padding: 14px 18px;
+  border-radius: 10px;
+  box-shadow: 0 8px 24px rgba(59, 36, 16, 0.45), inset 0 1px 0 rgba(255, 255, 255, 0.6);
+  opacity: 0;
+  transform: translateY(12px);
+  transition: opacity 0.25s ease, transform 0.25s ease;
+  z-index: 50;
+}
+
+.toast-reminder.visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.toast-reminder.warning {
+  background: linear-gradient(135deg, #e08a3c, var(--danger) 90%);
+  color: var(--white);
+}
+
+@media (max-width: 900px) {
+  .inventar-form-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* Demo-Modus-Hinweis */
+.demo-ribbon {
+  flex-shrink: 0;
+  width: 100%;
+  text-align: center;
+  background: linear-gradient(90deg, var(--bronze-dark), var(--gold) 50%, var(--bronze-dark));
+  color: #fffdf6;
+  font-weight: 700;
+  font-size: 12px;
+  letter-spacing: 0.3px;
+  padding: 6px 10px;
+  box-shadow: inset 0 -2px 0 rgba(0, 0, 0, 0.15);
+}
+
+</style>
+<style>
+  .demo-toolbar {
+    position: fixed;
+    left: 12px;
+    bottom: 12px;
+    z-index: 60;
+    display: flex;
+    gap: 8px;
+  }
+  .demo-toolbar a,
+  .demo-toolbar button {
+    font-family: inherit;
+    font-size: 12px;
+    font-weight: 600;
+    padding: 8px 14px;
+    border-radius: 20px;
+    border: none;
+    cursor: pointer;
+    text-decoration: none;
+    background: linear-gradient(180deg, #fffdf6, #f4e2a8);
+    color: #3b2410;
+    box-shadow: 0 3px 8px rgba(59, 36, 16, 0.35), inset 0 1px 0 rgba(255, 255, 255, 0.8);
+  }
+</style>
+</head>
+<body>
+  <header class="app-header">
+    <h1 id="appTitle">Dozenten Dashboard</h1>
+    <div class="mode-switch">
+      <button type="button" class="mode-btn active" id="modeDozentenBtn">👤 Dozenten</button>
+      <button type="button" class="mode-btn" id="modeInventarBtn">📦 Inventar - Dashboard</button>
+    </div>
+  </header>
+
+  <nav class="dozent-tabs" id="dozentTabs">
+    <!-- Dozenten-Tabs werden hier eingefügt -->
+  </nav>
+
+  <nav class="inventar-toolbar" id="inventarToolbar" hidden>
+    <button type="button" class="btn-gold" id="addInventarBtn">+ Neues Gerät</button>
+    <span class="inventar-toolbar-hint">Erfassung per Tastatur, Mikrofon 🎤 oder Foto 📷</span>
+    <button type="button" class="btn-gold-outline admin-toggle-btn" id="adminModeBtn">🔒 Admin-Modus</button>
+  </nav>
+
+  <main id="content">
+    <div class="empty-state" id="emptyState">
+      <p>Noch keine Dozenten angelegt.</p>
+      <button id="addDozentEmptyBtn" class="btn-primary">+ Dozent hinzufügen</button>
+    </div>
+  </main>
+
+  <!-- Modal: Dozent hinzufügen -->
+  <div class="modal-overlay" id="addDozentModal">
+    <div class="modal">
+      <h2>Neuen Dozenten hinzufügen</h2>
+      <input type="text" id="newDozentName" placeholder="Name des Dozenten" maxlength="60">
+      <div class="modal-actions">
+        <button id="cancelAddDozent" class="btn-secondary">Abbrechen</button>
+        <button id="confirmAddDozent" class="btn-primary">Hinzufügen</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal: Dozent löschen bestätigen -->
+  <div class="modal-overlay" id="deleteDozentModal">
+    <div class="modal">
+      <h2>Dozenten entfernen?</h2>
+      <p id="deleteDozentText"></p>
+      <div class="modal-actions">
+        <button id="cancelDeleteDozent" class="btn-secondary">Abbrechen</button>
+        <button id="confirmDeleteDozent" class="btn-danger">Entfernen</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal: Neues Inventar-Gerät erfassen -->
+  <div class="modal-overlay" id="addInventarModal">
+    <div class="modal modal-gold modal-wide">
+      <h2>Neues Gerät erfassen</h2>
+
+      <div class="inventar-form-grid">
+        <label>Gerät
+          <div class="input-with-mic">
+            <input type="text" id="invGeraet" placeholder="z. B. Laptop" maxlength="80">
+            <button type="button" class="mic-btn" id="invGeraetMic" title="Diktieren">🎤</button>
+          </div>
+        </label>
+
+        <label>Hersteller
+          <div class="input-with-mic">
+            <input type="text" id="invHersteller" placeholder="z. B. Dell" maxlength="80">
+            <button type="button" class="mic-btn" id="invHerstellerMic" title="Diktieren">🎤</button>
+          </div>
+        </label>
+
+        <label>Zustand
+          <select id="invZustand">
+            <option value="OVP">OVP (originalverpackt)</option>
+            <option value="Gebraucht">Gebraucht</option>
+          </select>
+        </label>
+
+        <label>Stückzahl
+          <input type="number" id="invStueckzahl" min="0" step="1" value="1">
+        </label>
+      </div>
+
+      <div class="foto-section">
+        <div class="foto-section-head">
+          <span>Foto-Erkennung</span>
+          <button type="button" class="btn-gold-outline" id="invStartCamera">📷 Kamera starten</button>
+        </div>
+        <video id="invCameraPreview" autoplay playsinline hidden></video>
+        <canvas id="invCameraCanvas" hidden></canvas>
+        <img id="invCapturedPhoto" alt="Aufgenommenes Foto" hidden>
+        <div class="foto-actions" id="invCameraActions" hidden>
+          <button type="button" class="btn-gold-outline" id="invCapturePhoto">Foto aufnehmen</button>
+          <button type="button" class="btn-secondary" id="invCancelCamera">Abbrechen</button>
+        </div>
+        <div class="recognition-box" id="invRecognitionBox" hidden>
+          <p id="invRecognitionText"></p>
+          <div class="modal-actions">
+            <button type="button" class="btn-secondary" id="invRecognitionNo">Nein, korrigieren</button>
+            <button type="button" class="btn-gold" id="invRecognitionYes">Ja, übernehmen</button>
+          </div>
+        </div>
+        <p class="foto-status" id="invFotoStatus"></p>
+      </div>
+
+      <div class="modal-actions">
+        <button id="cancelAddInventar" class="btn-secondary">Abbrechen</button>
+        <button id="confirmAddInventar" class="btn-gold">Gerät speichern</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal: Gerät an Kollegen/Kunden ausgeben -->
+  <div class="modal-overlay" id="ausgabeModal">
+    <div class="modal modal-gold">
+      <h2>Gerät ausgeben</h2>
+      <p id="ausgabeGeraetText"></p>
+      <label>Menge
+        <input type="number" id="ausgabeMenge" min="1" step="1" value="1">
+      </label>
+      <label>Ausgegeben an (Kollege/Kunde)
+        <input type="text" id="ausgabeEmpfaenger" placeholder="Name (optional)" maxlength="80">
+      </label>
+      <div class="modal-actions">
+        <button id="cancelAusgabe" class="btn-secondary">Abbrechen</button>
+        <button id="confirmAusgabe" class="btn-gold">Ausgeben</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal: Inventar-Gerät löschen bestätigen -->
+  <div class="modal-overlay" id="deleteInventarModal">
+    <div class="modal modal-gold">
+      <h2>Gerät entfernen?</h2>
+      <p id="deleteInventarText"></p>
+      <div class="modal-actions">
+        <button id="cancelDeleteInventar" class="btn-secondary">Abbrechen</button>
+        <button id="confirmDeleteInventar" class="btn-danger">Entfernen</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal: Admin-PIN einrichten/eingeben -->
+  <div class="modal-overlay" id="adminPinModal">
+    <div class="modal modal-gold">
+      <h2 id="adminPinTitle">Admin-PIN eingeben</h2>
+      <p id="adminPinHint" class="foto-status"></p>
+      <label>PIN
+        <input type="password" id="adminPinInput" maxlength="20" inputmode="numeric" autocomplete="off">
+      </label>
+      <label id="adminPinConfirmLabel" hidden>PIN bestätigen
+        <input type="password" id="adminPinConfirmInput" maxlength="20" inputmode="numeric" autocomplete="off">
+      </label>
+      <p class="foto-status" id="adminPinError" style="color: var(--danger);"></p>
+      <div class="modal-actions">
+        <button id="cancelAdminPin" class="btn-secondary">Abbrechen</button>
+        <button id="confirmAdminPin" class="btn-gold">Bestätigen</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="demo-toolbar">
+    <span>Eigenständige Offline-Demo</span>
+    <button type="button" id="demoResetBtn">🔄 Demo zurücksetzen</button>
+  </div>
+
+  <script>
+// Browser-Demo-Shim: ersetzt window.dashboardAPI (normalerweise von preload.js über
+// Electron IPC bereitgestellt) durch eine Version, die im localStorage des Browsers
+// speichert. So läuft renderer.js unverändert auch außerhalb von Electron.
+// KEINE echte Datenspeicherung – alles bleibt lokal im Browser dieses Tabs/Geräts.
+(function () {
+  window.__DASHBOARD_DEMO__ = true;
+
+  const STORAGE_KEY = 'dozentenDashboardDemoState';
+
+  function uid() {
+    return Date.now().toString(36) + Math.random().toString(36).slice(2, 8);
+  }
+
+  function seedState() {
+    const now = new Date().toLocaleString('de-DE', {
+      day: '2-digit',
+      month: '2-digit',
+      hour: '2-digit',
+      minute: '2-digit'
+    });
+
+    return {
+      dozenten: [
+        {
+          id: uid(),
+          name: 'Frau Bergmann',
+          todos: [
+            { id: uid(), text: 'Foliensatz Kapitel 4 überarbeiten', done: false },
+            { id: uid(), text: 'Rückmeldungen der Teilnehmer sichten', done: true }
+          ],
+          openProjects: [{ id: uid(), text: 'Praxisworkshop "Datenanalyse" planen', done: false }],
+          doneProjects: [{ id: uid(), text: 'Einführungskurs Q1 abgeschlossen', done: false }],
+          chat: [{ id: uid(), text: 'Materialien liegen im gemeinsamen Ordner bereit.', time: now }]
+        },
+        {
+          id: uid(),
+          name: 'Herr Keller',
+          todos: [{ id: uid(), text: 'Raumbuchung für nächste Woche prüfen', done: false }],
+          openProjects: [{ id: uid(), text: 'Zertifikatskurs Netzwerktechnik', done: false }],
+          doneProjects: [],
+          chat: []
+        }
+      ],
+      inventar: [
+        { id: uid(), geraet: 'Laptop', hersteller: 'Dell', zustand: 'OVP', stueckzahl: 8, photo: null, ausgaben: [] },
+        {
+          id: uid(),
+          geraet: 'Beamer',
+          hersteller: 'Epson',
+          zustand: 'Gebraucht',
+          stueckzahl: 2,
+          photo: null,
+          ausgaben: [{ id: uid(), menge: 2, empfaenger: 'Max Mustermann', datum: now }]
+        },
+        { id: uid(), geraet: 'Tastatur', hersteller: 'Logitech', zustand: 'OVP', stueckzahl: 15, photo: null, ausgaben: [] },
+        { id: uid(), geraet: 'Smartphone', hersteller: 'Samsung', zustand: 'Gebraucht', stueckzahl: 1, photo: null, ausgaben: [] }
+      ]
+    };
+  }
+
+  window.dashboardAPI = {
+    loadData: () =>
+      Promise.resolve().then(() => {
+        const raw = localStorage.getItem(STORAGE_KEY);
+        if (raw) {
+          try {
+            return JSON.parse(raw);
+          } catch (err) {
+            /* fällt durch auf Beispieldaten */
+          }
+        }
+        const seed = seedState();
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(seed));
+        return seed;
+      }),
+    saveData: (data) =>
+      Promise.resolve().then(() => {
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+        return true;
+      })
+  };
+})();
+
+</script>
+  <script>
 (function () {
   const MAX_DOZENTEN = 4;
   const LOW_STOCK_THRESHOLD = 3;
@@ -1249,3 +2437,13 @@
 
   init();
 })();
+
+</script>
+  <script>
+    document.getElementById('demoResetBtn').addEventListener('click', function () {
+      localStorage.removeItem('dozentenDashboardDemoState');
+      location.reload();
+    });
+  </script>
+</body>
+</html>
