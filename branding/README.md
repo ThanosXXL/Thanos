@@ -7,14 +7,17 @@ einer Chat-Session zu existieren.
 - **msr-deluxe-dashboard-demo-with-music.mp4** – Video-Walkthrough des
   Dashboards (alle fünf Ansichten), mit Klavier/Streicher-Begleitmusik
   unterlegt.
-- **msr-deluxe-flyer.png** (1080×1080) – Social-Media-Flyer im
-  Navy/Gold-Hochglanz-3D-Look, direkt postbar.
-- **msr-deluxe-flyer-shine-loop.mp4** – derselbe Flyer mit dem
+- **msr-deluxe-flyer.png** (1080×1080) – Social-Media-Poster im
+  Navy/Gold-Hochglanz-3D-Look: großes Wordmark mit changierendem
+  Glanz-Effekt, ein selbst gezeichnetes Instrumenten-Zifferblatt
+  (Canvas-Gauge) als Hero-Grafik statt eines UI-Karten-Layouts, direkt
+  postbar.
+- **msr-deluxe-flyer-shine-loop.mp4** – dasselbe Poster mit dem
   changierenden Glanz-Effekt auf der Headline in Bewegung, für
   Stories/Reels.
 - **msr-deluxe-flyer.html** – interaktive, eigenständige Quelldatei des
-  Flyers (Glanz-Animation inklusive, PNG/Video-Loop-Downloadbuttons
-  eingebettet als Data-URI). Einfach im Browser öffnen.
+  Posters (Glanz-Animation + Canvas-Zifferblatt inklusive,
+  PNG/Video-Loop-Downloadbuttons eingebettet). Einfach im Browser öffnen.
 - **lounge-band.mp3** – die Begleitmusik einzeln (Klavier mit Melodie &
   Begleitung, Streicher, weicher Kick/Rim-Beat), ~30s.
 - **lounge-session-player.html** – interaktive, eigenständige Quelldatei
