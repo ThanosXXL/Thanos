@@ -93,37 +93,6 @@
   .card ol { padding-left: 20px; line-height: 1.7; }
   .card ol li { margin-bottom: 4px; }
 
-  code, pre {
-    font-family: "Cascadia Code", "Consolas", monospace;
-  }
-  .code-block {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    background: var(--dark-brown);
-    color: #f7e9c4;
-    border-radius: 8px;
-    padding: 12px 14px;
-    font-size: 13px;
-    overflow-x: auto;
-    box-shadow: inset 0 2px 6px rgba(0, 0, 0, 0.4);
-  }
-  .code-block code { flex: 1; white-space: pre; }
-  .copy-btn {
-    flex-shrink: 0;
-    border: none;
-    border-radius: 6px;
-    padding: 6px 12px;
-    font-size: 12px;
-    font-weight: 600;
-    cursor: pointer;
-    color: var(--dark-brown);
-    background: linear-gradient(180deg, var(--gold-bright), var(--gold));
-    box-shadow: 0 2px 0 var(--bronze-dark);
-  }
-  .copy-btn:active { transform: translateY(2px); box-shadow: none; }
-  .copy-btn.copied { background: linear-gradient(180deg, #a8e0a8, #6fbf6f); }
-
   .btn-gold-outline {
     display: inline-block;
     text-decoration: none;
@@ -216,31 +185,6 @@
   <div class="wrap">
 
     <div class="card">
-      <h2>🖥️ Alternative: PowerShell-Skript (für IT/Admins)</h2>
-      <p>
-        Wer keine zusätzliche App installieren möchte, kann stattdessen das PowerShell-Skript
-        verwenden – es übernimmt genau denselben automatischen Download auf den Desktop.
-      </p>
-      <ol>
-        <li>PowerShell öffnen (Startmenü → „PowerShell" eingeben)</li>
-        <li>Folgenden Befehl einfügen und Enter drücken:</li>
-      </ol>
-      <div class="code-block">
-        <code id="oneLiner">irm https://raw.githubusercontent.com/ThanosXXL/Thanos/claude/inventory-dashboard-photo-recognition-2o37ac/scripts/Install-DozentenDashboard.ps1 | iex</code>
-        <button class="copy-btn" id="copyOneLiner">📋 Kopieren</button>
-      </div>
-      <ol start="3">
-        <li>Fertig – der Installer liegt automatisch auf deinem Desktop und startet.</li>
-      </ol>
-      <p class="note">
-        Alternativ das Skript direkt herunterladen und selbst ausführen (Rechtsklick → „Mit
-        PowerShell ausführen"):
-      </p>
-      <a class="btn-gold-outline" href="../scripts/Install-DozentenDashboard.ps1" download>⬇ Skript herunterladen (.ps1)</a>
-      <a class="btn-gold-outline" href="skript-handbuch.html">📜 Skript-Handbuch</a>
-    </div>
-
-    <div class="card">
       <h2>🎥 Demo-Video</h2>
       <p>Kurzer Video-Walkthrough des Inventar - Dashboards: Gerät erfassen, ausgeben, Admin-Modus und Nachbestellung – alles in echt, keine Animation.</p>
       <video class="video-frame" src="demo-video.webm" poster="images/15-demo-video-poster.png" controls preload="metadata"></video>
@@ -314,23 +258,6 @@
     <a href="demo-inventar.html">Demo</a>
   </footer>
 
-  <script>
-    (function () {
-      document.getElementById('copyOneLiner').addEventListener('click', function () {
-        var text = document.getElementById('oneLiner').textContent;
-        var btnEl = this;
-        navigator.clipboard.writeText(text).then(function () {
-          var original = btnEl.textContent;
-          btnEl.textContent = '✅ Kopiert';
-          btnEl.classList.add('copied');
-          setTimeout(function () {
-            btnEl.textContent = original;
-            btnEl.classList.remove('copied');
-          }, 2000);
-        });
-      });
-    })();
-  </script>
 
 </body>
 </html>
