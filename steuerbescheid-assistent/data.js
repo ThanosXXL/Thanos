@@ -87,6 +87,16 @@ function buildSteps(year, familyStatusId, situationIds) {
       { label: 'Schreiben mit Steuer-ID', required: true },
       { label: 'Kontoauszug/IBAN-Nachweis', required: true },
     ],
+    amounts: [
+      {
+        id: 'kirchensteuer', type: 'select', label: 'Kirchensteuersatz (für die Schätzung unten)',
+        options: [
+          { value: '0', label: 'Keine Kirchensteuerpflicht' },
+          { value: '8', label: '8 % (z. B. Bayern, Baden-Württemberg)' },
+          { value: '9', label: '9 % (übrige Bundesländer)' },
+        ],
+      },
+    ],
   });
 
   // Familienstand-spezifisch
@@ -156,6 +166,11 @@ function buildSteps(year, familyStatusId, situationIds) {
         { label: 'Nachweise Fahrtkosten (z. B. Entfernungsangabe, ÖPNV-Tickets)', required: false },
         { label: 'Belege für Arbeitsmittel/Fortbildungen', required: false },
       ],
+      amounts: [
+        { id: 'bruttolohn', type: 'number', label: 'Bruttoarbeitslohn (Summe aller Lohnsteuerbescheinigungen)' },
+        { id: 'werbungskosten', type: 'number', label: 'Sonstige Werbungskosten insgesamt (Arbeitsmittel, Fortbildung, Fahrtkosten – ohne Homeoffice-Pauschale, die unten separat erfasst wird)' },
+        { id: 'gezahlte_lohnsteuer', type: 'number', label: 'Bereits gezahlte Lohnsteuer laut Lohnsteuerbescheinigung (optional, für Erstattungsschätzung)' },
+      ],
     });
   }
 
@@ -173,6 +188,9 @@ function buildSteps(year, familyStatusId, situationIds) {
       documents: [
         { label: 'Kalender/Aufstellung der Homeoffice-Tage', required: false },
         { label: 'Rechnungen für Arbeitszimmer/Internet/Telefon', required: false },
+      ],
+      amounts: [
+        { id: 'homeoffice_tage', type: 'number', label: 'Anzahl Homeoffice-Tage im Steuerjahr', unit: 'Tage' },
       ],
     });
   }
@@ -194,6 +212,9 @@ function buildSteps(year, familyStatusId, situationIds) {
         { label: 'Rechnungen/Nachweise Kinderbetreuung', required: false },
         { label: 'Nachweis auswärtige Unterbringung (z. B. Mietvertrag Kind)', required: false },
       ],
+      amounts: [
+        { id: 'anzahl_kinder', type: 'number', label: 'Anzahl Kinder mit Kindergeldanspruch im Steuerjahr', unit: 'Kinder' },
+      ],
     });
   }
 
@@ -211,6 +232,9 @@ function buildSteps(year, familyStatusId, situationIds) {
       documents: [
         { label: 'Immatrikulationsbescheinigung / Ausbildungsvertrag', required: true },
         { label: 'Rechnungen für Studiengebühren/Lernmittel', required: false },
+      ],
+      amounts: [
+        { id: 'kosten_erstausbildung', type: 'number', label: 'Kosten der Erstausbildung insgesamt (als Sonderausgabe bis max. 6.000 €/Jahr ansetzbar)' },
       ],
     });
   }
@@ -232,6 +256,9 @@ function buildSteps(year, familyStatusId, situationIds) {
         { label: 'Immatrikulationsbescheinigung / Ausbildungsvertrag', required: true },
         { label: 'Rechnungen für Gebühren/Lernmittel/Fahrten', required: false },
       ],
+      amounts: [
+        { id: 'kosten_zweitausbildung', type: 'number', label: 'Kosten der Zweitausbildung/dualen Studiums insgesamt (zählt als Werbungskosten)' },
+      ],
     });
   }
 
@@ -248,6 +275,9 @@ function buildSteps(year, familyStatusId, situationIds) {
       ],
       documents: [
         { label: 'Steuerbescheinigung(en) der Bank/des Brokers', required: true },
+      ],
+      amounts: [
+        { id: 'kapitalertraege', type: 'number', label: 'Kapitalerträge insgesamt (Zinsen, Dividenden, Ausschüttungen vor Steuerabzug)' },
       ],
     });
   }
@@ -270,6 +300,10 @@ function buildSteps(year, familyStatusId, situationIds) {
         { label: 'Zinsbescheinigung der Bank', required: false },
         { label: 'Handwerkerrechnungen', required: false },
       ],
+      amounts: [
+        { id: 'mieteinnahmen', type: 'number', label: 'Mieteinnahmen (kalt) insgesamt' },
+        { id: 'werbungskosten_vermietung', type: 'number', label: 'Werbungskosten Vermietung insgesamt (Zinsen, Abschreibung, Reparaturen, Verwaltung)' },
+      ],
     });
   }
 
@@ -287,6 +321,9 @@ function buildSteps(year, familyStatusId, situationIds) {
       documents: [
         { label: 'Einnahmenüberschussrechnung (EÜR) oder Bilanz', required: true },
         { label: 'Belege aller Betriebsausgaben', required: false },
+      ],
+      amounts: [
+        { id: 'gewinn_selbststaendig', type: 'number', label: 'Gewinn insgesamt (Betriebseinnahmen minus Betriebsausgaben; bei Verlust negative Zahl eingeben)' },
       ],
       note: 'Dieser Bereich ist komplex – der Assistent zeigt nur die groben Formularbausteine, keine vollständige Gewinnermittlung.',
     });
@@ -307,6 +344,10 @@ function buildSteps(year, familyStatusId, situationIds) {
         { label: 'Beitragsbescheinigung der Rentenversicherung', required: true },
         { label: 'Beitragsbescheinigung der Kranken-/Pflegeversicherung', required: true },
       ],
+      amounts: [
+        { id: 'vorsorge_kranken_pflege', type: 'number', label: 'Beiträge Kranken-/Pflegeversicherung insgesamt' },
+        { id: 'vorsorge_rente', type: 'number', label: 'Beiträge Rentenversicherung (gesetzlich/Rürup) insgesamt' },
+      ],
     });
   }
 
@@ -319,6 +360,9 @@ function buildSteps(year, familyStatusId, situationIds) {
       fields: ['Summe der Spenden im Steuerjahr', 'Mitgliedsbeiträge an Vereine/Parteien'],
       documents: [
         { label: 'Spendenbescheinigungen/Zuwendungsbestätigungen', required: true },
+      ],
+      amounts: [
+        { id: 'spenden_betrag', type: 'number', label: 'Spenden & Mitgliedsbeiträge insgesamt' },
       ],
     });
   }
@@ -339,6 +383,9 @@ function buildSteps(year, familyStatusId, situationIds) {
         { label: 'Rechnungen und Zahlungsnachweise', required: true },
         { label: 'Ärztliches Attest/Verordnung, falls vorhanden', required: false },
       ],
+      amounts: [
+        { id: 'ausserg_betrag', type: 'number', label: 'Außergewöhnliche Belastungen insgesamt (dein Eigenanteil, vor Abzug der zumutbaren Belastung)' },
+      ],
     });
   }
 
@@ -356,6 +403,9 @@ function buildSteps(year, familyStatusId, situationIds) {
       documents: [
         { label: 'Zahlungsnachweise (Überweisungen)', required: true },
         { label: 'Unterschriebene Anlage U der empfangenden Person', required: false },
+      ],
+      amounts: [
+        { id: 'unterhalt_betrag', type: 'number', label: 'Gezahlter Unterhalt insgesamt (als Sonderausgabe bis max. ca. 13.805 €/Jahr ansetzbar)' },
       ],
     });
   }

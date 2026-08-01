@@ -6,6 +6,7 @@
 
   /** @type {any} */
   let state = loadState() || freshState();
+  if (!state.amounts) state.amounts = {}; // Backfill für vor der Schätzfunktion gespeicherte Stände
 
   function freshState() {
     return {
@@ -15,6 +16,7 @@
       situations: [],
       stepIndex: 0,
       docs: {}, // { [stepId]: { [docLabel]: { checked, fileName, fileData, tooBig } } }
+      amounts: {}, // { [amountFieldId]: string }
     };
   }
 
@@ -317,6 +319,38 @@
     reader.readAsDataURL(file);
   }
 
+  function renderAmountField(f) {
+    const value = state.amounts[f.id] !== undefined ? state.amounts[f.id] : '';
+    if (f.type === 'select') {
+      return h('label', { class: 'amount-field' },
+        h('span', {}, f.label),
+        h('select', { onchange: (e) => { state.amounts[f.id] = e.target.value; persist(); } },
+          f.options.map((o) => h('option', { value: o.value, selected: value === o.value ? 'selected' : null }, o.label))
+        )
+      );
+    }
+    return h('label', { class: 'amount-field' },
+      h('span', {}, f.label),
+      h('div', { class: 'amount-input-row' },
+        h('input', {
+          type: 'number', min: '0', step: '1', inputmode: 'decimal', placeholder: '0', value: value,
+          oninput: (e) => { state.amounts[f.id] = e.target.value; },
+          onblur: () => persist(),
+        }),
+        h('span', { class: 'amount-unit' }, f.unit || '€')
+      )
+    );
+  }
+
+  function renderAmountsBlock(step) {
+    if (!step.amounts || !step.amounts.length) return null;
+    return h('div', { class: 'amounts-block' },
+      h('strong', {}, '🧮 Werte für die automatische Steuerschätzung'),
+      h('p', { class: 'example-caption' }, 'Optional – ohne diese Angaben kann am Ende keine Schätzung berechnet werden.'),
+      h('div', { class: 'amounts-grid' }, step.amounts.map((f) => renderAmountField(f)))
+    );
+  }
+
   function renderWizard() {
     const steps = currentSteps();
     const step = steps[state.stepIndex];
@@ -339,6 +373,7 @@
         h('strong', {}, 'Unterlagen (Foto/Scan hochladen und abhaken):'),
         h('div', {}, step.documents.map((d) => renderDocItem(step, d)))
       ) : null,
+      renderAmountsBlock(step),
       step.note ? h('div', { class: 'note-box' }, step.note) : null,
       h('div', { class: 'btn-row' },
         h('button', {
@@ -378,7 +413,7 @@
       );
     });
 
-    return h('div', { class: 'card' },
+    const overviewCard = h('div', { class: 'card' },
       h('h2', {}, '🎉 Deine Checkliste für ' + state.year + ' ist fertig'),
       h('p', {}, `Insgesamt hast du ${checkedDocs} von ${totalDocs} Unterlagen als vorhanden markiert.`),
       disclaimerBanner(),
@@ -388,6 +423,55 @@
         h('button', { class: 'btn secondary', onclick: () => window.print() }, '🖨️ Checkliste drucken/als PDF'),
         h('button', { class: 'btn', onclick: () => { state = freshState(); persist(); render(); window.scrollTo(0, 0); } }, 'Neue Erklärung starten')
       )
+    );
+
+    return h('div', {}, overviewCard, renderEstimateCard());
+  }
+
+  function renderEstimateCard() {
+    const est = computeTaxEstimate(state);
+
+    const estimateWarning = h('div', { class: 'disclaimer estimate-warning' },
+      '⚠️ Achtung, ungefährer Richtwert: Diese Zahl ist ',
+      h('strong', {}, 'keine verbindliche Steuerberechnung'),
+      ' und stimmt nicht immer zu 100 % mit deinem echten Steuerbescheid überein. Häufigster Grund: einzelne absetzbare Posten – allen voran ',
+      h('strong', {}, 'Werbungskosten'),
+      ', aber auch Sonderausgaben, außergewöhnliche Belastungen oder Freibeträge – werden aus Unerfahrenheit vergessen oder nicht vollständig eingetragen. Auch Sonderfälle wie die Kinderfreibetrag-Günstigerprüfung, Steuerklassenkombinationen bei Ehepaaren oder Verlustvorträge werden hier nicht berücksichtigt. Nutze den Wert nur zur groben Orientierung und lass deinen tatsächlichen Bescheid über ELSTER oder eine steuerberatende Person prüfen.'
+    );
+
+    if (!est.hasData) {
+      return h('div', { class: 'card estimate-card' },
+        h('h2', {}, '🧮 Automatische Steuerschätzung'),
+        estimateWarning,
+        h('p', {}, 'Du hast noch keine Beträge eingetragen. Geh zurück zu den Schritten und trage z. B. deinen Bruttoarbeitslohn ein (Abschnitt „🧮 Werte für die automatische Steuerschätzung“), um hier eine Schätzung zu sehen.')
+      );
+    }
+
+    const rows = [
+      ['zu versteuerndes Einkommen (geschätzt)', formatEuro(est.zvE)],
+      ['geschätzte Einkommensteuer', formatEuro(est.estIncomeTax)],
+    ];
+    if (est.kirchensteuer > 0) rows.push(['geschätzte Kirchensteuer', formatEuro(est.kirchensteuer)]);
+    if (est.soli > 0) rows.push(['geschätzter Solidaritätszuschlag', formatEuro(est.soli)]);
+    if (est.abgeltungsteuerGesamt > 0) rows.push(['Abgeltungsteuer auf Kapitalerträge (meist schon von der Bank abgeführt)', formatEuro(est.abgeltungsteuerGesamt)]);
+
+    let diffText = null;
+    if (est.differenz !== null) {
+      const runde = formatEuro(Math.abs(est.differenz));
+      diffText = est.differenz >= 0
+        ? `Du hast laut Angabe ca. ${formatEuro(est.gezahlteLohnsteuer)} Lohnsteuer gezahlt, geschätzt fällig wären ca. ${formatEuro(est.estIncomeTax + est.kirchensteuer + est.soli)} — das deutet auf eine mögliche Erstattung von rund ${runde} hin.`
+        : `Du hast laut Angabe ca. ${formatEuro(est.gezahlteLohnsteuer)} Lohnsteuer gezahlt, geschätzt fällig wären aber ca. ${formatEuro(est.estIncomeTax + est.kirchensteuer + est.soli)} — das könnte auf eine mögliche Nachzahlung von rund ${runde} hindeuten.`;
+    }
+
+    return h('div', { class: 'card estimate-card' },
+      h('h2', {}, '🧮 Automatische Steuerschätzung'),
+      estimateWarning,
+      h('div', { class: 'fact-grid' },
+        rows.map(([lbl, val]) => h('div', { class: 'fact-tile' }, h('span', { class: 'val' }, val), h('span', { class: 'lbl' }, lbl))),
+        h('div', { class: 'fact-tile highlight' }, h('span', { class: 'val' }, formatEuro(est.gesamtSteuerlast)), h('span', { class: 'lbl' }, 'geschätzte Steuerlast insgesamt'))
+      ),
+      diffText ? h('p', {}, diffText) : null,
+      h('p', { class: 'example-caption' }, 'Häufig vergessene Posten, die dieses Ergebnis verändern können: Fachliteratur, Arbeitsmittel, Fortbildungen, doppelte Haushaltsführung, Handwerkerleistungen und haushaltsnahe Dienstleistungen, Kinderbetreuungskosten, Behinderten-Pauschbetrag, Verlustvorträge aus Vorjahren, Riester-/Rürup-Zulagen u.v.m.')
     );
   }
 

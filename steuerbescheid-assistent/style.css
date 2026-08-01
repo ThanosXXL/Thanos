@@ -415,6 +415,79 @@ body {
 .fact-tile .val { font-weight: 700; color: var(--orange-700); display: block; font-size: 1.05rem; }
 .fact-tile .lbl { font-size: 0.72rem; color: var(--ink-soft); }
 
+.fact-tile.highlight {
+  background: linear-gradient(180deg, var(--amber-200), var(--orange-500));
+  box-shadow: var(--shadow-pop), inset 0 1px 0 rgba(255,255,255,0.7);
+}
+
+.fact-tile.highlight .val { color: #4a2500; font-size: 1.3rem; }
+.fact-tile.highlight .lbl { color: #5c3300; }
+
+/* ---------- Beträge / Steuerschätzung ---------- */
+.amounts-block {
+  margin-top: 18px;
+  padding: 14px;
+  border-radius: var(--radius-md);
+  background: rgba(255, 255, 255, 0.55);
+  border: 1px dashed var(--orange-400);
+}
+
+.amounts-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 12px;
+  margin-top: 10px;
+}
+
+.amount-field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: var(--ink);
+}
+
+.amount-input-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.amount-input-row input[type="number"] {
+  flex: 1;
+  min-width: 0;
+  padding: 9px 10px;
+  border-radius: var(--radius-sm);
+  border: 1px solid #f0d9a8;
+  background: #fff;
+  font-size: 0.95rem;
+  color: var(--ink);
+}
+
+.amount-input-row input[type="number"]:focus {
+  outline: 2px solid var(--orange-500);
+  outline-offset: 1px;
+}
+
+.amount-unit {
+  font-size: 0.75rem;
+  color: var(--ink-soft);
+  white-space: nowrap;
+}
+
+.amount-field select {
+  padding: 9px 10px;
+  border-radius: var(--radius-sm);
+  border: 1px solid #f0d9a8;
+  background: #fff;
+  font-size: 0.9rem;
+  color: var(--ink);
+}
+
+.estimate-card { border: 2px solid var(--orange-500); }
+.estimate-warning { font-weight: 500; }
+
 /* ---------- Toast ---------- */
 .toast {
   position: fixed;
