@@ -18,7 +18,7 @@ function loadData() {
       saveData(seed);
       return seed;
     }
-    return { dozenten: [], inventar: [] };
+    return { inventar: [] };
   }
 }
 

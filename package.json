@@ -1,7 +1,7 @@
 {
   "name": "dozenten-dashboard",
   "version": "1.0.0",
-  "description": "Desktop-Dashboard zur Verwaltung von Dozenten, Aufgaben und Projekten",
+  "description": "Desktop-Dashboard zur Geräteinventar-Verwaltung mit Foto- und Spracherkennung",
   "main": "main.js",
   "author": "",
   "license": "MIT",

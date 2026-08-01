@@ -1,19 +1,7 @@
-# Dozenten Dashboard
+# Inventar - Dashboard
 
-Desktop-Dashboard (Electron) zur Verwaltung von bis zu vier Dozenten. Jeder Dozent hat drei Listen:
-
-1. **Liste 1 – To-Do-Liste** (Aufgabenliste)
-2. **Liste 2 – Offene Projekte**
-3. **Liste 3 – Erledigte Projekte**
-
-Projekte lassen sich per Klick von "Offene Projekte" nach "Erledigte Projekte" verschieben (und zurück).
-Alle Daten werden lokal gespeichert (im Benutzerdatenverzeichnis der App) und bleiben nach dem Neustart erhalten.
-
-## Inventar - Dashboard
-
-Über den Umschalter oben rechts im Header lässt sich in den **Inventar - Dashboard**-Modus wechseln
-(eigener Gold/Braun-Look im glänzenden 3D-Stil). Er verwaltet eine Geräteliste mit den Spalten
-**Gerät, Hersteller, Zustand (OVP/Gebraucht) und Stückzahl**:
+Desktop-Dashboard (Electron) zur Geräteinventar-Verwaltung, im glänzenden Gold/Braun-3D-Stil. Es
+verwaltet eine Geräteliste mit den Spalten **Gerät, Hersteller, Zustand (OVP/Gebraucht) und Stückzahl**:
 
 - Eingabe per Tastatur oder per Mikrofon-Diktat (🎤) für Gerät und Hersteller
 - Fotoerkennung per Kamera: Ein Foto wird analysiert und ein Erkennungsvorschlag angezeigt
@@ -21,6 +9,11 @@ Alle Daten werden lokal gespeichert (im Benutzerdatenverzeichnis der App) und bl
   Die Fotoerkennung benötigt eine Internetverbindung (Modell wird bei Bedarf nachgeladen).
 - Beim **Ausgeben** eines Geräts an Kollegen/Kunden wird die Stückzahl reduziert und protokolliert;
   fällt der Bestand auf oder unter den Schwellenwert, erscheint eine Erinnerung zur Nachbestellung.
+- Ein PIN-geschützter **Admin-Modus** schaltet eine Nachbestellungen-Verwaltung sowie alle
+  Download-Versionen frei.
+
+Alle Daten werden lokal gespeichert (im Benutzerdatenverzeichnis der App) und bleiben nach dem
+Neustart erhalten.
 
 ## Fertigen Installer herunterladen (ohne Terminal)
 
@@ -49,7 +42,7 @@ Neue Installer werden automatisch von GitHub Actions gebaut, sobald ein neuer Ve
 - **`docs/demo-video.webm`** – echter Video-Walkthrough des Inventar - Dashboards (kein Mockup).
 - Vier Handbücher, alle mit Screenshots und zusätzlich als PDF (`docs/*.pdf`, per
   `npm run build:handbook-pdfs` neu erzeugen, wenn sich eine Handbuch-HTML-Datei ändert):
-  - **`docs/handbuch.html`** – allgemeines Benutzerhandbuch (beide Modi)
+  - **`docs/handbuch.html`** – allgemeines Benutzerhandbuch
   - **`docs/handbuch-inventar.html`** – vertieftes Inventar-Handbuch
   - **`docs/skript-handbuch.html`** – PowerShell-Skript &amp; Downloader-App (technisch)
   - **`docs/admin-handbuch.html`** – Nutzung/Umgang mit dem Admin-Modus für alle vier Admins
@@ -65,7 +58,7 @@ Neue Installer werden automatisch von GitHub Actions gebaut, sobald ein neuer Ve
 npm run start:demo
 ```
 
-Startet die App mit vorbefüllten Beispiel-Dozenten und -Geräten in einer eigenen Datendatei
+Startet die App mit vorbefüllten Beispiel-Geräten in einer eigenen Datendatei
 (`dozenten-data-demo.json`), damit echte Nutzerdaten nie überschrieben werden. Im Fenster erscheint
 ein „DEMO-VERSION"-Hinweisbanner.
 

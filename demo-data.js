@@ -14,33 +14,6 @@ function getDemoSeed() {
   });
 
   return {
-    dozenten: [
-      {
-        id: uid(),
-        name: 'Frau Bergmann',
-        todos: [
-          { id: uid(), text: 'Foliensatz Kapitel 4 überarbeiten', done: false },
-          { id: uid(), text: 'Rückmeldungen der Teilnehmer sichten', done: true }
-        ],
-        openProjects: [
-          { id: uid(), text: 'Praxisworkshop "Datenanalyse" planen', done: false }
-        ],
-        doneProjects: [
-          { id: uid(), text: 'Einführungskurs Q1 abgeschlossen', done: false }
-        ],
-        chat: [
-          { id: uid(), text: 'Materialien liegen im gemeinsamen Ordner bereit.', time: now }
-        ]
-      },
-      {
-        id: uid(),
-        name: 'Herr Keller',
-        todos: [{ id: uid(), text: 'Raumbuchung für nächste Woche prüfen', done: false }],
-        openProjects: [{ id: uid(), text: 'Zertifikatskurs Netzwerktechnik', done: false }],
-        doneProjects: [],
-        chat: []
-      }
-    ],
     inventar: [
       {
         id: uid(),

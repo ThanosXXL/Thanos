@@ -2,8 +2,8 @@
 // CSS/JS (kein Bezug auf ../renderer/* nötig), damit sie offline im Browser
 // geöffnet werden können.
 //
-// Manuell ausführen, nachdem sich renderer/style.css, renderer/renderer.js,
-// docs/demo-shim.js oder docs/demo-inventar-shim.js geändert haben:
+// Manuell ausführen, nachdem sich renderer/style.css, renderer/renderer.js
+// oder docs/demo-inventar-shim.js geändert haben:
 //   node docs/build-standalone-demo.js
 'use strict';
 
@@ -40,16 +40,6 @@ function build({ templateFile, shimFile, shimTag, outFile, titleFrom, titleTo, f
   fs.writeFileSync(path.join(ROOT, 'docs', outFile), out, 'utf-8');
   console.log('docs/' + outFile + ' geschrieben (' + (out.length / 1024).toFixed(0) + ' KB).');
 }
-
-build({
-  templateFile: 'demo.html',
-  shimFile: 'demo-shim.js',
-  shimTag: '<script src="demo-shim.js"></script>',
-  outFile: 'demo-standalone.html',
-  titleFrom: '<title>Dozenten Dashboard – Demo</title>',
-  titleTo: '<title>Dozenten Dashboard – Demo (Offline)</title>',
-  footerLinkTag: '<a href="download.html">⬇ Zur Download-Seite</a>'
-});
 
 build({
   templateFile: 'demo-inventar.html',

@@ -1,7 +1,5 @@
-// Browser-Demo-Shim für die reine Inventar-Demo (kein Dozenten-Modus).
-// Ersetzt window.dashboardAPI wie demo-shim.js, speichert aber unter einem eigenen
-// localStorage-Schlüssel und seedet ausschließlich Inventar-Beispieldaten
-// (dozenten bleibt absichtlich leer, die Dozenten-Ansicht wird nie angezeigt).
+// Browser-Demo-Shim für die Inventar-Demo. Ersetzt window.dashboardAPI durch eine
+// localStorage-gestützte Version und seedet Beispieldaten beim ersten Aufruf.
 (function () {
   window.__DASHBOARD_DEMO__ = true;
 
@@ -20,7 +18,6 @@
     });
 
     return {
-      dozenten: [],
       inventar: [
         { id: uid(), geraet: 'Laptop', hersteller: 'Dell', zustand: 'OVP', stueckzahl: 8, photo: null, ausgaben: [], nachbestellungen: [] },
         {

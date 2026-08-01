@@ -1,6 +1,6 @@
 <#
 .SYNOPSIS
-    Lädt die neueste Version des Dozenten Dashboard (inkl. Inventar - Dashboard)
+    Lädt die neueste Version des Inventar - Dashboard
     automatisch von GitHub Releases herunter, speichert sie auf dem Desktop und
     startet den Installer.
 
@@ -53,7 +53,7 @@
     Lädt die Installer-Datei nur auf den Desktop, startet sie aber nicht.
 
 .NOTES
-    © 2026 Dozenten Dashboard – Alle Rechte vorbehalten.
+    © 2026 Inventar - Dashboard – Alle Rechte vorbehalten.
     Hinweis: Eine Windows-Konsole kann keinen echten Gold/Braun-3D-Hochglanz-Stil
     darstellen wie die App selbst – die Banner unten nutzen daher die nächstliegenden
     Konsolenfarben (Gelb/DarkYellow) als Annäherung an das Gold/Braun-Farbschema.
@@ -84,7 +84,7 @@ function Write-Step {
 }
 
 try {
-    Write-GoldBanner 'Dozenten Dashboard - Automatischer 1-Klick-Download'
+    Write-GoldBanner 'Inventar - Dashboard - Automatischer 1-Klick-Download'
 
     # TLS 1.2 erzwingen, damit ältere Windows/PowerShell-Kombinationen die
     # verschlüsselte Verbindung zu GitHub zuverlässig aufbauen können.
@@ -131,7 +131,7 @@ try {
     }
 
     Write-Host ''
-    Write-Host '  © 2026 Dozenten Dashboard - Alle Rechte vorbehalten.' -ForegroundColor DarkYellow
+    Write-Host '  © 2026 Inventar - Dashboard - Alle Rechte vorbehalten.' -ForegroundColor DarkYellow
     Write-Host ''
 }
 catch {
