@@ -34,13 +34,12 @@ Neue Installer werden automatisch von GitHub Actions gebaut, sobald ein neuer Ve
 
 - **`docs/download.html`** – gestylte Download-Seite (Gold/Braun-3D) und zentrale Anlaufstelle für
   **alles**: die 1-Klick-Downloader-App als Hauptweg, Direkt-Downloads pro Betriebssystem, das
-  PowerShell-Skript für IT/Admins, die Inventar-Demo und alle vier Handbücher (Ansehen +
-  PDF-Download). Jedes neue Deliverable kommt sofort hierhin, nicht erst nachträglich.
+  PowerShell-Skript für IT/Admins, das Demo-Video, die Inventar-Demo und alle vier Handbücher
+  (Ansehen + PDF-Download). Jedes neue Deliverable kommt sofort hierhin, nicht erst nachträglich.
 - **`docs/demo-inventar.html`** – interaktive Demo *nur* des Inventar - Dashboards im Browser mit
   Beispieldaten, ohne Installation nutzbar (Speicherung nur lokal via `localStorage`, keine echten
   Daten); `docs/demo-inventar-standalone.html` ist eine eigenständige, offline nutzbare Version davon.
-- **`docs/demo-video.webm`** – echter Video-Walkthrough des Inventar - Dashboards (kein Mockup);
-  liegt im Repo, ist aber auf ausdrücklichen Wunsch nicht mehr auf `download.html` verlinkt.
+- **`docs/demo-video.webm`** – echter Video-Walkthrough des Inventar - Dashboards (kein Mockup).
 - Vier Handbücher, alle mit Screenshots und zusätzlich als PDF (`docs/*.pdf`, per
   `npm run build:handbook-pdfs` neu erzeugen, wenn sich eine Handbuch-HTML-Datei ändert):
   - **`docs/handbuch.html`** – allgemeines Benutzerhandbuch
