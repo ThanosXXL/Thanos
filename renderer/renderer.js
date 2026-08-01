@@ -63,18 +63,19 @@
   let pendingDeleteInventarId = null;
 
   // ---- Admin-Modus ----
+  // Feste PINs für bis zu 4 Admins (kein Einrichtungsschritt) – jede der vier PINs
+  // schaltet den Admin-Modus frei. Das ist bewusst eine einfache lokale Klick-Sperre,
+  // keine echte Benutzer-Authentifizierung (siehe Admin-/Skript-Handbuch).
+  const ADMIN_PINS = ['2894', '2059', '0361', '2302'];
+
   const adminModeBtn = document.getElementById('adminModeBtn');
   const adminPinModal = document.getElementById('adminPinModal');
-  const adminPinTitle = document.getElementById('adminPinTitle');
   const adminPinHint = document.getElementById('adminPinHint');
   const adminPinInput = document.getElementById('adminPinInput');
-  const adminPinConfirmLabel = document.getElementById('adminPinConfirmLabel');
-  const adminPinConfirmInput = document.getElementById('adminPinConfirmInput');
   const adminPinError = document.getElementById('adminPinError');
   const cancelAdminPinBtn = document.getElementById('cancelAdminPin');
   const confirmAdminPinBtn = document.getElementById('confirmAdminPin');
   let isAdmin = false; // gilt nur für die aktuelle Sitzung, wird nicht gespeichert
-  let adminPinModalMode = 'unlock'; // 'setup' | 'unlock'
 
   const DOWNLOAD_LINKS = [
     { label: 'Windows – Installer (.exe)', url: 'https://github.com/ThanosXXL/Thanos/releases/latest/download/DozentenDashboard-Setup.exe' },
@@ -613,20 +614,10 @@
     }
   }
 
-  function openAdminPinModal(newMode) {
-    adminPinModalMode = newMode;
+  function openAdminPinModal() {
     adminPinInput.value = '';
-    adminPinConfirmInput.value = '';
     adminPinError.textContent = '';
-    if (newMode === 'setup') {
-      adminPinTitle.textContent = 'Admin-PIN einrichten';
-      adminPinHint.textContent = 'Es ist noch keine Admin-PIN eingerichtet. Bitte eine PIN vergeben (mind. 4 Zeichen).';
-      adminPinConfirmLabel.hidden = false;
-    } else {
-      adminPinTitle.textContent = 'Admin-PIN eingeben';
-      adminPinHint.textContent = 'Downloads für Admins und Nachbestellungen sind nur im Admin-Modus verfügbar.';
-      adminPinConfirmLabel.hidden = true;
-    }
+    adminPinHint.textContent = 'Downloads für Admins und Nachbestellungen sind nur im Admin-Modus verfügbar.';
     adminPinModal.classList.add('visible');
     adminPinInput.focus();
   }
@@ -637,26 +628,7 @@
 
   function confirmAdminPin() {
     const pin = adminPinInput.value.trim();
-
-    if (adminPinModalMode === 'setup') {
-      const confirmPin = adminPinConfirmInput.value.trim();
-      if (pin.length < 4) {
-        adminPinError.textContent = 'Die PIN muss mindestens 4 Zeichen lang sein.';
-        return;
-      }
-      if (pin !== confirmPin) {
-        adminPinError.textContent = 'Die beiden PINs stimmen nicht überein.';
-        return;
-      }
-      state.adminPin = pin;
-      persist();
-      isAdmin = true;
-      closeAdminPinModal();
-      render();
-      return;
-    }
-
-    if (pin !== state.adminPin) {
+    if (!ADMIN_PINS.includes(pin)) {
       adminPinError.textContent = 'Falsche PIN.';
       return;
     }
@@ -671,7 +643,7 @@
       render();
       return;
     }
-    openAdminPinModal(state.adminPin ? 'unlock' : 'setup');
+    openAdminPinModal();
   }
 
   // ---- Nachbestellungen (nur im Admin-Modus möglich) ----
@@ -1276,15 +1248,11 @@
   adminPinInput.addEventListener('keydown', (e) => {
     if (e.key === 'Enter') confirmAdminPin();
   });
-  adminPinConfirmInput.addEventListener('keydown', (e) => {
-    if (e.key === 'Enter') confirmAdminPin();
-  });
 
   async function init() {
     const loaded = await window.dashboardAPI.loadData();
     state = loaded && Array.isArray(loaded.dozenten) ? loaded : { dozenten: [], inventar: [] };
     if (!Array.isArray(state.inventar)) state.inventar = [];
-    if (typeof state.adminPin !== 'string') state.adminPin = null;
     state.dozenten.forEach((d) => {
       if (!Array.isArray(d.chat)) d.chat = [];
     });

@@ -211,9 +211,11 @@
     <section class="card" id="adminmodus">
       <h2>4. Admin-Modus &amp; Nachbestellungen in der App</h2>
       <p>
-        Im Inventar - Dashboard gibt es oben rechts den Button „🔒 Admin-Modus". Beim ersten Klick wird eine
-        PIN eingerichtet (mind. 4 Zeichen); danach muss diese PIN bei jedem Programmstart erneut eingegeben
-        werden, um den Admin-Bereich freizuschalten.
+        Im Inventar - Dashboard gibt es oben rechts den Button „🔒 Admin-Modus". Es gibt vier feste,
+        vordefinierte PINs – eine pro Administrator/in. Jede der vier PINs schaltet den Admin-Bereich
+        frei; es gibt keinen Einrichtungsschritt. Die genauen Codes werden nicht in diesem öffentlich
+        zugänglichen Handbuch aufgeführt, sondern separat an die vier Admins weitergegeben (hinterlegt
+        in <code>renderer/renderer.js</code>, Konstante <code>ADMIN_PINS</code>).
       </p>
       <figure>
         <img src="images/12-admin-pin.png" alt="PIN-Abfrage zum Entsperren des Admin-Modus">
@@ -225,7 +227,7 @@
         <figcaption>Admin-Bereich: alle Download-Versionen links, Nachbestellungen-Verwaltung rechts.</figcaption>
       </figure>
       <h3>Alle Download-Versionen</h3>
-      <p>Direkte Links zu Windows-Installer, Downloader-App, macOS- und Linux-Build sowie zur GitHub-Releases-Seite – praktisch, um Kolleg:innen schnell die passende Datei zuzuschicken.</p>
+      <p>Direkte Links zu Windows-Installer, Downloader-App, macOS- und Linux-Build – praktisch, um Kolleg:innen schnell die passende Datei zuzuschicken.</p>
       <h3>Nachbestellungen</h3>
       <p>
         Für jedes Gerät lässt sich eine Nachbestellung mit Menge anlegen; der Status (<em>Offen</em>,
