@@ -37,13 +37,20 @@ Neue Installer werden automatisch von GitHub Actions gebaut, sobald ein neuer Ve
 (z. B. `v1.0.0`) gepusht wird, oder manuell über den Button **"Run workflow"** im Tab
 **Actions → Build & Release Desktop App**.
 
-## Download-Center, Demo & Handbuch (`docs/`)
+## Download-Center, Demo & Handbücher (`docs/`)
 
-- **`docs/download.html`** – gestylte Download-Seite (Gold/Braun-3D) mit direktem Installer-Download
-  pro Betriebssystem sowie dem vollautomatischen PowerShell-Download für Windows (siehe unten).
-- **`docs/demo.html`** – interaktive Demo im Browser mit Beispieldaten, ohne Installation nutzbar
-  (Speicherung nur lokal im Browser via `localStorage`, keine echten Daten).
-- **`docs/handbuch.html`** – Benutzerhandbuch mit Screenshots für beide Modi.
+- **`docs/download.html`** – gestylte Download-Seite (Gold/Braun-3D): die 1-Klick-Downloader-App als
+  Hauptweg, Direkt-Downloads pro Betriebssystem, das PowerShell-Skript für IT/Admins, die
+  Inventar-Demo und alle Handbücher (Ansehen + PDF-Download).
+- **`docs/demo-inventar.html`** – interaktive Demo *nur* des Inventar - Dashboards im Browser mit
+  Beispieldaten, ohne Installation nutzbar (Speicherung nur lokal via `localStorage`, keine echten
+  Daten); `docs/demo-inventar-standalone.html` ist eine eigenständige, offline nutzbare Version davon.
+- **`docs/handbuch.html`**, **`docs/handbuch-inventar.html`**, **`docs/admin-handbuch.html`** –
+  Benutzer-, Inventar- und Admin-/Skript-Handbuch mit Screenshots. Jedes Handbuch gibt es auch als
+  PDF (`docs/*.pdf`) zum Herunterladen; nach Änderungen an einer Handbuch-HTML-Datei mit
+  `npm run build:handbook-pdfs` neu erzeugen.
+- **`downloader/`** – eigenständige, winzige Electron-App (portable .exe unter Windows): ein Button
+  lädt die neueste Version automatisch auf den Desktop und startet sie.
 - **`scripts/Install-DozentenDashboard.ps1`** – PowerShell-Skript, das die neueste Version automatisch
   auf den Desktop lädt und installiert (`powershell -ExecutionPolicy Bypass -File .\Install-DozentenDashboard.ps1`).
   Die Kommentare im Skript dienen zugleich als technische Kurzanleitung für IT/Admins.

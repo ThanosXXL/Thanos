@@ -9,6 +9,7 @@
     "start": "electron .",
     "start:demo": "electron . --demo",
     "build:demo-standalone": "node docs/build-standalone-demo.js",
+    "build:handbook-pdfs": "electron docs/build-handbook-pdfs.js",
     "dist": "electron-builder"
   },
   "devDependencies": {
