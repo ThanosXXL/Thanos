@@ -170,6 +170,15 @@
     display: flex;
     gap: 8px;
   }
+  .video-frame {
+    width: 100%;
+    border-radius: 10px;
+    border: 1px solid var(--gold);
+    box-shadow: 0 10px 26px rgba(59, 36, 16, 0.3);
+    display: block;
+    margin-top: 4px;
+    background: #000;
+  }
   .btn-gold-outline.small {
     padding: 6px 12px;
     font-size: 12px;
@@ -229,6 +238,20 @@
       </p>
       <a class="btn-gold-outline" href="../scripts/Install-DozentenDashboard.ps1" download>⬇ Skript herunterladen (.ps1)</a>
       <a class="btn-gold-outline" href="admin-handbuch.html">🛠️ Admin-/Skript-Handbuch</a>
+    </div>
+
+    <div class="card">
+      <h2>🎥 Demo-Video</h2>
+      <p>Kurzer Video-Walkthrough des Inventar - Dashboards: Gerät erfassen, ausgeben, Admin-Modus und Nachbestellung – alles in echt, keine Animation.</p>
+      <video class="video-frame" src="demo-video.webm" poster="images/15-demo-video-poster.png" controls preload="metadata"></video>
+      <div class="doc-list">
+        <div class="doc-row">
+          <span class="doc-label">Demo-Video (WebM, ca. 19 Sek.)</span>
+          <div class="doc-actions">
+            <a class="btn-gold-outline small" href="demo-video.webm" download>⬇ Herunterladen</a>
+          </div>
+        </div>
+      </div>
     </div>
 
     <div class="card">
