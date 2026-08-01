@@ -1,4 +1,4 @@
-# MSR175 Dashboard – Demo
+# MSR_DELUXE Dashboard – Demo
 
 Eigenständige, statische Demoversion eines Mess-, Steuer- und Regeltechnik
 (MSR)-Anlagendashboards – neu gestaltet in Navy-Blau/Weiß mit
