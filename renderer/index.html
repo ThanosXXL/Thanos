@@ -7,11 +7,20 @@
 </head>
 <body>
   <header class="app-header">
-    <h1>Dozenten Dashboard</h1>
+    <h1 id="appTitle">Dozenten Dashboard</h1>
+    <div class="mode-switch">
+      <button type="button" class="mode-btn active" id="modeDozentenBtn">👤 Dozenten</button>
+      <button type="button" class="mode-btn" id="modeInventarBtn">📦 Inventar - Dashboard</button>
+    </div>
   </header>
 
   <nav class="dozent-tabs" id="dozentTabs">
     <!-- Dozenten-Tabs werden hier eingefügt -->
+  </nav>
+
+  <nav class="inventar-toolbar" id="inventarToolbar" hidden>
+    <button type="button" class="btn-gold" id="addInventarBtn">+ Neues Gerät</button>
+    <span class="inventar-toolbar-hint">Erfassung per Tastatur, Mikrofon 🎤 oder Foto 📷</span>
   </nav>
 
   <main id="content">
@@ -41,6 +50,97 @@
       <div class="modal-actions">
         <button id="cancelDeleteDozent" class="btn-secondary">Abbrechen</button>
         <button id="confirmDeleteDozent" class="btn-danger">Entfernen</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal: Neues Inventar-Gerät erfassen -->
+  <div class="modal-overlay" id="addInventarModal">
+    <div class="modal modal-gold modal-wide">
+      <h2>Neues Gerät erfassen</h2>
+
+      <div class="inventar-form-grid">
+        <label>Gerät
+          <div class="input-with-mic">
+            <input type="text" id="invGeraet" placeholder="z. B. Laptop" maxlength="80">
+            <button type="button" class="mic-btn" id="invGeraetMic" title="Diktieren">🎤</button>
+          </div>
+        </label>
+
+        <label>Hersteller
+          <div class="input-with-mic">
+            <input type="text" id="invHersteller" placeholder="z. B. Dell" maxlength="80">
+            <button type="button" class="mic-btn" id="invHerstellerMic" title="Diktieren">🎤</button>
+          </div>
+        </label>
+
+        <label>Zustand
+          <select id="invZustand">
+            <option value="OVP">OVP (originalverpackt)</option>
+            <option value="Gebraucht">Gebraucht</option>
+          </select>
+        </label>
+
+        <label>Stückzahl
+          <input type="number" id="invStueckzahl" min="0" step="1" value="1">
+        </label>
+      </div>
+
+      <div class="foto-section">
+        <div class="foto-section-head">
+          <span>Foto-Erkennung</span>
+          <button type="button" class="btn-gold-outline" id="invStartCamera">📷 Kamera starten</button>
+        </div>
+        <video id="invCameraPreview" autoplay playsinline hidden></video>
+        <canvas id="invCameraCanvas" hidden></canvas>
+        <img id="invCapturedPhoto" alt="Aufgenommenes Foto" hidden>
+        <div class="foto-actions" id="invCameraActions" hidden>
+          <button type="button" class="btn-gold-outline" id="invCapturePhoto">Foto aufnehmen</button>
+          <button type="button" class="btn-secondary" id="invCancelCamera">Abbrechen</button>
+        </div>
+        <div class="recognition-box" id="invRecognitionBox" hidden>
+          <p id="invRecognitionText"></p>
+          <div class="modal-actions">
+            <button type="button" class="btn-secondary" id="invRecognitionNo">Nein, korrigieren</button>
+            <button type="button" class="btn-gold" id="invRecognitionYes">Ja, übernehmen</button>
+          </div>
+        </div>
+        <p class="foto-status" id="invFotoStatus"></p>
+      </div>
+
+      <div class="modal-actions">
+        <button id="cancelAddInventar" class="btn-secondary">Abbrechen</button>
+        <button id="confirmAddInventar" class="btn-gold">Gerät speichern</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal: Gerät an Kollegen/Kunden ausgeben -->
+  <div class="modal-overlay" id="ausgabeModal">
+    <div class="modal modal-gold">
+      <h2>Gerät ausgeben</h2>
+      <p id="ausgabeGeraetText"></p>
+      <label>Menge
+        <input type="number" id="ausgabeMenge" min="1" step="1" value="1">
+      </label>
+      <label>Ausgegeben an (Kollege/Kunde)
+        <input type="text" id="ausgabeEmpfaenger" placeholder="Name (optional)" maxlength="80">
+      </label>
+      <div class="modal-actions">
+        <button id="cancelAusgabe" class="btn-secondary">Abbrechen</button>
+        <button id="confirmAusgabe" class="btn-gold">Ausgeben</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal: Inventar-Gerät löschen bestätigen -->
+  <div class="modal-overlay" id="deleteInventarModal">
+    <div class="modal modal-gold">
+      <h2>Gerät entfernen?</h2>
+      <p id="deleteInventarText"></p>
+      <div class="modal-actions">
+        <button id="cancelDeleteInventar" class="btn-secondary">Abbrechen</button>
+        <button id="confirmDeleteInventar" class="btn-danger">Entfernen</button>
       </div>
     </div>
   </div>

@@ -9,6 +9,19 @@ Desktop-Dashboard (Electron) zur Verwaltung von bis zu vier Dozenten. Jeder Doze
 Projekte lassen sich per Klick von "Offene Projekte" nach "Erledigte Projekte" verschieben (und zurück).
 Alle Daten werden lokal gespeichert (im Benutzerdatenverzeichnis der App) und bleiben nach dem Neustart erhalten.
 
+## Inventar - Dashboard
+
+Über den Umschalter oben rechts im Header lässt sich in den **Inventar - Dashboard**-Modus wechseln
+(eigener Gold/Braun-Look im glänzenden 3D-Stil). Er verwaltet eine Geräteliste mit den Spalten
+**Gerät, Hersteller, Zustand (OVP/Gebraucht) und Stückzahl**:
+
+- Eingabe per Tastatur oder per Mikrofon-Diktat (🎤) für Gerät und Hersteller
+- Fotoerkennung per Kamera: Ein Foto wird analysiert und ein Erkennungsvorschlag angezeigt
+  ("Erkannt: ... – ist das richtig?"); nach Bestätigung springt der Fokus direkt zur Stückzahl-Eingabe.
+  Die Fotoerkennung benötigt eine Internetverbindung (Modell wird bei Bedarf nachgeladen).
+- Beim **Ausgeben** eines Geräts an Kollegen/Kunden wird die Stückzahl reduziert und protokolliert;
+  fällt der Bestand auf oder unter den Schwellenwert, erscheint eine Erinnerung zur Nachbestellung.
+
 ## Fertigen Installer herunterladen (ohne Terminal)
 
 Unter **[Releases](../../releases)** stehen fertig gebaute Installationsdateien zum Anklicken bereit:

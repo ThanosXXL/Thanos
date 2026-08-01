@@ -1,4 +1,4 @@
-const { app, BrowserWindow, ipcMain } = require('electron');
+const { app, BrowserWindow, ipcMain, session } = require('electron');
 const path = require('path');
 const fs = require('fs');
 
@@ -9,7 +9,7 @@ function loadData() {
     const raw = fs.readFileSync(dataFilePath, 'utf-8');
     return JSON.parse(raw);
   } catch (err) {
-    return { dozenten: [] };
+    return { dozenten: [], inventar: [] };
   }
 }
 
@@ -45,6 +45,11 @@ ipcMain.handle('save-data', (event, data) => {
 });
 
 app.whenReady().then(() => {
+  // Kamera (Fotoerkennung) und Mikrofon (Spracheingabe) für das Inventar-Dashboard erlauben
+  session.defaultSession.setPermissionRequestHandler((webContents, permission, callback) => {
+    callback(permission === 'media');
+  });
+
   createWindow();
 
   app.on('activate', () => {
