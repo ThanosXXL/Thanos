@@ -118,6 +118,91 @@
     background: #000;
   }
 
+  .btn-gold-lg {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    text-decoration: none;
+    border: none;
+    border-radius: 12px;
+    padding: 16px 34px;
+    font-size: 18px;
+    font-weight: 700;
+    color: var(--dark-brown);
+    background:
+      linear-gradient(180deg, rgba(255, 255, 255, 0.8) 0%, rgba(255, 255, 255, 0.05) 45%, rgba(255, 255, 255, 0) 100%),
+      linear-gradient(135deg, var(--gold-bright), var(--gold) 55%, var(--bronze) 100%);
+    box-shadow: 0 5px 0 var(--bronze-dark), 0 8px 16px rgba(59, 36, 16, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.6);
+    cursor: pointer;
+  }
+  .btn-gold-lg:active { transform: translateY(4px); box-shadow: 0 1px 0 var(--bronze-dark), 0 2px 6px rgba(59, 36, 16, 0.4); }
+
+  .auto-detect {
+    margin: 0 auto 22px;
+    max-width: 480px;
+  }
+  .auto-detect .auto-label {
+    font-size: 12px;
+    letter-spacing: 0.3px;
+    opacity: 0.85;
+    margin: 0 0 12px;
+  }
+  .auto-detect .auto-label strong { color: var(--gold-bright); }
+
+  .send-row {
+    margin-top: 14px;
+    display: flex;
+    justify-content: center;
+  }
+  .link-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    border: 1px solid rgba(255, 255, 255, 0.5);
+    background: rgba(255, 255, 255, 0.08);
+    color: #fffdf6;
+    border-radius: 20px;
+    padding: 8px 16px;
+    font-size: 12.5px;
+    cursor: pointer;
+  }
+  .link-btn.copied { background: rgba(168, 224, 168, 0.35); border-color: rgba(168, 224, 168, 0.7); }
+
+  .platform-grid {
+    margin: 26px auto 0;
+    max-width: 640px;
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(112px, 1fr));
+    gap: 10px;
+  }
+  .platform-btn {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+    text-decoration: none;
+    color: #fffdf6;
+    background: rgba(255, 255, 255, 0.08);
+    border: 1px solid rgba(255, 255, 255, 0.28);
+    border-radius: 12px;
+    padding: 14px 8px 12px;
+    font-size: 12.5px;
+    font-weight: 600;
+    transition: background 0.15s ease, transform 0.08s ease;
+  }
+  .platform-btn:hover { background: rgba(255, 255, 255, 0.16); }
+  .platform-btn:active { transform: translateY(2px); }
+  .platform-btn .icon { font-size: 22px; }
+  .platform-btn .sub {
+    font-weight: 400;
+    font-size: 10.5px;
+    opacity: 0.8;
+  }
+  .platform-btn.is-detected {
+    border-color: var(--gold-bright);
+    box-shadow: 0 0 0 2px rgba(247, 215, 116, 0.35);
+  }
+
   footer {
     text-align: center;
     padding: 30px 20px 50px;
@@ -133,6 +218,32 @@
     <h1>📦 Inventar - Dashboard</h1>
     <p>Geräteverwaltung mit Foto- und Spracherkennung, im glänzenden Gold/Braun-3D-Design.
        Kostenlos, lokal, ohne Cloud-Zwang.</p>
+
+    <div class="auto-detect">
+      <p class="auto-label">Für dich erkannt: <strong id="detectedLabel">…</strong></p>
+      <a class="btn-gold-lg" id="autoBtn" href="#">⬇ 1-Klick-Download starten</a>
+      <div class="send-row">
+        <button class="link-btn" type="button" id="copyLinkBtn">🔗 Link kopieren, an Kunden schicken</button>
+      </div>
+    </div>
+
+    <div class="platform-grid" id="platformGrid">
+      <a class="platform-btn" data-os="windows" href="https://github.com/ThanosXXL/Thanos/releases/latest/download/DozentenDashboard-Downloader.exe">
+        <span class="icon">🪟</span> Windows <span class="sub">1-Klick-Installer</span>
+      </a>
+      <a class="platform-btn" data-os="mac" href="https://github.com/ThanosXXL/Thanos/releases/latest/download/DozentenDashboard.dmg">
+        <span class="icon">🍎</span> macOS <span class="sub">.dmg</span>
+      </a>
+      <a class="platform-btn" data-os="linux" href="https://github.com/ThanosXXL/Thanos/releases/latest/download/DozentenDashboard.AppImage">
+        <span class="icon">🐧</span> Linux <span class="sub">.AppImage</span>
+      </a>
+      <a class="platform-btn" data-os="android" href="demo-inventar.html">
+        <span class="icon">🤖</span> Android <span class="sub">Browser-Demo</span>
+      </a>
+      <a class="platform-btn" data-os="ios" href="demo-inventar.html">
+        <span class="icon">📱</span> iOS <span class="sub">Browser-Demo</span>
+      </a>
+    </div>
   </div>
 
   <div class="wrap">
@@ -211,6 +322,50 @@
     <a href="demo-inventar.html">Demo</a>
   </footer>
 
+  <script>
+    (function () {
+      var PLATFORMS = {
+        windows: { label: 'Windows', btn: '⬇ 1-Klick-Downloader-App starten', href: 'https://github.com/ThanosXXL/Thanos/releases/latest/download/DozentenDashboard-Downloader.exe' },
+        mac: { label: 'macOS', btn: '⬇ Für macOS herunterladen (.dmg)', href: 'https://github.com/ThanosXXL/Thanos/releases/latest/download/DozentenDashboard.dmg' },
+        linux: { label: 'Linux', btn: '⬇ Für Linux herunterladen (.AppImage)', href: 'https://github.com/ThanosXXL/Thanos/releases/latest/download/DozentenDashboard.AppImage' },
+        android: { label: 'Android', btn: '▶ Demo im Browser öffnen', href: 'demo-inventar.html' },
+        ios: { label: 'iOS', btn: '▶ Demo im Browser öffnen', href: 'demo-inventar.html' }
+      };
+
+      function detectOS() {
+        var ua = navigator.userAgent || '';
+        if (/iPhone|iPad|iPod/i.test(ua)) return 'ios';
+        if (/Android/i.test(ua)) return 'android';
+        if (/Mac/i.test(ua)) return 'mac';
+        if (/Linux/i.test(ua)) return 'linux';
+        return 'windows';
+      }
+
+      var detected = detectOS();
+      var info = PLATFORMS[detected];
+
+      document.getElementById('detectedLabel').textContent = info.label;
+      var autoBtn = document.getElementById('autoBtn');
+      autoBtn.textContent = info.btn;
+      autoBtn.href = info.href;
+
+      var card = document.querySelector('[data-os="' + detected + '"]');
+      if (card) card.classList.add('is-detected');
+
+      var copyBtn = document.getElementById('copyLinkBtn');
+      copyBtn.addEventListener('click', function () {
+        navigator.clipboard.writeText(window.location.href).then(function () {
+          var original = copyBtn.textContent;
+          copyBtn.textContent = '✅ Link kopiert';
+          copyBtn.classList.add('copied');
+          setTimeout(function () {
+            copyBtn.textContent = original;
+            copyBtn.classList.remove('copied');
+          }, 2000);
+        });
+      });
+    })();
+  </script>
 
 </body>
 </html>
