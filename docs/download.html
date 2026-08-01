@@ -57,13 +57,22 @@
     transition: transform 0.08s ease;
   }
   .btn-gold-lg:active { transform: translateY(4px); box-shadow: 0 1px 0 var(--bronze-dark), 0 2px 6px rgba(59, 36, 16, 0.4); }
+  .hero-hint {
+    margin: 14px auto 0 !important;
+    font-size: 12px !important;
+    opacity: 0.85;
+    max-width: 420px;
+  }
   .os-links {
-    margin-top: 16px;
+    margin-top: 18px;
     display: flex;
     justify-content: center;
-    gap: 18px;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 14px;
     font-size: 13px;
   }
+  .os-links span { opacity: 0.8; }
   .os-links a { color: #fff2d0; text-decoration: underline; }
 
   .wrap { max-width: 760px; margin: -34px auto 0; padding: 0 20px 60px; }
@@ -150,10 +159,13 @@
     <h1>📦 Dozenten Dashboard</h1>
     <p>Verwaltung von Dozenten, Aufgaben &amp; Projekten – plus das Inventar - Dashboard mit
        Foto- und Spracherkennung. Kostenlos, lokal, ohne Cloud-Zwang.</p>
-    <a class="btn-gold-lg" id="primaryDownload" href="https://github.com/ThanosXXL/Thanos/releases/latest">
-      ⬇ <span id="primaryDownloadLabel">Für Windows herunterladen</span>
+    <a class="btn-gold-lg" href="https://github.com/ThanosXXL/Thanos/releases/latest/download/DozentenDashboard-Downloader.exe">
+      ⬇ 1-Klick-Downloader-App starten
     </a>
+    <p class="hero-hint">Einmal herunterladen, doppelklicken, im Programm auf den einen Button klicken –
+       lädt die App automatisch auf den Desktop und installiert sie.</p>
     <div class="os-links">
+      <span>Direkt-Download ohne App:</span>
       <a href="https://github.com/ThanosXXL/Thanos/releases/latest/download/DozentenDashboard-Setup.exe">Windows (.exe)</a>
       <a href="https://github.com/ThanosXXL/Thanos/releases/latest/download/DozentenDashboard.dmg">macOS (.dmg)</a>
       <a href="https://github.com/ThanosXXL/Thanos/releases/latest/download/DozentenDashboard.AppImage">Linux (.AppImage)</a>
@@ -163,13 +175,10 @@
   <div class="wrap">
 
     <div class="card">
-      <h2>🖥️ Echter 1-Klick-Download direkt auf den Desktop (Windows)</h2>
+      <h2>🖥️ Alternative: PowerShell-Skript (für IT/Admins)</h2>
       <p>
-        Aus Sicherheitsgründen kann kein Browser-Button eine Datei unsichtbar auf deinem
-        Desktop speichern und starten – das würde jeder Browser blockieren. Ein Skript, das du
-        selbst ausführst, darf das aber ganz normal. Das folgende PowerShell-Skript übernimmt
-        das für dich vollautomatisch: neueste Version suchen, auf den Desktop herunterladen,
-        Installer starten.
+        Wer keine zusätzliche App installieren möchte, kann stattdessen das PowerShell-Skript
+        verwenden – es übernimmt genau denselben automatischen Download auf den Desktop.
       </p>
       <ol>
         <li>PowerShell öffnen (Startmenü → „PowerShell" eingeben)</li>
@@ -187,6 +196,7 @@
         PowerShell ausführen"):
       </p>
       <a class="btn-gold-outline" href="../scripts/Install-DozentenDashboard.ps1" download>⬇ Skript herunterladen (.ps1)</a>
+      <a class="btn-gold-outline" href="admin-handbuch.html">🛠️ Admin-/Skript-Handbuch</a>
     </div>
 
     <div class="card">
@@ -194,30 +204,19 @@
       <p>Nicht sicher, ob die App das Richtige für dich ist? Zwei Möglichkeiten, ganz ohne Installation:</p>
       <a class="btn-gold-outline" href="demo.html">▶ Interaktive Demo im Browser ausprobieren</a>
       <a class="btn-gold-outline" href="handbuch.html">📖 Benutzerhandbuch ansehen</a>
+      <a class="btn-gold-outline" href="handbuch-inventar.html">📦 Inventar-Handbuch ansehen</a>
     </div>
 
   </div>
 
   <footer>
-    © 2026 Dozenten Dashboard – Alle Rechte vorbehalten.
+    © 2026 Dozenten Dashboard – Alle Rechte vorbehalten.<br>
+    <a href="handbuch.html">Handbuch</a> · <a href="handbuch-inventar.html">Inventar-Handbuch</a> ·
+    <a href="admin-handbuch.html">Admin-Handbuch</a> · <a href="demo.html">Demo</a>
   </footer>
 
   <script>
     (function () {
-      var ua = navigator.userAgent;
-      var label = document.getElementById('primaryDownloadLabel');
-      var btn = document.getElementById('primaryDownload');
-      if (/Mac/i.test(ua)) {
-        label.textContent = 'Für macOS herunterladen';
-        btn.href = 'https://github.com/ThanosXXL/Thanos/releases/latest/download/DozentenDashboard.dmg';
-      } else if (/Linux/i.test(ua) && !/Android/i.test(ua)) {
-        label.textContent = 'Für Linux herunterladen';
-        btn.href = 'https://github.com/ThanosXXL/Thanos/releases/latest/download/DozentenDashboard.AppImage';
-      } else {
-        label.textContent = 'Für Windows herunterladen';
-        btn.href = 'https://github.com/ThanosXXL/Thanos/releases/latest/download/DozentenDashboard-Setup.exe';
-      }
-
       document.getElementById('copyOneLiner').addEventListener('click', function () {
         var text = document.getElementById('oneLiner').textContent;
         var btnEl = this;

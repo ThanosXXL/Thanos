@@ -1,0 +1,231 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<title>Inventar - Dashboard – Handbuch</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="description" content="Ausführliches Handbuch für das Inventar - Dashboard: Erfassung, Ausgabe, Nachbestellungen und Admin-Modus.">
+<style>
+  :root {
+    --gold: #d4af37;
+    --gold-light: #f4e2a8;
+    --gold-bright: #f7d774;
+    --bronze: #8a5a2b;
+    --bronze-dark: #5c3a1a;
+    --dark-brown: #3b2410;
+    --dark-blue: #0b1f4d;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    font-family: "Segoe UI", Arial, sans-serif;
+    color: #2a2a2a;
+    background: linear-gradient(160deg, #fbf6e9, #ffffff 40%, #f3e6c8 100%);
+    line-height: 1.6;
+  }
+  .hero {
+    background: linear-gradient(135deg, var(--bronze-dark), var(--bronze) 45%, var(--gold) 100%);
+    color: #fffdf6;
+    padding: 46px 20px 60px;
+    text-align: center;
+    box-shadow: 0 3px 10px rgba(59, 36, 16, 0.4), inset 0 -2px 0 rgba(255, 255, 255, 0.25);
+  }
+  .hero h1 { margin: 0 0 8px; font-size: 28px; }
+  .hero p { margin: 0; opacity: 0.95; font-size: 14px; }
+
+  .wrap { max-width: 860px; margin: -30px auto 0; padding: 0 20px 60px; }
+
+  nav.toc {
+    background: linear-gradient(180deg, #fffdf6, var(--gold-light) 160%);
+    border: 1px solid var(--gold);
+    border-radius: 14px;
+    padding: 20px 26px;
+    margin-bottom: 26px;
+    box-shadow: 0 10px 26px rgba(59, 36, 16, 0.25), inset 0 1px 0 rgba(255, 255, 255, 0.85);
+  }
+  nav.toc h2 { margin-top: 0; font-size: 16px; color: var(--bronze-dark); }
+  nav.toc ol { margin: 0; padding-left: 20px; }
+  nav.toc a { color: var(--bronze-dark); font-weight: 600; text-decoration: none; }
+  nav.toc a:hover { text-decoration: underline; }
+
+  section.card {
+    background: #ffffff;
+    border: 1px solid var(--gold-light);
+    border-radius: 14px;
+    padding: 28px 30px;
+    margin-bottom: 26px;
+    box-shadow: 0 8px 20px rgba(59, 36, 16, 0.12);
+    scroll-margin-top: 20px;
+  }
+  section.card h2 {
+    margin-top: 0;
+    color: var(--bronze-dark);
+    border-bottom: 3px solid var(--gold);
+    padding-bottom: 8px;
+    font-size: 22px;
+  }
+  section.card h3 { color: var(--dark-blue); font-size: 16px; margin-top: 24px; }
+
+  figure { margin: 18px 0; text-align: center; }
+  figure img {
+    max-width: 100%;
+    border-radius: 10px;
+    border: 1px solid #ddd;
+    box-shadow: 0 6px 18px rgba(59, 36, 16, 0.25);
+  }
+  figcaption { margin-top: 8px; font-size: 12px; color: #777; font-style: italic; }
+
+  .badge {
+    display: inline-block;
+    padding: 3px 10px;
+    border-radius: 10px;
+    font-size: 11px;
+    font-weight: 700;
+    background: linear-gradient(180deg, var(--gold-bright), var(--gold));
+    color: var(--dark-brown);
+    margin-right: 6px;
+  }
+  .badge.admin { background: linear-gradient(180deg, #d9f0d9, #a8dba8); }
+
+  table { width: 100%; border-collapse: collapse; margin: 14px 0; font-size: 14px; }
+  table th, table td { text-align: left; padding: 8px 10px; border-bottom: 1px solid #eee; }
+  table th { color: var(--bronze-dark); }
+
+  .tip {
+    background: var(--gold-light);
+    border-left: 4px solid var(--gold);
+    padding: 10px 14px;
+    border-radius: 6px;
+    font-size: 14px;
+    margin: 14px 0;
+  }
+
+  a.btn-gold-outline {
+    display: inline-block;
+    text-decoration: none;
+    border-radius: 8px;
+    padding: 10px 18px;
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--bronze-dark);
+    background: linear-gradient(180deg, #ffffff, var(--gold-light) 100%);
+    box-shadow: 0 3px 0 var(--bronze), 0 5px 8px rgba(59, 36, 16, 0.25), inset 0 1px 0 rgba(255, 255, 255, 0.8);
+    margin: 4px 6px 4px 0;
+  }
+
+  footer { text-align: center; padding: 30px 20px 50px; font-size: 12px; color: var(--bronze-dark); }
+  footer a { color: var(--bronze-dark); }
+</style>
+</head>
+<body>
+
+  <div class="hero">
+    <h1>📦 Inventar - Dashboard – Handbuch</h1>
+    <p>Geräteverwaltung mit Foto- &amp; Spracherkennung, Ausgabe-Reminder, Nachbestellungen &amp; Admin-Modus</p>
+  </div>
+
+  <div class="wrap">
+
+    <nav class="toc" id="top">
+      <h2>Inhalt</h2>
+      <ol>
+        <li><a href="#tabelle">Die Geräteliste</a></li>
+        <li><a href="#erfassen">Gerät erfassen (Tastatur/Mikrofon/Foto)</a></li>
+        <li><a href="#ausgeben">Ausgeben &amp; Stückzahl-Reminder</a></li>
+        <li><a href="#admin">Admin-Modus &amp; Nachbestellungen</a></li>
+        <li><a href="#tipps">Tipps &amp; Fehlerbehebung</a></li>
+      </ol>
+    </nav>
+
+    <section class="card" id="tabelle">
+      <h2>1. Die Geräteliste</h2>
+      <p>Die obere Leiste zeigt für jedes Gerät vier Spalten:</p>
+      <table>
+        <tr><th>Spalte</th><th>Bedeutung</th></tr>
+        <tr><td>Gerät</td><td>Name des Geräts, optional mit Foto-Vorschau</td></tr>
+        <tr><td>Hersteller</td><td>z. B. Dell, Epson, Logitech</td></tr>
+        <tr><td>OVP/Gebraucht</td><td>Zustand des Geräts</td></tr>
+        <tr><td>Stückzahl</td><td>Aktueller Bestand, direkt im Feld änderbar</td></tr>
+      </table>
+      <figure>
+        <img src="images/03-inventar-tabelle.png" alt="Geräteliste des Inventar - Dashboards">
+        <figcaption>Geräte mit niedrigem Bestand sind rot umrandet und tragen ein „Nachbestellen"-Badge.</figcaption>
+      </figure>
+    </section>
+
+    <section class="card" id="erfassen">
+      <h2>2. Gerät erfassen</h2>
+      <p>Über „+ Neues Gerät" öffnet sich der Erfassungsdialog mit drei kombinierbaren Eingabewegen:</p>
+      <p>
+        <span class="badge">⌨ Tastatur</span>
+        <span class="badge">🎤 Mikrofon</span>
+        <span class="badge">📷 Foto</span>
+      </p>
+      <figure>
+        <img src="images/04-inventar-neues-geraet.png" alt="Erfassungsdialog für ein neues Gerät">
+        <figcaption>Erfassungsdialog: Gerät, Hersteller, Zustand, Stückzahl sowie Mikrofon- und Kamera-Optionen.</figcaption>
+      </figure>
+      <h3>Foto-Erkennung im Detail</h3>
+      <ol>
+        <li>„📷 Kamera starten" klicken, Gerät fotografieren.</li>
+        <li>Die App analysiert das Foto und schlägt einen Gerätenamen vor, inkl. Sicherheits-Prozentangabe.</li>
+        <li>„Ja, übernehmen" trägt den Namen ein und springt direkt zur Stückzahl-Eingabe. „Nein, korrigieren" lässt manuelle Eingabe zu.</li>
+      </ol>
+      <div class="tip">💡 Mikrofon-Diktat und Foto-Erkennung benötigen eine Internetverbindung. Ohne Internet einfach Tastatur nutzen.</div>
+    </section>
+
+    <section class="card" id="ausgeben">
+      <h2>3. Ausgeben &amp; Stückzahl-Reminder</h2>
+      <p>
+        „Ausgeben" öffnet einen Dialog für Menge und optionalen Empfänger (Kollege/Kunde). Die Stückzahl wird
+        reduziert, die Ausgabe protokolliert. Fällt der Bestand auf 3 Stück oder weniger, erscheint automatisch
+        eine Erinnerung.
+      </p>
+      <figure>
+        <img src="images/05-ausgeben-modal.png" alt="Dialog zum Ausgeben eines Geräts">
+        <figcaption>Ausgabe-Dialog: Menge und Empfänger eintragen.</figcaption>
+      </figure>
+      <figure>
+        <img src="images/06-reminder-toast.png" alt="Erinnerungsmeldung nach der Ausgabe">
+        <figcaption>Reminder nach der Ausgabe bei niedrigem Bestand.</figcaption>
+      </figure>
+    </section>
+
+    <section class="card" id="admin">
+      <h2>4. Admin-Modus &amp; Nachbestellungen <span class="badge admin">nur für Admins</span></h2>
+      <p>
+        Über „🔒 Admin-Modus" oben rechts (PIN-geschützt) öffnet sich ein Admin-Bereich ganz oben im
+        Inventar - Dashboard mit allen Download-Versionen der App und einer Nachbestellungen-Verwaltung.
+        Das Anlegen und Ändern von Nachbestellungen ist ausschließlich im Admin-Modus möglich.
+      </p>
+      <figure>
+        <img src="images/10-admin-bereich.png" alt="Admin-Bereich mit Downloads und Nachbestellungen">
+        <figcaption>Admin-Bereich: Downloads links, Nachbestellungen rechts.</figcaption>
+      </figure>
+      <figure>
+        <img src="images/11-nachbestellungen.png" alt="Nachbestellung mit Status Bestellt">
+        <figcaption>Nachbestellung mit Menge und Status (Offen/Bestellt/Erledigt).</figcaption>
+      </figure>
+      <p>Ausführliche technische Details (PIN-Einrichtung, Sicherheitsgrenzen) stehen im Admin-/Skript-Handbuch.</p>
+      <a class="btn-gold-outline" href="admin-handbuch.html">🛠️ Zum Admin-/Skript-Handbuch</a>
+    </section>
+
+    <section class="card" id="tipps">
+      <h2>5. Tipps &amp; Fehlerbehebung</h2>
+      <h3>Die Fotoerkennung liegt daneben</h3>
+      <p>„Nein, korrigieren" klicken und den Namen manuell eintragen – kein Problem, das Foto bleibt trotzdem als Vorschau am Gerät gespeichert.</p>
+      <h3>Ich sehe den Admin-Bereich nicht</h3>
+      <p>Er ist standardmäßig verborgen. Auf „🔒 Admin-Modus" klicken und die PIN eingeben (bzw. beim allerersten Mal eine PIN vergeben).</p>
+      <h3>Stückzahl versehentlich falsch eingegeben</h3>
+      <p>Einfach direkt im Stückzahl-Feld der Tabelle korrigieren – die Änderung wird sofort gespeichert.</p>
+    </section>
+
+  </div>
+
+  <footer>
+    © 2026 Dozenten Dashboard – Alle Rechte vorbehalten.<br>
+    <a href="#top">↑ Nach oben</a> · <a href="handbuch.html">Allgemeines Handbuch</a> · <a href="download.html">Download</a>
+  </footer>
+
+</body>
+</html>

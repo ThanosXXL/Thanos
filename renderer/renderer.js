@@ -60,6 +60,28 @@
   const confirmDeleteInventarBtn = document.getElementById('confirmDeleteInventar');
   let pendingDeleteInventarId = null;
 
+  // ---- Admin-Modus ----
+  const adminModeBtn = document.getElementById('adminModeBtn');
+  const adminPinModal = document.getElementById('adminPinModal');
+  const adminPinTitle = document.getElementById('adminPinTitle');
+  const adminPinHint = document.getElementById('adminPinHint');
+  const adminPinInput = document.getElementById('adminPinInput');
+  const adminPinConfirmLabel = document.getElementById('adminPinConfirmLabel');
+  const adminPinConfirmInput = document.getElementById('adminPinConfirmInput');
+  const adminPinError = document.getElementById('adminPinError');
+  const cancelAdminPinBtn = document.getElementById('cancelAdminPin');
+  const confirmAdminPinBtn = document.getElementById('confirmAdminPin');
+  let isAdmin = false; // gilt nur für die aktuelle Sitzung, wird nicht gespeichert
+  let adminPinModalMode = 'unlock'; // 'setup' | 'unlock'
+
+  const DOWNLOAD_LINKS = [
+    { label: 'Windows – Installer (.exe)', url: 'https://github.com/ThanosXXL/Thanos/releases/latest/download/DozentenDashboard-Setup.exe' },
+    { label: 'Windows – 1-Klick-Downloader-App', url: 'https://github.com/ThanosXXL/Thanos/releases/latest/download/DozentenDashboard-Downloader.exe' },
+    { label: 'macOS (.dmg)', url: 'https://github.com/ThanosXXL/Thanos/releases/latest/download/DozentenDashboard.dmg' },
+    { label: 'Linux (.AppImage)', url: 'https://github.com/ThanosXXL/Thanos/releases/latest/download/DozentenDashboard.AppImage' },
+    { label: 'Alle Releases auf GitHub', url: 'https://github.com/ThanosXXL/Thanos/releases' }
+  ];
+
   let cameraStream = null;
   let capturedPhotoDataUrl = null;
   let recognizedLabel = null;
@@ -465,6 +487,7 @@
     } else {
       dozentTabs.hidden = true;
       inventarToolbar.hidden = false;
+      updateAdminToggleButton();
       renderInventarPanel();
     }
   }
@@ -575,6 +598,256 @@
     persist();
     closeDeleteInventarModal();
     render();
+  }
+
+  // ---- Admin-Modus ----
+
+  function updateAdminToggleButton() {
+    if (isAdmin) {
+      adminModeBtn.textContent = '🔓 Admin-Modus verlassen';
+      adminModeBtn.classList.add('active');
+    } else {
+      adminModeBtn.textContent = '🔒 Admin-Modus';
+      adminModeBtn.classList.remove('active');
+    }
+  }
+
+  function openAdminPinModal(newMode) {
+    adminPinModalMode = newMode;
+    adminPinInput.value = '';
+    adminPinConfirmInput.value = '';
+    adminPinError.textContent = '';
+    if (newMode === 'setup') {
+      adminPinTitle.textContent = 'Admin-PIN einrichten';
+      adminPinHint.textContent = 'Es ist noch keine Admin-PIN eingerichtet. Bitte eine PIN vergeben (mind. 4 Zeichen).';
+      adminPinConfirmLabel.hidden = false;
+    } else {
+      adminPinTitle.textContent = 'Admin-PIN eingeben';
+      adminPinHint.textContent = 'Downloads für Admins und Nachbestellungen sind nur im Admin-Modus verfügbar.';
+      adminPinConfirmLabel.hidden = true;
+    }
+    adminPinModal.classList.add('visible');
+    adminPinInput.focus();
+  }
+
+  function closeAdminPinModal() {
+    adminPinModal.classList.remove('visible');
+  }
+
+  function confirmAdminPin() {
+    const pin = adminPinInput.value.trim();
+
+    if (adminPinModalMode === 'setup') {
+      const confirmPin = adminPinConfirmInput.value.trim();
+      if (pin.length < 4) {
+        adminPinError.textContent = 'Die PIN muss mindestens 4 Zeichen lang sein.';
+        return;
+      }
+      if (pin !== confirmPin) {
+        adminPinError.textContent = 'Die beiden PINs stimmen nicht überein.';
+        return;
+      }
+      state.adminPin = pin;
+      persist();
+      isAdmin = true;
+      closeAdminPinModal();
+      render();
+      return;
+    }
+
+    if (pin !== state.adminPin) {
+      adminPinError.textContent = 'Falsche PIN.';
+      return;
+    }
+    isAdmin = true;
+    closeAdminPinModal();
+    render();
+  }
+
+  function toggleAdminMode() {
+    if (isAdmin) {
+      isAdmin = false;
+      render();
+      return;
+    }
+    openAdminPinModal(state.adminPin ? 'unlock' : 'setup');
+  }
+
+  // ---- Nachbestellungen (nur im Admin-Modus möglich) ----
+
+  function addNachbestellung(itemId, menge) {
+    if (!isAdmin) return;
+    const item = findInventarItem(itemId);
+    if (!item) return;
+    const val = Math.max(1, parseInt(menge, 10) || 0);
+    if (!Array.isArray(item.nachbestellungen)) item.nachbestellungen = [];
+    item.nachbestellungen.push({
+      id: uid(),
+      menge: val,
+      status: 'offen',
+      datum: new Date().toLocaleString('de-DE', {
+        day: '2-digit',
+        month: '2-digit',
+        hour: '2-digit',
+        minute: '2-digit'
+      })
+    });
+    persist();
+    render();
+  }
+
+  function updateNachbestellungStatus(itemId, nbId, status) {
+    if (!isAdmin) return;
+    const item = findInventarItem(itemId);
+    if (!item) return;
+    const nb = (item.nachbestellungen || []).find((n) => n.id === nbId);
+    if (!nb) return;
+    nb.status = status;
+    persist();
+    render();
+  }
+
+  function deleteNachbestellung(itemId, nbId) {
+    if (!isAdmin) return;
+    const item = findInventarItem(itemId);
+    if (!item) return;
+    item.nachbestellungen = (item.nachbestellungen || []).filter((n) => n.id !== nbId);
+    persist();
+    render();
+  }
+
+  function buildAdminPanel() {
+    const panel = document.createElement('div');
+    panel.className = 'admin-panel';
+
+    const heading = document.createElement('h2');
+    heading.textContent = '🔓 Admin-Bereich';
+    panel.appendChild(heading);
+
+    const grid = document.createElement('div');
+    grid.className = 'admin-grid';
+
+    // --- Downloads für Admins ---
+    const downloadsCard = document.createElement('div');
+    downloadsCard.className = 'admin-card';
+    const downloadsHeading = document.createElement('h3');
+    downloadsHeading.textContent = '⬇ Alle Download-Versionen';
+    downloadsCard.appendChild(downloadsHeading);
+    const downloadsList = document.createElement('ul');
+    downloadsList.className = 'admin-download-list';
+    DOWNLOAD_LINKS.forEach((link) => {
+      const li = document.createElement('li');
+      const a = document.createElement('a');
+      a.href = link.url;
+      a.target = '_blank';
+      a.rel = 'noopener noreferrer';
+      a.textContent = link.label;
+      li.appendChild(a);
+      downloadsList.appendChild(li);
+    });
+    downloadsCard.appendChild(downloadsList);
+    grid.appendChild(downloadsCard);
+
+    // --- Nachbestellungen ---
+    const nbCard = document.createElement('div');
+    nbCard.className = 'admin-card';
+    const nbHeading = document.createElement('h3');
+    nbHeading.textContent = '📦 Nachbestellungen';
+    nbCard.appendChild(nbHeading);
+
+    const allNachbestellungen = [];
+    state.inventar.forEach((item) => {
+      (item.nachbestellungen || []).forEach((nb) => {
+        allNachbestellungen.push({ item, nb });
+      });
+    });
+
+    if (!allNachbestellungen.length) {
+      const empty = document.createElement('p');
+      empty.className = 'foto-status';
+      empty.textContent = 'Noch keine Nachbestellungen angelegt.';
+      nbCard.appendChild(empty);
+    } else {
+      const nbTable = document.createElement('table');
+      nbTable.className = 'admin-nb-table';
+      const thead = document.createElement('thead');
+      thead.innerHTML = '<tr><th>Gerät</th><th>Menge</th><th>Status</th><th>Datum</th><th></th></tr>';
+      nbTable.appendChild(thead);
+      const tbody = document.createElement('tbody');
+      allNachbestellungen.forEach(({ item, nb }) => {
+        const tr = document.createElement('tr');
+
+        const geraetTd = document.createElement('td');
+        geraetTd.textContent = item.geraet;
+        tr.appendChild(geraetTd);
+
+        const mengeTd = document.createElement('td');
+        mengeTd.textContent = String(nb.menge);
+        tr.appendChild(mengeTd);
+
+        const statusTd = document.createElement('td');
+        const statusSelect = document.createElement('select');
+        ['offen', 'bestellt', 'erledigt'].forEach((s) => {
+          const opt = document.createElement('option');
+          opt.value = s;
+          opt.textContent = s.charAt(0).toUpperCase() + s.slice(1);
+          if (s === nb.status) opt.selected = true;
+          statusSelect.appendChild(opt);
+        });
+        statusSelect.addEventListener('change', () => updateNachbestellungStatus(item.id, nb.id, statusSelect.value));
+        statusTd.appendChild(statusSelect);
+        tr.appendChild(statusTd);
+
+        const datumTd = document.createElement('td');
+        datumTd.textContent = nb.datum;
+        tr.appendChild(datumTd);
+
+        const actionsTd = document.createElement('td');
+        const delBtn = document.createElement('button');
+        delBtn.className = 'icon-btn danger';
+        delBtn.textContent = '✕';
+        delBtn.title = 'Nachbestellung löschen';
+        delBtn.addEventListener('click', () => deleteNachbestellung(item.id, nb.id));
+        actionsTd.appendChild(delBtn);
+        tr.appendChild(actionsTd);
+
+        tbody.appendChild(tr);
+      });
+      nbTable.appendChild(tbody);
+      nbCard.appendChild(nbTable);
+    }
+
+    const addRow = document.createElement('div');
+    addRow.className = 'admin-nb-add-row';
+    const geraetSelect = document.createElement('select');
+    state.inventar.forEach((item) => {
+      const opt = document.createElement('option');
+      opt.value = item.id;
+      opt.textContent = item.geraet + (item.hersteller ? ' (' + item.hersteller + ')' : '');
+      geraetSelect.appendChild(opt);
+    });
+    const mengeInput = document.createElement('input');
+    mengeInput.type = 'number';
+    mengeInput.min = '1';
+    mengeInput.value = '1';
+    mengeInput.className = 'stueckzahl-input';
+    const addBtn = document.createElement('button');
+    addBtn.className = 'btn-gold-outline small';
+    addBtn.textContent = '+ Nachbestellung anlegen';
+    addBtn.disabled = !state.inventar.length;
+    addBtn.addEventListener('click', () => {
+      if (!geraetSelect.value) return;
+      addNachbestellung(geraetSelect.value, mengeInput.value);
+    });
+    addRow.appendChild(geraetSelect);
+    addRow.appendChild(mengeInput);
+    addRow.appendChild(addBtn);
+    nbCard.appendChild(addRow);
+
+    grid.appendChild(nbCard);
+    panel.appendChild(grid);
+
+    return panel;
   }
 
   function updateStueckzahl(id, value) {
@@ -809,6 +1082,10 @@
   function renderInventarPanel() {
     content.innerHTML = '';
 
+    if (isAdmin) {
+      content.appendChild(buildAdminPanel());
+    }
+
     if (!state.inventar.length) {
       const empty = document.createElement('div');
       empty.className = 'empty-state';
@@ -945,15 +1222,27 @@
   cancelDeleteInventarBtn.addEventListener('click', closeDeleteInventarModal);
   confirmDeleteInventarBtn.addEventListener('click', confirmDeleteInventar);
 
+  adminModeBtn.addEventListener('click', toggleAdminMode);
+  cancelAdminPinBtn.addEventListener('click', closeAdminPinModal);
+  confirmAdminPinBtn.addEventListener('click', confirmAdminPin);
+  adminPinInput.addEventListener('keydown', (e) => {
+    if (e.key === 'Enter') confirmAdminPin();
+  });
+  adminPinConfirmInput.addEventListener('keydown', (e) => {
+    if (e.key === 'Enter') confirmAdminPin();
+  });
+
   async function init() {
     const loaded = await window.dashboardAPI.loadData();
     state = loaded && Array.isArray(loaded.dozenten) ? loaded : { dozenten: [], inventar: [] };
     if (!Array.isArray(state.inventar)) state.inventar = [];
+    if (typeof state.adminPin !== 'string') state.adminPin = null;
     state.dozenten.forEach((d) => {
       if (!Array.isArray(d.chat)) d.chat = [];
     });
     state.inventar.forEach((i) => {
       if (!Array.isArray(i.ausgaben)) i.ausgaben = [];
+      if (!Array.isArray(i.nachbestellungen)) i.nachbestellungen = [];
     });
     activeDozentId = state.dozenten.length ? state.dozenten[0].id : null;
     render();

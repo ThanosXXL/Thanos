@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<title>Dozenten Dashboard – 1-Klick-Downloader</title>
+<style>
+  :root {
+    --gold: #d4af37;
+    --gold-light: #f4e2a8;
+    --gold-bright: #f7d774;
+    --bronze: #8a5a2b;
+    --bronze-dark: #5c3a1a;
+    --dark-brown: #3b2410;
+  }
+  * { box-sizing: border-box; }
+  html, body {
+    margin: 0;
+    height: 100%;
+    font-family: "Segoe UI", Arial, sans-serif;
+    background: linear-gradient(160deg, var(--bronze-dark), var(--bronze) 55%, var(--gold) 100%);
+    color: var(--dark-brown);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    -webkit-user-select: none;
+    user-select: none;
+  }
+  .card {
+    width: 400px;
+    background: linear-gradient(180deg, #fffdf6, var(--gold-light) 160%);
+    border: 1px solid var(--gold);
+    border-radius: 16px;
+    padding: 28px 26px 22px;
+    text-align: center;
+    box-shadow: 0 16px 34px rgba(0, 0, 0, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.85);
+  }
+  h1 { font-size: 18px; margin: 0 0 4px; color: var(--bronze-dark); }
+  .subtitle { font-size: 12px; color: var(--bronze-dark); opacity: 0.85; margin-bottom: 22px; }
+
+  #startBtn {
+    width: 100%;
+    border: none;
+    border-radius: 12px;
+    padding: 18px 10px;
+    font-size: 17px;
+    font-weight: 700;
+    cursor: pointer;
+    color: var(--dark-brown);
+    background:
+      linear-gradient(180deg, rgba(255, 255, 255, 0.8) 0%, rgba(255, 255, 255, 0.05) 45%, rgba(255, 255, 255, 0) 100%),
+      linear-gradient(135deg, var(--gold-bright), var(--gold) 55%, var(--bronze) 100%);
+    box-shadow: 0 5px 0 var(--bronze-dark), 0 8px 16px rgba(59, 36, 16, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.6);
+    transition: transform 0.08s ease;
+  }
+  #startBtn:active:not(:disabled) { transform: translateY(4px); box-shadow: 0 1px 0 var(--bronze-dark); }
+  #startBtn:disabled { opacity: 0.6; cursor: default; }
+
+  #status {
+    margin-top: 18px;
+    min-height: 44px;
+    font-size: 13px;
+    line-height: 1.5;
+  }
+  .spinner {
+    display: inline-block;
+    width: 14px;
+    height: 14px;
+    border: 2px solid var(--bronze);
+    border-top-color: transparent;
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+    vertical-align: middle;
+    margin-right: 6px;
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  .status-ok { color: #2f6b2f; font-weight: 600; }
+  .status-error { color: #b3261e; font-weight: 600; }
+
+  footer {
+    margin-top: 18px;
+    font-size: 10px;
+    color: var(--bronze-dark);
+    opacity: 0.8;
+  }
+</style>
+</head>
+<body>
+  <div class="card">
+    <h1>📦 Dozenten Dashboard</h1>
+    <div class="subtitle">1-Klick-Download &amp; Installation auf den Desktop</div>
+
+    <button id="startBtn">⬇ 1-Klick-Installation starten</button>
+
+    <div id="status"></div>
+
+    <footer>© 2026 Dozenten Dashboard – Alle Rechte vorbehalten.</footer>
+  </div>
+
+  <script>
+    const btn = document.getElementById('startBtn');
+    const statusEl = document.getElementById('status');
+
+    function setStatus(html, cls) {
+      statusEl.innerHTML = html;
+      statusEl.className = cls || '';
+    }
+
+    window.downloaderAPI.onStatus((data) => {
+      switch (data.status) {
+        case 'searching':
+          setStatus('<span class="spinner"></span>Suche neueste Version …');
+          break;
+        case 'downloading':
+          setStatus('<span class="spinner"></span>Lade herunter: ' + data.name + ' …');
+          break;
+        case 'launching':
+          setStatus('<span class="spinner"></span>Download abgeschlossen, starte Installer …');
+          break;
+        case 'done':
+          setStatus('✅ ' + data.name + ' liegt auf dem Desktop bereit und wurde gestartet.', 'status-ok');
+          btn.disabled = false;
+          btn.textContent = '⬇ Erneut herunterladen';
+          break;
+        case 'error':
+          setStatus('❌ Fehler: ' + data.message, 'status-error');
+          btn.disabled = false;
+          btn.textContent = '⬇ Erneut versuchen';
+          break;
+      }
+    });
+
+    btn.addEventListener('click', async () => {
+      btn.disabled = true;
+      setStatus('<span class="spinner"></span>Starte …');
+      await window.downloaderAPI.start();
+    });
+  </script>
+</body>
+</html>

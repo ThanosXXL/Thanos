@@ -46,6 +46,7 @@
   <nav class="inventar-toolbar" id="inventarToolbar" hidden>
     <button type="button" class="btn-gold" id="addInventarBtn">+ Neues Gerät</button>
     <span class="inventar-toolbar-hint">Erfassung per Tastatur, Mikrofon 🎤 oder Foto 📷</span>
+    <button type="button" class="btn-gold-outline admin-toggle-btn" id="adminModeBtn">🔒 Admin-Modus</button>
   </nav>
 
   <main id="content">
@@ -166,6 +167,25 @@
       <div class="modal-actions">
         <button id="cancelDeleteInventar" class="btn-secondary">Abbrechen</button>
         <button id="confirmDeleteInventar" class="btn-danger">Entfernen</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal: Admin-PIN einrichten/eingeben -->
+  <div class="modal-overlay" id="adminPinModal">
+    <div class="modal modal-gold">
+      <h2 id="adminPinTitle">Admin-PIN eingeben</h2>
+      <p id="adminPinHint" class="foto-status"></p>
+      <label>PIN
+        <input type="password" id="adminPinInput" maxlength="20" inputmode="numeric" autocomplete="off">
+      </label>
+      <label id="adminPinConfirmLabel" hidden>PIN bestätigen
+        <input type="password" id="adminPinConfirmInput" maxlength="20" inputmode="numeric" autocomplete="off">
+      </label>
+      <p class="foto-status" id="adminPinError" style="color: var(--danger);"></p>
+      <div class="modal-actions">
+        <button id="cancelAdminPin" class="btn-secondary">Abbrechen</button>
+        <button id="confirmAdminPin" class="btn-gold">Bestätigen</button>
       </div>
     </div>
   </div>

@@ -438,6 +438,113 @@ body.mode-inventar .app-header {
   font-style: italic;
 }
 
+.admin-toggle-btn {
+  margin-left: auto;
+}
+
+.admin-toggle-btn.active {
+  background: linear-gradient(180deg, #d9f0d9, #a8dba8 100%);
+  box-shadow: 0 3px 0 #4b7a4b, 0 5px 8px rgba(59, 36, 16, 0.25), inset 0 1px 0 rgba(255, 255, 255, 0.8);
+}
+
+.admin-panel {
+  background: linear-gradient(180deg, #fffdf6, var(--gold-light) 160%);
+  border: 2px solid var(--gold);
+  border-radius: 12px;
+  padding: 18px 20px;
+  margin-bottom: 22px;
+  box-shadow: 0 8px 22px rgba(59, 36, 16, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.85);
+}
+
+.admin-panel h2 {
+  margin: 0 0 14px;
+  color: var(--bronze-dark);
+  font-size: 17px;
+}
+
+.admin-grid {
+  display: grid;
+  grid-template-columns: 1fr 1.6fr;
+  gap: 18px;
+}
+
+.admin-card {
+  background: rgba(255, 255, 255, 0.7);
+  border: 1px solid var(--gold);
+  border-radius: 10px;
+  padding: 14px 16px;
+}
+
+.admin-card h3 {
+  margin: 0 0 10px;
+  color: var(--bronze-dark);
+  font-size: 14px;
+}
+
+.admin-download-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  font-size: 13px;
+}
+
+.admin-download-list li {
+  margin-bottom: 8px;
+}
+
+.admin-download-list a {
+  color: var(--bronze-dark);
+  font-weight: 600;
+  text-decoration: none;
+}
+
+.admin-download-list a:hover {
+  text-decoration: underline;
+}
+
+.admin-nb-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13px;
+  margin-bottom: 12px;
+}
+
+.admin-nb-table th,
+.admin-nb-table td {
+  text-align: left;
+  padding: 6px 8px;
+  border-bottom: 1px solid var(--gold-light);
+}
+
+.admin-nb-table select {
+  padding: 4px 6px;
+  border-radius: 6px;
+  border: 1px solid var(--bronze);
+  font-size: 12px;
+}
+
+.admin-nb-add-row {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+.admin-nb-add-row select {
+  flex: 1;
+  min-width: 140px;
+  padding: 7px 8px;
+  border-radius: 6px;
+  border: 1px solid var(--bronze);
+  font-size: 13px;
+}
+
+@media (max-width: 900px) {
+  .admin-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
 body.mode-inventar main#content {
   background: transparent;
 }

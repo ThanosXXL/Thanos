@@ -49,3 +49,29 @@ jobs:
             dist/*.dmg
             dist/*.AppImage
           if-no-files-found: warn
+
+      - name: Downloader-App-Abhängigkeiten installieren
+        run: npm install
+        working-directory: downloader
+
+      - name: Downloader-App bauen (und bei Tag-Push veröffentlichen)
+        shell: bash
+        working-directory: downloader
+        run: |
+          if [ "${{ github.ref_type }}" = "tag" ]; then
+            npm run dist -- --publish always
+          else
+            npm run dist
+          fi
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Downloader-App-Artifact hochladen
+        uses: actions/upload-artifact@v4
+        with:
+          name: dozenten-dashboard-downloader-${{ matrix.os }}
+          path: |
+            downloader/dist/*.exe
+            downloader/dist/*.dmg
+            downloader/dist/*.AppImage
+          if-no-files-found: warn

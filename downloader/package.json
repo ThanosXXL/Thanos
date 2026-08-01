@@ -1,0 +1,46 @@
+{
+  "name": "dozenten-dashboard-downloader",
+  "version": "1.0.0",
+  "description": "1-Klick-Downloader: lädt das Dozenten Dashboard automatisch auf den Desktop und installiert es",
+  "main": "main.js",
+  "author": "",
+  "license": "MIT",
+  "scripts": {
+    "start": "electron .",
+    "dist": "electron-builder"
+  },
+  "devDependencies": {
+    "electron": "^31.0.0",
+    "electron-builder": "^24.13.3"
+  },
+  "build": {
+    "appId": "com.dozenten.dashboard.downloader",
+    "productName": "Dozenten Dashboard Downloader",
+    "files": [
+      "main.js",
+      "preload.js",
+      "index.html",
+      "package.json"
+    ],
+    "directories": {
+      "output": "dist"
+    },
+    "win": {
+      "target": "portable",
+      "artifactName": "DozentenDashboard-Downloader.${ext}"
+    },
+    "mac": {
+      "target": "dmg",
+      "artifactName": "DozentenDashboard-Downloader.${ext}"
+    },
+    "linux": {
+      "target": "AppImage",
+      "artifactName": "DozentenDashboard-Downloader.${ext}"
+    },
+    "publish": [
+      {
+        "provider": "github"
+      }
+    ]
+  }
+}
