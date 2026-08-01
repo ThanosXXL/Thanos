@@ -37,18 +37,18 @@
     Lädt die Installer-Datei nur herunter, startet sie aber nicht automatisch.
 
 .EXAMPLE
-    powershell -ExecutionPolicy Bypass -File .\Install-DozentenDashboard.ps1
+    powershell -ExecutionPolicy Bypass -File .\Install-InventarDashboard.ps1
 
     Lädt die aktuellste Version herunter, speichert sie auf dem Desktop und öffnet
     danach den normalen Installations-Assistenten.
 
 .EXAMPLE
-    powershell -ExecutionPolicy Bypass -File .\Install-DozentenDashboard.ps1 -Silent
+    powershell -ExecutionPolicy Bypass -File .\Install-InventarDashboard.ps1 -Silent
 
     Lädt herunter und installiert vollständig unbeaufsichtigt (z. B. für IT-Rollouts).
 
 .EXAMPLE
-    powershell -ExecutionPolicy Bypass -File .\Install-DozentenDashboard.ps1 -NoRun
+    powershell -ExecutionPolicy Bypass -File .\Install-InventarDashboard.ps1 -NoRun
 
     Lädt die Installer-Datei nur auf den Desktop, startet sie aber nicht.
 
@@ -92,7 +92,7 @@ try {
 
     Write-Step "Suche neueste Version im Repository '$Repo'..."
     $apiUrl = "https://api.github.com/repos/$Repo/releases/latest"
-    $headers = @{ 'User-Agent' = 'DozentenDashboard-InstallScript' }
+    $headers = @{ 'User-Agent' = 'InventarDashboard-InstallScript' }
     $release = Invoke-RestMethod -Uri $apiUrl -Headers $headers
 
     $asset = $release.assets | Where-Object { $_.name -like '*.exe' } | Select-Object -First 1

@@ -49,7 +49,7 @@ function assetExtensionForPlatform() {
 }
 
 ipcMain.handle('start-download', async () => {
-  const headers = { 'User-Agent': 'DozentenDashboard-Downloader' };
+  const headers = { 'User-Agent': 'InventarDashboard-Downloader' };
 
   try {
     sendStatus('searching');

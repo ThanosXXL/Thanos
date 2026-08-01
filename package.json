@@ -1,5 +1,5 @@
 {
-  "name": "dozenten-dashboard",
+  "name": "inventar-dashboard",
   "version": "1.0.0",
   "description": "Desktop-Dashboard zur Geräteinventar-Verwaltung mit Foto- und Spracherkennung",
   "main": "main.js",
@@ -21,8 +21,8 @@
     "electron-builder": "^24.13.3"
   },
   "build": {
-    "appId": "com.dozenten.dashboard",
-    "productName": "Dozenten Dashboard",
+    "appId": "com.inventar.dashboard",
+    "productName": "Inventar - Dashboard",
     "files": [
       "main.js",
       "preload.js",
@@ -35,15 +35,15 @@
     },
     "win": {
       "target": "nsis",
-      "artifactName": "DozentenDashboard-Setup.${ext}"
+      "artifactName": "InventarDashboard-Setup.${ext}"
     },
     "mac": {
       "target": "dmg",
-      "artifactName": "DozentenDashboard.${ext}"
+      "artifactName": "InventarDashboard.${ext}"
     },
     "linux": {
       "target": "AppImage",
-      "artifactName": "DozentenDashboard.${ext}"
+      "artifactName": "InventarDashboard.${ext}"
     },
     "publish": [
       {

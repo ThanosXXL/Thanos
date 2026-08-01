@@ -3,7 +3,7 @@
 (function () {
   window.__DASHBOARD_DEMO__ = true;
 
-  const STORAGE_KEY = 'dozentenDashboardDemoInventarState';
+  const STORAGE_KEY = 'inventarDashboardDemoState';
 
   function uid() {
     return Date.now().toString(36) + Math.random().toString(36).slice(2, 8);

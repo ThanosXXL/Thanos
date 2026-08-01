@@ -48,8 +48,8 @@ Neue Installer werden automatisch von GitHub Actions gebaut, sobald ein neuer Ve
   - **`docs/admin-handbuch.html`** – Nutzung/Umgang mit dem Admin-Modus für alle vier Admins
 - **`downloader/`** – eigenständige, winzige Electron-App (portable .exe unter Windows): ein Button
   lädt die neueste Version automatisch auf den Desktop und startet sie.
-- **`scripts/Install-DozentenDashboard.ps1`** – PowerShell-Skript, das die neueste Version automatisch
-  auf den Desktop lädt und installiert (`powershell -ExecutionPolicy Bypass -File .\Install-DozentenDashboard.ps1`).
+- **`scripts/Install-InventarDashboard.ps1`** – PowerShell-Skript, das die neueste Version automatisch
+  auf den Desktop lädt und installiert (`powershell -ExecutionPolicy Bypass -File .\Install-InventarDashboard.ps1`).
   Die Kommentare im Skript dienen zugleich als technische Kurzanleitung für IT/Admins.
 
 ## Demo-Modus (mit Beispieldaten)
@@ -59,7 +59,7 @@ npm run start:demo
 ```
 
 Startet die App mit vorbefüllten Beispiel-Geräten in einer eigenen Datendatei
-(`dozenten-data-demo.json`), damit echte Nutzerdaten nie überschrieben werden. Im Fenster erscheint
+(`inventar-data-demo.json`), damit echte Nutzerdaten nie überschrieben werden. Im Fenster erscheint
 ein „DEMO-VERSION"-Hinweisbanner.
 
 ## Installation (für Entwicklung)

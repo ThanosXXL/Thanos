@@ -1,7 +1,7 @@
 {
-  "name": "dozenten-dashboard-downloader",
+  "name": "inventar-dashboard-downloader",
   "version": "1.0.0",
-  "description": "1-Klick-Downloader: lädt das Dozenten Dashboard automatisch auf den Desktop und installiert es",
+  "description": "1-Klick-Downloader: lädt das Inventar - Dashboard automatisch auf den Desktop und installiert es",
   "main": "main.js",
   "author": "",
   "license": "MIT",
@@ -18,8 +18,8 @@
     "electron-builder": "^24.13.3"
   },
   "build": {
-    "appId": "com.dozenten.dashboard.downloader",
-    "productName": "Dozenten Dashboard Downloader",
+    "appId": "com.inventar.dashboard.downloader",
+    "productName": "Inventar - Dashboard Downloader",
     "files": [
       "main.js",
       "preload.js",
@@ -31,15 +31,15 @@
     },
     "win": {
       "target": "portable",
-      "artifactName": "DozentenDashboard-Downloader.${ext}"
+      "artifactName": "InventarDashboard-Downloader.${ext}"
     },
     "mac": {
       "target": "dmg",
-      "artifactName": "DozentenDashboard-Downloader.${ext}"
+      "artifactName": "InventarDashboard-Downloader.${ext}"
     },
     "linux": {
       "target": "AppImage",
-      "artifactName": "DozentenDashboard-Downloader.${ext}"
+      "artifactName": "InventarDashboard-Downloader.${ext}"
     },
     "publish": [
       {

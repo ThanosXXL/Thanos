@@ -6,7 +6,7 @@ const { getDemoSeed } = require('./demo-data');
 // Demo-Modus: `npm run start:demo` bzw. `electron . --demo`. Nutzt eine eigene
 // Datendatei mit Beispieldaten, damit echte Nutzerdaten nie überschrieben werden.
 const isDemo = process.argv.includes('--demo');
-const dataFilePath = path.join(app.getPath('userData'), isDemo ? 'dozenten-data-demo.json' : 'dozenten-data.json');
+const dataFilePath = path.join(app.getPath('userData'), isDemo ? 'inventar-data-demo.json' : 'inventar-data.json');
 
 function loadData() {
   try {

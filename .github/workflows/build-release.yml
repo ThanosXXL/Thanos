@@ -43,7 +43,7 @@ jobs:
       - name: Installer als Artifact hochladen
         uses: actions/upload-artifact@v4
         with:
-          name: dozenten-dashboard-${{ matrix.os }}
+          name: inventar-dashboard-${{ matrix.os }}
           path: |
             dist/*.exe
             dist/*.dmg
@@ -69,7 +69,7 @@ jobs:
       - name: Downloader-App-Artifact hochladen
         uses: actions/upload-artifact@v4
         with:
-          name: dozenten-dashboard-downloader-${{ matrix.os }}
+          name: inventar-dashboard-downloader-${{ matrix.os }}
           path: |
             downloader/dist/*.exe
             downloader/dist/*.dmg

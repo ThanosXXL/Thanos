@@ -61,10 +61,10 @@
   let isAdmin = false; // gilt nur für die aktuelle Sitzung, wird nicht gespeichert
 
   const DOWNLOAD_LINKS = [
-    { label: 'Windows – Installer (.exe)', url: 'https://github.com/ThanosXXL/Thanos/releases/latest/download/DozentenDashboard-Setup.exe' },
-    { label: 'Windows – 1-Klick-Downloader-App', url: 'https://github.com/ThanosXXL/Thanos/releases/latest/download/DozentenDashboard-Downloader.exe' },
-    { label: 'macOS (.dmg)', url: 'https://github.com/ThanosXXL/Thanos/releases/latest/download/DozentenDashboard.dmg' },
-    { label: 'Linux (.AppImage)', url: 'https://github.com/ThanosXXL/Thanos/releases/latest/download/DozentenDashboard.AppImage' }
+    { label: 'Windows – Installer (.exe)', url: 'https://github.com/ThanosXXL/Thanos/releases/latest/download/InventarDashboard-Setup.exe' },
+    { label: 'Windows – 1-Klick-Downloader-App', url: 'https://github.com/ThanosXXL/Thanos/releases/latest/download/InventarDashboard-Downloader.exe' },
+    { label: 'macOS (.dmg)', url: 'https://github.com/ThanosXXL/Thanos/releases/latest/download/InventarDashboard.dmg' },
+    { label: 'Linux (.AppImage)', url: 'https://github.com/ThanosXXL/Thanos/releases/latest/download/InventarDashboard.AppImage' }
   ];
 
   let cameraStream = null;

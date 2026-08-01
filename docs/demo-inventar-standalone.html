@@ -810,7 +810,7 @@ main#content {
 (function () {
   window.__DASHBOARD_DEMO__ = true;
 
-  const STORAGE_KEY = 'dozentenDashboardDemoInventarState';
+  const STORAGE_KEY = 'inventarDashboardDemoState';
 
   function uid() {
     return Date.now().toString(36) + Math.random().toString(36).slice(2, 8);
@@ -931,10 +931,10 @@ main#content {
   let isAdmin = false; // gilt nur für die aktuelle Sitzung, wird nicht gespeichert
 
   const DOWNLOAD_LINKS = [
-    { label: 'Windows – Installer (.exe)', url: 'https://github.com/ThanosXXL/Thanos/releases/latest/download/DozentenDashboard-Setup.exe' },
-    { label: 'Windows – 1-Klick-Downloader-App', url: 'https://github.com/ThanosXXL/Thanos/releases/latest/download/DozentenDashboard-Downloader.exe' },
-    { label: 'macOS (.dmg)', url: 'https://github.com/ThanosXXL/Thanos/releases/latest/download/DozentenDashboard.dmg' },
-    { label: 'Linux (.AppImage)', url: 'https://github.com/ThanosXXL/Thanos/releases/latest/download/DozentenDashboard.AppImage' }
+    { label: 'Windows – Installer (.exe)', url: 'https://github.com/ThanosXXL/Thanos/releases/latest/download/InventarDashboard-Setup.exe' },
+    { label: 'Windows – 1-Klick-Downloader-App', url: 'https://github.com/ThanosXXL/Thanos/releases/latest/download/InventarDashboard-Downloader.exe' },
+    { label: 'macOS (.dmg)', url: 'https://github.com/ThanosXXL/Thanos/releases/latest/download/InventarDashboard.dmg' },
+    { label: 'Linux (.AppImage)', url: 'https://github.com/ThanosXXL/Thanos/releases/latest/download/InventarDashboard.AppImage' }
   ];
 
   let cameraStream = null;
@@ -1723,7 +1723,7 @@ main#content {
 </script>
   <script>
     document.getElementById('demoResetBtn').addEventListener('click', function () {
-      localStorage.removeItem('dozentenDashboardDemoInventarState');
+      localStorage.removeItem('inventarDashboardDemoState');
       location.reload();
     });
   </script>
