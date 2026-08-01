@@ -1,6 +1,8 @@
 (function () {
   const MAX_DOZENTEN = 4;
   const LOW_STOCK_THRESHOLD = 3;
+  const NACHBESTELLUNG_REMINDER_DAYS = [2, 5]; // 2 = Dienstag, 5 = Freitag (JS: Sonntag = 0)
+  const NACHBESTELLUNG_REMINDER_HOUR = 10;
 
   let state = { dozenten: [], inventar: [] };
   let activeDozentId = null;
@@ -715,6 +717,48 @@
     render();
   }
 
+  function countOpenNachbestellungen() {
+    let count = 0;
+    state.inventar.forEach((item) => {
+      (item.nachbestellungen || []).forEach((nb) => {
+        if (nb.status !== 'erledigt') count += 1;
+      });
+    });
+    return count;
+  }
+
+  function isNachbestellungReminderTime() {
+    const now = new Date();
+    return NACHBESTELLUNG_REMINDER_DAYS.includes(now.getDay()) && now.getHours() >= NACHBESTELLUNG_REMINDER_HOUR;
+  }
+
+  function buildNachbestellungReminder(openCount) {
+    const banner = document.createElement('div');
+    banner.className = 'nachbestellung-reminder';
+
+    const text = document.createElement('span');
+    text.textContent =
+      `⏰ Erinnerung: ${openCount} offene Nachbestellung${openCount === 1 ? '' : 'en'} – bitte prüfen und bearbeiten. ` +
+      `(Erinnerung dienstags & freitags ab ${NACHBESTELLUNG_REMINDER_HOUR} Uhr, bis erledigt)`;
+    banner.appendChild(text);
+
+    const actionBtn = document.createElement('button');
+    actionBtn.type = 'button';
+    actionBtn.className = 'btn-gold-outline small';
+    actionBtn.textContent = isAdmin ? '→ Zu den Nachbestellungen' : '🔒 Admin-Modus entsperren';
+    actionBtn.addEventListener('click', () => {
+      if (isAdmin) {
+        const nbTable = content.querySelector('.admin-nb-table, .admin-nb-add-row');
+        if (nbTable) nbTable.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      } else {
+        toggleAdminMode();
+      }
+    });
+    banner.appendChild(actionBtn);
+
+    return banner;
+  }
+
   function buildAdminPanel() {
     const panel = document.createElement('div');
     panel.className = 'admin-panel';
@@ -1081,6 +1125,11 @@
   function renderInventarPanel() {
     content.innerHTML = '';
 
+    const openNachbestellungen = countOpenNachbestellungen();
+    if (openNachbestellungen > 0 && isNachbestellungReminderTime()) {
+      content.appendChild(buildNachbestellungReminder(openNachbestellungen));
+    }
+
     if (isAdmin) {
       content.appendChild(buildAdminPanel());
     }
@@ -1246,6 +1295,19 @@
     activeDozentId = state.dozenten.length ? state.dozenten[0].id : null;
     render();
   }
+
+  // Prüft minütlich, ob der Nachbestellungen-Reminder ein-/ausgeblendet werden muss
+  // (z. B. beim Überschreiten von Dienstag/Freitag 10 Uhr), ohne bei unveränderter
+  // Lage unnötig neu zu rendern.
+  let lastReminderKey = null;
+  setInterval(() => {
+    if (mode !== 'inventar') return;
+    const key = isNachbestellungReminderTime() + ':' + countOpenNachbestellungen();
+    if (key !== lastReminderKey) {
+      lastReminderKey = key;
+      render();
+    }
+  }, 60000);
 
   init();
 })();
