@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>MSR175 Dashboard – Demo</title>
+<link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <div class="app">
+    <aside class="sidebar">
+      <div class="brand">
+        <div class="brand-mark">MSR</div>
+        <div class="brand-text">
+          <strong>MSR175</strong>
+          <span>Dashboard Demo</span>
+        </div>
+      </div>
+      <nav class="nav">
+        <button class="nav-item active" data-view="overview">
+          <span class="nav-icon">◈</span> Übersicht
+        </button>
+        <button class="nav-item" data-view="history">
+          <span class="nav-icon">◱</span> Verlauf
+        </button>
+        <button class="nav-item" data-view="events">
+          <span class="nav-icon">◉</span> Ereignisse
+        </button>
+        <button class="nav-item" data-view="device">
+          <span class="nav-icon">⬡</span> Gerät
+        </button>
+      </nav>
+      <div class="sidebar-footer">
+        <div class="battery-pill">
+          <span class="dot"></span> Akku 87%
+        </div>
+      </div>
+    </aside>
+
+    <main class="main">
+      <header class="topbar">
+        <div class="topbar-title">
+          <h1>Geräte-Übersicht</h1>
+          <p>MSR175 Datenlogger · Standort: Halle 2, Sensorpunkt A</p>
+        </div>
+        <div class="topbar-status">
+          <div class="status-pill online">
+            <span class="dot"></span> Live verbunden
+          </div>
+          <div class="clock" id="clock">--:--:--</div>
+        </div>
+      </header>
+
+      <section class="view" id="view-overview">
+        <div class="kpi-grid" id="kpi-grid"></div>
+
+        <div class="panel-grid">
+          <div class="panel chart-panel">
+            <div class="panel-head">
+              <h2>Messverlauf</h2>
+              <div class="legend" id="chart-legend"></div>
+            </div>
+            <canvas id="chart" height="220"></canvas>
+          </div>
+
+          <div class="panel events-panel">
+            <div class="panel-head">
+              <h2>Letzte Ereignisse</h2>
+              <span class="badge">3 neu</span>
+            </div>
+            <ul class="event-list" id="event-list"></ul>
+          </div>
+        </div>
+      </section>
+
+      <section class="view hidden" id="view-history">
+        <div class="panel">
+          <div class="panel-head">
+            <h2>Verlauf (Demo)</h2>
+          </div>
+          <p class="placeholder-text">
+            Hier würde der vollständige historische Messverlauf mit Zeitraum-Auswahl,
+            Export (CSV/PDF) und Vergleich mehrerer Sensorpunkte erscheinen.
+          </p>
+        </div>
+      </section>
+
+      <section class="view hidden" id="view-events">
+        <div class="panel">
+          <div class="panel-head">
+            <h2>Alle Ereignisse (Demo)</h2>
+          </div>
+          <ul class="event-list" id="event-list-full"></ul>
+        </div>
+      </section>
+
+      <section class="view hidden" id="view-device">
+        <div class="panel">
+          <div class="panel-head">
+            <h2>Gerätedetails</h2>
+          </div>
+          <div class="device-info">
+            <div><span>Modell</span><strong>MSR175</strong></div>
+            <div><span>Seriennummer</span><strong>MS175-DEMO-0042</strong></div>
+            <div><span>Firmware</span><strong>v2.3.1</strong></div>
+            <div><span>Aufzeichnungsintervall</span><strong>10 s</strong></div>
+            <div><span>Speicherbelegung</span><strong>34%</strong></div>
+            <div><span>Letzte Synchronisierung</span><strong>vor 2 Minuten</strong></div>
+          </div>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <script src="script.js"></script>
+</body>
+</html>
