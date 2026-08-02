@@ -132,11 +132,32 @@ Monat abgeschlossen ist.
 
 ![Einstellungen: Administratoren, Kategorien, Autostart, Datensicherung](handbuch/bilder/03-einstellungen.png)
 
-- **Administratoren** – Namen der vier Administratoren ändern.
+- **Administratoren** – Namen der vier Administratoren ändern, optional eine **PIN** pro Administrator
+  festlegen.
 - **Kategorien Einnahmen / Ausgaben** – eigene Kategorien hinzufügen oder per „×“ entfernen.
 - **Erinnerung / Autostart** *(nur Desktop-Version)* – „Beim Systemstart automatisch starten“ aktivieren,
   damit die App zuverlässig im Hintergrund läuft und die Erinnerung nicht verpasst wird.
 - **Datensicherung** – vollständige Sicherung exportieren/importieren (siehe nächstes Kapitel).
+
+### PIN-Schutz pro Administrator
+
+Über **„PIN festlegen“** neben einem Administratornamen lässt sich eine 4-stellige PIN vergeben.
+
+![PIN-Status je Administrator in den Einstellungen](handbuch/bilder/14-pin-einstellungen.png)
+*Jeder Administrator zeigt seinen PIN-Status („Kein PIN“ / „PIN aktiv“) mit passendem Button.*
+
+Sobald ein Administrator eine PIN hat, wird sie beim **Wechsel zu diesem Profil** einmal pro
+Programmsitzung abgefragt – wer die falsche PIN eingibt, bleibt beim vorherigen Administrator.
+
+![PIN-Abfrage beim Profilwechsel](handbuch/bilder/15-pin-sperre.png)
+*Beim Versuch, zu einem geschützten Profil zu wechseln, erscheint diese Abfrage; erst nach korrekter
+Eingabe wechselt die Ansicht tatsächlich zum geschützten Administrator.*
+
+Über „PIN ändern“ lässt sich die PIN jederzeit erneuern oder per „PIN entfernen“ wieder ganz deaktivieren.
+
+> **Hinweis:** Die PIN schützt vor versehentlichem oder beiläufigem Mitlesen an einem gemeinsam genutzten
+> Rechner – sie ist keine Verschlüsselung. Wer direkten Zugriff auf die Datendatei hat, kann sie technisch
+> umgehen.
 
 ---
 

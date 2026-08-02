@@ -126,6 +126,8 @@
 
       <section class="settings-section">
         <h3>Administratoren</h3>
+        <p class="hint">Optional: PIN pro Administrator festlegen. Beim Wechsel zu einem geschützten Profil
+          wird die PIN abgefragt.</p>
         <div id="settings-admin-names"></div>
       </section>
 
@@ -167,6 +169,49 @@
       <div class="modal-actions">
         <button type="button" class="btn btn-primary" id="settings-close">Schließen</button>
       </div>
+    </div>
+  </div>
+
+  <!-- Modal: PIN festlegen/ändern -->
+  <div id="modal-pin-set" class="modal-overlay hidden">
+    <div class="modal glossy-panel modal-small">
+      <h2 id="pin-set-title">PIN festlegen</h2>
+      <form id="pin-set-form">
+        <label>
+          Neue PIN (4 Ziffern)
+          <input type="password" id="pin-set-new" inputmode="numeric" pattern="[0-9]{4}" maxlength="4" autocomplete="off" required />
+        </label>
+        <label>
+          PIN bestätigen
+          <input type="password" id="pin-set-confirm" inputmode="numeric" pattern="[0-9]{4}" maxlength="4" autocomplete="off" required />
+        </label>
+        <p id="pin-set-error" class="pin-error hidden"></p>
+        <div class="modal-actions modal-actions-left">
+          <button type="button" class="btn btn-danger btn-small hidden" id="pin-remove">PIN entfernen</button>
+        </div>
+        <div class="modal-actions">
+          <button type="button" class="btn btn-outline" id="pin-set-cancel">Abbrechen</button>
+          <button type="submit" class="btn btn-primary">Speichern</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Modal: PIN eingeben -->
+  <div id="modal-pin-enter" class="modal-overlay hidden">
+    <div class="modal glossy-panel modal-small">
+      <h2 id="pin-enter-title">PIN erforderlich</h2>
+      <form id="pin-enter-form">
+        <label>
+          PIN
+          <input type="password" id="pin-enter-value" inputmode="numeric" pattern="[0-9]{4}" maxlength="4" autocomplete="off" required />
+        </label>
+        <p id="pin-enter-error" class="pin-error hidden">Falsche PIN. Bitte erneut versuchen.</p>
+        <div class="modal-actions">
+          <button type="button" class="btn btn-outline" id="pin-enter-cancel">Abbrechen</button>
+          <button type="submit" class="btn btn-primary">Bestätigen</button>
+        </div>
+      </form>
     </div>
   </div>
 

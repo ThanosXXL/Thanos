@@ -665,6 +665,56 @@ table.entries tfoot td {
   font-family: inherit;
 }
 
+.pin-status {
+  font-size: 0.78rem;
+  font-weight: 700;
+  padding: 4px 10px;
+  border-radius: 999px;
+  white-space: nowrap;
+}
+
+.pin-status.on {
+  background: rgba(46, 158, 91, 0.18);
+  color: var(--green-deep);
+}
+
+.pin-status.off {
+  background: rgba(138, 90, 26, 0.12);
+  color: var(--ink-soft);
+}
+
+.pin-error {
+  color: var(--red-deep);
+  font-size: 0.85rem;
+  font-weight: 600;
+  margin: -4px 0 4px;
+}
+
+#pin-set-form input,
+#pin-enter-form input {
+  font-family: inherit;
+  font-size: 1.3rem;
+  letter-spacing: 6px;
+  text-align: center;
+  padding: 9px 10px;
+  border-radius: 10px;
+  border: 1px solid #e8c988;
+  background: #fffef8;
+  color: var(--ink);
+  width: 100%;
+}
+
+#pin-set-form label,
+#pin-enter-form label {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--ink-soft);
+  margin-bottom: 12px;
+}
+
 .chip-list {
   display: flex;
   flex-wrap: wrap;

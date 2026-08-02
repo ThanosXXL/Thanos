@@ -125,9 +125,32 @@
   let entryModalCtx = null;
   let deleteCtx = null;
   let deferredInstallPrompt = null;
+  let pinSetAdmin = null;
+  let pinEnterCtx = null;
+  const unlockedAdmins = new Set();
 
   function defaultAdmin(n) {
-    return { id: uid(), name: `Administrator ${n}`, jahre: {} };
+    return { id: uid(), name: `Administrator ${n}`, jahre: {}, pin: null };
+  }
+
+  async function sha256Hex(text) {
+    const enc = new TextEncoder().encode('buchhaltung-pin::' + text);
+    const buf = await crypto.subtle.digest('SHA-256', enc);
+    return Array.from(new Uint8Array(buf)).map((b) => b.toString(16).padStart(2, '0')).join('');
+  }
+
+  function requestAdminAccess(admin, onSuccess) {
+    if (!admin.pin || unlockedAdmins.has(admin.id)) {
+      onSuccess();
+      return;
+    }
+    pinEnterCtx = { admin, onSuccess };
+    document.getElementById('pin-enter-title').textContent = `PIN erforderlich – ${admin.name}`;
+    document.getElementById('pin-enter-error').classList.add('hidden');
+    const input = document.getElementById('pin-enter-value');
+    input.value = '';
+    document.getElementById('modal-pin-enter').classList.remove('hidden');
+    input.focus();
   }
 
   function ensureMonth(admin, jahr, monatKey) {
@@ -163,6 +186,7 @@
       }
 
       state.administratoren.forEach((admin) => {
+        if (typeof admin.pin !== 'string') admin.pin = null;
         if (!admin.jahre || typeof admin.jahre !== 'object') admin.jahre = {};
       });
 
@@ -214,9 +238,11 @@
       btn.className = 'admin-tab' + (admin.id === state.einstellungen.aktiverAdminId ? ' active' : '');
       btn.textContent = admin.name;
       btn.addEventListener('click', () => {
-        state.einstellungen.aktiverAdminId = admin.id;
-        persist();
-        render();
+        requestAdminAccess(admin, () => {
+          state.einstellungen.aktiverAdminId = admin.id;
+          persist();
+          render();
+        });
       });
       nav.appendChild(btn);
     });
@@ -639,24 +665,7 @@
   // ---------- Settings modal ----------
 
   function openSettingsModal() {
-    const namesWrap = document.getElementById('settings-admin-names');
-    namesWrap.textContent = '';
-    state.administratoren.forEach((admin) => {
-      const row = document.createElement('div');
-      row.className = 'admin-name-row';
-      const input = document.createElement('input');
-      input.type = 'text';
-      input.maxLength = 60;
-      input.value = admin.name;
-      input.addEventListener('change', () => {
-        admin.name = input.value.trim() || admin.name;
-        persist();
-        renderAdminTabs();
-      });
-      row.appendChild(input);
-      namesWrap.appendChild(row);
-    });
-
+    renderSettingsAdminRows();
     renderCategoryChips();
 
     const autostartRow = document.getElementById('setting-autostart').closest('.settings-section');
@@ -674,6 +683,116 @@
 
   function closeSettingsModal() {
     document.getElementById('modal-settings').classList.add('hidden');
+  }
+
+  function renderSettingsAdminRows() {
+    const namesWrap = document.getElementById('settings-admin-names');
+    namesWrap.textContent = '';
+    state.administratoren.forEach((admin) => {
+      const row = document.createElement('div');
+      row.className = 'admin-name-row';
+
+      const input = document.createElement('input');
+      input.type = 'text';
+      input.maxLength = 60;
+      input.value = admin.name;
+      input.addEventListener('change', () => {
+        admin.name = input.value.trim() || admin.name;
+        persist();
+        renderAdminTabs();
+      });
+      row.appendChild(input);
+
+      const status = document.createElement('span');
+      status.className = 'pin-status ' + (admin.pin ? 'on' : 'off');
+      status.textContent = admin.pin ? 'PIN aktiv' : 'Kein PIN';
+      row.appendChild(status);
+
+      const pinBtn = document.createElement('button');
+      pinBtn.type = 'button';
+      pinBtn.className = 'btn btn-outline btn-small';
+      pinBtn.textContent = admin.pin ? 'PIN ändern' : 'PIN festlegen';
+      pinBtn.addEventListener('click', () => openPinSetModal(admin));
+      row.appendChild(pinBtn);
+
+      namesWrap.appendChild(row);
+    });
+  }
+
+  // ---------- PIN-Schutz ----------
+
+  function openPinSetModal(admin) {
+    pinSetAdmin = admin;
+    document.getElementById('pin-set-title').textContent = admin.pin
+      ? `PIN für ${admin.name} ändern`
+      : `PIN für ${admin.name} festlegen`;
+    document.getElementById('pin-set-new').value = '';
+    document.getElementById('pin-set-confirm').value = '';
+    document.getElementById('pin-set-error').classList.add('hidden');
+    document.getElementById('pin-remove').classList.toggle('hidden', !admin.pin);
+    document.getElementById('modal-pin-set').classList.remove('hidden');
+  }
+
+  function closePinSetModal() {
+    document.getElementById('modal-pin-set').classList.add('hidden');
+    pinSetAdmin = null;
+  }
+
+  function showPinSetError(message) {
+    const el = document.getElementById('pin-set-error');
+    el.textContent = message;
+    el.classList.remove('hidden');
+  }
+
+  async function submitPinSetForm(ev) {
+    ev.preventDefault();
+    if (!pinSetAdmin) return;
+    const val = document.getElementById('pin-set-new').value;
+    const confirmVal = document.getElementById('pin-set-confirm').value;
+    if (!/^[0-9]{4}$/.test(val)) {
+      showPinSetError('Bitte genau 4 Ziffern eingeben.');
+      return;
+    }
+    if (val !== confirmVal) {
+      showPinSetError('Die beiden PINs stimmen nicht überein.');
+      return;
+    }
+    pinSetAdmin.pin = await sha256Hex(val);
+    unlockedAdmins.add(pinSetAdmin.id);
+    persist();
+    renderSettingsAdminRows();
+    closePinSetModal();
+  }
+
+  function removeCurrentPin() {
+    if (!pinSetAdmin) return;
+    if (!confirm(`PIN für ${pinSetAdmin.name} wirklich entfernen?`)) return;
+    pinSetAdmin.pin = null;
+    persist();
+    renderSettingsAdminRows();
+    closePinSetModal();
+  }
+
+  function closePinEnterModal() {
+    document.getElementById('modal-pin-enter').classList.add('hidden');
+    pinEnterCtx = null;
+  }
+
+  async function submitPinEnterForm(ev) {
+    ev.preventDefault();
+    if (!pinEnterCtx) return;
+    const input = document.getElementById('pin-enter-value');
+    const hash = await sha256Hex(input.value);
+    if (hash === pinEnterCtx.admin.pin) {
+      unlockedAdmins.add(pinEnterCtx.admin.id);
+      const onSuccess = pinEnterCtx.onSuccess;
+      closePinEnterModal();
+      onSuccess();
+    } else {
+      document.getElementById('pin-enter-error').classList.remove('hidden');
+      input.value = '';
+      input.focus();
+    }
   }
 
   function renderCategoryChips() {
@@ -962,10 +1081,18 @@
       }
     });
 
+    document.getElementById('pin-set-form').addEventListener('submit', submitPinSetForm);
+    document.getElementById('pin-set-cancel').addEventListener('click', closePinSetModal);
+    document.getElementById('pin-remove').addEventListener('click', removeCurrentPin);
+
+    document.getElementById('pin-enter-form').addEventListener('submit', submitPinEnterForm);
+    document.getElementById('pin-enter-cancel').addEventListener('click', closePinEnterModal);
+
     [document.getElementById('modal-entry'), document.getElementById('modal-delete'),
-     document.getElementById('modal-reminder'), document.getElementById('modal-settings')].forEach((overlay) => {
+     document.getElementById('modal-reminder'), document.getElementById('modal-settings'),
+     document.getElementById('modal-pin-set'), document.getElementById('modal-pin-enter')].forEach((overlay) => {
       overlay.addEventListener('click', (ev) => {
-        if (ev.target === overlay && overlay.id !== 'modal-reminder') {
+        if (ev.target === overlay && overlay.id !== 'modal-reminder' && overlay.id !== 'modal-pin-enter') {
           overlay.classList.add('hidden');
         }
       });
