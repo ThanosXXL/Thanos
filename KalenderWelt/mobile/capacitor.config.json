@@ -1,0 +1,12 @@
+{
+  "appId": "com.kalenderwelt.app",
+  "appName": "KalenderWelt",
+  "webDir": "../app",
+  "backgroundColor": "#b6f2a4",
+  "plugins": {
+    "LocalNotifications": {
+      "smallIcon": "ic_stat_kalenderwelt",
+      "iconColor": "#4fbf4f"
+    }
+  }
+}

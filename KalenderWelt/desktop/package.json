@@ -1,0 +1,32 @@
+{
+  "name": "kalenderwelt-desktop",
+  "version": "1.0.0",
+  "description": "KalenderWelt – Desktop-App (Windows, macOS, Linux)",
+  "main": "main.js",
+  "author": "KalenderWelt",
+  "license": "UNLICENSED",
+  "private": true,
+  "scripts": {
+    "start": "electron .",
+    "dist": "electron-builder"
+  },
+  "devDependencies": {
+    "electron": "^43.2.0",
+    "electron-builder": "^26.15.3"
+  },
+  "build": {
+    "appId": "com.kalenderwelt.app",
+    "productName": "KalenderWelt",
+    "files": [
+      "main.js",
+      "preload.js",
+      "package.json"
+    ],
+    "extraResources": [
+      { "from": "../app", "to": "app" }
+    ],
+    "win": { "target": "nsis" },
+    "mac": { "target": "dmg" },
+    "linux": { "target": "AppImage" }
+  }
+}

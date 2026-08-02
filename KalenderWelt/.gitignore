@@ -1,0 +1,6 @@
+node_modules/
+dist/
+
+# Capacitor: generierte native Projekte, werden per "npx cap add" neu erzeugt
+mobile/android/
+mobile/ios/

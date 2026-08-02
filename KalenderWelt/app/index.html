@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+<title>KalenderWelt</title>
+<link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <header class="topbar">
+    <div class="brand">KalenderWelt</div>
+    <nav class="topnav">
+      <button id="nav-kalender" class="nav-btn active" type="button">📅 Kalender / Live</button>
+      <button id="nav-mail" class="nav-btn" type="button">✉️ E-Mail(s)</button>
+      <button id="nav-docs" class="nav-btn" type="button">📄 Word-Dateien</button>
+    </nav>
+  </header>
+
+  <main id="content" class="content"></main>
+
+  <footer class="footer">
+    <span id="copyright"></span>
+  </footer>
+
+  <div id="modal-root"></div>
+
+  <script src="js/vendor/docx.js"></script>
+  <script src="js/platform.js"></script>
+  <script src="js/state.js"></script>
+  <script src="js/calendar.js"></script>
+  <script src="js/mail.js"></script>
+  <script src="js/documents.js"></script>
+  <script src="js/app.js"></script>
+</body>
+</html>
