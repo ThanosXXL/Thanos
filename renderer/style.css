@@ -19,6 +19,10 @@
   box-sizing: border-box;
 }
 
+.hidden {
+  display: none;
+}
+
 html, body {
   height: 100%;
 }
@@ -385,6 +389,22 @@ body {
   padding: 18px 20px;
   box-shadow: var(--shadow-soft), inset 0 1px 0 #fff;
   margin-bottom: 22px;
+}
+
+.locked-placeholder {
+  text-align: center;
+  padding: 70px 20px;
+}
+
+.locked-placeholder .locked-icon {
+  font-size: 2.6rem;
+  margin-bottom: 14px;
+}
+
+.locked-placeholder p {
+  font-weight: 700;
+  color: var(--ink-soft);
+  margin: 0;
 }
 
 .section-block-header {

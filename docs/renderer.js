@@ -114,6 +114,9 @@
           };
           input.click();
         });
+      },
+      onVisibilityChange: () => {
+        // Der Browser/PWA-Pfad nutzt stattdessen direkt document.visibilitychange.
       }
     };
   }
@@ -151,6 +154,43 @@
     input.value = '';
     document.getElementById('modal-pin-enter').classList.remove('hidden');
     input.focus();
+  }
+
+  function showLockedPlaceholder(admin) {
+    const monthTabs = document.getElementById('month-tabs');
+    monthTabs.textContent = '';
+    monthTabs.style.display = 'none';
+
+    const content = document.getElementById('content');
+    content.textContent = '';
+    const wrap = document.createElement('div');
+    wrap.className = 'section-block locked-placeholder';
+    const icon = document.createElement('div');
+    icon.className = 'locked-icon';
+    icon.textContent = '🔒';
+    const txt = document.createElement('p');
+    txt.textContent = `${admin.name} ist gesperrt – bitte PIN eingeben.`;
+    wrap.appendChild(icon);
+    wrap.appendChild(txt);
+    content.appendChild(wrap);
+  }
+
+  function lockAdminNow(admin) {
+    unlockedAdmins.delete(admin.id);
+    showLockedPlaceholder(admin);
+    requestAdminAccess(admin, () => render());
+  }
+
+  function handleAppHidden() {
+    unlockedAdmins.clear();
+  }
+
+  function handleAppVisible() {
+    const admin = getActiveAdmin();
+    if (admin && admin.pin && !unlockedAdmins.has(admin.id)) {
+      showLockedPlaceholder(admin);
+      requestAdminAccess(admin, () => render());
+    }
   }
 
   function ensureMonth(admin, jahr, monatKey) {
@@ -227,6 +267,13 @@
     renderMonthTabs();
     renderContent();
     renderReminderBanner();
+    renderLockButton();
+  }
+
+  function renderLockButton() {
+    const btn = document.getElementById('btn-lock');
+    const admin = getActiveAdmin();
+    btn.classList.toggle('hidden', !(admin && admin.pin));
   }
 
   function renderAdminTabs() {
@@ -1011,6 +1058,18 @@
     document.getElementById('btn-export-year').addEventListener('click', exportYear);
 
     document.getElementById('btn-settings').addEventListener('click', openSettingsModal);
+    document.getElementById('btn-lock').addEventListener('click', () => {
+      const admin = getActiveAdmin();
+      if (admin && admin.pin) lockAdminNow(admin);
+    });
+    document.addEventListener('visibilitychange', () => {
+      if (document.hidden) handleAppHidden();
+      else handleAppVisible();
+    });
+    api.onVisibilityChange((state) => {
+      if (state === 'hidden') handleAppHidden();
+      else handleAppVisible();
+    });
     document.getElementById('settings-close').addEventListener('click', closeSettingsModal);
 
     document.getElementById('entry-form').addEventListener('submit', submitEntryForm);

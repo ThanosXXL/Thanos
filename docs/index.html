@@ -27,6 +27,7 @@
 
       <div class="header-actions">
         <a id="link-downloads" class="btn btn-glass" href="download.html" title="Buchhaltung! für alle Geräte herunterladen">⬇ Alle Downloads</a>
+        <button id="btn-lock" class="btn btn-glass hidden" type="button" title="Aktuellen Administrator jetzt sperren">🔒 Sperren</button>
         <button id="btn-settings" class="btn btn-glass" type="button" title="Einstellungen">⚙ Einstellungen</button>
       </div>
     </header>
@@ -127,7 +128,9 @@
       <section class="settings-section">
         <h3>Administratoren</h3>
         <p class="hint">Optional: PIN pro Administrator festlegen. Beim Wechsel zu einem geschützten Profil
-          wird die PIN abgefragt.</p>
+          wird die PIN abgefragt. Sobald die App minimiert/verlassen wird (z. B. Fenster wechseln, App in
+          den Hintergrund), sperrt sich ein geschütztes Profil automatisch wieder – beim Zurückkehren ist
+          erneut die PIN nötig. Mit „🔒 Sperren“ oben rechts lässt sich das auch jederzeit manuell auslösen.</p>
         <div id="settings-admin-names"></div>
       </section>
 

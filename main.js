@@ -45,6 +45,18 @@ function createWindow() {
       mainWindow.hide();
     }
   });
+
+  const notifyHidden = () => mainWindow.webContents.send('app-visibility-changed', 'hidden');
+  const notifyVisible = () => mainWindow.webContents.send('app-visibility-changed', 'visible');
+
+  // Chromium's document.visibilitychange does not fire reliably for a hidden/minimized
+  // Electron BrowserWindow, so the PIN auto-lock relies on these window-level events instead.
+  mainWindow.on('hide', notifyHidden);
+  mainWindow.on('minimize', notifyHidden);
+  mainWindow.on('blur', notifyHidden);
+  mainWindow.on('show', notifyVisible);
+  mainWindow.on('restore', notifyVisible);
+  mainWindow.on('focus', notifyVisible);
 }
 
 function createTray() {
