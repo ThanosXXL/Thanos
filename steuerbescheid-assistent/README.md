@@ -42,6 +42,12 @@ oder lässt sich von einer steuerberatenden Person unterstützen.
   versteuerndes Einkommen, Einkommensteuer nach § 32a EStG, Kirchensteuer,
   Soli, Abgeltungsteuer, mögliche Erstattung/Nachzahlung) berechnet wird –
   deutlich als Richtwert gekennzeichnet, nicht als verbindliche Berechnung
+- Demo-Video direkt in der App abrufbar (Button „🎬 Demo-Video ansehen“ auf
+  dem Startbildschirm öffnet einen Player mit Download-Link)
+- Download-Link für eine vollständige Zusammenfassung (Checkliste + Schätzung
+  als eigenständige HTML-Datei) auf der Zusammenfassungsseite – erscheint
+  erst, sobald alle Pflicht-Unterlagen abgehakt sind und eine Schätzung
+  vorliegt
 
 ## Technik
 
@@ -73,6 +79,11 @@ Jeder statische Webserver funktioniert; ein Build-Schritt ist nicht nötig.
 - `app.js` – Wizard-Logik, Zustandsverwaltung (`localStorage`), Datei-Upload,
   Beträge-Eingabefelder, Beispielbild-Erzeugung (SVG)
 - `manifest.json`, `sw.js`, `icons/icon.svg` – PWA-/Installations-Setup
+- `demo/steuerbescheid-assistent-demo.mp4`, `demo/poster.jpg` – Demo-Video und
+  Vorschaubild, die der „Demo-Video ansehen“-Button in der App einbindet
+- `demo/workflow/` – wiederverwendbarer Ablauf (inkl. Hintergrundmusik), mit
+  dem das Demo-Video entstanden ist und mit dem sich künftige Demovideos
+  genauso bauen lassen (Details in `demo/workflow/README.md`)
 
 ## Grenzen
 

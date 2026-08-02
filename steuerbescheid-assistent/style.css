@@ -503,9 +503,121 @@ body {
   z-index: 50;
 }
 
+/* ---------- Video-Modal ---------- */
+.video-modal {
+  position: fixed;
+  inset: 0;
+  z-index: 100;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+}
+
+.video-modal[hidden] { display: none; }
+
+.video-modal-backdrop {
+  position: absolute;
+  inset: 0;
+  background: rgba(58, 36, 0, 0.72);
+}
+
+.video-modal-content {
+  position: relative;
+  z-index: 1;
+  width: 100%;
+  max-width: 860px;
+  background: linear-gradient(180deg, #fff4dc 0%, #ffe4ad 100%);
+  border-radius: var(--radius-lg);
+  padding: 20px;
+  box-shadow: var(--shadow-pop), inset 0 1px 0 rgba(255,255,255,0.7);
+  border: 1px solid rgba(255, 149, 0, 0.35);
+}
+
+.demo-video {
+  width: 100%;
+  border-radius: var(--radius-md);
+  background: #000;
+  box-shadow: var(--shadow-pop-sm);
+  display: block;
+}
+
+.video-modal-actions {
+  display: flex;
+  justify-content: center;
+  margin-top: 16px;
+}
+
+.video-modal-close {
+  position: absolute;
+  top: -14px;
+  right: -14px;
+  width: 38px;
+  height: 38px;
+  border-radius: 50%;
+  border: none;
+  cursor: pointer;
+  font-size: 1rem;
+  font-weight: 700;
+  color: #4a2500;
+  background: linear-gradient(180deg, var(--amber-200), var(--orange-500));
+  box-shadow: var(--shadow-pop-sm), inset 0 1px 0 rgba(255,255,255,0.7);
+}
+
+.demo-teaser {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  margin: 18px 0;
+  padding: 14px 16px;
+  border-radius: var(--radius-md);
+  background: linear-gradient(180deg, #fff, #ffe9bd);
+  box-shadow: var(--shadow-pop-sm), inset 0 1px 0 rgba(255,255,255,0.8);
+  cursor: pointer;
+  border: none;
+  width: 100%;
+  text-align: left;
+  font: inherit;
+  color: var(--ink);
+}
+
+.demo-teaser-icon {
+  font-size: 1.8rem;
+  flex-shrink: 0;
+}
+
+.demo-teaser strong { display: block; color: var(--deep-700); }
+.demo-teaser span { font-size: 0.82rem; color: var(--ink-soft); }
+
+/* ---------- Download-Freigabe (Zusammenfassung) ---------- */
+.download-gate {
+  margin-top: 16px;
+  padding: 16px;
+  border-radius: var(--radius-md);
+}
+
+.download-gate.locked {
+  background: rgba(255, 255, 255, 0.55);
+  border: 1px dashed var(--orange-400);
+  font-size: 0.85rem;
+  color: var(--ink-soft);
+}
+
+.download-gate.unlocked {
+  background: linear-gradient(180deg, #fff, #ffe9bd);
+  border: 1px solid var(--orange-500);
+  text-align: center;
+}
+
+.download-gate.unlocked p {
+  margin: 0 0 12px;
+  font-weight: 600;
+  color: var(--deep-700);
+}
+
 /* ---------- Summary print ---------- */
 @media print {
-  .app-header, .app-footer, .btn-row, .file-attach { display: none !important; }
+  .app-header, .app-footer, .btn-row, .file-attach, .video-modal, .demo-teaser { display: none !important; }
   body { background: #fff; }
 }
 

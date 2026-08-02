@@ -38,6 +38,17 @@
 
   <div id="toast" class="toast" hidden></div>
 
+  <div id="video-modal" class="video-modal" hidden>
+    <div class="video-modal-backdrop" id="video-modal-backdrop"></div>
+    <div class="video-modal-content">
+      <button id="video-modal-close" class="video-modal-close" aria-label="Schließen">✕</button>
+      <video id="demo-video" class="demo-video" controls playsinline poster="demo/poster.jpg"></video>
+      <div class="video-modal-actions">
+        <a id="video-download-link" class="btn secondary" href="demo/steuerbescheid-assistent-demo.mp4" download="steuerbescheid-assistent-demo.mp4">⬇️ Video herunterladen</a>
+      </div>
+    </div>
+  </div>
+
   <script src="data.js"></script>
   <script src="calc.js"></script>
   <script src="app.js"></script>

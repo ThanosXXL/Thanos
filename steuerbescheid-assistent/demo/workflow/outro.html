@@ -1,0 +1,49 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="UTF-8" />
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body { width: 1280px; height: 720px; overflow: hidden; font-family: "Segoe UI", Roboto, Arial, sans-serif; }
+  body {
+    display: flex; align-items: center; justify-content: center;
+    background:
+      radial-gradient(circle at 15% -10%, #fff6d8 0%, transparent 55%),
+      radial-gradient(circle at 100% 0%, #ffcf80 0%, transparent 45%),
+      linear-gradient(160deg, #fff2cf 0%, #ffdf9e 38%, #ffb559 75%, #ff9a3d 100%);
+  }
+  .card {
+    width: 980px; text-align: center; padding: 56px 64px; border-radius: 34px;
+    background: linear-gradient(180deg, #ffffff 0%, #fff4dc 100%);
+    box-shadow: 0 14px 28px rgba(163,69,0,0.28), 0 4px 8px rgba(163,69,0,0.18), inset 0 1px 0 rgba(255,255,255,0.9);
+    border: 1px solid rgba(255,149,0,0.25);
+  }
+  h1 { font-size: 46px; color: #a34500; margin-bottom: 22px; }
+  ul { list-style: none; text-align: left; margin: 0 auto 30px; max-width: 760px; font-size: 22px; color: #3a2400; }
+  ul li { margin-bottom: 12px; padding-left: 34px; position: relative; }
+  ul li::before { content: "✅"; position: absolute; left: 0; }
+  .disclaimer {
+    background: linear-gradient(180deg, #fff3cf, #ffe08a);
+    border: 1px solid #ff9500; border-radius: 16px; padding: 18px 22px;
+    font-size: 17px; color: #3a2400; text-align: left; line-height: 1.5;
+  }
+</style>
+</head>
+<body>
+  <div class="card">
+    <h1>🎉 In wenigen Schritten organisiert</h1>
+    <ul>
+      <li>Checkliste je nach Familienstand &amp; Situation (Job, Kinder, Studium, Vermietung, u.v.m.)</li>
+      <li>Foto/Scan-Upload direkt in der Checkliste</li>
+      <li>Automatische Steuerschätzung als Richtwert</li>
+      <li>Installierbar auf Windows, macOS, Linux, Android &amp; iOS</li>
+    </ul>
+    <div class="disclaimer">
+      ⚠️ Organisations- und Lernwerkzeug — keine Steuerberatung, keine verbindliche
+      Berechnung, keine Übermittlung ans Finanzamt. Die Steuerschätzung ist ein
+      ungefährer Richtwert. Erklärung selbst über ELSTER einreichen oder von einer
+      steuerberatenden Person prüfen lassen.
+    </div>
+  </div>
+</body>
+</html>

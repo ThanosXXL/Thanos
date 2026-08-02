@@ -1,4 +1,4 @@
-const CACHE_NAME = 'steuerbescheid-assistent-v2';
+const CACHE_NAME = 'steuerbescheid-assistent-v3';
 const APP_SHELL = [
   './',
   './index.html',

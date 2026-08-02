@@ -67,6 +67,32 @@
     showToast._timer = setTimeout(() => { t.hidden = true; }, 3200);
   }
 
+  // ---------- Demo-Video-Modal ----------
+  const DEMO_VIDEO_SRC = 'demo/steuerbescheid-assistent-demo.mp4';
+
+  function openVideoModal() {
+    const modal = document.getElementById('video-modal');
+    const video = document.getElementById('demo-video');
+    video.src = DEMO_VIDEO_SRC;
+    modal.hidden = false;
+    video.play().catch(() => {});
+  }
+
+  function closeVideoModal() {
+    const modal = document.getElementById('video-modal');
+    const video = document.getElementById('demo-video');
+    video.pause();
+    video.removeAttribute('src');
+    video.load();
+    modal.hidden = true;
+  }
+
+  document.getElementById('video-modal-close').addEventListener('click', closeVideoModal);
+  document.getElementById('video-modal-backdrop').addEventListener('click', closeVideoModal);
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape' && !document.getElementById('video-modal').hidden) closeVideoModal();
+  });
+
   // ---------- Beispielbild (schematisches SVG, keine amtliche Vorlage) ----------
   const EXAMPLES = {
     persoenlich: { icon: '🪪', label: 'Hauptvordruck – Persönliche Daten', field: 'Steuer-Identifikationsnummer' },
@@ -183,6 +209,13 @@
     const card = h('div', { class: 'card' },
       h('h2', {}, 'Willkommen beim Steuerbescheid-Assistenten'),
       h('p', {}, 'In wenigen Schritten zeigt dir dieser Assistent, welche Formulare (Anlagen) für deine Situation relevant sind, welche Angaben dort gefragt sind und welche Unterlagen du als Foto oder Scan bereitlegen solltest – rückwirkend ab dem Steuerjahr 2023.'),
+      h('button', { class: 'demo-teaser', onclick: openVideoModal },
+        h('span', { class: 'demo-teaser-icon' }, '🎬'),
+        h('span', {},
+          h('strong', {}, 'Demo-Video ansehen'),
+          h('span', {}, 'Kurzer Rundgang durch den Assistenten (43 Sekunden, mit Musik)')
+        )
+      ),
       disclaimerBanner(),
       h('div', { class: 'btn-row' },
         h('button', {
@@ -471,8 +504,105 @@
         h('div', { class: 'fact-tile highlight' }, h('span', { class: 'val' }, formatEuro(est.gesamtSteuerlast)), h('span', { class: 'lbl' }, 'geschätzte Steuerlast insgesamt'))
       ),
       diffText ? h('p', {}, diffText) : null,
-      h('p', { class: 'example-caption' }, 'Häufig vergessene Posten, die dieses Ergebnis verändern können: Fachliteratur, Arbeitsmittel, Fortbildungen, doppelte Haushaltsführung, Handwerkerleistungen und haushaltsnahe Dienstleistungen, Kinderbetreuungskosten, Behinderten-Pauschbetrag, Verlustvorträge aus Vorjahren, Riester-/Rürup-Zulagen u.v.m.')
+      h('p', { class: 'example-caption' }, 'Häufig vergessene Posten, die dieses Ergebnis verändern können: Fachliteratur, Arbeitsmittel, Fortbildungen, doppelte Haushaltsführung, Handwerkerleistungen und haushaltsnahe Dienstleistungen, Kinderbetreuungskosten, Behinderten-Pauschbetrag, Verlustvorträge aus Vorjahren, Riester-/Rürup-Zulagen u.v.m.'),
+      renderDownloadGate(est)
     );
+  }
+
+  function requiredDocsStatus(steps) {
+    let total = 0, checked = 0;
+    const missing = [];
+    steps.forEach((s) => (s.documents || []).forEach((d) => {
+      if (!d.required) return;
+      total += 1;
+      const e = state.docs[s.id] && state.docs[s.id][d.label];
+      if (e && e.checked) checked += 1;
+      else missing.push(`${d.label} (${s.title})`);
+    }));
+    return { total, checked, missing };
+  }
+
+  function renderDownloadGate(est) {
+    const steps = currentSteps();
+    const req = requiredDocsStatus(steps);
+    const allRequiredDone = req.total === 0 || req.checked === req.total;
+
+    if (!allRequiredDone) {
+      return h('div', { class: 'download-gate locked' },
+        `🔒 Der Download der vollständigen Zusammenfassung wird freigeschaltet, sobald alle Pflicht-Unterlagen abgehakt sind (aktuell ${req.checked}/${req.total}). Noch offen: ${req.missing.join(', ')}.`
+      );
+    }
+    return h('div', { class: 'download-gate unlocked' },
+      h('p', {}, '📥 Alle Pflicht-Unterlagen sind abgehakt – deine Zusammenfassung inkl. Schätzung ist bereit.'),
+      h('button', { class: 'btn', onclick: () => downloadSummary(steps, est) }, '⬇️ Zusammenfassung & Schätzung herunterladen')
+    );
+  }
+
+  function buildSummaryHtml(steps, est) {
+    const familyLabel = (FAMILY_STATUS.find((f) => f.id === state.familyStatus) || {}).label || '';
+    const situationLabels = SITUATIONS.filter((s) => state.situations.includes(s.id)).map((s) => s.label);
+
+    const stepsHtml = steps.map((s) => {
+      const docs = (s.documents || []).map((d) => {
+        const e = state.docs[s.id] && state.docs[s.id][d.label];
+        const checked = e && e.checked;
+        return `<li>${checked ? '✅' : '⬜'} ${escapeXml(d.label)}${d.required ? ' <em>(nötig)</em>' : ''}</li>`;
+      }).join('');
+      return `<div class="step"><h3>${escapeXml(s.title)}</h3><p class="form">${escapeXml(s.form)}</p>${docs ? `<ul>${docs}</ul>` : ''}</div>`;
+    }).join('');
+
+    const estRows = [
+      ['zu versteuerndes Einkommen (geschätzt)', formatEuro(est.zvE)],
+      ['geschätzte Einkommensteuer', formatEuro(est.estIncomeTax)],
+    ];
+    if (est.kirchensteuer > 0) estRows.push(['geschätzte Kirchensteuer', formatEuro(est.kirchensteuer)]);
+    if (est.soli > 0) estRows.push(['geschätzter Solidaritätszuschlag', formatEuro(est.soli)]);
+    if (est.abgeltungsteuerGesamt > 0) estRows.push(['Abgeltungsteuer auf Kapitalerträge', formatEuro(est.abgeltungsteuerGesamt)]);
+    estRows.push(['geschätzte Steuerlast insgesamt', formatEuro(est.gesamtSteuerlast)]);
+
+    let diffLine = '';
+    if (est.differenz !== null) {
+      diffLine = est.differenz >= 0
+        ? `<p><strong>Mögliche Erstattung (geschätzt): ${formatEuro(est.differenz)}</strong></p>`
+        : `<p><strong>Mögliche Nachzahlung (geschätzt): ${formatEuro(-est.differenz)}</strong></p>`;
+    }
+
+    return `<!doctype html>
+<html lang="de"><head><meta charset="UTF-8"><title>Steuercheckliste ${state.year}</title>
+<style>
+  body{font-family:"Segoe UI",Roboto,Arial,sans-serif;background:linear-gradient(160deg,#fff2cf,#ffb559);margin:0;padding:30px;color:#3a2400;}
+  .sheet{max-width:760px;margin:0 auto;background:#fff;border-radius:20px;padding:32px;box-shadow:0 10px 24px rgba(163,69,0,0.25);}
+  h1{color:#a34500;} h2{color:#a34500;margin-top:30px;} h3{margin-bottom:4px;}
+  .form{color:#e85d00;font-weight:600;margin-top:0;}
+  ul{margin-top:4px;}
+  .disclaimer{background:#fff3cf;border:1px solid #ff9500;border-radius:12px;padding:14px 18px;font-size:0.85rem;margin-top:24px;}
+  .fact{display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px solid #f0d9a8;}
+</style></head>
+<body><div class="sheet">
+  <h1>Steuercheckliste ${state.year}</h1>
+  <p><strong>Familienstand:</strong> ${escapeXml(familyLabel)}</p>
+  <p><strong>Situation:</strong> ${escapeXml(situationLabels.join(', ') || '—')}</p>
+  <h2>Unterlagen-Checkliste</h2>
+  ${stepsHtml}
+  <h2>🧮 Automatische Steuerschätzung (Richtwert)</h2>
+  ${estRows.map(([l, v]) => `<div class="fact"><span>${escapeXml(l)}</span><strong>${v}</strong></div>`).join('')}
+  ${diffLine}
+  <div class="disclaimer">⚠️ Ungefährer Richtwert, keine verbindliche Steuerberechnung. Kann von deinem echten Steuerbescheid abweichen, u. a. wenn Werbungskosten oder andere absetzbare Posten nicht vollständig erfasst wurden. Ersetzt keine Steuerberatung. Reiche deine Erklärung über ELSTER ein oder lass sie von einer steuerberatenden Person prüfen.</div>
+  <p style="margin-top:24px;font-size:0.75rem;color:#6b4a17;">Erstellt mit dem Steuerbescheid-Assistenten am ${new Date().toLocaleDateString('de-DE')}.</p>
+</div></body></html>`;
+  }
+
+  function downloadSummary(steps, est) {
+    const html = buildSummaryHtml(steps, est);
+    const blob = new Blob([html], { type: 'text/html' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `steuercheckliste-${state.year}.html`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    setTimeout(() => URL.revokeObjectURL(url), 2000);
   }
 
   // ---------- PWA: Service Worker ----------
