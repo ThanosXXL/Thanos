@@ -3,8 +3,12 @@ package com.freshtrades.android
 import android.Manifest
 import android.app.AlertDialog
 import android.content.pm.PackageManager
+import android.graphics.Bitmap
+import android.graphics.Canvas
 import android.net.Uri
+import android.os.Build
 import android.os.Bundle
+import android.provider.MediaStore
 import android.speech.RecognizerIntent
 import android.speech.tts.TextToSpeech
 import android.view.KeyEvent
@@ -18,6 +22,8 @@ import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
+import java.text.SimpleDateFormat
+import java.util.Date
 import java.util.Locale
 
 class MainActivity : AppCompatActivity(), TextToSpeech.OnInitListener {
@@ -32,7 +38,6 @@ class MainActivity : AppCompatActivity(), TextToSpeech.OnInitListener {
 
     private var textToSpeech: TextToSpeech? = null
     private var googleConnected = false
-    private var snipingActive = false
 
     private val speechLauncher = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
         val transcript = result.data
@@ -49,6 +54,14 @@ class MainActivity : AppCompatActivity(), TextToSpeech.OnInitListener {
             launchSpeechRecognizer()
         } else {
             Toast.makeText(this, R.string.mic_permission_denied, Toast.LENGTH_SHORT).show()
+        }
+    }
+
+    private val storagePermissionLauncher = registerForActivityResult(ActivityResultContracts.RequestPermission()) { granted ->
+        if (granted) {
+            captureAndSaveScreenshot()
+        } else {
+            Toast.makeText(this, R.string.storage_permission_denied, Toast.LENGTH_SHORT).show()
         }
     }
 
@@ -131,12 +144,37 @@ class MainActivity : AppCompatActivity(), TextToSpeech.OnInitListener {
     }
 
     private fun onSnipingClicked() {
-        val message = if (snipingActive) R.string.confirm_sniping_deactivate_message else R.string.confirm_sniping_activate_message
-        confirmAction(message) {
-            snipingActive = !snipingActive
-            snipingBtn.isActivated = snipingActive
-            snipingBtn.contentDescription = getString(if (snipingActive) R.string.sniping_active else R.string.sniping_default)
-            Toast.makeText(this, R.string.sniping_toast, Toast.LENGTH_SHORT).show()
+        confirmAction(R.string.confirm_sniping_message) {
+            val needsPermission = Build.VERSION.SDK_INT <= Build.VERSION_CODES.P &&
+                ContextCompat.checkSelfPermission(this, Manifest.permission.WRITE_EXTERNAL_STORAGE) !=
+                PackageManager.PERMISSION_GRANTED
+            if (needsPermission) {
+                storagePermissionLauncher.launch(Manifest.permission.WRITE_EXTERNAL_STORAGE)
+            } else {
+                captureAndSaveScreenshot()
+            }
+        }
+    }
+
+    private fun captureAndSaveScreenshot() {
+        val width = searchView.width
+        val height = searchView.height
+        if (width <= 0 || height <= 0) {
+            Toast.makeText(this, R.string.sniping_screenshot_failed, Toast.LENGTH_SHORT).show()
+            return
+        }
+
+        val bitmap = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888)
+        searchView.draw(Canvas(bitmap))
+
+        val timestamp = SimpleDateFormat("yyyyMMdd-HHmmss", Locale.GERMANY).format(Date())
+        val title = "FreshTrades-Sniping-$timestamp"
+        val savedUri = MediaStore.Images.Media.insertImage(contentResolver, bitmap, title, "FreshTrades Sniping-Screenshot")
+
+        if (savedUri != null) {
+            Toast.makeText(this, R.string.sniping_screenshot_saved, Toast.LENGTH_SHORT).show()
+        } else {
+            Toast.makeText(this, R.string.sniping_screenshot_failed, Toast.LENGTH_SHORT).show()
         }
     }
 
