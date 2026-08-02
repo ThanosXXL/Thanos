@@ -4,7 +4,7 @@
   "description": "Buchhaltung! - Desktop-Buchhaltungssoftware fuer bis zu vier Administratoren mit monatlicher Erfassung (Januar-Dezember) und automatischer Erinnerung",
   "main": "main.js",
   "author": "",
-  "license": "MIT",
+  "license": "UNLICENSED",
   "scripts": {
     "start": "electron .",
     "dist": "electron-builder",
