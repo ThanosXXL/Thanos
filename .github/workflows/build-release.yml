@@ -35,7 +35,7 @@ jobs:
         run: npm install
 
       - name: Desktop-App bauen
-        run: npm run dist
+        run: npm run dist -- --publish=never
 
       - name: Installer als Artifact hochladen
         uses: actions/upload-artifact@v4
