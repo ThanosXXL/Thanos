@@ -25,10 +25,18 @@ const APP_URL = process.env.APP_URL || 'http://127.0.0.1:8642/index.html';
   const page = await context.newPage();
   const pause = (ms) => page.waitForTimeout(ms);
 
+  // Hakt ALLE Pflicht-Unterlagen des aktuell sichtbaren Schritts ab (nicht nur die erste!)
+  async function checkAllRequiredDocsOnStep() {
+    const boxes = await page.$$('.doc-item.required input[type=checkbox]');
+    for (const cb of boxes) {
+      const isChecked = await cb.isChecked();
+      if (!isChecked) { await cb.click(); await pause(350); }
+    }
+  }
+
   await page.goto(APP_URL);
   await pause(2200);
 
-  // Neues Feature zeigen: Demo-Video-Button auf dem Startbildschirm
   await page.click('text=Demo-Video ansehen');
   await pause(1700);
   await page.click('#video-modal-close');
@@ -53,57 +61,66 @@ const APP_URL = process.env.APP_URL || 'http://127.0.0.1:8642/index.html';
   await page.click('text=Checkliste erstellen');
   await pause(2000);
 
-  // Schritt 1: persoenlich -> Kirchensteuer + Pflicht-Unterlagen abhaken
+  // Schritt 1: persoenlich -> Kirchensteuer + ALLE Pflicht-Unterlagen
   await page.selectOption('select', '9');
   await pause(900);
-  let checkboxes = await page.$$('input[type=checkbox]');
-  for (const cb of checkboxes) { await cb.click(); await pause(250); }
-  await pause(500);
+  await checkAllRequiredDocsOnStep();
+  await pause(400);
   await page.click('text=Weiter');
   await pause(1800);
 
-  // Schritt 2: Anlage N -> Beträge + Pflicht-Unterlage abhaken
+  // Schritt 2: Anlage N -> Beträge + Pflicht-Unterlage
   const amountInputs = await page.$$('.amounts-grid input[type=number]');
   await amountInputs[0].click(); await amountInputs[0].type('45000', { delay: 40 });
   await pause(350);
   await amountInputs[1].click(); await amountInputs[1].type('500', { delay: 40 });
   await pause(350);
   await amountInputs[2].click(); await amountInputs[2].type('7000', { delay: 40 });
-  await pause(600);
-  const reqCb = await page.$('.doc-item.required input[type=checkbox]');
-  if (reqCb) { await reqCb.click(); await pause(700); }
+  await pause(500);
+  await checkAllRequiredDocsOnStep();
+  await pause(400);
+  await page.click('text=Weiter');
+  await pause(1700);
+
+  // Schritt 3: Kinder -> Anzahl + Pflicht-Unterlage (Kindergeldbescheid!)
+  const kinderInputs = await page.$$('.amounts-grid input[type=number]');
+  if (kinderInputs[0]) { await kinderInputs[0].click(); await kinderInputs[0].type('1', { delay: 60 }); await pause(500); }
+  await checkAllRequiredDocsOnStep();
+  await pause(500);
   await page.click('text=Weiter');
   await pause(1600);
 
-  // Schritt 3: Kinder
-  const kinderInputs = await page.$$('.amounts-grid input[type=number]');
-  if (kinderInputs[0]) { await kinderInputs[0].click(); await kinderInputs[0].type('1', { delay: 60 }); await pause(600); }
-  await page.click('text=Weiter');
-  await pause(1400);
-
-  // Schritt 4: Kapitalerträge
+  // Schritt 4: Kapitalerträge -> Betrag + Pflicht-Unterlage (Steuerbescheinigung Bank!)
   const kapInputs = await page.$$('.amounts-grid input[type=number]');
-  if (kapInputs[0]) { await kapInputs[0].click(); await kapInputs[0].type('1500', { delay: 60 }); await pause(600); }
+  if (kapInputs[0]) { await kapInputs[0].click(); await kapInputs[0].type('1500', { delay: 60 }); await pause(500); }
+  await checkAllRequiredDocsOnStep();
+  await pause(600);
 
+  // Alle weiteren Schritte zügig durchklicken (Pflicht-Docs jeweils generisch abhaken)
   for (let i = 0; i < 10; i++) {
+    await checkAllRequiredDocsOnStep();
     const zusBtn = await page.$('button:has-text("Zur Zusammenfassung")');
     if (zusBtn) { await zusBtn.click(); break; }
     const weiter = await page.$('button:has-text("Weiter")');
-    if (weiter) { await weiter.click(); await pause(800); }
+    if (weiter) { await weiter.click(); await pause(700); }
   }
   await pause(1800);
 
   // Zusammenfassung: zur Schätzung + freigeschaltetem Download scrollen
   await page.evaluate(() => window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' }));
-  await pause(2200);
+  await pause(2400);
 
-  // Download-Button antippen (löst echten Download aus, für die Aufnahme unschädlich)
   const dlBtn = await page.$('button:has-text("Zusammenfassung & Schätzung herunterladen")');
+  console.log('Download-Button gefunden (Gate entsperrt):', !!dlBtn);
   if (dlBtn) {
+    await dlBtn.scrollIntoViewIfNeeded();
+    await pause(600);
     await dlBtn.hover();
-    await pause(900);
+    await pause(1200);
     await dlBtn.click().catch(() => {});
-    await pause(1600);
+    await pause(2000);
+  } else {
+    console.log('WARNUNG: Download-Button nicht sichtbar, Gate vermutlich noch gesperrt!');
   }
 
   await context.close();
