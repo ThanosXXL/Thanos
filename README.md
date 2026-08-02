@@ -50,3 +50,7 @@ Im Ordner [`trading-agent/`](trading-agent/) liegt die separate FreshTrades-Anwe
 Frage-Eingabe (inkl. Mikrofon), Sniping-, Vorlese- und "Seite speichern unter"-Button sowie
 Google-Anmeldung. Installation und Start erfolgen dort mit denselben Befehlen
 (`npm install`, `npm start`, `npm run dist`).
+
+- Native Android-App: [`trading-agent/android-app/`](trading-agent/android-app/)
+- Bookmarklet für Chrome (Android/Desktop, kein App-Install nötig):
+  [`trading-agent/bookmarklet/`](trading-agent/bookmarklet/)
