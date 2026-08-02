@@ -155,6 +155,12 @@ Eingabe wechselt die Ansicht tatsächlich zum geschützten Administrator.*
 
 Über „PIN ändern“ lässt sich die PIN jederzeit erneuern oder per „PIN entfernen“ wieder ganz deaktivieren.
 
+**Automatisches Sperren beim Verlassen:** Sobald die App minimiert, in den Hintergrund geschickt oder das
+Fenster verlassen wird (z. B. Fenster wechseln, Bildschirm sperren), sperrt sich ein geschütztes Profil
+automatisch wieder – beim Zurückkehren ist erneut die PIN nötig. Über den Button **„🔒 Sperren“** oben
+rechts (nur sichtbar, wenn der aktuelle Administrator eine PIN hat) lässt sich das auch jederzeit manuell
+sofort auslösen, z. B. bevor man kurz den Platz verlässt.
+
 > **Hinweis:** Die PIN schützt vor versehentlichem oder beiläufigem Mitlesen an einem gemeinsam genutzten
 > Rechner – sie ist keine Verschlüsselung. Wer direkten Zugriff auf die Datendatei hat, kann sie technisch
 > umgehen.
