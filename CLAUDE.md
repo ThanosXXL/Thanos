@@ -87,6 +87,22 @@ interval) keeps running in the background as long as the app isn't fully quit �
 (`setting-autostart`) makes this reliable across reboots. This is a design tradeoff, not a guarantee: if the
 user fully quits the app (via the tray menu), no reminder fires until it's reopened.
 
+## Vertraulichkeit & Zugriff (WICHTIG)
+
+Dieses Projekt ist **proprietär** (`"license": "UNLICENSED"`, siehe `LICENSE`) — der Eigentümer plant,
+die App möglicherweise kommerziell zu verkaufen. Daraus folgt eine feste Regel, die für **jede** Session,
+jedes Fenster und jeden Klon dieses Repos gilt:
+
+- **Niemals** Personen als GitHub-Collaborator zum Repository hinzufügen und **niemals** vorschlagen, das
+  Repository öffentlich zu machen. Es gibt bei GitHub keine Zugriffsstufe, die Quellcode verbirgt — jeder
+  Collaborator kann den kompletten Code klonen.
+- **Ausschließlich der Repo-Owner** darf Zugriff auf den Quellcode haben. Kolleginnen/Kollegen, Kunden oder
+  Tester bekommen **nur die fertig gebauten Installer-Dateien** (`.exe`/`.dmg`/`.AppImage` bzw. die
+  gepackte Web-Version), niemals Repo- oder Quellcode-Zugriff.
+- Falls eine Aufgabe scheinbar erfordern würde, jemanden einzuladen oder das Repo öffentlich zu schalten:
+  stattdessen nachfragen bzw. auf reine Datei-Weitergabe (Chat/Mail/Freigabe-Link) der gebauten Artefakte
+  ausweichen.
+
 ## Conventions
 
 - User-facing strings, list labels, and comments are in German. Match the existing language when touching
@@ -98,13 +114,23 @@ user fully quits the app (via the tray menu), no reminder fires until it's reope
 
 ## Releases (CI)
 
-- `.github/workflows/build-release.yml` builds and publishes installers for Windows, macOS, and Linux. It
-  triggers on pushing a `v*` tag (e.g. `v1.0.0`) or manually via **Actions → Build & Release Desktop App →
-  Run workflow**, running `npm run dist -- --publish always` to upload artifacts to GitHub Releases
-  (`publish: github` in `package.json`). Artifact names are pinned (`Buchhaltung-Windows-Setup.exe`,
-  `Buchhaltung-macOS.dmg`, `Buchhaltung-Linux.AppImage` via `build.<platform>.artifactName`) so the in-app
-  download banner can link to `.../releases/latest/download/<fixed-name>` without needing updates per
-  release.
+- `.github/workflows/build-release.yml` has two stages: a `build` matrix (Windows/macOS/Linux, `npm run
+  dist`, no publish) that always runs and uploads each OS's installer as a workflow artifact, and a
+  `release` job that only runs on a `v*` tag push or a manual run with the `publish` input set to `true`.
+  The release job downloads all three artifacts, deletes any stale draft release for the target tag
+  (`gh release delete ... --cleanup-tag`), then publishes a clean release with `gh release create`.
+  **Do not** rely on electron-builder's own `--publish always` here — triggered from a non-tag ref it only
+  ever produces a permanently-draft "untagged-xxxx" release with no working download links, which is why
+  this project uses the two-stage design instead. Artifact names are pinned
+  (`Buchhaltung-Windows-Setup.exe`, `Buchhaltung-macOS.dmg`, `Buchhaltung-Linux.AppImage` via
+  `build.<platform>.artifactName`) so the in-app download banner can link to
+  `.../releases/latest/download/<fixed-name>` without needing updates per release.
+- This repository hosts multiple unrelated projects across different branches, and already has generic
+  `v1.0.0`/`v0.1.1` releases belonging to other apps. Buchhaltung!'s `package.json` version must stay
+  distinct from those to avoid electron-builder/`gh release` colliding with someone else's release.
+- Pushing a git tag directly from a Claude Code session is blocked (403) by this environment's sandboxed
+  git proxy — use the manual `publish: true` workflow_dispatch input instead (see above); it does not
+  require pushing a tag yourself.
 - `.github/workflows/deploy-pages.yml` syncs `renderer/` → `docs/` and publishes it to GitHub Pages on every
   push to `main` that touches `renderer/`. GitHub Pages itself must be pointed at **Source: GitHub Actions**
   once, manually, in repository Settings — this workflow only handles subsequent deploys.
