@@ -130,5 +130,6 @@
     notifyNow,
     openExternal,
     saveAndShareFile,
+    blobToBase64,
   };
 })(window);

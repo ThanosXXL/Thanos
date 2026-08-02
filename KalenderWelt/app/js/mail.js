@@ -5,7 +5,9 @@
   const view = {
     messages: [],
     loading: false,
+    loaded: false,
     error: "",
+    sessionExpiredMessage: "",
     openMessage: null,
   };
 
@@ -52,6 +54,8 @@
       state.mailToken = null;
       state.mailAccount = null;
       view.messages = [];
+      view.loaded = false;
+      view.error = "";
       await global.AppState.persist();
       global.KalenderWeltApp.rerender();
     });
@@ -84,7 +88,7 @@
     } else if (view.messages.length === 0) {
       const l = document.createElement("div");
       l.className = "hint";
-      l.textContent = "Keine Nachrichten geladen. Auf „Aktualisieren“ klicken.";
+      l.textContent = view.loaded ? "Keine Nachrichten im Posteingang." : "Noch nicht geladen.";
       list.appendChild(l);
     } else {
       view.messages.forEach((m) => {
@@ -108,7 +112,7 @@
     panel.appendChild(list);
     container.appendChild(panel);
 
-    if (!view.loading && view.messages.length === 0 && !view.error) {
+    if (!view.loading && !view.loaded && !view.error) {
       loadMessages(container);
     }
   }
@@ -123,6 +127,15 @@
     hint.className = "hint";
     hint.textContent = "Zugangsdaten werden an den KalenderWelt-Vermittlungsserver gesendet (server/) und dort für IMAP/SMTP verwendet.";
     body.appendChild(hint);
+
+    if (view.sessionExpiredMessage) {
+      const sessionHint = document.createElement("div");
+      sessionHint.className = "hint";
+      sessionHint.style.color = "#8b1f1f";
+      sessionHint.textContent = view.sessionExpiredMessage;
+      body.appendChild(sessionHint);
+      view.sessionExpiredMessage = "";
+    }
 
     const serverLabel = document.createElement("label");
     serverLabel.textContent = "Server-Adresse (auf Mobilgeräten nicht „localhost“, sondern IP/Domain des Servers)";
@@ -219,12 +232,22 @@
     try {
       const res = await fetch(api("/api/mail/messages?token=" + encodeURIComponent(state.mailToken)));
       const data = await res.json();
+      if (res.status === 401) {
+        // Sitzung abgelaufen (Server neu gestartet oder TTL erreicht) – zurück zum Login führen.
+        state.mailToken = null;
+        state.mailAccount = null;
+        await global.AppState.persist();
+        view.messages = [];
+        view.sessionExpiredMessage = "Sitzung abgelaufen, bitte Postfach erneut verbinden.";
+        return;
+      }
       if (!res.ok) throw new Error(data.error || "Fehler beim Laden");
       view.messages = data.messages || [];
     } catch (err) {
       view.error = "Postfach konnte nicht geladen werden: " + err.message;
     } finally {
       view.loading = false;
+      view.loaded = true;
       render(container);
     }
   }
@@ -248,9 +271,9 @@
     closeBtn.className = "btn secondary";
     closeBtn.style.marginTop = "16px";
     closeBtn.textContent = "Schließen";
-    closeBtn.addEventListener("click", () => document.getElementById("modal-root").innerHTML = "");
+    closeBtn.addEventListener("click", global.Modal.close);
     body.appendChild(closeBtn);
-    showModal(body);
+    global.Modal.show(body);
   }
 
   function openComposeModal(prefill) {
@@ -319,7 +342,7 @@
       sendBtn.disabled = false;
       sendBtn.textContent = "Senden";
       if (ok) {
-        document.getElementById("modal-root").innerHTML = "";
+        global.Modal.close();
       } else {
         errorBox.textContent = "Senden fehlgeschlagen. Ist das Postfach verbunden und der Server erreichbar?";
       }
@@ -330,11 +353,11 @@
     cancelBtn.type = "button";
     cancelBtn.className = "btn secondary";
     cancelBtn.textContent = "Abbrechen";
-    cancelBtn.addEventListener("click", () => document.getElementById("modal-root").innerHTML = "");
+    cancelBtn.addEventListener("click", global.Modal.close);
     row.appendChild(cancelBtn);
 
     body.appendChild(row);
-    showModal(body);
+    global.Modal.show(body);
   }
 
   async function sendMail({ to, subject, text, attachmentBase64, attachmentName }) {
@@ -358,21 +381,6 @@
     } catch (err) {
       return false;
     }
-  }
-
-  function showModal(bodyEl) {
-    const root = document.getElementById("modal-root");
-    root.innerHTML = "";
-    const overlay = document.createElement("div");
-    overlay.className = "modal-overlay";
-    overlay.addEventListener("click", (e) => {
-      if (e.target === overlay) root.innerHTML = "";
-    });
-    const box = document.createElement("div");
-    box.className = "modal-box";
-    box.appendChild(bodyEl);
-    overlay.appendChild(box);
-    root.appendChild(overlay);
   }
 
   global.Mail = { render, openComposeModal, sendMail };

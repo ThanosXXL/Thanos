@@ -72,9 +72,13 @@
   function renderMonthGrid() {
     const grid = document.createElement("div");
     grid.className = "month-grid";
+    const now = new Date();
     MONTH_NAMES.forEach((name, idx) => {
       const card = document.createElement("div");
       card.className = "month-card";
+      if (view.year === now.getFullYear() && idx === now.getMonth()) {
+        card.classList.add("current");
+      }
       const label = document.createElement("div");
       label.textContent = name;
       card.appendChild(label);
@@ -209,6 +213,14 @@
       actions.style.display = "flex";
       actions.style.gap = "6px";
 
+      const editBtn = document.createElement("button");
+      editBtn.type = "button";
+      editBtn.className = "btn secondary";
+      editBtn.textContent = "✎";
+      editBtn.title = "Bearbeiten";
+      editBtn.addEventListener("click", () => openApptForm(dateStr, a));
+      actions.appendChild(editBtn);
+
       const doneBtn = document.createElement("button");
       doneBtn.type = "button";
       doneBtn.className = "btn secondary";
@@ -216,6 +228,7 @@
       doneBtn.addEventListener("click", async () => {
         a.done = !a.done;
         await global.AppState.persist();
+        openDayModal(dateStr);
         global.KalenderWeltApp.rerender();
       });
       actions.appendChild(doneBtn);
@@ -228,7 +241,7 @@
         const { state } = global.AppState;
         state.appointments = state.appointments.filter((x) => x.id !== a.id);
         await global.AppState.persist();
-        closeModal();
+        openDayModal(dateStr);
         global.KalenderWeltApp.rerender();
       });
       actions.appendChild(delBtn);
@@ -252,16 +265,17 @@
     closeBtn.style.marginTop = "14px";
     closeBtn.style.marginLeft = "8px";
     closeBtn.textContent = "Schließen";
-    closeBtn.addEventListener("click", closeModal);
+    closeBtn.addEventListener("click", global.Modal.close);
     body.appendChild(closeBtn);
 
-    showModal(body);
+    global.Modal.show(body);
   }
 
-  function openApptForm(dateStr) {
+  function openApptForm(dateStr, existing) {
+    const isEdit = !!existing;
     const body = document.createElement("div");
     const heading = document.createElement("h3");
-    heading.textContent = "Neuer Termin – " + formatDate(dateStr);
+    heading.textContent = (isEdit ? "Termin bearbeiten – " : "Neuer Termin – ") + formatDate(dateStr);
     body.appendChild(heading);
 
     const titleLabel = document.createElement("label");
@@ -270,6 +284,7 @@
     const titleInput = document.createElement("input");
     titleInput.type = "text";
     titleInput.placeholder = "z. B. Vorlesung, Meeting …";
+    titleInput.value = isEdit ? existing.title : "";
     body.appendChild(titleInput);
 
     const timeLabel = document.createElement("label");
@@ -277,13 +292,14 @@
     body.appendChild(timeLabel);
     const timeInput = document.createElement("input");
     timeInput.type = "time";
-    timeInput.value = "09:00";
+    timeInput.value = isEdit ? existing.time || "09:00" : "09:00";
     body.appendChild(timeInput);
 
     const notesLabel = document.createElement("label");
     notesLabel.textContent = "Notizen";
     body.appendChild(notesLabel);
     const notesInput = document.createElement("textarea");
+    notesInput.value = isEdit ? existing.notes || "" : "";
     body.appendChild(notesInput);
 
     const hint = document.createElement("div");
@@ -304,14 +320,20 @@
         return;
       }
       const { state, uid } = global.AppState;
-      state.appointments.push({
-        id: uid(),
-        date: dateStr,
-        time: timeInput.value,
-        title: titleInput.value.trim(),
-        notes: notesInput.value.trim(),
-        done: false,
-      });
+      if (isEdit) {
+        existing.time = timeInput.value;
+        existing.title = titleInput.value.trim();
+        existing.notes = notesInput.value.trim();
+      } else {
+        state.appointments.push({
+          id: uid(),
+          date: dateStr,
+          time: timeInput.value,
+          title: titleInput.value.trim(),
+          notes: notesInput.value.trim(),
+          done: false,
+        });
+      }
       await global.AppState.persist();
       openDayModal(dateStr);
       global.KalenderWeltApp.rerender();
@@ -326,31 +348,12 @@
     row.appendChild(cancelBtn);
 
     body.appendChild(row);
-    showModal(body);
+    global.Modal.show(body);
   }
 
   function formatDate(dateStr) {
     const [y, m, d] = dateStr.split("-");
     return `${d}.${m}.${y}`;
-  }
-
-  function showModal(bodyEl) {
-    const root = document.getElementById("modal-root");
-    root.innerHTML = "";
-    const overlay = document.createElement("div");
-    overlay.className = "modal-overlay";
-    overlay.addEventListener("click", (e) => {
-      if (e.target === overlay) closeModal();
-    });
-    const box = document.createElement("div");
-    box.className = "modal-box";
-    box.appendChild(bodyEl);
-    overlay.appendChild(box);
-    root.appendChild(overlay);
-  }
-
-  function closeModal() {
-    document.getElementById("modal-root").innerHTML = "";
   }
 
   // ---------- Tägliche Reminder ab 7 Uhr bis erledigt ----------
@@ -376,9 +379,12 @@
         }
       });
 
-    // altes Log aufräumen (nur heutige Einträge behalten)
+    // altes Log aufräumen (nur heutige Einträge behalten). Key-Format:
+    // "<apptId>|<YYYY-MM-DD>|<Stunde>" – Datum steht immer im mittleren Teil.
     Object.keys(state.notifiedLog).forEach((key) => {
-      if (!key.includes(today)) {
+      const parts = key.split("|");
+      const keyDate = parts[parts.length - 2];
+      if (keyDate !== today) {
         delete state.notifiedLog[key];
         changed = true;
       }

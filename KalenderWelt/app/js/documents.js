@@ -93,9 +93,14 @@
     saveOnlyBtn.className = "btn secondary";
     saveOnlyBtn.textContent = "Nur speichern";
     saveOnlyBtn.addEventListener("click", async () => {
-      const { blob, filename } = await buildDocx(titleInput.value.trim() || "Dokument", contentInput.value);
-      await global.Platform.saveAndShareFile(blob, filename);
-      statusBox.textContent = "Datei gespeichert: " + filename;
+      saveOnlyBtn.disabled = true;
+      try {
+        const { blob, filename } = await buildDocx(titleInput.value.trim() || "Dokument", contentInput.value);
+        await global.Platform.saveAndShareFile(blob, filename);
+        statusBox.textContent = "Datei gespeichert: " + filename;
+      } finally {
+        saveOnlyBtn.disabled = false;
+      }
     });
     row.appendChild(saveOnlyBtn);
 
@@ -163,15 +168,6 @@
     return { blob, filename };
   }
 
-  function blobToBase64(blob) {
-    return new Promise((resolve, reject) => {
-      const reader = new FileReader();
-      reader.onloadend = () => resolve(String(reader.result).split(",")[1]);
-      reader.onerror = reject;
-      reader.readAsDataURL(blob);
-    });
-  }
-
   async function createAndDistribute(title, content, statusBox) {
     statusBox.textContent = "Erzeuge Word-Datei …";
     const { blob, filename } = await buildDocx(title, content);
@@ -183,7 +179,7 @@
 
     if (emailRecipients.length > 0) {
       statusBox.textContent = "Sende E-Mail(s) …";
-      const base64 = await blobToBase64(blob);
+      const base64 = await global.Platform.blobToBase64(blob);
       for (const r of emailRecipients) {
         const ok = await global.Mail.sendMail({
           to: r.value.trim(),

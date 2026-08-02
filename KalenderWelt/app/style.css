@@ -189,6 +189,11 @@ h1, h2, h3 {
   transform: translateY(-3px) scale(1.02);
 }
 
+.month-card.current {
+  background: linear-gradient(180deg, #ffe9a8 0%, #ffd35c 100%);
+  border-color: #b8860b;
+}
+
 .month-card .badge {
   display: inline-block;
   margin-top: 6px;

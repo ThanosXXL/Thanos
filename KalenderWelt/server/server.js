@@ -10,6 +10,8 @@
 const crypto = require("crypto");
 const express = require("express");
 const cors = require("cors");
+const helmet = require("helmet");
+const rateLimit = require("express-rate-limit");
 const mail = require("./lib/mail");
 
 const PORT = process.env.PORT || 4790;
@@ -41,12 +43,33 @@ setInterval(() => {
 }, 30 * 60 * 1000);
 
 const app = express();
+app.set("trust proxy", 1);
+app.use(helmet());
 app.use(cors());
 app.use(express.json({ limit: "20mb" }));
 
+// Verhindert, dass dieser Server als offenes Werkzeug zum Durchprobieren von
+// Postfach-Passwörtern (Credential Stuffing) gegen fremde Mailserver
+// missbraucht wird.
+const connectLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  limit: 10,
+  standardHeaders: true,
+  legacyHeaders: false,
+  message: { error: "Zu viele Verbindungsversuche. Bitte später erneut versuchen." },
+});
+
+const sendLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  limit: 60,
+  standardHeaders: true,
+  legacyHeaders: false,
+  message: { error: "Zu viele Sendevorgänge. Bitte später erneut versuchen." },
+});
+
 app.get("/api/health", (req, res) => res.json({ ok: true }));
 
-app.post("/api/mail/connect", async (req, res) => {
+app.post("/api/mail/connect", connectLimiter, async (req, res) => {
   const { user, password, imapHost, imapPort, imapSecure, smtpHost, smtpPort, smtpSecure } = req.body || {};
   if (!user || !password || !imapHost || !smtpHost) {
     return res.status(400).json({ error: "Bitte alle Pflichtfelder ausfüllen." });
@@ -81,7 +104,7 @@ app.get("/api/mail/messages", async (req, res) => {
   }
 });
 
-app.post("/api/mail/send", async (req, res) => {
+app.post("/api/mail/send", sendLimiter, async (req, res) => {
   const { token, to, subject, text, attachmentBase64, attachmentName } = req.body || {};
   const session = getSession(String(token || ""));
   if (!session) return res.status(401).json({ error: "Ungültige oder abgelaufene Sitzung." });

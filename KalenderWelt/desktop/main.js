@@ -3,18 +3,23 @@ const fs = require("fs");
 const path = require("path");
 
 const DATA_FILE = () => path.join(app.getPath("userData"), "kalenderwelt-data.json");
-const PASSWORD_MARKER = "encrypted:";
-
-function encryptPassword(plain) {
+const SECRET_MARKER = "encrypted:";
+// Felder, die als Zugangs-/Sitzungsgeheimnisse gelten und deshalb über das
+// OS-Schlüsselbund (safeStorage) verschlüsselt auf der Platte liegen, statt
+// im Klartext. mailToken ist das eigentlich persistierte Geheimnis (das
+// Postfach-Passwort selbst verlässt den Server nie und wird clientseitig nie
+// gespeichert); mailAccount.password wird defensiv mitbehandelt, falls es in
+// Zukunft doch einmal lokal gehalten werden sollte.
+function encryptSecret(plain) {
   if (!plain || !safeStorage.isEncryptionAvailable()) return plain || "";
-  return PASSWORD_MARKER + safeStorage.encryptString(plain).toString("base64");
+  return SECRET_MARKER + safeStorage.encryptString(plain).toString("base64");
 }
 
-function decryptPassword(stored) {
-  if (!stored || !stored.startsWith(PASSWORD_MARKER)) return stored || "";
+function decryptSecret(stored) {
+  if (!stored || !stored.startsWith(SECRET_MARKER)) return stored || "";
   if (!safeStorage.isEncryptionAvailable()) return "";
   try {
-    return safeStorage.decryptString(Buffer.from(stored.slice(PASSWORD_MARKER.length), "base64"));
+    return safeStorage.decryptString(Buffer.from(stored.slice(SECRET_MARKER.length), "base64"));
   } catch (err) {
     return "";
   }
@@ -24,8 +29,11 @@ function loadData() {
   try {
     const raw = fs.readFileSync(DATA_FILE(), "utf-8");
     const data = JSON.parse(raw);
+    if (data.mailToken) {
+      data.mailToken = decryptSecret(data.mailToken);
+    }
     if (data.mailAccount && data.mailAccount.password) {
-      data.mailAccount.password = decryptPassword(data.mailAccount.password);
+      data.mailAccount.password = decryptSecret(data.mailAccount.password);
     }
     return data;
   } catch (err) {
@@ -35,8 +43,11 @@ function loadData() {
 
 function saveData(data) {
   const toWrite = JSON.parse(JSON.stringify(data));
+  if (toWrite.mailToken) {
+    toWrite.mailToken = encryptSecret(toWrite.mailToken);
+  }
   if (toWrite.mailAccount && toWrite.mailAccount.password) {
-    toWrite.mailAccount.password = encryptPassword(toWrite.mailAccount.password);
+    toWrite.mailAccount.password = encryptSecret(toWrite.mailAccount.password);
   }
   fs.mkdirSync(path.dirname(DATA_FILE()), { recursive: true });
   fs.writeFileSync(DATA_FILE(), JSON.stringify(toWrite, null, 2), "utf-8");
