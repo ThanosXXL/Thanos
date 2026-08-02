@@ -1,0 +1,38 @@
+{
+  "name": "freshtrades",
+  "version": "1.0.0",
+  "description": "FreshTrades Desktop – KI-Assistent mit Sprachfrage, Sniping-Steuerung und Vorlesefunktion",
+  "main": "main.js",
+  "author": "",
+  "license": "MIT",
+  "scripts": {
+    "start": "electron .",
+    "dist": "node scripts/set-flavor.js live && electron-builder",
+    "dist:demo": "node scripts/set-flavor.js demo && electron-builder --config.productName=\"FreshTrades Demo\" --config.artifactName=\"FreshTrades-Demo-${version}.${ext}\""
+  },
+  "devDependencies": {
+    "electron": "^31.0.0",
+    "electron-builder": "^24.13.3"
+  },
+  "build": {
+    "appId": "com.freshtrades.desktop",
+    "productName": "FreshTrades",
+    "files": [
+      "main.js",
+      "preload.js",
+      "renderer/**/*",
+      "package.json"
+    ],
+    "directories": {
+      "output": "dist-desktop"
+    },
+    "win": {
+      "target": "nsis"
+    },
+    "publish": [
+      {
+        "provider": "github"
+      }
+    ]
+  }
+}

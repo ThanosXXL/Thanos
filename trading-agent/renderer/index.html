@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<title>FreshTrades</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <header class="app-header">
+    <h1>FreshTrades</h1>
+    <button id="googleBtn" class="btn-gold" type="button">Mit Google anmelden</button>
+  </header>
+
+  <div class="demo-banner" id="demoBanner" hidden>Demo-Modus – nur Paper-Trading, keine Auszahlung</div>
+
+  <main class="content">
+    <section class="ask-section">
+      <label for="questionInput">Frage stellen</label>
+      <div class="ask-row">
+        <input type="text" id="questionInput" placeholder="Frage stellen..." maxlength="500">
+        <button id="micBtn" class="btn-gold btn-icon" type="button" title="Frage per Mikrofon eingeben" aria-pressed="false">🎤</button>
+      </div>
+    </section>
+
+    <section class="actions-section">
+      <button id="snipingBtn" class="btn-gold" type="button" aria-pressed="false">Sniping</button>
+      <button id="vorlesenBtn" class="btn-gold" type="button">Vorlesen</button>
+      <button id="saveAsBtn" class="btn-gold" type="button">Seite speichern unter</button>
+    </section>
+
+    <section class="answer-section">
+      <h2>Antwort</h2>
+      <div id="answerText" class="answer-text">Noch keine Frage gestellt.</div>
+    </section>
+  </main>
+
+  <script src="buildFlavor.js"></script>
+  <script src="renderer.js"></script>
+</body>
+</html>

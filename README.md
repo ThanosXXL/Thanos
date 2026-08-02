@@ -43,3 +43,10 @@ npm run dist
 ```
 
 Erzeugt eine installierbare Desktop-Anwendung (Windows/macOS/Linux) im Ordner `dist/`.
+
+## FreshTrades (trading-agent/)
+
+Im Ordner [`trading-agent/`](trading-agent/) liegt die separate FreshTrades-Anwendung mit
+Frage-Eingabe (inkl. Mikrofon), Sniping-, Vorlese- und "Seite speichern unter"-Button sowie
+Google-Anmeldung. Installation und Start erfolgen dort mit denselben Befehlen
+(`npm install`, `npm start`, `npm run dist`).

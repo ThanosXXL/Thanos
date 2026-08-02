@@ -1,0 +1,150 @@
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  font-family: 'Segoe UI', Arial, sans-serif;
+  background: #0c0c0c;
+  color: #f2f2f2;
+}
+
+.app-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16px 24px;
+  background: #050505;
+  border-bottom: 1px solid #2a2200;
+}
+
+.app-header h1 {
+  margin: 0;
+  color: #ffd700;
+  letter-spacing: 1px;
+  text-shadow: 0 0 8px rgba(255, 215, 0, 0.35);
+}
+
+.demo-banner {
+  background: #3a2c00;
+  color: #ffd700;
+  text-align: center;
+  padding: 6px 12px;
+  font-size: 0.9rem;
+  border-bottom: 1px solid #806000;
+}
+
+.content {
+  max-width: 720px;
+  margin: 32px auto;
+  padding: 0 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 28px;
+}
+
+.ask-section label {
+  display: block;
+  margin-bottom: 8px;
+  color: #d8d8d8;
+}
+
+.ask-row {
+  display: flex;
+  gap: 10px;
+}
+
+#questionInput {
+  flex: 1;
+  padding: 12px 14px;
+  border-radius: 10px;
+  border: 1px solid #3a3a3a;
+  background: #161616;
+  color: #f2f2f2;
+  font-size: 1rem;
+}
+
+#questionInput:focus {
+  outline: none;
+  border-color: #ffd700;
+}
+
+.actions-section {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+.answer-section h2 {
+  margin: 0 0 10px;
+  color: #ffd700;
+  font-size: 1.1rem;
+}
+
+.answer-text {
+  background: #141414;
+  border: 1px solid #2a2a2a;
+  border-radius: 10px;
+  padding: 16px;
+  min-height: 60px;
+  line-height: 1.5;
+}
+
+/* Schwarz-Gold 3D-Hochglanz-Buttons */
+.btn-gold {
+  position: relative;
+  padding: 12px 20px;
+  border-radius: 12px;
+  border: 1px solid #7a5c00;
+  background: linear-gradient(180deg, #3c3c3c 0%, #141414 55%, #000000 100%);
+  color: #ffd700;
+  font-size: 1rem;
+  font-weight: 600;
+  text-shadow: 0 1px 1px #000, 0 0 6px rgba(255, 215, 0, 0.35);
+  cursor: pointer;
+  overflow: hidden;
+  box-shadow:
+    0 6px 10px rgba(0, 0, 0, 0.55),
+    inset 0 1px 0 rgba(255, 255, 255, 0.18),
+    inset 0 -3px 6px rgba(0, 0, 0, 0.65);
+  transition: transform 0.12s ease, box-shadow 0.12s ease;
+}
+
+.btn-gold::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 45%;
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.28), rgba(255, 255, 255, 0));
+  border-radius: 12px 12px 50% 50% / 12px 12px 20px 20px;
+  pointer-events: none;
+}
+
+.btn-gold:hover {
+  box-shadow:
+    0 8px 14px rgba(0, 0, 0, 0.6),
+    inset 0 1px 0 rgba(255, 255, 255, 0.25),
+    inset 0 -3px 6px rgba(0, 0, 0, 0.65),
+    0 0 10px rgba(255, 215, 0, 0.25);
+  transform: translateY(-1px);
+}
+
+.btn-gold:active,
+.btn-gold.is-active {
+  transform: translateY(1px);
+  box-shadow:
+    0 3px 6px rgba(0, 0, 0, 0.6),
+    inset 0 2px 5px rgba(0, 0, 0, 0.75);
+}
+
+.btn-gold.is-active {
+  border-color: #ffd700;
+}
+
+.btn-icon {
+  padding: 12px 16px;
+  font-size: 1.2rem;
+  line-height: 1;
+}
