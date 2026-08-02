@@ -7,10 +7,9 @@
   var GOLD = '#FFD700';
   var GOLD_DARK = '#7A5C00';
 
-  // SRI-Hash für html2canvas 1.4.1 (sha384-...). Siehe README "Bekannte offene
-  // Sicherheitslücke" für den Befehl, mit dem der echte Hash erzeugt wird.
-  // Solange dieser String leer ist, wird KEINE Integritätsprüfung durchgeführt.
-  var HTML2CANVAS_SRI = '';
+  // SRI-Hash für html2canvas 1.4.1, berechnet aus dist/html2canvas.min.js im
+  // offiziellen npm-Paket (siehe README, Abschnitt "Bekannte offene Sicherheitslücke").
+  var HTML2CANVAS_SRI = 'sha384-ZZ1pncU3bQe8y31yfZdMFdSpttDoPmOZg2wguVK9almUodir1PghgT0eY7Mrty8H';
 
   function styleIconBtn(el) {
     el.style.cssText =
