@@ -41,6 +41,16 @@ android {
     }
 
     signingConfigs {
+        // Fester, im Repo abgelegter Debug-Key statt des von Gradle pro Maschine
+        // automatisch erzeugten (der sich sonst bei jedem CI-Build ändert und
+        // dazu führt, dass Android neue Builds als "nicht installiert" ablehnt,
+        // sobald eine ältere, anders signierte Version schon installiert ist).
+        getByName("debug") {
+            storeFile = file("keystore/debug.keystore")
+            storePassword = "android"
+            keyAlias = "androiddebugkey"
+            keyPassword = "android"
+        }
         if (hasReleaseSigning) {
             create("release") {
                 storeFile = file(releaseStoreFile!!)

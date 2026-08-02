@@ -30,9 +30,18 @@ Die APKs liegen danach unter `app/build/outputs/apk/live/release/` bzw.
 `app/build/outputs/apk/demo/release/`.
 
 **Hinweis zur Signatur:** Solange kein eigener Signing-Key hinterlegt ist, sind die
-Release-Builds mit dem automatisch generierten Debug-Zertifikat signiert. Das reicht zum
-Sideloading auf dem eigenen Handy ("Installation aus unbekannten Quellen" erlauben), aber
-**nicht** für eine Veröffentlichung im Play Store oder Weitergabe an andere Nutzer.
+Release-Builds mit dem Debug-Zertifikat aus [`app/keystore/debug.keystore`](app/keystore/debug.keystore)
+signiert. Das reicht zum Sideloading auf dem eigenen Handy ("Installation aus unbekannten
+Quellen" erlauben), aber **nicht** für eine Veröffentlichung im Play Store oder Weitergabe
+an andere Nutzer.
+
+Dieser Debug-Key liegt bewusst fest im Repo (Standard-Passwort `android`, wie Androids
+eigener Standard-Debug-Key – das ist üblich und unkritisch, da er nie für echte Releases
+verwendet wird). Ohne ihn würde jeder CI-Build automatisch einen **neuen, zufälligen**
+Debug-Key erzeugen – Android lehnt dann jede neuere APK mit "App wurde nicht installiert"
+ab, sobald schon eine ältere, anders signierte Version auf dem Gerät installiert ist. Mit
+dem festen Key bleibt die Signatur über alle Builds hinweg gleich, Updates funktionieren
+normal.
 
 Um einen echten Release-Key zu nutzen: Keystore erzeugen (`keytool -genkey -v -keystore
 release.keystore -alias freshtrades -keyalg RSA -keysize 2048 -validity 10000`) und die
