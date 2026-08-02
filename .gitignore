@@ -2,3 +2,10 @@ node_modules/
 dist/
 dist-desktop/
 *.log
+
+# Android
+.gradle/
+build/
+local.properties
+*.iml
+.idea/

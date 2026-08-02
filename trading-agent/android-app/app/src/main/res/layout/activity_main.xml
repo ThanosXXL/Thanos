@@ -1,0 +1,136 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/black"
+    android:orientation="vertical">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:gravity="center_vertical"
+        android:padding="12dp">
+
+        <TextView
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="@string/app_name"
+            android:textColor="@color/gold"
+            android:textSize="20sp"
+            android:textStyle="bold" />
+
+        <Button
+            android:id="@+id/googleBtn"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:background="@drawable/btn_gold_selector"
+            android:text="@string/google_button_default"
+            android:textColor="@color/gold"
+            android:textAllCaps="false"
+            android:paddingStart="16dp"
+            android:paddingEnd="16dp"
+            android:paddingTop="10dp"
+            android:paddingBottom="10dp" />
+    </LinearLayout>
+
+    <TextView
+        android:id="@+id/demoBanner"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="#3A2C00"
+        android:text="@string/demo_banner"
+        android:textColor="@color/gold"
+        android:textSize="13sp"
+        android:gravity="center"
+        android:padding="6dp"
+        android:visibility="gone" />
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:padding="12dp"
+        android:gravity="center_vertical">
+
+        <EditText
+            android:id="@+id/questionInput"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:layout_marginEnd="6dp"
+            android:background="@color/panel"
+            android:hint="@string/question_hint"
+            android:textColor="#F2F2F2"
+            android:textColorHint="#888888"
+            android:padding="12dp"
+            android:imeOptions="actionSearch"
+            android:inputType="text"
+            android:maxLines="1" />
+
+        <!-- Mikrofon + Sniping/Vorlesen/Speichern-unter als Icon-Cluster oben rechts neben der Eingabe -->
+        <Button
+            android:id="@+id/micBtn"
+            android:layout_width="44dp"
+            android:layout_height="44dp"
+            android:layout_marginEnd="4dp"
+            android:background="@drawable/btn_gold_selector"
+            android:text="🎤"
+            android:textColor="@color/gold"
+            android:textSize="16sp"
+            android:padding="0dp"
+            android:minWidth="0dp"
+            android:minHeight="0dp"
+            android:contentDescription="@string/mic_content_description" />
+
+        <Button
+            android:id="@+id/snipingBtn"
+            android:layout_width="44dp"
+            android:layout_height="44dp"
+            android:layout_marginEnd="4dp"
+            android:background="@drawable/btn_gold_selector"
+            android:text="🎯"
+            android:textColor="@color/gold"
+            android:textSize="16sp"
+            android:padding="0dp"
+            android:minWidth="0dp"
+            android:minHeight="0dp"
+            android:contentDescription="@string/sniping_content_description" />
+
+        <Button
+            android:id="@+id/vorlesenBtn"
+            android:layout_width="44dp"
+            android:layout_height="44dp"
+            android:layout_marginEnd="4dp"
+            android:background="@drawable/btn_gold_selector"
+            android:text="🔊"
+            android:textColor="@color/gold"
+            android:textSize="16sp"
+            android:padding="0dp"
+            android:minWidth="0dp"
+            android:minHeight="0dp"
+            android:contentDescription="@string/vorlesen_content_description" />
+
+        <Button
+            android:id="@+id/saveAsBtn"
+            android:layout_width="44dp"
+            android:layout_height="44dp"
+            android:background="@drawable/btn_gold_selector"
+            android:text="💾"
+            android:textColor="@color/gold"
+            android:textSize="16sp"
+            android:padding="0dp"
+            android:minWidth="0dp"
+            android:minHeight="0dp"
+            android:contentDescription="@string/save_as_content_description" />
+    </LinearLayout>
+
+    <WebView
+        android:id="@+id/searchView"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1" />
+
+</LinearLayout>

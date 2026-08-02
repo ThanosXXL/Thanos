@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <style name="Theme.FreshTrades" parent="Theme.MaterialComponents.DayNight.NoActionBar">
+        <item name="android:windowBackground">@color/black</item>
+        <item name="colorPrimary">@color/gold</item>
+        <item name="android:statusBarColor">@color/black_deep</item>
+    </style>
+
+    <style name="ThemeOverlay.FreshTrades.Dialog" parent="ThemeOverlay.MaterialComponents.Dialog.Alert">
+        <item name="colorPrimary">@color/gold</item>
+        <item name="colorOnSurface">@color/gold</item>
+        <item name="android:windowBackground">@color/panel</item>
+        <item name="android:textColorPrimary">@color/gold</item>
+        <item name="buttonBarPositiveButtonStyle">@style/FreshTradesDialogButton</item>
+        <item name="buttonBarNegativeButtonStyle">@style/FreshTradesDialogButton</item>
+    </style>
+
+    <style name="FreshTradesDialogButton" parent="Widget.MaterialComponents.Button.TextButton.Dialog">
+        <item name="android:textColor">@color/gold</item>
+    </style>
+</resources>

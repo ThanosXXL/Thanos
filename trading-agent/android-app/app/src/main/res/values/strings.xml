@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">FreshTrades</string>
+    <string name="google_button_default">Mit Google anmelden</string>
+    <string name="google_button_connected">Google verbunden</string>
+    <string name="question_hint">Frage stellen…</string>
+    <string name="sniping_default">Sniping</string>
+    <string name="sniping_active">Sniping: Aktiv</string>
+    <string name="vorlesen">Vorlesen</string>
+    <string name="save_as">Seite speichern unter</string>
+    <string name="demo_banner">Demo-Modus – nur Paper-Trading, keine Auszahlung</string>
+    <string name="sniping_toast">Sniping-Funktion folgt in einem späteren Update.</string>
+    <string name="mic_not_available">Spracherkennung ist auf diesem Gerät nicht verfügbar.</string>
+    <string name="mic_permission_denied">Ohne Mikrofon-Berechtigung ist die Spracheingabe nicht möglich.</string>
+    <string name="save_success">Gespeichert unter: %1$s</string>
+
+    <string name="mic_content_description">Frage per Mikrofon eingeben</string>
+    <string name="sniping_content_description">Sniping</string>
+    <string name="vorlesen_content_description">Vorlesen</string>
+    <string name="save_as_content_description">Seite speichern unter</string>
+
+    <string name="confirm_title">Bestätigung</string>
+    <string name="confirm_sniping_activate_message">Sniping-Modus jetzt aktivieren?</string>
+    <string name="confirm_sniping_deactivate_message">Sniping-Modus jetzt deaktivieren?</string>
+    <string name="confirm_vorlesen_message">Die aktuelle Seite jetzt vorlesen?</string>
+    <string name="confirm_save_message">Die aktuelle Seite jetzt speichern unter…?</string>
+    <string name="confirm_yes">Bestätigen</string>
+    <string name="confirm_cancel">Abbrechen</string>
+</resources>

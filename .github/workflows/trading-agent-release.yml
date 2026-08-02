@@ -76,13 +76,8 @@ jobs:
           if [ "${{ github.ref_type }}" = "tag" ]; then
             echo "name=${{ github.ref_name }}" >> "$GITHUB_OUTPUT"
           else
-            echo "name=v$(node -p "require('../package.json').version")" >> "$GITHUB_OUTPUT"
+            echo "name=v$(grep 'versionName = ' app/build.gradle.kts | head -1 | sed -E 's/.*"(.*)".*/\1/')" >> "$GITHUB_OUTPUT"
           fi
-
-      - name: Node.js einrichten
-        uses: actions/setup-node@v4
-        with:
-          node-version: 20
 
       - name: JDK einrichten
         uses: actions/setup-java@v4
@@ -93,39 +88,27 @@ jobs:
       - name: Android SDK einrichten
         uses: android-actions/setup-android@v3
 
-      - name: Abhängigkeiten installieren
-        run: npm ci
-
       - name: APK bauen (debug-signiert, siehe README)
         run: |
-          cd android
           chmod +x gradlew
-          ./gradlew assembleRelease
+          ./gradlew assembleLiveRelease
 
       - name: APK auf stabilen Dateinamen umbenennen
-        run: cp android/app/build/outputs/apk/release/app-release.apk android/app/build/outputs/apk/release/FreshTrades.apk
+        run: cp app/build/outputs/apk/live/release/app-live-release.apk app/build/outputs/apk/live/release/FreshTrades.apk
 
-      - name: Demo-Flag aktivieren (paper-only, keine Auszahlung)
-        run: |
-          cat > src/buildFlavor.js << 'EOF'
-          export const IS_DEMO = true;
-          EOF
-
-      - name: Demo-APK bauen (debug-signiert, siehe README)
-        run: |
-          cd android
-          ./gradlew assembleRelease
+      - name: Demo-APK bauen (paper-only, keine Auszahlung; debug-signiert, siehe README)
+        run: ./gradlew assembleDemoRelease
 
       - name: Demo-APK auf stabilen Dateinamen umbenennen
-        run: cp android/app/build/outputs/apk/release/app-release.apk android/app/build/outputs/apk/release/FreshTrades-Demo.apk
+        run: cp app/build/outputs/apk/demo/release/app-demo-release.apk app/build/outputs/apk/demo/release/FreshTrades-Demo.apk
 
       - name: APKs als Artifact hochladen
         uses: actions/upload-artifact@v4
         with:
           name: freshtrades-android
           path: |
-            trading-agent/android-app/android/app/build/outputs/apk/release/FreshTrades.apk
-            trading-agent/android-app/android/app/build/outputs/apk/release/FreshTrades-Demo.apk
+            trading-agent/android-app/app/build/outputs/apk/live/release/FreshTrades.apk
+            trading-agent/android-app/app/build/outputs/apk/demo/release/FreshTrades-Demo.apk
           if-no-files-found: warn
 
       - name: APKs zum GitHub Release hinzufügen
@@ -134,7 +117,7 @@ jobs:
         with:
           tag_name: ${{ steps.tag.outputs.name }}
           files: |
-            trading-agent/android-app/android/app/build/outputs/apk/release/FreshTrades.apk
-            trading-agent/android-app/android/app/build/outputs/apk/release/FreshTrades-Demo.apk
+            trading-agent/android-app/app/build/outputs/apk/live/release/FreshTrades.apk
+            trading-agent/android-app/app/build/outputs/apk/demo/release/FreshTrades-Demo.apk
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

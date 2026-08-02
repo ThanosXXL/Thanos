@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="black">#0C0C0C</color>
+    <color name="black_deep">#000000</color>
+    <color name="gold">#FFD700</color>
+    <color name="gold_dark">#7A5C00</color>
+    <color name="panel">#161616</color>
+</resources>
