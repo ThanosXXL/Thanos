@@ -134,3 +134,23 @@ jedes Fenster und jeden Klon dieses Repos gilt:
 - `.github/workflows/deploy-pages.yml` syncs `renderer/` → `docs/` and publishes it to GitHub Pages on every
   push to `main` that touches `renderer/`. GitHub Pages itself must be pointed at **Source: GitHub Actions**
   once, manually, in repository Settings — this workflow only handles subsequent deploys.
+
+### Current live release (keep this section in sync — do not lose track of it)
+
+As of this writing, a real, published (non-draft) GitHub Release already exists at tag **`v1.1.0`**, built
+from this project's own code (not to be confused with the unrelated `v1.0.0`/`v0.1.1` releases from other
+projects sharing this repo — see above). Its fixed-name assets are what `renderer/download.html` and the
+in-app install banner link to:
+
+- https://github.com/ThanosXXL/Thanos/releases/tag/v1.1.0
+- https://github.com/ThanosXXL/Thanos/releases/latest/download/Buchhaltung-Windows-Setup.exe
+- https://github.com/ThanosXXL/Thanos/releases/latest/download/Buchhaltung-macOS.dmg
+- https://github.com/ThanosXXL/Thanos/releases/latest/download/Buchhaltung-Linux.AppImage
+
+The repo is **private**, so these links only resolve for the repo owner (or anyone later given access —
+see "Vertraulichkeit & Zugriff" above, which currently forbids that). Whenever a future change should ship
+as a new build (new features, bug fixes the owner wants distributed), bump `package.json`'s `version` to a
+value not already used by any release in this repo, then trigger `build-release.yml` via `workflow_dispatch`
+with `publish: true` (see the two-stage design above) — do not assume the owner will do this manually, and
+do not leave `download.html`/README references pointing at a stale version. Keep this section's tag/links
+updated to whatever the actual latest Buchhaltung! release is after doing so.
