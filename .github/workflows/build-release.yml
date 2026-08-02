@@ -5,6 +5,11 @@ on:
     tags:
       - "v*"
   workflow_dispatch:
+    inputs:
+      publish:
+        description: "Als GitHub Release veröffentlichen? (erstellt Tag v<version> aus package.json)"
+        type: boolean
+        default: false
 
 permissions:
   contents: write
@@ -29,10 +34,10 @@ jobs:
       - name: Abhängigkeiten installieren
         run: npm install
 
-      - name: Desktop-App bauen (und bei Tag-Push veröffentlichen)
+      - name: Desktop-App bauen (und bei Tag-Push oder manueller Freigabe veröffentlichen)
         shell: bash
         run: |
-          if [ "${{ github.ref_type }}" = "tag" ]; then
+          if [ "${{ github.ref_type }}" = "tag" ] || [ "${{ github.event.inputs.publish }}" = "true" ]; then
             npm run dist -- --publish always
           else
             npm run dist
