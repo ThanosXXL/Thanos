@@ -11,9 +11,12 @@
     <string name="mic_not_available">Spracherkennung ist auf diesem Gerät nicht verfügbar.</string>
     <string name="mic_permission_denied">Ohne Mikrofon-Berechtigung ist die Spracheingabe nicht möglich.</string>
     <string name="save_success">Gespeichert unter: %1$s</string>
-    <string name="storage_permission_denied">Ohne Speicher-Berechtigung kann kein Screenshot gespeichert werden.</string>
-    <string name="sniping_screenshot_saved">Screenshot in der Galerie gespeichert.</string>
+    <string name="sniping_screenshot_saved">Screenshot gespeichert.</string>
     <string name="sniping_screenshot_failed">Screenshot konnte nicht gespeichert werden.</string>
+    <string name="remember_folder_title">Ordner merken?</string>
+    <string name="remember_folder_message">Zukünftige Sniping-Screenshots automatisch in diesem Ordner speichern?</string>
+    <string name="remember_folder_always">Immer in diesem Ordner speichern</string>
+    <string name="remember_folder_once">Nur dieses Mal</string>
 
     <string name="mic_content_description">Frage per Mikrofon eingeben</string>
     <string name="sniping_content_description">Sniping – Screenshot aufnehmen</string>

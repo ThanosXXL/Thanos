@@ -2,13 +2,13 @@ package com.freshtrades.android
 
 import android.Manifest
 import android.app.AlertDialog
+import android.content.Intent
+import android.content.SharedPreferences
 import android.content.pm.PackageManager
 import android.graphics.Bitmap
 import android.graphics.Canvas
 import android.net.Uri
-import android.os.Build
 import android.os.Bundle
-import android.provider.MediaStore
 import android.speech.RecognizerIntent
 import android.speech.tts.TextToSpeech
 import android.view.KeyEvent
@@ -22,11 +22,17 @@ import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
+import androidx.documentfile.provider.DocumentFile
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
 
 class MainActivity : AppCompatActivity(), TextToSpeech.OnInitListener {
+
+    companion object {
+        private const val PREFS_NAME = "freshtrades_prefs"
+        private const val KEY_SNIPING_FOLDER_URI = "sniping_folder_uri"
+    }
 
     private lateinit var questionInput: EditText
     private lateinit var searchView: WebView
@@ -57,11 +63,11 @@ class MainActivity : AppCompatActivity(), TextToSpeech.OnInitListener {
         }
     }
 
-    private val storagePermissionLauncher = registerForActivityResult(ActivityResultContracts.RequestPermission()) { granted ->
-        if (granted) {
-            captureAndSaveScreenshot()
+    private val folderPickerLauncher = registerForActivityResult(ActivityResultContracts.OpenDocumentTree()) { uri ->
+        if (uri == null) {
+            Toast.makeText(this, R.string.sniping_screenshot_failed, Toast.LENGTH_SHORT).show()
         } else {
-            Toast.makeText(this, R.string.storage_permission_denied, Toast.LENGTH_SHORT).show()
+            askRememberFolder(uri)
         }
     }
 
@@ -145,18 +151,45 @@ class MainActivity : AppCompatActivity(), TextToSpeech.OnInitListener {
 
     private fun onSnipingClicked() {
         confirmAction(R.string.confirm_sniping_message) {
-            val needsPermission = Build.VERSION.SDK_INT <= Build.VERSION_CODES.P &&
-                ContextCompat.checkSelfPermission(this, Manifest.permission.WRITE_EXTERNAL_STORAGE) !=
-                PackageManager.PERMISSION_GRANTED
-            if (needsPermission) {
-                storagePermissionLauncher.launch(Manifest.permission.WRITE_EXTERNAL_STORAGE)
+            val rememberedFolder = getSavedSnipingFolderUri()
+            if (rememberedFolder != null) {
+                saveScreenshotToFolder(rememberedFolder)
             } else {
-                captureAndSaveScreenshot()
+                folderPickerLauncher.launch(null)
             }
         }
     }
 
-    private fun captureAndSaveScreenshot() {
+    private fun getPrefs(): SharedPreferences = getSharedPreferences(PREFS_NAME, MODE_PRIVATE)
+
+    private fun getSavedSnipingFolderUri(): Uri? {
+        val stored = getPrefs().getString(KEY_SNIPING_FOLDER_URI, null) ?: return null
+        val uri = Uri.parse(stored)
+        val stillGranted = contentResolver.persistedUriPermissions.any { it.uri == uri && it.isWritePermission }
+        return if (stillGranted) uri else null
+    }
+
+    private fun askRememberFolder(treeUri: Uri) {
+        AlertDialog.Builder(this, R.style.ThemeOverlay_FreshTrades_Dialog)
+            .setTitle(R.string.remember_folder_title)
+            .setMessage(R.string.remember_folder_message)
+            .setPositiveButton(R.string.remember_folder_always) { dialog, _ ->
+                dialog.dismiss()
+                contentResolver.takePersistableUriPermission(
+                    treeUri,
+                    Intent.FLAG_GRANT_READ_URI_PERMISSION or Intent.FLAG_GRANT_WRITE_URI_PERMISSION
+                )
+                getPrefs().edit().putString(KEY_SNIPING_FOLDER_URI, treeUri.toString()).apply()
+                saveScreenshotToFolder(treeUri)
+            }
+            .setNegativeButton(R.string.remember_folder_once) { dialog, _ ->
+                dialog.dismiss()
+                saveScreenshotToFolder(treeUri)
+            }
+            .show()
+    }
+
+    private fun saveScreenshotToFolder(treeUri: Uri) {
         val width = searchView.width
         val height = searchView.height
         if (width <= 0 || height <= 0) {
@@ -168,14 +201,20 @@ class MainActivity : AppCompatActivity(), TextToSpeech.OnInitListener {
         searchView.draw(Canvas(bitmap))
 
         val timestamp = SimpleDateFormat("yyyyMMdd-HHmmss", Locale.GERMANY).format(Date())
-        val title = "FreshTrades-Sniping-$timestamp"
-        val savedUri = MediaStore.Images.Media.insertImage(contentResolver, bitmap, title, "FreshTrades Sniping-Screenshot")
+        val folder = DocumentFile.fromTreeUri(this, treeUri)
+        val file = folder?.createFile("image/png", "freshtrades-sniping-$timestamp.png")
 
-        if (savedUri != null) {
-            Toast.makeText(this, R.string.sniping_screenshot_saved, Toast.LENGTH_SHORT).show()
-        } else {
-            Toast.makeText(this, R.string.sniping_screenshot_failed, Toast.LENGTH_SHORT).show()
-        }
+        val saved = file?.uri?.let { uri ->
+            contentResolver.openOutputStream(uri)?.use { out ->
+                bitmap.compress(Bitmap.CompressFormat.PNG, 100, out)
+            } != null
+        } ?: false
+
+        Toast.makeText(
+            this,
+            if (saved) R.string.sniping_screenshot_saved else R.string.sniping_screenshot_failed,
+            Toast.LENGTH_SHORT
+        ).show()
     }
 
     private fun onVorlesenClicked() {

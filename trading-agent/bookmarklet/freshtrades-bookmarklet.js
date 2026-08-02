@@ -7,6 +7,11 @@
   var GOLD = '#FFD700';
   var GOLD_DARK = '#7A5C00';
 
+  // SRI-Hash für html2canvas 1.4.1 (sha384-...). Siehe README "Bekannte offene
+  // Sicherheitslücke" für den Befehl, mit dem der echte Hash erzeugt wird.
+  // Solange dieser String leer ist, wird KEINE Integritätsprüfung durchgeführt.
+  var HTML2CANVAS_SRI = '';
+
   function styleIconBtn(el) {
     el.style.cssText =
       'width:44px;height:44px;margin-left:6px;border-radius:12px;border:1px solid ' + GOLD_DARK +
@@ -109,6 +114,10 @@
     showConfirm('Jetzt einen Screenshot der aktuellen Seite aufnehmen?', function () {
       var script = document.createElement('script');
       script.src = 'https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js';
+      if (HTML2CANVAS_SRI) {
+        script.integrity = HTML2CANVAS_SRI;
+        script.crossOrigin = 'anonymous';
+      }
       script.onload = function () {
         window.html2canvas(document.body).then(function (canvas) {
           var link = document.createElement('a');

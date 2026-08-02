@@ -3,6 +3,17 @@ plugins {
     id("org.jetbrains.kotlin.android")
 }
 
+// Optional echter Release-Signing-Key: nur aktiv, wenn alle vier Properties gesetzt sind
+// (lokal via gradle.properties, in CI via -P.../GitHub Secrets). Sonst debug-signiert.
+val releaseStoreFile = findProperty("RELEASE_STORE_FILE") as String?
+val releaseStorePassword = findProperty("RELEASE_STORE_PASSWORD") as String?
+val releaseKeyAlias = findProperty("RELEASE_KEY_ALIAS") as String?
+val releaseKeyPassword = findProperty("RELEASE_KEY_PASSWORD") as String?
+val hasReleaseSigning = !releaseStoreFile.isNullOrBlank() &&
+    !releaseStorePassword.isNullOrBlank() &&
+    !releaseKeyAlias.isNullOrBlank() &&
+    !releaseKeyPassword.isNullOrBlank()
+
 android {
     namespace = "com.freshtrades.android"
     compileSdk = 34
@@ -29,13 +40,24 @@ android {
         }
     }
 
+    signingConfigs {
+        if (hasReleaseSigning) {
+            create("release") {
+                storeFile = file(releaseStoreFile!!)
+                storePassword = releaseStorePassword
+                keyAlias = releaseKeyAlias
+                keyPassword = releaseKeyPassword
+            }
+        }
+    }
+
     buildTypes {
         release {
             isMinifyEnabled = false
             proguardFiles(getDefaultProguardFile("proguard-android-optimize.txt"), "proguard-rules.pro")
-            // Debug-signiert für einfaches Sideloading ohne eigenes Release-Zertifikat.
-            // Für eine Play-Store-Veröffentlichung muss hier ein echter Signing-Key hinterlegt werden.
-            signingConfig = signingConfigs.getByName("debug")
+            // Nutzt den echten Release-Key, sobald einer hinterlegt ist – sonst
+            // debug-signiert für einfaches Sideloading (siehe README).
+            signingConfig = if (hasReleaseSigning) signingConfigs.getByName("release") else signingConfigs.getByName("debug")
         }
     }
 
@@ -57,5 +79,6 @@ dependencies {
     implementation("androidx.core:core-ktx:1.13.1")
     implementation("androidx.appcompat:appcompat:1.7.0")
     implementation("androidx.activity:activity-ktx:1.9.0")
+    implementation("androidx.documentfile:documentfile:1.0.1")
     implementation("com.google.android.material:material:1.12.0")
 }

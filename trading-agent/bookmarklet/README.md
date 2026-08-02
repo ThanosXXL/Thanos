@@ -57,3 +57,27 @@ javascript:!function()%7Bif(!window.__freshtradesBar)%7Bwindow.__freshtradesBar%
   nicht dauerhaft im Hintergrund).
 - Für die **FreshTrades-App** (separate App, siehe `../android-app/`) gelten
   diese Einschränkungen nicht, da sie echte native Android-APIs nutzt.
+
+## ⚠️ Bekannte offene Sicherheitslücke: fehlende Integritätsprüfung
+
+Der Sniping-Button lädt `html2canvas` zur Laufzeit von `cdnjs.cloudflare.com` nach –
+**ohne Subresource-Integrity-Hash (SRI)**. Das Bookmarklet läuft im Kontext der gerade
+geöffneten Seite (z. B. auch eingeloggte Konten, Banking, E-Mail). Würde die CDN-Leitung
+oder cdnjs kompromittiert, könnte darüber beliebiger Code mit den Rechten dieser Seite
+laufen.
+
+Der Code in [`freshtrades-bookmarklet.js`](freshtrades-bookmarklet.js) ist bereits dafür
+vorbereitet (`HTML2CANVAS_SRI`-Konstante), **aktuell aber noch leer** – ich konnte den
+echten Hash aus dieser Sandbox nicht berechnen, da der Zugriff auf `cdnjs.cloudflare.com`
+hier blockiert ist. So aktivierst du die Prüfung:
+
+```bash
+curl -s https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js \
+  | openssl dgst -sha384 -binary | openssl base64 -A
+```
+
+Das Ergebnis (mit vorangestelltem `sha384-`) in `HTML2CANVAS_SRI` in
+`freshtrades-bookmarklet.js` eintragen, danach das Bookmarklet neu minifizieren und den
+Code oben in dieser README aktualisieren. Bis dahin bleibt dieser eine Programmpunkt ohne
+Integritätsschutz – alle anderen Buttons (Mikrofon, Vorlesen, Speichern unter) laden keinen
+externen Code und sind davon nicht betroffen.

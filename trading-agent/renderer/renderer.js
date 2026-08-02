@@ -16,6 +16,42 @@
     answerText.textContent = text;
   }
 
+  // Bestätigungsdialog (schwarz/gold), bevor Sniping/Vorlesen/Speichern unter ausgeführt wird
+  function showConfirmModal(message, onConfirmed) {
+    const overlay = document.createElement('div');
+    overlay.className = 'confirm-overlay';
+
+    const box = document.createElement('div');
+    box.className = 'confirm-box';
+
+    const msg = document.createElement('p');
+    msg.textContent = message;
+
+    const row = document.createElement('div');
+    row.className = 'confirm-actions';
+
+    const yes = document.createElement('button');
+    yes.className = 'btn-gold';
+    yes.textContent = 'Bestätigen';
+
+    const no = document.createElement('button');
+    no.className = 'btn-gold';
+    no.textContent = 'Abbrechen';
+
+    yes.addEventListener('click', () => {
+      overlay.remove();
+      onConfirmed();
+    });
+    no.addEventListener('click', () => overlay.remove());
+
+    row.appendChild(yes);
+    row.appendChild(no);
+    box.appendChild(msg);
+    box.appendChild(row);
+    overlay.appendChild(box);
+    document.body.appendChild(overlay);
+  }
+
   function askQuestion() {
     const question = questionInput.value.trim();
     if (!question) return;
@@ -74,34 +110,37 @@
     recognition.start();
   });
 
-  // Sniping: Umschalter für den Sniping-Modus
-  let snipingActive = false;
+  // Sniping: Screenshot des Fensters aufnehmen (nach Bestätigung)
   snipingBtn.addEventListener('click', () => {
-    snipingActive = !snipingActive;
-    snipingBtn.classList.toggle('is-active', snipingActive);
-    snipingBtn.setAttribute('aria-pressed', String(snipingActive));
-    snipingBtn.textContent = snipingActive ? 'Sniping: Aktiv' : 'Sniping';
+    showConfirmModal('Jetzt einen Screenshot des Fensters aufnehmen?', async () => {
+      const result = await window.freshTradesAPI.captureSniping();
+      setAnswer(result.saved ? `Screenshot gespeichert unter: ${result.filePath}` : 'Screenshot wurde nicht gespeichert.');
+    });
   });
 
-  // Vorlesen: Antwort per Sprachausgabe vorlesen
+  // Vorlesen: Antwort per Sprachausgabe vorlesen (nach Bestätigung)
   vorlesenBtn.addEventListener('click', () => {
-    if (!('speechSynthesis' in window)) {
-      setAnswer('Sprachausgabe wird von diesem System nicht unterstützt.');
-      return;
-    }
-    const utterance = new SpeechSynthesisUtterance(answerText.textContent);
-    utterance.lang = 'de-DE';
-    window.speechSynthesis.cancel();
-    window.speechSynthesis.speak(utterance);
+    showConfirmModal('Die aktuelle Antwort jetzt vorlesen?', () => {
+      if (!('speechSynthesis' in window)) {
+        setAnswer('Sprachausgabe wird von diesem System nicht unterstützt.');
+        return;
+      }
+      const utterance = new SpeechSynthesisUtterance(answerText.textContent);
+      utterance.lang = 'de-DE';
+      window.speechSynthesis.cancel();
+      window.speechSynthesis.speak(utterance);
+    });
   });
 
-  // Seite speichern unter: Frage & Antwort als Textdatei sichern
-  saveAsBtn.addEventListener('click', async () => {
-    const content = `Frage/Antwort – FreshTrades\n\n${answerText.textContent}\n`;
-    const result = await window.freshTradesAPI.saveAs(content);
-    if (result.saved) {
-      setAnswer(`Gespeichert unter: ${result.filePath}`);
-    }
+  // Seite speichern unter: Frage & Antwort als Textdatei sichern (nach Bestätigung)
+  saveAsBtn.addEventListener('click', () => {
+    showConfirmModal('Die aktuelle Seite jetzt speichern?', async () => {
+      const content = `Frage/Antwort – FreshTrades\n\n${answerText.textContent}\n`;
+      const result = await window.freshTradesAPI.saveAs(content);
+      if (result.saved) {
+        setAnswer(`Gespeichert unter: ${result.filePath}`);
+      }
+    });
   });
 
   // Google: Verbindungsstatus umschalten (Platzhalter bis echte OAuth-Anbindung erfolgt)
