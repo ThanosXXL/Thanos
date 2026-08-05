@@ -24,7 +24,9 @@
     activeTab: 'basis',
     searchQuery: '',
     editingPatientId: null, // set when patientFormModal is in "edit" mode
-    entryModalCategory: null // 'journal' | 'rezepte' | 'termine' | 'briefe' | 'labor'
+    entryModalCategory: null, // 'journal' | 'rezepte' | 'termine' | 'briefe' | 'labor'
+    sortKey: 'name', // 'name' | 'geburtsdatum' | 'geschlecht' | 'versicherung'
+    sortDir: 'asc' // 'asc' | 'desc'
   };
 
   const el = {
@@ -32,6 +34,15 @@
     content: document.getElementById('content'),
     patientSearch: document.getElementById('patientSearch'),
     newPatientBtn: document.getElementById('newPatientBtn'),
+
+    toolPatientListBtn: document.getElementById('toolPatientListBtn'),
+    toolNewPatientBtn: document.getElementById('toolNewPatientBtn'),
+    toolSearchBtn: document.getElementById('toolSearchBtn'),
+    toolTermineBtn: document.getElementById('toolTermineBtn'),
+    toolBriefeBtn: document.getElementById('toolBriefeBtn'),
+    toolLaborBtn: document.getElementById('toolLaborBtn'),
+    toolPrintBtn: document.getElementById('toolPrintBtn'),
+    toolReloadBtn: document.getElementById('toolReloadBtn'),
 
     patientFormModal: document.getElementById('patientFormModal'),
     patientFormTitle: document.getElementById('patientFormTitle'),
@@ -90,7 +101,7 @@
   }
 
   async function persist() {
-    await window.praxisAPI.saveData(state);
+    await window.patientenweltinAPI.saveData(state);
   }
 
   // ---------- Rendering ----------
@@ -98,6 +109,14 @@
   function render() {
     renderSidebar();
     renderContent();
+    updateToolbarState();
+  }
+
+  function updateToolbarState() {
+    const hasPatient = !!ui.selectedPatientId;
+    el.toolTermineBtn.disabled = !hasPatient;
+    el.toolBriefeBtn.disabled = !hasPatient;
+    el.toolLaborBtn.disabled = !hasPatient;
   }
 
   function renderSidebar() {
@@ -173,14 +192,10 @@
 
   function renderPatientListView() {
     const wrap = document.createDocumentFragment();
-    const card = document.createElement('div');
-    card.className = 'panel-card';
-
-    const filtered = state.patients
-      .filter((p) => matchesSearch(p, ui.searchQuery))
-      .sort((a, b) => `${a.nachname} ${a.vorname}`.localeCompare(`${b.nachname} ${b.vorname}`, 'de'));
 
     if (state.patients.length === 0) {
+      const card = document.createElement('div');
+      card.className = 'panel-card';
       const empty = document.createElement('div');
       empty.className = 'empty-state';
       const p = document.createElement('p');
@@ -195,6 +210,17 @@
       return wrap;
     }
 
+    wrap.appendChild(renderOverviewStats());
+
+    const card = document.createElement('div');
+    card.className = 'panel-card';
+
+    const filtered = sortPatients(
+      state.patients.filter((p) => matchesSearch(p, ui.searchQuery)),
+      ui.sortKey,
+      ui.sortDir
+    );
+
     const heading = document.createElement('h2');
     heading.textContent = 'Patient wählen';
     card.appendChild(heading);
@@ -208,11 +234,37 @@
       const table = document.createElement('table');
       table.className = 'patient-table';
       const thead = document.createElement('thead');
-      thead.innerHTML = '';
       const headRow = document.createElement('tr');
-      ['Name', 'Geburtsdatum', 'Geschlecht', 'Krankenkasse', ''].forEach((h) => {
+      const columns = [
+        { key: 'name', label: 'Name' },
+        { key: 'geburtsdatum', label: 'Geburtsdatum' },
+        { key: 'geschlecht', label: 'Geschlecht' },
+        { key: 'versicherung', label: 'Krankenkasse' },
+        { key: null, label: '' }
+      ];
+      columns.forEach((col) => {
         const th = document.createElement('th');
-        th.textContent = h;
+        if (col.key) {
+          th.className = 'sortable';
+          th.textContent = col.label;
+          if (ui.sortKey === col.key) {
+            const arrow = document.createElement('span');
+            arrow.className = 'sort-arrow';
+            arrow.textContent = ui.sortDir === 'asc' ? '▲' : '▼';
+            th.appendChild(arrow);
+          }
+          th.addEventListener('click', () => {
+            if (ui.sortKey === col.key) {
+              ui.sortDir = ui.sortDir === 'asc' ? 'desc' : 'asc';
+            } else {
+              ui.sortKey = col.key;
+              ui.sortDir = 'asc';
+            }
+            render();
+          });
+        } else {
+          th.textContent = col.label;
+        }
         headRow.appendChild(th);
       });
       thead.appendChild(headRow);
@@ -277,13 +329,76 @@
     return `${patient.nachname} ${patient.vorname}`.toLowerCase().includes(q);
   }
 
+  function sortPatients(list, key, dir) {
+    const factor = dir === 'desc' ? -1 : 1;
+    return list.slice().sort((a, b) => {
+      let av;
+      let bv;
+      if (key === 'geburtsdatum') {
+        av = a.geburtsdatum || '';
+        bv = b.geburtsdatum || '';
+      } else if (key === 'geschlecht') {
+        av = GESCHLECHT_LABEL[a.geschlecht] || '';
+        bv = GESCHLECHT_LABEL[b.geschlecht] || '';
+      } else if (key === 'versicherung') {
+        av = a.versicherung || '';
+        bv = b.versicherung || '';
+      } else {
+        av = `${a.nachname} ${a.vorname}`;
+        bv = `${b.nachname} ${b.vorname}`;
+      }
+      return factor * av.localeCompare(bv, 'de');
+    });
+  }
+
+  function countUpcomingTermine(patients, days) {
+    const today = todayISO();
+    const limit = new Date();
+    limit.setDate(limit.getDate() + days);
+    const limitISO = limit.toISOString().slice(0, 10);
+    let count = 0;
+    patients.forEach((p) => {
+      (p.termine || []).forEach((t) => {
+        if (t.datum && t.datum >= today && t.datum <= limitISO) count += 1;
+      });
+    });
+    return count;
+  }
+
+  function renderOverviewStats() {
+    const grid = document.createElement('div');
+    grid.className = 'stat-grid';
+
+    const totalJournalEntries = state.patients.reduce((sum, p) => sum + (p.journal ? p.journal.length : 0), 0);
+    const stats = [
+      { value: state.patients.length, label: 'Patienten gesamt' },
+      { value: countUpcomingTermine(state.patients, 14), label: 'Termine in den nächsten 14 Tagen' },
+      { value: totalJournalEntries, label: 'Verlaufseinträge gesamt' }
+    ];
+
+    stats.forEach((s) => {
+      const tile = document.createElement('div');
+      tile.className = 'stat-tile';
+      const value = document.createElement('div');
+      value.className = 'stat-value';
+      value.textContent = String(s.value);
+      const label = document.createElement('div');
+      label.className = 'stat-label';
+      label.textContent = s.label;
+      tile.append(value, label);
+      grid.appendChild(tile);
+    });
+
+    return grid;
+  }
+
   function renderPatientBanner(patient) {
     const banner = document.createElement('div');
     banner.className = 'patient-banner';
 
     const left = document.createElement('div');
     const name = document.createElement('div');
-    name.className = 'patient-name';
+    name.className = 'patient-name text-glossy-dark';
     name.textContent = `${patient.nachname}, ${patient.vorname}`;
     left.appendChild(name);
 
@@ -315,7 +430,10 @@
       const btn = document.createElement('button');
       btn.type = 'button';
       btn.className = 'tab-btn' + (ui.activeTab === tab.key ? ' active' : '');
-      btn.textContent = tab.label;
+      const label = document.createElement('span');
+      label.className = 'tab-label';
+      label.textContent = tab.label;
+      btn.appendChild(label);
       btn.addEventListener('click', () => {
         ui.activeTab = tab.key;
         render();
@@ -471,6 +589,7 @@
     el.fieldNachname.value = '';
     el.fieldVorname.value = '';
     el.fieldGeburtsdatum.value = '';
+    el.fieldGeburtsdatum.max = todayISO();
     el.fieldGeschlecht.value = 'w';
     el.fieldVersicherung.value = '';
     el.fieldVersichertenNr.value = '';
@@ -486,6 +605,7 @@
     el.fieldNachname.value = patient.nachname || '';
     el.fieldVorname.value = patient.vorname || '';
     el.fieldGeburtsdatum.value = patient.geburtsdatum || '';
+    el.fieldGeburtsdatum.max = todayISO();
     el.fieldGeschlecht.value = patient.geschlecht || 'w';
     el.fieldVersicherung.value = patient.versicherung || '';
     el.fieldVersichertenNr.value = patient.versichertenNr || '';
@@ -707,10 +827,49 @@
     if (e.target === el.entryFormModal) closeEntryModal();
   });
 
+  el.toolPatientListBtn.addEventListener('click', () => {
+    ui.viewMode = 'list';
+    render();
+  });
+  el.toolNewPatientBtn.addEventListener('click', openNewPatientModal);
+  el.toolSearchBtn.addEventListener('click', () => el.patientSearch.focus());
+  el.toolTermineBtn.addEventListener('click', () => {
+    if (ui.selectedPatientId) selectTab('termine');
+  });
+  el.toolBriefeBtn.addEventListener('click', () => {
+    if (ui.selectedPatientId) selectTab('briefe');
+  });
+  el.toolLaborBtn.addEventListener('click', () => {
+    if (ui.selectedPatientId) selectTab('labor');
+  });
+  el.toolPrintBtn.addEventListener('click', () => window.print());
+  el.toolReloadBtn.addEventListener('click', () => init());
+
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape') {
+      if (el.entryFormModal.classList.contains('open')) closeEntryModal();
+      else if (el.deletePatientModal.classList.contains('open')) closeDeletePatientModal();
+      else if (el.patientFormModal.classList.contains('open')) closePatientFormModal();
+      return;
+    }
+    if (e.key === 'Enter' && e.target.tagName !== 'TEXTAREA') {
+      if (el.entryFormModal.classList.contains('open') && el.entryFormModal.contains(e.target)) {
+        e.preventDefault();
+        submitEntryForm();
+      } else if (el.patientFormModal.classList.contains('open') && el.patientFormModal.contains(e.target)) {
+        e.preventDefault();
+        submitPatientForm();
+      } else if (el.deletePatientModal.classList.contains('open') && el.deletePatientModal.contains(e.target)) {
+        e.preventDefault();
+        confirmDeletePatient();
+      }
+    }
+  });
+
   // ---------- Initialisierung ----------
 
   async function init() {
-    const loaded = await window.praxisAPI.loadData();
+    const loaded = await window.patientenweltinAPI.loadData();
     state = loaded && Array.isArray(loaded.patients) ? loaded : { patients: [] };
     render();
   }

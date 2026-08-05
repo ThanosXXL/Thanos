@@ -2,7 +2,7 @@ const { app, BrowserWindow, ipcMain } = require('electron');
 const path = require('path');
 const fs = require('fs');
 
-const dataFilePath = path.join(app.getPath('userData'), 'praxis-data.json');
+const dataFilePath = path.join(app.getPath('userData'), 'patientenweltin-data.json');
 
 function loadData() {
   try {

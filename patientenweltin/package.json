@@ -1,7 +1,7 @@
 {
-  "name": "praxis-dashboard",
+  "name": "patientenweltin",
   "version": "1.0.0",
-  "description": "Desktop-Praxisverwaltung (Patientenakte, Journal, Rezepte, Termine) im Blau-Weiss-3D-Hochglanz-Stil",
+  "description": "PatientenWeltin - Desktop-Praxisverwaltung (Patientenakte, Journal, Rezepte, Termine) im Blau-Weiss-3D-Hochglanz-Stil",
   "main": "main.js",
   "author": "",
   "license": "MIT",
@@ -14,8 +14,8 @@
     "electron-builder": "^24.13.3"
   },
   "build": {
-    "appId": "com.praxis.dashboard",
-    "productName": "Praxis Dashboard",
+    "appId": "com.patientenweltin.app",
+    "productName": "PatientenWeltin",
     "files": [
       "main.js",
       "preload.js",
