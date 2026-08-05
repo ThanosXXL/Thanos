@@ -509,5 +509,41 @@
     </div>
   </div>
   </div>
+
+  <script>
+    // The plain data-URI + download attribute is silently ignored by
+    // many in-app/embedded mobile browsers (WhatsApp, Files "Quick
+    // Look", etc.). Converting to a Blob object URL first works in far
+    // more of them; if even that's blocked, fall back to just
+    // navigating to the image so the user can long-press-save it.
+    document.querySelectorAll('.download-link').forEach(function (link) {
+      link.addEventListener('click', function (event) {
+        var href = link.getAttribute('href');
+        var filename = link.getAttribute('download') || 'flyer.png';
+        try {
+          var parts = href.split(',');
+          var mime = parts[0].match(/:(.*?);/)[1];
+          var binary = atob(parts[1]);
+          var bytes = new Uint8Array(binary.length);
+          for (var i = 0; i < binary.length; i++) {
+            bytes[i] = binary.charCodeAt(i);
+          }
+          var blob = new Blob([bytes], { type: mime });
+          var url = URL.createObjectURL(blob);
+          event.preventDefault();
+          var tempLink = document.createElement('a');
+          tempLink.href = url;
+          tempLink.download = filename;
+          document.body.appendChild(tempLink);
+          tempLink.click();
+          document.body.removeChild(tempLink);
+          setTimeout(function () { URL.revokeObjectURL(url); }, 4000);
+        } catch (err) {
+          event.preventDefault();
+          window.open(href, '_blank', 'noopener');
+        }
+      });
+    });
+  </script>
 </body>
 </html>
