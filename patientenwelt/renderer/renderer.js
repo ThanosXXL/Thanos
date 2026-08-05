@@ -10,8 +10,15 @@
     { key: 'journal', label: 'Verlauf' },
     { key: 'rezepte', label: 'Rezepte' },
     { key: 'termine', label: 'Termine' },
+    { key: 'kalender', label: 'Kalender' },
     { key: 'briefe', label: 'Briefe' },
     { key: 'labor', label: 'Laborwerte' }
+  ];
+
+  const WOCHENTAGE_KURZ = ['Mo', 'Di', 'Mi', 'Do', 'Fr', 'Sa', 'So'];
+  const MONATSNAMEN = [
+    'Januar', 'Februar', 'März', 'April', 'Mai', 'Juni',
+    'Juli', 'August', 'September', 'Oktober', 'November', 'Dezember'
   ];
 
   const ENTRY_LIST_KEYS = ['journal', 'rezepte', 'termine', 'briefe', 'labor'];
@@ -19,14 +26,15 @@
   let state = { patients: [] };
 
   const ui = {
-    viewMode: 'list', // 'list' | 'patient'
+    viewMode: 'list', // 'list' | 'patient' | 'placeholder'
     selectedPatientId: null,
     activeTab: 'basis',
     searchQuery: '',
     editingPatientId: null, // set when patientFormModal is in "edit" mode
     entryModalCategory: null, // 'journal' | 'rezepte' | 'termine' | 'briefe' | 'labor'
     sortKey: 'name', // 'name' | 'geburtsdatum' | 'geschlecht' | 'versicherung'
-    sortDir: 'asc' // 'asc' | 'desc'
+    sortDir: 'asc', // 'asc' | 'desc'
+    placeholderLabel: null // aktuell angezeigter Platzhalter-Menüpunkt, wenn viewMode === 'placeholder'
   };
 
   const el = {
@@ -101,7 +109,7 @@
   }
 
   async function persist() {
-    await window.patientenweltinAPI.saveData(state);
+    await window.patientenweltAPI.saveData(state);
   }
 
   // ---------- Rendering ----------
@@ -119,6 +127,42 @@
     el.toolLaborBtn.disabled = !hasPatient;
   }
 
+  // Menüpunkte ohne hinterlegte Funktion (siehe Referenz-Screenshot der Praxissoftware).
+  // Sie führen bewusst zu einer ehrlichen "noch nicht verfügbar"-Anzeige statt zu totem UI.
+  const PLACEHOLDER_GROUPS = [
+    {
+      afterGroup: 'Praxis',
+      items: [
+        'Praxisgebühr Info', 'Praxisgebühr Kassenbuch', 'Registrierung Versichertenkarte',
+        'Krankenscheinabgabe', 'Formulare', 'Druckauftrag Formular', 'Recallfunktion',
+        'Warteliste Eintragen', 'Warteliste Nachsehen'
+      ]
+    },
+    {
+      afterGroup: 'Behandlung',
+      items: ['Laborwerterfassung', 'Leistungsstatus', 'Verordnungsstatus']
+    },
+    {
+      title: 'Patientenverwaltung',
+      items: [
+        'Scheinrückseite', 'Übergabe Patient', 'Patientendaten duplizieren',
+        'Archivinformation SD', 'Archivinformation MD'
+      ]
+    },
+    {
+      title: 'Abrechnung',
+      items: ['Privatliquidation', 'BG-Abrechnung', 'KV-Abrechnung']
+    },
+    {
+      title: 'Auswertung',
+      items: ['Analyse allgemein', 'Analyse Leistungen', 'Analyse Verordnungen']
+    },
+    {
+      title: 'Weitere Services',
+      items: ['Weitere Services']
+    }
+  ];
+
   function renderSidebar() {
     el.sidebar.replaceChildren();
     const hasPatient = !!ui.selectedPatientId;
@@ -132,15 +176,42 @@
     el.sidebar.appendChild(sidebarNavBtn('Patientendaten ändern', false, () => {
       if (hasPatient) openEditPatientModal(ui.selectedPatientId);
     }, !hasPatient));
+    appendPlaceholderItems('Praxis');
 
     el.sidebar.appendChild(sidebarGroupTitle('Behandlung'));
     el.sidebar.appendChild(sidebarNavBtn('Verlauf (Journal)', hasPatient && ui.viewMode === 'patient' && ui.activeTab === 'journal', () => selectTab('journal'), !hasPatient));
     el.sidebar.appendChild(sidebarNavBtn('Rezepte', hasPatient && ui.viewMode === 'patient' && ui.activeTab === 'rezepte', () => selectTab('rezepte'), !hasPatient));
     el.sidebar.appendChild(sidebarNavBtn('Laborwerte', hasPatient && ui.viewMode === 'patient' && ui.activeTab === 'labor', () => selectTab('labor'), !hasPatient));
+    appendPlaceholderItems('Behandlung');
 
     el.sidebar.appendChild(sidebarGroupTitle('Termine & Kommunikation'));
     el.sidebar.appendChild(sidebarNavBtn('Termine', hasPatient && ui.viewMode === 'patient' && ui.activeTab === 'termine', () => selectTab('termine'), !hasPatient));
+    el.sidebar.appendChild(sidebarNavBtn('Kalender', hasPatient && ui.viewMode === 'patient' && ui.activeTab === 'kalender', () => selectTab('kalender'), !hasPatient));
     el.sidebar.appendChild(sidebarNavBtn('Briefe', hasPatient && ui.viewMode === 'patient' && ui.activeTab === 'briefe', () => selectTab('briefe'), !hasPatient));
+
+    PLACEHOLDER_GROUPS.filter((g) => g.title).forEach((group) => {
+      el.sidebar.appendChild(sidebarGroupTitle(group.title));
+      group.items.forEach((label) => {
+        el.sidebar.appendChild(sidebarPlaceholderBtn(label));
+      });
+    });
+  }
+
+  function appendPlaceholderItems(afterGroup) {
+    const group = PLACEHOLDER_GROUPS.find((g) => g.afterGroup === afterGroup);
+    if (!group) return;
+    group.items.forEach((label) => {
+      el.sidebar.appendChild(sidebarPlaceholderBtn(label));
+    });
+  }
+
+  function sidebarPlaceholderBtn(label) {
+    const active = ui.viewMode === 'placeholder' && ui.placeholderLabel === label;
+    return sidebarNavBtn(label, active, () => {
+      ui.viewMode = 'placeholder';
+      ui.placeholderLabel = label;
+      render();
+    });
   }
 
   function sidebarGroupTitle(text) {
@@ -171,6 +242,11 @@
 
   function renderContent() {
     el.content.replaceChildren();
+
+    if (ui.viewMode === 'placeholder') {
+      el.content.appendChild(renderPlaceholderView(ui.placeholderLabel));
+      return;
+    }
 
     if (ui.viewMode === 'list' || !ui.selectedPatientId) {
       el.content.appendChild(renderPatientListView());
@@ -322,6 +398,20 @@
     return wrap;
   }
 
+  function renderPlaceholderView(label) {
+    const card = document.createElement('div');
+    card.className = 'panel-card';
+    const empty = document.createElement('div');
+    empty.className = 'empty-state';
+    const heading = document.createElement('h2');
+    heading.textContent = label;
+    const p = document.createElement('p');
+    p.textContent = 'Diese Funktion ist in dieser Version von PatientenWelt noch nicht verfügbar.';
+    empty.append(heading, p);
+    card.appendChild(empty);
+    return card;
+  }
+
   function matchesSearch(patient, query) {
     if (!query) return true;
     const q = query.trim().toLowerCase();
@@ -445,6 +535,7 @@
 
   function renderTabPanel(patient) {
     if (ui.activeTab === 'basis') return renderBasisPanel(patient);
+    if (ui.activeTab === 'kalender') return renderKalenderPanel(patient);
     return renderEntryListPanel(patient, ui.activeTab);
   }
 
@@ -581,6 +672,123 @@
     return entry.text;
   }
 
+  // ---------- Kalender ----------
+
+  function renderKalenderPanel(patient) {
+    const card = document.createElement('div');
+    card.className = 'panel-card';
+
+    const toolbar = document.createElement('div');
+    toolbar.className = 'list-toolbar';
+    const heading = document.createElement('h2');
+    heading.textContent = 'Kalender';
+    heading.style.margin = '0';
+    const hint = document.createElement('span');
+    hint.className = 'entry-empty';
+    hint.style.padding = '0';
+    hint.textContent = 'Tag anklicken, um einen Termin einzutragen';
+    toolbar.append(heading, hint);
+    card.appendChild(toolbar);
+
+    const termineByDate = buildTermineByDate(patient);
+    const currentYear = new Date().getFullYear();
+
+    [currentYear, currentYear + 1].forEach((year) => {
+      card.appendChild(renderCalendarYear(year, termineByDate));
+    });
+
+    return card;
+  }
+
+  function buildTermineByDate(patient) {
+    const map = new Map();
+    (patient.termine || []).forEach((t) => {
+      if (!t.datum) return;
+      if (!map.has(t.datum)) map.set(t.datum, []);
+      map.get(t.datum).push(t);
+    });
+    return map;
+  }
+
+  function renderCalendarYear(year, termineByDate) {
+    const block = document.createElement('div');
+    block.className = 'calendar-year-block';
+
+    const title = document.createElement('h3');
+    title.className = 'calendar-year-title';
+    title.textContent = String(year);
+    block.appendChild(title);
+
+    const grid = document.createElement('div');
+    grid.className = 'calendar-month-grid';
+    for (let month = 0; month < 12; month += 1) {
+      grid.appendChild(renderCalendarMonth(year, month, termineByDate));
+    }
+    block.appendChild(grid);
+
+    return block;
+  }
+
+  function renderCalendarMonth(year, monthIndex, termineByDate) {
+    const todayIso = todayISO();
+    const card = document.createElement('div');
+    card.className = 'month-card';
+
+    const header = document.createElement('div');
+    header.className = 'month-card-header';
+    header.textContent = MONATSNAMEN[monthIndex];
+    card.appendChild(header);
+
+    const weekdayRow = document.createElement('div');
+    weekdayRow.className = 'month-days-grid month-weekday-row';
+    WOCHENTAGE_KURZ.forEach((w) => {
+      const cell = document.createElement('div');
+      cell.className = 'weekday-cell';
+      cell.textContent = w;
+      weekdayRow.appendChild(cell);
+    });
+    card.appendChild(weekdayRow);
+
+    const daysGrid = document.createElement('div');
+    daysGrid.className = 'month-days-grid';
+
+    const firstOfMonth = new Date(year, monthIndex, 1);
+    const totalDays = new Date(year, monthIndex + 1, 0).getDate();
+    const leadingBlanks = (firstOfMonth.getDay() + 6) % 7; // Montag = 0
+
+    for (let i = 0; i < leadingBlanks; i += 1) {
+      const blank = document.createElement('div');
+      blank.className = 'day-cell padding';
+      daysGrid.appendChild(blank);
+    }
+
+    for (let day = 1; day <= totalDays; day += 1) {
+      const iso = `${year}-${String(monthIndex + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
+      const dayTermine = termineByDate.get(iso) || [];
+
+      const cell = document.createElement('button');
+      cell.type = 'button';
+      cell.className = 'day-cell';
+      if (iso === todayIso) cell.classList.add('today');
+      if (dayTermine.length > 0) cell.classList.add('has-termin');
+
+      const num = document.createElement('span');
+      num.className = 'day-number';
+      num.textContent = String(day);
+      cell.appendChild(num);
+
+      if (dayTermine.length > 0) {
+        cell.title = dayTermine.map((t) => `${t.uhrzeit ? t.uhrzeit + ' ' : ''}${t.grund}`).join('\n');
+      }
+
+      cell.addEventListener('click', () => openEntryModal('termine', iso));
+      daysGrid.appendChild(cell);
+    }
+
+    card.appendChild(daysGrid);
+    return card;
+  }
+
   // ---------- Patient anlegen / bearbeiten ----------
 
   function openNewPatientModal() {
@@ -688,13 +896,13 @@
 
   // ---------- Einträge (Journal/Rezepte/Termine/Briefe/Labor) ----------
 
-  function openEntryModal(category) {
+  function openEntryModal(category, presetDate) {
     ui.entryModalCategory = category;
     el.entryFormFields.replaceChildren();
     el.entryFormTitle.textContent = CATEGORY_META[category].addLabel.replace('+ ', '') + ' hinzufügen';
 
     const dateLabel = fieldLabel('Datum', 'entryDatum', 'date');
-    dateLabel.querySelector('input').value = todayISO();
+    dateLabel.querySelector('input').value = presetDate || todayISO();
     el.entryFormFields.appendChild(dateLabel);
 
     if (category === 'journal') {
@@ -869,7 +1077,7 @@
   // ---------- Initialisierung ----------
 
   async function init() {
-    const loaded = await window.patientenweltinAPI.loadData();
+    const loaded = await window.patientenweltAPI.loadData();
     state = loaded && Array.isArray(loaded.patients) ? loaded : { patients: [] };
     render();
   }

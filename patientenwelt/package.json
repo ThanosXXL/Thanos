@@ -1,7 +1,7 @@
 {
-  "name": "patientenweltin",
+  "name": "patientenwelt",
   "version": "1.0.0",
-  "description": "PatientenWeltin - Desktop-Praxisverwaltung (Patientenakte, Journal, Rezepte, Termine) im Blau-Weiss-3D-Hochglanz-Stil",
+  "description": "PatientenWelt - Desktop-Praxisverwaltung (Patientenakte, Journal, Rezepte, Termine, Kalender) im Blau-Weiss-3D-Hochglanz-Stil",
   "main": "main.js",
   "author": "",
   "license": "MIT",
@@ -14,8 +14,8 @@
     "electron-builder": "^24.13.3"
   },
   "build": {
-    "appId": "com.patientenweltin.app",
-    "productName": "PatientenWeltin",
+    "appId": "com.patientenwelt.app",
+    "productName": "PatientenWelt",
     "files": [
       "main.js",
       "preload.js",
