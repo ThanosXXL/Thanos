@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<title>Praxis Dashboard</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <header class="app-header">
+    <div class="brand">
+      <span class="brand-icon" aria-hidden="true">&#9877;</span>
+      <span class="brand-title">Praxis Dashboard</span>
+    </div>
+    <div class="header-search">
+      <input type="text" id="patientSearch" placeholder="Patient suchen (Name)&#8230;">
+    </div>
+    <button id="newPatientBtn" class="btn-glossy btn-primary">+ Neuer Patient</button>
+  </header>
+
+  <div class="app-body">
+    <nav class="sidebar" id="sidebar">
+      <!-- Sidebar-Navigation wird hier eingefügt -->
+    </nav>
+
+    <main id="content">
+      <!-- Hauptinhalt wird hier eingefügt -->
+    </main>
+  </div>
+
+  <!-- Modal: Patient anlegen / bearbeiten -->
+  <div class="modal-overlay" id="patientFormModal">
+    <div class="modal">
+      <h2 id="patientFormTitle">Neuen Patienten anlegen</h2>
+      <div class="form-grid">
+        <label>Nachname
+          <input type="text" id="fieldNachname" maxlength="60">
+        </label>
+        <label>Vorname
+          <input type="text" id="fieldVorname" maxlength="60">
+        </label>
+        <label>Geburtsdatum
+          <input type="date" id="fieldGeburtsdatum">
+        </label>
+        <label>Geschlecht
+          <select id="fieldGeschlecht">
+            <option value="w">weiblich</option>
+            <option value="m">männlich</option>
+            <option value="d">divers</option>
+          </select>
+        </label>
+        <label>Krankenkasse
+          <input type="text" id="fieldVersicherung" maxlength="80" placeholder="z. B. AOK Niedersachsen">
+        </label>
+        <label>Versichertennummer
+          <input type="text" id="fieldVersichertenNr" maxlength="40">
+        </label>
+      </div>
+      <div class="modal-actions">
+        <button id="cancelPatientForm" class="btn-glossy btn-secondary">Abbrechen</button>
+        <button id="confirmPatientForm" class="btn-glossy btn-primary">Speichern</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal: Patient löschen bestätigen -->
+  <div class="modal-overlay" id="deletePatientModal">
+    <div class="modal">
+      <h2>Patient entfernen?</h2>
+      <p id="deletePatientText"></p>
+      <div class="modal-actions">
+        <button id="cancelDeletePatient" class="btn-glossy btn-secondary">Abbrechen</button>
+        <button id="confirmDeletePatient" class="btn-glossy btn-danger">Entfernen</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal: Eintrag hinzufügen (Journal/Rezepte/Termine/Briefe/Labor) -->
+  <div class="modal-overlay" id="entryFormModal">
+    <div class="modal">
+      <h2 id="entryFormTitle">Eintrag hinzufügen</h2>
+      <div class="form-grid" id="entryFormFields">
+        <!-- Felder werden je nach Kategorie eingefügt -->
+      </div>
+      <div class="modal-actions">
+        <button id="cancelEntryForm" class="btn-glossy btn-secondary">Abbrechen</button>
+        <button id="confirmEntryForm" class="btn-glossy btn-primary">Hinzufügen</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="renderer.js"></script>
+</body>
+</html>

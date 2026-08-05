@@ -8,6 +8,8 @@ Dozenten Dashboard is a cross-platform Electron desktop app for managing up to f
 
 This repository also hosts a second, unrelated project: `omniroute/` is a vendored snapshot of [OmniRoute](https://github.com/diegosouzapw/OmniRoute) (an AI gateway/router, Next.js + TypeScript monorepo), included as-is with its own `package.json`, tooling, and `CLAUDE.md`. It does not share dependencies, build config, or CI with the Dozenten Dashboard — the root `npm install`/`npm start`/`npm run dist` commands above only ever touch the Dozenten Dashboard files (`main.js`, `preload.js`, `renderer/`); nothing in `omniroute/` is packaged into its installers. Treat `omniroute/` as its own project — see `omniroute/CLAUDE.md` and `omniroute/VENDORED.md` for details and provenance. It is a one-time snapshot, not a live sync with upstream.
 
+A third, also unrelated project lives in `praxis-dashboard/`: a standalone Electron desktop app for managing patient records (Praxisverwaltung — patient list, journal/visit history, prescriptions, appointments, letters, lab values), styled in a blue-white 3D glossy theme. It is an original app (not vendored) that mirrors the Dozenten Dashboard's architecture pattern (`main.js`/`preload.js`/`renderer/`, `contextIsolation: true`, single in-memory `state` persisted as JSON via `mutate → persist() → render()`) but has its own `package.json`, its own data file (`praxis-data.json` in `userData`), and its own `window.praxisAPI` bridge. See `praxis-dashboard/README.md`. All sample/patient data in it is fictional.
+
 ## Commands
 
 ```bash
