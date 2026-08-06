@@ -6,39 +6,52 @@
 <link rel="stylesheet" href="style.css">
 </head>
 <body>
-  <header class="app-header">
-    <div class="brand">
-      <span class="brand-icon" aria-hidden="true">&#9877;</span>
-      <span class="brand-title text-glossy-dark">PatientenWelt</span>
+  <!-- Anmelde-/Einrichtungsbildschirm: verdeckt die App vollständig, bis entsperrt -->
+  <div class="auth-overlay" id="authScreen">
+    <div class="auth-card" id="authCard">
+      <!-- Inhalt (Einrichtung oder Anmeldung) wird per JS eingefügt -->
     </div>
-    <div class="header-search">
-      <input type="text" id="patientSearch" placeholder="Patient suchen (Name)&#8230;">
-    </div>
-    <button id="newPatientBtn" class="btn-glossy btn-primary">+ Neuer Patient</button>
-  </header>
-
-  <div class="icon-toolbar" id="iconToolbar">
-    <button type="button" id="toolPatientListBtn" class="tool-icon-btn" title="Patient wählen" aria-label="Patient wählen">&#128100;</button>
-    <button type="button" id="toolNewPatientBtn" class="tool-icon-btn" title="Neuer Patient" aria-label="Neuer Patient">&#10133;</button>
-    <button type="button" id="toolSearchBtn" class="tool-icon-btn" title="Suche" aria-label="Suche">&#128269;</button>
-    <span class="tool-sep" aria-hidden="true"></span>
-    <button type="button" id="toolTermineBtn" class="tool-icon-btn" title="Termine des Patienten" aria-label="Termine">&#128197;</button>
-    <button type="button" id="toolBriefeBtn" class="tool-icon-btn" title="Briefe des Patienten" aria-label="Briefe">&#9993;</button>
-    <button type="button" id="toolLaborBtn" class="tool-icon-btn" title="Laborwerte des Patienten" aria-label="Laborwerte">&#129514;</button>
-    <span class="tool-sep" aria-hidden="true"></span>
-    <button type="button" id="toolPrintBtn" class="tool-icon-btn" title="Drucken" aria-label="Drucken">&#128438;</button>
-    <button type="button" id="toolReloadBtn" class="tool-icon-btn" title="Neu laden" aria-label="Neu laden">&#8635;</button>
-    <button type="button" id="toolSettingsBtn" class="tool-icon-btn" title="Einstellungen (Demo – noch nicht verfügbar)" aria-label="Einstellungen" disabled>&#9881;</button>
   </div>
 
-  <div class="app-body">
-    <nav class="sidebar" id="sidebar">
-      <!-- Sidebar-Navigation wird hier eingefügt -->
-    </nav>
+  <div class="app-shell" id="appShell" hidden>
+    <header class="app-header">
+      <div class="brand">
+        <span class="brand-icon" aria-hidden="true">&#9877;</span>
+        <span class="brand-title text-glossy-dark">PatientenWelt</span>
+      </div>
+      <div class="header-search">
+        <input type="text" id="patientSearch" placeholder="Patient suchen (Name)&#8230;">
+      </div>
+      <div class="header-user" id="headerUser">
+        <span class="user-chip" id="userChip"></span>
+        <button id="lockBtn" class="btn-glossy btn-secondary btn-small" title="App sperren">&#128274; Sperren</button>
+      </div>
+      <button id="newPatientBtn" class="btn-glossy btn-primary">+ Neuer Patient</button>
+    </header>
 
-    <main id="content">
-      <!-- Hauptinhalt wird hier eingefügt -->
-    </main>
+    <div class="icon-toolbar" id="iconToolbar">
+      <button type="button" id="toolPatientListBtn" class="tool-icon-btn" title="Patient wählen" aria-label="Patient wählen">&#128100;</button>
+      <button type="button" id="toolNewPatientBtn" class="tool-icon-btn" title="Neuer Patient" aria-label="Neuer Patient">&#10133;</button>
+      <button type="button" id="toolSearchBtn" class="tool-icon-btn" title="Suche" aria-label="Suche">&#128269;</button>
+      <span class="tool-sep" aria-hidden="true"></span>
+      <button type="button" id="toolTermineBtn" class="tool-icon-btn" title="Termine des Patienten" aria-label="Termine">&#128197;</button>
+      <button type="button" id="toolBriefeBtn" class="tool-icon-btn" title="Briefe des Patienten" aria-label="Briefe">&#9993;</button>
+      <button type="button" id="toolLaborBtn" class="tool-icon-btn" title="Laborwerte des Patienten" aria-label="Laborwerte">&#129514;</button>
+      <span class="tool-sep" aria-hidden="true"></span>
+      <button type="button" id="toolPrintBtn" class="tool-icon-btn" title="Drucken" aria-label="Drucken">&#128438;</button>
+      <button type="button" id="toolReloadBtn" class="tool-icon-btn" title="Neu laden" aria-label="Neu laden">&#8635;</button>
+      <button type="button" id="toolSettingsBtn" class="tool-icon-btn" title="Einstellungen (Demo – noch nicht verfügbar)" aria-label="Einstellungen" disabled>&#9881;</button>
+    </div>
+
+    <div class="app-body">
+      <nav class="sidebar" id="sidebar">
+        <!-- Sidebar-Navigation wird hier eingefügt -->
+      </nav>
+
+      <main id="content">
+        <!-- Hauptinhalt wird hier eingefügt -->
+      </main>
+    </div>
   </div>
 
   <!-- Modal: Patient anlegen / bearbeiten -->
@@ -98,6 +111,47 @@
       <div class="modal-actions">
         <button id="cancelEntryForm" class="btn-glossy btn-secondary">Abbrechen</button>
         <button id="confirmEntryForm" class="btn-glossy btn-primary">Hinzufügen</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal: Neuen Benutzer anlegen -->
+  <div class="modal-overlay" id="userFormModal">
+    <div class="modal">
+      <h2>Neuen Benutzer anlegen</h2>
+      <div class="form-grid">
+        <label>Name
+          <input type="text" id="fieldUserName" maxlength="60">
+        </label>
+        <label>Rolle
+          <select id="fieldUserRole">
+            <option value="mitarbeiter">Mitarbeiter</option>
+            <option value="admin">Administrator</option>
+          </select>
+        </label>
+        <label>Passwort
+          <input type="password" id="fieldUserPassword" minlength="6">
+        </label>
+        <label>Passwort bestätigen
+          <input type="password" id="fieldUserPasswordConfirm" minlength="6">
+        </label>
+      </div>
+      <p class="auth-error" id="userFormError"></p>
+      <div class="modal-actions">
+        <button id="cancelUserForm" class="btn-glossy btn-secondary">Abbrechen</button>
+        <button id="confirmUserForm" class="btn-glossy btn-primary">Benutzer anlegen</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal: generische Bestätigung (Benutzer entfernen, Backup wiederherstellen, ...) -->
+  <div class="modal-overlay" id="confirmActionModal">
+    <div class="modal">
+      <h2 id="confirmActionTitle"></h2>
+      <p id="confirmActionText"></p>
+      <div class="modal-actions">
+        <button id="cancelConfirmAction" class="btn-glossy btn-secondary">Abbrechen</button>
+        <button id="confirmConfirmAction" class="btn-glossy btn-danger">Bestätigen</button>
       </div>
     </div>
   </div>

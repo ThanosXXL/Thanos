@@ -72,10 +72,137 @@ html, body {
 }
 
 body {
+  height: 100vh;
+  overflow: hidden;
+}
+
+.app-shell:not([hidden]) {
   display: flex;
   flex-direction: column;
   height: 100vh;
   overflow: hidden;
+}
+
+/* ---------- Anmelde-/Einrichtungsbildschirm ---------- */
+
+.auth-overlay:not([hidden]) {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 100vh;
+  background: linear-gradient(160deg, var(--blue-900) 0%, var(--blue-700) 55%, var(--blue-500) 100%);
+}
+
+.auth-card {
+  width: min(420px, 92vw);
+  background: linear-gradient(180deg, var(--white), var(--blue-50));
+  border-radius: 16px;
+  padding: 32px 30px;
+  box-shadow: 0 24px 60px rgba(4, 18, 45, 0.5), 0 1px 0 rgba(255, 255, 255, 0.5) inset;
+}
+
+.auth-card h1 {
+  margin: 0 0 4px;
+  font-size: 26px;
+}
+
+.auth-card .auth-subtitle {
+  color: var(--ink-soft);
+  font-size: 13.5px;
+  margin: 0 0 20px;
+}
+
+.auth-card label {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  font-size: 12.5px;
+  font-weight: 600;
+  color: var(--ink-soft);
+  margin-bottom: 14px;
+}
+
+.auth-card input,
+.auth-card select {
+  font-family: inherit;
+  padding: 9px 11px;
+  border-radius: 7px;
+  border: 1px solid var(--blue-300);
+  background: var(--white);
+  font-size: 14px;
+  color: var(--ink);
+}
+
+.auth-card input:focus,
+.auth-card select:focus {
+  outline: 2px solid var(--blue-400);
+  outline-offset: 1px;
+}
+
+.auth-card .btn-glossy {
+  width: 100%;
+  margin-top: 6px;
+}
+
+.auth-card .auth-switch {
+  margin-top: 16px;
+  text-align: center;
+  font-size: 12.5px;
+}
+
+.auth-card .auth-switch button {
+  background: none;
+  border: none;
+  color: var(--blue-700);
+  font-weight: 700;
+  cursor: pointer;
+  text-decoration: underline;
+  font-size: 12.5px;
+  padding: 0;
+}
+
+.auth-error {
+  color: var(--danger);
+  font-size: 12.5px;
+  font-weight: 600;
+  min-height: 16px;
+  margin: 0 0 8px;
+}
+
+/* ---------- Angemeldeter Benutzer / Sperre ---------- */
+
+.header-user {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--white);
+}
+
+.user-chip {
+  font-size: 12.5px;
+  background: rgba(255, 255, 255, 0.16);
+  border: 1px solid rgba(255, 255, 255, 0.32);
+  border-radius: 999px;
+  padding: 5px 12px;
+  white-space: nowrap;
+}
+
+.role-badge {
+  display: inline-block;
+  font-size: 10.5px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  padding: 2px 7px;
+  border-radius: 5px;
+  margin-left: 6px;
+  background: linear-gradient(180deg, var(--blue-500), var(--blue-700));
+  color: var(--white);
+}
+
+.role-badge.role-admin {
+  background: linear-gradient(180deg, #ffd98a, #d99a1f);
+  color: #4a3200;
 }
 
 /* ---------- Kopfleiste (glossy) ---------- */

@@ -38,6 +38,13 @@
   };
 
   const el = {
+    authScreen: document.getElementById('authScreen'),
+    authCard: document.getElementById('authCard'),
+    appShell: document.getElementById('appShell'),
+    headerUser: document.getElementById('headerUser'),
+    userChip: document.getElementById('userChip'),
+    lockBtn: document.getElementById('lockBtn'),
+
     sidebar: document.getElementById('sidebar'),
     content: document.getElementById('content'),
     patientSearch: document.getElementById('patientSearch'),
@@ -72,10 +79,29 @@
     entryFormTitle: document.getElementById('entryFormTitle'),
     entryFormFields: document.getElementById('entryFormFields'),
     cancelEntryForm: document.getElementById('cancelEntryForm'),
-    confirmEntryForm: document.getElementById('confirmEntryForm')
+    confirmEntryForm: document.getElementById('confirmEntryForm'),
+
+    userFormModal: document.getElementById('userFormModal'),
+    fieldUserName: document.getElementById('fieldUserName'),
+    fieldUserRole: document.getElementById('fieldUserRole'),
+    fieldUserPassword: document.getElementById('fieldUserPassword'),
+    fieldUserPasswordConfirm: document.getElementById('fieldUserPasswordConfirm'),
+    userFormError: document.getElementById('userFormError'),
+    cancelUserForm: document.getElementById('cancelUserForm'),
+    confirmUserForm: document.getElementById('confirmUserForm'),
+
+    confirmActionModal: document.getElementById('confirmActionModal'),
+    confirmActionTitle: document.getElementById('confirmActionTitle'),
+    confirmActionText: document.getElementById('confirmActionText'),
+    cancelConfirmAction: document.getElementById('cancelConfirmAction'),
+    confirmConfirmAction: document.getElementById('confirmConfirmAction')
   };
 
   let pendingDeletePatientId = null;
+  let currentUser = null; // { id, name, role }
+  let idleTimer = null;
+  const IDLE_LOCK_MS = 5 * 60 * 1000; // 5 Minuten Inaktivität sperren
+  let pendingConfirmAction = null; // async function, vom generischen Bestätigungs-Modal aufgerufen
 
   function uid() {
     return Date.now().toString(36) + Math.random().toString(36).slice(2, 8);
@@ -109,7 +135,24 @@
   }
 
   async function persist() {
-    await window.patientenweltAPI.saveData(state);
+    const result = await window.patientenweltAPI.saveData(state);
+    if (result && result.success === false) {
+      console.warn('Speichern fehlgeschlagen:', result.error);
+    }
+  }
+
+  function logAction(action, details) {
+    if (!currentUser) return;
+    if (!Array.isArray(state.auditLog)) state.auditLog = [];
+    state.auditLog.unshift({
+      id: uid(),
+      datum: new Date().toISOString(),
+      userId: currentUser.id,
+      userName: currentUser.name,
+      action,
+      details: details || ''
+    });
+    if (state.auditLog.length > 500) state.auditLog.length = 500;
   }
 
   // ---------- Rendering ----------
@@ -195,6 +238,24 @@
         el.sidebar.appendChild(sidebarPlaceholderBtn(label));
       });
     });
+
+    if (currentUser && currentUser.role === 'admin') {
+      el.sidebar.appendChild(sidebarGroupTitle('Sicherheit'));
+      el.sidebar.appendChild(sidebarNavBtn('Benutzerverwaltung', ui.viewMode === 'users', () => {
+        ui.viewMode = 'users';
+        loadUsersView();
+        render();
+      }));
+      el.sidebar.appendChild(sidebarNavBtn('Protokoll', ui.viewMode === 'audit', () => {
+        ui.viewMode = 'audit';
+        render();
+      }));
+      el.sidebar.appendChild(sidebarNavBtn('Datensicherung', ui.viewMode === 'backups', () => {
+        ui.viewMode = 'backups';
+        loadBackupsView();
+        render();
+      }));
+    }
   }
 
   function appendPlaceholderItems(afterGroup) {
@@ -245,6 +306,21 @@
 
     if (ui.viewMode === 'placeholder') {
       el.content.appendChild(renderPlaceholderView(ui.placeholderLabel));
+      return;
+    }
+
+    if (ui.viewMode === 'users' && currentUser && currentUser.role === 'admin') {
+      el.content.appendChild(renderUsersView());
+      return;
+    }
+
+    if (ui.viewMode === 'audit' && currentUser && currentUser.role === 'admin') {
+      el.content.appendChild(renderAuditView());
+      return;
+    }
+
+    if (ui.viewMode === 'backups' && currentUser && currentUser.role === 'admin') {
+      el.content.appendChild(renderBackupsView());
       return;
     }
 
@@ -368,17 +444,19 @@
         tr.appendChild(tdVers);
 
         const tdActions = document.createElement('td');
-        const actions = document.createElement('div');
-        actions.className = 'row-actions';
-        const delBtn = document.createElement('button');
-        delBtn.className = 'btn-glossy btn-danger btn-small';
-        delBtn.textContent = 'Entfernen';
-        delBtn.addEventListener('click', (e) => {
-          e.stopPropagation();
-          openDeletePatientModal(p.id);
-        });
-        actions.appendChild(delBtn);
-        tdActions.appendChild(actions);
+        if (currentUser && currentUser.role === 'admin') {
+          const actions = document.createElement('div');
+          actions.className = 'row-actions';
+          const delBtn = document.createElement('button');
+          delBtn.className = 'btn-glossy btn-danger btn-small';
+          delBtn.textContent = 'Entfernen';
+          delBtn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            openDeletePatientModal(p.id);
+          });
+          actions.appendChild(delBtn);
+          tdActions.appendChild(actions);
+        }
         tr.appendChild(tdActions);
 
         tr.addEventListener('click', () => {
@@ -410,6 +488,331 @@
     empty.append(heading, p);
     card.appendChild(empty);
     return card;
+  }
+
+  // ---------- Sicherheit: Benutzerverwaltung / Protokoll / Datensicherung ----------
+
+  let usersCache = { loading: false, users: [] };
+  let backupsCache = { loading: false, backups: [] };
+
+  async function loadUsersView() {
+    usersCache.loading = true;
+    const users = await window.patientenweltAPI.listUsers();
+    usersCache = { loading: false, users: users || [] };
+    if (ui.viewMode === 'users') render();
+  }
+
+  async function loadBackupsView() {
+    backupsCache.loading = true;
+    const res = await window.patientenweltAPI.listBackups();
+    backupsCache = { loading: false, backups: (res && res.success) ? res.backups : [] };
+    if (ui.viewMode === 'backups') render();
+  }
+
+  function renderUsersView() {
+    const wrap = document.createDocumentFragment();
+    const card = document.createElement('div');
+    card.className = 'panel-card';
+
+    const toolbar = document.createElement('div');
+    toolbar.className = 'list-toolbar';
+    const heading = document.createElement('h2');
+    heading.textContent = 'Benutzerverwaltung';
+    heading.style.margin = '0';
+    const addBtn = document.createElement('button');
+    addBtn.className = 'btn-glossy btn-primary btn-small';
+    addBtn.textContent = '+ Neuer Benutzer';
+    addBtn.addEventListener('click', openUserFormModal);
+    toolbar.append(heading, addBtn);
+    card.appendChild(toolbar);
+
+    if (usersCache.loading) {
+      const p = document.createElement('p');
+      p.className = 'entry-empty';
+      p.textContent = 'Lade Benutzer …';
+      card.appendChild(p);
+      wrap.appendChild(card);
+      return wrap;
+    }
+
+    const adminCount = usersCache.users.filter((u) => u.role === 'admin').length;
+
+    const table = document.createElement('table');
+    table.className = 'patient-table';
+    const thead = document.createElement('thead');
+    const headRow = document.createElement('tr');
+    ['Name', 'Rolle', ''].forEach((h) => {
+      const th = document.createElement('th');
+      th.textContent = h;
+      headRow.appendChild(th);
+    });
+    thead.appendChild(headRow);
+    table.appendChild(thead);
+
+    const tbody = document.createElement('tbody');
+    usersCache.users.forEach((u) => {
+      const tr = document.createElement('tr');
+
+      const tdName = document.createElement('td');
+      tdName.textContent = u.name;
+      if (currentUser && u.id === currentUser.id) tdName.textContent += ' (Sie)';
+      tr.appendChild(tdName);
+
+      const tdRole = document.createElement('td');
+      const badge = document.createElement('span');
+      badge.className = 'role-badge' + (u.role === 'admin' ? ' role-admin' : '');
+      badge.textContent = u.role === 'admin' ? 'Administrator' : 'Mitarbeiter';
+      tdRole.appendChild(badge);
+      tr.appendChild(tdRole);
+
+      const tdActions = document.createElement('td');
+      const removeBtn = document.createElement('button');
+      removeBtn.className = 'btn-glossy btn-danger btn-small';
+      removeBtn.textContent = 'Entfernen';
+      const isLastAdmin = u.role === 'admin' && adminCount <= 1;
+      if (isLastAdmin) {
+        removeBtn.disabled = true;
+        removeBtn.title = 'Der letzte Administrator kann nicht entfernt werden.';
+      } else {
+        removeBtn.addEventListener('click', () => {
+          openConfirm(
+            'Benutzer entfernen?',
+            `Soll „${u.name}" wirklich entfernt werden? Diese Person kann sich danach nicht mehr anmelden.`,
+            async () => {
+              const removingSelf = currentUser && u.id === currentUser.id;
+              const res = await window.patientenweltAPI.removeUser(u.id);
+              if (!res || !res.success) {
+                showAuthlessError(res && res.error);
+                return;
+              }
+              if (removingSelf) {
+                // Die Sitzung wurde serverseitig bereits beendet (kein DEK mehr im
+                // Hauptprozess) — hier nur noch den Renderer-Zustand nachziehen,
+                // ohne persist() aufzurufen (das würde ohne Anmeldung fehlschlagen).
+                currentUser = null;
+                state = { patients: [] };
+                ui.viewMode = 'list';
+                ui.selectedPatientId = null;
+                el.appShell.hidden = true;
+                el.authScreen.hidden = false;
+                boot();
+                return;
+              }
+              logAction('Benutzer entfernt', u.name);
+              await persist();
+              usersCache.users = res.users;
+              render();
+            }
+          );
+        });
+      }
+      tdActions.appendChild(removeBtn);
+      tr.appendChild(tdActions);
+
+      tbody.appendChild(tr);
+    });
+    table.appendChild(tbody);
+    card.appendChild(table);
+
+    wrap.appendChild(card);
+    return wrap;
+  }
+
+  function showAuthlessError(message) {
+    // Einfache, nicht blockierende Rückmeldung für Aktionen außerhalb von Formularen.
+    window.alert(message || 'Aktion fehlgeschlagen.');
+  }
+
+  function openUserFormModal() {
+    el.fieldUserName.value = '';
+    el.fieldUserRole.value = 'mitarbeiter';
+    el.fieldUserPassword.value = '';
+    el.fieldUserPasswordConfirm.value = '';
+    el.userFormError.textContent = '';
+    el.userFormModal.classList.add('open');
+    el.fieldUserName.focus();
+  }
+
+  function closeUserFormModal() {
+    el.userFormModal.classList.remove('open');
+  }
+
+  async function submitUserForm() {
+    const name = el.fieldUserName.value.trim();
+    const role = el.fieldUserRole.value;
+    const password = el.fieldUserPassword.value;
+    const passwordConfirm = el.fieldUserPasswordConfirm.value;
+
+    if (!name) {
+      el.userFormError.textContent = 'Name ist erforderlich.';
+      return;
+    }
+    if (password.length < 6) {
+      el.userFormError.textContent = 'Passwort muss mindestens 6 Zeichen haben.';
+      return;
+    }
+    if (password !== passwordConfirm) {
+      el.userFormError.textContent = 'Passwörter stimmen nicht überein.';
+      return;
+    }
+
+    const res = await window.patientenweltAPI.addUser(name, password, role);
+    if (!res || !res.success) {
+      el.userFormError.textContent = (res && res.error) || 'Anlegen fehlgeschlagen.';
+      return;
+    }
+
+    logAction('Benutzer angelegt', `${name} (${role === 'admin' ? 'Administrator' : 'Mitarbeiter'})`);
+    await persist();
+    usersCache.users = res.users;
+    closeUserFormModal();
+    render();
+  }
+
+  function renderAuditView() {
+    const card = document.createElement('div');
+    card.className = 'panel-card';
+    const heading = document.createElement('h2');
+    heading.textContent = 'Protokoll';
+    card.appendChild(heading);
+
+    const log = Array.isArray(state.auditLog) ? state.auditLog : [];
+    if (log.length === 0) {
+      const p = document.createElement('p');
+      p.className = 'entry-empty';
+      p.textContent = 'Noch keine protokollierten Aktionen.';
+      card.appendChild(p);
+      return card;
+    }
+
+    const table = document.createElement('table');
+    table.className = 'patient-table';
+    const thead = document.createElement('thead');
+    const headRow = document.createElement('tr');
+    ['Zeitpunkt', 'Benutzer', 'Aktion', 'Details'].forEach((h) => {
+      const th = document.createElement('th');
+      th.textContent = h;
+      headRow.appendChild(th);
+    });
+    thead.appendChild(headRow);
+    table.appendChild(thead);
+
+    const tbody = document.createElement('tbody');
+    log.forEach((entry) => {
+      const tr = document.createElement('tr');
+      const tdDate = document.createElement('td');
+      tdDate.textContent = formatDateTime(entry.datum);
+      tr.appendChild(tdDate);
+      const tdUser = document.createElement('td');
+      tdUser.textContent = entry.userName || '–';
+      tr.appendChild(tdUser);
+      const tdAction = document.createElement('td');
+      tdAction.textContent = entry.action || '–';
+      tr.appendChild(tdAction);
+      const tdDetails = document.createElement('td');
+      tdDetails.textContent = entry.details || '';
+      tr.appendChild(tdDetails);
+      tbody.appendChild(tr);
+    });
+    table.appendChild(tbody);
+    card.appendChild(table);
+
+    return card;
+  }
+
+  function formatDateTime(iso) {
+    const d = new Date(iso);
+    if (Number.isNaN(d.getTime())) return iso || '';
+    const pad = (n) => String(n).padStart(2, '0');
+    return `${pad(d.getDate())}.${pad(d.getMonth() + 1)}.${d.getFullYear()} ${pad(d.getHours())}:${pad(d.getMinutes())}`;
+  }
+
+  function renderBackupsView() {
+    const card = document.createElement('div');
+    card.className = 'panel-card';
+    const heading = document.createElement('h2');
+    heading.textContent = 'Datensicherung';
+    card.appendChild(heading);
+
+    const info = document.createElement('p');
+    info.className = 'entry-empty';
+    info.textContent = 'Bei jedem Speichern wird automatisch eine Sicherung angelegt (die letzten 10 werden aufbewahrt).';
+    card.appendChild(info);
+
+    if (backupsCache.loading) {
+      const p = document.createElement('p');
+      p.className = 'entry-empty';
+      p.textContent = 'Lade Sicherungen …';
+      card.appendChild(p);
+      return card;
+    }
+
+    if (backupsCache.backups.length === 0) {
+      const p = document.createElement('p');
+      p.className = 'entry-empty';
+      p.textContent = 'Noch keine Sicherungen vorhanden.';
+      card.appendChild(p);
+      return card;
+    }
+
+    const list = document.createElement('ul');
+    list.className = 'entry-list';
+    backupsCache.backups.forEach((b) => {
+      const li = document.createElement('li');
+      li.className = 'entry-row';
+
+      const date = document.createElement('div');
+      date.className = 'entry-date';
+      date.textContent = formatDateTime(b.mtime);
+      li.appendChild(date);
+
+      const text = document.createElement('div');
+      text.className = 'entry-text';
+      text.textContent = `${(b.size / 1024).toFixed(1)} KB`;
+      li.appendChild(text);
+
+      const restoreBtn = document.createElement('button');
+      restoreBtn.className = 'btn-glossy btn-primary btn-small';
+      restoreBtn.textContent = 'Wiederherstellen';
+      restoreBtn.addEventListener('click', () => {
+        openConfirm(
+          'Backup wiederherstellen?',
+          `Der aktuelle Stand wird zuvor selbst als Sicherung gespeichert. Soll der Stand vom ${formatDateTime(b.mtime)} wiederhergestellt werden?`,
+          async () => {
+            const res = await window.patientenweltAPI.restoreBackup(b.filename);
+            if (res && res.success) {
+              state = res.state;
+              logAction('Backup wiederhergestellt', formatDateTime(b.mtime));
+              await persist();
+              loadBackupsView();
+              ui.viewMode = 'list';
+              ui.selectedPatientId = null;
+              render();
+            } else {
+              showAuthlessError(res && res.error);
+            }
+          }
+        );
+      });
+      li.appendChild(restoreBtn);
+
+      list.appendChild(li);
+    });
+    card.appendChild(list);
+
+    return card;
+  }
+
+  function openConfirm(title, text, onConfirm) {
+    el.confirmActionTitle.textContent = title;
+    el.confirmActionText.textContent = text;
+    pendingConfirmAction = onConfirm;
+    el.confirmActionModal.classList.add('open');
+  }
+
+  function closeConfirm() {
+    el.confirmActionModal.classList.remove('open');
+    pendingConfirmAction = null;
   }
 
   function matchesSearch(patient, query) {
@@ -651,6 +1054,7 @@
     delBtn.title = 'Eintrag löschen';
     delBtn.addEventListener('click', () => {
       patient[category] = patient[category].filter((e) => e.id !== entry.id);
+      logAction(`Eintrag gelöscht (${CATEGORY_META[category].title})`, `${patient.nachname}, ${patient.vorname}`);
       persist();
       render();
     });
@@ -846,6 +1250,7 @@
     if (ui.editingPatientId) {
       const patient = getPatient(ui.editingPatientId);
       if (patient) Object.assign(patient, data);
+      logAction('Patient bearbeitet', `${nachname}, ${vorname}`);
     } else {
       const patient = {
         id: uid(),
@@ -860,6 +1265,7 @@
       ui.selectedPatientId = patient.id;
       ui.viewMode = 'patient';
       ui.activeTab = 'basis';
+      logAction('Patient angelegt', `${nachname}, ${vorname}`);
     }
 
     closePatientFormModal();
@@ -870,6 +1276,7 @@
   // ---------- Patient löschen ----------
 
   function openDeletePatientModal(patientId) {
+    if (!currentUser || currentUser.role !== 'admin') return;
     const patient = getPatient(patientId);
     if (!patient) return;
     pendingDeletePatientId = patientId;
@@ -884,7 +1291,9 @@
 
   function confirmDeletePatient() {
     if (!pendingDeletePatientId) return;
+    const patient = getPatient(pendingDeletePatientId);
     state.patients = state.patients.filter((p) => p.id !== pendingDeletePatientId);
+    if (patient) logAction('Patient gelöscht', `${patient.nachname}, ${patient.vorname}`);
     if (ui.selectedPatientId === pendingDeletePatientId) {
       ui.selectedPatientId = null;
       ui.viewMode = 'list';
@@ -1002,6 +1411,7 @@
 
     if (!patient[category]) patient[category] = [];
     patient[category].push(entry);
+    logAction(`Eintrag hinzugefügt (${CATEGORY_META[category].title})`, `${patient.nachname}, ${patient.vorname}`);
 
     closeEntryModal();
     persist();
@@ -1035,6 +1445,24 @@
     if (e.target === el.entryFormModal) closeEntryModal();
   });
 
+  el.cancelUserForm.addEventListener('click', closeUserFormModal);
+  el.confirmUserForm.addEventListener('click', submitUserForm);
+  el.userFormModal.addEventListener('click', (e) => {
+    if (e.target === el.userFormModal) closeUserFormModal();
+  });
+
+  el.cancelConfirmAction.addEventListener('click', closeConfirm);
+  el.confirmConfirmAction.addEventListener('click', () => {
+    const action = pendingConfirmAction;
+    closeConfirm();
+    if (action) action();
+  });
+  el.confirmActionModal.addEventListener('click', (e) => {
+    if (e.target === el.confirmActionModal) closeConfirm();
+  });
+
+  el.lockBtn.addEventListener('click', doLock);
+
   el.toolPatientListBtn.addEventListener('click', () => {
     ui.viewMode = 'list';
     render();
@@ -1051,13 +1479,21 @@
     if (ui.selectedPatientId) selectTab('labor');
   });
   el.toolPrintBtn.addEventListener('click', () => window.print());
-  el.toolReloadBtn.addEventListener('click', () => init());
+  el.toolReloadBtn.addEventListener('click', async () => {
+    const res = await window.patientenweltAPI.reloadData();
+    if (res && res.success) {
+      state = res.state;
+      render();
+    }
+  });
 
   document.addEventListener('keydown', (e) => {
     if (e.key === 'Escape') {
       if (el.entryFormModal.classList.contains('open')) closeEntryModal();
       else if (el.deletePatientModal.classList.contains('open')) closeDeletePatientModal();
       else if (el.patientFormModal.classList.contains('open')) closePatientFormModal();
+      else if (el.userFormModal.classList.contains('open')) closeUserFormModal();
+      else if (el.confirmActionModal.classList.contains('open')) closeConfirm();
       return;
     }
     if (e.key === 'Enter' && e.target.tagName !== 'TEXTAREA') {
@@ -1070,17 +1506,195 @@
       } else if (el.deletePatientModal.classList.contains('open') && el.deletePatientModal.contains(e.target)) {
         e.preventDefault();
         confirmDeletePatient();
+      } else if (el.userFormModal.classList.contains('open') && el.userFormModal.contains(e.target)) {
+        e.preventDefault();
+        submitUserForm();
+      } else if (el.confirmActionModal.classList.contains('open') && el.confirmActionModal.contains(e.target)) {
+        e.preventDefault();
+        el.confirmConfirmAction.click();
       }
     }
   });
 
-  // ---------- Initialisierung ----------
+  // ---------- Sperre / Sitzungsende bei Inaktivität ----------
 
-  async function init() {
-    const loaded = await window.patientenweltAPI.loadData();
-    state = loaded && Array.isArray(loaded.patients) ? loaded : { patients: [] };
-    render();
+  function resetIdleTimer() {
+    if (!currentUser) return;
+    if (idleTimer) clearTimeout(idleTimer);
+    idleTimer = setTimeout(doLock, IDLE_LOCK_MS);
   }
 
-  init();
+  ['mousemove', 'keydown', 'click', 'wheel'].forEach((evt) => {
+    document.addEventListener(evt, resetIdleTimer, { passive: true });
+  });
+
+  async function doLock() {
+    if (!currentUser) return;
+    if (idleTimer) clearTimeout(idleTimer);
+    logAction('Sperre aktiviert');
+    await persist();
+    await window.patientenweltAPI.lock();
+    currentUser = null;
+    state = { patients: [] };
+    ui.viewMode = 'list';
+    ui.selectedPatientId = null;
+    el.appShell.hidden = true;
+    el.authScreen.hidden = false;
+    boot();
+  }
+
+  // ---------- Anmelde-/Einrichtungsbildschirm ----------
+
+  function renderHeaderUser() {
+    el.userChip.replaceChildren();
+    if (!currentUser) return;
+    el.userChip.append(document.createTextNode(currentUser.name));
+    const badge = document.createElement('span');
+    badge.className = 'role-badge' + (currentUser.role === 'admin' ? ' role-admin' : '');
+    badge.textContent = currentUser.role === 'admin' ? 'Admin' : 'Mitarbeiter';
+    el.userChip.appendChild(badge);
+  }
+
+  function unlockApp(newState, user) {
+    state = newState && Array.isArray(newState.patients) ? newState : { patients: [] };
+    currentUser = user;
+    el.authScreen.hidden = true;
+    el.appShell.hidden = false;
+    renderHeaderUser();
+    render();
+    resetIdleTimer();
+  }
+
+  function fieldRow(labelText, type) {
+    const label = document.createElement('label');
+    const span = document.createElement('span');
+    span.textContent = labelText;
+    const input = document.createElement('input');
+    input.type = type;
+    label.append(span, input);
+    return { label, input };
+  }
+
+  function renderSetupScreen() {
+    el.authCard.replaceChildren();
+
+    const h1 = document.createElement('h1');
+    h1.className = 'text-glossy-blue';
+    h1.textContent = 'PatientenWelt';
+    el.authCard.appendChild(h1);
+
+    const subtitle = document.createElement('p');
+    subtitle.className = 'auth-subtitle';
+    subtitle.textContent = 'Erstes Admin-Konto anlegen, um die Praxisdaten verschlüsselt zu speichern.';
+    el.authCard.appendChild(subtitle);
+
+    const nameRow = fieldRow('Name', 'text');
+    const pwRow = fieldRow('Passwort (mind. 6 Zeichen)', 'password');
+    const pwConfirmRow = fieldRow('Passwort bestätigen', 'password');
+    el.authCard.append(nameRow.label, pwRow.label, pwConfirmRow.label);
+
+    const error = document.createElement('p');
+    error.className = 'auth-error';
+    el.authCard.appendChild(error);
+
+    const submitBtn = document.createElement('button');
+    submitBtn.type = 'button';
+    submitBtn.className = 'btn-glossy btn-primary';
+    submitBtn.textContent = 'Konto anlegen & Daten verschlüsseln';
+    el.authCard.appendChild(submitBtn);
+
+    async function submit() {
+      const name = nameRow.input.value.trim();
+      const password = pwRow.input.value;
+      if (!name) { error.textContent = 'Name ist erforderlich.'; return; }
+      if (password.length < 6) { error.textContent = 'Passwort muss mindestens 6 Zeichen haben.'; return; }
+      if (password !== pwConfirmRow.input.value) { error.textContent = 'Passwörter stimmen nicht überein.'; return; }
+
+      const res = await window.patientenweltAPI.setup(name, password);
+      if (!res || !res.success) {
+        error.textContent = (res && res.error) || 'Einrichtung fehlgeschlagen.';
+        return;
+      }
+      unlockApp(res.state, res.user);
+    }
+
+    submitBtn.addEventListener('click', submit);
+    [nameRow.input, pwRow.input, pwConfirmRow.input].forEach((input) => {
+      input.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter') { e.preventDefault(); submit(); }
+      });
+    });
+    nameRow.input.focus();
+  }
+
+  function renderLoginScreen(users) {
+    el.authCard.replaceChildren();
+
+    const h1 = document.createElement('h1');
+    h1.className = 'text-glossy-blue';
+    h1.textContent = 'PatientenWelt';
+    el.authCard.appendChild(h1);
+
+    const subtitle = document.createElement('p');
+    subtitle.className = 'auth-subtitle';
+    subtitle.textContent = 'Bitte anmelden, um die verschlüsselten Praxisdaten zu entsperren.';
+    el.authCard.appendChild(subtitle);
+
+    const userLabel = document.createElement('label');
+    const userSpan = document.createElement('span');
+    userSpan.textContent = 'Benutzer';
+    const userSelect = document.createElement('select');
+    users.forEach((u) => {
+      const opt = document.createElement('option');
+      opt.value = u.id;
+      opt.textContent = `${u.name} (${u.role === 'admin' ? 'Administrator' : 'Mitarbeiter'})`;
+      userSelect.appendChild(opt);
+    });
+    userLabel.append(userSpan, userSelect);
+    el.authCard.appendChild(userLabel);
+
+    const pwRow = fieldRow('Passwort', 'password');
+    el.authCard.appendChild(pwRow.label);
+
+    const error = document.createElement('p');
+    error.className = 'auth-error';
+    el.authCard.appendChild(error);
+
+    const submitBtn = document.createElement('button');
+    submitBtn.type = 'button';
+    submitBtn.className = 'btn-glossy btn-primary';
+    submitBtn.textContent = 'Anmelden';
+    el.authCard.appendChild(submitBtn);
+
+    async function submit() {
+      const res = await window.patientenweltAPI.login(userSelect.value, pwRow.input.value);
+      if (!res || !res.success) {
+        error.textContent = (res && res.error) || 'Anmeldung fehlgeschlagen.';
+        pwRow.input.value = '';
+        pwRow.input.focus();
+        return;
+      }
+      unlockApp(res.state, res.user);
+    }
+
+    submitBtn.addEventListener('click', submit);
+    pwRow.input.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter') { e.preventDefault(); submit(); }
+    });
+    pwRow.input.focus();
+  }
+
+  // ---------- Initialisierung ----------
+
+  async function boot() {
+    const hasAccount = await window.patientenweltAPI.hasAccount();
+    if (!hasAccount) {
+      renderSetupScreen();
+      return;
+    }
+    const users = await window.patientenweltAPI.listUsers();
+    renderLoginScreen(users);
+  }
+
+  boot();
 })();

@@ -22,8 +22,16 @@ Markenname, Überschriften, Patientennamen-Banner und aktive Tabs. Sie ist unabh
   Formulare, Warteliste, Abrechnung, Auswertung, Patientenverwaltung usw.); Menüpunkte ohne
   hinterlegte Funktion zeigen bewusst einen ehrlichen "noch nicht verfügbar"-Hinweis statt totem UI
 - Bedienkomfort: Enter speichert/bestätigt das offene Formular, Escape schließt es
+- **Datensicherheit**: verschlüsselte Datenablage (AES-256-GCM), Anmeldung mit Benutzerrollen
+  (Administrator/Mitarbeiter), automatische Sperre nach Inaktivität, Audit-Protokoll, automatische
+  Backups mit Wiederherstellung — siehe Abschnitt „Datensicherheit" unten
 
 Alle Beispieldaten sind frei erfunden. Es werden keine echten Patientendaten mitgeliefert.
+
+**Wichtig:** Trotz Verschlüsselung ist diese App **kein zulassungsfähiges Praxisverwaltungssystem**
+und darf nicht mit echten Patientendaten verwendet werden — es fehlen KBV-Zulassung, TI-Anbindung
+(eHealth-Konnektor, eRezept/eAU/ePA) und eine echte Abrechnungsschnittstelle. Details siehe
+„Grenzen" am Ende dieser Datei.
 
 ## Installation & Start
 
@@ -44,14 +52,58 @@ npm run dist
 
 Gleiches Muster wie das Dozenten Dashboard: `contextIsolation: true`, `nodeIntegration: false`.
 
-- **`main.js`** — erstellt das `BrowserWindow` und persistiert den gesamten State als JSON unter
-  `app.getPath('userData')/patientenwelt-data.json` via die IPC-Handler `load-data`/`save-data`.
-- **`preload.js`** — exponiert `window.patientenweltAPI` (`loadData()`, `saveData(data)`) als
-  einzige Brücke zum Renderer.
+- **`main.js`** — erstellt das `BrowserWindow` und besitzt die gesamte Kryptografie/Persistenz
+  (siehe „Datensicherheit"). Der Daten-Schlüssel (DEK) lebt ausschließlich im Hauptprozess-Speicher,
+  nie im Renderer.
+- **`preload.js`** — exponiert `window.patientenweltAPI` (Auth: `hasAccount`, `listUsers`, `setup`,
+  `login`, `lock`, `addUser`, `removeUser`, `changePassword`; Daten: `saveData`, `reloadData`;
+  Backups: `listBackups`, `restoreBackup`) als einzige Brücke zum Renderer.
 - **`renderer/`** — komplette UI als Vanilla-JS-IIFE (`renderer.js`), statisches HTML-Grundgerüst
-  (`index.html`) und Styling (`style.css`). Zustand liegt in einem einzigen `state = { patients: [] }`;
-  jede Änderung folgt dem Muster **State mutieren → `persist()` → `render()`**, ganz ohne
-  inkrementelles DOM-Update.
+  (`index.html`) und Styling (`style.css`). Zustand liegt in einem einzigen `state = { patients: [],
+  auditLog: [] }`; jede Änderung folgt dem Muster **State mutieren → `logAction()` →
+  `persist()` → `render()`**, ganz ohne inkrementelles DOM-Update. Vor der Anmeldung zeigt
+  `#authScreen` Einrichtung/Login; `#appShell` (Header, Symbolleiste, Sidebar, Content) bleibt bis
+  zur erfolgreichen Anmeldung `hidden`.
+
+## Datensicherheit
+
+- **Verschlüsselung**: Die Datendatei (`patientenwelt-data.json` in `userData`) liegt als
+  AES-256-GCM-verschlüsselte Hülle vor. Jeder Benutzer wickelt (wrapped) denselben zufälligen
+  Daten-Schlüssel (DEK) mit seinem eigenen, per PBKDF2-SHA256 (210.000 Iterationen) abgeleiteten
+  Passwort-Schlüssel ein — mehrere Benutzer können so unabhängig voneinander entschlüsseln, ohne
+  dass der DEK je unverschlüsselt gespeichert wird. Beide Krypto-Grundfunktionen nutzen ausschließlich
+  Node's eingebautes `crypto`-Modul, keine zusätzliche Abhängigkeit.
+- **Benutzerrollen**: `admin` (Benutzerverwaltung, Protokoll, Datensicherung, Patienten löschen)
+  und `mitarbeiter` (alles andere: Patienten anlegen/bearbeiten, Einträge erfassen). Der letzte
+  verbleibende Administrator kann nicht entfernt werden.
+- **Sperre**: manueller „Sperren"-Button im Header sowie automatische Sperre nach 5 Minuten
+  Inaktivität (`IDLE_LOCK_MS` in `renderer.js`). Beim Sperren wird der Hauptprozess-Schlüssel
+  verworfen; ohne erneute Anmeldung ist kein Zugriff mehr möglich.
+- **Audit-Protokoll**: `state.auditLog` (Teil der verschlüsselten Daten) protokolliert jede Mutation
+  (Patient/Eintrag angelegt/geändert/gelöscht, Benutzer angelegt/entfernt, Anmeldung, Sperre) mit
+  Zeitstempel und Benutzer. Nur lesbar für Administratoren, im UI nicht löschbar.
+- **Backups**: bei jedem Speichern wird automatisch eine Sicherung der verschlüsselten Datei unter
+  `userData/backups/` abgelegt (die letzten 10 werden aufbewahrt). Administratoren können über
+  „Datensicherung" einen früheren Stand wiederherstellen; der aktuelle Stand wird davor selbst noch
+  gesichert.
+- **Kein Passwort-Recovery ohne zweiten Administrator**: Wer sein Passwort vergisst und der einzige
+  Benutzer ist, kann die Daten nicht wiederherstellen — das ist die erwartete Konsequenz echter
+  Verschlüsselung, keine fehlende Funktion. Ein zweiter Administrator kann das Passwort eines
+  anderen Benutzers ohne Kenntnis des alten zurücksetzen (`auth:change-password`).
+
+Verifiziert über eine eigenständige Node-Testsuite für die Krypto-Grundfunktionen (Round-Trip,
+falsches Passwort, Mehrbenutzer-Unwrapping, Manipulationserkennung) sowie einen vollständigen
+Playwright-Durchlauf der UI (Einrichtung → Patient/Benutzer anlegen → Protokoll → Backup → Sperren →
+Rollenwechsel → Fehlermeldung bei falschem Passwort) gegen eine Stub-Implementierung von
+`window.patientenweltAPI`, da in dieser Umgebung kein `npm install`/`npm start` der echten
+Electron-App möglich war (kein Netzwerkzugriff für `electron`-Paket).
+
+## Grenzen (siehe auch Auswertung im Chat)
+
+Verschlüsselung, Rollen und Audit-Log machen die App für eine interne Demo/Prototyp-Nutzung
+angemessen sicher. Sie machen sie aber **nicht** zu einem zulassungsfähigen Praxisverwaltungssystem:
+keine KBV-Zulassung, keine TI-Anbindung (eHealth-Konnektor, eRezept/eAU/ePA), keine echte
+Abrechnungsschnittstelle (KVDT-Export). Für echte Patientendaten ungeeignet.
 
 ### Hochglanz-3D-Schrift
 
