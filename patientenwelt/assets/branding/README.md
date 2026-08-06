@@ -1,12 +1,25 @@
-# Branding-Hintergrundmusik
+# Branding-Assets: Hintergrundmusik & Demovideo
 
-Dieser Ordner ist der dauerhafte, versionierte Ablageort für die offizielle
-Hintergrundmusik von PatientenWelt-Demovideos. Einmal hier abgelegt, bleibt die
-Datei über alle künftigen Sessions/Chats hinweg erhalten (sie liegt im Git-Repo,
-nicht in einer einzelnen Chat-Session) und wird automatisch für jedes neue
-Demovideo wiederverwendet.
+Dieser Ordner ist der dauerhafte, versionierte Ablageort für die offiziellen
+Branding-Assets von PatientenWelt (Hintergrundmusik und Demovideo). Einmal
+hier abgelegt, bleiben die Dateien über alle künftigen Sessions/Chats hinweg
+erhalten (sie liegen im Git-Repo, nicht in einer einzelnen Chat-Session).
 
-## Ablage
+## Demovideo
+
+```
+patientenwelt/assets/branding/patientenwelt-dashboard-demo-with-music.mp4
+```
+
+Klick-Walkthrough der App (1400×900, ~31s, mit `lounge-band.mp3` unterlegt):
+Patientenliste mit Kennzahlen-Kacheln → Patient auswählen → Verlauf → Rezepte
+→ Termine → **Kalender** (Termin per Tagesklick eintragen) → Briefe → Suche
+& Sortierung in der Patientenliste → Laborwerte eines zweiten Patienten.
+Aufgenommen mit Playwright (Chromium, `recordVideo`) gegen die echte
+`renderer/`-UI mit frei erfundenen Beispielpatienten, dann mit
+`mix-demo-audio.sh` (siehe unten) automatisch vertont.
+
+## Hintergrundmusik
 
 ```
 patientenwelt/assets/branding/lounge-band.mp3
