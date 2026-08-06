@@ -1,0 +1,41 @@
+Betreff: Anlagendashboard live erleben – Pilotprojekt für [Gebäude/Firma]?
+
+Hallo [Name],
+
+[Anlass/Aufhänger einfügen, z. B.: "beim Austausch über die Anlagentechnik in
+[Gebäude] ist mir aufgefallen, dass ..." oder "wir kennen uns von [Kontext]" –
+eine echte, persönliche erste Zeile schlägt jede Vorlage.]
+
+Kurz worum es geht: Wir haben ein Anlagendashboard entwickelt, das
+Temperaturen, Drücke, Alarme, Verläufe und Energiekennzahlen aus der
+Gebäudetechnik in einer Oberfläche bündelt – statt verstreut über
+Einzelsteuerungen, Excel-Listen und Vor-Ort-Kontrollen.
+
+Die Oberfläche steht bereits, inklusive Video-Demo:
+[Link zum Demo-Video / Artifact-Link einfügen]
+
+Für [Gebäude/Firma] böten wir gern ein Pilotprojekt an: echte Anbindung eines
+Gebäudes/einer Anlage an das Dashboard, mit Ihren echten Messwerten statt
+Beispieldaten. Umsetzung typischerweise 2–4 Monate, zu Pilotkonditionen als
+Referenzprojekt.
+
+Hätten Sie 15 Minuten für ein kurzes Gespräch – ich zeige Ihnen die Demo live
+und wir schauen, ob ein Pilot für Ihr Gebäude passt?
+
+Beste Grüße
+[Ihr Name]
+[Telefonnummer]
+[E-Mail-Adresse]
+
+--
+Anbei: One-Pager mit Übersicht (MSR_DELUXE-Pilotprojekt-OnePager.pdf)
+
+
+---
+HINWEISE ZUR NUTZUNG (bitte vor dem Versand entfernen):
+- Die erste Zeile IMMER personalisieren – eine generische Massen-E-Mail wirkt
+  sofort wie Massen-E-Mail und landet ungelesen im Papierkorb.
+- Kein Preis in der ersten Mail nennen (siehe One-Pager: "auf Anfrage") – das
+  Gespräch soll das Ziel sein, nicht eine sofortige Preisverhandlung per Mail.
+- Betreffzeile mit dem konkreten Gebäude-/Firmennamen füllen, das erhöht die
+  Öffnungsrate deutlich gegenüber einer generischen Betreffzeile.
