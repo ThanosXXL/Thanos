@@ -16,6 +16,25 @@
           <span>Anlagendashboard Demo</span>
         </div>
       </div>
+
+      <button class="sidebar-alarm-pill" id="sidebar-alarm-pill" type="button">
+        <span class="sidebar-alarm-icon" id="sidebar-alarm-icon">⚠</span>
+        <span class="sidebar-alarm-text">
+          <strong id="sidebar-alarm-count">–</strong>
+          <span id="sidebar-alarm-sub">Aktive Alarme</span>
+        </span>
+      </button>
+
+      <div class="role-switcher">
+        <label class="role-switcher-label" for="role-select">Ansicht für</label>
+        <select class="role-select" id="role-select">
+          <option value="all">Alle Bereiche</option>
+          <option value="operator">Bediener</option>
+          <option value="energy">Energiebeauftragter</option>
+          <option value="facility">Facility Manager</option>
+        </select>
+      </div>
+
       <nav class="nav">
         <button class="nav-item active" data-view="home">
           <span class="nav-icon">◈</span> Übersicht
@@ -33,10 +52,13 @@
           <span class="nav-icon">◉</span> Strategisch
         </button>
       </nav>
+
       <div class="sidebar-footer">
-        <div class="battery-pill">
-          <span class="dot"></span> 4 Anlagen online
+        <div class="sidebar-plants-head">
+          <span>Systeme</span>
+          <span class="sidebar-plants-count" id="sidebar-plants-count">– / –</span>
         </div>
+        <ul class="sidebar-plant-list" id="sidebar-plant-list"></ul>
       </div>
     </aside>
 

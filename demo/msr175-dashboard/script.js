@@ -374,6 +374,86 @@
     );
   }
 
+  /* ============ Sidebar: Alarme, Rollen, Anlagenliste ============ */
+
+  // Welche Ansichten pro Rolle sichtbar/nutzbar sind — spiegelt die
+  // Zielgruppen der vier Dashboard-Ebenen (Operativ: Bediener/Haustechniker,
+  // Analytisch: Ingenieure/Energiebeauftragte, Strategisch: Facility
+  // Manager/Management). "Übersicht" bleibt für alle Rollen verfügbar.
+  const ROLE_VIEWS = {
+    all: ["home", "operative", "analytics", "plant", "strategic"],
+    operator: ["home", "operative", "plant"],
+    energy: ["home", "analytics", "plant"],
+    facility: ["home", "strategic"],
+  };
+
+  let currentRole = "all";
+
+  function renderSidebarAlarms() {
+    const pill = document.getElementById("sidebar-alarm-pill");
+    const countEl = document.getElementById("sidebar-alarm-count");
+    const subEl = document.getElementById("sidebar-alarm-sub");
+    const iconEl = document.getElementById("sidebar-alarm-icon");
+
+    const hasDanger = ALARMS.some((a) => a.sev === "danger");
+    const hasWarn = ALARMS.some((a) => a.sev === "warn");
+
+    pill.classList.toggle("has-danger", hasDanger);
+    pill.classList.toggle("has-warn", !hasDanger && hasWarn);
+
+    if (ALARMS.length === 0) {
+      countEl.textContent = "0";
+      subEl.textContent = "Keine aktiven Alarme";
+      iconEl.textContent = "✓";
+    } else {
+      countEl.textContent = String(ALARMS.length);
+      subEl.textContent = ALARMS.length === 1 ? "Aktiver Alarm" : "Aktive Alarme";
+      iconEl.textContent = "⚠";
+    }
+  }
+
+  function renderSidebarPlants() {
+    const list = document.getElementById("sidebar-plant-list");
+    const countEl = document.getElementById("sidebar-plants-count");
+    list.innerHTML = "";
+
+    const runningCount = PLANTS.filter((p) => p.status === "running").length;
+    countEl.textContent = runningCount + " / " + PLANTS.length;
+
+    PLANTS.forEach((p) => {
+      const row = el("button", "sidebar-plant-row");
+      row.type = "button";
+      row.appendChild(el("span", "status-dot " + p.status));
+      row.appendChild(el("span", null, p.name));
+      row.addEventListener("click", () => navigateTo("operative", "home"));
+      list.appendChild(row);
+    });
+  }
+
+  function applyRoleVisibility(role) {
+    currentRole = role;
+    const allowed = ROLE_VIEWS[role];
+    document.querySelectorAll(".nav-item").forEach((btn) => {
+      const view = btn.dataset.view;
+      btn.classList.toggle("disabled", allowed.indexOf(view) === -1);
+    });
+
+    const activeBtn = document.querySelector(".nav-item.active");
+    if (activeBtn && allowed.indexOf(activeBtn.dataset.view) === -1) {
+      navigateTo("home");
+    }
+  }
+
+  function setupSidebarExtras() {
+    document.getElementById("sidebar-alarm-pill").addEventListener("click", () => {
+      navigateTo("operative", "home");
+    });
+
+    document.getElementById("role-select").addEventListener("change", (e) => {
+      applyRoleVisibility(e.target.value);
+    });
+  }
+
   /* ============ Navigation & Uhrzeit ============ */
 
   const VIEW_META = {
@@ -384,21 +464,36 @@
     strategic: { title: "Strategisch", subtitle: "Enterprise-KPIs für Management-Ebene" },
   };
 
-  function setupNav() {
-    const items = document.querySelectorAll(".nav-item");
-    items.forEach((btn) => {
-      btn.addEventListener("click", () => {
-        items.forEach((b) => b.classList.remove("active"));
-        btn.classList.add("active");
-        const view = btn.dataset.view;
-        document.querySelectorAll(".view").forEach((v) => v.classList.add("hidden"));
-        document.getElementById("view-" + view).classList.remove("hidden");
-        document.getElementById("view-title").textContent = VIEW_META[view].title;
-        document.getElementById("view-subtitle").textContent = VIEW_META[view].subtitle;
+  // Wechselt zur gewünschten Ansicht; ist sie für die aktuelle Rolle nicht
+  // freigegeben, wird stattdessen (falls angegeben) die Fallback-Ansicht
+  // geöffnet.
+  function navigateTo(view, fallback) {
+    if (ROLE_VIEWS[currentRole].indexOf(view) === -1) {
+      if (fallback && ROLE_VIEWS[currentRole].indexOf(fallback) !== -1) {
+        view = fallback;
+      } else {
+        return;
+      }
+    }
 
-        if (view === "analytics") renderAnalytics("day");
-        if (view === "plant") renderSchema();
-        if (view === "strategic") renderStrategic();
+    document.querySelectorAll(".nav-item").forEach((b) => {
+      b.classList.toggle("active", b.dataset.view === view);
+    });
+    document.querySelectorAll(".view").forEach((v) => v.classList.add("hidden"));
+    document.getElementById("view-" + view).classList.remove("hidden");
+    document.getElementById("view-title").textContent = VIEW_META[view].title;
+    document.getElementById("view-subtitle").textContent = VIEW_META[view].subtitle;
+
+    if (view === "analytics") renderAnalytics("day");
+    if (view === "plant") renderSchema();
+    if (view === "strategic") renderStrategic();
+  }
+
+  function setupNav() {
+    document.querySelectorAll(".nav-item").forEach((btn) => {
+      btn.addEventListener("click", () => {
+        if (btn.classList.contains("disabled")) return;
+        navigateTo(btn.dataset.view);
       });
     });
   }
@@ -418,6 +513,9 @@
     renderMeasureTable();
     renderSwitchTable();
     renderStrategic();
+    renderSidebarAlarms();
+    renderSidebarPlants();
+    setupSidebarExtras();
     setupNav();
     tickClock();
 
