@@ -124,6 +124,11 @@ KBV-Zulassung, keine TI-Anbindung (eHealth-Konnektor, eRezept/eAU/ePA), kein ech
 die KV-Sammelerklärung, keine offizielle EBM/GOÄ-Ziffern-Datenbank. Für echte Patientendaten
 ungeeignet.
 
+**Realistischer Zielmarkt ohne diese Zertifizierung:** Berufsgruppen ohne KV-Zulassungs-/
+TI-Anbindungspflicht — Heilpraktiker, reine Privatpraxen, Physiotherapie, Osteopathie u. ä. Vertrags-
+und Haftungsvorlagen für diesen Einsatz liegen in `patientenwelt/legal/` (AVV-Vorlage,
+Haftungsausschluss — beides ungeprüfte Entwürfe, siehe dortige README).
+
 ### Hochglanz-3D-Schrift
 
 `style.css` definiert Utility-Klassen `.text-glossy-dark` (verchromter, heller Text auf dunkelblauen
