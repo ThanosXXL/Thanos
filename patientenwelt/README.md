@@ -18,9 +18,12 @@ Markenname, Überschriften, Patientennamen-Banner und aktive Tabs. Sie ist unabh
 - Rezepte, Termine, Briefe und Laborwerte je Patient
 - **Kalender** je Patient: Jahresansicht für das aktuelle und das folgende Jahr, Tag anklicken
   trägt einen neuen Termin für dieses Datum ein; Tage mit bestehenden Terminen sind hervorgehoben
+- **Abrechnung**: Leistungen (Ziffer, Bezeichnung, Betrag) je Patient erfassen, nach
+  Privatliquidation/KV/BG filtern, Rechnung für die Privatliquidation erzeugen und drucken;
+  dazu praxisweite Sammelübersichten je Kategorie über die Seitenleiste — siehe „Abrechnung" unten
 - Umfangreiche Seitenleiste analog zur Referenz-Praxissoftware (Praxisgebühr, Registrierung,
-  Formulare, Warteliste, Abrechnung, Auswertung, Patientenverwaltung usw.); Menüpunkte ohne
-  hinterlegte Funktion zeigen bewusst einen ehrlichen "noch nicht verfügbar"-Hinweis statt totem UI
+  Formulare, Warteliste, Auswertung, Patientenverwaltung usw.); Menüpunkte ohne hinterlegte Funktion
+  zeigen bewusst einen ehrlichen "noch nicht verfügbar"-Hinweis statt totem UI
 - Bedienkomfort: Enter speichert/bestätigt das offene Formular, Escape schließt es
 - **Datensicherheit**: verschlüsselte Datenablage (AES-256-GCM), Anmeldung mit Benutzerrollen
   (Administrator/Mitarbeiter), automatische Sperre nach Inaktivität, Audit-Protokoll, automatische
@@ -98,12 +101,28 @@ Rollenwechsel → Fehlermeldung bei falschem Passwort) gegen eine Stub-Implement
 `window.patientenweltAPI`, da in dieser Umgebung kein `npm install`/`npm start` der echten
 Electron-App möglich war (kein Netzwerkzugriff für `electron`-Paket).
 
+## Abrechnung
+
+Je Patient im Tab „Abrechnung" (`patient.abrechnung`, Einträge `{ kategorie, ziffer, bezeichnung,
+betrag }`): Leistungen erfassen (mit `ZIFFERN_VORSCHLAEGE` als Ausfüllhilfe — **keine offizielle
+EBM/GOÄ-Datenbank**, nur ein paar Beispielziffern), nach Kategorie filtern (Alle/Privat/GKV/BG) und
+die Summe sehen. Im Privat-Filter erzeugt „Rechnung erstellen" (`ui.viewMode = 'invoice'`) eine
+druckfertige Rechnung (Rechnungsnummer, Datum, Patient, Leistungen, Summe); „Drucken" ruft
+`window.print()`, `@media print` in `style.css` blendet Header/Symbolleiste/Sidebar aus.
+
+Über die Seitenleiste („Abrechnung"-Gruppe, für alle Rollen sichtbar) gibt es zusätzlich
+praxisweite, patientenübergreifende Sammelübersichten je Kategorie (`renderBillingOverview()`) —
+das bildet die Sammelerklärung-artige Natur von KV-/BG-Abrechnung nach, ohne einen echten
+KVDT-Export zu erzeugen.
+
 ## Grenzen (siehe auch Auswertung im Chat)
 
 Verschlüsselung, Rollen und Audit-Log machen die App für eine interne Demo/Prototyp-Nutzung
-angemessen sicher. Sie machen sie aber **nicht** zu einem zulassungsfähigen Praxisverwaltungssystem:
-keine KBV-Zulassung, keine TI-Anbindung (eHealth-Konnektor, eRezept/eAU/ePA), keine echte
-Abrechnungsschnittstelle (KVDT-Export). Für echte Patientendaten ungeeignet.
+angemessen sicher, und die Abrechnungs-Oberfläche bildet Leistungserfassung und Rechnungsstellung
+nach. Das macht die App aber **nicht** zu einem zulassungsfähigen Praxisverwaltungssystem: keine
+KBV-Zulassung, keine TI-Anbindung (eHealth-Konnektor, eRezept/eAU/ePA), kein echter KVDT-Export für
+die KV-Sammelerklärung, keine offizielle EBM/GOÄ-Ziffern-Datenbank. Für echte Patientendaten
+ungeeignet.
 
 ### Hochglanz-3D-Schrift
 
@@ -121,8 +140,10 @@ Glanztext-Stellen dasselbe Muster verwenden, falls das Element selbst schon eine
 ### Seitenleiste: echte Funktionen vs. Platzhalter
 
 `renderer.js` unterscheidet zwei Arten von Seitenleisten-Einträgen: fest verdrahtete Funktionen
-(Patient wählen/erfassen/ändern, Verlauf, Rezepte, Laborwerte, Termine, Kalender, Briefe) und
-`PLACEHOLDER_GROUPS` — Menüpunkte, die es in der Referenz-Praxissoftware gibt, für die diese App
-aber keine Funktion hinterlegt. Ein Klick darauf setzt `ui.viewMode = 'placeholder'` und zeigt
-`renderPlaceholderView()`. Neue echte Funktionen sollten aus `PLACEHOLDER_GROUPS` entfernt und als
-eigener Tab/eigenes Panel verdrahtet werden, statt den Platzhalter-Mechanismus zu missbrauchen.
+(Patient wählen/erfassen/ändern, Verlauf, Rezepte, Laborwerte, Termine, Kalender, Abrechnung,
+Briefe, Benutzerverwaltung/Protokoll/Datensicherung für Admins) und `PLACEHOLDER_GROUPS` —
+Menüpunkte, die es in der Referenz-Praxissoftware gibt, für die diese App aber keine Funktion
+hinterlegt. Ein Klick darauf setzt `ui.viewMode = 'placeholder'` und zeigt `renderPlaceholderView()`.
+Neue echte Funktionen sollten aus `PLACEHOLDER_GROUPS` entfernt und als eigener Tab/eigenes Panel
+verdrahtet werden, statt den Platzhalter-Mechanismus zu missbrauchen — „Abrechnung" war ursprünglich
+selbst ein Platzhalter und wurde nach diesem Muster durch eine echte Sidebar-Gruppe ersetzt.

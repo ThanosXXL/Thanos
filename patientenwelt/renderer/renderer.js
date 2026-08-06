@@ -11,8 +11,23 @@
     { key: 'rezepte', label: 'Rezepte' },
     { key: 'termine', label: 'Termine' },
     { key: 'kalender', label: 'Kalender' },
+    { key: 'abrechnung', label: 'Abrechnung' },
     { key: 'briefe', label: 'Briefe' },
     { key: 'labor', label: 'Laborwerte' }
+  ];
+
+  const ABRECHNUNG_KATEGORIEN = {
+    privat: 'Privatliquidation',
+    gkv: 'KV-Abrechnung',
+    bg: 'BG-Abrechnung'
+  };
+
+  // Kleine Ziffern-Auswahl als Ausfüllhilfe (keine offizielle EBM/GOÄ-Datenbank).
+  const ZIFFERN_VORSCHLAEGE = [
+    { ziffer: '01', bezeichnung: 'Beratung', betrag: 15 },
+    { ziffer: '06', bezeichnung: 'Grundpauschale', betrag: 22 },
+    { ziffer: '1200', bezeichnung: 'Basisdiagnostik Auge', betrag: 18.5 },
+    { ziffer: '06225', bezeichnung: 'Kontrolluntersuchung', betrag: 12 }
   ];
 
   const WOCHENTAGE_KURZ = ['Mo', 'Di', 'Mi', 'Do', 'Fr', 'Sa', 'So'];
@@ -34,7 +49,10 @@
     entryModalCategory: null, // 'journal' | 'rezepte' | 'termine' | 'briefe' | 'labor'
     sortKey: 'name', // 'name' | 'geburtsdatum' | 'geschlecht' | 'versicherung'
     sortDir: 'asc', // 'asc' | 'desc'
-    placeholderLabel: null // aktuell angezeigter Platzhalter-Menüpunkt, wenn viewMode === 'placeholder'
+    placeholderLabel: null, // aktuell angezeigter Platzhalter-Menüpunkt, wenn viewMode === 'placeholder'
+    billingKategorie: 'privat', // 'privat' | 'gkv' | 'bg' – für viewMode === 'billing'
+    abrechnungFilter: 'alle', // 'alle' | 'privat' | 'gkv' | 'bg' – Filter im Patienten-Tab "Abrechnung"
+    invoicePatientId: null // für viewMode === 'invoice'
   };
 
   const el = {
@@ -193,10 +211,6 @@
       ]
     },
     {
-      title: 'Abrechnung',
-      items: ['Privatliquidation', 'BG-Abrechnung', 'KV-Abrechnung']
-    },
-    {
       title: 'Auswertung',
       items: ['Analyse allgemein', 'Analyse Leistungen', 'Analyse Verordnungen']
     },
@@ -231,6 +245,19 @@
     el.sidebar.appendChild(sidebarNavBtn('Termine', hasPatient && ui.viewMode === 'patient' && ui.activeTab === 'termine', () => selectTab('termine'), !hasPatient));
     el.sidebar.appendChild(sidebarNavBtn('Kalender', hasPatient && ui.viewMode === 'patient' && ui.activeTab === 'kalender', () => selectTab('kalender'), !hasPatient));
     el.sidebar.appendChild(sidebarNavBtn('Briefe', hasPatient && ui.viewMode === 'patient' && ui.activeTab === 'briefe', () => selectTab('briefe'), !hasPatient));
+
+    el.sidebar.appendChild(sidebarGroupTitle('Abrechnung'));
+    Object.entries(ABRECHNUNG_KATEGORIEN).forEach(([key, label]) => {
+      el.sidebar.appendChild(sidebarNavBtn(
+        label,
+        ui.viewMode === 'billing' && ui.billingKategorie === key,
+        () => {
+          ui.viewMode = 'billing';
+          ui.billingKategorie = key;
+          render();
+        }
+      ));
+    });
 
     PLACEHOLDER_GROUPS.filter((g) => g.title).forEach((group) => {
       el.sidebar.appendChild(sidebarGroupTitle(group.title));
@@ -322,6 +349,20 @@
     if (ui.viewMode === 'backups' && currentUser && currentUser.role === 'admin') {
       el.content.appendChild(renderBackupsView());
       return;
+    }
+
+    if (ui.viewMode === 'billing') {
+      el.content.appendChild(renderBillingOverview(ui.billingKategorie));
+      return;
+    }
+
+    if (ui.viewMode === 'invoice') {
+      const invoicePatient = getPatient(ui.invoicePatientId);
+      if (invoicePatient) {
+        el.content.appendChild(renderInvoiceView(invoicePatient));
+        return;
+      }
+      ui.viewMode = 'list';
     }
 
     if (ui.viewMode === 'list' || !ui.selectedPatientId) {
@@ -815,7 +856,169 @@
     pendingConfirmAction = null;
   }
 
+  // ---------- Abrechnung: praxisweite Übersicht & Rechnung ----------
+
+  function renderBillingOverview(kategorie) {
+    const card = document.createElement('div');
+    card.className = 'panel-card';
+    const heading = document.createElement('h2');
+    heading.textContent = ABRECHNUNG_KATEGORIEN[kategorie] + (kategorie === 'privat' ? '' : ' (Sammelübersicht)');
+    card.appendChild(heading);
+
+    const rows = [];
+    state.patients.forEach((patient) => {
+      (patient.abrechnung || []).forEach((entry) => {
+        if (entry.kategorie === kategorie) rows.push({ patient, entry });
+      });
+    });
+    rows.sort((a, b) => (a.entry.datum || '').localeCompare(b.entry.datum || ''));
+
+    if (rows.length === 0) {
+      const p = document.createElement('p');
+      p.className = 'entry-empty';
+      p.textContent = 'Noch keine erfassten Leistungen in dieser Kategorie.';
+      card.appendChild(p);
+      return card;
+    }
+
+    const table = document.createElement('table');
+    table.className = 'patient-table';
+    const thead = document.createElement('thead');
+    const headRow = document.createElement('tr');
+    ['Datum', 'Patient', 'Ziffer', 'Bezeichnung', 'Betrag'].forEach((h) => {
+      const th = document.createElement('th');
+      th.textContent = h;
+      headRow.appendChild(th);
+    });
+    thead.appendChild(headRow);
+    table.appendChild(thead);
+
+    const tbody = document.createElement('tbody');
+    let sum = 0;
+    rows.forEach(({ patient, entry }) => {
+      sum += Number(entry.betrag) || 0;
+      const tr = document.createElement('tr');
+      [
+        formatDate(entry.datum),
+        `${patient.nachname}, ${patient.vorname}`,
+        entry.ziffer,
+        entry.bezeichnung,
+        formatEuro(entry.betrag)
+      ].forEach((val) => {
+        const td = document.createElement('td');
+        td.textContent = val;
+        tr.appendChild(td);
+      });
+      tbody.appendChild(tr);
+    });
+    table.appendChild(tbody);
+    card.appendChild(table);
+
+    const sumRow = document.createElement('div');
+    sumRow.className = 'billing-sum-row';
+    sumRow.textContent = `Summe: ${formatEuro(sum)}`;
+    card.appendChild(sumRow);
+
+    return card;
+  }
+
+  function renderInvoiceView(patient) {
+    const wrap = document.createDocumentFragment();
+
+    const backBtn = document.createElement('button');
+    backBtn.className = 'btn-glossy btn-secondary btn-small no-print';
+    backBtn.textContent = '← Zurück';
+    backBtn.style.marginBottom = '12px';
+    backBtn.addEventListener('click', () => {
+      ui.viewMode = 'patient';
+      ui.activeTab = 'abrechnung';
+      ui.invoicePatientId = null;
+      render();
+    });
+    wrap.appendChild(backBtn);
+
+    const card = document.createElement('div');
+    card.className = 'panel-card invoice-card';
+
+    const header = document.createElement('div');
+    header.className = 'invoice-header';
+    const praxis = document.createElement('div');
+    praxis.className = 'invoice-praxis';
+    praxis.textContent = 'PatientenWelt Praxis · Musterstraße 1 · 12345 Musterstadt';
+    const printBtn = document.createElement('button');
+    printBtn.className = 'btn-glossy btn-primary btn-small no-print';
+    printBtn.textContent = 'Drucken';
+    printBtn.addEventListener('click', () => window.print());
+    header.append(praxis, printBtn);
+    card.appendChild(header);
+
+    const title = document.createElement('h2');
+    title.textContent = 'Rechnung';
+    card.appendChild(title);
+
+    const meta = document.createElement('div');
+    meta.className = 'invoice-meta';
+    const rechnungsnummer = `${new Date().getFullYear()}-${patient.id.slice(-6).toUpperCase()}`;
+    [
+      ['Rechnungsnummer', rechnungsnummer],
+      ['Rechnungsdatum', formatDate(todayISO())],
+      ['Patient', `${patient.nachname}, ${patient.vorname}`],
+      ['Geburtsdatum', patient.geburtsdatum ? formatDate(patient.geburtsdatum) : '–']
+    ].forEach(([label, value]) => {
+      const row = document.createElement('div');
+      const strong = document.createElement('span');
+      strong.className = 'invoice-meta-label';
+      strong.textContent = label + ': ';
+      row.appendChild(strong);
+      row.appendChild(document.createTextNode(value));
+      meta.appendChild(row);
+    });
+    card.appendChild(meta);
+
+    const entries = (patient.abrechnung || []).filter((e) => e.kategorie === 'privat');
+
+    const table = document.createElement('table');
+    table.className = 'patient-table';
+    const thead = document.createElement('thead');
+    const headRow = document.createElement('tr');
+    ['Datum', 'Ziffer', 'Bezeichnung', 'Betrag'].forEach((h) => {
+      const th = document.createElement('th');
+      th.textContent = h;
+      headRow.appendChild(th);
+    });
+    thead.appendChild(headRow);
+    table.appendChild(thead);
+    const tbody = document.createElement('tbody');
+    let sum = 0;
+    entries.forEach((entry) => {
+      sum += Number(entry.betrag) || 0;
+      const tr = document.createElement('tr');
+      [formatDate(entry.datum), entry.ziffer, entry.bezeichnung, formatEuro(entry.betrag)].forEach((val) => {
+        const td = document.createElement('td');
+        td.textContent = val;
+        tr.appendChild(td);
+      });
+      tbody.appendChild(tr);
+    });
+    table.appendChild(tbody);
+    card.appendChild(table);
+
+    const total = document.createElement('div');
+    total.className = 'invoice-total';
+    total.textContent = `Gesamtbetrag: ${formatEuro(sum)}`;
+    card.appendChild(total);
+
+    const footer = document.createElement('p');
+    footer.className = 'invoice-footer-note';
+    footer.textContent = 'Bitte überweisen Sie den Betrag innerhalb von 14 Tagen unter Angabe der Rechnungsnummer.';
+    card.appendChild(footer);
+
+    wrap.appendChild(card);
+    return wrap;
+  }
+
   function matchesSearch(patient, query) {
+    if (!query) return true;
     if (!query) return true;
     const q = query.trim().toLowerCase();
     if (!q) return true;
@@ -987,8 +1190,14 @@
     rezepte: { title: 'Rezepte', addLabel: '+ Rezept' },
     termine: { title: 'Termine', addLabel: '+ Termin' },
     briefe: { title: 'Briefe', addLabel: '+ Brief' },
-    labor: { title: 'Laborwerte', addLabel: '+ Laborwert' }
+    labor: { title: 'Laborwerte', addLabel: '+ Laborwert' },
+    abrechnung: { title: 'Abrechnung', addLabel: '+ Leistung' }
   };
+
+  function formatEuro(value) {
+    const n = Number(value) || 0;
+    return n.toLocaleString('de-DE', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + ' €';
+  }
 
   function renderEntryListPanel(patient, category) {
     const meta = CATEGORY_META[category];
@@ -1007,7 +1216,14 @@
     toolbar.append(heading, addBtn);
     card.appendChild(toolbar);
 
-    const entries = (patient[category] || []).slice().sort((a, b) => (a.datum || '').localeCompare(b.datum || ''));
+    let entries = (patient[category] || []).slice().sort((a, b) => (a.datum || '').localeCompare(b.datum || ''));
+
+    if (category === 'abrechnung') {
+      card.appendChild(renderAbrechnungFilterBar(patient));
+      if (ui.abrechnungFilter !== 'alle') {
+        entries = entries.filter((e) => e.kategorie === ui.abrechnungFilter);
+      }
+    }
 
     if (entries.length === 0) {
       const none = document.createElement('p');
@@ -1024,7 +1240,49 @@
     });
     card.appendChild(list);
 
+    if (category === 'abrechnung') {
+      const sum = entries.reduce((acc, e) => acc + (Number(e.betrag) || 0), 0);
+      const sumRow = document.createElement('div');
+      sumRow.className = 'billing-sum-row';
+      sumRow.textContent = `Summe: ${formatEuro(sum)}`;
+      card.appendChild(sumRow);
+    }
+
     return card;
+  }
+
+  function renderAbrechnungFilterBar(patient) {
+    const bar = document.createElement('div');
+    bar.className = 'billing-filter-bar';
+
+    const filters = [['alle', 'Alle'], ['privat', 'Privat'], ['gkv', 'GKV'], ['bg', 'BG']];
+    filters.forEach(([key, label]) => {
+      const btn = document.createElement('button');
+      btn.type = 'button';
+      btn.className = 'billing-filter-btn' + (ui.abrechnungFilter === key ? ' active' : '');
+      btn.textContent = label;
+      btn.addEventListener('click', () => {
+        ui.abrechnungFilter = key;
+        render();
+      });
+      bar.appendChild(btn);
+    });
+
+    if (ui.abrechnungFilter === 'privat') {
+      const invoiceBtn = document.createElement('button');
+      invoiceBtn.type = 'button';
+      invoiceBtn.className = 'btn-glossy btn-primary btn-small';
+      invoiceBtn.textContent = 'Rechnung erstellen';
+      invoiceBtn.style.marginLeft = 'auto';
+      invoiceBtn.addEventListener('click', () => {
+        ui.viewMode = 'invoice';
+        ui.invoicePatientId = patient.id;
+        render();
+      });
+      bar.appendChild(invoiceBtn);
+    }
+
+    return bar;
   }
 
   function renderEntryRow(patient, category, entry) {
@@ -1041,6 +1299,13 @@
       typ.className = 'entry-type';
       typ.textContent = entry.typ;
       li.appendChild(typ);
+    }
+
+    if (category === 'abrechnung' && entry.kategorie) {
+      const kat = document.createElement('span');
+      kat.className = 'entry-type';
+      kat.textContent = ABRECHNUNG_KATEGORIEN[entry.kategorie] || entry.kategorie;
+      li.appendChild(kat);
     }
 
     const text = document.createElement('div');
@@ -1072,6 +1337,9 @@
     }
     if (category === 'briefe') {
       return entry.betreff ? `${entry.betreff}: ${entry.text}` : entry.text;
+    }
+    if (category === 'abrechnung') {
+      return `Ziffer ${entry.ziffer} — ${entry.bezeichnung} (${formatEuro(entry.betrag)})`;
     }
     return entry.text;
   }
@@ -1259,7 +1527,8 @@
         rezepte: [],
         termine: [],
         briefe: [],
-        labor: []
+        labor: [],
+        abrechnung: []
       };
       state.patients.push(patient);
       ui.selectedPatientId = patient.id;
@@ -1340,6 +1609,59 @@
       el.entryFormFields.appendChild(textAreaField('Text', 'entryText'));
     } else if (category === 'labor') {
       el.entryFormFields.appendChild(textAreaField('Befund', 'entryText'));
+    } else if (category === 'abrechnung') {
+      const katLabel = document.createElement('label');
+      const katSpan = document.createElement('span');
+      katSpan.textContent = 'Kategorie';
+      const katSelect = document.createElement('select');
+      katSelect.id = 'entryKategorie';
+      Object.entries(ABRECHNUNG_KATEGORIEN).forEach(([value, label]) => {
+        const opt = document.createElement('option');
+        opt.value = value;
+        opt.textContent = label;
+        katSelect.appendChild(opt);
+      });
+      katLabel.append(katSpan, katSelect);
+      el.entryFormFields.appendChild(katLabel);
+
+      const zifferLabel = fieldLabel('Ziffer (EBM/GOÄ)', 'entryZiffer', 'text');
+      const zifferInput = zifferLabel.querySelector('input');
+      zifferInput.setAttribute('list', 'zifferVorschlaege');
+      const datalist = document.createElement('datalist');
+      datalist.id = 'zifferVorschlaege';
+      ZIFFERN_VORSCHLAEGE.forEach((z) => {
+        const opt = document.createElement('option');
+        opt.value = z.ziffer;
+        opt.label = z.bezeichnung;
+        datalist.appendChild(opt);
+      });
+      zifferLabel.appendChild(datalist);
+      el.entryFormFields.appendChild(zifferLabel);
+
+      const bezeichnungLabel = fieldLabel('Bezeichnung', 'entryBezeichnung', 'text');
+      el.entryFormFields.appendChild(bezeichnungLabel);
+      const bezeichnungInput = bezeichnungLabel.querySelector('input');
+
+      const betragLabel = fieldLabel('Betrag (€)', 'entryBetrag', 'number');
+      const betragInput = betragLabel.querySelector('input');
+      betragInput.step = '0.01';
+      betragInput.min = '0';
+      el.entryFormFields.appendChild(betragLabel);
+
+      zifferInput.addEventListener('change', () => {
+        const match = ZIFFERN_VORSCHLAEGE.find((z) => z.ziffer === zifferInput.value);
+        if (!match) return;
+        // .select() markiert den übernommenen Vorschlag, damit ein Benutzer, der direkt
+        // weitertippt, ihn ersetzt statt versehentlich etwas anzuhängen.
+        if (!bezeichnungInput.value) {
+          bezeichnungInput.value = match.bezeichnung;
+          bezeichnungInput.select();
+        }
+        if (!betragInput.value) {
+          betragInput.value = match.betrag;
+          betragInput.select();
+        }
+      });
     }
 
     el.entryFormModal.classList.add('open');
@@ -1407,6 +1729,15 @@
       const text = byId('entryText').value.trim();
       if (!text) return;
       entry.text = text;
+    } else if (category === 'abrechnung') {
+      const ziffer = byId('entryZiffer').value.trim();
+      const bezeichnung = byId('entryBezeichnung').value.trim();
+      const betrag = parseFloat(byId('entryBetrag').value);
+      if (!ziffer || !bezeichnung || !(betrag > 0)) return;
+      entry.kategorie = byId('entryKategorie').value;
+      entry.ziffer = ziffer;
+      entry.bezeichnung = bezeichnung;
+      entry.betrag = betrag;
     }
 
     if (!patient[category]) patient[category] = [];
