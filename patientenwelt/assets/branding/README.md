@@ -8,14 +8,20 @@ Demovideo wiederverwendet.
 
 ## Ablage
 
-Die Musikdatei gehört hierher als:
-
 ```
 patientenwelt/assets/branding/lounge-band.mp3
 ```
 
-Noch nicht vorhanden — sobald die Datei einmal im Chat hochgeladen wird, wird sie
-genau hier committet.
+Vorhanden und committet (~30s, Klavier/Streicher, weicher Kick/Rim-Beat,
+Lounge-Stil). Ursprünglich auf einem anderen Branch desselben Repos/Accounts
+(`claude/msr175-dashboard-demo-fyhsly`, ein separates "MSR_DELUXE"-Demoprojekt)
+erzeugt und von dort hierher kopiert — dieses Repo hostet mehrere unabhängige
+Demo-Projekte je auf eigenem Branch. Bei Bedarf so wiederfinden/aktualisieren:
+
+```bash
+git fetch origin
+git show origin/claude/msr175-dashboard-demo-fyhsly:branding/lounge-band.mp3 > lounge-band.mp3
+```
 
 ## Verwendung: Musiklänge automatisch anpassen
 
