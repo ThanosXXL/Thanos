@@ -12,7 +12,7 @@ Gebäudetechnik in einer Oberfläche bündelt – statt verstreut über
 Einzelsteuerungen, Excel-Listen und Vor-Ort-Kontrollen.
 
 Die Oberfläche steht bereits, inklusive Video-Demo:
-[Link zum Demo-Video / Artifact-Link einfügen]
+https://claude.ai/code/artifact/a9b9a895-d899-407f-895f-21208ba299ac
 
 Für [Gebäude/Firma] böten wir gern ein Pilotprojekt an: echte Anbindung eines
 Gebäudes/einer Anlage an das Dashboard, mit Ihren echten Messwerten statt
