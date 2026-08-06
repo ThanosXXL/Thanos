@@ -1,4 +1,4 @@
-const { app, BrowserWindow, ipcMain } = require('electron');
+const { app, BrowserWindow, ipcMain, dialog } = require('electron');
 const path = require('path');
 const fs = require('fs');
 const crypto = require('crypto');
@@ -380,7 +380,35 @@ ipcMain.handle('backups:restore', (event, filename) => {
   return { success: true, state };
 });
 
+// ---------- IPC: Datenexport (Art. 20 DSGVO – Datenportabilität) ----------
+// Der Export selbst arbeitet mit bereits entschlüsselten Daten, die der Renderer übergibt
+// (kein erneuter Zugriff auf die verschlüsselte Datei nötig) — verlangt aber trotzdem eine
+// aktive Anmeldung, damit nicht im gesperrten Zustand exportiert werden kann.
+
+ipcMain.handle('export:save-file', async (event, defaultName, content, filterName, filterExt) => {
+  try {
+    requireUnlocked();
+  } catch (err) {
+    return { success: false, error: err.message };
+  }
+
+  const { canceled, filePath } = await dialog.showSaveDialog(mainWindow, {
+    defaultPath: defaultName,
+    filters: [{ name: filterName, extensions: [filterExt] }]
+  });
+  if (canceled || !filePath) return { success: false, canceled: true };
+
+  try {
+    fs.writeFileSync(filePath, content, 'utf-8');
+    return { success: true, filePath };
+  } catch (err) {
+    return { success: false, error: 'Datei konnte nicht geschrieben werden.' };
+  }
+});
+
 // ---------- Fenster ----------
+
+let mainWindow = null;
 
 function createWindow() {
   const win = new BrowserWindow({
@@ -399,9 +427,11 @@ function createWindow() {
   win.setMenuBarVisibility(false);
   win.loadFile(path.join(__dirname, 'renderer', 'index.html'));
 
+  mainWindow = win;
   win.on('closed', () => {
     cachedDEK = null;
     currentUser = null;
+    mainWindow = null;
   });
 }
 

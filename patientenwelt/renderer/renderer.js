@@ -282,6 +282,10 @@
         loadBackupsView();
         render();
       }));
+      el.sidebar.appendChild(sidebarNavBtn('Datenexport', ui.viewMode === 'export', () => {
+        ui.viewMode = 'export';
+        render();
+      }));
     }
   }
 
@@ -348,6 +352,11 @@
 
     if (ui.viewMode === 'backups' && currentUser && currentUser.role === 'admin') {
       el.content.appendChild(renderBackupsView());
+      return;
+    }
+
+    if (ui.viewMode === 'export' && currentUser && currentUser.role === 'admin') {
+      el.content.appendChild(renderExportView());
       return;
     }
 
@@ -713,11 +722,24 @@
   function renderAuditView() {
     const card = document.createElement('div');
     card.className = 'panel-card';
+
+    const toolbar = document.createElement('div');
+    toolbar.className = 'list-toolbar';
     const heading = document.createElement('h2');
     heading.textContent = 'Protokoll';
-    card.appendChild(heading);
+    heading.style.margin = '0';
+    toolbar.appendChild(heading);
 
     const log = Array.isArray(state.auditLog) ? state.auditLog : [];
+    if (log.length > 0) {
+      const exportBtn = document.createElement('button');
+      exportBtn.className = 'btn-glossy btn-secondary btn-small';
+      exportBtn.textContent = 'Als CSV exportieren';
+      exportBtn.addEventListener('click', exportAuditLogCSV);
+      toolbar.appendChild(exportBtn);
+    }
+    card.appendChild(toolbar);
+
     if (log.length === 0) {
       const p = document.createElement('p');
       p.className = 'entry-empty';
@@ -1017,6 +1039,103 @@
     return wrap;
   }
 
+  // ---------- Datenexport (Art. 20 DSGVO – Datenportabilität) ----------
+
+  function sanitizeFilenamePart(text) {
+    return String(text || '').replace(/[^a-zA-Z0-9äöüÄÖÜß_-]+/g, '-').replace(/^-+|-+$/g, '') || 'patient';
+  }
+
+  function csvEscape(value) {
+    const s = value === null || value === undefined ? '' : String(value);
+    if (/[",;\n\r]/.test(s)) {
+      return '"' + s.replace(/"/g, '""') + '"';
+    }
+    return s;
+  }
+
+  function toCSV(headerRow, dataRows) {
+    const lines = [headerRow, ...dataRows].map((row) => row.map(csvEscape).join(';'));
+    // BOM voranstellen, damit Excel Umlaute in der UTF-8-Datei korrekt anzeigt.
+    return '﻿' + lines.join('\r\n');
+  }
+
+  async function triggerExport(defaultName, content, filterName, filterExt, logLabel, logDetails) {
+    const res = await window.patientenweltAPI.exportFile(defaultName, content, filterName, filterExt);
+    if (res && res.success) {
+      logAction(logLabel, logDetails);
+      await persist();
+    } else if (res && !res.canceled) {
+      showAuthlessError(res.error);
+    }
+  }
+
+  async function exportPatientJSON(patient) {
+    const content = JSON.stringify(patient, null, 2);
+    const name = `patientenakte-${sanitizeFilenamePart(patient.nachname)}-${sanitizeFilenamePart(patient.vorname)}-${todayISO()}.json`;
+    await triggerExport(name, content, 'JSON-Datei', 'json', 'Patientenakte exportiert (JSON)', `${patient.nachname}, ${patient.vorname}`);
+  }
+
+  function patientCSVRows(patient) {
+    const rows = [];
+    (patient.journal || []).forEach((e) => rows.push(['Verlauf', e.datum, '', e.typ || '', e.text || '', '']));
+    (patient.rezepte || []).forEach((e) => rows.push(['Rezept', e.datum, '', e.medikament || '', e.hinweis || '', '']));
+    (patient.termine || []).forEach((e) => rows.push(['Termin', e.datum, e.uhrzeit || '', e.grund || '', '', '']));
+    (patient.briefe || []).forEach((e) => rows.push(['Brief', e.datum, '', e.betreff || '', e.text || '', '']));
+    (patient.labor || []).forEach((e) => rows.push(['Laborwert', e.datum, '', '', e.text || '', '']));
+    (patient.abrechnung || []).forEach((e) => rows.push([
+      ABRECHNUNG_KATEGORIEN[e.kategorie] || e.kategorie || '',
+      e.datum, '', e.ziffer || '', e.bezeichnung || '',
+      e.betrag != null ? String(e.betrag).replace('.', ',') : ''
+    ]));
+    return rows.sort((a, b) => (a[1] || '').localeCompare(b[1] || ''));
+  }
+
+  async function exportPatientCSV(patient) {
+    const header = ['Kategorie', 'Datum', 'Uhrzeit', 'Titel', 'Beschreibung', 'Betrag'];
+    const content = toCSV(header, patientCSVRows(patient));
+    const name = `patientenakte-${sanitizeFilenamePart(patient.nachname)}-${sanitizeFilenamePart(patient.vorname)}-${todayISO()}.csv`;
+    await triggerExport(name, content, 'CSV-Datei', 'csv', 'Patientenakte exportiert (CSV)', `${patient.nachname}, ${patient.vorname}`);
+  }
+
+  async function exportAllPatientsJSON() {
+    const content = JSON.stringify(state.patients, null, 2);
+    const name = `patientenwelt-alle-patienten-${todayISO()}.json`;
+    const count = state.patients.length;
+    await triggerExport(name, content, 'JSON-Datei', 'json', 'Alle Patientendaten exportiert', `${count} ${count === 1 ? 'Patient' : 'Patienten'}`);
+  }
+
+  async function exportAuditLogCSV() {
+    const header = ['Zeitpunkt', 'Benutzer', 'Aktion', 'Details'];
+    const rows = (state.auditLog || []).map((e) => [formatDateTime(e.datum), e.userName || '', e.action || '', e.details || '']);
+    const content = toCSV(header, rows);
+    const name = `patientenwelt-protokoll-${todayISO()}.csv`;
+    await triggerExport(name, content, 'CSV-Datei', 'csv', 'Protokoll exportiert', `${rows.length} Einträge`);
+  }
+
+  function renderExportView() {
+    const card = document.createElement('div');
+    card.className = 'panel-card';
+    const heading = document.createElement('h2');
+    heading.textContent = 'Datenexport';
+    card.appendChild(heading);
+
+    const info = document.createElement('p');
+    info.className = 'entry-empty';
+    info.textContent = 'Für die Datenportabilität (Art. 20 DSGVO) und bei Vertragsende: exportiert ' +
+      'alle Patientendaten als maschinenlesbare JSON-Datei. Einzelne Patientenakten lassen sich ' +
+      'zusätzlich im jeweiligen Patienten-Tab „Basis" als JSON oder CSV exportieren.';
+    card.appendChild(info);
+
+    const btn = document.createElement('button');
+    btn.className = 'btn-glossy btn-primary btn-small';
+    const count = state.patients.length;
+    btn.textContent = `Alle Patientendaten exportieren (${count} ${count === 1 ? 'Patient' : 'Patienten'}, JSON)`;
+    btn.addEventListener('click', exportAllPatientsJSON);
+    card.appendChild(btn);
+
+    return card;
+  }
+
   function matchesSearch(patient, query) {
     if (!query) return true;
     if (!query) return true;
@@ -1176,11 +1295,28 @@
     });
     card.appendChild(grid);
 
+    const actions = document.createElement('div');
+    actions.className = 'basis-actions';
+
     const editBtn = document.createElement('button');
     editBtn.className = 'btn-glossy btn-primary btn-small';
     editBtn.textContent = 'Stammdaten bearbeiten';
     editBtn.addEventListener('click', () => openEditPatientModal(patient.id));
-    card.appendChild(editBtn);
+    actions.appendChild(editBtn);
+
+    const exportJsonBtn = document.createElement('button');
+    exportJsonBtn.className = 'btn-glossy btn-secondary btn-small';
+    exportJsonBtn.textContent = 'Patientenakte exportieren (JSON)';
+    exportJsonBtn.addEventListener('click', () => exportPatientJSON(patient));
+    actions.appendChild(exportJsonBtn);
+
+    const exportCsvBtn = document.createElement('button');
+    exportCsvBtn.className = 'btn-glossy btn-secondary btn-small';
+    exportCsvBtn.textContent = 'Patientenakte exportieren (CSV)';
+    exportCsvBtn.addEventListener('click', () => exportPatientCSV(patient));
+    actions.appendChild(exportCsvBtn);
+
+    card.appendChild(actions);
 
     return card;
   }

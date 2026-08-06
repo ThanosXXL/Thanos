@@ -15,5 +15,8 @@ contextBridge.exposeInMainWorld('patientenweltAPI', {
   reloadData: () => ipcRenderer.invoke('data:reload'),
 
   listBackups: () => ipcRenderer.invoke('backups:list'),
-  restoreBackup: (filename) => ipcRenderer.invoke('backups:restore', filename)
+  restoreBackup: (filename) => ipcRenderer.invoke('backups:restore', filename),
+
+  exportFile: (defaultName, content, filterName, filterExt) =>
+    ipcRenderer.invoke('export:save-file', defaultName, content, filterName, filterExt)
 });

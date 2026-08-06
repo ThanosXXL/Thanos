@@ -28,6 +28,9 @@ Markenname, Überschriften, Patientennamen-Banner und aktive Tabs. Sie ist unabh
 - **Datensicherheit**: verschlüsselte Datenablage (AES-256-GCM), Anmeldung mit Benutzerrollen
   (Administrator/Mitarbeiter), automatische Sperre nach Inaktivität, Audit-Protokoll, automatische
   Backups mit Wiederherstellung — siehe Abschnitt „Datensicherheit" unten
+- **Datenexport** (Art. 20 DSGVO): einzelne Patientenakten als JSON oder CSV exportieren (Tab
+  „Basis"), für Administratoren zusätzlich alle Patientendaten der Praxis auf einmal (JSON) sowie
+  das Protokoll als CSV — jeweils über den nativen Speichern-unter-Dialog, siehe „Datenexport" unten
 
 Alle Beispieldaten sind frei erfunden. Es werden keine echten Patientendaten mitgeliefert.
 
@@ -100,6 +103,27 @@ Playwright-Durchlauf der UI (Einrichtung → Patient/Benutzer anlegen → Protok
 Rollenwechsel → Fehlermeldung bei falschem Passwort) gegen eine Stub-Implementierung von
 `window.patientenweltAPI`, da in dieser Umgebung kein `npm install`/`npm start` der echten
 Electron-App möglich war (kein Netzwerkzugriff für `electron`-Paket).
+
+## Datenexport
+
+Für Art. 20 DSGVO (Datenportabilität) und für den Fall einer Kündigung: `main.js` registriert
+`export:save-file` (öffnet den nativen „Speichern unter"-Dialog via `dialog.showSaveDialog` und
+schreibt die vom Renderer übergebene, bereits entschlüsselte Datei — verlangt trotzdem eine aktive
+Anmeldung, damit im gesperrten Zustand nichts exportiert werden kann). Der Renderer bietet:
+
+- **Je Patient** (Tab „Basis", jede Rolle): vollständige Akte als JSON (1:1-Objekt, alle Felder) oder
+  als CSV (eine Zeile pro Eintrag über alle Kategorien hinweg — `Kategorie;Datum;Uhrzeit;Titel;
+  Beschreibung;Betrag` — mit UTF-8-BOM, damit Excel Umlaute korrekt anzeigt)
+  über `exportPatientJSON()`/`exportPatientCSV()` in `renderer.js`
+- **Praxisweit** (Seitenleiste „Sicherheit" → „Datenexport", nur Administratoren): alle Patienten
+  auf einmal als JSON über `exportAllPatientsJSON()`
+- **Protokoll** (Seitenleiste „Sicherheit" → „Protokoll", nur Administratoren): das Audit-Protokoll
+  als CSV über `exportAuditLogCSV()`, Button direkt in der Protokoll-Ansicht
+- Jeder erfolgreiche Export wird selbst als Audit-Eintrag protokolliert; Abbruch durch den Nutzer
+  bleibt bewusst still, ein Schreibfehler zeigt eine Fehlermeldung — beides ohne Protokolleintrag
+
+Verifiziert per Playwright gegen eine Stub-Implementierung von `exportFile()` (Erfolgs-, Abbruch-
+und Fehlerfall, sowie Inhalt/Dateiname aller vier Export-Wege).
 
 ## Abrechnung
 

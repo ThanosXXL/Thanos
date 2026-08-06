@@ -906,6 +906,12 @@ body {
   justify-content: flex-end;
 }
 
+.basis-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
 /* ---------- Formulare ---------- */
 
 .form-grid {
