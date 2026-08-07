@@ -409,6 +409,15 @@ body.view-crm .app-header h1 {
   font-weight: 600;
 }
 
+.main-nav-btn-icon-only {
+  padding: 8px 14px;
+  opacity: 0.75;
+}
+
+.main-nav-btn-icon-only:hover {
+  opacity: 1;
+}
+
 .main-nav-btn.active {
   background: linear-gradient(180deg, var(--crm-gold-300) 0%, var(--crm-gold-500) 45%, var(--crm-gold-700) 100%);
   color: var(--crm-brown-950);

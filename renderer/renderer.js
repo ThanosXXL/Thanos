@@ -825,6 +825,21 @@
     document.getElementById('appTitle').textContent = title;
     document.title = title;
     document.body.classList.toggle('view-crm', activeView === 'crm');
+
+    // Solange die CRM-Ansicht aktiv ist, darf nirgends das Wort "Dozenten"
+    // auftauchen — der Umschalt-Button wird zu einem namenlosen Zurück-Pfeil.
+    const dozentenBtn = document.getElementById('viewBtnDozenten');
+    if (activeView === 'crm') {
+      dozentenBtn.textContent = '←';
+      dozentenBtn.title = 'Zurück';
+      dozentenBtn.setAttribute('aria-label', 'Zurück');
+      dozentenBtn.classList.add('main-nav-btn-icon-only');
+    } else {
+      dozentenBtn.textContent = '🎓 Dozenten';
+      dozentenBtn.title = '';
+      dozentenBtn.removeAttribute('aria-label');
+      dozentenBtn.classList.remove('main-nav-btn-icon-only');
+    }
   }
 
   function render() {
