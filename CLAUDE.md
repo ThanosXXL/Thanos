@@ -44,19 +44,29 @@ The renderer keeps the whole app state in one in-memory `state = { admins: [], e
 
 Shapes:
 - Admin: `{ id, name, pinHash }` — `pinHash` is `simpleHash(pin)`, a non-cryptographic hash (cyrb53); it's a convenience gate for a shared local kiosk machine, not a security boundary. `MAX_ADMINS = 4`.
-- Employee: `{ id, name, reminderStart, reminderEnd, active, createdBy }` — `reminderStart`/`reminderEnd` are `"HH:MM"` strings (defaults `"06:30"`/`"15:00"`) that drive that employee's own reminder schedule.
-- Time entry: `{ id, employeeId, date, start, end, note }` — `date` is `"YYYY-MM-DD"`, `start`/`end` are `"HH:MM"` or `null`. At most one entry per `(employeeId, date)` pair is expected; `findEntry()` looks it up.
+- Employee: `{ id, name, reminderStart, reminderEnd, targetHoursPerDay, active, createdBy }` — `reminderStart`/`reminderEnd` are `"HH:MM"` strings (defaults `"06:30"`/`"15:00"`) that drive that employee's own reminder schedule; `targetHoursPerDay` (default `8`) is the daily Soll-Stunden used by the Auswertung tab.
+- Time entry: `{ id, employeeId, date, start, end, pauseStart, pauseEnd, note }` — `date` is `"YYYY-MM-DD"`, the four time fields are `"HH:MM"` or `null`. `pauseStart`/`pauseEnd` model a single lunch/break window per day (not multiple breaks) and are subtracted from worked time by `workedHours()`. At most one entry per `(employeeId, date)` pair is expected; `findEntry()` looks it up.
 
-IDs come from the local `uid()` helper (timestamp + random). `load()` back-fills `reminderStart`/`reminderEnd`/`active` on older employee records that predate those fields — follow this pattern when adding new fields to the shapes above so existing saved files keep loading.
+IDs come from the local `uid()` helper (timestamp + random). `load()`/`normalizeEmployees()` back-fill `reminderStart`/`reminderEnd`/`targetHoursPerDay`/`active` on older employee records that predate those fields — follow this pattern when adding new fields to the shapes above so existing saved files keep loading.
 
 ### Reminder engine
 
 `checkReminders()` runs on load and then every `REMINDER_CHECK_MS` (30s). For each active employee it compares the current time against `reminderStart`/`reminderEnd` and that employee's today-entry; if a reminder is due it calls `maybeNotify(key, title, body)`, which throttles per `key` (e.g. `start-<employeeId>`) to at most one `Notification` per `REMINDER_REPEAT_MS` (10 min) — so each employee is reminded individually and repeatedly until their entry is filled in, independent of the other employees.
 
+### Browser fallback (demo/testing)
+
+At the top of `renderer.js`, if `window.zeitAPI` is absent (i.e. the page is opened outside Electron, with no preload bridge), a `localStorage`-backed shim is installed under the same name before anything else runs. This means `renderer/index.html` can be opened directly in any browser — or inlined into a single self-contained HTML file — for a fully working demo/test build with no Electron involved; the Electron path is untouched since `contextBridge` always provides `window.zeitAPI` there first.
+
+### Auswertung (Soll/Ist) and exports
+
+- `workedHours(entry)` / `durationStr(entry)` compute worked time as `end - start`, minus the pause window when both `pauseStart` and `pauseEnd` are set.
+- The "Auswertung" admin tab sums `workedHours()` per employee for a selected `YYYY-MM` month and compares it against `targetHoursPerDay × (days with a completed entry that month)` — Soll-Stunden are only counted for days actually worked, not calendar/workdays, to avoid needing a holiday/vacation model.
+- "Zeiten" tab entries can be exported as CSV (`exportEntriesCsv`) and the full `state` can be exported/imported as a JSON backup ("Mein Konto" tab, `exportBackup`/`importBackupFile`) — both build a `Blob` and trigger a synthetic `<a download>` click; import replaces `state` wholesale after a confirm step and logs the current admin out.
+
 ## Conventions
 
 - User-facing strings, list labels, and comments are in German. Match the existing language when touching the UI.
-- Build DOM with `createElement` and set user-controlled text via `textContent` (never `innerHTML`) — this is done consistently to avoid injecting untrusted list/chat content.
+- Build DOM with `createElement` and set user-controlled text via `textContent` (never `innerHTML`) — `innerHTML` is only ever assigned static, hardcoded markup (e.g. a table's `<thead>`), never a template string containing user/data-derived values.
 
 ## Releases (CI)
 

@@ -256,12 +256,29 @@ main#content {
   text-align: center;
 }
 
+.pause-row {
+  margin-top: 10px;
+}
+
+.pause-row .btn {
+  width: 100%;
+  padding: 10px 8px;
+  text-align: center;
+  font-size: 13px;
+}
+
 .btn-in {
   background: linear-gradient(180deg, var(--success-500) 0%, var(--success-600) 55%, #1e5636 100%);
 }
 
 .btn-out {
   background: linear-gradient(180deg, var(--danger-500) 0%, var(--danger-600) 55%, #6e0f16 100%);
+}
+
+.btn-pause {
+  background: linear-gradient(180deg, var(--gold-300) 0%, var(--gold-400) 55%, #b98f3f 100%);
+  color: #3a2205;
+  text-shadow: 0 1px 0 rgba(255, 255, 255, 0.4);
 }
 
 .empty-state {
@@ -370,6 +387,16 @@ main#content {
   color: var(--wine-400);
 }
 
+.diff-positive {
+  color: var(--gold-300);
+  font-weight: 700;
+}
+
+.diff-negative {
+  color: var(--wine-300);
+  font-weight: 700;
+}
+
 .table-actions {
   display: flex;
   gap: 6px;
@@ -411,6 +438,8 @@ input[type="text"],
 input[type="password"],
 input[type="time"],
 input[type="date"],
+input[type="month"],
+input[type="number"],
 select {
   width: 100%;
   padding: 10px 12px;

@@ -2,6 +2,26 @@
   const MAX_ADMINS = 4;
   const REMINDER_CHECK_MS = 30 * 1000;
   const REMINDER_REPEAT_MS = 10 * 60 * 1000;
+  const DEFAULT_TARGET_HOURS = 8;
+
+  // Runs standalone in any browser (demo/testing) by falling back to localStorage
+  // when there is no Electron preload bridge on window.zeitAPI.
+  if (!window.zeitAPI) {
+    const LS_KEY = 'zeiterfassung-data';
+    window.zeitAPI = {
+      loadData: async () => {
+        try {
+          return JSON.parse(localStorage.getItem(LS_KEY)) || { admins: [], employees: [], entries: [] };
+        } catch (err) {
+          return { admins: [], employees: [], entries: [] };
+        }
+      },
+      saveData: async (data) => {
+        localStorage.setItem(LS_KEY, JSON.stringify(data));
+        return true;
+      }
+    };
+  }
 
   let state = { admins: [], employees: [], entries: [] };
 
@@ -9,7 +29,7 @@
 
   const ui = {
     view: 'kiosk', // 'kiosk' | 'admin'
-    adminTab: 'mitarbeiter' // 'mitarbeiter' | 'zeiten' | 'admins' | 'konto'
+    adminTab: 'mitarbeiter' // 'mitarbeiter' | 'zeiten' | 'auswertung' | 'admins' | 'konto'
   };
 
   const login = {
@@ -22,6 +42,7 @@
   let editingEntryId = null;
   let confirmAction = null;
   let zeitenFilterEmployeeId = 'all';
+  let auswertungMonth = null;
 
   const lastReminder = new Map();
 
@@ -54,6 +75,7 @@
   const employeeName = $('employeeName');
   const employeeReminderStart = $('employeeReminderStart');
   const employeeReminderEnd = $('employeeReminderEnd');
+  const employeeTargetHours = $('employeeTargetHours');
   const employeeActive = $('employeeActive');
   const employeeError = $('employeeError');
   const employeeCancelBtn = $('employeeCancelBtn');
@@ -75,6 +97,8 @@
   const entryDate = $('entryDate');
   const entryStart = $('entryStart');
   const entryEnd = $('entryEnd');
+  const entryPauseStart = $('entryPauseStart');
+  const entryPauseEnd = $('entryPauseEnd');
   const entryNote = $('entryNote');
   const entryError = $('entryError');
   const entryCancelBtn = $('entryCancelBtn');
@@ -85,6 +109,8 @@
   const confirmMessage = $('confirmMessage');
   const confirmCancelBtn = $('confirmCancelBtn');
   const confirmOkBtn = $('confirmOkBtn');
+
+  const importFileInput = $('importFileInput');
 
   // ---------------- utils ----------------
 
@@ -136,11 +162,28 @@
     return `${d}.${m}.${y}`;
   }
 
-  function durationStr(start, end) {
-    if (!start || !end) return '–';
-    const diff = timeToMinutes(end) - timeToMinutes(start);
-    if (diff < 0) return '–';
-    return `${Math.floor(diff / 60)}:${pad2(diff % 60)} Std.`;
+  function fmtDecimal(n) {
+    return n.toFixed(2).replace('.', ',');
+  }
+
+  // Worked hours for one entry, as a decimal, with the lunch/break window (if any) subtracted.
+  function workedHours(entry) {
+    if (!entry.start || !entry.end) return 0;
+    let mins = timeToMinutes(entry.end) - timeToMinutes(entry.start);
+    if (mins < 0) return 0;
+    if (entry.pauseStart && entry.pauseEnd) {
+      const p = timeToMinutes(entry.pauseEnd) - timeToMinutes(entry.pauseStart);
+      if (p > 0) mins -= p;
+    }
+    return Math.max(0, mins) / 60;
+  }
+
+  function durationStr(entry) {
+    if (!entry.start || !entry.end) return '–';
+    const hours = workedHours(entry);
+    const h = Math.floor(hours);
+    const m = Math.round((hours - h) * 60);
+    return `${h}:${pad2(m)} Std.`;
   }
 
   function initials(name) {
@@ -161,6 +204,17 @@
     modal.classList.remove('visible');
   }
 
+  function downloadBlob(blob, filename) {
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = filename;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+  }
+
   // ---------------- persistence ----------------
 
   async function load() {
@@ -169,10 +223,17 @@
     if (!Array.isArray(state.admins)) state.admins = [];
     if (!Array.isArray(state.employees)) state.employees = [];
     if (!Array.isArray(state.entries)) state.entries = [];
+    normalizeEmployees();
+  }
+
+  function normalizeEmployees() {
     state.employees.forEach((e) => {
       if (!e.reminderStart) e.reminderStart = '06:30';
       if (!e.reminderEnd) e.reminderEnd = '15:00';
       if (typeof e.active !== 'boolean') e.active = true;
+      if (typeof e.targetHoursPerDay !== 'number' || e.targetHoursPerDay < 0) {
+        e.targetHoursPerDay = DEFAULT_TARGET_HOURS;
+      }
     });
   }
 
@@ -220,7 +281,7 @@
     let entry = findEntry(employeeId, date);
     if (entry && entry.start) return;
     if (!entry) {
-      entry = { id: uid(), employeeId, date, start: null, end: null, note: '' };
+      entry = { id: uid(), employeeId, date, start: null, end: null, pauseStart: null, pauseEnd: null, note: '' };
       state.entries.push(entry);
     }
     entry.start = nowHM();
@@ -233,6 +294,24 @@
     const entry = findEntry(employeeId, date);
     if (!entry || !entry.start || entry.end) return;
     entry.end = nowHM();
+    persist();
+    render();
+  }
+
+  function startPause(employeeId) {
+    const date = todayStr();
+    const entry = findEntry(employeeId, date);
+    if (!entry || !entry.start || entry.end || entry.pauseStart) return;
+    entry.pauseStart = nowHM();
+    persist();
+    render();
+  }
+
+  function endPause(employeeId) {
+    const date = todayStr();
+    const entry = findEntry(employeeId, date);
+    if (!entry || !entry.pauseStart || entry.pauseEnd) return;
+    entry.pauseEnd = nowHM();
     persist();
     render();
   }
@@ -358,6 +437,15 @@
       rowIn.querySelector('.val').textContent = entry && entry.start ? entry.start : '–';
       status.appendChild(rowIn);
 
+      const rowPause = document.createElement('div');
+      rowPause.className = 'row';
+      const pauseDone = entry && entry.pauseStart && entry.pauseEnd;
+      rowPause.innerHTML = `<span>Pause</span><span class="val${entry && entry.pauseStart ? '' : ' missing'}"></span>`;
+      rowPause.querySelector('.val').textContent = entry && entry.pauseStart
+        ? `${entry.pauseStart}–${entry.pauseEnd || '...'}`
+        : '–';
+      status.appendChild(rowPause);
+
       const rowOut = document.createElement('div');
       rowOut.className = 'row';
       rowOut.innerHTML = `<span>Feierabend</span><span class="val${entry && entry.end ? '' : ' missing'}"></span>`;
@@ -385,6 +473,24 @@
       actions.appendChild(btnOut);
       tile.appendChild(actions);
 
+      const pauseRow = document.createElement('div');
+      pauseRow.className = 'pause-row';
+      const btnPause = document.createElement('button');
+      btnPause.className = 'btn btn-glossy btn-pause';
+      if (pauseDone) {
+        btnPause.textContent = 'Pause beendet';
+        btnPause.disabled = true;
+      } else if (entry && entry.pauseStart) {
+        btnPause.textContent = 'Pause beenden';
+        btnPause.addEventListener('click', () => endPause(emp.id));
+      } else {
+        btnPause.textContent = 'Pause';
+        btnPause.disabled = !entry || !entry.start || !!entry.end;
+        btnPause.addEventListener('click', () => startPause(emp.id));
+      }
+      pauseRow.appendChild(btnPause);
+      tile.appendChild(pauseRow);
+
       grid.appendChild(tile);
     });
 
@@ -402,6 +508,7 @@
     [
       ['mitarbeiter', 'Mitarbeiter'],
       ['zeiten', 'Zeiten'],
+      ['auswertung', 'Auswertung'],
       ['admins', 'Administratoren'],
       ['konto', 'Mein Konto']
     ].forEach(([key, label]) => {
@@ -420,6 +527,7 @@
     const panel = document.createElement('div');
     if (ui.adminTab === 'mitarbeiter') renderMitarbeiterTab(panel);
     else if (ui.adminTab === 'zeiten') renderZeitenTab(panel);
+    else if (ui.adminTab === 'auswertung') renderAuswertungTab(panel);
     else if (ui.adminTab === 'admins') renderAdminsTab(panel);
     else renderKontoTab(panel);
     content.appendChild(panel);
@@ -486,7 +594,7 @@
       const table = document.createElement('table');
       table.className = 'data-table';
       table.innerHTML = `<thead><tr>
-        <th>Name</th><th>Kommen ab</th><th>Feierabend ab</th><th>Status</th><th></th>
+        <th>Name</th><th>Kommen ab</th><th>Feierabend ab</th><th>Soll/Tag</th><th>Status</th><th></th>
       </tr></thead>`;
       const tbody = document.createElement('tbody');
       state.employees.forEach((emp) => {
@@ -503,6 +611,10 @@
         const tdEnd = document.createElement('td');
         tdEnd.textContent = emp.reminderEnd;
         tr.appendChild(tdEnd);
+
+        const tdTarget = document.createElement('td');
+        tdTarget.textContent = fmtDecimal(emp.targetHoursPerDay) + ' Std.';
+        tr.appendChild(tdTarget);
 
         const tdActive = document.createElement('td');
         tdActive.textContent = emp.active ? 'Aktiv' : 'Inaktiv';
@@ -548,15 +660,31 @@
     const card = document.createElement('div');
     card.className = 'panel-card';
 
+    let entries = state.entries.slice();
+    if (zeitenFilterEmployeeId !== 'all') {
+      entries = entries.filter((e) => e.employeeId === zeitenFilterEmployeeId);
+    }
+    entries.sort((a, b) => (a.date < b.date ? 1 : a.date > b.date ? -1 : 0));
+    entries = entries.slice(0, 200);
+
     const header = document.createElement('div');
     header.className = 'panel-card-header';
     header.innerHTML = '<h3>Zeiteinträge</h3>';
+    const headerBtns = document.createElement('div');
+    headerBtns.className = 'table-actions';
+    const exportBtn = document.createElement('button');
+    exportBtn.className = 'btn btn-secondary';
+    exportBtn.textContent = 'CSV exportieren';
+    exportBtn.disabled = !entries.length;
+    exportBtn.addEventListener('click', () => exportEntriesCsv(entries));
     const addBtn = document.createElement('button');
     addBtn.className = 'btn btn-glossy btn-primary';
     addBtn.textContent = '+ Eintrag erfassen';
     addBtn.disabled = !state.employees.length;
     addBtn.addEventListener('click', () => openEntryModal(null));
-    header.appendChild(addBtn);
+    headerBtns.appendChild(exportBtn);
+    headerBtns.appendChild(addBtn);
+    header.appendChild(headerBtns);
     card.appendChild(header);
 
     const filters = document.createElement('div');
@@ -580,13 +708,6 @@
     filters.appendChild(select);
     card.appendChild(filters);
 
-    let entries = state.entries.slice();
-    if (zeitenFilterEmployeeId !== 'all') {
-      entries = entries.filter((e) => e.employeeId === zeitenFilterEmployeeId);
-    }
-    entries.sort((a, b) => (a.date < b.date ? 1 : a.date > b.date ? -1 : 0));
-    entries = entries.slice(0, 200);
-
     if (!entries.length) {
       const p = document.createElement('p');
       p.className = 'muted';
@@ -596,7 +717,7 @@
       const table = document.createElement('table');
       table.className = 'data-table';
       table.innerHTML = `<thead><tr>
-        <th>Datum</th><th>Mitarbeiter</th><th>Kommen</th><th>Gehen</th><th>Dauer</th><th>Notiz</th><th></th>
+        <th>Datum</th><th>Mitarbeiter</th><th>Kommen</th><th>Pause</th><th>Gehen</th><th>Dauer</th><th>Notiz</th><th></th>
       </tr></thead>`;
       const tbody = document.createElement('tbody');
       entries.forEach((entry) => {
@@ -615,12 +736,16 @@
         tdStart.textContent = entry.start || '–';
         tr.appendChild(tdStart);
 
+        const tdPause = document.createElement('td');
+        tdPause.textContent = entry.pauseStart ? `${entry.pauseStart}–${entry.pauseEnd || '...'}` : '–';
+        tr.appendChild(tdPause);
+
         const tdEnd = document.createElement('td');
         tdEnd.textContent = entry.end || '–';
         tr.appendChild(tdEnd);
 
         const tdDur = document.createElement('td');
-        tdDur.textContent = durationStr(entry.start, entry.end);
+        tdDur.textContent = durationStr(entry);
         tr.appendChild(tdDur);
 
         const tdNote = document.createElement('td');
@@ -648,6 +773,103 @@
         actions.appendChild(delBtn);
         tdActions.appendChild(actions);
         tr.appendChild(tdActions);
+
+        tbody.appendChild(tr);
+      });
+      table.appendChild(tbody);
+      card.appendChild(table);
+    }
+
+    panel.appendChild(card);
+  }
+
+  function exportEntriesCsv(entries) {
+    const header = ['Datum', 'Mitarbeiter', 'Kommen', 'Pause Beginn', 'Pause Ende', 'Gehen', 'Dauer (Std.)', 'Notiz'];
+    const rows = entries
+      .slice()
+      .sort((a, b) => (a.date < b.date ? -1 : a.date > b.date ? 1 : 0))
+      .map((entry) => {
+        const emp = findEmployee(entry.employeeId);
+        return [
+          fmtDateDisplay(entry.date),
+          emp ? emp.name : '(gelöscht)',
+          entry.start || '',
+          entry.pauseStart || '',
+          entry.pauseEnd || '',
+          entry.end || '',
+          fmtDecimal(workedHours(entry)),
+          (entry.note || '').replace(/;/g, ',')
+        ];
+      });
+    const csv = [header, ...rows].map((r) => r.join(';')).join('\r\n');
+    downloadBlob(new Blob(['﻿' + csv], { type: 'text/csv;charset=utf-8;' }), `zeiterfassung-export-${todayStr()}.csv`);
+  }
+
+  function renderAuswertungTab(panel) {
+    if (!auswertungMonth) auswertungMonth = todayStr().slice(0, 7);
+
+    const card = document.createElement('div');
+    card.className = 'panel-card';
+
+    const header = document.createElement('div');
+    header.className = 'panel-card-header';
+    header.innerHTML = '<h3>Monatsauswertung</h3>';
+    const monthInput = document.createElement('input');
+    monthInput.type = 'month';
+    monthInput.value = auswertungMonth;
+    monthInput.addEventListener('change', () => {
+      if (monthInput.value) auswertungMonth = monthInput.value;
+      render();
+    });
+    header.appendChild(monthInput);
+    card.appendChild(header);
+
+    const hint = document.createElement('p');
+    hint.className = 'modal-hint';
+    hint.textContent = 'Soll-Stunden werden je erfasstem Tag berechnet (Soll pro Tag × Anzahl erfasster Tage im Monat), nicht je Kalendertag.';
+    card.appendChild(hint);
+
+    if (!state.employees.length) {
+      const p = document.createElement('p');
+      p.className = 'muted';
+      p.textContent = 'Keine Mitarbeiter vorhanden.';
+      card.appendChild(p);
+    } else {
+      const table = document.createElement('table');
+      table.className = 'data-table';
+      table.innerHTML = '<thead><tr><th>Mitarbeiter</th><th>Tage erfasst</th><th>Ist-Stunden</th><th>Soll-Stunden</th><th>Differenz</th></tr></thead>';
+      const tbody = document.createElement('tbody');
+
+      state.employees.forEach((emp) => {
+        const monthEntries = state.entries.filter(
+          (e) => e.employeeId === emp.id && e.date.startsWith(auswertungMonth) && e.start && e.end
+        );
+        const istHours = monthEntries.reduce((sum, e) => sum + workedHours(e), 0);
+        const sollHours = monthEntries.length * emp.targetHoursPerDay;
+        const diff = istHours - sollHours;
+
+        const tr = document.createElement('tr');
+
+        const tdName = document.createElement('td');
+        tdName.textContent = emp.name;
+        tr.appendChild(tdName);
+
+        const tdDays = document.createElement('td');
+        tdDays.textContent = String(monthEntries.length);
+        tr.appendChild(tdDays);
+
+        const tdIst = document.createElement('td');
+        tdIst.textContent = fmtDecimal(istHours) + ' Std.';
+        tr.appendChild(tdIst);
+
+        const tdSoll = document.createElement('td');
+        tdSoll.textContent = fmtDecimal(sollHours) + ' Std.';
+        tr.appendChild(tdSoll);
+
+        const tdDiff = document.createElement('td');
+        tdDiff.textContent = (diff >= 0 ? '+' : '') + fmtDecimal(diff) + ' Std.';
+        tdDiff.className = diff > 0.001 ? 'diff-positive' : diff < -0.001 ? 'diff-negative' : '';
+        tr.appendChild(tdDiff);
 
         tbody.appendChild(tr);
       });
@@ -730,7 +952,67 @@
       card.appendChild(editBtn);
     }
     panel.appendChild(card);
+
+    const backupCard = document.createElement('div');
+    backupCard.className = 'panel-card';
+    backupCard.innerHTML = '<h3>Datensicherung</h3><p class="modal-hint">Exportiere alle Daten (Administratoren, Mitarbeiter, Zeiteinträge) als Sicherungsdatei oder stelle eine vorherige Sicherung wieder her.</p>';
+    const btnRow = document.createElement('div');
+    btnRow.className = 'table-actions';
+    const exportBtn = document.createElement('button');
+    exportBtn.className = 'btn btn-glossy btn-primary';
+    exportBtn.textContent = 'Daten exportieren (JSON)';
+    exportBtn.addEventListener('click', exportBackup);
+    const importBtn = document.createElement('button');
+    importBtn.className = 'btn btn-secondary';
+    importBtn.textContent = 'Daten importieren';
+    importBtn.addEventListener('click', () => importFileInput.click());
+    btnRow.appendChild(exportBtn);
+    btnRow.appendChild(importBtn);
+    backupCard.appendChild(btnRow);
+    panel.appendChild(backupCard);
   }
+
+  function exportBackup() {
+    downloadBlob(
+      new Blob([JSON.stringify(state, null, 2)], { type: 'application/json' }),
+      `zeiterfassung-backup-${todayStr()}.json`
+    );
+  }
+
+  function importBackupFile(file) {
+    const reader = new FileReader();
+    reader.onload = () => {
+      let data;
+      try {
+        data = JSON.parse(String(reader.result));
+        if (!data || !Array.isArray(data.admins) || !Array.isArray(data.employees) || !Array.isArray(data.entries)) {
+          throw new Error('invalid shape');
+        }
+      } catch (err) {
+        window.alert('Ungültige Sicherungsdatei.');
+        return;
+      }
+      openConfirm(
+        'Aktuelle Daten wirklich durch die importierte Sicherung ersetzen? Dies kann nicht rückgängig gemacht werden.',
+        () => {
+          state = data;
+          normalizeEmployees();
+          session.adminId = null;
+          ui.view = 'kiosk';
+          persist();
+          render();
+        },
+        'Sicherung wiederherstellen'
+      );
+    };
+    reader.readAsText(file);
+  }
+
+  importFileInput.addEventListener('change', () => {
+    const file = importFileInput.files[0];
+    if (file) importBackupFile(file);
+    importFileInput.value = '';
+  });
 
   // ---------------- render dispatch ----------------
 
@@ -909,6 +1191,19 @@
     btn.addEventListener('click', () => pressPinKey(btn.dataset.key));
   });
 
+  // Lets a login PIN also be typed on a physical keyboard, not just tapped on the pad.
+  document.addEventListener('keydown', (e) => {
+    if (!loginModal.classList.contains('visible') || loginPinPad.classList.contains('hidden')) return;
+    if (login.selectedAdminId === null) return;
+    if (e.key >= '0' && e.key <= '9') {
+      pressPinKey(e.key);
+    } else if (e.key === 'Backspace') {
+      pressPinKey('back');
+    } else if (e.key === 'Escape') {
+      pressPinKey('cancel');
+    }
+  });
+
   loginCancelBtn.addEventListener('click', () => hideModal(loginModal));
 
   // ---------------- employee modal ----------------
@@ -922,12 +1217,14 @@
       employeeName.value = emp.name;
       employeeReminderStart.value = emp.reminderStart;
       employeeReminderEnd.value = emp.reminderEnd;
+      employeeTargetHours.value = emp.targetHoursPerDay;
       employeeActive.checked = emp.active;
     } else {
       employeeModalTitle.textContent = 'Mitarbeiter hinzufügen';
       employeeName.value = '';
       employeeReminderStart.value = '06:30';
       employeeReminderEnd.value = '15:00';
+      employeeTargetHours.value = DEFAULT_TARGET_HOURS;
       employeeActive.checked = true;
     }
     showModal(employeeModal);
@@ -944,6 +1241,9 @@
     }
     const reminderStart = employeeReminderStart.value || '06:30';
     const reminderEnd = employeeReminderEnd.value || '15:00';
+    let targetHoursPerDay = parseFloat(employeeTargetHours.value);
+    if (!Number.isFinite(targetHoursPerDay) || targetHoursPerDay < 0) targetHoursPerDay = DEFAULT_TARGET_HOURS;
+    if (targetHoursPerDay > 24) targetHoursPerDay = 24;
     const active = employeeActive.checked;
 
     if (editingEmployeeId) {
@@ -951,6 +1251,7 @@
       emp.name = name;
       emp.reminderStart = reminderStart;
       emp.reminderEnd = reminderEnd;
+      emp.targetHoursPerDay = targetHoursPerDay;
       emp.active = active;
     } else {
       state.employees.push({
@@ -958,6 +1259,7 @@
         name,
         reminderStart,
         reminderEnd,
+        targetHoursPerDay,
         active,
         createdBy: session.adminId
       });
@@ -1055,6 +1357,8 @@
       entryDate.disabled = true;
       entryStart.value = entry.start || '';
       entryEnd.value = entry.end || '';
+      entryPauseStart.value = entry.pauseStart || '';
+      entryPauseEnd.value = entry.pauseEnd || '';
       entryNote.value = entry.note || '';
     } else {
       entryModalTitle.textContent = 'Zeiteintrag erfassen';
@@ -1063,6 +1367,8 @@
       entryDate.value = todayStr();
       entryStart.value = '';
       entryEnd.value = '';
+      entryPauseStart.value = '';
+      entryPauseEnd.value = '';
       entryNote.value = '';
     }
     showModal(entryModal);
@@ -1075,6 +1381,8 @@
     const date = entryDate.value;
     const start = entryStart.value || null;
     const end = entryEnd.value || null;
+    const pauseStart = entryPauseStart.value || null;
+    const pauseEnd = entryPauseEnd.value || null;
     const note = entryNote.value.trim();
 
     if (!employeeId || !date) {
@@ -1085,18 +1393,28 @@
       entryError.textContent = 'Die Gehen-Zeit darf nicht vor der Kommen-Zeit liegen.';
       return;
     }
+    if ((pauseStart && !pauseEnd) || (!pauseStart && pauseEnd)) {
+      entryError.textContent = 'Bitte Pausenbeginn und -ende beide angeben oder beide leer lassen.';
+      return;
+    }
+    if (pauseStart && pauseEnd && timeToMinutes(pauseEnd) < timeToMinutes(pauseStart)) {
+      entryError.textContent = 'Das Pausenende darf nicht vor dem Pausenbeginn liegen.';
+      return;
+    }
 
     if (editingEntryId) {
       const entry = state.entries.find((e) => e.id === editingEntryId);
       entry.start = start;
       entry.end = end;
+      entry.pauseStart = pauseStart;
+      entry.pauseEnd = pauseEnd;
       entry.note = note;
     } else {
       if (findEntry(employeeId, date)) {
         entryError.textContent = 'Für diesen Mitarbeiter existiert an diesem Tag bereits ein Eintrag. Bitte bearbeiten.';
         return;
       }
-      state.entries.push({ id: uid(), employeeId, date, start, end, note });
+      state.entries.push({ id: uid(), employeeId, date, start, end, pauseStart, pauseEnd, note });
     }
     persist();
     hideModal(entryModal);

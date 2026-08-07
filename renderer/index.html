@@ -81,6 +81,8 @@
       <input type="time" id="employeeReminderStart" value="06:30">
       <label class="field-label" for="employeeReminderEnd">Erinnerung Feierabend ab</label>
       <input type="time" id="employeeReminderEnd" value="15:00">
+      <label class="field-label" for="employeeTargetHours">Soll-Stunden pro Tag</label>
+      <input type="number" id="employeeTargetHours" min="0" max="24" step="0.5" value="8">
       <label class="checkbox-row">
         <input type="checkbox" id="employeeActive" checked>
         <span>Aktiv (wird an Zeiterfassung &amp; Erinnerungen berücksichtigt)</span>
@@ -123,6 +125,10 @@
       <input type="time" id="entryStart">
       <label class="field-label" for="entryEnd">Gehen</label>
       <input type="time" id="entryEnd">
+      <label class="field-label" for="entryPauseStart">Pause Beginn</label>
+      <input type="time" id="entryPauseStart">
+      <label class="field-label" for="entryPauseEnd">Pause Ende</label>
+      <input type="time" id="entryPauseEnd">
       <label class="field-label" for="entryNote">Notiz</label>
       <input type="text" id="entryNote" placeholder="Notiz (optional)" maxlength="120">
       <p class="form-error" id="entryError"></p>
@@ -144,6 +150,8 @@
       </div>
     </div>
   </div>
+
+  <input type="file" id="importFileInput" accept="application/json,.json" class="hidden">
 
   <script src="renderer.js"></script>
 </body>
