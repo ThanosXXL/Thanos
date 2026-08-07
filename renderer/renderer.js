@@ -7,10 +7,13 @@
   let activeView = 'dozenten';
   let activeCustomerId = null;
   let customerSearchQuery = '';
+  let customerSort = 'name-asc';
 
   const dozentTabs = document.getElementById('dozentTabs');
   const crmToolbar = document.getElementById('crmToolbar');
   const crmSearchInput = document.getElementById('crmSearchInput');
+  const crmSortSelect = document.getElementById('crmSortSelect');
+  const crmStats = document.getElementById('crmStats');
   const content = document.getElementById('content');
   const emptyState = document.getElementById('emptyState');
 
@@ -21,6 +24,7 @@
 
   const addCustomerModal = document.getElementById('addCustomerModal');
   const newCustomerName = document.getElementById('newCustomerName');
+  const newCustomerNameError = document.getElementById('newCustomerNameError');
   const newCustomerFirma = document.getElementById('newCustomerFirma');
   const newCustomerTelefon = document.getElementById('newCustomerTelefon');
   const newCustomerEmail = document.getElementById('newCustomerEmail');
@@ -441,6 +445,8 @@
     newCustomerEmail.value = '';
     newCustomerAdresse.value = '';
     newCustomerStatus.value = CUSTOMER_STATUSES[0];
+    newCustomerName.classList.remove('input-error');
+    newCustomerNameError.style.display = 'none';
     addCustomerModal.classList.add('visible');
     newCustomerName.focus();
   }
@@ -451,7 +457,12 @@
 
   function confirmAddCustomer() {
     const name = newCustomerName.value.trim();
-    if (!name) return;
+    if (!name) {
+      newCustomerName.classList.add('input-error');
+      newCustomerNameError.style.display = 'block';
+      newCustomerName.focus();
+      return;
+    }
 
     const customer = {
       id: uid(),
@@ -461,6 +472,7 @@
       email: newCustomerEmail.value.trim(),
       adresse: newCustomerAdresse.value.trim(),
       status: newCustomerStatus.value,
+      createdAt: Date.now(),
       notes: []
     };
     state.customers.push(customer);
@@ -528,6 +540,46 @@
     return 'status-badge status-' + status.toLowerCase();
   }
 
+  function initials(name) {
+    const parts = name.trim().split(/\s+/).filter(Boolean);
+    if (!parts.length) return '?';
+    const first = parts[0][0];
+    const last = parts.length > 1 ? parts[parts.length - 1][0] : '';
+    return (first + last).toUpperCase();
+  }
+
+  function formatDate(timestamp) {
+    if (!timestamp) return '—';
+    return new Date(timestamp).toLocaleDateString('de-DE', {
+      day: '2-digit',
+      month: '2-digit',
+      year: 'numeric'
+    });
+  }
+
+  function sortCustomers(customers) {
+    const sorted = customers.slice();
+    if (customerSort === 'created-desc') {
+      sorted.sort((a, b) => (b.createdAt || 0) - (a.createdAt || 0));
+    } else if (customerSort === 'status') {
+      sorted.sort((a, b) => {
+        const diff = CUSTOMER_STATUSES.indexOf(a.status) - CUSTOMER_STATUSES.indexOf(b.status);
+        return diff !== 0 ? diff : a.name.localeCompare(b.name, 'de');
+      });
+    } else {
+      sorted.sort((a, b) => a.name.localeCompare(b.name, 'de'));
+    }
+    return sorted;
+  }
+
+  function renderCrmStats() {
+    const total = state.customers.length;
+    const counts = CUSTOMER_STATUSES.map(
+      (status) => `${status}: ${state.customers.filter((c) => c.status === status).length}`
+    );
+    crmStats.textContent = total ? `${total} Kunden · ${counts.join(' · ')}` : '';
+  }
+
   function buildCustomerList(customers) {
     const wrap = document.createElement('div');
     wrap.className = 'crm-customer-list';
@@ -544,17 +596,29 @@
       const card = document.createElement('div');
       card.className = 'crm-customer-card glossy' + (customer.id === activeCustomerId ? ' active' : '');
 
-      const name = document.createElement('div');
-      name.className = 'crm-card-name';
-      name.textContent = customer.name;
-
-      const firma = document.createElement('div');
-      firma.className = 'crm-card-firma';
-      firma.textContent = customer.firma || '—';
+      const avatar = document.createElement('div');
+      avatar.className = 'crm-avatar glossy';
+      avatar.textContent = initials(customer.name);
 
       const badge = document.createElement('span');
       badge.className = statusClass(customer.status);
       badge.textContent = customer.status;
+
+      const textCol = document.createElement('div');
+      textCol.className = 'crm-card-text';
+      const name = document.createElement('div');
+      name.className = 'crm-card-name';
+      name.textContent = customer.name;
+      const firma = document.createElement('div');
+      firma.className = 'crm-card-firma';
+      firma.textContent = customer.firma || '—';
+      textCol.appendChild(name);
+      textCol.appendChild(firma);
+
+      const topRow = document.createElement('div');
+      topRow.className = 'crm-card-top';
+      topRow.appendChild(avatar);
+      topRow.appendChild(textCol);
 
       const delBtn = document.createElement('button');
       delBtn.className = 'icon-btn danger crm-card-delete';
@@ -566,8 +630,7 @@
       });
 
       card.appendChild(badge);
-      card.appendChild(name);
-      card.appendChild(firma);
+      card.appendChild(topRow);
       card.appendChild(delBtn);
 
       card.addEventListener('click', () => {
@@ -587,9 +650,15 @@
 
     const header = document.createElement('div');
     header.className = 'crm-detail-header';
+    const titleCol = document.createElement('div');
     const title = document.createElement('h2');
     title.textContent = customer.name;
-    header.appendChild(title);
+    titleCol.appendChild(title);
+    const since = document.createElement('div');
+    since.className = 'crm-since';
+    since.textContent = 'Kunde seit ' + formatDate(customer.createdAt);
+    titleCol.appendChild(since);
+    header.appendChild(titleCol);
 
     const statusSelect = document.createElement('select');
     statusSelect.className = 'crm-status-select';
@@ -619,10 +688,13 @@
     fields.forEach(({ key, label }) => {
       const row = document.createElement('div');
       row.className = 'crm-field-row';
+      const inputId = 'crm-field-' + key + '-' + customer.id;
       const labelEl = document.createElement('label');
       labelEl.textContent = label;
+      labelEl.htmlFor = inputId;
       const input = document.createElement('input');
       input.type = 'text';
+      input.id = inputId;
       input.value = customer[key] || '';
       input.addEventListener('change', () => updateCustomerField(customer.id, key, input.value.trim()));
       row.appendChild(labelEl);
@@ -700,15 +772,21 @@
 
   function renderCrmSection() {
     content.innerHTML = '';
+    renderCrmStats();
 
     const query = customerSearchQuery.trim().toLowerCase();
-    const filtered = state.customers.filter((c) => {
-      if (!query) return true;
-      return (
-        c.name.toLowerCase().includes(query) ||
-        (c.firma || '').toLowerCase().includes(query)
-      );
-    });
+    const filtered = sortCustomers(
+      state.customers.filter((c) => {
+        if (!query) return true;
+        return (
+          c.name.toLowerCase().includes(query) ||
+          (c.firma || '').toLowerCase().includes(query) ||
+          (c.telefon || '').toLowerCase().includes(query) ||
+          (c.email || '').toLowerCase().includes(query) ||
+          (c.adresse || '').toLowerCase().includes(query)
+        );
+      })
+    );
 
     if (!state.customers.length) {
       const empty = document.createElement('div');
@@ -770,6 +848,10 @@
   newCustomerName.addEventListener('keydown', (e) => {
     if (e.key === 'Enter') confirmAddCustomer();
   });
+  newCustomerName.addEventListener('input', () => {
+    newCustomerName.classList.remove('input-error');
+    newCustomerNameError.style.display = 'none';
+  });
 
   document.getElementById('cancelDeleteCustomer').addEventListener('click', closeDeleteCustomerModal);
   document.getElementById('confirmDeleteCustomer').addEventListener('click', confirmDeleteCustomer);
@@ -779,12 +861,21 @@
     renderCrmSection();
   });
 
+  crmSortSelect.addEventListener('change', () => {
+    customerSort = crmSortSelect.value;
+    renderCrmSection();
+  });
+
   async function init() {
     const loaded = await window.dashboardAPI.loadData();
     state = loaded && Array.isArray(loaded.dozenten) ? loaded : { dozenten: [], customers: [] };
     if (!Array.isArray(state.customers)) state.customers = [];
     state.dozenten.forEach((d) => {
       if (!Array.isArray(d.chat)) d.chat = [];
+    });
+    state.customers.forEach((c) => {
+      if (!c.createdAt) c.createdAt = Date.now();
+      if (!Array.isArray(c.notes)) c.notes = [];
     });
     activeDozentId = state.dozenten.length ? state.dozenten[0].id : null;
     render();

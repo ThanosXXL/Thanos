@@ -20,7 +20,13 @@
   </nav>
 
   <nav class="crm-toolbar" id="crmToolbar" style="display:none">
-    <input type="text" id="crmSearchInput" class="crm-search-input" placeholder="Kunden suchen...">
+    <input type="text" id="crmSearchInput" class="crm-search-input" placeholder="Kunden suchen (Name, Firma, Telefon, E-Mail, Adresse)...">
+    <select id="crmSortSelect" class="crm-sort-select">
+      <option value="name-asc">Name A–Z</option>
+      <option value="created-desc">Neueste zuerst</option>
+      <option value="status">Nach Status</option>
+    </select>
+    <span id="crmStats" class="crm-stats"></span>
     <button id="addCustomerBtn" class="btn-crm-primary">+ Kunde hinzufügen</button>
   </nav>
 
@@ -59,11 +65,12 @@
   <div class="modal-overlay" id="addCustomerModal">
     <div class="modal modal-crm">
       <h2>Neuen Kunden anlegen</h2>
-      <input type="text" id="newCustomerName" placeholder="Name *" maxlength="80">
-      <input type="text" id="newCustomerFirma" placeholder="Firma" maxlength="80">
-      <input type="text" id="newCustomerTelefon" placeholder="Telefon" maxlength="40">
-      <input type="email" id="newCustomerEmail" placeholder="E-Mail" maxlength="120">
-      <input type="text" id="newCustomerAdresse" placeholder="Adresse" maxlength="120">
+      <input type="text" id="newCustomerName" placeholder="Name *" maxlength="80" aria-label="Name (Pflichtfeld)">
+      <p id="newCustomerNameError" class="field-error" style="display:none">Bitte einen Namen eingeben.</p>
+      <input type="text" id="newCustomerFirma" placeholder="Firma" maxlength="80" aria-label="Firma">
+      <input type="text" id="newCustomerTelefon" placeholder="Telefon" maxlength="40" aria-label="Telefon">
+      <input type="email" id="newCustomerEmail" placeholder="E-Mail" maxlength="120" aria-label="E-Mail">
+      <input type="text" id="newCustomerAdresse" placeholder="Adresse" maxlength="120" aria-label="Adresse">
       <select id="newCustomerStatus"></select>
       <div class="modal-actions">
         <button id="cancelAddCustomer" class="btn-secondary">Abbrechen</button>
