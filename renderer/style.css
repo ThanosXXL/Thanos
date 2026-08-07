@@ -376,6 +376,19 @@ ul.item-list li span.item-text {
   }
 }
 
+/* CRM ist eigenständig und teilt sich nur die Kopfzeile mit Dozenten —
+   wenn die CRM-Ansicht aktiv ist, wechselt die Kopfzeile ins Gold/Braun-
+   Theme, damit sie nicht wie Teil der Dozenten-Verwaltung aussieht. */
+body.view-crm .app-header {
+  background: linear-gradient(90deg, var(--crm-brown-950), var(--crm-brown-700));
+  border-bottom: 2px solid var(--crm-gold-600);
+}
+
+body.view-crm .app-header h1 {
+  color: var(--crm-gold-300);
+  text-shadow: 0 1px 0 rgba(0, 0, 0, 0.6);
+}
+
 /* ===== Haupt-Navigation (Dozenten / CRM) ===== */
 .main-nav {
   display: flex;

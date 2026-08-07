@@ -820,7 +820,15 @@
     content.appendChild(layout);
   }
 
+  function updateAppTitle() {
+    const title = activeView === 'crm' ? 'Kundenverwaltung DELUXE' : 'Dozenten Dashboard';
+    document.getElementById('appTitle').textContent = title;
+    document.title = title;
+    document.body.classList.toggle('view-crm', activeView === 'crm');
+  }
+
   function render() {
+    updateAppTitle();
     if (activeView === 'crm') {
       renderCrmSection();
     } else {
