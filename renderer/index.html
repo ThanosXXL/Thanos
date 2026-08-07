@@ -7,11 +7,21 @@
 </head>
 <body>
   <header class="app-header">
-    <h1>Dozenten Dashboard</h1>
+    <h1 id="appTitle">Dozenten Dashboard</h1>
   </header>
+
+  <nav class="main-nav" id="mainNav">
+    <button class="main-nav-btn active" id="viewBtnDozenten" data-view="dozenten">🎓 Dozenten</button>
+    <button class="main-nav-btn" id="viewBtnCrm" data-view="crm">💼 Kundenverwaltung DELUXE</button>
+  </nav>
 
   <nav class="dozent-tabs" id="dozentTabs">
     <!-- Dozenten-Tabs werden hier eingefügt -->
+  </nav>
+
+  <nav class="crm-toolbar" id="crmToolbar" style="display:none">
+    <input type="text" id="crmSearchInput" class="crm-search-input" placeholder="Kunden suchen...">
+    <button id="addCustomerBtn" class="btn-crm-primary">+ Kunde hinzufügen</button>
   </nav>
 
   <main id="content">
@@ -41,6 +51,35 @@
       <div class="modal-actions">
         <button id="cancelDeleteDozent" class="btn-secondary">Abbrechen</button>
         <button id="confirmDeleteDozent" class="btn-danger">Entfernen</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal: Kunde hinzufügen -->
+  <div class="modal-overlay" id="addCustomerModal">
+    <div class="modal modal-crm">
+      <h2>Neuen Kunden anlegen</h2>
+      <input type="text" id="newCustomerName" placeholder="Name *" maxlength="80">
+      <input type="text" id="newCustomerFirma" placeholder="Firma" maxlength="80">
+      <input type="text" id="newCustomerTelefon" placeholder="Telefon" maxlength="40">
+      <input type="email" id="newCustomerEmail" placeholder="E-Mail" maxlength="120">
+      <input type="text" id="newCustomerAdresse" placeholder="Adresse" maxlength="120">
+      <select id="newCustomerStatus"></select>
+      <div class="modal-actions">
+        <button id="cancelAddCustomer" class="btn-secondary">Abbrechen</button>
+        <button id="confirmAddCustomer" class="btn-crm-primary">Anlegen</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal: Kunde löschen bestätigen -->
+  <div class="modal-overlay" id="deleteCustomerModal">
+    <div class="modal modal-crm">
+      <h2>Kunden entfernen?</h2>
+      <p id="deleteCustomerText"></p>
+      <div class="modal-actions">
+        <button id="cancelDeleteCustomer" class="btn-secondary">Abbrechen</button>
+        <button id="confirmDeleteCustomer" class="btn-danger">Entfernen</button>
       </div>
     </div>
   </div>

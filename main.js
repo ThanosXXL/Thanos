@@ -7,9 +7,11 @@ const dataFilePath = path.join(app.getPath('userData'), 'dozenten-data.json');
 function loadData() {
   try {
     const raw = fs.readFileSync(dataFilePath, 'utf-8');
-    return JSON.parse(raw);
+    const data = JSON.parse(raw);
+    if (!Array.isArray(data.customers)) data.customers = [];
+    return data;
   } catch (err) {
-    return { dozenten: [] };
+    return { dozenten: [], customers: [] };
   }
 }
 
