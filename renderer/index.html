@@ -2,45 +2,145 @@
 <html lang="de">
 <head>
 <meta charset="UTF-8">
-<title>Dozenten Dashboard</title>
+<title>Zeiterfassung</title>
 <link rel="stylesheet" href="style.css">
 </head>
 <body>
   <header class="app-header">
-    <h1>Dozenten Dashboard</h1>
+    <div class="brand">
+      <span class="brand-icon">⏱</span>
+      <h1>Zeiterfassung</h1>
+    </div>
+    <div class="header-clock" id="headerClock"></div>
+    <div class="header-actions">
+      <span class="admin-badge hidden" id="adminBadge"></span>
+      <button class="btn btn-glossy" id="btnAdminLogin">Admin-Login</button>
+      <button class="btn btn-glossy btn-logout hidden" id="btnAdminLogout">Abmelden</button>
+    </div>
   </header>
 
-  <nav class="dozent-tabs" id="dozentTabs">
-    <!-- Dozenten-Tabs werden hier eingefügt -->
-  </nav>
+  <main id="content"></main>
 
-  <main id="content">
-    <div class="empty-state" id="emptyState">
-      <p>Noch keine Dozenten angelegt.</p>
-      <button id="addDozentEmptyBtn" class="btn-primary">+ Dozent hinzufügen</button>
-    </div>
-  </main>
-
-  <!-- Modal: Dozent hinzufügen -->
-  <div class="modal-overlay" id="addDozentModal">
-    <div class="modal">
-      <h2>Neuen Dozenten hinzufügen</h2>
-      <input type="text" id="newDozentName" placeholder="Name des Dozenten" maxlength="60">
+  <!-- Modal: Ersteinrichtung der Administratoren -->
+  <div class="modal-overlay" id="setupModal">
+    <div class="modal modal-wide">
+      <h2>Ersteinrichtung</h2>
+      <p class="modal-hint">Lege mindestens einen, maximal vier Administratoren an. Jeder Administrator erhält einen eigenen 4-stelligen PIN zum Einloggen.</p>
+      <div class="admin-list" id="setupAdminList"></div>
+      <div class="admin-form" id="setupAdminForm">
+        <input type="text" id="setupAdminName" placeholder="Name des Administrators" maxlength="40">
+        <input type="password" id="setupAdminPin" placeholder="4-stelliger PIN" maxlength="4" inputmode="numeric" pattern="[0-9]*">
+        <button class="btn btn-glossy" id="setupAddAdminBtn">+ Administrator hinzufügen</button>
+      </div>
+      <p class="form-error" id="setupError"></p>
       <div class="modal-actions">
-        <button id="cancelAddDozent" class="btn-secondary">Abbrechen</button>
-        <button id="confirmAddDozent" class="btn-primary">Hinzufügen</button>
+        <button class="btn btn-glossy btn-primary" id="setupFinishBtn" disabled>Einrichtung abschließen</button>
       </div>
     </div>
   </div>
 
-  <!-- Modal: Dozent löschen bestätigen -->
-  <div class="modal-overlay" id="deleteDozentModal">
+  <!-- Modal: Admin PIN Login -->
+  <div class="modal-overlay" id="loginModal">
     <div class="modal">
-      <h2>Dozenten entfernen?</h2>
-      <p id="deleteDozentText"></p>
+      <h2>Admin-Login</h2>
+      <div id="loginAdminChooser" class="admin-tiles"></div>
+      <div id="loginPinPad" class="pin-pad-wrap hidden">
+        <p class="login-selected-name" id="loginSelectedName"></p>
+        <div class="pin-dots" id="pinDots">
+          <span class="pin-dot"></span><span class="pin-dot"></span><span class="pin-dot"></span><span class="pin-dot"></span>
+        </div>
+        <p class="form-error" id="loginError"></p>
+        <div class="pin-keypad">
+          <button class="pin-key" data-key="1">1</button>
+          <button class="pin-key" data-key="2">2</button>
+          <button class="pin-key" data-key="3">3</button>
+          <button class="pin-key" data-key="4">4</button>
+          <button class="pin-key" data-key="5">5</button>
+          <button class="pin-key" data-key="6">6</button>
+          <button class="pin-key" data-key="7">7</button>
+          <button class="pin-key" data-key="8">8</button>
+          <button class="pin-key" data-key="9">9</button>
+          <button class="pin-key pin-key-alt" data-key="back">⌫</button>
+          <button class="pin-key" data-key="0">0</button>
+          <button class="pin-key pin-key-alt" data-key="cancel">Abbr.</button>
+        </div>
+      </div>
       <div class="modal-actions">
-        <button id="cancelDeleteDozent" class="btn-secondary">Abbrechen</button>
-        <button id="confirmDeleteDozent" class="btn-danger">Entfernen</button>
+        <button class="btn btn-secondary" id="loginCancelBtn">Schließen</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal: Mitarbeiter anlegen/bearbeiten -->
+  <div class="modal-overlay" id="employeeModal">
+    <div class="modal">
+      <h2 id="employeeModalTitle">Mitarbeiter hinzufügen</h2>
+      <label class="field-label" for="employeeName">Name</label>
+      <input type="text" id="employeeName" placeholder="Name des Mitarbeiters" maxlength="60">
+      <label class="field-label" for="employeeReminderStart">Erinnerung Kommen ab</label>
+      <input type="time" id="employeeReminderStart" value="06:30">
+      <label class="field-label" for="employeeReminderEnd">Erinnerung Feierabend ab</label>
+      <input type="time" id="employeeReminderEnd" value="15:00">
+      <label class="checkbox-row">
+        <input type="checkbox" id="employeeActive" checked>
+        <span>Aktiv (wird an Zeiterfassung &amp; Erinnerungen berücksichtigt)</span>
+      </label>
+      <p class="form-error" id="employeeError"></p>
+      <div class="modal-actions">
+        <button class="btn btn-secondary" id="employeeCancelBtn">Abbrechen</button>
+        <button class="btn btn-glossy btn-primary" id="employeeSaveBtn">Speichern</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal: Administrator anlegen/bearbeiten -->
+  <div class="modal-overlay" id="adminModal">
+    <div class="modal">
+      <h2 id="adminModalTitle">Administrator hinzufügen</h2>
+      <label class="field-label" for="adminName">Name</label>
+      <input type="text" id="adminName" placeholder="Name" maxlength="40">
+      <label class="field-label" for="adminPin">Neuer 4-stelliger PIN <span id="adminPinOptionalHint" class="hidden">(leer lassen, um PIN zu behalten)</span></label>
+      <input type="password" id="adminPin" placeholder="PIN" maxlength="4" inputmode="numeric" pattern="[0-9]*">
+      <label class="field-label" for="adminPinConfirm">PIN bestätigen</label>
+      <input type="password" id="adminPinConfirm" placeholder="PIN wiederholen" maxlength="4" inputmode="numeric" pattern="[0-9]*">
+      <p class="form-error" id="adminError"></p>
+      <div class="modal-actions">
+        <button class="btn btn-secondary" id="adminCancelBtn">Abbrechen</button>
+        <button class="btn btn-glossy btn-primary" id="adminSaveBtn">Speichern</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal: Zeiteintrag anlegen/bearbeiten -->
+  <div class="modal-overlay" id="entryModal">
+    <div class="modal">
+      <h2 id="entryModalTitle">Zeiteintrag</h2>
+      <label class="field-label" for="entryEmployee">Mitarbeiter</label>
+      <select id="entryEmployee"></select>
+      <label class="field-label" for="entryDate">Datum</label>
+      <input type="date" id="entryDate">
+      <label class="field-label" for="entryStart">Kommen</label>
+      <input type="time" id="entryStart">
+      <label class="field-label" for="entryEnd">Gehen</label>
+      <input type="time" id="entryEnd">
+      <label class="field-label" for="entryNote">Notiz</label>
+      <input type="text" id="entryNote" placeholder="Notiz (optional)" maxlength="120">
+      <p class="form-error" id="entryError"></p>
+      <div class="modal-actions">
+        <button class="btn btn-secondary" id="entryCancelBtn">Abbrechen</button>
+        <button class="btn btn-glossy btn-primary" id="entrySaveBtn">Speichern</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal: Generische Bestätigung -->
+  <div class="modal-overlay" id="confirmModal">
+    <div class="modal">
+      <h2 id="confirmTitle">Bitte bestätigen</h2>
+      <p id="confirmMessage"></p>
+      <div class="modal-actions">
+        <button class="btn btn-secondary" id="confirmCancelBtn">Abbrechen</button>
+        <button class="btn btn-danger" id="confirmOkBtn">Entfernen</button>
       </div>
     </div>
   </div>

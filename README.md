@@ -1,13 +1,20 @@
-# Dozenten Dashboard
+# Zeiterfassung
 
-Desktop-Dashboard (Electron) zur Verwaltung von bis zu vier Dozenten. Jeder Dozent hat drei Listen:
+Desktop-Zeiterfassung (Electron) für bis zu vier Administratoren, die jeweils mit einem eigenen
+4-stelligen PIN einloggen und Mitarbeiter anlegen und verwalten.
 
-1. **Liste 1 – To-Do-Liste** (Aufgabenliste)
-2. **Liste 2 – Offene Projekte**
-3. **Liste 3 – Erledigte Projekte**
+- **Kiosk-Ansicht** (Startbildschirm): Jeder Mitarbeiter trägt per Klick auf "Kommt" / "Geht"
+  seine Start- bzw. Feierabendzeit ein — kein Login nötig.
+- **Admin-Login**: PIN-geschützter Zugang für bis zu vier Administratoren, die Mitarbeiter
+  anlegen/bearbeiten/löschen, Zeiteinträge korrigieren und weitere Administratoren verwalten
+  können.
+- **Erinnerungen**: Ab einer je Mitarbeiter einstellbaren Uhrzeit (Standard 06:30 Uhr) erinnert
+  die App per Desktop-Benachrichtigung einzeln an jeden Mitarbeiter, der seine Kommen-Zeit noch
+  nicht eingetragen hat — ebenso für die Feierabend-Zeit. Die Erinnerung wiederholt sich, bis der
+  jeweilige Eintrag erfasst wurde.
 
-Projekte lassen sich per Klick von "Offene Projekte" nach "Erledigte Projekte" verschieben (und zurück).
-Alle Daten werden lokal gespeichert (im Benutzerdatenverzeichnis der App) und bleiben nach dem Neustart erhalten.
+Alle Daten werden lokal gespeichert (im Benutzerdatenverzeichnis der App) und bleiben nach dem
+Neustart erhalten.
 
 ## Fertigen Installer herunterladen (ohne Terminal)
 

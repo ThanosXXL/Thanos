@@ -2,14 +2,14 @@ const { app, BrowserWindow, ipcMain } = require('electron');
 const path = require('path');
 const fs = require('fs');
 
-const dataFilePath = path.join(app.getPath('userData'), 'dozenten-data.json');
+const dataFilePath = path.join(app.getPath('userData'), 'zeiterfassung-data.json');
 
 function loadData() {
   try {
     const raw = fs.readFileSync(dataFilePath, 'utf-8');
     return JSON.parse(raw);
   } catch (err) {
-    return { dozenten: [] };
+    return { admins: [], employees: [], entries: [] };
   }
 }
 
@@ -19,11 +19,11 @@ function saveData(data) {
 
 function createWindow() {
   const win = new BrowserWindow({
-    width: 1200,
-    height: 800,
-    minWidth: 900,
-    minHeight: 600,
-    backgroundColor: '#ffffff',
+    width: 1280,
+    height: 840,
+    minWidth: 960,
+    minHeight: 640,
+    backgroundColor: '#2b0710',
     webPreferences: {
       preload: path.join(__dirname, 'preload.js'),
       contextIsolation: true,

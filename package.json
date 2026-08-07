@@ -1,7 +1,7 @@
 {
-  "name": "dozenten-dashboard",
+  "name": "zeiterfassung",
   "version": "1.0.0",
-  "description": "Desktop-Dashboard zur Verwaltung von Dozenten, Aufgaben und Projekten",
+  "description": "Desktop-Zeiterfassung mit PIN-geschütztem Admin-Login und Erinnerungen für Mitarbeiter",
   "main": "main.js",
   "author": "",
   "license": "MIT",
@@ -14,8 +14,8 @@
     "electron-builder": "^24.13.3"
   },
   "build": {
-    "appId": "com.dozenten.dashboard",
-    "productName": "Dozenten Dashboard",
+    "appId": "com.zeiterfassung.app",
+    "productName": "Zeiterfassung",
     "files": [
       "main.js",
       "preload.js",
