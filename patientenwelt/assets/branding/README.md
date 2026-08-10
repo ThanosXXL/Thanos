@@ -8,23 +8,33 @@ erhalten (sie liegen im Git-Repo, nicht in einer einzelnen Chat-Session).
 ## Social-Media-Flyer
 
 ```
-patientenwelt/assets/branding/patientenwelt-social-flyer.png
+patientenwelt/assets/branding/patientenwelt-social-flyer.png   (2160×2160px, Post-Format)
+patientenwelt/assets/branding/patientenwelt-story-flyer.png    (2160×3840px, Story-Format 9:16)
 ```
 
-Quadratisches Format (2160×2160px, für Instagram/Facebook/LinkedIn-Posts),
-im Hochglanz-3D-Look der App: verlaufsblauer Hintergrund, glänzendes
+Beide im Hochglanz-3D-Look der App: verlaufsblauer Hintergrund, glänzendes
 Kreis-Medaillon mit dem ⚕-Markenzeichen, Chrom-Wortmarke „PatientenWelt",
 Tagline „Ihre Praxis. Digital. Sicher.", vier Feature-Badges
 (Verschlüsselt / Kalender / Abrechnung / Datenexport) und ein CTA-Banner
-unten. Trägt oben rechts dezent den Hinweis „Demo-Konzept · fiktive
-Beispieldaten". Quelle ist eine reine HTML/CSS-Datei, gerendert per
-Playwright-Screenshot (`deviceScaleFactor: 2` für hohe Auflösung). Verwendet
-dieselben CSS-Variablen (`--blue-900` … `--blue-50`) wie `renderer/style.css`
-und hält sich an die bekannte Regel „kein `text-shadow`/`filter` auf
-Gradient-Text" (siehe `patientenwelt/README.md`, Abschnitt
-Hochglanz-3D-Schrift) — Schattenwirkung wird stattdessen über eine separat
-gerenderte, leicht versetzte Volltonfarben-Kopie hinter dem Gradient-Text
-erzeugt.
+unten. Das Story-Format (für Instagram/Facebook-Stories, 9:16 hochkant)
+nutzt die zusätzliche Höhe für eine dritte Ebene: eine glänzende
+Feature-Karte mit drei Zeilen (Verschlüsselte Patientendaten / Kalender &
+Termine / Abrechnung leicht gemacht). Beide tragen oben rechts dezent den
+Hinweis „Demo-Konzept · fiktive Beispieldaten". Quelle ist je eine reine
+HTML/CSS-Datei, gerendert per Playwright-Screenshot (`deviceScaleFactor: 2`
+für hohe Auflösung). Verwenden dieselben CSS-Variablen (`--blue-900` …
+`--blue-50`) wie `renderer/style.css` und halten sich an die bekannte Regel
+„kein `text-shadow`/`filter` auf Gradient-Text" (siehe
+`patientenwelt/README.md`, Abschnitt Hochglanz-3D-Schrift) —
+Schattenwirkung wird stattdessen über eine separat gerenderte, leicht
+versetzte Volltonfarben-Kopie hinter dem Gradient-Text erzeugt.
+
+**Hinweis für Download-Seiten:** Wird eines dieser PNGs zusammen mit einem
+Download-Button als eigenständige HTML-Datei ausgeliefert, das Bild als
+Base64-Data-URI nur **einmal** einbetten (per JS auf `<img src>` und
+`<a href>` gleichzeitig zuweisen, nicht zweimal im Markup duplizieren) —
+eine doppelte Einbettung verdoppelt unnötig die Dateigröße und kann dazu
+führen, dass mobile In-App-Vorschauen die Datei nicht mehr laden.
 
 ## Demovideo
 
