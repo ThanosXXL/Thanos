@@ -29,12 +29,36 @@ für hohe Auflösung). Verwenden dieselben CSS-Variablen (`--blue-900` …
 Schattenwirkung wird stattdessen über eine separat gerenderte, leicht
 versetzte Volltonfarben-Kopie hinter dem Gradient-Text erzeugt.
 
-**Hinweis für Download-Seiten:** Wird eines dieser PNGs zusammen mit einem
-Download-Button als eigenständige HTML-Datei ausgeliefert, das Bild als
-Base64-Data-URI nur **einmal** einbetten (per JS auf `<img src>` und
-`<a href>` gleichzeitig zuweisen, nicht zweimal im Markup duplizieren) —
-eine doppelte Einbettung verdoppelt unnötig die Dateigröße und kann dazu
-führen, dass mobile In-App-Vorschauen die Datei nicht mehr laden.
+### Fertige Download-Seiten mit Download-Button
+
+```
+patientenwelt/assets/branding/flyer-download-post.html    (~0,9 MB)
+patientenwelt/assets/branding/flyer-download-story.html   (~1,5 MB)
+patientenwelt/assets/branding/patientenwelt-social-flyer.jpg
+patientenwelt/assets/branding/patientenwelt-story-flyer.jpg
+```
+
+Eigenständige, offline funktionierende HTML-Seiten mit Bildvorschau und
+einem großen glossy "Download"-Button (Data-URI-Download, kein Server
+nötig). Referenzimplementierung für jede künftige Download-Seite in
+diesem Projekt — bitte dieses Muster wiederverwenden statt neu zu bauen:
+
+- **Bild als JPEG, nicht PNG, einbetten.** Die verlustfreien PNGs
+  (`patientenwelt-social-flyer.png` / `-story-flyer.png`, 2,3–3 MB) sind
+  fürs Archiv/Druck gedacht. Für eingebettete Download-Seiten stattdessen
+  die `.jpg`-Varianten verwenden (`ffmpeg -i input.png -q:v 2 -update 1
+  -frames:v 1 output.jpg`, praktisch verlustfrei fürs Auge, aber
+  85–90 % kleiner — Social-Media-Plattformen komprimieren beim Upload
+  ohnehin zu JPEG).
+- **Bild nur einmal einbetten.** Die Base64-Data-URI per JS einer
+  Variable zuweisen und sowohl an `<img src>` als auch an `<a href
+  download>` hängen — nie zweimal identisch ins Markup schreiben. Eine
+  doppelte Einbettung verdoppelt unnötig die Dateigröße.
+- **Ein Flyer pro Datei, nicht mehrere kombiniert.** Eine Seite mit zwei
+  eingebetteten Bildern (Post + Story zusammen, ~7 MB) hat sich in der
+  Praxis als zu groß für mobile In-App-HTML-Vorschauen erwiesen (Fehler
+  „Vorschau konnte nicht geladen werden"); getrennte, schlanke Seiten
+  (< 1,5 MB) haben zuverlässig funktioniert.
 
 ## Demovideo
 
