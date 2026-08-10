@@ -11,13 +11,16 @@ erhalten (sie liegen im Git-Repo, nicht in einer einzelnen Chat-Session).
 patientenwelt/assets/branding/patientenwelt-dashboard-demo-with-music.mp4
 ```
 
-Klick-Walkthrough der App (1400×900, ~31s, mit `lounge-band.mp3` unterlegt):
-Patientenliste mit Kennzahlen-Kacheln → Patient auswählen → Verlauf → Rezepte
-→ Termine → **Kalender** (Termin per Tagesklick eintragen) → Briefe → Suche
-& Sortierung in der Patientenliste → Laborwerte eines zweiten Patienten.
-Aufgenommen mit Playwright (Chromium, `recordVideo`) gegen die echte
+Klick-Walkthrough der App (1400×900, ~40s, mit `lounge-band.mp3` unterlegt):
+Konto-Einrichtung (Verschlüsselung aktivieren) → Patientenliste mit
+Kennzahlen-Kacheln → Patient auswählen → Verlauf → Termine → **Kalender**
+(Termin per Tagesklick eintragen) → **Abrechnung** (nach Privat filtern,
+Rechnung erstellen) → Sidebar „Sicherheit": Benutzerverwaltung → Protokoll →
+Sperren. Aufgenommen mit Playwright (Chromium, `recordVideo`) gegen die echte
 `renderer/`-UI mit frei erfundenen Beispielpatienten, dann mit
-`mix-demo-audio.sh` (siehe unten) automatisch vertont.
+`mix-demo-audio.sh` (siehe unten) automatisch vertont. Ersetzt eine ältere
+Version, die vor Einführung von Login/Verschlüsselung, Kalender und
+Abrechnung aufgenommen wurde.
 
 ## Hintergrundmusik
 
