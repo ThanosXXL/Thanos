@@ -11,9 +11,9 @@
     window.zeitAPI = {
       loadData: async () => {
         try {
-          return JSON.parse(localStorage.getItem(LS_KEY)) || { admins: [], employees: [], entries: [] };
+          return JSON.parse(localStorage.getItem(LS_KEY)) || { admins: [], employees: [], entries: [], absences: [] };
         } catch (err) {
-          return { admins: [], employees: [], entries: [] };
+          return { admins: [], employees: [], entries: [], absences: [] };
         }
       },
       saveData: async (data) => {
@@ -23,7 +23,7 @@
     };
   }
 
-  let state = { admins: [], employees: [], entries: [] };
+  let state = { admins: [], employees: [], entries: [], absences: [] };
 
   const session = { adminId: null };
 
@@ -40,6 +40,7 @@
   let editingEmployeeId = null;
   let editingAdminId = null;
   let editingEntryId = null;
+  let editingAbsenceId = null;
   let confirmAction = null;
   let zeitenFilterEmployeeId = 'all';
   let auswertungMonth = null;
@@ -94,11 +95,16 @@
   const entryModal = $('entryModal');
   const entryModalTitle = $('entryModalTitle');
   const entryEmployee = $('entryEmployee');
+  const entryType = $('entryType');
+  const entryWorkFields = $('entryWorkFields');
+  const entryAbsenceFields = $('entryAbsenceFields');
   const entryDate = $('entryDate');
   const entryStart = $('entryStart');
   const entryEnd = $('entryEnd');
   const entryPauseStart = $('entryPauseStart');
   const entryPauseEnd = $('entryPauseEnd');
+  const entryDateFrom = $('entryDateFrom');
+  const entryDateTo = $('entryDateTo');
   const entryNote = $('entryNote');
   const entryError = $('entryError');
   const entryCancelBtn = $('entryCancelBtn');
@@ -162,6 +168,38 @@
     return `${d}.${m}.${y}`;
   }
 
+  function parseDateStr(dateStr) {
+    const [y, m, d] = dateStr.split('-').map(Number);
+    return new Date(y, m - 1, d);
+  }
+
+  function daysBetweenInclusive(fromStr, toStr) {
+    const ms = parseDateStr(toStr) - parseDateStr(fromStr);
+    return Math.round(ms / 86400000) + 1;
+  }
+
+  function absenceTypeLabel(type) {
+    return type === 'urlaub' ? 'Urlaub' : 'Krank';
+  }
+
+  // Days of the given absence type an employee has within monthStr ("YYYY-MM"), clipped to the month.
+  function absenceDaysInMonth(employeeId, type, monthStr) {
+    const [y, m] = monthStr.split('-').map(Number);
+    const monthStart = new Date(y, m - 1, 1);
+    const monthEnd = new Date(y, m, 0);
+    let days = 0;
+    state.absences
+      .filter((a) => a.employeeId === employeeId && a.type === type)
+      .forEach((a) => {
+        const from = parseDateStr(a.dateFrom);
+        const to = parseDateStr(a.dateTo);
+        const start = from < monthStart ? monthStart : from;
+        const end = to > monthEnd ? monthEnd : to;
+        if (start <= end) days += Math.round((end - start) / 86400000) + 1;
+      });
+    return days;
+  }
+
   function fmtDecimal(n) {
     return n.toFixed(2).replace('.', ',');
   }
@@ -219,10 +257,11 @@
 
   async function load() {
     const data = await window.zeitAPI.loadData();
-    state = Object.assign({ admins: [], employees: [], entries: [] }, data);
+    state = Object.assign({ admins: [], employees: [], entries: [], absences: [] }, data);
     if (!Array.isArray(state.admins)) state.admins = [];
     if (!Array.isArray(state.employees)) state.employees = [];
     if (!Array.isArray(state.entries)) state.entries = [];
+    if (!Array.isArray(state.absences)) state.absences = [];
     normalizeEmployees();
   }
 
@@ -253,6 +292,11 @@
 
   function findEntry(employeeId, date) {
     return state.entries.find((e) => e.employeeId === employeeId && e.date === date);
+  }
+
+  // Returns the Urlaub/Krank absence covering this employee on this date, if any.
+  function findAbsence(employeeId, date) {
+    return state.absences.find((a) => a.employeeId === employeeId && date >= a.dateFrom && date <= a.dateTo);
   }
 
   // ---------------- admin accounts ----------------
@@ -352,6 +396,7 @@
     state.employees
       .filter((e) => e.active)
       .forEach((emp) => {
+        if (findAbsence(emp.id, date)) return;
         const entry = findEntry(emp.id, date);
         const overdue = employeeOverdue(emp, entry, nm);
         if (overdue === 'start') {
@@ -418,6 +463,25 @@
     grid.className = 'kiosk-grid';
 
     active.forEach((emp) => {
+      const absence = findAbsence(emp.id, date);
+
+      if (absence) {
+        const tile = document.createElement('div');
+        tile.className = 'employee-tile absent';
+
+        const h3 = document.createElement('h3');
+        h3.textContent = emp.name;
+        tile.appendChild(h3);
+
+        const badge = document.createElement('div');
+        badge.className = 'type-badge ' + absence.type;
+        badge.textContent = `${absenceTypeLabel(absence.type)} bis ${fmtDateDisplay(absence.dateTo)}`;
+        tile.appendChild(badge);
+
+        grid.appendChild(tile);
+        return;
+      }
+
       const entry = findEntry(emp.id, date);
       const overdue = employeeOverdue(emp, entry, nm);
 
@@ -551,9 +615,16 @@
       statusList.appendChild(p);
     }
     activeEmployees.forEach((emp) => {
+      const absence = findAbsence(emp.id, date);
+      const chip = document.createElement('span');
+      if (absence) {
+        chip.className = 'status-chip';
+        chip.textContent = `${emp.name}: ${absenceTypeLabel(absence.type)} bis ${fmtDateDisplay(absence.dateTo)}`;
+        statusList.appendChild(chip);
+        return;
+      }
       const entry = findEntry(emp.id, date);
       const overdue = employeeOverdue(emp, entry, nm);
-      const chip = document.createElement('span');
       if (overdue === 'start') {
         chip.className = 'status-chip overdue';
         chip.textContent = `${emp.name}: Kommen fehlt`;
@@ -637,6 +708,7 @@
             () => {
               state.employees = state.employees.filter((e) => e.id !== emp.id);
               state.entries = state.entries.filter((e) => e.employeeId !== emp.id);
+              state.absences = state.absences.filter((a) => a.employeeId !== emp.id);
               persist();
               render();
             }
@@ -682,7 +754,13 @@
     addBtn.textContent = '+ Eintrag erfassen';
     addBtn.disabled = !state.employees.length;
     addBtn.addEventListener('click', () => openEntryModal(null));
+    const addAbsenceBtn = document.createElement('button');
+    addAbsenceBtn.className = 'btn btn-glossy btn-primary';
+    addAbsenceBtn.textContent = '+ Urlaub/Krank erfassen';
+    addAbsenceBtn.disabled = !state.employees.length;
+    addAbsenceBtn.addEventListener('click', () => openEntryModal(null, 'urlaub'));
     headerBtns.appendChild(exportBtn);
+    headerBtns.appendChild(addAbsenceBtn);
     headerBtns.appendChild(addBtn);
     header.appendChild(headerBtns);
     card.appendChild(header);
@@ -781,6 +859,92 @@
     }
 
     panel.appendChild(card);
+    panel.appendChild(renderAbsencesCard());
+  }
+
+  function renderAbsencesCard() {
+    const card = document.createElement('div');
+    card.className = 'panel-card';
+    card.innerHTML = '<h3>Abwesenheiten (Urlaub/Krank)</h3>';
+
+    let absences = state.absences.slice();
+    if (zeitenFilterEmployeeId !== 'all') {
+      absences = absences.filter((a) => a.employeeId === zeitenFilterEmployeeId);
+    }
+    absences.sort((a, b) => (a.dateFrom < b.dateFrom ? 1 : a.dateFrom > b.dateFrom ? -1 : 0));
+
+    if (!absences.length) {
+      const p = document.createElement('p');
+      p.className = 'muted';
+      p.textContent = 'Keine Urlaubs- oder Krankmeldungen vorhanden.';
+      card.appendChild(p);
+      return card;
+    }
+
+    const table = document.createElement('table');
+    table.className = 'data-table';
+    table.innerHTML = `<thead><tr>
+      <th>Von</th><th>Bis</th><th>Tage</th><th>Mitarbeiter</th><th>Art</th><th>Notiz</th><th></th>
+    </tr></thead>`;
+    const tbody = document.createElement('tbody');
+    absences.forEach((absence) => {
+      const emp = findEmployee(absence.employeeId);
+      const tr = document.createElement('tr');
+
+      const tdFrom = document.createElement('td');
+      tdFrom.textContent = fmtDateDisplay(absence.dateFrom);
+      tr.appendChild(tdFrom);
+
+      const tdTo = document.createElement('td');
+      tdTo.textContent = fmtDateDisplay(absence.dateTo);
+      tr.appendChild(tdTo);
+
+      const tdDays = document.createElement('td');
+      tdDays.textContent = String(daysBetweenInclusive(absence.dateFrom, absence.dateTo));
+      tr.appendChild(tdDays);
+
+      const tdEmp = document.createElement('td');
+      tdEmp.textContent = emp ? emp.name : '(gelöscht)';
+      tr.appendChild(tdEmp);
+
+      const tdType = document.createElement('td');
+      const badge = document.createElement('span');
+      badge.className = 'type-badge ' + absence.type;
+      badge.textContent = absenceTypeLabel(absence.type);
+      tdType.appendChild(badge);
+      tr.appendChild(tdType);
+
+      const tdNote = document.createElement('td');
+      tdNote.textContent = absence.note || '';
+      tr.appendChild(tdNote);
+
+      const tdActions = document.createElement('td');
+      const actions = document.createElement('div');
+      actions.className = 'table-actions';
+      const editBtn = document.createElement('button');
+      editBtn.className = 'icon-btn';
+      editBtn.textContent = 'Bearbeiten';
+      editBtn.addEventListener('click', () => openEntryModal(absence, absence.type));
+      const delBtn = document.createElement('button');
+      delBtn.className = 'icon-btn danger';
+      delBtn.textContent = 'Löschen';
+      delBtn.addEventListener('click', () => {
+        openConfirm('Diesen Eintrag wirklich löschen?', () => {
+          state.absences = state.absences.filter((a) => a.id !== absence.id);
+          persist();
+          render();
+        });
+      });
+      actions.appendChild(editBtn);
+      actions.appendChild(delBtn);
+      tdActions.appendChild(actions);
+      tr.appendChild(tdActions);
+
+      tbody.appendChild(tr);
+    });
+    table.appendChild(tbody);
+    card.appendChild(table);
+    return card;
   }
 
   function exportEntriesCsv(entries) {
@@ -837,7 +1001,7 @@
     } else {
       const table = document.createElement('table');
       table.className = 'data-table';
-      table.innerHTML = '<thead><tr><th>Mitarbeiter</th><th>Tage erfasst</th><th>Ist-Stunden</th><th>Soll-Stunden</th><th>Differenz</th></tr></thead>';
+      table.innerHTML = '<thead><tr><th>Mitarbeiter</th><th>Tage erfasst</th><th>Ist-Stunden</th><th>Soll-Stunden</th><th>Differenz</th><th>Urlaubstage</th><th>Kranktage</th></tr></thead>';
       const tbody = document.createElement('tbody');
 
       state.employees.forEach((emp) => {
@@ -847,6 +1011,8 @@
         const istHours = monthEntries.reduce((sum, e) => sum + workedHours(e), 0);
         const sollHours = monthEntries.length * emp.targetHoursPerDay;
         const diff = istHours - sollHours;
+        const urlaubTage = absenceDaysInMonth(emp.id, 'urlaub', auswertungMonth);
+        const krankTage = absenceDaysInMonth(emp.id, 'krank', auswertungMonth);
 
         const tr = document.createElement('tr');
 
@@ -870,6 +1036,14 @@
         tdDiff.textContent = (diff >= 0 ? '+' : '') + fmtDecimal(diff) + ' Std.';
         tdDiff.className = diff > 0.001 ? 'diff-positive' : diff < -0.001 ? 'diff-negative' : '';
         tr.appendChild(tdDiff);
+
+        const tdUrlaub = document.createElement('td');
+        tdUrlaub.textContent = String(urlaubTage);
+        tr.appendChild(tdUrlaub);
+
+        const tdKrank = document.createElement('td');
+        tdKrank.textContent = String(krankTage);
+        tr.appendChild(tdKrank);
 
         tbody.appendChild(tr);
       });
@@ -988,6 +1162,7 @@
         if (!data || !Array.isArray(data.admins) || !Array.isArray(data.employees) || !Array.isArray(data.entries)) {
           throw new Error('invalid shape');
         }
+        if (!Array.isArray(data.absences)) data.absences = [];
       } catch (err) {
         window.alert('Ungültige Sicherungsdatei.');
         return;
@@ -1337,8 +1512,19 @@
 
   // ---------------- entry modal ----------------
 
-  function openEntryModal(entry) {
-    editingEntryId = entry ? entry.id : null;
+  function updateEntryTypeVisibility() {
+    const isWork = entryType.value === 'arbeit';
+    entryWorkFields.classList.toggle('hidden', !isWork);
+    entryAbsenceFields.classList.toggle('hidden', isWork);
+    entryModalTitle.textContent = isWork ? entryModalTitle.dataset.workTitle : absenceTypeLabel(entryType.value) + ' erfassen';
+  }
+
+  entryType.addEventListener('change', updateEntryTypeVisibility);
+
+  function openEntryModal(item, presetType) {
+    const isAbsence = !!(item && item.type);
+    editingEntryId = item && !isAbsence ? item.id : null;
+    editingAbsenceId = isAbsence ? item.id : null;
     entryError.textContent = '';
 
     entryEmployee.innerHTML = '';
@@ -1349,19 +1535,35 @@
       entryEmployee.appendChild(opt);
     });
 
-    if (entry) {
-      entryModalTitle.textContent = 'Zeiteintrag bearbeiten';
-      entryEmployee.value = entry.employeeId;
+    if (isAbsence) {
+      entryModalTitle.dataset.workTitle = 'Zeiteintrag erfassen';
+      entryType.value = item.type;
+      entryType.disabled = true;
+      entryEmployee.value = item.employeeId;
       entryEmployee.disabled = true;
-      entryDate.value = entry.date;
+      entryDateFrom.value = item.dateFrom;
+      entryDateTo.value = item.dateTo;
+      entryNote.value = item.note || '';
+      entryModalTitle.textContent = absenceTypeLabel(item.type) + ' bearbeiten';
+      updateEntryTypeVisibility();
+    } else if (item) {
+      entryModalTitle.dataset.workTitle = 'Zeiteintrag bearbeiten';
+      entryType.value = 'arbeit';
+      entryType.disabled = true;
+      entryEmployee.value = item.employeeId;
+      entryEmployee.disabled = true;
+      entryDate.value = item.date;
       entryDate.disabled = true;
-      entryStart.value = entry.start || '';
-      entryEnd.value = entry.end || '';
-      entryPauseStart.value = entry.pauseStart || '';
-      entryPauseEnd.value = entry.pauseEnd || '';
-      entryNote.value = entry.note || '';
+      entryStart.value = item.start || '';
+      entryEnd.value = item.end || '';
+      entryPauseStart.value = item.pauseStart || '';
+      entryPauseEnd.value = item.pauseEnd || '';
+      entryNote.value = item.note || '';
+      updateEntryTypeVisibility();
     } else {
-      entryModalTitle.textContent = 'Zeiteintrag erfassen';
+      entryModalTitle.dataset.workTitle = 'Zeiteintrag erfassen';
+      entryType.disabled = false;
+      entryType.value = presetType || 'arbeit';
       entryEmployee.disabled = false;
       entryDate.disabled = false;
       entryDate.value = todayStr();
@@ -1369,7 +1571,10 @@
       entryEnd.value = '';
       entryPauseStart.value = '';
       entryPauseEnd.value = '';
+      entryDateFrom.value = todayStr();
+      entryDateTo.value = todayStr();
       entryNote.value = '';
+      updateEntryTypeVisibility();
     }
     showModal(entryModal);
   }
@@ -1377,7 +1582,39 @@
   entryCancelBtn.addEventListener('click', () => hideModal(entryModal));
 
   entrySaveBtn.addEventListener('click', () => {
+    const type = entryType.value;
     const employeeId = entryEmployee.value;
+    if (!employeeId) {
+      entryError.textContent = 'Bitte einen Mitarbeiter wählen.';
+      return;
+    }
+
+    if (type !== 'arbeit') {
+      const dateFrom = entryDateFrom.value;
+      const dateTo = entryDateTo.value;
+      const note = entryNote.value.trim();
+      if (!dateFrom || !dateTo) {
+        entryError.textContent = 'Bitte Von- und Bis-Datum angeben.';
+        return;
+      }
+      if (dateTo < dateFrom) {
+        entryError.textContent = 'Das Bis-Datum darf nicht vor dem Von-Datum liegen.';
+        return;
+      }
+      if (editingAbsenceId) {
+        const absence = state.absences.find((a) => a.id === editingAbsenceId);
+        absence.dateFrom = dateFrom;
+        absence.dateTo = dateTo;
+        absence.note = note;
+      } else {
+        state.absences.push({ id: uid(), employeeId, type, dateFrom, dateTo, note });
+      }
+      persist();
+      hideModal(entryModal);
+      render();
+      return;
+    }
+
     const date = entryDate.value;
     const start = entryStart.value || null;
     const end = entryEnd.value || null;
@@ -1385,8 +1622,8 @@
     const pauseEnd = entryPauseEnd.value || null;
     const note = entryNote.value.trim();
 
-    if (!employeeId || !date) {
-      entryError.textContent = 'Mitarbeiter und Datum sind erforderlich.';
+    if (!date) {
+      entryError.textContent = 'Bitte ein Datum angeben.';
       return;
     }
     if (start && end && timeToMinutes(end) < timeToMinutes(start)) {

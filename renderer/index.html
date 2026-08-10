@@ -119,16 +119,33 @@
       <h2 id="entryModalTitle">Zeiteintrag</h2>
       <label class="field-label" for="entryEmployee">Mitarbeiter</label>
       <select id="entryEmployee"></select>
-      <label class="field-label" for="entryDate">Datum</label>
-      <input type="date" id="entryDate">
-      <label class="field-label" for="entryStart">Kommen</label>
-      <input type="time" id="entryStart">
-      <label class="field-label" for="entryEnd">Gehen</label>
-      <input type="time" id="entryEnd">
-      <label class="field-label" for="entryPauseStart">Pause Beginn</label>
-      <input type="time" id="entryPauseStart">
-      <label class="field-label" for="entryPauseEnd">Pause Ende</label>
-      <input type="time" id="entryPauseEnd">
+      <label class="field-label" for="entryType">Art</label>
+      <select id="entryType">
+        <option value="arbeit">Arbeitszeit</option>
+        <option value="urlaub">Urlaub</option>
+        <option value="krank">Krank</option>
+      </select>
+
+      <div id="entryWorkFields">
+        <label class="field-label" for="entryDate">Datum</label>
+        <input type="date" id="entryDate">
+        <label class="field-label" for="entryStart">Kommen</label>
+        <input type="time" id="entryStart">
+        <label class="field-label" for="entryEnd">Gehen</label>
+        <input type="time" id="entryEnd">
+        <label class="field-label" for="entryPauseStart">Pause Beginn</label>
+        <input type="time" id="entryPauseStart">
+        <label class="field-label" for="entryPauseEnd">Pause Ende</label>
+        <input type="time" id="entryPauseEnd">
+      </div>
+
+      <div id="entryAbsenceFields" class="hidden">
+        <label class="field-label" for="entryDateFrom">Von</label>
+        <input type="date" id="entryDateFrom">
+        <label class="field-label" for="entryDateTo">Bis</label>
+        <input type="date" id="entryDateTo">
+      </div>
+
       <label class="field-label" for="entryNote">Notiz</label>
       <input type="text" id="entryNote" placeholder="Notiz (optional)" maxlength="120">
       <p class="form-error" id="entryError"></p>

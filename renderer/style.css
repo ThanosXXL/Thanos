@@ -216,10 +216,41 @@ main#content {
     0 10px 22px rgba(0, 0, 0, 0.5);
 }
 
+.employee-tile.absent {
+  background: linear-gradient(160deg, var(--wine-800) 0%, var(--wine-950) 100%);
+  opacity: 0.9;
+}
+
 .employee-tile h3 {
   margin: 0 0 10px 0;
   color: var(--cream);
   font-size: 17px;
+}
+
+.type-badge {
+  display: inline-block;
+  padding: 8px 14px;
+  border-radius: 20px;
+  font-size: 13px;
+  font-weight: 700;
+  box-shadow: 0 1px 0 rgba(255, 255, 255, 0.2) inset, 0 3px 6px rgba(0, 0, 0, 0.4);
+}
+
+.type-badge.urlaub {
+  background: linear-gradient(180deg, var(--gold-300) 0%, var(--gold-400) 55%, #b98f3f 100%);
+  color: #3a2205;
+  text-shadow: 0 1px 0 rgba(255, 255, 255, 0.4);
+}
+
+.type-badge.krank {
+  background: linear-gradient(180deg, var(--danger-500) 0%, var(--danger-600) 55%, #6e0f16 100%);
+  color: var(--cream);
+  text-shadow: 0 1px 1px rgba(0, 0, 0, 0.5);
+}
+
+.type-badge.arbeit {
+  background: linear-gradient(180deg, var(--success-500) 0%, var(--success-600) 55%, #1e5636 100%);
+  color: var(--cream);
 }
 
 .employee-status {
