@@ -1,0 +1,38 @@
+{
+  "name": "patientenwelt",
+  "version": "1.0.0",
+  "description": "PatientenWelt - Desktop-Praxisverwaltung (Patientenakte, Journal, Rezepte, Termine, Kalender) im Blau-Weiss-3D-Hochglanz-Stil",
+  "main": "main.js",
+  "author": "",
+  "license": "MIT",
+  "scripts": {
+    "start": "electron .",
+    "dist": "electron-builder"
+  },
+  "devDependencies": {
+    "electron": "^31.0.0",
+    "electron-builder": "^24.13.3"
+  },
+  "build": {
+    "appId": "com.patientenwelt.app",
+    "productName": "PatientenWelt",
+    "files": [
+      "main.js",
+      "preload.js",
+      "renderer/**/*",
+      "package.json"
+    ],
+    "directories": {
+      "output": "dist"
+    },
+    "win": {
+      "target": "nsis"
+    },
+    "mac": {
+      "target": "dmg"
+    },
+    "linux": {
+      "target": "AppImage"
+    }
+  }
+}
