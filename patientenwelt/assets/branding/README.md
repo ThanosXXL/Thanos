@@ -1,9 +1,30 @@
-# Branding-Assets: Hintergrundmusik & Demovideo
+# Branding-Assets: Hintergrundmusik, Demovideo & Social-Media-Flyer
 
 Dieser Ordner ist der dauerhafte, versionierte Ablageort für die offiziellen
-Branding-Assets von PatientenWelt (Hintergrundmusik und Demovideo). Einmal
+Branding-Assets von PatientenWelt (Hintergrundmusik, Demovideo, Flyer). Einmal
 hier abgelegt, bleiben die Dateien über alle künftigen Sessions/Chats hinweg
 erhalten (sie liegen im Git-Repo, nicht in einer einzelnen Chat-Session).
+
+## Social-Media-Flyer
+
+```
+patientenwelt/assets/branding/patientenwelt-social-flyer.png
+```
+
+Quadratisches Format (2160×2160px, für Instagram/Facebook/LinkedIn-Posts),
+im Hochglanz-3D-Look der App: verlaufsblauer Hintergrund, glänzendes
+Kreis-Medaillon mit dem ⚕-Markenzeichen, Chrom-Wortmarke „PatientenWelt",
+Tagline „Ihre Praxis. Digital. Sicher.", vier Feature-Badges
+(Verschlüsselt / Kalender / Abrechnung / Datenexport) und ein CTA-Banner
+unten. Trägt oben rechts dezent den Hinweis „Demo-Konzept · fiktive
+Beispieldaten". Quelle ist eine reine HTML/CSS-Datei, gerendert per
+Playwright-Screenshot (`deviceScaleFactor: 2` für hohe Auflösung). Verwendet
+dieselben CSS-Variablen (`--blue-900` … `--blue-50`) wie `renderer/style.css`
+und hält sich an die bekannte Regel „kein `text-shadow`/`filter` auf
+Gradient-Text" (siehe `patientenwelt/README.md`, Abschnitt
+Hochglanz-3D-Schrift) — Schattenwirkung wird stattdessen über eine separat
+gerenderte, leicht versetzte Volltonfarben-Kopie hinter dem Gradient-Text
+erzeugt.
 
 ## Demovideo
 
