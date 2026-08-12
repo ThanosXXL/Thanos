@@ -1,0 +1,44 @@
+{
+  "name": "steuerwelt",
+  "version": "1.0.0",
+  "description": "Kanzleisoftware für Steuerberater – Mandanten, Fristen, Dokumente, Zeiterfassung, Rechnungen, Notizen",
+  "main": "main.js",
+  "author": "",
+  "license": "UNLICENSED",
+  "scripts": {
+    "start": "electron .",
+    "dist": "electron-builder"
+  },
+  "devDependencies": {
+    "electron": "^31.0.0",
+    "electron-builder": "^24.13.3"
+  },
+  "build": {
+    "appId": "com.steuerwelt.app",
+    "productName": "SteuerWelt",
+    "files": [
+      "main.js",
+      "preload.js",
+      "license/**/*",
+      "renderer/**/*",
+      "package.json"
+    ],
+    "directories": {
+      "output": "dist"
+    },
+    "win": {
+      "target": "nsis"
+    },
+    "mac": {
+      "target": "dmg"
+    },
+    "linux": {
+      "target": "AppImage"
+    },
+    "publish": [
+      {
+        "provider": "github"
+      }
+    ]
+  }
+}

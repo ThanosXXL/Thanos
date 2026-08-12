@@ -8,6 +8,13 @@ Dozenten Dashboard is a cross-platform Electron desktop app for managing up to f
 
 This repository also hosts a second, unrelated project: `omniroute/` is a vendored snapshot of [OmniRoute](https://github.com/diegosouzapw/OmniRoute) (an AI gateway/router, Next.js + TypeScript monorepo), included as-is with its own `package.json`, tooling, and `CLAUDE.md`. It does not share dependencies, build config, or CI with the Dozenten Dashboard — the root `npm install`/`npm start`/`npm run dist` commands above only ever touch the Dozenten Dashboard files (`main.js`, `preload.js`, `renderer/`); nothing in `omniroute/` is packaged into its installers. Treat `omniroute/` as its own project — see `omniroute/CLAUDE.md` and `omniroute/VENDORED.md` for details and provenance. It is a one-time snapshot, not a live sync with upstream.
 
+A third, also unrelated project lives here too: **SteuerWelt**, a Kanzleisoftware for Steuerberater (tax advisor) customers, split across two independent sub-projects with their own `package.json` and `README.md`:
+
+- `steuerwelt/` — the Electron desktop app customers install (Mandanten, Fristen, Dokumente, Zeiterfassung, Rechnungen, Notizen), following the same main/preload/renderer split and `state → persist() → render()` pattern as the Dozenten Dashboard, plus a license-activation gate and a lightweight name/PIN user picker in front of the app shell. See `steuerwelt/README.md`.
+- `steuerwelt-license-server/` — a small standalone Node/Express service that issues and validates device-bound license activations for the SteuerWelt app (Ed25519-signed certificates, `node:sqlite` for storage, no shared code with any other project here). Deployed and hosted separately from everything else in this repo. See `steuerwelt-license-server/README.md`.
+
+Like `omniroute/`, neither SteuerWelt sub-project is touched by the root `npm install`/`npm start`/`npm run dist` commands — each has its own install/start/dist scripts, run from within its own directory.
+
 ## Commands
 
 ```bash

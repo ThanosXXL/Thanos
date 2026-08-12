@@ -1,0 +1,19 @@
+{
+  "name": "steuerwelt-license-server",
+  "version": "1.0.0",
+  "description": "Lizenz-Aktivierungsserver für SteuerWelt (Geräte-gebundene Online-Aktivierung)",
+  "private": true,
+  "main": "src/server.js",
+  "type": "commonjs",
+  "engines": {
+    "node": ">=22.5.0"
+  },
+  "scripts": {
+    "start": "node src/server.js",
+    "generate-keys": "node scripts/generate-keys.js",
+    "create-license": "node scripts/create-license.js"
+  },
+  "dependencies": {
+    "express": "^4.19.2"
+  }
+}
