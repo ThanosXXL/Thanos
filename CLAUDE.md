@@ -8,6 +8,19 @@ Dozenten Dashboard is a cross-platform Electron desktop app for managing up to f
 
 This repository also hosts a second, unrelated project: `omniroute/` is a vendored snapshot of [OmniRoute](https://github.com/diegosouzapw/OmniRoute) (an AI gateway/router, Next.js + TypeScript monorepo), included as-is with its own `package.json`, tooling, and `CLAUDE.md`. It does not share dependencies, build config, or CI with the Dozenten Dashboard — the root `npm install`/`npm start`/`npm run dist` commands above only ever touch the Dozenten Dashboard files (`main.js`, `preload.js`, `renderer/`); nothing in `omniroute/` is packaged into its installers. Treat `omniroute/` as its own project — see `omniroute/CLAUDE.md` and `omniroute/VENDORED.md` for details and provenance. It is a one-time snapshot, not a live sync with upstream.
 
+A third, also unrelated project lives here too: **SteuerWelt**, a Kanzleisoftware for Steuerberater (tax advisor) customers, split across two independent sub-projects with their own `package.json` and `README.md`:
+
+- `steuerwelt/` — the Electron desktop app customers install (Mandanten, Fristen, Dokumente, Zeiterfassung, Rechnungen, Notizen), following the same main/preload/renderer split and `state → persist() → render()` pattern as the Dozenten Dashboard, plus a license-activation gate and a lightweight name/PIN user picker in front of the app shell. See `steuerwelt/README.md`.
+- `steuerwelt-license-server/` — a small standalone Node/Express service that issues and validates device-bound license activations for the SteuerWelt app (Ed25519-signed certificates, `node:sqlite` for storage, no shared code with any other project here). Deployed and hosted separately from everything else in this repo. See `steuerwelt-license-server/README.md`.
+
+Like `omniroute/`, neither SteuerWelt sub-project is touched by the root `npm install`/`npm start`/`npm run dist` commands — each has its own install/start/dist scripts, run from within its own directory.
+
+**Standing rule — do not drop this in future sessions:** SteuerWelt is licensed, paid software distributed to Steuerberater customers. Every time license keys or copy protection come up for this project (the user asks about them, a license key is entered/tested, licensing behavior is changed, or a new installer/release is prepared), the device-bound online activation system must stay in place and be used — never silently skip, weaken, or remove it:
+- `steuerwelt-license-server/` issues and validates Ed25519-signed, device-bound activation certificates (see its README for the activate/validate/deactivate flow and seat limits).
+- `steuerwelt/license/` is the client side: `activation.js` orchestrates activation/renewal, `verify.js` checks certificates offline against `public-key.js`, `hardware-id.js` derives the device binding. `main.js` gates the app behind this before the renderer's app shell is shown.
+- `steuerwelt/license/public-key.js` currently holds a clearly-marked **dev/test key** — before any real customer installer is built, a fresh keypair must be generated on the license server (`npm run generate-keys`) and the real public key placed here; this must not be forgotten or reused across environments.
+- If asked to add features, refactor, or "clean up" this project, license/copy-protection code is in scope for improvement but never for removal, bypassing, or making optional — treat it as a hard requirement of the product, not an implementation detail.
+
 ## Commands
 
 ```bash

@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8" />
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; style-src 'self' 'unsafe-inline'; font-src 'self'; img-src 'self' data:;" />
+  <title>SteuerWelt</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+
+  <!-- Bildschirm 1: Lizenzaktivierung -->
+  <section id="screen-license" class="screen">
+    <div class="auth-card">
+      <span class="wordmark">SteuerWelt</span>
+      <p class="auth-lead">Bitte den Lizenzschlüssel eingeben, den ihr von eurem Anbieter erhalten habt.</p>
+      <label class="field-label" for="licenseKeyInput">Lizenzschlüssel</label>
+      <input id="licenseKeyInput" class="field-input mono" type="text" placeholder="STWL-XXXX-XXXX-XXXX-XXXX" autocomplete="off" spellcheck="false" />
+      <div id="licenseError" class="field-error" hidden></div>
+      <button id="activateBtn" class="btn-3d">Aktivieren</button>
+      <p class="auth-hint">Die Aktivierung bindet die Lizenz an dieses Gerät und benötigt einmalig eine Internetverbindung.</p>
+    </div>
+  </section>
+
+  <!-- Bildschirm 2: Benutzerkennung -->
+  <section id="screen-user" class="screen" hidden>
+    <div class="auth-card">
+      <span class="wordmark small">SteuerWelt</span>
+      <p class="auth-lead">Wer arbeitet gerade an diesem Rechner?</p>
+      <div id="userList" class="user-list"></div>
+      <button id="newUserBtn" class="btn-3d ghost">+ Neues Profil anlegen</button>
+    </div>
+  </section>
+
+  <!-- Bildschirm 3: Hauptanwendung -->
+  <div id="app-shell" class="screen app-shell" hidden>
+    <header class="topbar">
+      <span class="brand">SteuerWelt</span>
+      <nav id="moduleTabs" class="module-tabs"></nav>
+      <button id="userBadge" class="user-badge" title="Benutzer wechseln"></button>
+    </header>
+    <div class="app-body">
+      <aside class="mandanten-sidebar">
+        <div class="sidebar-head">
+          <input id="mandantSearch" class="field-input small" type="text" placeholder="Mandant suchen…" />
+        </div>
+        <div id="mandantenList" class="mandanten-list"></div>
+        <button id="addMandantBtn" class="btn-3d block">+ Neuer Mandant</button>
+      </aside>
+      <main id="content"></main>
+    </div>
+  </div>
+
+  <div id="modalRoot"></div>
+
+  <script src="renderer.js"></script>
+</body>
+</html>
