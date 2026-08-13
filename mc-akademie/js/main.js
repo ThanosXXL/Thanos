@@ -151,22 +151,12 @@
     }
     card.addEventListener('mousemove', handleMove);
     card.addEventListener('mouseleave', function () {
-      card.style.setProperty('--rx', '0deg');
-      card.style.setProperty('--ry', '0deg');
+      card.style.removeProperty('--rx');
+      card.style.removeProperty('--ry');
     });
   });
 
-  /* ---- Hero card subtle tilt toward cursor ---- */
-  var heroCard = document.getElementById('heroCard');
-  if (heroCard) {
-    document.addEventListener('mousemove', function (e) {
-      var w = window.innerWidth;
-      var h = window.innerHeight;
-      var rx = 6 - ((e.clientY / h) - 0.5) * 10;
-      var ry = -14 + ((e.clientX / w) - 0.5) * 14;
-      heroCard.style.transform = 'translateY(-50%) perspective(1200px) rotateX(' + rx.toFixed(2) + 'deg) rotateY(' + ry.toFixed(2) + 'deg)';
-    }, { passive: true });
-  }
+  /* Hero card tilt toward cursor is driven by the --px/--py vars (set above) via CSS. */
 
   /* ---- Contact form (client-side only, no backend) ---- */
   var form = document.getElementById('kontaktForm');

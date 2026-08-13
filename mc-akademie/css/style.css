@@ -121,7 +121,7 @@ body.cursor-active .cursor-glow { opacity: 1; }
 .site-header.scrolled {
   height: 140px;
 }
-.site-header.scrolled .brand-mark {
+.site-header.scrolled .brand-mark-wrap {
   width: 220px;
 }
 .site-header.scrolled::before {
@@ -136,14 +136,50 @@ body.cursor-active .cursor-glow { opacity: 1; }
   gap: 12px;
 }
 
-.brand-mark {
+.brand-mark-wrap {
+  position: relative;
+  display: inline-block;
+  overflow: hidden;
+  border-radius: 12px;
   width: 400px;
+  transition: width .35s var(--ease);
+  animation: logoFloat 6s ease-in-out infinite;
+}
+.brand-mark {
+  display: block;
+  width: 100%;
   height: auto;
-  transition: transform .5s var(--ease), width .35s var(--ease);
+  transition: transform .5s var(--ease);
 }
 .brand:hover .brand-mark { transform: rotate(-4deg) scale(1.06); }
 
-.brand-mark.large { width: 190px; margin-bottom: 18px; }
+.brand-mark-wrap::after {
+  content: "";
+  position: absolute;
+  top: -60%;
+  left: -60%;
+  width: 35%;
+  height: 220%;
+  background: linear-gradient(75deg, transparent 0%, rgba(255,255,255,.75) 50%, transparent 100%);
+  transform: rotate(20deg);
+  mix-blend-mode: screen;
+  pointer-events: none;
+  animation: logoShine 5.5s ease-in-out infinite;
+}
+
+@keyframes logoFloat {
+  0%, 100% { transform: translateY(0) rotate(0deg); }
+  50% { transform: translateY(-4px) rotate(-1.4deg); }
+}
+
+@keyframes logoShine {
+  0% { left: -60%; opacity: 0; }
+  6% { opacity: 1; }
+  26% { left: 140%; opacity: 0; }
+  100% { left: 140%; opacity: 0; }
+}
+
+.brand-mark-wrap.large { width: 190px; margin-bottom: 18px; }
 
 .nav-links {
   display: flex;
@@ -340,8 +376,17 @@ body.cursor-active .cursor-glow { opacity: 1; }
   color: #fff;
   background: linear-gradient(135deg, var(--red-light), var(--red) 60%, var(--red-dark));
   box-shadow: 0 16px 34px -12px rgba(214,31,44,.6), inset 0 1px 0 rgba(255,255,255,.35);
+  animation: ctaPulse 3.2s ease-in-out infinite;
 }
-.btn-primary:hover { transform: translateY(-3px); box-shadow: 0 22px 40px -12px rgba(214,31,44,.7), inset 0 1px 0 rgba(255,255,255,.4); }
+.btn-primary:hover {
+  animation-play-state: paused;
+  transform: translateY(-3px);
+  box-shadow: 0 22px 40px -12px rgba(214,31,44,.7), inset 0 1px 0 rgba(255,255,255,.4);
+}
+@keyframes ctaPulse {
+  0%, 100% { box-shadow: 0 16px 34px -12px rgba(214,31,44,.6), inset 0 1px 0 rgba(255,255,255,.35); }
+  50% { box-shadow: 0 20px 46px -10px rgba(214,31,44,.9), inset 0 1px 0 rgba(255,255,255,.5); }
+}
 
 .btn-ghost {
   color: var(--navy);
@@ -358,15 +403,15 @@ body.cursor-active .cursor-glow { opacity: 1; }
   position: absolute;
   right: 6%;
   top: 50%;
-  transform: translateY(-50%) perspective(1200px) rotateY(-14deg) rotateX(6deg);
+  transform: translateY(-50%) perspective(1200px) rotateY(calc(-14deg + var(--px, 0) * 6deg)) rotateX(calc(6deg + var(--py, 0) * -4deg));
   z-index: 2;
   width: 320px;
   animation: cardFloat 7s ease-in-out infinite;
   perspective: 1200px;
 }
 @keyframes cardFloat {
-  0%, 100% { transform: translateY(-50%) perspective(1200px) rotateY(-14deg) rotateX(6deg); }
-  50% { transform: translateY(calc(-50% - 16px)) perspective(1200px) rotateY(-10deg) rotateX(3deg); }
+  0%, 100% { transform: translateY(calc(-50% + var(--py, 0) * -6px)) perspective(1200px) rotateY(calc(-14deg + var(--px, 0) * 6deg)) rotateX(calc(6deg + var(--py, 0) * -4deg)); }
+  50% { transform: translateY(calc(-50% - 16px + var(--py, 0) * -6px)) perspective(1200px) rotateY(calc(-10deg + var(--px, 0) * 6deg)) rotateX(calc(3deg + var(--py, 0) * -4deg)); }
 }
 
 .hero-card-inner {
@@ -378,6 +423,18 @@ body.cursor-active .cursor-glow { opacity: 1; }
   backdrop-filter: blur(16px);
   box-shadow: var(--shadow-lift), inset 0 1px 0 rgba(255,255,255,.6);
   overflow: hidden;
+}
+.hero-card-inner::after {
+  content: "";
+  position: absolute;
+  top: -80%;
+  left: -70%;
+  width: 40%;
+  height: 260%;
+  background: linear-gradient(75deg, transparent 0%, rgba(255,255,255,.8) 50%, transparent 100%);
+  transform: rotate(20deg);
+  pointer-events: none;
+  animation: logoShine 7s ease-in-out infinite 1.5s;
 }
 .hero-card-glow {
   position: absolute;
@@ -489,10 +546,18 @@ body.cursor-active .cursor-glow { opacity: 1; }
   position: relative;
   border-radius: var(--radius);
   box-shadow: var(--shadow-lift);
-  transform: perspective(1000px) rotateX(var(--rx, 0deg)) rotateY(var(--ry, 0deg));
+  transform: perspective(1000px) rotateX(var(--rx, 4deg)) rotateY(var(--ry, -5deg));
   transition: transform .2s ease-out;
   overflow: hidden;
   aspect-ratio: 16/10.5;
+}
+.info-visual-inner::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(115deg, transparent 42%, rgba(255,255,255,.16) 50%, transparent 58%);
+  pointer-events: none;
+  z-index: 1;
 }
 .info-visual-inner img {
   width: 100%;
@@ -529,7 +594,7 @@ body.cursor-active .cursor-glow { opacity: 1; }
   text-align: center;
   min-width: 108px;
 }
-.stat-chip strong { display: block; font-family: 'Sora', sans-serif; font-size: 1.5rem; color: var(--red); font-weight: 800; }
+.stat-chip strong { display: block; font-family: 'Sora', sans-serif; font-size: 1.5rem; color: var(--red); font-weight: 800; white-space: nowrap; }
 .stat-chip span { font-size: .74rem; color: var(--ink-soft); font-weight: 600; }
 .stat-chip-a { left: -24px; bottom: -22px; }
 .stat-chip-b { right: -18px; top: -22px; }
@@ -566,7 +631,13 @@ body.cursor-active .cursor-glow { opacity: 1; }
     radial-gradient(900px 500px at 10% 0%, rgba(255,255,255,.12), transparent 55%),
     radial-gradient(700px 500px at 100% 100%, rgba(0,0,0,.25), transparent 60%),
     linear-gradient(150deg, #e2202d 0%, #9c141f 55%, #4a0910 120%);
+  background-size: 100% 100%, 100% 100%, 240% 240%;
+  animation: programmeGradientPan 16s ease-in-out infinite alternate;
   z-index: 0;
+}
+@keyframes programmeGradientPan {
+  0% { background-position: 0% 0%, 0% 0%, 0% 30%; }
+  100% { background-position: 0% 0%, 0% 0%, 100% 70%; }
 }
 .programme-bg::after {
   content: "";
@@ -591,11 +662,22 @@ body.cursor-active .cursor-glow { opacity: 1; }
   padding: 34px 32px;
   backdrop-filter: blur(10px);
   overflow: hidden;
-  transform: perspective(1000px) rotateX(var(--rx, 0deg)) rotateY(var(--ry, 0deg));
   transition: transform .2s ease-out, box-shadow .3s ease-out;
   box-shadow: 0 20px 44px -20px rgba(0,0,0,.4);
 }
+/* .reveal also sets `transform` on this same element for its slide-up animation;
+   these two higher-specificity rules fold the 3D tilt into that same property so
+   neither declaration silently wins over the other. */
+.prog-card.reveal { transform: perspective(1000px) rotateX(var(--rx, 3deg)) rotateY(var(--ry, -3deg)) translateY(36px); }
+.prog-card.reveal.in-view { transform: perspective(1000px) rotateX(var(--rx, 3deg)) rotateY(var(--ry, -3deg)) translateY(0); }
 .prog-card:hover { box-shadow: 0 30px 60px -20px rgba(0,0,0,.55); }
+.prog-card::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(115deg, transparent 45%, rgba(255,255,255,.14) 52%, transparent 60%);
+  pointer-events: none;
+}
 .prog-card::before {
   content: "";
   position: absolute;
@@ -809,9 +891,9 @@ body.cursor-active .cursor-glow { opacity: 1; }
 
 @media (max-width: 760px) {
   :root { --header-h: 92px; }
-  .brand-mark { width: 150px; }
+  .brand-mark-wrap { width: 150px; }
   .site-header.scrolled { height: 68px; }
-  .site-header.scrolled .brand-mark { width: 110px; }
+  .site-header.scrolled .brand-mark-wrap { width: 110px; }
   .nav-links {
     position: fixed;
     inset: 0;
