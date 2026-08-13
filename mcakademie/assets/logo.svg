@@ -1,0 +1,27 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 600 300" role="img" aria-labelledby="mcLogoTitle">
+  <title id="mcLogoTitle">M&amp;C Akademie Logo</title>
+
+  <!-- Schwarzes Schwung-Band (oben) -->
+  <path d="M 85,158
+           C 130,60 220,42 300,50
+           C 400,40 500,55 558,165
+           C 495,120 400,88 300,92
+           C 210,88 130,108 85,158 Z"
+        fill="#111111"/>
+
+  <!-- Rotes Schwung-Band (unten) -->
+  <path d="M 92,185
+           C 140,275 240,298 320,292
+           C 420,300 500,272 552,178
+           C 480,232 400,252 315,248
+           C 220,252 140,232 92,185 Z"
+        fill="#E2101B"/>
+
+  <!-- Wortmarke -->
+  <text x="300" y="150" text-anchor="middle" font-family="Arial Black, Arial, sans-serif" font-weight="900" font-size="52" fill="#111111" letter-spacing="1">
+    M&amp;C <tspan fill="#111111" font-style="italic">AKADEMIE</tspan>
+  </text>
+
+  <!-- Pfeil-Unterstreichung -->
+  <path d="M 235,182 L 430,182 L 415,168 M 430,182 L 415,196" fill="none" stroke="#111111" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/>
+</svg>
