@@ -8,6 +8,8 @@ Dozenten Dashboard is a cross-platform Electron desktop app for managing up to f
 
 This repository also hosts a second, unrelated project: `omniroute/` is a vendored snapshot of [OmniRoute](https://github.com/diegosouzapw/OmniRoute) (an AI gateway/router, Next.js + TypeScript monorepo), included as-is with its own `package.json`, tooling, and `CLAUDE.md`. It does not share dependencies, build config, or CI with the Dozenten Dashboard — the root `npm install`/`npm start`/`npm run dist` commands above only ever touch the Dozenten Dashboard files (`main.js`, `preload.js`, `renderer/`); nothing in `omniroute/` is packaged into its installers. Treat `omniroute/` as its own project — see `omniroute/CLAUDE.md` and `omniroute/VENDORED.md` for details and provenance. It is a one-time snapshot, not a live sync with upstream.
 
+A third, also unrelated project lives in `mc-akademie/`: a static marketing website (plain HTML/CSS/JS, no build step) for the M&C Akademie training company, unconnected to the Dozenten Dashboard or `omniroute/`. See `mc-akademie/CLAUDE.md` for its conventions — notably: **all communication and all code comments for this project are in German**, not just user-facing UI text.
+
 ## Commands
 
 ```bash
