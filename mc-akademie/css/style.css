@@ -595,6 +595,7 @@ body.cursor-active .cursor-glow { opacity: 1; }
   min-width: 108px;
 }
 .stat-chip strong { display: block; font-family: 'Sora', sans-serif; font-size: 1.5rem; color: var(--red); font-weight: 800; white-space: nowrap; }
+.stat-chip strong small { display: block; font-size: .44em; font-weight: 700; letter-spacing: .03em; text-transform: uppercase; color: var(--ink-soft); margin-bottom: 1px; }
 .stat-chip span { font-size: .74rem; color: var(--ink-soft); font-weight: 600; }
 .stat-chip-a { left: -24px; bottom: -22px; }
 .stat-chip-b { right: -18px; top: -22px; }
