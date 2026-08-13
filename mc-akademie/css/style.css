@@ -17,7 +17,7 @@
   --shadow-lift: 0 30px 80px -25px rgba(19, 27, 58, 0.45);
   --radius: 22px;
   --ease: cubic-bezier(.16, 1, .3, 1);
-  --header-h: 84px;
+  --header-h: 100px;
 }
 
 * { box-sizing: border-box; }
@@ -119,7 +119,10 @@ body.cursor-active .cursor-glow { opacity: 1; }
 }
 
 .site-header.scrolled {
-  height: 68px;
+  height: 76px;
+}
+.site-header.scrolled .brand-mark {
+  width: 118px;
 }
 .site-header.scrolled::before {
   background: rgba(255, 255, 255, 0.72);
@@ -134,9 +137,9 @@ body.cursor-active .cursor-glow { opacity: 1; }
 }
 
 .brand-mark {
-  width: 108px;
+  width: 168px;
   height: auto;
-  transition: transform .5s var(--ease);
+  transition: transform .5s var(--ease), width .35s var(--ease);
 }
 .brand:hover .brand-mark { transform: rotate(-4deg) scale(1.06); }
 
