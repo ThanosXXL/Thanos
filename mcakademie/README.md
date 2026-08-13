@@ -12,7 +12,7 @@ mcakademie/
 ├── index.html        # Einseitige Vorlage: Hero, Über uns, Angebote, Instagram, Kontakt
 ├── css/style.css      # Styling inkl. Farbvariablen
 ├── js/main.js         # Mobile-Menü + Jahr im Footer
-├── assets/logo.svg    # Nachgebautes Logo als Vektorgrafik
+├── assets/logo.png    # Original-Logo, freigestellt (transparenter Hintergrund)
 └── README.md
 ```
 
@@ -37,13 +37,12 @@ zentralen Stelle angepasst werden können:
 
 ## Logo
 
-`assets/logo.svg` ist eine per Hand nachgebaute Vektorversion des Original-Logos
-(schwarz-rotes Schwung-Oval mit dem Schriftzug „M&C AKADEMIE" und Pfeil-Unterstreichung),
-da im Repository keine Originaldatei vorlag – nur ein im Chat geteiltes Bild. Als
-SVG ist sie verlustfrei skalierbar und wird in Header, Hero und Über-uns-Bereich
-eingesetzt. Sobald die Original-Logodatei verfügbar ist, kann sie einfach unter
-`assets/logo.svg` (oder als `.png`, mit Anpassung der `<img src>`-Pfade) ersetzt
-werden.
+`assets/logo.png` ist das Original-Logo (schwarz-rotes Schwung-Oval mit dem
+Schriftzug „M&C AKADEMIE" und Pfeil-Unterstreichung), aus dem im Chat geteilten
+Bild freigestellt (Hintergrund entfernt, transparenter PNG, 1400×542px). Es wird
+in Header, Hero und Über-uns-Bereich eingesetzt. Zum Austauschen einfach
+`assets/logo.png` ersetzen (Dateiname/Pfad beibehalten oder die `<img src>`-Pfade
+in `index.html` anpassen).
 
 ## Anpassen
 
