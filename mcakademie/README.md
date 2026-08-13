@@ -9,7 +9,7 @@ Repo-Root für den Gesamtüberblick über dieses Repository.
 
 ```
 mcakademie/
-├── index.html        # Einseitige Vorlage: Hero, Über uns, Angebote, Instagram, Kontakt
+├── index.html        # Einseitige Vorlage: Logo/Hero, Über uns, Instagram
 ├── css/style.css      # Styling inkl. Farbvariablen
 ├── js/main.js         # Mobile-Menü + Jahr im Footer
 ├── assets/logo.png    # Original-Logo, freigestellt (transparenter Hintergrund)
@@ -40,14 +40,14 @@ zentralen Stelle angepasst werden können:
 `assets/logo.png` ist das Original-Logo (schwarz-rotes Schwung-Oval mit dem
 Schriftzug „M&C AKADEMIE" und Pfeil-Unterstreichung), aus dem im Chat geteilten
 Bild freigestellt (Hintergrund entfernt, transparenter PNG, 1400×542px). Es wird
-in Header, Hero und Über-uns-Bereich eingesetzt. Zum Austauschen einfach
-`assets/logo.png` ersetzen (Dateiname/Pfad beibehalten oder die `<img src>`-Pfade
+genau einmal, groß, im Hero-Bereich eingesetzt. Zum Austauschen einfach
+`assets/logo.png` ersetzen (Dateiname/Pfad beibehalten oder den `<img src>`-Pfad
 in `index.html` anpassen).
 
 ## Anpassen
 
-- **Texte/Inhalte**: Platzhaltertexte in `index.html` (Über uns, Angebote, Kontaktdaten)
-  durch echte Inhalte ersetzen.
+- **Texte/Inhalte**: Platzhaltertexte in `index.html` (Über uns) durch echte
+  Inhalte ersetzen.
 - **Instagram-Link**: aktuell `https://instagram.com/mcakademiedo` – bei Bedarf
-  in `index.html` (Hero, Instagram-Sektion, Footer) anpassen.
+  in `index.html` (Instagram-Sektion) anpassen.
 - **Farben**: nur die CSS-Variablen in `css/style.css` ändern, der Rest folgt automatisch.
