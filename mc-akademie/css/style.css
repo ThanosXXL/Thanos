@@ -134,22 +134,13 @@ body.cursor-active .cursor-glow { opacity: 1; }
 }
 
 .brand-mark {
-  width: 52px;
+  width: 108px;
   height: auto;
-  filter: drop-shadow(0 6px 14px rgba(214,31,44,.25));
   transition: transform .5s var(--ease);
 }
-.brand:hover .brand-mark { transform: rotate(-6deg) scale(1.06); }
+.brand:hover .brand-mark { transform: rotate(-4deg) scale(1.06); }
 
-.brand-mark.large { width: 90px; margin-bottom: 18px; }
-
-.brand-text {
-  font-family: 'Sora', sans-serif;
-  font-size: 1.15rem;
-  letter-spacing: .01em;
-  color: var(--navy);
-}
-.brand-text strong { font-weight: 800; }
+.brand-mark.large { width: 190px; margin-bottom: 18px; }
 
 .nav-links {
   display: flex;
