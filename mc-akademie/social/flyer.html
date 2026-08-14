@@ -1,0 +1,231 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<title>M&amp;C Akademie – Social-Media-Flyer</title>
+<link href="https://fonts.googleapis.com/css2?family=Sora:wght@400;600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --navy: #131b3a;
+    --navy-2: #1c2752;
+    --red: #d61f2c;
+    --red-light: #ff4757;
+    --red-dark: #7a0f1a;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body {
+    width: 1080px;
+    height: 1080px;
+    overflow: hidden;
+    font-family: 'Inter', sans-serif;
+  }
+  .flyer {
+    position: relative;
+    width: 1080px;
+    height: 1080px;
+    background:
+      radial-gradient(900px 700px at 12% 6%, rgba(255,255,255,.14), transparent 55%),
+      radial-gradient(800px 700px at 100% 105%, rgba(0,0,0,.35), transparent 60%),
+      linear-gradient(150deg, #e2202d 0%, #9c141f 48%, #3d0a10 105%);
+    overflow: hidden;
+  }
+
+  .grid {
+    position: absolute; inset: 0;
+    background-image: linear-gradient(rgba(255,255,255,.055) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,.055) 1px, transparent 1px);
+    background-size: 54px 54px;
+  }
+
+  .orb {
+    position: absolute;
+    border-radius: 50%;
+    filter: blur(1px);
+    opacity: .5;
+  }
+  .orb-a { width: 340px; height: 340px; left: -90px; top: -90px; background: radial-gradient(circle at 30% 30%, #fff, #ffb1b8 55%, transparent 78%); }
+  .orb-b { width: 260px; height: 260px; right: -70px; top: 62%; background: radial-gradient(circle at 30% 30%, #cfd6ff, #4d5aa8 65%, transparent 80%); opacity: .35; }
+  .orb-c { width: 200px; height: 200px; right: 8%; top: -60px; background: radial-gradient(circle at 30% 30%, #ff8b95, #7a0f1a 70%, transparent 82%); opacity: .4; }
+
+  .sheen {
+    position: absolute;
+    top: -20%;
+    left: -30%;
+    width: 55%;
+    height: 150%;
+    background: linear-gradient(75deg, transparent 0%, rgba(255,255,255,.16) 50%, transparent 100%);
+    transform: rotate(12deg);
+    pointer-events: none;
+  }
+
+  .content {
+    position: relative;
+    z-index: 2;
+    width: 100%;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 56px 90px 48px;
+  }
+
+  .logo-card {
+    position: relative;
+    background: linear-gradient(155deg, rgba(255,255,255,.95), rgba(255,255,255,.82));
+    border-radius: 28px;
+    padding: 28px 46px;
+    box-shadow: 0 30px 70px -20px rgba(0,0,0,.55), inset 0 1px 0 rgba(255,255,255,.8);
+  }
+  .logo-card img { display: block; width: 320px; height: auto; }
+
+  .eyebrow {
+    margin-top: 34px;
+    font-family: 'Sora', sans-serif;
+    font-weight: 700;
+    font-size: 21px;
+    letter-spacing: .16em;
+    text-transform: uppercase;
+    color: #ffd7d9;
+  }
+
+  .headline {
+    margin-top: 18px;
+    font-family: 'Sora', sans-serif;
+    font-weight: 800;
+    font-size: 52px;
+    line-height: 1.12;
+    text-align: center;
+    color: #fff;
+    text-shadow: 0 18px 40px rgba(0,0,0,.35);
+    max-width: 920px;
+  }
+
+  .subline {
+    margin-top: 20px;
+    font-size: 25px;
+    font-weight: 600;
+    color: rgba(255,255,255,.92);
+    text-align: center;
+    max-width: 760px;
+    line-height: 1.5;
+  }
+
+  .badges {
+    margin-top: 38px;
+    display: flex;
+    gap: 22px;
+  }
+  .badge {
+    position: relative;
+    overflow: hidden;
+    background: linear-gradient(160deg, rgba(255,255,255,.16), rgba(255,255,255,.05));
+    border: 1px solid rgba(255,255,255,.28);
+    border-radius: 20px;
+    padding: 22px 30px;
+    text-align: center;
+    min-width: 190px;
+    box-shadow: 0 18px 40px -16px rgba(0,0,0,.45);
+  }
+  .badge::after {
+    content: "";
+    position: absolute; inset: 0;
+    background: linear-gradient(115deg, transparent 45%, rgba(255,255,255,.16) 52%, transparent 60%);
+    pointer-events: none;
+  }
+  .badge strong {
+    position: relative;
+    z-index: 1;
+    display: block;
+    font-family: 'Sora', sans-serif;
+    font-weight: 800;
+    font-size: 40px;
+    color: #fff;
+  }
+  .badge span {
+    position: relative;
+    z-index: 1;
+    display: block;
+    margin-top: 4px;
+    font-size: 17px;
+    font-weight: 600;
+    color: rgba(255,255,255,.85);
+  }
+
+  .spacer { flex: 1; }
+
+  .cta-row {
+    display: flex;
+    align-items: center;
+    gap: 22px;
+  }
+  .cta-btn {
+    position: relative;
+    overflow: hidden;
+    display: inline-flex;
+    align-items: center;
+    padding: 22px 48px;
+    border-radius: 100px;
+    background: linear-gradient(135deg, #fff, #ffe9ea);
+    color: var(--red-dark);
+    font-family: 'Sora', sans-serif;
+    font-weight: 800;
+    font-size: 30px;
+    box-shadow: 0 20px 44px -14px rgba(0,0,0,.5), inset 0 1px 0 rgba(255,255,255,.9);
+  }
+  .cta-btn::after {
+    content: "";
+    position: absolute; inset: 0;
+    background: linear-gradient(115deg, transparent 42%, rgba(255,255,255,.55) 50%, transparent 58%);
+    pointer-events: none;
+  }
+  .cta-btn span { position: relative; z-index: 1; }
+
+  .contact {
+    margin-top: 30px;
+    font-size: 24px;
+    font-weight: 700;
+    color: #fff;
+    letter-spacing: .01em;
+  }
+  .contact span {
+    display: block;
+    margin-top: 6px;
+    font-size: 18px;
+    font-weight: 500;
+    color: rgba(255,255,255,.75);
+  }
+</style>
+</head>
+<body>
+  <div class="flyer">
+    <div class="grid"></div>
+    <span class="orb orb-a"></span>
+    <span class="orb orb-b"></span>
+    <span class="orb orb-c"></span>
+    <div class="sheen"></div>
+
+    <div class="content">
+      <div class="logo-card">
+        <img src="../assets/logo.png" alt="M&C Akademie">
+      </div>
+
+      <p class="eyebrow">M&amp;C Holding GmbH &middot; Weiterbildungsinstitut</p>
+      <h1 class="headline">Schulungen &middot; Unterweisungen &middot; Sachkunde</h1>
+      <p class="subline">Praxisnah, zertifiziert und flexibel als Präsenz-, Online- oder Hybridformat.</p>
+
+      <div class="badges">
+        <div class="badge"><strong>Seit 2019</strong><span>Erfahrung</span></div>
+        <div class="badge"><strong>98%</strong><span>Zufriedenheit</span></div>
+        <div class="badge"><strong>250+</strong><span>Schulungen p.a.</span></div>
+        <div class="badge"><strong>100%</strong><span>Zertifiziert</span></div>
+      </div>
+
+      <div class="spacer"></div>
+
+      <div class="cta-row">
+        <div class="cta-btn"><span>Jetzt anfragen</span></div>
+      </div>
+      <p class="contact">Info@mc-akademie.com<span>Im II. Westfeld 7 &middot; 44388 Dortmund</span></p>
+    </div>
+  </div>
+</body>
+</html>

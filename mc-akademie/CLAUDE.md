@@ -49,6 +49,13 @@ Das gilt dauerhaft für alle zukünftigen Sessions, nicht nur für die aktuelle.
   Keyframes referenzieren, statt einen separaten `mousemove`-Handler mit
   eigenem Inline-`transform` zu schreiben.
 
+## Lieferung von Dateien — wichtig
+
+**Jede erzeugte Datei (Video, Bild, Flyer, Audio, …) muss dem Nutzer aktiv
+über das Datei-Versand-Tool geschickt werden, nicht nur lokal abgelegt
+werden.** Nur so erscheint der Download-Button im Chat. Das gilt dauerhaft
+für alle zukünftigen Sessions.
+
 ## Deployment
 
 Der Branch `gh-pages` enthält einen automatisch generierten Snapshot dieses
