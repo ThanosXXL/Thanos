@@ -46,8 +46,32 @@
   const KINO_TOKENS = ['vod', 'movie', 'movies', 'film', 'filme', 'kino', 'cinema'];
   const SERIEN_TOKENS = ['serie', 'serien', 'series', 'show', 'shows'];
 
+  // Well-known free-to-air channel brands, used as a last-resort country
+  // match for playlists whose group-title/tvg-language carries no country
+  // marker at all (common in real-world, inconsistently labeled playlists).
+  const KNOWN_DE_CHANNELS = [
+    'das erste', 'ard', 'zdfneo', 'zdf', 'rtlzwei', 'rtl2', 'rtl', 'sat.1', 'sat1',
+    'prosieben', 'pro7', 'vox', 'kabel eins', 'kabel1', '3sat', 'phoenix',
+    'tagesschau24', 'welt', 'n-tv', 'ntv', 'sport1', 'sport 1', 'arte',
+    'wdr', 'ndr', 'mdr', 'hr', 'rbb', 'swr', 'br', 'dmax', 'tele 5', 'tele5',
+    'sixx', 'nitro', 'eurosport',
+  ];
+  const KNOWN_GR_CHANNELS = [
+    'ert news', 'ertnews', 'ert1', 'ert2', 'ert3', 'ert', 'ant1', 'mega',
+    'skai', 'star channel', 'star', 'alpha tv', 'alpha', 'open tv', 'open',
+    'epsilon', 'action24', 'action 24', 'kontra channel', 'kontra',
+  ];
+
   function hasToken(haystack, tokens) {
     return tokens.some((token) => new RegExp(`\\b${token}\\b`, 'i').test(haystack));
+  }
+
+  function normalizeChannelName(name) {
+    return name
+      .toLowerCase()
+      .replace(/\b(hd|fhd|uhd|4k|sd|backup|geo|multi)\b/g, ' ')
+      .replace(/[^a-z0-9äöüß.]+/g, ' ')
+      .trim();
   }
 
   function classifyCountry(channel) {
@@ -58,6 +82,11 @@
     const nameHaystack = channel.name;
     if (/🇩🇪/.test(nameHaystack) || hasToken(nameHaystack, DE_TOKENS)) return 'DE';
     if (/🇬🇷/.test(nameHaystack) || hasToken(nameHaystack, GR_TOKENS)) return 'GR';
+    // Last resort: recognize well-known channel brands even without any
+    // country marker in the playlist (e.g. group-title="LIVE" with no DE/GR tag).
+    const normalizedName = normalizeChannelName(channel.name);
+    if (KNOWN_DE_CHANNELS.some((brand) => normalizedName.startsWith(brand))) return 'DE';
+    if (KNOWN_GR_CHANNELS.some((brand) => normalizedName.startsWith(brand))) return 'GR';
     return null;
   }
 
