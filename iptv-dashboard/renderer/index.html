@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8" />
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; img-src 'self' https: http: data:; media-src 'self' https: http: blob:; connect-src 'self' https: http: blob:; script-src 'self'; style-src 'self' 'unsafe-inline';" />
+  <title>DE/GR TV Dashboard</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <header class="app-header">
+    <div class="brand">
+      <span class="brand-badge">TV</span>
+      <span class="brand-name">DE&nbsp;/&nbsp;GR Dashboard</span>
+    </div>
+    <nav class="app-nav" id="app-nav"></nav>
+  </header>
+
+  <main id="app" class="app-content"></main>
+
+  <script src="vendor/hls.min.js"></script>
+  <script src="m3u.js"></script>
+  <script src="renderer.js"></script>
+</body>
+</html>

@@ -8,6 +8,8 @@ Dozenten Dashboard is a cross-platform Electron desktop app for managing up to f
 
 This repository also hosts a second, unrelated project: `omniroute/` is a vendored snapshot of [OmniRoute](https://github.com/diegosouzapw/OmniRoute) (an AI gateway/router, Next.js + TypeScript monorepo), included as-is with its own `package.json`, tooling, and `CLAUDE.md`. It does not share dependencies, build config, or CI with the Dozenten Dashboard — the root `npm install`/`npm start`/`npm run dist` commands above only ever touch the Dozenten Dashboard files (`main.js`, `preload.js`, `renderer/`); nothing in `omniroute/` is packaged into its installers. Treat `omniroute/` as its own project — see `omniroute/CLAUDE.md` and `omniroute/VENDORED.md` for details and provenance. It is a one-time snapshot, not a live sync with upstream.
 
+A third, also unrelated project lives in `iptv-dashboard/`: a standalone Electron app ("DE/GR TV Dashboard") for browsing and playing channels from a user-supplied M3U playlist, filtered to Germany/Greece and grouped into Live TV, Serien, and Kino/Filme. It has its own `package.json`, `main.js`, `preload.js`, and `renderer/`, and its own `npm install`/`npm start`/`npm run dist` (run from inside `iptv-dashboard/`). See `iptv-dashboard/README.md` for details.
+
 ## Commands
 
 ```bash

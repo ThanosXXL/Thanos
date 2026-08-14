@@ -1,0 +1,46 @@
+{
+  "name": "de-gr-iptv-dashboard",
+  "version": "1.0.0",
+  "description": "Desktop-Dashboard zur Anzeige und Wiedergabe von Sendern (Deutschland & Griechenland) aus einer M3U-Playlist",
+  "main": "main.js",
+  "author": "",
+  "license": "MIT",
+  "scripts": {
+    "start": "electron .",
+    "dist": "electron-builder"
+  },
+  "devDependencies": {
+    "electron": "^31.0.0",
+    "electron-builder": "^24.13.3"
+  },
+  "dependencies": {
+    "hls.js": "^1.5.15"
+  },
+  "build": {
+    "appId": "com.degr.iptvdashboard",
+    "productName": "DE-GR TV Dashboard",
+    "files": [
+      "main.js",
+      "preload.js",
+      "renderer/**/*",
+      "package.json"
+    ],
+    "directories": {
+      "output": "dist"
+    },
+    "win": {
+      "target": "nsis"
+    },
+    "mac": {
+      "target": "dmg"
+    },
+    "linux": {
+      "target": "AppImage"
+    },
+    "publish": [
+      {
+        "provider": "github"
+      }
+    ]
+  }
+}
