@@ -16,6 +16,7 @@
     selectedChannel: null,
     playerReturnScreen: 'list',
     errorMessage: '',
+    isDemo: false,
   };
 
   const PLAYBACK_STALL_TIMEOUT_MS = 15000;
@@ -235,7 +236,17 @@
 
     state.channels = channels;
     state.m3uUrl = url;
+    state.isDemo = false;
     persistSettings();
+    state.screen = 'country';
+    render();
+  }
+
+  function startDemo() {
+    state.errorMessage = '';
+    state.channels = window.M3U.parseAndClassify(window.DEMO_M3U);
+    state.m3uUrl = '';
+    state.isDemo = true;
     state.screen = 'country';
     render();
   }
@@ -294,6 +305,7 @@
     state.selectedCategory = null;
     state.selectedChannel = null;
     state.errorMessage = '';
+    state.isDemo = false;
     state.screen = 'input';
     render();
   }
@@ -359,6 +371,18 @@
     );
 
     screen.appendChild(card);
+
+    const demoCard = el('div', { className: 'glass-card demo-card' }, [
+      el('div', { className: 'demo-divider-label', text: 'oder' }),
+      el('p', { className: 'field-label', text: 'Ohne eigenen Link testen' }),
+      button('▶ Demo-Version starten', 'btn btn-ghost btn-demo', startDemo),
+      el('p', {
+        className: 'hint-text',
+        text: 'Zeigt die Länder-/Kategorie-Navigation sofort mit echten Sendernamen aus Deutschland (Das Erste, ZDF, RTL, …) und Griechenland (ERT1, ANT1, MEGA, …). Da hier kein eigener Zugang hinterlegt ist, läuft im Player ein neutraler Test-Stream statt des echten Live-Signals.',
+      }),
+    ]);
+    screen.appendChild(demoCard);
+
     input.focus();
     return screen;
   }
@@ -550,6 +574,14 @@
     const screen = el('div', { className: 'screen player-wrap' });
     screen.appendChild(el('div', { className: 'breadcrumbs', text: breadcrumbText }));
     screen.appendChild(el('div', { className: 'player-title', text: channel.name }));
+    if (state.isDemo) {
+      screen.appendChild(
+        el('div', {
+          className: 'demo-note',
+          text: 'Demo-Modus: neutraler Test-Stream statt des echten Live-Signals. Für echtes Live-TV eigenen M3U-Link verwenden.',
+        })
+      );
+    }
 
     const frame = el('div', { className: 'player-frame' });
     const video = document.createElement('video');
@@ -568,11 +600,14 @@
   function renderNav() {
     const nav = document.getElementById('app-nav');
     nav.textContent = '';
+    if (state.isDemo && state.channels.length > 0) {
+      nav.appendChild(el('span', { className: 'demo-badge', text: '🧪 Demo-Modus' }));
+    }
     if (state.screen === 'category' || state.screen === 'list' || state.screen === 'favorites' || state.screen === 'player') {
       nav.appendChild(button('← Zurück', 'btn btn-ghost', handleBack));
     }
     if (state.channels.length > 0) {
-      nav.appendChild(button('M3U ändern', 'btn btn-ghost', changeM3U));
+      nav.appendChild(button(state.isDemo ? 'Eigenen Link nutzen' : 'M3U ändern', 'btn btn-ghost', changeM3U));
     }
   }
 

@@ -27,10 +27,26 @@ zugeordnet (Stichwort-Erkennung, z. B. `DE`, `Deutschland`, `GR`,
 unterscheiden sich in ihrer Benennung – bei Bedarf lässt sich die Zuordnung
 in `renderer/m3u.js` anpassen.
 
+## Demo-Modus
+
+Auf dem Start-Bildschirm steht neben der M3U-Eingabe ein Button **„▶ Demo-Version
+starten“** zur Verfügung. Er lädt sofort einen eingebauten Beispiel-Datensatz mit
+echten deutschen (Das Erste, ZDF, RTL, SAT.1, ProSieben, VOX, kabel eins, RTLZWEI,
+ZDFneo, 3sat, Phoenix, tagesschau24) und griechischen (ERT1, ERT2, ERT3, ERT NEWS,
+ANT1, MEGA, SKAI, STAR Channel, ALPHA TV, OPEN TV) Sendernamen – ganz ohne eigenen
+Link, sofort nutzbar. Die App kann keine echten Live-Signale dieser Sender
+mitliefern (das wären unautorisierte Streams); im Player läuft daher ein neutraler,
+öffentlich bereitgestellter HLS-Test-Stream (derselbe, den auch die hls.js-Doku als
+Beispiel verwendet). Ein gut sichtbarer „Demo-Modus“-Hinweis in der Kopfzeile und im
+Player macht das jederzeit klar. Über „Eigenen Link nutzen“ kommt man zurück zur
+M3U-Eingabe für echtes Live-TV.
+
 ## Hinweis
 
 Es wird ausschließlich die vom Nutzer eingegebene, rechtmäßig bezogene
-M3U-Playlist verwendet. Die App liefert keine eigenen Sender oder Links mit.
+M3U-Playlist verwendet. Die App liefert keine eigenen Sender oder Links mit
+(der Demo-Modus ist die einzige Ausnahme und nutzt bewusst nur einen
+neutralen Test-Stream, keine echten Sendersignale).
 
 ## Befehle
 
@@ -52,6 +68,7 @@ npm run dist     # Installer nach dist/ bauen (electron-builder)
   `fetchM3U`) via `contextBridge`; `contextIsolation: true`, `nodeIntegration: false`.
 - **`renderer/`** – statisches UI (HTML/CSS/Vanilla JS, kein Build-Schritt).
   - `m3u.js` – M3U-Parser und Land-/Kategorie-Klassifizierung.
-  - `renderer.js` – State-Machine (`input → loading → country → category → list → player`),
-    rendert das UI bei jeder Zustandsänderung neu.
+  - `demo-data.js` – eingebauter Beispiel-Datensatz für den Demo-Modus (siehe oben).
+  - `renderer.js` – State-Machine (`input → loading → country → category → list →
+    favorites → player`), rendert das UI bei jeder Zustandsänderung neu.
   - `vendor/hls.min.js` – gebündelte hls.js-Bibliothek für HLS-Wiedergabe im Chromium-Player.
