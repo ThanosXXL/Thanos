@@ -61,7 +61,7 @@
     background: linear-gradient(75deg, transparent 0%, rgba(255,255,255,.16) 50%, transparent 100%);
     transform: rotate(12deg);
     pointer-events: none;
-    animation: sheenSweep 6s ease-in-out infinite;
+    animation: sheenSweep 8s ease-in-out infinite;
   }
   @keyframes sheenSweep {
     0% { left: -60%; }
@@ -84,12 +84,18 @@
     display: flex;
     justify-content: center;
     width: 100%;
+    perspective: 900px;
   }
   .logo-card img {
     display: block;
     width: 620px;
     height: auto;
     filter: drop-shadow(0 18px 34px rgba(0,0,0,.45)) drop-shadow(0 2px 0 rgba(255,255,255,.35));
+    animation: logoTilt3d 8s ease-in-out infinite;
+  }
+  @keyframes logoTilt3d {
+    0%, 100% { transform: rotateY(-7deg) rotateX(2deg); }
+    50% { transform: rotateY(7deg) rotateX(-2deg); }
   }
 
   .eyebrow {
@@ -128,7 +134,7 @@
     transform: rotate(14deg);
     mix-blend-mode: overlay;
     pointer-events: none;
-    animation: sheenSweep 6s ease-in-out infinite 1.2s;
+    animation: sheenSweep 8s ease-in-out infinite 1.2s;
   }
 
   .subline {
@@ -145,6 +151,7 @@
     margin-top: 38px;
     display: flex;
     gap: 22px;
+    perspective: 900px;
   }
   .badge {
     position: relative;
@@ -156,7 +163,11 @@
     text-align: center;
     min-width: 190px;
     box-shadow: 0 18px 40px -16px rgba(0,0,0,.45);
+    transform: rotateX(6deg) rotateY(-5deg);
   }
+  .badge:nth-child(2) { transform: rotateX(6deg) rotateY(-2deg); }
+  .badge:nth-child(3) { transform: rotateX(6deg) rotateY(2deg); }
+  .badge:nth-child(4) { transform: rotateX(6deg) rotateY(5deg); }
   .badge::after {
     content: "";
     position: absolute; inset: 0;
@@ -202,7 +213,7 @@
     font-weight: 800;
     font-size: 30px;
     box-shadow: 0 20px 44px -14px rgba(0,0,0,.5), inset 0 1px 0 rgba(255,255,255,.9);
-    animation: ctaGlow 3.2s ease-in-out infinite;
+    animation: ctaGlow 4s ease-in-out infinite;
   }
   .cta-btn::after {
     content: "";
