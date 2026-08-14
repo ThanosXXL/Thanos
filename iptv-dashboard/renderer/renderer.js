@@ -6,6 +6,16 @@
   const DIRECT_FILE_RE = /\.(mp4|mkv|avi|mov|webm|m4v)(\?|#|$)/i;
   const MAX_HLS_NETWORK_RETRIES = 2;
 
+  // Community-maintained playlists of channels their broadcasters have made
+  // publicly available (iptv-org only lists streams "intentionally made
+  // publicly by the copyright holders", with a takedown process for the
+  // rest). Each file is already scoped to one country, so we tag the
+  // country directly instead of relying on group-title guesswork.
+  const PUBLIC_PLAYLISTS = [
+    { country: 'DE', url: 'https://iptv-org.github.io/iptv/countries/de.m3u' },
+    { country: 'GR', url: 'https://iptv-org.github.io/iptv/countries/gr.m3u' },
+  ];
+
   const state = {
     m3uUrl: '',
     channels: [],
@@ -17,6 +27,7 @@
     playerReturnScreen: 'list',
     errorMessage: '',
     isDemo: false,
+    isPublicSource: false,
   };
 
   const PLAYBACK_STALL_TIMEOUT_MS = 15000;
@@ -237,6 +248,7 @@
     state.channels = channels;
     state.m3uUrl = url;
     state.isDemo = false;
+    state.isPublicSource = false;
     persistSettings();
     state.screen = 'country';
     render();
@@ -247,11 +259,66 @@
     state.channels = window.M3U.parseAndClassify(window.DEMO_M3U);
     state.m3uUrl = '';
     state.isDemo = true;
+    state.isPublicSource = false;
+    state.screen = 'country';
+    render();
+  }
+
+  // Loads the two community-maintained, country-scoped public playlists
+  // (see PUBLIC_PLAYLISTS) so the app has real, working channels without
+  // requiring the user's own M3U link. Each file is fetched independently
+  // so one country failing (e.g. a network hiccup) doesn't block the other.
+  async function loadPublicChannels() {
+    state.errorMessage = '';
+    state.screen = 'loading';
+    render();
+
+    const outcomes = await Promise.all(
+      PUBLIC_PLAYLISTS.map(async (source) => {
+        const result = await window.iptvAPI.fetchM3U(source.url);
+        return { ...source, result };
+      })
+    );
+
+    const channels = [];
+    const failedCountries = [];
+    for (const { country, result } of outcomes) {
+      if (!result.ok || !/#EXTM3U|#EXTINF/i.test(result.text)) {
+        failedCountries.push(COUNTRY_LABELS[country]);
+        continue;
+      }
+      let parsed = [];
+      try {
+        parsed = window.M3U.parseM3U(result.text).filter((c) => c.url);
+      } catch {
+        parsed = [];
+      }
+      parsed.forEach((channel) => {
+        channels.push({ ...channel, country, category: window.M3U.classifyCategory(channel) });
+      });
+    }
+
+    if (channels.length === 0) {
+      state.errorMessage =
+        'Die öffentlichen Sender konnten nicht geladen werden (kein Internetzugang oder die Quelle ist gerade nicht erreichbar). Bitte später erneut versuchen oder einen eigenen M3U-Link nutzen.';
+      state.screen = 'input';
+      render();
+      return;
+    }
+
+    state.channels = channels;
+    state.m3uUrl = '';
+    state.isDemo = false;
+    state.isPublicSource = true;
+    if (failedCountries.length > 0) {
+      state.errorMessage = `Hinweis: ${failedCountries.join(', ')} konnte gerade nicht geladen werden.`;
+    }
     state.screen = 'country';
     render();
   }
 
   function selectCountry(code) {
+    state.errorMessage = '';
     state.selectedCountry = code;
     state.screen = 'category';
     render();
@@ -306,6 +373,7 @@
     state.selectedChannel = null;
     state.errorMessage = '';
     state.isDemo = false;
+    state.isPublicSource = false;
     state.screen = 'input';
     render();
   }
@@ -340,11 +408,26 @@
     screen.appendChild(
       el('p', {
         className: 'screen-subtitle',
-        text: 'Gib den Link zu deiner M3U-Playlist ein, um deutsche und griechische Sender zu durchsuchen und live wiederzugeben.',
+        text: 'Sender aus Deutschland und Griechenland durchsuchen und wiedergeben – mit eigenem Link oder direkt kostenlos.',
       })
     );
 
+    if (state.errorMessage) {
+      screen.appendChild(el('div', { className: 'error-box error-box-standalone', text: state.errorMessage }));
+    }
+
+    const publicCard = el('div', { className: 'glass-card public-card' }, [
+      el('p', { className: 'field-label', text: 'Kein eigener Link vorhanden?' }),
+      button('📡 Kostenlose Sender laden (DE + GR)', 'btn btn-primary btn-public', loadPublicChannels),
+      el('p', {
+        className: 'hint-text',
+        text: 'Lädt echte, frei empfangbare Live-Sender aus Deutschland und Griechenland – kuratiert vom Community-Projekt iptv-org, das nur Streams listet, die von den Sendern selbst öffentlich bereitgestellt werden. Enthält Live TV; Serien/Kino sind über diese Quelle nicht verfügbar.',
+      }),
+    ]);
+    screen.appendChild(publicCard);
+
     const card = el('div', { className: 'glass-card' });
+    card.appendChild(el('div', { className: 'demo-divider-label', text: 'oder eigenen Link nutzen' }));
     card.appendChild(el('label', { className: 'field-label', text: 'M3U Playlist-Link', attrs: { for: 'm3u-url' } }));
 
     const input = document.createElement('input');
@@ -358,11 +441,7 @@
     });
     card.appendChild(input);
 
-    if (state.errorMessage) {
-      card.appendChild(el('div', { className: 'error-box', text: state.errorMessage }));
-    }
-
-    card.appendChild(button('Sender laden', 'btn btn-primary', () => submitM3U(input.value)));
+    card.appendChild(button('Sender laden', 'btn btn-ghost', () => submitM3U(input.value)));
     card.appendChild(
       el('p', {
         className: 'hint-text',
@@ -372,18 +451,10 @@
 
     screen.appendChild(card);
 
-    const demoCard = el('div', { className: 'glass-card demo-card' }, [
-      el('div', { className: 'demo-divider-label', text: 'oder' }),
-      el('p', { className: 'field-label', text: 'Ohne eigenen Link testen' }),
-      button('▶ Demo-Version starten', 'btn btn-ghost btn-demo', startDemo),
-      el('p', {
-        className: 'hint-text',
-        text: 'Zeigt die Länder-/Kategorie-Navigation sofort mit echten Sendernamen aus Deutschland (Das Erste, ZDF, RTL, …) und Griechenland (ERT1, ANT1, MEGA, …). Da hier kein eigener Zugang hinterlegt ist, läuft im Player ein neutraler Test-Stream statt des echten Live-Signals.',
-      }),
-    ]);
-    screen.appendChild(demoCard);
+    screen.appendChild(
+      button('Nur Oberfläche testen (Test-Video, kein echter Sender)', 'btn btn-ghost btn-demo-link', startDemo)
+    );
 
-    input.focus();
     return screen;
   }
 
@@ -582,6 +653,14 @@
         })
       );
     }
+    if (state.isPublicSource) {
+      screen.appendChild(
+        el('div', {
+          className: 'public-note',
+          text: 'Kostenloser öffentlicher Stream (Quelle: iptv-org). Verfügbarkeit/Qualität hängt vom jeweiligen Sender ab.',
+        })
+      );
+    }
 
     const frame = el('div', { className: 'player-frame' });
     const video = document.createElement('video');
@@ -603,11 +682,16 @@
     if (state.isDemo && state.channels.length > 0) {
       nav.appendChild(el('span', { className: 'demo-badge', text: '🧪 Demo-Modus' }));
     }
+    if (state.isPublicSource && state.channels.length > 0) {
+      nav.appendChild(el('span', { className: 'public-badge', text: '📡 Kostenlose Sender' }));
+    }
     if (state.screen === 'category' || state.screen === 'list' || state.screen === 'favorites' || state.screen === 'player') {
       nav.appendChild(button('← Zurück', 'btn btn-ghost', handleBack));
     }
     if (state.channels.length > 0) {
-      nav.appendChild(button(state.isDemo ? 'Eigenen Link nutzen' : 'M3U ändern', 'btn btn-ghost', changeM3U));
+      nav.appendChild(
+        button(state.isDemo || state.isPublicSource ? 'Eigenen Link nutzen' : 'M3U ändern', 'btn btn-ghost', changeM3U)
+      );
     }
   }
 

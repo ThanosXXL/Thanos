@@ -108,5 +108,5 @@
       .filter((channel) => channel.country === 'DE' || channel.country === 'GR');
   }
 
-  global.M3U = { parseM3U, parseAndClassify };
+  global.M3U = { parseM3U, parseAndClassify, classifyCategory };
 })(window);

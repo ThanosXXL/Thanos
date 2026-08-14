@@ -10,8 +10,10 @@ in der Root-`CLAUDE.md`.
 
 ## Ablauf
 
-1. **M3U-Link eingeben** – eine beliebige, selbst bezogene M3U-Playlist-URL. Die zuletzt
-   verwendete Playlist wird gespeichert und beim nächsten Start automatisch neu geladen.
+1. **Sender laden** – entweder mit einem Klick auf **„📡 Kostenlose Sender laden (DE + GR)“**
+   (kein eigener Link nötig, siehe unten) oder über einen eigenen M3U-Playlist-Link. Die
+   zuletzt verwendete eigene Playlist wird gespeichert und beim nächsten Start automatisch
+   neu geladen.
 2. **Land wählen** – Deutschland oder Griechenland (oder direkt zu den ★ Favoriten springen).
 3. **Kategorie wählen** – Live TV, Serien oder Kino/Filme.
 4. **Sender wählen** – bei mehr als 8 Sendern steht ein Suchfeld zur Verfügung; jeder Sender
@@ -19,6 +21,19 @@ in der Root-`CLAUDE.md`.
    hls.js, mit automatischem Fallback auf native Wiedergabe, Netzwerk-Retry und einer
    sichtbaren, wiederholbaren Fehlermeldung bei nicht erreichbaren oder nicht antwortenden
    Sendern).
+
+## Kostenlose Sender ohne eigenen Link
+
+Der Button **„📡 Kostenlose Sender laden (DE + GR)“** auf dem Start-Bildschirm lädt zwei
+länderspezifische Playlists des Community-Projekts [iptv-org/iptv](https://github.com/iptv-org/iptv)
+(`countries/de.m3u` und `countries/gr.m3u`). Laut eigener Projekt-Policy listet iptv-org
+ausschließlich Stream-Links, die "von den Rechteinhabern absichtlich öffentlich gemacht
+wurden", mit einem Takedown-Prozess für alles andere. Da jede Datei bereits nur ein Land
+enthält, wird das Land direkt übernommen (kein Rätselraten anhand von `group-title`) – nur
+die Kategorie (Live/Serien/Kino) wird weiter automatisch erkannt. Diese Quelle enthält in
+der Praxis **nur Live-TV**, keine Serien/Kino-Inhalte. Ein grüner „Kostenlose Sender“-Badge
+sowie ein Hinweis im Player machen die Quelle jederzeit erkennbar. Über „Eigenen Link
+nutzen“ wechselst du zurück zur M3U-Eingabe.
 
 Sender werden anhand von `group-title`, `tvg-language`/`tvg-country` und dem
 Sendernamen automatisch dem passenden Land und der passenden Kategorie
