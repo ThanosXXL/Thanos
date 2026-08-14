@@ -10,10 +10,15 @@ in der Root-`CLAUDE.md`.
 
 ## Ablauf
 
-1. **M3U-Link eingeben** – eine beliebige, selbst bezogene M3U-Playlist-URL.
-2. **Land wählen** – Deutschland oder Griechenland.
+1. **M3U-Link eingeben** – eine beliebige, selbst bezogene M3U-Playlist-URL. Die zuletzt
+   verwendete Playlist wird gespeichert und beim nächsten Start automatisch neu geladen.
+2. **Land wählen** – Deutschland oder Griechenland (oder direkt zu den ★ Favoriten springen).
 3. **Kategorie wählen** – Live TV, Serien oder Kino/Filme.
-4. **Sender wählen** – Wiedergabe im integrierten Player (HLS via hls.js).
+4. **Sender wählen** – bei mehr als 8 Sendern steht ein Suchfeld zur Verfügung; jeder Sender
+   lässt sich per Stern-Icon favorisieren. Wiedergabe erfolgt im integrierten Player (HLS via
+   hls.js, mit automatischem Fallback auf native Wiedergabe, Netzwerk-Retry und einer
+   sichtbaren, wiederholbaren Fehlermeldung bei nicht erreichbaren oder nicht antwortenden
+   Sendern).
 
 Sender werden anhand von `group-title`, `tvg-language`/`tvg-country` und dem
 Sendernamen automatisch dem passenden Land und der passenden Kategorie

@@ -50,20 +50,35 @@ function createWindow() {
 ipcMain.handle('load-settings', () => loadSettings());
 ipcMain.handle('save-settings', (_event, settings) => saveSettings(settings));
 
+const M3U_FETCH_TIMEOUT_MS = 20000;
+
 ipcMain.handle('fetch-m3u', async (_event, url) => {
+  let parsed;
   try {
-    const parsed = new URL(url);
-    if (parsed.protocol !== 'http:' && parsed.protocol !== 'https:') {
-      return { ok: false, error: 'Nur http(s)-Links werden unterstützt.' };
-    }
-    const response = await fetch(url, { redirect: 'follow' });
+    parsed = new URL(url);
+  } catch {
+    return { ok: false, error: 'Die eingegebene Adresse ist keine gültige URL.' };
+  }
+  if (parsed.protocol !== 'http:' && parsed.protocol !== 'https:') {
+    return { ok: false, error: 'Nur http(s)-Links werden unterstützt.' };
+  }
+
+  const controller = new AbortController();
+  const timeout = setTimeout(() => controller.abort(), M3U_FETCH_TIMEOUT_MS);
+  try {
+    const response = await fetch(url, { redirect: 'follow', signal: controller.signal });
     if (!response.ok) {
       return { ok: false, error: `Server antwortete mit Status ${response.status}` };
     }
     const text = await response.text();
     return { ok: true, text };
   } catch (err) {
+    if (err.name === 'AbortError') {
+      return { ok: false, error: `Zeitüberschreitung beim Laden der Playlist (${M3U_FETCH_TIMEOUT_MS / 1000}s).` };
+    }
     return { ok: false, error: err.message || 'Unbekannter Fehler beim Laden der M3U-Playlist.' };
+  } finally {
+    clearTimeout(timeout);
   }
 });
 
