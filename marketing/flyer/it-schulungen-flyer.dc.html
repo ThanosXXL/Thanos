@@ -1,0 +1,433 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Manrope:wght@400;500;600;700;800&display=swap">
+  <style>
+    * { box-sizing: border-box; }
+    body { margin: 0; }
+    a { color: #f3d98b; }
+    a:hover { color: #ffe9ab; }
+
+    .page {
+      position: relative;
+      width: 794px;
+      height: 1123px;
+      overflow: hidden;
+      background: linear-gradient(160deg, #0a1730 0%, #0d1d42 45%, #0a1730 100%);
+      font-family: 'Manrope', system-ui, sans-serif;
+      color: #ffffff;
+    }
+
+    .bg-glow-tr {
+      position: absolute; top: -220px; right: -220px; width: 620px; height: 620px;
+      background: radial-gradient(circle, rgba(217,169,74,0.35) 0%, rgba(217,169,74,0.08) 45%, rgba(217,169,74,0) 70%);
+      pointer-events: none;
+    }
+    .bg-glow-bl {
+      position: absolute; bottom: -260px; left: -240px; width: 640px; height: 640px;
+      background: radial-gradient(circle, rgba(58,90,166,0.35) 0%, rgba(58,90,166,0.08) 45%, rgba(58,90,166,0) 70%);
+      pointer-events: none;
+    }
+    .bg-dots {
+      position: absolute; inset: 0;
+      background-image: radial-gradient(rgba(255,255,255,0.08) 1px, transparent 1px);
+      background-size: 26px 26px;
+      background-position: -6px -6px;
+      opacity: 0.5;
+      pointer-events: none;
+    }
+    .bg-sheen {
+      position: absolute; top: -120px; left: -420px; width: 1500px; height: 340px;
+      background: linear-gradient(100deg, rgba(255,255,255,0) 40%, rgba(255,255,255,0.10) 49%, rgba(255,255,255,0.16) 50%, rgba(255,255,255,0.10) 51%, rgba(255,255,255,0) 60%);
+      transform: rotate(-8deg);
+      pointer-events: none;
+    }
+    .bg-shard {
+      position: absolute; top: 58px; right: -160px; width: 560px; height: 168px;
+      background: linear-gradient(120deg, #f7dd9a 0%, #d9a94a 45%, #a8791b 100%);
+      box-shadow: 0 30px 60px rgba(0,0,0,0.45), inset 0 2px 2px rgba(255,255,255,0.55), inset 0 -6px 10px rgba(0,0,0,0.25);
+      transform: rotate(-9deg);
+      opacity: 0.16;
+      pointer-events: none;
+      border-radius: 18px;
+    }
+
+    .content {
+      position: relative;
+      height: 100%;
+      display: flex;
+      flex-direction: column;
+      padding: 44px 54px 0 54px;
+    }
+
+    .header {
+      display: flex;
+      flex-direction: row;
+      justify-content: space-between;
+      align-items: flex-start;
+    }
+    .brand {
+      display: flex;
+      flex-direction: column;
+      align-items: flex-start;
+    }
+    .logo-plaque {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      padding: 10px 20px;
+      border-radius: 12px;
+      background: linear-gradient(180deg, #ffffff 0%, #eef0f3 100%);
+      box-shadow: 0 12px 22px rgba(0,0,0,0.35), inset 0 1px 0 rgba(255,255,255,0.9);
+    }
+    .logo-plaque img {
+      height: 52px;
+      width: auto;
+      display: block;
+    }
+    .kicker {
+      margin-top: 12px;
+      font-size: 12px;
+      letter-spacing: 0.16em;
+      text-transform: uppercase;
+      color: rgba(255,255,255,0.65);
+      font-weight: 600;
+    }
+
+    .seal-wrap {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 6px;
+    }
+    .seal-circle {
+      width: 68px; height: 68px; border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      background: radial-gradient(circle at 32% 26%, #fbe7b0 0%, #e3b658 38%, #b9822c 72%, #7c581a 100%);
+      box-shadow: 0 10px 18px rgba(0,0,0,0.5), inset 0 2px 3px rgba(255,255,255,0.65), inset 0 -4px 6px rgba(0,0,0,0.35);
+      border: 1px solid rgba(255,255,255,0.35);
+    }
+    .seal-text {
+      font-family: 'Space Grotesk', sans-serif;
+      font-weight: 700;
+      font-size: 17px;
+      letter-spacing: 0.03em;
+      color: #3a2a06;
+    }
+    .seal-label {
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: 0.10em;
+      text-transform: uppercase;
+      color: #f3d98b;
+    }
+
+    .hero {
+      margin-top: 54px;
+    }
+    .headline {
+      font-family: 'Space Grotesk', sans-serif;
+      font-weight: 700;
+      font-size: 56px;
+      line-height: 1.04;
+      letter-spacing: -0.01em;
+      margin: 0;
+      color: #ffffff;
+      text-shadow: 0 2px 0 rgba(0,0,0,0.25), 0 18px 40px rgba(0,0,0,0.35);
+    }
+    .headline-accent {
+      background: linear-gradient(115deg, #fbe7b0 0%, #d9a94a 55%, #a8791b 100%);
+      -webkit-background-clip: text;
+      background-clip: text;
+      color: transparent;
+    }
+    .headline-rule {
+      width: 96px; height: 5px; border-radius: 3px;
+      margin-top: 22px;
+      background: linear-gradient(90deg, #fbe7b0, #d9a94a 55%, #a8791b);
+      box-shadow: 0 3px 8px rgba(217,169,74,0.55);
+    }
+    .subheadline {
+      margin-top: 20px;
+      max-width: 560px;
+      font-size: 16.5px;
+      line-height: 1.55;
+      color: rgba(255,255,255,0.86);
+      font-weight: 500;
+    }
+
+    .features {
+      margin-top: 40px;
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 16px;
+    }
+    .feature-card {
+      display: flex;
+      flex-direction: row;
+      align-items: flex-start;
+      gap: 14px;
+      padding: 18px 18px;
+      border-radius: 14px;
+      background: linear-gradient(165deg, rgba(255,255,255,0.09), rgba(255,255,255,0.02));
+      border: 1px solid rgba(217,169,74,0.30);
+      box-shadow: 0 14px 26px rgba(0,0,0,0.30), inset 0 1px 0 rgba(255,255,255,0.12);
+    }
+    .feature-icon {
+      flex: 0 0 auto;
+      width: 44px; height: 44px; border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      background: radial-gradient(circle at 32% 26%, #fbe7b0 0%, #e3b658 40%, #b9822c 75%, #7c581a 100%);
+      box-shadow: 0 6px 12px rgba(0,0,0,0.45), inset 0 2px 2px rgba(255,255,255,0.6), inset 0 -3px 5px rgba(0,0,0,0.3);
+    }
+    .feature-title {
+      font-family: 'Space Grotesk', sans-serif;
+      font-weight: 700;
+      font-size: 14.5px;
+      letter-spacing: 0.02em;
+      color: #ffffff;
+      text-transform: uppercase;
+    }
+    .feature-desc {
+      margin-top: 4px;
+      font-size: 13px;
+      line-height: 1.45;
+      color: rgba(255,255,255,0.70);
+      font-weight: 500;
+    }
+
+    .participants {
+      margin-top: 40px;
+      padding: 22px 22px;
+      border-radius: 16px;
+      background: linear-gradient(165deg, rgba(217,169,74,0.14), rgba(217,169,74,0.03));
+      border: 1px solid rgba(217,169,74,0.32);
+      box-shadow: inset 0 1px 0 rgba(255,255,255,0.10);
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+    }
+    .participants-kicker {
+      font-size: 11.5px;
+      font-weight: 700;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      color: #f3d98b;
+    }
+    .avatar-row {
+      display: flex;
+      flex-direction: row;
+      align-items: center;
+    }
+    .avatar {
+      width: 52px; height: 52px; border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      font-family: 'Space Grotesk', sans-serif;
+      font-weight: 700;
+      font-size: 15px;
+      color: #3a2a06;
+      border: 2.5px solid #0d1d42;
+      box-shadow: 0 8px 16px rgba(0,0,0,0.4), inset 0 2px 2px rgba(255,255,255,0.55);
+      margin-left: -14px;
+    }
+    .avatar:first-child { margin-left: 0; }
+    .stars {
+      display: flex;
+      flex-direction: row;
+      gap: 4px;
+    }
+    .participants-caption {
+      font-size: 14px;
+      line-height: 1.5;
+      color: rgba(255,255,255,0.85);
+      font-weight: 600;
+      max-width: 520px;
+    }
+
+    .footer {
+      margin-top: auto;
+    }
+    .cta-bar {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      height: 64px;
+      background: linear-gradient(100deg, #fbe7b0 0%, #e3b658 35%, #d9a94a 60%, #a8791b 100%);
+      box-shadow: 0 -6px 22px rgba(0,0,0,0.30), inset 0 2px 2px rgba(255,255,255,0.6), inset 0 -4px 6px rgba(0,0,0,0.20);
+    }
+    .cta-text {
+      font-family: 'Space Grotesk', sans-serif;
+      font-weight: 700;
+      font-size: 22px;
+      letter-spacing: 0.06em;
+      color: #241a04;
+    }
+    .contact-strip {
+      background: #081228;
+      padding: 20px 54px 26px 54px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+    .contact-row {
+      display: flex;
+      flex-direction: row;
+      gap: 28px;
+      flex-wrap: wrap;
+    }
+    .contact-item {
+      display: flex;
+      flex-direction: row;
+      align-items: center;
+      gap: 8px;
+      font-size: 12.5px;
+      font-weight: 600;
+      color: rgba(255,255,255,0.85);
+    }
+    .contact-item svg { flex: 0 0 auto; }
+    .address {
+      font-size: 11.5px;
+      color: rgba(255,255,255,0.45);
+      font-weight: 500;
+      letter-spacing: 0.01em;
+    }
+  </style>
+</helmet>
+
+<div class="page">
+  <div class="bg-glow-tr"></div>
+  <div class="bg-glow-bl"></div>
+  <div class="bg-dots"></div>
+  <div class="bg-shard"></div>
+  <div class="bg-sheen"></div>
+
+  <div class="content">
+    <div class="header">
+      <div class="brand">
+        <div class="logo-plaque"><img src="logo.png" alt="M&amp;C Akademie Logo"></div>
+        <div class="kicker">Professionelle IT-Weiterbildung</div>
+      </div>
+      <div class="seal-wrap">
+        <div class="seal-circle"><span class="seal-text">IHK</span></div>
+        <div class="seal-label">Zertifiziert</div>
+      </div>
+    </div>
+
+    <div class="hero">
+      <h1 class="headline">IT-SCHULUNGEN,<br/><span class="headline-accent">DIE WIRKEN.</span></h1>
+      <div class="headline-rule"></div>
+      <p class="subheadline">Praxisnahe IT-Schulungen mit anerkanntem IHK-Zertifikat – vor Ort oder flexibel online. Von erfahrenen Dozenten für Ihren nächsten Karriereschritt.</p>
+    </div>
+
+    <div class="features">
+      <div class="feature-card">
+        <div class="feature-icon">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none">
+            <rect x="3" y="4" width="18" height="12" rx="1.5" stroke="#3a2a06" stroke-width="1.8"/>
+            <path d="M1.5 19.5h21" stroke="#3a2a06" stroke-width="1.8" stroke-linecap="round"/>
+            <path d="M8.5 9.5l2.2 2.2L15 8" stroke="#3a2a06" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+        </div>
+        <div>
+          <div class="feature-title">IT-Schulungen</div>
+          <div class="feature-desc">Von Grundlagen bis Spezialwissen – praxisnah vermittelt</div>
+        </div>
+      </div>
+
+      <div class="feature-card">
+        <div class="feature-icon">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none">
+            <circle cx="12" cy="8.5" r="5.5" stroke="#3a2a06" stroke-width="1.8"/>
+            <path d="M8.2 13.2L6.5 21l5.5-3 5.5 3-1.7-7.8" stroke="#3a2a06" stroke-width="1.8" stroke-linejoin="round"/>
+          </svg>
+        </div>
+        <div>
+          <div class="feature-title">IHK-Zertifikate</div>
+          <div class="feature-desc">Anerkannte Abschlüsse für Ihre Karriere</div>
+        </div>
+      </div>
+
+      <div class="feature-card">
+        <div class="feature-icon">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none">
+            <circle cx="12" cy="12" r="8.5" stroke="#3a2a06" stroke-width="1.8"/>
+            <path d="M3.5 12h17M12 3.5c2.6 2.3 4 5.3 4 8.5s-1.4 6.2-4 8.5c-2.6-2.3-4-5.3-4-8.5s1.4-6.2 4-8.5z" stroke="#3a2a06" stroke-width="1.6"/>
+          </svg>
+        </div>
+        <div>
+          <div class="feature-title">Online-Schulungen</div>
+          <div class="feature-desc">Flexibel lernen, wo und wann Sie wollen</div>
+        </div>
+      </div>
+
+      <div class="feature-card">
+        <div class="feature-icon">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none">
+            <circle cx="12" cy="7.5" r="3.3" stroke="#3a2a06" stroke-width="1.8"/>
+            <path d="M5 20c0-4 3.1-6.5 7-6.5s7 2.5 7 6.5" stroke="#3a2a06" stroke-width="1.8" stroke-linecap="round"/>
+            <path d="M16.2 5.2c1.3.5 2.2 1.8 2.2 3.3 0 1.4-.8 2.7-2 3.2" stroke="#3a2a06" stroke-width="1.6" stroke-linecap="round"/>
+          </svg>
+        </div>
+        <div>
+          <div class="feature-title">Qualifizierte Dozenten</div>
+          <div class="feature-desc">Erfahrene Experten direkt aus der Praxis</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="participants">
+      <div class="participants-kicker">Unsere Teilnehmer</div>
+      <div class="avatar-row">
+        <div class="avatar" style="background: radial-gradient(circle at 32% 26%, #fbe7b0 0%, #e3b658 40%, #b9822c 75%, #7c581a 100%);">AK</div>
+        <div class="avatar" style="background: radial-gradient(circle at 32% 26%, #f7e3ad 0%, #dcae57 40%, #a8791b 75%, #6e4f14 100%);">ML</div>
+        <div class="avatar" style="background: radial-gradient(circle at 32% 26%, #fbe7b0 0%, #e3b658 40%, #b9822c 75%, #7c581a 100%);">SR</div>
+        <div class="avatar" style="background: radial-gradient(circle at 32% 26%, #f7e3ad 0%, #dcae57 40%, #a8791b 75%, #6e4f14 100%);">TN</div>
+      </div>
+      <div class="stars">
+        <svg width="16" height="16" viewBox="0 0 24 24"><path fill="#e3b658" d="M12 2l2.9 6.6 7.1.6-5.4 4.7 1.7 7-6.3-3.9L5.7 21l1.7-7-5.4-4.7 7.1-.6z"/></svg>
+        <svg width="16" height="16" viewBox="0 0 24 24"><path fill="#e3b658" d="M12 2l2.9 6.6 7.1.6-5.4 4.7 1.7 7-6.3-3.9L5.7 21l1.7-7-5.4-4.7 7.1-.6z"/></svg>
+        <svg width="16" height="16" viewBox="0 0 24 24"><path fill="#e3b658" d="M12 2l2.9 6.6 7.1.6-5.4 4.7 1.7 7-6.3-3.9L5.7 21l1.7-7-5.4-4.7 7.1-.6z"/></svg>
+        <svg width="16" height="16" viewBox="0 0 24 24"><path fill="#e3b658" d="M12 2l2.9 6.6 7.1.6-5.4 4.7 1.7 7-6.3-3.9L5.7 21l1.7-7-5.4-4.7 7.1-.6z"/></svg>
+        <svg width="16" height="16" viewBox="0 0 24 24"><path fill="#e3b658" d="M12 2l2.9 6.6 7.1.6-5.4 4.7 1.7 7-6.3-3.9L5.7 21l1.7-7-5.4-4.7 7.1-.6z"/></svg>
+      </div>
+      <div class="participants-caption">Glückliche Teilnehmer, die ihre IT-Zukunft aktiv gestalten – mit dem Wissen und der Zuversicht für den nächsten Karriereschritt.</div>
+    </div>
+  </div>
+
+  <div class="footer">
+    <div class="cta-bar"><span class="cta-text">JETZT ANMELDEN</span></div>
+    <div class="contact-strip">
+      <div class="contact-row">
+        <div class="contact-item">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="9" stroke="#d9a94a" stroke-width="1.8"/><path d="M3 12h18M12 3c2.4 2.1 3.6 4.9 3.6 9s-1.2 6.9-3.6 9c-2.4-2.1-3.6-4.9-3.6-9s1.2-6.9 3.6-9z" stroke="#d9a94a" stroke-width="1.5"/></svg>
+          <span>[www.ihre-domain.de]</span>
+        </div>
+        <div class="contact-item">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none"><path d="M5 4h3.2l1.4 4.2-2 1.6a13 13 0 006.6 6.6l1.6-2 4.2 1.4V19a2 2 0 01-2 2C10.4 21 3 13.6 3 6a2 2 0 012-2z" stroke="#d9a94a" stroke-width="1.6" stroke-linejoin="round"/></svg>
+          <span>[+49 000 0000000]</span>
+        </div>
+        <div class="contact-item">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none"><rect x="3" y="5" width="18" height="14" rx="2" stroke="#d9a94a" stroke-width="1.6"/><path d="M3.5 6.5L12 13l8.5-6.5" stroke="#d9a94a" stroke-width="1.6" stroke-linejoin="round"/></svg>
+          <span>[info@ihre-domain.de]</span>
+        </div>
+      </div>
+      <div class="address">[Musterstraße 1, 12345 Musterstadt]</div>
+    </div>
+  </div>
+</div>
+</x-dc>
+<script data-dc-script data-props='{}'>
+class Component extends DCLogic {
+  renderVals() {
+    return {};
+  }
+}
+</script>
+</body>
+</html>
