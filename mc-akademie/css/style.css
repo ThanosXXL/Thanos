@@ -51,6 +51,28 @@ img { max-width: 100%; display: block; }
   padding: 0 32px;
 }
 
+.skip-link {
+  position: absolute;
+  top: -60px;
+  left: 16px;
+  z-index: 10000;
+  background: var(--navy);
+  color: #fff;
+  font-weight: 700;
+  font-size: .92rem;
+  padding: 12px 20px;
+  border-radius: 10px;
+  transition: top .25s var(--ease);
+}
+.skip-link:focus {
+  top: 16px;
+}
+
+:focus-visible {
+  outline: 2px solid var(--red-light);
+  outline-offset: 3px;
+}
+
 .grain {
   position: fixed;
   inset: 0;
