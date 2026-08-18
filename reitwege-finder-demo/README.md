@@ -1,0 +1,28 @@
+# Reitwege-Finder – Design-Demo (separat, nicht Teil des Dozenten Dashboards)
+
+Dieser Ordner enthält eine reine Design-/Konzept-Demo für eine **eigenständige,
+neue** App-Idee ("Reitwege-Finder"). Er hat keinen Bezug zum Dozenten Dashboard
+(`main.js`, `preload.js`, `renderer/`), zu `omniroute/` oder zu `branding/`
+(MSR_DELUXE) und wird von keinem Build/Installer mitverpackt.
+
+- **reitwege-finder-demo.mp4** – Slideshow-Video (Intro-Karte → Tracking-Screen
+  → Ausritt-Verlauf-Screen → Abspann), erzeugt aus echten Screenshots des
+  zuvor gebauten UI-Mockups (Mintgrün/Babyblau, 3D-Hochglanz-Optik, fette
+  schwarze Schrift). Unterlegt mit `branding/lounge-band.mp3` (bereits
+  vorhandener, lizenzfreier Instrumental-Track – wiederverwendet, aber ohne
+  MSR_DELUXE-Bildmaterial oder -Branding).
+- **reitwege-finder-demo-player.html** – eigenständige Seite mit Video-Player
+  und echtem Download-Button. Einfach im Browser öffnen (funktioniert nicht
+  in der eingebetteten Artifact-Vorschau, da dort Downloads technisch
+  blockiert sind).
+
+**Wichtig – was das hier NICHT ist:** Weder das Video noch die Screens zeigen
+eine funktionierende App. Es gibt kein echtes GPS-Tracking und keine echten
+Wegedaten. Die Kartendarstellung im Design ist bewusst illustrativ (generische
+Linien, keine Behörden-/Wegerecht-Daten) – ein Hinweis-Badge dazu ist direkt
+im Design sichtbar.
+
+Die beiden gezeigten Screens (Tracking, Verlauf) wurden zuerst als
+Claude-Design-Canvas erstellt; die Screenshots dafür wurden lokal aus statisch
+aufgelösten Kopien der Design-Dateien gerendert (Playwright), das Video mit
+ffmpeg zusammengesetzt.

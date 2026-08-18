@@ -10,6 +10,8 @@ This repository also hosts a second, unrelated project: `omniroute/` is a vendor
 
 `branding/` is a third, unrelated addition: static demo/music assets (video, mp3, and two self-contained HTML player pages) for a different, unrelated project ("MSR_DELUXE" anlagendashboard), copied in only to persist them permanently instead of losing them at the end of a chat session. See `branding/README.md` for provenance. It has no code, no build step, and is not referenced by or packaged with the Dozenten Dashboard.
 
+`reitwege-finder-demo/` is a fourth, unrelated addition: a design-mockup demo video + self-contained HTML player (with download button) for a separate, hypothetical "Reitwege-Finder" horse-trail-finder app concept. It is explicitly a non-functional UI mockup (no real GPS tracking or trail data) and reuses only the generic `branding/lounge-band.mp3` track for audio, not any MSR_DELUXE visuals/branding. See `reitwege-finder-demo/README.md` for provenance. No code, no build step, not packaged with the Dozenten Dashboard.
+
 ## Commands
 
 ```bash
