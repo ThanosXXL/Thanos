@@ -11,7 +11,7 @@
 
   document.getElementById('year').textContent = new Date().getFullYear();
 
-  /* ---- Scroll: header state, progress bar, back-to-top ---- */
+  /* ---- Scroll: Header-Zustand, Fortschrittsbalken, Nach-oben-Button ---- */
   function onScroll() {
     var y = window.scrollY || window.pageYOffset;
     header.classList.toggle('scrolled', y > 30);
@@ -35,7 +35,7 @@
     window.scrollTo({ top: 0, behavior: 'smooth' });
   });
 
-  /* ---- Mobile menu ---- */
+  /* ---- Mobiles Menü ---- */
   var menuBtnLabel = menuBtn.querySelector('span');
   function setMenuOpen(open) {
     navLinks.classList.toggle('open', open);
@@ -50,7 +50,7 @@
     a.addEventListener('click', function () { setMenuOpen(false); });
   });
 
-  /* ---- Active nav link on scroll ---- */
+  /* ---- Aktiver Menüpunkt beim Scrollen ---- */
   var sections = ['home', 'info', 'programme', 'kontakt']
     .map(function (id) { return document.getElementById(id); })
     .filter(Boolean);
@@ -67,7 +67,7 @@
   }, { rootMargin: '-45% 0px -45% 0px' });
   sections.forEach(function (s) { sectionIO.observe(s); });
 
-  /* ---- Scroll reveal ---- */
+  /* ---- Einblenden beim Scrollen ---- */
   var revealIO = new IntersectionObserver(function (entries) {
     entries.forEach(function (entry) {
       if (entry.isIntersecting) {
@@ -78,7 +78,7 @@
   }, { threshold: 0.15, rootMargin: '0px 0px -60px 0px' });
   document.querySelectorAll('.reveal').forEach(function (el) { revealIO.observe(el); });
 
-  /* ---- Animated stat counters ---- */
+  /* ---- Animierte Zähler ---- */
   function animateCount(el) {
     var target = parseInt(el.getAttribute('data-count'), 10) || 0;
     var duration = 1400;
@@ -103,7 +103,7 @@
   }, { threshold: 0.6 });
   document.querySelectorAll('[data-count]').forEach(function (el) { countIO.observe(el); });
 
-  /* ---- Mouse parallax (hero orbs + cursor glow) ---- */
+  /* ---- Maus-Parallax (Hero-Kugeln + Cursor-Glow) ---- */
   var rafId = null;
   var pendingEvent = null;
   function applyMouse() {
@@ -128,7 +128,7 @@
     document.body.classList.remove('cursor-active');
   });
 
-  /* ---- 3D tilt cards ---- */
+  /* ---- 3D-Neige-Karten ---- */
   var tiltCards = document.querySelectorAll('.tilt-card');
   var MAX_TILT = 8;
   tiltCards.forEach(function (card) {
@@ -156,9 +156,9 @@
     });
   });
 
-  /* Hero card tilt toward cursor is driven by the --px/--py vars (set above) via CSS. */
+  /* Die Neigung der Hero-Karte zum Mauszeiger wird über die oben gesetzten --px/--py-Variablen per CSS gesteuert. */
 
-  /* ---- Contact form (client-side only, no backend) ---- */
+  /* ---- Kontaktformular (nur clientseitig, kein Backend) ---- */
   var form = document.getElementById('kontaktForm');
   var note = document.getElementById('formNote');
   var submitLabel = document.getElementById('submitLabel');
