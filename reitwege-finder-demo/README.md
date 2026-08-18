@@ -15,6 +15,21 @@ neue** App-Idee ("Reitwege-Finder"). Er hat keinen Bezug zum Dozenten Dashboard
   und echtem Download-Button. Einfach im Browser öffnen (funktioniert nicht
   in der eingebetteten Artifact-Vorschau, da dort Downloads technisch
   blockiert sind).
+- **karten-prototyp.html** – *echter*, funktionsfähiger Karten-Prototyp
+  (kein Mockup): lädt echte OpenStreetMap-Kartenkacheln und echte
+  Reitweg-Tags (`highway=bridleway`, `horse=yes|designated`) live über die
+  Overpass API, mit Ortssuche über OpenStreetMap-Nominatim-Geocoding.
+  Startregion: Odenwald bei Michelstadt (Beispiel), per Suchfeld frei
+  änderbar. Einfach im Browser öffnen – braucht echten Internetzugang.
+  **Hinweis:** Konnte in der Sandbox-Umgebung dieser Session nicht live
+  getestet werden, da die Egress-Policy `tile.openstreetmap.org`,
+  `overpass-api.de`, `nominatim.openstreetmap.org` und `unpkg.com`
+  (Leaflet-Bibliothek) blockiert (403, Richtlinienentscheid) – der Code
+  folgt Standard-Leaflet/Overpass/Nominatim-Nutzung, ist aber nicht
+  Ende-zu-Ende verifiziert. Für produktiven Einsatz mit höherem
+  Traffic: Nominatim/Overpass haben Nutzungsrichtlinien (Rate-Limits,
+  kein Massen-Scraping) – bei ernsthafter Nutzung eigenes Hosting oder
+  einen kommerziellen Anbieter einplanen.
 
 **Wichtig – was das hier NICHT ist:** Weder das Video noch die Screens zeigen
 eine funktionierende App. Es gibt hier (Mockup/Demo) kein echtes GPS-Tracking
