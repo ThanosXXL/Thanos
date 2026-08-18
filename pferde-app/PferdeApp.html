@@ -229,6 +229,7 @@
     <button class="btn" data-tab="chip">Chip-Registrierung</button>
     <button class="btn" data-tab="foto">Foto-ID-Datenbank</button>
     <button class="btn" data-tab="alarm">Alarm / Sicherheit</button>
+    <button class="btn" data-tab="demo">Demo-Video</button>
   </nav>
   <div id="content"></div>
 </main>
@@ -649,6 +650,36 @@
     if (!state.alarm.triggered) stopSiren();
   }
 
+  // ---------------- Demo-Video ----------------
+  function renderDemo(container) {
+    var panel = el("section", { class: "glass panel" });
+    panel.appendChild(el("h2", {}, ["Demoversion — Video mit Hintergrundmusik"]));
+    panel.appendChild(el("p", { class: "empty-hint" }, [
+      "Kurzer Rundgang durch die Pferde App (Chip-Registrierung, Foto-ID-Datenbank, Stall-Alarm) mit hinterlegter Hintergrundmusik. Zum Abspielen auf ▶ klicken."
+    ]));
+
+    var video = el("video", {
+      controls: "controls",
+      preload: "metadata",
+      style: "width:100%; border-radius:14px; border:2px solid #04162f; box-shadow:0 8px 20px rgba(0,0,0,0.5); display:block; margin-top:12px;"
+    });
+    video.appendChild(el("source", { src: "demo/pferde-app-demo.webm", type: "video/webm" }));
+    video.appendChild(document.createTextNode("Dein Browser unterstützt das Video-Element leider nicht."));
+    panel.appendChild(video);
+
+    var downloadLink = el("a", {
+      href: "demo/pferde-app-demo.webm",
+      download: "Pferde-App-Demo.webm",
+      class: "btn ok"
+    }, ["⬇ Demo-Video herunterladen"]);
+    downloadLink.style.display = "inline-block";
+    downloadLink.style.marginTop = "16px";
+    downloadLink.style.textDecoration = "none";
+    panel.appendChild(downloadLink);
+
+    container.appendChild(panel);
+  }
+
   // ---------------- Render dispatch ----------------
   function render() {
     renderTabs();
@@ -658,6 +689,7 @@
     else if (activeTab === "chip") renderChip(container);
     else if (activeTab === "foto") renderFoto(container);
     else if (activeTab === "alarm") renderAlarm(container);
+    else if (activeTab === "demo") renderDemo(container);
   }
 
   render();

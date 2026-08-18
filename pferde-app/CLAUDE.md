@@ -16,6 +16,14 @@ tooling. All data (horses, chip numbers, photos, alarm log) lives only in the br
 `localStorage`; nothing is sent to a server. The UI is in German. Visual design is navy blue
 mixed with baby blue, glossy 3D surfaces, and bold black text throughout.
 
+A fifth tab, "Demo-Video", plays a short walkthrough (`demo/pferde-app-demo.webm`, VP9 + Opus)
+with generated background music and offers a "Demo-Video herunterladen" download button
+(`<a download>`). Regenerating that video is a manual, off-repo process (Playwright screen
+recording muxed with a synthesized music track via ffmpeg) — there is no build step that
+produces it, so treat the checked-in `.webm` as a static asset. Use WebM/VP9+Opus, not MP4/H.264
+— headless/plain Chromium builds commonly lack the proprietary H.264 decoder and fail to load an
+MP4 `<source>` (`MEDIA_ERR_SRC_NOT_SUPPORTED`), which was confirmed while building this feature.
+
 ## Commands
 
 There is no install step, build step, test suite, or linter. It is plain HTML/CSS/vanilla JS
@@ -33,7 +41,7 @@ The whole app state lives in one in-memory `state = { horses: [], alarm: { armed
 The canonical pattern for any mutation is: **mutate `state` → call `persist()` → call `render()`**.
 `persist()` writes the full state to `localStorage` under the `pferdeAppData` key via
 `JSON.stringify`; there is no partial/diff saving. `render()` rebuilds `#content` from scratch
-based on `activeTab` (`renderUebersicht` / `renderChip` / `renderFoto` / `renderAlarm`), so
+based on `activeTab` (`renderUebersicht` / `renderChip` / `renderFoto` / `renderAlarm` / `renderDemo`), so
 there is no incremental DOM updating — always drive the UI by changing `state` and
 re-rendering, never by hand-editing the DOM. `loadData()` returns a fresh empty state on any
 missing/corrupt `localStorage` value, so a cleared or broken store degrades gracefully.

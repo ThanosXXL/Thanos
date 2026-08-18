@@ -54,4 +54,5 @@ die das Dozenten Dashboard oben nicht berühren:
 - `pferde-app/` — die **Pferde App**: eine einzelne HTML-Datei (`pferde-app/PferdeApp.html`) zur
   Pferdeverwaltung mit Chip-Registrierung, Foto-ID-Datenbank und simulierter Stall-Alarmfunktion.
   Einfach per Doppelklick im Browser öffnen (Windows/macOS/Linux/Android/iOS), kein Terminal
-  nötig. Siehe `pferde-app/CLAUDE.md`.
+  nötig. Im Tab "Demo-Video" gibt es einen kurzen Rundgang mit Hintergrundmusik sowie einen
+  Download-Button für das Demo-Video. Siehe `pferde-app/CLAUDE.md`.
