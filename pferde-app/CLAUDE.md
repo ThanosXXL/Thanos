@@ -17,12 +17,15 @@ tooling. All data (horses, chip numbers, photos, alarm log) lives only in the br
 mixed with baby blue, glossy 3D surfaces, and bold black text throughout.
 
 A fifth tab, "Demo-Video", plays a short walkthrough (`demo/pferde-app-demo.webm`, VP9 + Opus)
-with generated background music and offers a "Demo-Video herunterladen" download button
-(`<a download>`). Regenerating that video is a manual, off-repo process (Playwright screen
-recording muxed with a synthesized music track via ffmpeg) — there is no build step that
-produces it, so treat the checked-in `.webm` as a static asset. Use WebM/VP9+Opus, not MP4/H.264
-— headless/plain Chromium builds commonly lack the proprietary H.264 decoder and fail to load an
-MP4 `<source>` (`MEDIA_ERR_SRC_NOT_SUPPORTED`), which was confirmed while building this feature.
+with background music and offers a "Demo-Video herunterladen" download button (`<a download>`).
+The music track is `lounge-band.mp3` (piano/strings, synthetic — Fluidsynth + General-MIDI
+soundfont, no external copyrighted source), pulled in from `branding/lounge-band.mp3` on the
+`claude/msr175-dashboard-demo-fyhsly` branch of this repo, per that branch's `branding/README.md`
+license note. Regenerating the video is a manual, off-repo process (Playwright screen recording
+muxed with the music track via ffmpeg) — there is no build step that produces it, so treat the
+checked-in `.webm` as a static asset. Use WebM/VP9+Opus, not MP4/H.264 — headless/plain Chromium
+builds commonly lack the proprietary H.264 decoder and fail to load an MP4 `<source>`
+(`MEDIA_ERR_SRC_NOT_SUPPORTED`), which was confirmed while building this feature.
 
 ## Commands
 
