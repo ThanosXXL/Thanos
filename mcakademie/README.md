@@ -13,6 +13,7 @@ mcakademie/
 ├── css/style.css      # Styling inkl. Farbvariablen
 ├── js/main.js         # Mobile-Menü + Jahr im Footer
 ├── assets/logo.png    # Original-Logo, freigestellt (transparenter Hintergrund)
+├── build-standalone.py # Buendelt alles zu einer einzigen HTML-Datei (siehe unten)
 └── README.md
 ```
 
@@ -20,6 +21,27 @@ mcakademie/
 
 `index.html` direkt im Browser öffnen (kein Server/Build-Schritt nötig) oder den
 Ordner auf beliebigem Webspace/Hosting hochladen.
+
+## Als eine einzige Datei exportieren (für Download/Versand)
+
+```bash
+python3 mcakademie/build-standalone.py
+```
+
+Erzeugt `mcakademie/mcakademie-standalone.html` – eine einzelne, in sich
+geschlossene HTML-Datei mit eingebettetem CSS, JS und Logo (als base64), ganz
+ohne externe Dateien. Praktisch, um die fertige Seite als **eine** Datei zu
+verschicken oder herunterzuladen (z. B. als Chat-Anhang), statt den ganzen
+Ordner. Optional lässt sich ein anderer Zielpfad angeben:
+`python3 mcakademie/build-standalone.py pfad/zur/datei.html`.
+
+Für eine Live-Vorschau mit echtem Download-Button (über die
+`window.claude.downloads`-Capability des Artifact-Viewers) wird derselbe
+Bündelungs-Ansatz verwendet: das Ergebnis von `build-standalone.py` als
+Payload in ein `<script type="text/plain">`-Element einbetten (literale
+`</script`-Vorkommen vorher z. B. durch `@@MC_ENDSCRIPT@@` ersetzen und beim
+Download wieder zurücktauschen) und per Button-Klick mit
+`window.claude.downloads.save({ filename, data })` anbieten.
 
 ## Farben (aus dem Logo abgeleitet)
 
