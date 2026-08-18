@@ -17,10 +17,22 @@ neue** App-Idee ("Reitwege-Finder"). Er hat keinen Bezug zum Dozenten Dashboard
   blockiert sind).
 
 **Wichtig – was das hier NICHT ist:** Weder das Video noch die Screens zeigen
-eine funktionierende App. Es gibt kein echtes GPS-Tracking und keine echten
-Wegedaten. Die Kartendarstellung im Design ist bewusst illustrativ (generische
-Linien, keine Behörden-/Wegerecht-Daten) – ein Hinweis-Badge dazu ist direkt
-im Design sichtbar.
+eine funktionierende App. Es gibt hier (Mockup/Demo) kein echtes GPS-Tracking
+und keine echten Wegedaten. Die Kartendarstellung im Design ist bewusst
+illustrativ (generische Linien, keine Behörden-/Wegerecht-Daten) – ein
+Hinweis-Badge dazu ist direkt im Design sichtbar.
+
+**Status für eine geplante Vollversion** (zwei unterschiedliche Fälle):
+- **GPS-Tracking von Ausritten** (eigene Position während der Fahrt
+  aufzeichnen, Strecke/Tempo/Dauer) ist eine realistische, technisch
+  überschaubare Funktion für eine echte Vollversion – dafür reicht
+  Standard-Geräte-GPS, keine externe Datenquelle nötig.
+- **Kartierung *erlaubter* Reitwege** ist etwas anderes: Das würde echte,
+  autoritative Daten voraussetzen (Wegerecht, Forst-/Naturschutzbehörden,
+  Grundstückseigentümer). Das ist **nicht automatisch Teil einer Vollversion**,
+  sondern hängt davon ab, ob eine solche Datenquelle tatsächlich beschafft
+  wird – sonst wäre es ein leeres Versprechen gegenüber echten Nutzer:innen,
+  die sich beim Reiten darauf verlassen, wo sie legal unterwegs sind.
 
 Die drei gezeigten Screens (Tracking, Verlauf, Menü – Menü listet alle
 geplanten Funktionen als Navigationspunkte auf, ohne dass dahinter echte
