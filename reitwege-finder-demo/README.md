@@ -6,8 +6,8 @@ neue** App-Idee ("Reitwege-Finder"). Er hat keinen Bezug zum Dozenten Dashboard
 (MSR_DELUXE) und wird von keinem Build/Installer mitverpackt.
 
 - **reitwege-finder-demo.mp4** – Slideshow-Video (Intro-Karte → Tracking-Screen
-  → Ausritt-Verlauf-Screen → Abspann), erzeugt aus echten Screenshots des
-  zuvor gebauten UI-Mockups (Mintgrün/Babyblau, 3D-Hochglanz-Optik, fette
+  → Ausritt-Verlauf-Screen → Menü-Screen → Abspann), erzeugt aus echten
+  Screenshots des UI-Mockups (Mintgrün/Babyblau, 3D-Hochglanz-Optik, fette
   schwarze Schrift). Unterlegt mit `branding/lounge-band.mp3` (bereits
   vorhandener, lizenzfreier Instrumental-Track – wiederverwendet, aber ohne
   MSR_DELUXE-Bildmaterial oder -Branding).
@@ -22,7 +22,8 @@ Wegedaten. Die Kartendarstellung im Design ist bewusst illustrativ (generische
 Linien, keine Behörden-/Wegerecht-Daten) – ein Hinweis-Badge dazu ist direkt
 im Design sichtbar.
 
-Die beiden gezeigten Screens (Tracking, Verlauf) wurden zuerst als
-Claude-Design-Canvas erstellt; die Screenshots dafür wurden lokal aus statisch
-aufgelösten Kopien der Design-Dateien gerendert (Playwright), das Video mit
-ffmpeg zusammengesetzt.
+Die drei gezeigten Screens (Tracking, Verlauf, Menü – Menü listet alle
+geplanten Funktionen als Navigationspunkte auf, ohne dass dahinter echte
+Funktionalität steckt) wurden zuerst als Claude-Design-Canvas erstellt; die
+Screenshots dafür wurden lokal aus statisch aufgelösten Kopien der
+Design-Dateien gerendert (Playwright), das Video mit ffmpeg zusammengesetzt.
