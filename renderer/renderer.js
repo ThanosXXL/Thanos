@@ -20,7 +20,15 @@
   }
 
   function persist() {
-    window.dashboardAPI.saveData(state);
+    window.dashboardAPI.saveData(state).then((result) => {
+      if (result && result.ok === false) {
+        alert(
+          'Speichern fehlgeschlagen: ' +
+            result.error +
+            '\nÄnderungen könnten beim Beenden verloren gehen.'
+        );
+      }
+    });
   }
 
   function findDozent(id) {
@@ -411,6 +419,19 @@
 
   document.getElementById('cancelDeleteDozent').addEventListener('click', closeDeleteDozentModal);
   document.getElementById('confirmDeleteDozent').addEventListener('click', confirmDeleteDozent);
+
+  addDozentModal.addEventListener('click', (e) => {
+    if (e.target === addDozentModal) closeAddDozentModal();
+  });
+  deleteDozentModal.addEventListener('click', (e) => {
+    if (e.target === deleteDozentModal) closeDeleteDozentModal();
+  });
+
+  document.addEventListener('keydown', (e) => {
+    if (e.key !== 'Escape') return;
+    if (addDozentModal.classList.contains('visible')) closeAddDozentModal();
+    if (deleteDozentModal.classList.contains('visible')) closeDeleteDozentModal();
+  });
 
   async function init() {
     const loaded = await window.dashboardAPI.loadData();
