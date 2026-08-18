@@ -1,0 +1,665 @@
+<meta charset="UTF-8">
+<title>Pferde App</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<style>
+  :root {
+    --navy-1: #050f24;
+    --navy-2: #0d2158;
+    --navy-3: #163a7a;
+    --baby-1: #bfe6fb;
+    --baby-2: #8ecbf0;
+    --baby-3: #4fa3d8;
+    --ink: #050608;
+    --alarm-red: #d40000;
+    --ok-green: #0a8a3d;
+  }
+
+  * { box-sizing: border-box; }
+
+  html, body {
+    margin: 0;
+    padding: 0;
+    min-height: 100%;
+    font-family: "Arial Black", "Segoe UI Black", Arial, Helvetica, sans-serif;
+    font-weight: 900;
+    color: var(--ink);
+    background: linear-gradient(155deg, var(--navy-1) 0%, var(--navy-2) 32%, var(--navy-3) 55%, var(--baby-3) 78%, var(--baby-2) 100%);
+    background-attachment: fixed;
+  }
+
+  body { padding-bottom: 48px; }
+
+  ::selection { background: var(--baby-1); color: #000; }
+
+  /* --- glossy building blocks --- */
+  .glass {
+    position: relative;
+    border-radius: 18px;
+    border: 1px solid rgba(5, 15, 40, 0.55);
+    background: linear-gradient(180deg, rgba(255, 255, 255, 0.55) 0%, rgba(142, 203, 240, 0.28) 12%, rgba(13, 33, 88, 0.55) 60%, rgba(5, 15, 36, 0.75) 100%);
+    box-shadow: 0 14px 30px rgba(0, 6, 20, 0.55), inset 0 1px 0 rgba(255, 255, 255, 0.55), inset 0 -12px 22px rgba(0, 0, 0, 0.28);
+    overflow: hidden;
+  }
+  .glass::before {
+    content: "";
+    position: absolute;
+    top: -35%;
+    left: -10%;
+    width: 120%;
+    height: 65%;
+    background: radial-gradient(ellipse at center, rgba(255, 255, 255, 0.65) 0%, rgba(255, 255, 255, 0.12) 55%, rgba(255, 255, 255, 0) 75%);
+    transform: rotate(-3deg);
+    pointer-events: none;
+  }
+
+  .btn {
+    font-family: inherit;
+    font-weight: 900;
+    color: #000;
+    text-shadow: 0 1px 0 rgba(255, 255, 255, 0.45);
+    cursor: pointer;
+    border: 1px solid #04162f;
+    border-radius: 12px;
+    padding: 10px 18px;
+    background: linear-gradient(180deg, #eef8ff 0%, #bfe4fb 18%, #6fb8e6 48%, #1c4f8c 50%, #0a2a55 100%);
+    box-shadow: 0 6px 14px rgba(0, 6, 20, 0.5), inset 0 1px 0 rgba(255, 255, 255, 0.75), inset 0 -3px 6px rgba(0, 0, 0, 0.3);
+    transition: transform 0.06s ease, box-shadow 0.06s ease;
+  }
+  .btn:hover { filter: brightness(1.06); }
+  .btn:active {
+    transform: translateY(2px);
+    box-shadow: 0 2px 6px rgba(0, 6, 20, 0.5), inset 0 1px 0 rgba(255, 255, 255, 0.6), inset 0 -1px 3px rgba(0, 0, 0, 0.3);
+  }
+  .btn.danger { background: linear-gradient(180deg, #ffd9d9 0%, #ff9a9a 18%, #e23b3b 48%, #8c0a0a 50%, #4a0303 100%); }
+  .btn.ok { background: linear-gradient(180deg, #d9ffe4 0%, #9af0b8 18%, #1fae55 48%, #0a6b30 50%, #033616 100%); }
+  .btn.ghost {
+    background: linear-gradient(180deg, rgba(255,255,255,0.35), rgba(191,230,251,0.15));
+    color: #fff;
+    text-shadow: 0 1px 3px rgba(0,0,0,0.8);
+  }
+  .btn.small { padding: 6px 12px; font-size: 0.85em; border-radius: 9px; }
+  .btn:disabled { opacity: 0.5; cursor: not-allowed; }
+
+  input, select, textarea {
+    font-family: Arial, Helvetica, sans-serif;
+    font-weight: 700;
+    color: #000;
+    padding: 9px 11px;
+    border-radius: 9px;
+    border: 1px solid #0a2a55;
+    background: linear-gradient(180deg, #ffffff 0%, #eaf5fc 100%);
+    box-shadow: inset 0 2px 4px rgba(0, 20, 50, 0.25);
+    width: 100%;
+  }
+  label { display: block; font-size: 0.82em; color: #eaf6ff; text-shadow: 0 1px 3px rgba(0,0,0,0.9); margin: 10px 0 4px; }
+
+  /* --- layout --- */
+  header.app-header {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    padding: 18px 22px;
+    margin-bottom: 18px;
+    border-radius: 0 0 22px 22px;
+    background: linear-gradient(180deg, rgba(191,230,251,0.9) 0%, rgba(79,163,216,0.85) 25%, rgba(13,33,88,0.95) 70%, rgba(5,15,36,0.98) 100%);
+    box-shadow: 0 10px 24px rgba(0,0,0,0.55), inset 0 1px 0 rgba(255,255,255,0.6);
+  }
+  .logo-badge {
+    width: 54px; height: 54px; border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 26px;
+    background: radial-gradient(circle at 35% 30%, #ffffff, #bfe6fb 40%, #1c4f8c 85%, #04162f 100%);
+    box-shadow: 0 6px 14px rgba(0,0,0,0.5), inset 0 2px 3px rgba(255,255,255,0.8);
+    border: 1px solid #04162f;
+    flex-shrink: 0;
+  }
+  header.app-header h1 {
+    margin: 0;
+    font-size: 1.6em;
+    color: #000;
+    text-shadow: 0 1px 0 rgba(255,255,255,0.5), 0 2px 6px rgba(0,0,0,0.25);
+    letter-spacing: 0.5px;
+  }
+  header.app-header .subtitle {
+    margin: 2px 0 0;
+    font-size: 0.78em;
+    color: #04162f;
+    font-weight: 700;
+  }
+
+  main { max-width: 980px; margin: 0 auto; padding: 0 18px; }
+
+  nav.tabs { display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 20px; }
+  nav.tabs button {
+    flex: 1 1 auto;
+    min-width: 150px;
+  }
+  nav.tabs button.active {
+    background: linear-gradient(180deg, #ffffff 0%, #eaf6ff 18%, #8ecbf0 50%, #163a7a 100%);
+    box-shadow: 0 0 0 3px rgba(191,230,251,0.7), 0 6px 14px rgba(0,6,20,0.5), inset 0 1px 0 rgba(255,255,255,0.85);
+  }
+
+  section.panel { padding: 20px; margin-bottom: 20px; }
+  section.panel h2 {
+    margin-top: 0;
+    color: #fff;
+    text-shadow: 0 2px 6px rgba(0,0,0,0.6), 0 0 14px rgba(142,203,240,0.5);
+    font-size: 1.25em;
+    border-bottom: 2px solid rgba(191,230,251,0.5);
+    padding-bottom: 10px;
+  }
+
+  .stat-row { display: flex; gap: 14px; flex-wrap: wrap; margin-bottom: 18px; }
+  .stat-tile { flex: 1 1 160px; padding: 16px; text-align: center; }
+  .stat-tile .num { font-size: 2em; color: #fff; text-shadow: 0 0 12px rgba(191,230,251,0.8), 0 2px 4px #000; }
+  .stat-tile .label { font-size: 0.75em; color: #dff1fc; margin-top: 4px; }
+
+  .horse-card { padding: 16px; margin-bottom: 14px; display: flex; gap: 14px; align-items: flex-start; }
+  .horse-card .photo {
+    width: 84px; height: 84px; border-radius: 12px; object-fit: cover; flex-shrink: 0;
+    border: 2px solid #04162f;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.5), inset 0 1px 0 rgba(255,255,255,0.5);
+    background: linear-gradient(180deg, #eaf6ff, #8ecbf0);
+  }
+  .horse-card .photo.placeholder { display: flex; align-items: center; justify-content: center; font-size: 30px; }
+  .horse-card .info { flex: 1; color: #fff; text-shadow: 0 1px 4px rgba(0,0,0,0.7); }
+  .horse-card .info .name { font-size: 1.15em; margin-bottom: 4px; }
+  .horse-card .info .meta { font-size: 0.78em; font-weight: 700; color: #eaf6ff; line-height: 1.6; }
+  .horse-card .info .meta b { color: #fff; }
+  .horse-card .actions { display: flex; flex-direction: column; gap: 8px; }
+
+  .photo-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(70px, 1fr)); gap: 8px; margin-top: 8px; }
+  .photo-grid img {
+    width: 100%; aspect-ratio: 1/1; object-fit: cover; border-radius: 8px;
+    border: 2px solid #04162f; box-shadow: 0 3px 8px rgba(0,0,0,0.5);
+  }
+
+  form .grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 0 14px; }
+  @media (max-width: 620px) { form .grid2 { grid-template-columns: 1fr; } }
+  form .actions-row { margin-top: 16px; display: flex; gap: 10px; flex-wrap: wrap; }
+
+  .empty-hint { color: #eaf6ff; font-weight: 700; font-size: 0.9em; text-shadow: 0 1px 4px rgba(0,0,0,0.6); }
+
+  /* --- alarm panel --- */
+  .alarm-status {
+    display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 14px;
+    padding: 18px; margin-bottom: 16px;
+  }
+  .alarm-status .state-pill {
+    padding: 10px 20px; border-radius: 30px; font-size: 1em;
+    border: 1px solid #04162f;
+  }
+  .state-pill.armed { background: linear-gradient(180deg, #d9ffe4, #1fae55 50%, #033616); color: #000; box-shadow: 0 0 16px rgba(31,174,85,0.7), inset 0 1px 0 rgba(255,255,255,0.6); }
+  .state-pill.disarmed { background: linear-gradient(180deg, #eee, #999 50%, #333); color: #000; }
+  .state-pill.triggered { background: linear-gradient(180deg, #ffd9d9, #e23b3b 50%, #4a0303); color: #fff; box-shadow: 0 0 20px rgba(228,20,20,0.9); animation: pulseRed 0.9s infinite; }
+
+  @keyframes pulseRed { 0%, 100% { box-shadow: 0 0 10px rgba(228,20,20,0.6); } 50% { box-shadow: 0 0 30px rgba(228,20,20,1); } }
+
+  #alarmFullOverlay {
+    position: fixed; inset: 0; z-index: 999; pointer-events: none;
+    display: none;
+    background: rgba(212, 0, 0, 0.0);
+    animation: flashRed 0.6s infinite;
+  }
+  @keyframes flashRed { 0%, 100% { background: rgba(212, 0, 0, 0.0); } 50% { background: rgba(212, 0, 0, 0.55); } }
+
+  .log-list { max-height: 220px; overflow-y: auto; padding: 14px; }
+  .log-entry { font-size: 0.82em; color: #fff; padding: 6px 0; border-bottom: 1px solid rgba(255,255,255,0.15); font-weight: 700; }
+  .log-entry .t { color: var(--baby-1); margin-right: 8px; }
+
+  footer.app-footer {
+    text-align: center; color: #eaf6ff; font-size: 0.72em; margin-top: 30px; opacity: 0.85;
+    text-shadow: 0 1px 4px rgba(0,0,0,0.7);
+  }
+</style>
+
+<div id="alarmFullOverlay"></div>
+
+<header class="app-header">
+  <div class="logo-badge">🐴</div>
+  <div>
+    <h1>Pferde App</h1>
+    <p class="subtitle">Chip-Registrierung &middot; Foto-ID &middot; Stall-Alarm</p>
+  </div>
+</header>
+
+<main>
+  <nav class="tabs">
+    <button class="btn" data-tab="uebersicht">Übersicht</button>
+    <button class="btn" data-tab="chip">Chip-Registrierung</button>
+    <button class="btn" data-tab="foto">Foto-ID-Datenbank</button>
+    <button class="btn" data-tab="alarm">Alarm / Sicherheit</button>
+  </nav>
+  <div id="content"></div>
+</main>
+
+<footer class="app-footer">Pferde App &mdash; alle Daten werden ausschließlich lokal in diesem Browser gespeichert (localStorage).</footer>
+
+<script>
+(function () {
+  "use strict";
+
+  var STORAGE_KEY = "pferdeAppData";
+
+  function uid() {
+    return Date.now().toString(36) + "-" + Math.random().toString(36).slice(2, 9);
+  }
+
+  function loadData() {
+    try {
+      var raw = localStorage.getItem(STORAGE_KEY);
+      if (!raw) return { horses: [], alarm: { armed: false, triggered: false, log: [] } };
+      var parsed = JSON.parse(raw);
+      if (!parsed || typeof parsed !== "object") throw new Error("invalid");
+      if (!Array.isArray(parsed.horses)) parsed.horses = [];
+      if (!parsed.alarm) parsed.alarm = { armed: false, triggered: false, log: [] };
+      if (!Array.isArray(parsed.alarm.log)) parsed.alarm.log = [];
+      return parsed;
+    } catch (e) {
+      return { horses: [], alarm: { armed: false, triggered: false, log: [] } };
+    }
+  }
+
+  var state = loadData();
+  var activeTab = "uebersicht";
+  var alarmSirenTimer = null;
+  var audioCtx = null;
+
+  function persist() {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+  }
+
+  function fmtDate(iso) {
+    if (!iso) return "-";
+    var d = new Date(iso);
+    if (isNaN(d.getTime())) return iso;
+    return d.toLocaleDateString("de-DE") + " " + d.toLocaleTimeString("de-DE", { hour: "2-digit", minute: "2-digit" });
+  }
+
+  function el(tag, attrs, children) {
+    var node = document.createElement(tag);
+    attrs = attrs || {};
+    Object.keys(attrs).forEach(function (k) {
+      if (k === "class") node.className = attrs[k];
+      else if (k === "html") node.innerHTML = attrs[k];
+      else node.setAttribute(k, attrs[k]);
+    });
+    (children || []).forEach(function (c) {
+      if (c === null || c === undefined) return;
+      node.appendChild(typeof c === "string" ? document.createTextNode(c) : c);
+    });
+    return node;
+  }
+
+  // ---------------- Tabs ----------------
+  function renderTabs() {
+    document.querySelectorAll("nav.tabs button").forEach(function (btn) {
+      btn.classList.toggle("active", btn.dataset.tab === activeTab);
+    });
+  }
+
+  function switchTab(tab) {
+    activeTab = tab;
+    render();
+  }
+
+  document.querySelectorAll("nav.tabs button").forEach(function (btn) {
+    btn.addEventListener("click", function () { switchTab(btn.dataset.tab); });
+  });
+
+  // ---------------- Übersicht ----------------
+  function renderUebersicht(container) {
+    var stats = el("div", { class: "stat-row" }, [
+      el("div", { class: "glass stat-tile" }, [
+        el("div", { class: "num" }, [String(state.horses.length)]),
+        el("div", { class: "label" }, ["Registrierte Pferde"])
+      ]),
+      el("div", { class: "glass stat-tile" }, [
+        el("div", { class: "num" }, [String(state.horses.filter(function (h) { return h.chip; }).length)]),
+        el("div", { class: "label" }, ["Mit Chip-Nummer"])
+      ]),
+      el("div", { class: "glass stat-tile" }, [
+        el("div", { class: "num" }, [String(state.horses.reduce(function (n, h) { return n + (h.fotos ? h.fotos.length : 0); }, 0))]),
+        el("div", { class: "label" }, ["Fotos in der Datenbank"])
+      ]),
+      el("div", { class: "glass stat-tile" }, [
+        el("div", { class: "num" }, [state.alarm.armed ? "SCHARF" : "AUS"]),
+        el("div", { class: "label" }, ["Stall-Alarm Status"])
+      ])
+    ]);
+    container.appendChild(stats);
+
+    var panel = el("section", { class: "glass panel" });
+    panel.appendChild(el("h2", {}, ["Meine Pferde"]));
+    if (state.horses.length === 0) {
+      panel.appendChild(el("p", { class: "empty-hint" }, ["Noch keine Pferde registriert. Wechsle zu „Chip-Registrierung“, um dein erstes Pferd anzulegen."]));
+    } else {
+      state.horses.forEach(function (h) {
+        panel.appendChild(renderHorseCard(h));
+      });
+    }
+    container.appendChild(panel);
+  }
+
+  function renderHorseCard(h) {
+    var photo;
+    if (h.fotos && h.fotos.length > 0) {
+      photo = el("img", { class: "photo", src: h.fotos[0], alt: h.name });
+    } else {
+      photo = el("div", { class: "photo placeholder" }, ["🐴"]);
+    }
+    var meta = el("div", { class: "meta" }, [
+      el("div", {}, [el("b", {}, ["Chip: "]), h.chip || "nicht registriert"]),
+      el("div", {}, [el("b", {}, ["Rasse: "]), h.rasse || "-", "  ", el("b", {}, ["Farbe: "]), h.fellfarbe || "-"]),
+      el("div", {}, [el("b", {}, ["Abzeichen: "]), h.abzeichen || "-"]),
+      el("div", {}, [el("b", {}, ["Brandzeichen: "]), h.brandzeichen || "-"]),
+      el("div", {}, [el("b", {}, ["Besitzer: "]), h.besitzer || "-"])
+    ]);
+    var delBtn = el("button", { class: "btn danger small" }, ["Löschen"]);
+    delBtn.addEventListener("click", function () {
+      if (confirm("Pferd „" + h.name + "“ wirklich löschen?")) {
+        state.horses = state.horses.filter(function (x) { return x.id !== h.id; });
+        persist();
+        render();
+      }
+    });
+    var card = el("div", { class: "glass horse-card" }, [
+      photo,
+      el("div", { class: "info" }, [
+        el("div", { class: "name" }, [h.name]),
+        meta
+      ]),
+      el("div", { class: "actions" }, [delBtn])
+    ]);
+    return card;
+  }
+
+  // ---------------- Chip-Registrierung ----------------
+  function renderChip(container) {
+    var panel = el("section", { class: "glass panel" });
+    panel.appendChild(el("h2", {}, ["Neues Pferd &amp; Chip-Registrierung"]));
+
+    var form = document.createElement("form");
+    form.innerHTML =
+      '<div class="grid2">' +
+      '<div><label>Name des Pferdes *</label><input name="name" required maxlength="60"></div>' +
+      '<div><label>Chip-/Transponder-Nummer *</label><input name="chip" required maxlength="30" placeholder="15-stellig, z.B. 276000000123456"></div>' +
+      '<div><label>Rasse</label><input name="rasse" maxlength="60"></div>' +
+      '<div><label>Fellfarbe</label><input name="fellfarbe" maxlength="60"></div>' +
+      '<div><label>Geburtsdatum</label><input name="geburtsdatum" type="date"></div>' +
+      '<div><label>Besitzer / Kontakt</label><input name="besitzer" maxlength="80"></div>' +
+      '</div>' +
+      '<label>Notizen</label><textarea name="notizen" rows="2" maxlength="300"></textarea>';
+
+    var actions = el("div", { class: "actions-row" }, [
+      el("button", { class: "btn ok", type: "submit" }, ["Pferd registrieren"])
+    ]);
+    form.appendChild(actions);
+
+    form.addEventListener("submit", function (e) {
+      e.preventDefault();
+      var fd = new FormData(form);
+      var name = (fd.get("name") || "").toString().trim();
+      var chip = (fd.get("chip") || "").toString().trim();
+      if (!name || !chip) return;
+      if (state.horses.some(function (h) { return h.chip === chip; })) {
+        alert("Diese Chip-Nummer ist bereits registriert.");
+        return;
+      }
+      state.horses.push({
+        id: uid(),
+        name: name,
+        chip: chip,
+        rasse: (fd.get("rasse") || "").toString().trim(),
+        fellfarbe: (fd.get("fellfarbe") || "").toString().trim(),
+        geburtsdatum: (fd.get("geburtsdatum") || "").toString(),
+        besitzer: (fd.get("besitzer") || "").toString().trim(),
+        notizen: (fd.get("notizen") || "").toString().trim(),
+        abzeichen: "",
+        brandzeichen: "",
+        fotos: [],
+        registriertAm: new Date().toISOString()
+      });
+      persist();
+      form.reset();
+      render();
+    });
+
+    panel.appendChild(form);
+    container.appendChild(panel);
+
+    var listPanel = el("section", { class: "glass panel" });
+    listPanel.appendChild(el("h2", {}, ["Chip-Register"]));
+    if (state.horses.length === 0) {
+      listPanel.appendChild(el("p", { class: "empty-hint" }, ["Keine Pferde im Chip-Register."]));
+    } else {
+      state.horses.forEach(function (h) {
+        listPanel.appendChild(el("div", { class: "glass horse-card" }, [
+          el("div", { class: "photo placeholder" }, ["🔖"]),
+          el("div", { class: "info" }, [
+            el("div", { class: "name" }, [h.name]),
+            el("div", { class: "meta" }, [
+              el("div", {}, [el("b", {}, ["Chip-Nr.: "]), h.chip]),
+              el("div", {}, [el("b", {}, ["Registriert am: "]), fmtDate(h.registriertAm)])
+            ])
+          ])
+        ]));
+      });
+    }
+    container.appendChild(listPanel);
+  }
+
+  // ---------------- Foto-ID-Datenbank ----------------
+  function renderFoto(container) {
+    var panel = el("section", { class: "glass panel" });
+    panel.appendChild(el("h2", {}, ["Foto-ID-Datenbank"]));
+
+    if (state.horses.length === 0) {
+      panel.appendChild(el("p", { class: "empty-hint" }, ["Bitte zuerst unter „Chip-Registrierung“ ein Pferd anlegen."]));
+      container.appendChild(panel);
+      return;
+    }
+
+    var form = document.createElement("form");
+    var select = el("select", { name: "horseId" });
+    state.horses.forEach(function (h) {
+      select.appendChild(el("option", { value: h.id }, [h.name + " (Chip: " + h.chip + ")"]));
+    });
+
+    form.innerHTML =
+      '<div class="grid2">' +
+      '<div id="selWrap"><label>Pferd auswählen *</label></div>' +
+      '<div><label>Fotos hochladen</label><input name="fotos" type="file" accept="image/*" multiple></div>' +
+      '<div><label>Abzeichen (z.B. Blesse, Schnippe, Stern)</label><input name="abzeichen" maxlength="120"></div>' +
+      '<div><label>Brandzeichen</label><input name="brandzeichen" maxlength="120"></div>' +
+      '</div>';
+    form.querySelector("#selWrap").appendChild(select);
+
+    var actions = el("div", { class: "actions-row" }, [
+      el("button", { class: "btn ok", type: "submit" }, ["Foto-ID speichern"])
+    ]);
+    form.appendChild(actions);
+
+    form.addEventListener("submit", function (e) {
+      e.preventDefault();
+      var fd = new FormData(form);
+      var horseId = fd.get("horseId");
+      var horse = state.horses.find(function (h) { return h.id === horseId; });
+      if (!horse) return;
+      horse.abzeichen = (fd.get("abzeichen") || "").toString().trim() || horse.abzeichen;
+      horse.brandzeichen = (fd.get("brandzeichen") || "").toString().trim() || horse.brandzeichen;
+
+      var files = form.querySelector('input[name="fotos"]').files;
+      var readers = [];
+      Array.prototype.forEach.call(files, function (file) {
+        readers.push(new Promise(function (resolve) {
+          var reader = new FileReader();
+          reader.onload = function () { resolve(reader.result); };
+          reader.readAsDataURL(file);
+        }));
+      });
+      Promise.all(readers).then(function (dataUrls) {
+        horse.fotos = (horse.fotos || []).concat(dataUrls);
+        persist();
+        form.reset();
+        render();
+      });
+    });
+
+    panel.appendChild(form);
+    container.appendChild(panel);
+
+    var gallery = el("section", { class: "glass panel" });
+    gallery.appendChild(el("h2", {}, ["Alle Foto-IDs"]));
+    state.horses.forEach(function (h) {
+      var block = el("div", { class: "glass horse-card" }, [
+        el("div", { class: "photo placeholder" }, ["📷"]),
+        el("div", { class: "info", style: "flex:1" }, [
+          el("div", { class: "name" }, [h.name]),
+          el("div", { class: "meta" }, [
+            el("div", {}, [el("b", {}, ["Abzeichen: "]), h.abzeichen || "-"]),
+            el("div", {}, [el("b", {}, ["Brandzeichen: "]), h.brandzeichen || "-"]),
+            el("div", {}, [el("b", {}, ["Fotos: "]), String((h.fotos || []).length)])
+          ])
+        ])
+      ]);
+      var infoNode = block.querySelector(".info");
+      if (h.fotos && h.fotos.length > 0) {
+        var grid = el("div", { class: "photo-grid" });
+        h.fotos.forEach(function (src) { grid.appendChild(el("img", { src: src, alt: h.name })); });
+        infoNode.appendChild(grid);
+      }
+      gallery.appendChild(block);
+    });
+    container.appendChild(gallery);
+  }
+
+  // ---------------- Alarm / Sicherheit ----------------
+  function beep(freq, duration) {
+    try {
+      if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+      var osc = audioCtx.createOscillator();
+      var gain = audioCtx.createGain();
+      osc.type = "square";
+      osc.frequency.value = freq;
+      gain.gain.value = 0.15;
+      osc.connect(gain);
+      gain.connect(audioCtx.destination);
+      osc.start();
+      setTimeout(function () { osc.stop(); }, duration);
+    } catch (e) { /* Web Audio nicht verfügbar */ }
+  }
+
+  function addLog(text) {
+    state.alarm.log.unshift({ zeit: new Date().toISOString(), text: text });
+    state.alarm.log = state.alarm.log.slice(0, 50);
+  }
+
+  function stopSiren() {
+    if (alarmSirenTimer) {
+      clearInterval(alarmSirenTimer);
+      alarmSirenTimer = null;
+    }
+    document.getElementById("alarmFullOverlay").style.display = "none";
+  }
+
+  function triggerAlarm(source) {
+    if (!state.alarm.armed) return;
+    state.alarm.triggered = true;
+    addLog("ALARM ausgelöst — " + source);
+    persist();
+    document.getElementById("alarmFullOverlay").style.display = "block";
+    if (!alarmSirenTimer) {
+      beep(1200, 300);
+      alarmSirenTimer = setInterval(function () { beep(1200, 300); }, 700);
+    }
+    if (navigator.vibrate) navigator.vibrate([400, 200, 400, 200, 400]);
+    if (window.Notification && Notification.permission === "granted") {
+      new Notification("Pferde App — Stall-Alarm!", { body: "Einbruch/Bewegung erkannt: " + source });
+    }
+    render();
+  }
+
+  function renderAlarm(container) {
+    var statusPanel = el("section", { class: "glass alarm-status" });
+    var pillClass = state.alarm.triggered ? "triggered" : (state.alarm.armed ? "armed" : "disarmed");
+    var pillText = state.alarm.triggered ? "ALARM AUSGELÖST" : (state.alarm.armed ? "SCHARF GESCHALTET" : "UNSCHARF");
+    statusPanel.appendChild(el("div", { class: "state-pill " + pillClass }, [pillText]));
+
+    var btnRow = el("div", { class: "actions-row" });
+
+    if (state.alarm.triggered) {
+      var ackBtn = el("button", { class: "btn danger" }, ["Alarm quittieren"]);
+      ackBtn.addEventListener("click", function () {
+        state.alarm.triggered = false;
+        addLog("Alarm quittiert");
+        persist();
+        stopSiren();
+        render();
+      });
+      btnRow.appendChild(ackBtn);
+    } else {
+      var toggleBtn = el("button", { class: "btn " + (state.alarm.armed ? "danger" : "ok") }, [state.alarm.armed ? "Unscharf schalten" : "Scharf schalten"]);
+      toggleBtn.addEventListener("click", function () {
+        state.alarm.armed = !state.alarm.armed;
+        addLog(state.alarm.armed ? "Stall-Alarm scharf geschaltet" : "Stall-Alarm unscharf geschaltet");
+        persist();
+        render();
+      });
+      btnRow.appendChild(toggleBtn);
+
+      var testBtn = el("button", { class: "btn ghost" }, ["Einbruch simulieren (Test)"]);
+      testBtn.disabled = !state.alarm.armed;
+      testBtn.addEventListener("click", function () { triggerAlarm("Testauslösung (manuell)"); });
+      btnRow.appendChild(testBtn);
+    }
+
+    var notifBtn = el("button", { class: "btn ghost" }, ["Benachrichtigungen erlauben"]);
+    notifBtn.addEventListener("click", function () {
+      if (window.Notification) Notification.requestPermission();
+    });
+    btnRow.appendChild(notifBtn);
+
+    statusPanel.appendChild(btnRow);
+    container.appendChild(statusPanel);
+
+    var infoPanel = el("section", { class: "glass panel" });
+    infoPanel.appendChild(el("h2", {}, ["Wie funktioniert der Stall-Alarm?"]));
+    infoPanel.appendChild(el("p", { class: "empty-hint" }, [
+      "Schalte den Alarm scharf, bevor du den Stall verlässt. Bei einer erkannten Störung (hier simulierbar über „Einbruch simulieren“) ertönt ein akustisches Signal, der Bildschirm blinkt rot, das Gerät vibriert (auf Mobilgeräten) und — falls erlaubt — erscheint eine Push-Benachrichtigung."
+    ]));
+    container.appendChild(infoPanel);
+
+    var logPanel = el("section", { class: "glass panel" });
+    logPanel.appendChild(el("h2", {}, ["Ereignis-Log"]));
+    var logList = el("div", { class: "glass log-list" });
+    if (state.alarm.log.length === 0) {
+      logList.appendChild(el("p", { class: "empty-hint" }, ["Noch keine Ereignisse."]));
+    } else {
+      state.alarm.log.forEach(function (entry) {
+        logList.appendChild(el("div", { class: "log-entry" }, [
+          el("span", { class: "t" }, [fmtDate(entry.zeit)]),
+          entry.text
+        ]));
+      });
+    }
+    logPanel.appendChild(logList);
+    container.appendChild(logPanel);
+
+    if (!state.alarm.triggered) stopSiren();
+  }
+
+  // ---------------- Render dispatch ----------------
+  function render() {
+    renderTabs();
+    var container = document.getElementById("content");
+    container.innerHTML = "";
+    if (activeTab === "uebersicht") renderUebersicht(container);
+    else if (activeTab === "chip") renderChip(container);
+    else if (activeTab === "foto") renderFoto(container);
+    else if (activeTab === "alarm") renderAlarm(container);
+  }
+
+  render();
+})();
+</script>
