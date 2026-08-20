@@ -1,0 +1,244 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<title>RadarAlarm Flyer</title>
+<style>
+  * { box-sizing: border-box; }
+  html, body {
+    margin: 0;
+    width: 1080px;
+    height: 1080px;
+    overflow: hidden;
+    background: #050506;
+  }
+  .stage {
+    position: relative;
+    width: 1080px;
+    height: 1080px;
+    background: radial-gradient(ellipse at 50% 30%, #1c1a22 0%, #0a0a0c 55%, #050506 100%);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    font-family: "Segoe UI", Arial, sans-serif;
+    color: #f3ecdd;
+  }
+
+  /* Radar-Grafik */
+  .radar-wrap {
+    position: relative;
+    width: 420px;
+    height: 420px;
+    margin-bottom: 30px;
+    filter: drop-shadow(0 10px 30px rgba(212,175,55,0.35));
+  }
+  canvas { display: block; }
+
+  /* Wordmark mit Glanz-Sweep */
+  .wordmark {
+    position: relative;
+    font-size: 96px;
+    font-weight: 800;
+    letter-spacing: 1px;
+    line-height: 1;
+    background: linear-gradient(180deg, #f6de8f 0%, #d4af37 45%, #8a6d1f 100%);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+    overflow: hidden;
+    padding: 0 10px;
+  }
+  .wordmark::after {
+    content: "";
+    position: absolute;
+    top: -50%;
+    left: -60%;
+    width: 40%;
+    height: 200%;
+    background: linear-gradient(100deg, rgba(255,255,255,0) 20%, rgba(255,255,255,0.85) 50%, rgba(255,255,255,0) 80%);
+    transform: rotate(12deg);
+    mix-blend-mode: overlay;
+    animation: shine 3.2s ease-in-out infinite;
+  }
+  @keyframes shine {
+    0%   { left: -60%; }
+    45%  { left: 130%; }
+    100% { left: 130%; }
+  }
+
+  .demo-badge {
+    margin-top: 14px;
+    font-size: 20px;
+    font-weight: 700;
+    letter-spacing: 3px;
+    padding: 8px 22px;
+    border-radius: 20px;
+    background: rgba(224,72,62,0.18);
+    color: #ff8a80;
+    border: 1px solid #e0483e;
+  }
+
+  .tagline {
+    margin-top: 34px;
+    font-size: 34px;
+    font-weight: 600;
+    color: #f6de8f;
+    text-align: center;
+  }
+
+  .subline {
+    margin-top: 14px;
+    font-size: 22px;
+    color: #a89f8f;
+    letter-spacing: 0.5px;
+    text-align: center;
+  }
+
+  .feature-row {
+    margin-top: 46px;
+    display: flex;
+    gap: 18px;
+  }
+  .chip {
+    font-size: 18px;
+    padding: 10px 20px;
+    border-radius: 24px;
+    background: linear-gradient(155deg, #26232a 0%, #17161b 55%, #100f13 100%);
+    border: 1px solid #8a6d1f;
+    color: #f6de8f;
+    box-shadow: 0 3px 10px rgba(0,0,0,0.4), inset 0 1px 0 rgba(255,255,255,0.05);
+  }
+</style>
+</head>
+<body>
+  <div class="stage">
+    <div class="radar-wrap">
+      <canvas id="radar" width="420" height="420"></canvas>
+    </div>
+    <div class="wordmark">RadarAlarm</div>
+    <div class="demo-badge">DEMO</div>
+    <div class="tagline">Erfassen. Alarmieren. Beheben.</div>
+    <div class="subline">Baudokumentation · Mängelmanagement · Kommunikation</div>
+    <div class="feature-row">
+      <span class="chip">📍 Grundriss-Pins</span>
+      <span class="chip">📷 Foto &amp; Status</span>
+      <span class="chip">💬 Team-Chat</span>
+    </div>
+  </div>
+
+<script>
+(function () {
+  var canvas = document.getElementById('radar');
+  var ctx = canvas.getContext('2d');
+  var cx = 210, cy = 210, maxR = 190;
+  var sweepAngle = 0;
+
+  function drawGrid() {
+    ctx.save();
+    ctx.translate(cx, cy);
+
+    // Konzentrische Ringe
+    for (var r = maxR; r > 0; r -= maxR / 4) {
+      ctx.beginPath();
+      ctx.arc(0, 0, r, 0, Math.PI * 2);
+      ctx.strokeStyle = 'rgba(212,175,55,0.28)';
+      ctx.lineWidth = 1.5;
+      ctx.stroke();
+    }
+    // Kreuz-Linien
+    ctx.beginPath();
+    ctx.moveTo(-maxR, 0); ctx.lineTo(maxR, 0);
+    ctx.moveTo(0, -maxR); ctx.lineTo(0, maxR);
+    ctx.strokeStyle = 'rgba(212,175,55,0.18)';
+    ctx.lineWidth = 1;
+    ctx.stroke();
+
+    // Äußerer Glanzring
+    var ringGrad = ctx.createRadialGradient(0, 0, maxR - 6, 0, 0, maxR + 6);
+    ringGrad.addColorStop(0, 'rgba(212,175,55,0)');
+    ringGrad.addColorStop(0.5, 'rgba(246,222,143,0.9)');
+    ringGrad.addColorStop(1, 'rgba(212,175,55,0)');
+    ctx.beginPath();
+    ctx.arc(0, 0, maxR, 0, Math.PI * 2);
+    ctx.strokeStyle = ringGrad;
+    ctx.lineWidth = 4;
+    ctx.stroke();
+
+    ctx.restore();
+  }
+
+  function drawSweep(angle) {
+    ctx.save();
+    ctx.translate(cx, cy);
+    ctx.rotate(angle);
+
+    var grad = ctx.createConicGradient
+      ? ctx.createConicGradient(-0.9, 0, 0)
+      : null;
+
+    // Fächerförmige Nachleucht-Spur
+    var sweepGrad = ctx.createLinearGradient(0, 0, maxR, 0);
+    sweepGrad.addColorStop(0, 'rgba(246,222,143,0.55)');
+    sweepGrad.addColorStop(1, 'rgba(246,222,143,0)');
+
+    ctx.beginPath();
+    ctx.moveTo(0, 0);
+    ctx.arc(0, 0, maxR, -0.55, 0);
+    ctx.closePath();
+    ctx.fillStyle = sweepGrad;
+    ctx.fill();
+
+    // Heller Leitstrahl
+    ctx.beginPath();
+    ctx.moveTo(0, 0);
+    ctx.lineTo(maxR, 0);
+    ctx.strokeStyle = '#f6de8f';
+    ctx.lineWidth = 3;
+    ctx.shadowColor = '#f6de8f';
+    ctx.shadowBlur = 14;
+    ctx.stroke();
+
+    ctx.restore();
+  }
+
+  // Ein paar "Kontakte" (Punkte), die kurz aufleuchten, wenn der Strahl sie streift
+  var blips = [
+    { angle: 0.6, r: 120 },
+    { angle: 2.1, r: 165 },
+    { angle: 3.4, r: 90 },
+    { angle: 4.8, r: 150 }
+  ];
+
+  function drawBlips(sweep) {
+    blips.forEach(function (b) {
+      var diff = Math.abs(((sweep - b.angle + Math.PI) % (Math.PI * 2)) - Math.PI);
+      var glow = Math.max(0, 1 - diff / 0.5);
+      if (glow <= 0.02) return;
+      var x = cx + Math.cos(b.angle) * b.r;
+      var y = cy + Math.sin(b.angle) * b.r;
+      ctx.save();
+      ctx.beginPath();
+      ctx.arc(x, y, 5 + glow * 4, 0, Math.PI * 2);
+      ctx.fillStyle = 'rgba(255, 138, 128,' + (0.25 + glow * 0.75) + ')';
+      ctx.shadowColor = '#ff8a80';
+      ctx.shadowBlur = 12 * glow;
+      ctx.fill();
+      ctx.restore();
+    });
+  }
+
+  function frame() {
+    ctx.clearRect(0, 0, 420, 420);
+    drawGrid();
+    drawSweep(sweepAngle);
+    drawBlips(sweepAngle);
+    sweepAngle += 0.028;
+    if (sweepAngle > Math.PI * 2) sweepAngle -= Math.PI * 2;
+    requestAnimationFrame(frame);
+  }
+  frame();
+})();
+</script>
+</body>
+</html>
