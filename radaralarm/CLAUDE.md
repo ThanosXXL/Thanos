@@ -5,11 +5,14 @@ root `CLAUDE.md` for how it relates to the Dozenten Dashboard and `omniroute/`).
 
 ## Standing rule: always include a download button
 
-For every deliverable file handed to the user (video, flyer/image, PDF, any
-future asset) — always ship it with a working download button, not just a
-bare file. Concretely: wrap it in a self-contained HTML page (per the pattern
-below) with a real `<a download>`/blob-download button, in addition to
-sending the raw file. Do this by default, without being asked each time.
+For every deliverable file handed to the user — demo videos, images/flyers,
+social-media MP4s/loops, PDFs, and anything similar — always ship it with a
+working download button, not just a bare file. Concretely: wrap it in a
+self-contained HTML page (per the pattern below) with a real
+`<a download>`/blob-download button, in addition to sending the raw file.
+Do this by default, every time, without being asked again. Confirmed by the
+user twice now (this instruction and its predecessor) — treat as permanent
+for this project.
 
 ## Brand identity (persistent — apply to all future visual work here)
 
