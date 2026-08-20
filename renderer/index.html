@@ -2,17 +2,38 @@
 <html lang="de">
 <head>
 <meta charset="UTF-8">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; object-src 'none'; base-uri 'none'; form-action 'none';">
 <title>Dozenten Dashboard</title>
 <link rel="stylesheet" href="style.css">
 </head>
 <body>
+  <div class="lock-overlay" id="lockOverlay">
+    <div class="lock-box">
+      <div class="lock-icon">&#128274;</div>
+      <h2>Gesperrt</h2>
+      <p id="lockMessage">Bitte PIN eingeben, um fortzufahren.</p>
+      <input type="password" id="lockPinInput" inputmode="numeric" maxlength="12" placeholder="PIN">
+      <button id="lockUnlockBtn" class="btn-primary">Entsperren</button>
+      <p class="lock-error" id="lockError"></p>
+    </div>
+  </div>
+
   <header class="app-header">
     <h1>Dozenten Dashboard</h1>
+    <div class="header-actions">
+      <span class="license-badge" id="licenseBadge"></span>
+      <button class="icon-btn header-btn" id="openSettingsBtn" title="Sicherheit &amp; Abo">&#9881;</button>
+    </div>
   </header>
 
   <nav class="dozent-tabs" id="dozentTabs">
     <!-- Dozenten-Tabs werden hier eingefügt -->
   </nav>
+
+  <div class="toolbar" id="toolbar">
+    <input type="text" id="globalSearch" class="search-input" placeholder="Suchen in Aufgaben &amp; Projekten...">
+    <div class="stats-bar" id="statsBar"></div>
+  </div>
 
   <main id="content">
     <div class="empty-state" id="emptyState">
@@ -41,6 +62,49 @@
       <div class="modal-actions">
         <button id="cancelDeleteDozent" class="btn-secondary">Abbrechen</button>
         <button id="confirmDeleteDozent" class="btn-danger">Entfernen</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal: Sicherheit & Abo -->
+  <div class="modal-overlay" id="settingsModal">
+    <div class="modal settings-modal">
+      <h2>Sicherheit &amp; Abo</h2>
+
+      <section class="settings-section">
+        <h3>PIN-Sperre</h3>
+        <p class="settings-hint" id="pinStatusText"></p>
+        <div class="settings-row" id="pinSetRow">
+          <input type="password" id="newPinInput" maxlength="12" placeholder="Neue PIN (mind. 4 Zeichen)">
+          <button id="savePinBtn" class="btn-primary">PIN setzen</button>
+        </div>
+        <div class="settings-row" id="pinRemoveRow" style="display:none;">
+          <input type="password" id="currentPinInput" maxlength="12" placeholder="Aktuelle PIN zum Entfernen">
+          <button id="removePinBtn" class="btn-danger">PIN entfernen</button>
+        </div>
+      </section>
+
+      <section class="settings-section">
+        <h3>Lizenz / Jahres-Abo</h3>
+        <p class="settings-hint" id="licenseStatusText"></p>
+        <div class="settings-row">
+          <label class="toggle-row">
+            <input type="checkbox" id="autoRenewToggle">
+            Automatische Verlängerung um 1 Jahr
+          </label>
+        </div>
+        <div class="settings-row">
+          <input type="text" id="licenseKeyInput" placeholder="XXXX-XXXX-XXXX-XXXX">
+          <button id="activateLicenseBtn" class="btn-primary">Aktivieren</button>
+        </div>
+        <div class="settings-row">
+          <button id="cancelLicenseBtn" class="btn-secondary">Abo kündigen</button>
+        </div>
+        <p class="settings-error" id="licenseError"></p>
+      </section>
+
+      <div class="modal-actions">
+        <button id="closeSettingsBtn" class="btn-secondary">Schließen</button>
       </div>
     </div>
   </div>

@@ -1,17 +1,40 @@
 (function () {
   const MAX_DOZENTEN = 4;
+  const PRIORITIES = ['normal', 'hoch', 'dringend'];
+  const PRIORITY_LABELS = { normal: 'Normal', hoch: 'Hoch', dringend: 'Dringend' };
 
   let state = { dozenten: [] };
   let activeDozentId = null;
+  let searchQuery = '';
+  let license = null;
 
   const dozentTabs = document.getElementById('dozentTabs');
   const content = document.getElementById('content');
   const emptyState = document.getElementById('emptyState');
+  const statsBar = document.getElementById('statsBar');
+  const globalSearch = document.getElementById('globalSearch');
+  const licenseBadge = document.getElementById('licenseBadge');
 
   const addDozentModal = document.getElementById('addDozentModal');
   const newDozentNameInput = document.getElementById('newDozentName');
   const deleteDozentModal = document.getElementById('deleteDozentModal');
   const deleteDozentText = document.getElementById('deleteDozentText');
+
+  const lockOverlay = document.getElementById('lockOverlay');
+  const lockPinInput = document.getElementById('lockPinInput');
+  const lockError = document.getElementById('lockError');
+  const lockMessage = document.getElementById('lockMessage');
+
+  const settingsModal = document.getElementById('settingsModal');
+  const pinStatusText = document.getElementById('pinStatusText');
+  const pinSetRow = document.getElementById('pinSetRow');
+  const pinRemoveRow = document.getElementById('pinRemoveRow');
+  const newPinInput = document.getElementById('newPinInput');
+  const currentPinInput = document.getElementById('currentPinInput');
+  const licenseStatusText = document.getElementById('licenseStatusText');
+  const autoRenewToggle = document.getElementById('autoRenewToggle');
+  const licenseKeyInput = document.getElementById('licenseKeyInput');
+  const licenseError = document.getElementById('licenseError');
 
   let pendingDeleteId = null;
 
@@ -26,6 +49,159 @@
   function findDozent(id) {
     return state.dozenten.find((d) => d.id === id);
   }
+
+  function formatDate(isoOrTimestamp) {
+    const d = new Date(isoOrTimestamp);
+    return d.toLocaleDateString('de-DE', { day: '2-digit', month: '2-digit', year: 'numeric' });
+  }
+
+  function isOverdue(item) {
+    if (!item.dueDate || item.done) return false;
+    return new Date(item.dueDate).setHours(23, 59, 59, 999) < Date.now();
+  }
+
+  // ---------- Sperrbildschirm ----------
+
+  function showLock() {
+    lockOverlay.classList.add('visible');
+    lockError.textContent = '';
+    lockPinInput.value = '';
+    lockPinInput.disabled = false;
+    lockPinInput.focus();
+  }
+
+  function hideLock() {
+    lockOverlay.classList.remove('visible');
+  }
+
+  async function attemptUnlock() {
+    const result = await window.dashboardAPI.verifyPin(lockPinInput.value);
+    if (result.ok) {
+      hideLock();
+      await afterUnlock();
+      return;
+    }
+    if (result.lockedForMs) {
+      const seconds = Math.ceil(result.lockedForMs / 1000);
+      lockError.textContent = `Zu viele Fehlversuche. Bitte ${seconds}s warten.`;
+      lockPinInput.disabled = true;
+      setTimeout(() => {
+        lockPinInput.disabled = false;
+        lockError.textContent = '';
+      }, result.lockedForMs);
+    } else {
+      lockError.textContent = `Falsche PIN. Noch ${result.attemptsLeft} Versuch(e).`;
+    }
+    lockPinInput.value = '';
+    lockPinInput.focus();
+  }
+
+  document.getElementById('lockUnlockBtn').addEventListener('click', attemptUnlock);
+  lockPinInput.addEventListener('keydown', (e) => {
+    if (e.key === 'Enter') attemptUnlock();
+  });
+
+  // ---------- Lizenz ----------
+
+  async function refreshLicense() {
+    license = await window.dashboardAPI.getLicense();
+    renderLicenseBadge();
+    renderLicenseSettings();
+  }
+
+  function renderLicenseBadge() {
+    if (!license) {
+      licenseBadge.textContent = '';
+      return;
+    }
+    const expired = Date.now() >= license.expiresAt;
+    if (expired) {
+      licenseBadge.textContent = 'Abo abgelaufen';
+      licenseBadge.className = 'license-badge expired';
+    } else {
+      licenseBadge.textContent = `Abo aktiv bis ${formatDate(license.expiresAt)}`;
+      licenseBadge.className = 'license-badge active';
+    }
+  }
+
+  function renderLicenseSettings() {
+    if (!license) return;
+    const expired = Date.now() >= license.expiresAt;
+    if (expired) {
+      licenseStatusText.textContent = license.cancelled
+        ? `Abo gekündigt, abgelaufen am ${formatDate(license.expiresAt)}. Bitte neuen Lizenzschlüssel aktivieren.`
+        : `Abo abgelaufen am ${formatDate(license.expiresAt)}.`;
+    } else if (license.cancelled) {
+      licenseStatusText.textContent = `Gekündigt – läuft am ${formatDate(license.expiresAt)} aus.`;
+    } else {
+      licenseStatusText.textContent = `Aktiv bis ${formatDate(license.expiresAt)}${license.autoRenew ? ' (verlängert sich automatisch um 1 Jahr)' : ''}.`;
+    }
+    autoRenewToggle.checked = !!license.autoRenew;
+  }
+
+  autoRenewToggle.addEventListener('change', async () => {
+    license = await window.dashboardAPI.setAutoRenew(autoRenewToggle.checked);
+    renderLicenseBadge();
+    renderLicenseSettings();
+  });
+
+  document.getElementById('activateLicenseBtn').addEventListener('click', async () => {
+    licenseError.textContent = '';
+    try {
+      license = await window.dashboardAPI.activateLicense(licenseKeyInput.value);
+      licenseKeyInput.value = '';
+      renderLicenseBadge();
+      renderLicenseSettings();
+    } catch (err) {
+      licenseError.textContent = 'Ungültiger Lizenzschlüssel (Format: XXXX-XXXX-XXXX-XXXX).';
+    }
+  });
+
+  document.getElementById('cancelLicenseBtn').addEventListener('click', async () => {
+    license = await window.dashboardAPI.cancelLicense();
+    renderLicenseBadge();
+    renderLicenseSettings();
+  });
+
+  // ---------- Einstellungen: PIN ----------
+
+  async function renderPinSettings() {
+    const hasPin = await window.dashboardAPI.hasPin();
+    pinStatusText.textContent = hasPin ? 'PIN-Sperre ist aktiv.' : 'Keine PIN gesetzt.';
+    pinSetRow.style.display = hasPin ? 'none' : 'flex';
+    pinRemoveRow.style.display = hasPin ? 'flex' : 'none';
+  }
+
+  document.getElementById('savePinBtn').addEventListener('click', async () => {
+    try {
+      await window.dashboardAPI.setPin(newPinInput.value);
+      newPinInput.value = '';
+      await renderPinSettings();
+    } catch (err) {
+      pinStatusText.textContent = 'PIN muss mindestens 4 Zeichen haben.';
+    }
+  });
+
+  document.getElementById('removePinBtn').addEventListener('click', async () => {
+    const ok = await window.dashboardAPI.removePin(currentPinInput.value);
+    currentPinInput.value = '';
+    if (ok) {
+      await renderPinSettings();
+    } else {
+      pinStatusText.textContent = 'Falsche PIN – entfernen fehlgeschlagen.';
+    }
+  });
+
+  document.getElementById('openSettingsBtn').addEventListener('click', async () => {
+    await renderPinSettings();
+    renderLicenseSettings();
+    settingsModal.classList.add('visible');
+  });
+  document.getElementById('closeSettingsBtn').addEventListener('click', () => {
+    settingsModal.classList.remove('visible');
+  });
+
+  // ---------- Dozenten ----------
 
   function openAddDozentModal() {
     if (state.dozenten.length >= MAX_DOZENTEN) return;
@@ -82,10 +258,16 @@
     render();
   }
 
-  function addItem(dozentId, listKey, text) {
+  function addItem(dozentId, listKey, text, opts) {
     const dozent = findDozent(dozentId);
     if (!dozent || !text.trim()) return;
-    dozent[listKey].push({ id: uid(), text: text.trim(), done: false });
+    dozent[listKey].push({
+      id: uid(),
+      text: text.trim(),
+      done: false,
+      priority: (opts && opts.priority) || 'normal',
+      dueDate: (opts && opts.dueDate) || null
+    });
     persist();
     render();
   }
@@ -150,15 +332,22 @@
     state.dozenten.forEach((dozent) => {
       const tab = document.createElement('div');
       tab.className = 'dozent-tab' + (dozent.id === activeDozentId ? ' active' : '');
-      tab.innerHTML = `<span class="tab-name"></span><span class="remove-x" title="Entfernen">&times;</span>`;
-      tab.querySelector('.tab-name').textContent = dozent.name;
+      const nameSpan = document.createElement('span');
+      nameSpan.className = 'tab-name';
+      nameSpan.textContent = dozent.name;
+      const removeSpan = document.createElement('span');
+      removeSpan.className = 'remove-x';
+      removeSpan.title = 'Entfernen';
+      removeSpan.textContent = '×';
+      tab.appendChild(nameSpan);
+      tab.appendChild(removeSpan);
 
-      tab.querySelector('.tab-name').addEventListener('click', () => {
+      nameSpan.addEventListener('click', () => {
         activeDozentId = dozent.id;
         render();
       });
 
-      tab.querySelector('.remove-x').addEventListener('click', (e) => {
+      removeSpan.addEventListener('click', (e) => {
         e.stopPropagation();
         openDeleteDozentModal(dozent.id);
       });
@@ -175,6 +364,30 @@
     dozentTabs.appendChild(addBtn);
   }
 
+  function matchesSearch(item) {
+    if (!searchQuery) return true;
+    return item.text.toLowerCase().includes(searchQuery);
+  }
+
+  function buildItemMeta(item) {
+    const meta = document.createElement('span');
+    meta.className = 'item-meta';
+
+    const badge = document.createElement('span');
+    badge.className = 'priority-badge priority-' + item.priority;
+    badge.textContent = PRIORITY_LABELS[item.priority] || PRIORITY_LABELS.normal;
+    meta.appendChild(badge);
+
+    if (item.dueDate) {
+      const due = document.createElement('span');
+      due.className = 'due-badge' + (isOverdue(item) ? ' overdue' : '');
+      due.textContent = formatDate(item.dueDate);
+      meta.appendChild(due);
+    }
+
+    return meta;
+  }
+
   function buildListColumn({ title, extraClass, dozentId, listKey, items, renderItem }) {
     const col = document.createElement('div');
     col.className = 'list-column' + (extraClass ? ' ' + extraClass : '');
@@ -188,26 +401,66 @@
     const input = document.createElement('input');
     input.type = 'text';
     input.placeholder = 'Neuer Eintrag...';
+    const prioritySelect = document.createElement('select');
+    prioritySelect.className = 'priority-select';
+    PRIORITIES.forEach((p) => {
+      const opt = document.createElement('option');
+      opt.value = p;
+      opt.textContent = PRIORITY_LABELS[p];
+      prioritySelect.appendChild(opt);
+    });
+    const dateInput = document.createElement('input');
+    dateInput.type = 'date';
+    dateInput.className = 'due-input';
     const addBtn = document.createElement('button');
     addBtn.textContent = '+';
-    addBtn.addEventListener('click', () => {
-      addItem(dozentId, listKey, input.value);
+    const submit = () => {
+      addItem(dozentId, listKey, input.value, {
+        priority: prioritySelect.value,
+        dueDate: dateInput.value || null
+      });
       input.value = '';
+      dateInput.value = '';
+      prioritySelect.value = 'normal';
       input.focus();
-    });
+    };
+    addBtn.addEventListener('click', submit);
     input.addEventListener('keydown', (e) => {
-      if (e.key === 'Enter') addBtn.click();
+      if (e.key === 'Enter') submit();
     });
     addRow.appendChild(input);
+    addRow.appendChild(prioritySelect);
+    addRow.appendChild(dateInput);
     addRow.appendChild(addBtn);
     col.appendChild(addRow);
 
     const ul = document.createElement('ul');
     ul.className = 'item-list';
-    items.forEach((item) => ul.appendChild(renderItem(item)));
+    items.filter(matchesSearch).forEach((item) => ul.appendChild(renderItem(item)));
     col.appendChild(ul);
 
     return col;
+  }
+
+  function renderStats(dozent) {
+    statsBar.innerHTML = '';
+    const stats = [
+      { label: 'Offene Aufgaben', value: dozent.todos.filter((i) => !i.done).length },
+      { label: 'Erledigte Aufgaben', value: dozent.todos.filter((i) => i.done).length },
+      { label: 'Offene Projekte', value: dozent.openProjects.length },
+      { label: 'Abgeschlossene Projekte', value: dozent.doneProjects.length },
+      {
+        label: 'Überfällig',
+        value: [...dozent.todos, ...dozent.openProjects].filter(isOverdue).length,
+        warn: true
+      }
+    ];
+    stats.forEach((s) => {
+      const pill = document.createElement('span');
+      pill.className = 'stat-pill' + (s.warn && s.value > 0 ? ' warn' : '');
+      pill.textContent = `${s.label}: ${s.value}`;
+      statsBar.appendChild(pill);
+    });
   }
 
   function renderPanel() {
@@ -215,19 +468,22 @@
 
     if (!state.dozenten.length) {
       content.appendChild(emptyState);
+      statsBar.innerHTML = '';
       return;
     }
 
     const dozent = findDozent(activeDozentId) || state.dozenten[0];
     activeDozentId = dozent.id;
+    renderStats(dozent);
 
     const panel = document.createElement('div');
     panel.className = 'dozent-panel';
 
     const header = document.createElement('div');
     header.className = 'panel-header';
-    header.innerHTML = `<h2></h2>`;
-    header.querySelector('h2').textContent = dozent.name;
+    const h2 = document.createElement('h2');
+    h2.textContent = dozent.name;
+    header.appendChild(h2);
     panel.appendChild(header);
 
     const grid = document.createElement('div');
@@ -243,6 +499,7 @@
       renderItem: (item) => {
         const li = document.createElement('li');
         if (item.done) li.classList.add('completed');
+        if (isOverdue(item)) li.classList.add('overdue-row');
         const checkbox = document.createElement('input');
         checkbox.type = 'checkbox';
         checkbox.checked = item.done;
@@ -257,6 +514,7 @@
         delBtn.addEventListener('click', () => deleteItem(dozent.id, 'todos', item.id));
         li.appendChild(checkbox);
         li.appendChild(span);
+        li.appendChild(buildItemMeta(item));
         li.appendChild(delBtn);
         return li;
       }
@@ -271,6 +529,7 @@
       items: dozent.openProjects,
       renderItem: (item) => {
         const li = document.createElement('li');
+        if (isOverdue(item)) li.classList.add('overdue-row');
         const span = document.createElement('span');
         span.className = 'item-text';
         span.textContent = item.text;
@@ -287,6 +546,7 @@
         delBtn.title = 'Löschen';
         delBtn.addEventListener('click', () => deleteItem(dozent.id, 'openProjects', item.id));
         li.appendChild(span);
+        li.appendChild(buildItemMeta(item));
         li.appendChild(doneBtn);
         li.appendChild(delBtn);
         return li;
@@ -319,6 +579,7 @@
         delBtn.title = 'Löschen';
         delBtn.addEventListener('click', () => deleteItem(dozent.id, 'doneProjects', item.id));
         li.appendChild(span);
+        li.appendChild(buildItemMeta(item));
         li.appendChild(undoBtn);
         li.appendChild(delBtn);
         return li;
@@ -412,14 +673,34 @@
   document.getElementById('cancelDeleteDozent').addEventListener('click', closeDeleteDozentModal);
   document.getElementById('confirmDeleteDozent').addEventListener('click', confirmDeleteDozent);
 
-  async function init() {
+  globalSearch.addEventListener('input', () => {
+    searchQuery = globalSearch.value.trim().toLowerCase();
+    renderPanel();
+  });
+
+  async function afterUnlock() {
     const loaded = await window.dashboardAPI.loadData();
     state = loaded && Array.isArray(loaded.dozenten) ? loaded : { dozenten: [] };
     state.dozenten.forEach((d) => {
       if (!Array.isArray(d.chat)) d.chat = [];
+      [...d.todos, ...d.openProjects, ...d.doneProjects].forEach((item) => {
+        if (!item.priority) item.priority = 'normal';
+        if (item.dueDate === undefined) item.dueDate = null;
+      });
     });
     activeDozentId = state.dozenten.length ? state.dozenten[0].id : null;
     render();
+    await refreshLicense();
+    setInterval(refreshLicense, 60 * 60 * 1000);
+  }
+
+  async function init() {
+    const pinSet = await window.dashboardAPI.hasPin();
+    if (pinSet) {
+      showLock();
+    } else {
+      await afterUnlock();
+    }
   }
 
   init();
