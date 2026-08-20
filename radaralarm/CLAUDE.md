@@ -3,6 +3,14 @@
 Guidance specific to `radaralarm/`, a standalone project inside this repo (see the
 root `CLAUDE.md` for how it relates to the Dozenten Dashboard and `omniroute/`).
 
+## Standing rule: always include a download button
+
+For every deliverable file handed to the user (video, flyer/image, PDF, any
+future asset) — always ship it with a working download button, not just a
+bare file. Concretely: wrap it in a self-contained HTML page (per the pattern
+below) with a real `<a download>`/blob-download button, in addition to
+sending the raw file. Do this by default, without being asked each time.
+
 ## Brand identity (persistent — apply to all future visual work here)
 
 Every visual asset for RadarAlarm (app UI, demo videos, flyers, social posts,
