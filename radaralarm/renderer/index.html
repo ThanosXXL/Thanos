@@ -16,6 +16,7 @@
       <span class="pin-hint" id="pinHint" style="display:none;">Klicke auf den Grundriss, um den Mangel zu platzieren – oder Abbrechen.</span>
       <button class="btn-secondary" id="cancelPinPlacementBtn" style="display:none;">Platzierung abbrechen</button>
       <span class="saved-indicator" id="savedIndicator"></span>
+      <button class="btn-secondary header-btn" id="dashboardBtn" title="Übersicht über alle Projekte">🏠 Übersicht</button>
       <button class="btn-primary header-btn" id="downloadBtn">⬇ Demo herunterladen</button>
     </div>
   </header>
@@ -73,6 +74,11 @@
         <input type="date" id="newDefectDueDate">
       </div>
       <div class="form-row">
+        <select id="newDefectAssignee">
+          <option value="">Nicht zugewiesen</option>
+        </select>
+      </div>
+      <div class="form-row">
         <button id="newDefectPhotoBtn" class="btn-secondary" type="button">📷 Foto anhängen</button>
         <span class="settings-hint" id="newDefectPhotoStatus"></span>
       </div>
@@ -104,6 +110,11 @@
         <input type="text" id="detailTrade" placeholder="Gewerk">
         <input type="date" id="detailDueDate">
       </div>
+      <div class="form-row">
+        <select id="detailAssignee">
+          <option value="">Nicht zugewiesen</option>
+        </select>
+      </div>
       <textarea id="detailDescription" rows="3" placeholder="Beschreibung"></textarea>
       <div class="form-row">
         <img id="detailPhotoPreview" class="photo-preview" style="display:none;">
@@ -120,9 +131,47 @@
         </div>
       </section>
 
+      <section class="settings-section">
+        <h3>Verlauf</h3>
+        <div class="activity-log" id="detailActivity"></div>
+      </section>
+
       <div class="modal-actions">
         <button id="deleteDefectBtn" class="btn-danger">Mangel löschen</button>
         <button id="closeDefectDetailBtn" class="btn-secondary">Schließen</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal: Etage hinzufügen -->
+  <div class="modal-overlay" id="addFloorModal">
+    <div class="modal">
+      <h2>Neue Etage</h2>
+      <input type="text" id="newFloorName" placeholder="Name (z.B. 1. OG)" maxlength="40">
+      <div class="modal-actions">
+        <button id="cancelAddFloor" class="btn-secondary">Abbrechen</button>
+        <button id="confirmAddFloor" class="btn-primary">Anlegen</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal: Team verwalten -->
+  <div class="modal-overlay" id="teamModal">
+    <div class="modal">
+      <h2>Team verwalten</h2>
+      <div class="team-list" id="teamList"></div>
+      <div class="form-row">
+        <input type="text" id="newTeamName" placeholder="Name" maxlength="60">
+        <select id="newTeamRole">
+          <option value="Bauleitung">Bauleitung</option>
+          <option value="Architektur">Architektur</option>
+          <option value="Gewerk">Gewerk</option>
+          <option value="Auftraggeber">Auftraggeber</option>
+        </select>
+        <button id="addTeamMemberBtn" class="btn-primary" type="button">+ Hinzufügen</button>
+      </div>
+      <div class="modal-actions">
+        <button id="closeTeamModalBtn" class="btn-secondary">Schließen</button>
       </div>
     </div>
   </div>

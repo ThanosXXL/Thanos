@@ -627,3 +627,167 @@ main#content {
 }
 
 .toast.visible { bottom: 24px; }
+
+/* ---------- Kleine Buttons ---------- */
+
+.btn-secondary.small,
+.btn-primary.small {
+  padding: 6px 12px;
+  font-size: 12px;
+}
+
+/* ---------- Etagen ---------- */
+
+.floor-tabs {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-wrap: wrap;
+  margin-bottom: 10px;
+}
+
+.floor-tab {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 5px 10px;
+  border-radius: 14px;
+  font-size: 12px;
+  background: #1c1a20;
+  border: 1px solid #35323a;
+  color: var(--text-muted);
+  cursor: pointer;
+}
+
+.floor-tab.active {
+  background: rgba(212, 175, 55, 0.16);
+  border-color: var(--gold-dark);
+  color: var(--gold-bright);
+}
+
+.floor-tab-remove {
+  font-weight: bold;
+  border-radius: 50%;
+  padding: 0 3px;
+}
+
+.floor-tab-remove:hover { background: var(--danger); color: var(--white); }
+
+/* ---------- Team ---------- */
+
+.team-list {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  max-height: 200px;
+  overflow-y: auto;
+  margin-bottom: 12px;
+}
+
+.team-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: #1c1a20;
+  border: 1px solid #2f2c36;
+  border-radius: 6px;
+  padding: 7px 10px;
+  font-size: 13px;
+}
+
+.assignee-badge { color: var(--gold-bright); }
+
+/* ---------- Verlauf ---------- */
+
+.activity-log {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  max-height: 140px;
+  overflow-y: auto;
+  font-size: 12px;
+}
+
+.activity-row {
+  display: flex;
+  justify-content: space-between;
+  gap: 10px;
+  color: var(--text-muted);
+  border-bottom: 1px solid #2a2731;
+  padding-bottom: 4px;
+}
+
+/* ---------- Kanban ---------- */
+
+.kanban-board {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 12px;
+  max-height: 60vh;
+  overflow-y: auto;
+}
+
+.kanban-column {
+  background: #1c1a20;
+  border: 1px solid #2f2c36;
+  border-radius: 8px;
+  padding: 8px;
+  min-height: 120px;
+}
+
+.kanban-column h4 {
+  margin: 0 0 8px 0;
+  font-size: 12px;
+  text-transform: uppercase;
+  letter-spacing: 0.4px;
+  color: var(--gold);
+}
+
+.defect-card.compact {
+  flex-direction: column;
+  padding: 8px;
+  margin-bottom: 8px;
+}
+
+.kanban-move-row {
+  display: flex;
+  justify-content: flex-end;
+  gap: 4px;
+  margin-top: 6px;
+}
+
+@media (max-width: 900px) {
+  .kanban-board { grid-template-columns: 1fr; }
+}
+
+/* ---------- Dashboard ---------- */
+
+.dashboard-panel h2 {
+  color: var(--gold-bright);
+  border-bottom: 2px solid var(--gold-dark);
+  padding-bottom: 8px;
+}
+
+.dashboard-cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+  gap: 16px;
+  margin-top: 18px;
+}
+
+.dashboard-card {
+  background: var(--panel-gradient);
+  border: 1px solid #2f2c36;
+  border-radius: 12px;
+  padding: 16px;
+  cursor: pointer;
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.5), inset 0 1px 0 rgba(255, 255, 255, 0.04);
+  transition: transform 0.12s ease, border-color 0.12s ease;
+}
+
+.dashboard-card:hover {
+  transform: translateY(-2px);
+  border-color: var(--gold-dark);
+}
+
+.dashboard-card h3 { margin: 0 0 4px 0; color: var(--gold-bright); }

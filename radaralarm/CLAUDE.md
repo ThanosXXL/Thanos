@@ -73,3 +73,36 @@ There is no license/subscription/payment backend for this project (see chat
 history from when this was discussed) — don't imply real billing, license
 enforcement beyond the local checksum-format check, or a hosted download
 link exists unless one has actually been built.
+
+## "Vollversion" scope — explicitly split by the user, mid-flight
+
+When asked whether a full version was possible, the user answered three
+sub-questions differently — don't collapse them back into one "just build
+everything" task:
+
+1. **Demo limits (2 projects / 8 defects)**: explicitly "NEIN" — leave as is.
+2. **More local features ("das Maximale")**: "JA" — this is what got built
+   (see below). Keep extending this list when asked for more, still fully
+   local/offline, no account system.
+3. **Real multi-user cloud + real paid subscription**: "Ja auch", but the
+   user deferred both sub-decisions explicitly — **ask again before
+   building either**, don't just wire something up:
+   - Hosting/backend: user said it depends on which customer(s) it's for —
+     ask what to use (or whether to recommend something, e.g. Supabase)
+     only once real cloud work actually starts.
+   - Payments: user said to set up a real Stripe-style account "once it
+     starts" — ask again at that point rather than assuming test/mock
+     billing is wanted, and don't draft binding legal text (AGB/Widerruf)
+     without flagging it needs a real legal review.
+
+Local feature set built for point 2 (all in `renderer.js`/`main.js`, no
+external services): team members + roles per project, defect assignment,
+auto-logged per-defect activity history, desktop notifications (new defect /
+defect done / new comment) via `Notification` in the main process, multiple
+floor plans ("Etagen") per project with per-floor pins, a Kanban view
+(offen/in Bearbeitung/erledigt, click-to-move) alongside the list view, a
+cross-project dashboard ("Übersicht"), and PDF (via `webContents.printToPDF`
+in a hidden `BrowserWindow`, no dependency needed) + CSV (semicolon-delimited,
+BOM-prefixed for Excel) exports per project. `window.prompt()` does not work
+in Electron's renderer (Chromium disabled it) — use a real modal for any new
+free-text input, not `prompt()`, as originally attempted for adding a floor.

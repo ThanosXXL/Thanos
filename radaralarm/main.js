@@ -26,11 +26,24 @@ function isValidComment(c) {
   return c && typeof c === 'object' && typeof c.id === 'string' && typeof c.text === 'string';
 }
 
+function isValidActivity(a) {
+  return a && typeof a === 'object' && typeof a.id === 'string' && typeof a.text === 'string';
+}
+
 function isValidDefect(d) {
   if (!d || typeof d !== 'object') return false;
   if (typeof d.id !== 'string' || typeof d.title !== 'string') return false;
   if (!Array.isArray(d.comments) || !d.comments.every(isValidComment)) return false;
+  if (!Array.isArray(d.activity) || !d.activity.every(isValidActivity)) return false;
   return true;
+}
+
+function isValidTeamMember(t) {
+  return t && typeof t === 'object' && typeof t.id === 'string' && typeof t.name === 'string';
+}
+
+function isValidFloor(f) {
+  return f && typeof f === 'object' && typeof f.id === 'string' && typeof f.name === 'string';
 }
 
 function isValidData(data) {
@@ -40,6 +53,8 @@ function isValidData(data) {
     if (!p || typeof p !== 'object') return false;
     if (typeof p.id !== 'string' || typeof p.name !== 'string') return false;
     if (!Array.isArray(p.defects) || !Array.isArray(p.pins)) return false;
+    if (!Array.isArray(p.floors) || !p.floors.every(isValidFloor)) return false;
+    if (!Array.isArray(p.team) || !p.team.every(isValidTeamMember)) return false;
     if (p.defects.length > DEMO_MAX_DEFECTS_PER_PROJECT) return false;
     return p.defects.every(isValidDefect);
   });
@@ -73,12 +88,44 @@ async function pickImage() {
   return `data:${mime};base64,${buffer.toString('base64')}`;
 }
 
+async function exportPdfReport(html, suggestedName) {
+  const win = new BrowserWindow({
+    show: false,
+    webPreferences: { sandbox: true, contextIsolation: true, nodeIntegration: false }
+  });
+  try {
+    await win.loadURL('data:text/html;charset=utf-8,' + encodeURIComponent(html));
+    const pdfBuffer = await win.webContents.printToPDF({ printBackground: true, pageSize: 'A4' });
+    const result = await dialog.showSaveDialog({
+      title: 'Mängelbericht speichern',
+      defaultPath: suggestedName,
+      filters: [{ name: 'PDF', extensions: ['pdf'] }]
+    });
+    if (result.canceled || !result.filePath) return false;
+    fs.writeFileSync(result.filePath, pdfBuffer);
+    return true;
+  } finally {
+    win.destroy();
+  }
+}
+
+async function exportCsvReport(csv, suggestedName) {
+  const result = await dialog.showSaveDialog({
+    title: 'CSV-Export speichern',
+    defaultPath: suggestedName,
+    filters: [{ name: 'CSV', extensions: ['csv'] }]
+  });
+  if (result.canceled || !result.filePath) return false;
+  fs.writeFileSync(result.filePath, '﻿' + csv, 'utf-8');
+  return true;
+}
+
 function createWindow() {
   const win = new BrowserWindow({
-    width: 1280,
-    height: 840,
-    minWidth: 960,
-    minHeight: 620,
+    width: 1320,
+    height: 860,
+    minWidth: 1000,
+    minHeight: 640,
     backgroundColor: '#0b0b0d',
     webPreferences: {
       preload: path.join(__dirname, 'preload.js'),
@@ -144,6 +191,17 @@ ipcMain.handle('open-external', (event, url) => {
   }
   shell.openExternal(parsed.toString());
   return true;
+});
+
+ipcMain.handle('export-pdf-report', (event, { html, suggestedName }) => exportPdfReport(html, suggestedName));
+
+ipcMain.handle('export-csv-report', (event, { csv, suggestedName }) => exportCsvReport(csv, suggestedName));
+
+ipcMain.handle('notify', (event, { title, body }) => {
+  const { Notification } = require('electron');
+  if (Notification.isSupported()) {
+    new Notification({ title: String(title).slice(0, 200), body: String(body).slice(0, 500) }).show();
+  }
 });
 
 app.whenReady().then(() => {
