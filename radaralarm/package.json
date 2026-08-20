@@ -6,6 +6,7 @@
   "author": "",
   "license": "UNLICENSED",
   "private": true,
+  "repository": "https://github.com/ThanosXXL/Thanos",
   "scripts": {
     "start": "electron .",
     "dist": "electron-builder"
@@ -16,6 +17,7 @@
     "electron-builder": "^24.13.3"
   },
   "build": {
+    "electronVersion": "31.0.0",
     "appId": "com.radaralarm.demo",
     "productName": "RadarAlarm Demo",
     "files": [
