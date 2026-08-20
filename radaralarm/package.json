@@ -1,0 +1,40 @@
+{
+  "name": "radaralarm",
+  "version": "0.1.0-demo",
+  "description": "RadarAlarm Demo – Baudokumentation, Mängelmanagement und Kommunikation für Bau- und Immobilienprojekte (lokale Vorführversion)",
+  "main": "main.js",
+  "author": "",
+  "license": "UNLICENSED",
+  "private": true,
+  "scripts": {
+    "start": "electron .",
+    "dist": "electron-builder"
+  },
+  "dependencies": {},
+  "devDependencies": {
+    "electron": "^31.0.0",
+    "electron-builder": "^24.13.3"
+  },
+  "build": {
+    "appId": "com.radaralarm.demo",
+    "productName": "RadarAlarm Demo",
+    "files": [
+      "main.js",
+      "preload.js",
+      "renderer/**/*",
+      "package.json"
+    ],
+    "directories": {
+      "output": "dist"
+    },
+    "win": {
+      "target": "nsis"
+    },
+    "mac": {
+      "target": "dmg"
+    },
+    "linux": {
+      "target": "AppImage"
+    }
+  }
+}

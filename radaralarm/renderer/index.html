@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; object-src 'none'; base-uri 'none'; form-action 'none';">
+<title>RadarAlarm</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <header class="app-header">
+    <div class="brand">
+      <h1>RadarAlarm</h1>
+      <span class="demo-badge">DEMO</span>
+    </div>
+    <div class="header-actions">
+      <span class="pin-hint" id="pinHint" style="display:none;">Klicke auf den Grundriss, um den Mangel zu platzieren – oder Abbrechen.</span>
+      <button class="btn-secondary" id="cancelPinPlacementBtn" style="display:none;">Platzierung abbrechen</button>
+      <span class="saved-indicator" id="savedIndicator"></span>
+      <button class="btn-primary header-btn" id="downloadBtn">⬇ Demo herunterladen</button>
+    </div>
+  </header>
+
+  <nav class="project-tabs" id="projectTabs">
+    <!-- Projekt-Tabs werden hier eingefügt -->
+  </nav>
+
+  <main id="content">
+    <div class="empty-state" id="emptyState">
+      <p>Noch keine Projekte angelegt.</p>
+      <button id="addProjectEmptyBtn" class="btn-primary">+ Projekt anlegen</button>
+    </div>
+  </main>
+
+  <!-- Modal: Projekt anlegen -->
+  <div class="modal-overlay" id="addProjectModal">
+    <div class="modal">
+      <h2>Neues Bauprojekt</h2>
+      <input type="text" id="newProjectName" placeholder="Projektname" maxlength="80">
+      <input type="text" id="newProjectAddress" placeholder="Adresse / Baustelle (optional)" maxlength="120">
+      <div class="modal-actions">
+        <button id="cancelAddProject" class="btn-secondary">Abbrechen</button>
+        <button id="confirmAddProject" class="btn-primary">Anlegen</button>
+      </div>
+      <p class="settings-hint" id="addProjectHint"></p>
+    </div>
+  </div>
+
+  <!-- Modal: Projekt löschen bestätigen -->
+  <div class="modal-overlay" id="deleteProjectModal">
+    <div class="modal">
+      <h2>Projekt entfernen?</h2>
+      <p id="deleteProjectText"></p>
+      <div class="modal-actions">
+        <button id="cancelDeleteProject" class="btn-secondary">Abbrechen</button>
+        <button id="confirmDeleteProject" class="btn-danger">Entfernen</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal: Neuer Mangel -->
+  <div class="modal-overlay" id="addDefectModal">
+    <div class="modal">
+      <h2>Neuer Mangel</h2>
+      <input type="text" id="newDefectTitle" placeholder="Titel" maxlength="100">
+      <textarea id="newDefectDescription" placeholder="Beschreibung" maxlength="500" rows="3"></textarea>
+      <div class="form-row">
+        <select id="newDefectPriority">
+          <option value="normal">Normal</option>
+          <option value="hoch">Hoch</option>
+          <option value="dringend">Dringend</option>
+        </select>
+        <input type="text" id="newDefectTrade" placeholder="Gewerk (z.B. Elektro)" maxlength="60">
+        <input type="date" id="newDefectDueDate">
+      </div>
+      <div class="form-row">
+        <button id="newDefectPhotoBtn" class="btn-secondary" type="button">📷 Foto anhängen</button>
+        <span class="settings-hint" id="newDefectPhotoStatus"></span>
+      </div>
+      <div class="modal-actions">
+        <button id="cancelAddDefect" class="btn-secondary">Abbrechen</button>
+        <button id="confirmAddDefect" class="btn-primary">Anlegen</button>
+      </div>
+      <p class="settings-error" id="addDefectError"></p>
+    </div>
+  </div>
+
+  <!-- Modal: Mangel-Detail -->
+  <div class="modal-overlay" id="defectDetailModal">
+    <div class="modal defect-modal">
+      <h2 id="defectDetailTitle"></h2>
+      <div class="form-row">
+        <select id="detailStatus">
+          <option value="offen">Offen</option>
+          <option value="in_bearbeitung">In Bearbeitung</option>
+          <option value="erledigt">Erledigt</option>
+        </select>
+        <select id="detailPriority">
+          <option value="normal">Normal</option>
+          <option value="hoch">Hoch</option>
+          <option value="dringend">Dringend</option>
+        </select>
+      </div>
+      <div class="form-row">
+        <input type="text" id="detailTrade" placeholder="Gewerk">
+        <input type="date" id="detailDueDate">
+      </div>
+      <textarea id="detailDescription" rows="3" placeholder="Beschreibung"></textarea>
+      <div class="form-row">
+        <img id="detailPhotoPreview" class="photo-preview" style="display:none;">
+        <button id="detailPhotoBtn" class="btn-secondary" type="button">📷 Foto ändern</button>
+        <button id="detailPlacePinBtn" class="btn-secondary" type="button">📍 Auf Grundriss platzieren</button>
+      </div>
+
+      <section class="settings-section">
+        <h3>Kommunikation</h3>
+        <div class="chat-messages" id="detailComments"></div>
+        <div class="add-item-row">
+          <input type="text" id="detailCommentInput" placeholder="Kommentar schreiben...">
+          <button id="detailCommentSendBtn">Senden</button>
+        </div>
+      </section>
+
+      <div class="modal-actions">
+        <button id="deleteDefectBtn" class="btn-danger">Mangel löschen</button>
+        <button id="closeDefectDetailBtn" class="btn-secondary">Schließen</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="toast" id="undoToast">
+    <span id="toastMessage"></span>
+    <button id="toastUndoBtn" class="btn-secondary">Rückgängig</button>
+  </div>
+
+  <script src="renderer.js"></script>
+</body>
+</html>
