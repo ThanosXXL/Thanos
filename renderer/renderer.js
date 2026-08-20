@@ -7,6 +7,13 @@
   let activeDozentId = null;
   let searchQuery = '';
   let license = null;
+  let editingItemId = null;
+  let pinIsSet = false;
+  let appStarted = false;
+  let idleTimer = null;
+  let lastDeleted = null;
+  let toastTimeoutId = null;
+  const IDLE_LOCK_MS = 5 * 60 * 1000;
 
   const dozentTabs = document.getElementById('dozentTabs');
   const content = document.getElementById('content');
@@ -14,6 +21,13 @@
   const statsBar = document.getElementById('statsBar');
   const globalSearch = document.getElementById('globalSearch');
   const licenseBadge = document.getElementById('licenseBadge');
+  const liveClock = document.getElementById('liveClock');
+  const lockNowBtn = document.getElementById('lockNowBtn');
+  const savedIndicator = document.getElementById('savedIndicator');
+  const undoToast = document.getElementById('undoToast');
+  const toastMessage = document.getElementById('toastMessage');
+  const toastUndoBtn = document.getElementById('toastUndoBtn');
+  const backupList = document.getElementById('backupList');
 
   const addDozentModal = document.getElementById('addDozentModal');
   const newDozentNameInput = document.getElementById('newDozentName');
@@ -43,12 +57,42 @@
   }
 
   function persist() {
-    window.dashboardAPI.saveData(state);
+    window.dashboardAPI.saveData(state)
+      .then(() => {
+        savedIndicator.classList.remove('save-error');
+        savedIndicator.textContent = 'Gespeichert um ' + new Date().toLocaleTimeString('de-DE');
+      })
+      .catch(() => {
+        savedIndicator.classList.add('save-error');
+        savedIndicator.textContent = 'Speichern fehlgeschlagen!';
+      });
   }
 
   function findDozent(id) {
     return state.dozenten.find((d) => d.id === id);
   }
+
+  function normalizeDozent(d) {
+    if (!Array.isArray(d.chat)) d.chat = [];
+    [...d.todos, ...d.openProjects, ...d.doneProjects].forEach((item) => {
+      if (!item.priority) item.priority = 'normal';
+      if (item.dueDate === undefined) item.dueDate = null;
+    });
+  }
+
+  function showUndoToast(message, undoFn) {
+    lastDeleted = { undoFn };
+    toastMessage.textContent = message;
+    undoToast.classList.add('visible');
+    clearTimeout(toastTimeoutId);
+    toastTimeoutId = setTimeout(() => undoToast.classList.remove('visible'), 6000);
+  }
+
+  toastUndoBtn.addEventListener('click', () => {
+    if (lastDeleted && lastDeleted.undoFn) lastDeleted.undoFn();
+    undoToast.classList.remove('visible');
+    lastDeleted = null;
+  });
 
   function formatDate(isoOrTimestamp) {
     const d = new Date(isoOrTimestamp);
@@ -63,6 +107,7 @@
   // ---------- Sperrbildschirm ----------
 
   function showLock() {
+    clearTimeout(idleTimer);
     lockOverlay.classList.add('visible');
     lockError.textContent = '';
     lockPinInput.value = '';
@@ -74,11 +119,30 @@
     lockOverlay.classList.remove('visible');
   }
 
+  function resetIdleTimer() {
+    if (lockOverlay.classList.contains('visible')) return;
+    clearTimeout(idleTimer);
+    if (!pinIsSet) return;
+    idleTimer = setTimeout(showLock, IDLE_LOCK_MS);
+  }
+
+  ['mousemove', 'mousedown', 'keydown', 'scroll', 'click'].forEach((evt) => {
+    document.addEventListener(evt, resetIdleTimer);
+  });
+
+  lockNowBtn.addEventListener('click', showLock);
+
   async function attemptUnlock() {
     const result = await window.dashboardAPI.verifyPin(lockPinInput.value);
     if (result.ok) {
       hideLock();
-      await afterUnlock();
+      if (appStarted) {
+        resetIdleTimer();
+      } else {
+        appStarted = true;
+        render();
+        resetIdleTimer();
+      }
       return;
     }
     if (result.lockedForMs) {
@@ -176,6 +240,9 @@
     try {
       await window.dashboardAPI.setPin(newPinInput.value);
       newPinInput.value = '';
+      pinIsSet = true;
+      lockNowBtn.style.display = 'inline-flex';
+      resetIdleTimer();
       await renderPinSettings();
     } catch (err) {
       pinStatusText.textContent = 'PIN muss mindestens 4 Zeichen haben.';
@@ -186,15 +253,55 @@
     const ok = await window.dashboardAPI.removePin(currentPinInput.value);
     currentPinInput.value = '';
     if (ok) {
+      pinIsSet = false;
+      lockNowBtn.style.display = 'none';
+      clearTimeout(idleTimer);
       await renderPinSettings();
     } else {
       pinStatusText.textContent = 'Falsche PIN – entfernen fehlgeschlagen.';
     }
   });
 
+  async function renderBackupList() {
+    const backups = await window.dashboardAPI.listBackups();
+    backupList.innerHTML = '';
+    if (!backups.length) {
+      const p = document.createElement('p');
+      p.className = 'settings-hint';
+      p.textContent = 'Noch keine Sicherungen vorhanden.';
+      backupList.appendChild(p);
+      return;
+    }
+    backups.slice(0, 10).forEach((b) => {
+      const row = document.createElement('div');
+      row.className = 'backup-row';
+      const label = document.createElement('span');
+      label.textContent = new Date(b.mtime).toLocaleString('de-DE');
+      const restoreBtn = document.createElement('button');
+      restoreBtn.className = 'btn-secondary';
+      restoreBtn.textContent = 'Wiederherstellen';
+      restoreBtn.addEventListener('click', () => confirmRestoreBackup(b.file));
+      row.appendChild(label);
+      row.appendChild(restoreBtn);
+      backupList.appendChild(row);
+    });
+  }
+
+  async function confirmRestoreBackup(file) {
+    const ok = window.confirm('Aktuelle Daten durch diese Sicherung ersetzen? Der aktuelle Stand wird vorher zusätzlich gesichert.');
+    if (!ok) return;
+    const restored = await window.dashboardAPI.restoreBackup(file);
+    state = restored;
+    state.dozenten.forEach(normalizeDozent);
+    activeDozentId = state.dozenten.length ? state.dozenten[0].id : null;
+    render();
+    await renderBackupList();
+  }
+
   document.getElementById('openSettingsBtn').addEventListener('click', async () => {
     await renderPinSettings();
     renderLicenseSettings();
+    await renderBackupList();
     settingsModal.classList.add('visible');
   });
   document.getElementById('closeSettingsBtn').addEventListener('click', () => {
@@ -249,13 +356,21 @@
 
   function confirmDeleteDozent() {
     if (!pendingDeleteId) return;
-    state.dozenten = state.dozenten.filter((d) => d.id !== pendingDeleteId);
+    const idx = state.dozenten.findIndex((d) => d.id === pendingDeleteId);
+    if (idx === -1) { closeDeleteDozentModal(); return; }
+    const [removed] = state.dozenten.splice(idx, 1);
     if (activeDozentId === pendingDeleteId) {
       activeDozentId = state.dozenten.length ? state.dozenten[0].id : null;
     }
     persist();
     closeDeleteDozentModal();
     render();
+    showUndoToast(`"${removed.name}" entfernt.`, () => {
+      state.dozenten.splice(idx, 0, removed);
+      activeDozentId = removed.id;
+      persist();
+      render();
+    });
   }
 
   function addItem(dozentId, listKey, text, opts) {
@@ -272,12 +387,28 @@
     render();
   }
 
+  function updateItem(dozentId, listKey, itemId, changes) {
+    const dozent = findDozent(dozentId);
+    if (!dozent) return;
+    const item = dozent[listKey].find((i) => i.id === itemId);
+    if (!item) return;
+    Object.assign(item, changes);
+    persist();
+  }
+
   function deleteItem(dozentId, listKey, itemId) {
     const dozent = findDozent(dozentId);
     if (!dozent) return;
-    dozent[listKey] = dozent[listKey].filter((i) => i.id !== itemId);
+    const idx = dozent[listKey].findIndex((i) => i.id === itemId);
+    if (idx === -1) return;
+    const [removed] = dozent[listKey].splice(idx, 1);
     persist();
     render();
+    showUndoToast('Eintrag gelöscht.', () => {
+      dozent[listKey].splice(idx, 0, removed);
+      persist();
+      render();
+    });
   }
 
   function toggleTodo(dozentId, itemId) {
@@ -321,9 +452,16 @@
   function deleteChatMessage(dozentId, messageId) {
     const dozent = findDozent(dozentId);
     if (!dozent) return;
-    dozent.chat = dozent.chat.filter((m) => m.id !== messageId);
+    const idx = dozent.chat.findIndex((m) => m.id === messageId);
+    if (idx === -1) return;
+    const [removed] = dozent.chat.splice(idx, 1);
     persist();
     render();
+    showUndoToast('Nachricht gelöscht.', () => {
+      dozent.chat.splice(idx, 0, removed);
+      persist();
+      render();
+    });
   }
 
   function renderTabs() {
@@ -386,6 +524,73 @@
     }
 
     return meta;
+  }
+
+  function buildEditRow(dozentId, listKey, item) {
+    const li = document.createElement('li');
+    li.className = 'edit-row';
+
+    const textInput = document.createElement('input');
+    textInput.type = 'text';
+    textInput.className = 'edit-text-input';
+    textInput.value = item.text;
+
+    const prioritySelect = document.createElement('select');
+    prioritySelect.className = 'priority-select';
+    PRIORITIES.forEach((p) => {
+      const opt = document.createElement('option');
+      opt.value = p;
+      opt.textContent = PRIORITY_LABELS[p];
+      if (p === item.priority) opt.selected = true;
+      prioritySelect.appendChild(opt);
+    });
+
+    const dateInput = document.createElement('input');
+    dateInput.type = 'date';
+    dateInput.className = 'due-input';
+    dateInput.value = item.dueDate || '';
+
+    const saveBtn = document.createElement('button');
+    saveBtn.className = 'icon-btn';
+    saveBtn.textContent = '✓';
+    saveBtn.title = 'Speichern';
+    const save = () => {
+      if (!textInput.value.trim()) return;
+      updateItem(dozentId, listKey, item.id, {
+        text: textInput.value.trim(),
+        priority: prioritySelect.value,
+        dueDate: dateInput.value || null
+      });
+      editingItemId = null;
+      render();
+    };
+    saveBtn.addEventListener('click', save);
+    textInput.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter') save();
+      if (e.key === 'Escape') { editingItemId = null; render(); }
+    });
+
+    const cancelBtn = document.createElement('button');
+    cancelBtn.className = 'icon-btn danger';
+    cancelBtn.textContent = '✕';
+    cancelBtn.title = 'Abbrechen';
+    cancelBtn.addEventListener('click', () => { editingItemId = null; render(); });
+
+    li.appendChild(textInput);
+    li.appendChild(prioritySelect);
+    li.appendChild(dateInput);
+    li.appendChild(saveBtn);
+    li.appendChild(cancelBtn);
+    return li;
+  }
+
+  function buildEditButton(item) {
+    const editBtn = document.createElement('button');
+    editBtn.className = 'icon-btn';
+    editBtn.textContent = '✎';
+    editBtn.title = 'Bearbeiten';
+    editBtn.addEventListener('click', () => { editingItemId = item.id; render(); });
+    return editBtn;
   }
 
   function buildListColumn({ title, extraClass, dozentId, listKey, items, renderItem }) {
@@ -497,6 +702,7 @@
       listKey: 'todos',
       items: dozent.todos,
       renderItem: (item) => {
+        if (item.id === editingItemId) return buildEditRow(dozent.id, 'todos', item);
         const li = document.createElement('li');
         if (item.done) li.classList.add('completed');
         if (isOverdue(item)) li.classList.add('overdue-row');
@@ -515,6 +721,7 @@
         li.appendChild(checkbox);
         li.appendChild(span);
         li.appendChild(buildItemMeta(item));
+        li.appendChild(buildEditButton(item));
         li.appendChild(delBtn);
         return li;
       }
@@ -528,6 +735,7 @@
       listKey: 'openProjects',
       items: dozent.openProjects,
       renderItem: (item) => {
+        if (item.id === editingItemId) return buildEditRow(dozent.id, 'openProjects', item);
         const li = document.createElement('li');
         if (isOverdue(item)) li.classList.add('overdue-row');
         const span = document.createElement('span');
@@ -547,6 +755,7 @@
         delBtn.addEventListener('click', () => deleteItem(dozent.id, 'openProjects', item.id));
         li.appendChild(span);
         li.appendChild(buildItemMeta(item));
+        li.appendChild(buildEditButton(item));
         li.appendChild(doneBtn);
         li.appendChild(delBtn);
         return li;
@@ -561,6 +770,7 @@
       listKey: 'doneProjects',
       items: dozent.doneProjects,
       renderItem: (item) => {
+        if (item.id === editingItemId) return buildEditRow(dozent.id, 'doneProjects', item);
         const li = document.createElement('li');
         li.classList.add('completed');
         const span = document.createElement('span');
@@ -580,6 +790,7 @@
         delBtn.addEventListener('click', () => deleteItem(dozent.id, 'doneProjects', item.id));
         li.appendChild(span);
         li.appendChild(buildItemMeta(item));
+        li.appendChild(buildEditButton(item));
         li.appendChild(undoBtn);
         li.appendChild(delBtn);
         return li;
@@ -678,28 +889,39 @@
     renderPanel();
   });
 
-  async function afterUnlock() {
+  function updateClock() {
+    liveClock.textContent = new Date().toLocaleString('de-DE', {
+      weekday: 'short',
+      day: '2-digit',
+      month: '2-digit',
+      year: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit',
+      second: '2-digit'
+    });
+  }
+  updateClock();
+  setInterval(updateClock, 1000);
+
+  async function loadState() {
     const loaded = await window.dashboardAPI.loadData();
     state = loaded && Array.isArray(loaded.dozenten) ? loaded : { dozenten: [] };
-    state.dozenten.forEach((d) => {
-      if (!Array.isArray(d.chat)) d.chat = [];
-      [...d.todos, ...d.openProjects, ...d.doneProjects].forEach((item) => {
-        if (!item.priority) item.priority = 'normal';
-        if (item.dueDate === undefined) item.dueDate = null;
-      });
-    });
+    state.dozenten.forEach(normalizeDozent);
     activeDozentId = state.dozenten.length ? state.dozenten[0].id : null;
-    render();
     await refreshLicense();
     setInterval(refreshLicense, 60 * 60 * 1000);
   }
 
   async function init() {
-    const pinSet = await window.dashboardAPI.hasPin();
-    if (pinSet) {
+    pinIsSet = await window.dashboardAPI.hasPin();
+    lockNowBtn.style.display = pinIsSet ? 'inline-flex' : 'none';
+    await loadState();
+    if (pinIsSet) {
       showLock();
     } else {
-      await afterUnlock();
+      appStarted = true;
+      render();
+      resetIdleTimer();
     }
   }
 

@@ -21,7 +21,9 @@
   <header class="app-header">
     <h1>Dozenten Dashboard</h1>
     <div class="header-actions">
+      <span class="live-clock" id="liveClock"></span>
       <span class="license-badge" id="licenseBadge"></span>
+      <button class="icon-btn header-btn" id="lockNowBtn" title="Jetzt sperren" style="display:none;">&#128274;</button>
       <button class="icon-btn header-btn" id="openSettingsBtn" title="Sicherheit &amp; Abo">&#9881;</button>
     </div>
   </header>
@@ -32,7 +34,13 @@
 
   <div class="toolbar" id="toolbar">
     <input type="text" id="globalSearch" class="search-input" placeholder="Suchen in Aufgaben &amp; Projekten...">
+    <span class="saved-indicator" id="savedIndicator"></span>
     <div class="stats-bar" id="statsBar"></div>
+  </div>
+
+  <div class="toast" id="undoToast">
+    <span id="toastMessage"></span>
+    <button id="toastUndoBtn" class="btn-secondary">Rückgängig</button>
   </div>
 
   <main id="content">
@@ -101,6 +109,12 @@
           <button id="cancelLicenseBtn" class="btn-secondary">Abo kündigen</button>
         </div>
         <p class="settings-error" id="licenseError"></p>
+      </section>
+
+      <section class="settings-section">
+        <h3>Datensicherung</h3>
+        <p class="settings-hint">Automatische Sicherungen (mehrmals täglich). Wiederherstellen ersetzt die aktuellen Daten – der aktuelle Stand wird vorher zusätzlich gesichert.</p>
+        <div class="backup-list" id="backupList"></div>
       </section>
 
       <div class="modal-actions">

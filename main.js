@@ -78,6 +78,32 @@ function runBackup() {
   }
 }
 
+function listBackups() {
+  if (!fs.existsSync(backupsDir)) return [];
+  return fs.readdirSync(backupsDir)
+    .filter((f) => f.startsWith('dozenten-data-') && f.endsWith('.json'))
+    .map((f) => {
+      const stat = fs.statSync(path.join(backupsDir, f));
+      return { file: f, mtime: stat.mtimeMs };
+    })
+    .sort((a, b) => b.mtime - a.mtime);
+}
+
+function restoreBackup(file) {
+  const safeName = path.basename(String(file));
+  const src = path.join(backupsDir, safeName);
+  if (!src.startsWith(backupsDir) || !fs.existsSync(src)) {
+    throw new Error('Backup nicht gefunden');
+  }
+  const parsed = JSON.parse(fs.readFileSync(src, 'utf-8'));
+  if (!isValidData(parsed)) {
+    throw new Error('Ungültiges Backup');
+  }
+  runBackup(); // aktuellen Stand vor dem Überschreiben sichern
+  saveData(parsed);
+  return parsed;
+}
+
 // ---------- PIN-Sperre (Hackerschutz) ----------
 
 function loadSecurity() {
@@ -320,6 +346,10 @@ ipcMain.handle('activate-license', (event, key) => activateLicense(key));
 ipcMain.handle('set-auto-renew', (event, value) => setAutoRenew(value));
 
 ipcMain.handle('cancel-license', () => cancelLicense());
+
+ipcMain.handle('list-backups', () => listBackups());
+
+ipcMain.handle('restore-backup', (event, file) => restoreBackup(file));
 
 app.whenReady().then(() => {
   setupContentSecurityPolicy();
