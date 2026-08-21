@@ -1,3 +1,6 @@
+[![Dozenten Dashboard](https://img.shields.io/badge/📋_Dozenten_Dashboard-0b1f4d?style=for-the-badge)](../README.md)
+[![IT-Schulung Dashboard](https://img.shields.io/badge/💻_IT--Schulung_Dashboard-5b9bd5?style=for-the-badge)](README.md)
+
 # IT-Schulung Dashboard
 
 Desktop-Dashboard (Electron) zur Verwaltung von bis zu vier IT-Schulungen. Jede Schulung hat drei Listen:
