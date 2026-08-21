@@ -1,5 +1,10 @@
 # Dozenten Dashboard
 
+Dieses Repository enthält zwei eigenständige Desktop-Apps, jede mit eigenem Code:
+
+- **Dozenten Dashboard** (dieses Verzeichnis) – Verwaltung von Dozenten, Aufgaben und Projekten
+- **[IT-Schulung Dashboard](it-schulung/README.md)** (`it-schulung/`) – Verwaltung von IT-Schulungen, Aufgaben und Themen
+
 Desktop-Dashboard (Electron) zur Verwaltung von bis zu vier Dozenten. Jeder Dozent hat drei Listen:
 
 1. **Liste 1 – To-Do-Liste** (Aufgabenliste)
