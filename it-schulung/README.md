@@ -9,7 +9,7 @@ Desktop-Dashboard (Electron) zur Verwaltung von bis zu vier IT-Schulungen. Jede 
 Themen lassen sich per Klick von "Offene Themen" nach "Abgeschlossene Themen" verschieben (und zurück).
 Alle Daten werden lokal gespeichert (im Benutzerdatenverzeichnis der App) und bleiben nach dem Neustart erhalten.
 
-Dies ist eine eigenständige App, komplett getrennt vom Dozenten Dashboard im Wurzelverzeichnis dieses
+Dies ist eine eigenständige App, komplett getrennt vom **[Dozenten Dashboard](../README.md)** im Wurzelverzeichnis dieses
 Repositories (eigener Code, eigenes `package.json`, eigene Datendatei). Beide Apps teilen sich keine
 Abhängigkeiten oder Build-Konfiguration.
 
