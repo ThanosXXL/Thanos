@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<title>IT-Schulung Dashboard</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <header class="app-header">
+    <h1>IT-Schulung Dashboard</h1>
+  </header>
+
+  <nav class="schulung-tabs" id="schulungTabs">
+    <!-- Schulungs-Tabs werden hier eingefügt -->
+  </nav>
+
+  <main id="content">
+    <div class="empty-state" id="emptyState">
+      <p>Noch keine Schulungen angelegt.</p>
+      <button id="addSchulungEmptyBtn" class="btn-primary">+ Schulung hinzufügen</button>
+    </div>
+  </main>
+
+  <!-- Modal: Schulung hinzufügen -->
+  <div class="modal-overlay" id="addSchulungModal">
+    <div class="modal">
+      <h2>Neue Schulung hinzufügen</h2>
+      <input type="text" id="newSchulungName" placeholder="Name der Schulung" maxlength="60">
+      <div class="modal-actions">
+        <button id="cancelAddSchulung" class="btn-secondary">Abbrechen</button>
+        <button id="confirmAddSchulung" class="btn-primary">Hinzufügen</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal: Schulung löschen bestätigen -->
+  <div class="modal-overlay" id="deleteSchulungModal">
+    <div class="modal">
+      <h2>Schulung entfernen?</h2>
+      <p id="deleteSchulungText"></p>
+      <div class="modal-actions">
+        <button id="cancelDeleteSchulung" class="btn-secondary">Abbrechen</button>
+        <button id="confirmDeleteSchulung" class="btn-danger">Entfernen</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="renderer.js"></script>
+</body>
+</html>
