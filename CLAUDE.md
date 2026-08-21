@@ -8,6 +8,8 @@ Dozenten Dashboard is a cross-platform Electron desktop app for managing up to f
 
 This repository also hosts a second, unrelated project: `omniroute/` is a vendored snapshot of [OmniRoute](https://github.com/diegosouzapw/OmniRoute) (an AI gateway/router, Next.js + TypeScript monorepo), included as-is with its own `package.json`, tooling, and `CLAUDE.md`. It does not share dependencies, build config, or CI with the Dozenten Dashboard — the root `npm install`/`npm start`/`npm run dist` commands above only ever touch the Dozenten Dashboard files (`main.js`, `preload.js`, `renderer/`); nothing in `omniroute/` is packaged into its installers. Treat `omniroute/` as its own project — see `omniroute/CLAUDE.md` and `omniroute/VENDORED.md` for details and provenance. It is a one-time snapshot, not a live sync with upstream.
 
+A third project, `it-schulung/`, is a separate Electron desktop app for managing up to four IT-Schulungen (IT training courses), built with the same architecture as the Dozenten Dashboard (main/preload/renderer split, `contextIsolation: true`, JSON persistence in `app.getPath('userData')`) but as fully independent code: its own `package.json`, `main.js`, `preload.js`, `renderer/`, and data file (`it-schulung-data.json`, separate from `dozenten-data.json`). Each *Schulung* object is `{ id, name, todos, offeneThemen, abgeschlosseneThemen, chat }` — the training-course equivalent of a *Dozent*. Run it with `npm install` / `npm start` / `npm run dist` from inside `it-schulung/`, not from the repo root. It shares no dependencies, build config, or CI with the Dozenten Dashboard or with `omniroute/`.
+
 ## Commands
 
 ```bash
