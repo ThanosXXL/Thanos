@@ -1,3 +1,6 @@
+[![Dozenten Dashboard](https://img.shields.io/badge/📋_Dozenten_Dashboard-0b1f4d?style=for-the-badge)](README.md)
+[![IT-Schulung Dashboard](https://img.shields.io/badge/💻_IT--Schulung_Dashboard-5b9bd5?style=for-the-badge)](it-schulung/README.md)
+
 # Dozenten Dashboard
 
 Dieses Repository enthält zwei eigenständige Desktop-Apps, jede mit eigenem Code:
