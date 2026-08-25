@@ -853,6 +853,7 @@ body.cursor-active .cursor-glow { opacity: 1; }
 
 .footer-social { display: flex; gap: 12px; justify-content: center; }
 .social-btn {
+  position: relative;
   width: 42px; height: 42px;
   border-radius: 50%;
   display: flex; align-items: center; justify-content: center;
@@ -861,11 +862,32 @@ body.cursor-active .cursor-glow { opacity: 1; }
   color: #fff;
   transition: transform .3s var(--ease), background .3s, box-shadow .3s;
 }
-.social-btn svg { width: 18px; height: 18px; }
+.social-btn svg { width: 18px; height: 18px; position: relative; z-index: 1; }
 .social-btn:hover {
   transform: translateY(-4px) scale(1.08);
   background: linear-gradient(135deg, var(--red-light), var(--red));
   box-shadow: 0 10px 22px -8px rgba(214,31,44,.7);
+}
+/* Lauflicht: die Icons leuchten nacheinander von links nach rechts auf */
+.social-btn::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  background: linear-gradient(135deg, var(--red-light), var(--red));
+  box-shadow: 0 10px 22px -8px rgba(214,31,44,.7);
+  opacity: 0;
+  pointer-events: none;
+  animation: socialLauflicht 3s ease-in-out infinite;
+}
+.footer-social .social-btn:nth-child(1)::after { animation-delay: 0s; }
+.footer-social .social-btn:nth-child(2)::after { animation-delay: .6s; }
+.footer-social .social-btn:nth-child(3)::after { animation-delay: 1.2s; }
+.footer-social .social-btn:nth-child(4)::after { animation-delay: 1.8s; }
+.footer-social .social-btn:nth-child(5)::after { animation-delay: 2.4s; }
+@keyframes socialLauflicht {
+  0%, 4%, 24%, 100% { opacity: 0; }
+  10%, 18% { opacity: 1; }
 }
 
 .footer-meta { display: flex; flex-direction: column; align-items: flex-end; gap: 14px; }
