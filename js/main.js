@@ -193,4 +193,74 @@
       setTimeout(function () { submitLabel.textContent = 'Absenden'; }, 1800);
     });
   }
+
+  /* ---- Formular-Vorschau: Beispielangaben werden automatisch eingetippt ---- */
+  if (form && !window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+    var demoFelder = [
+      { feld: form.firma, text: 'Bergmann Fortbildungen GmbH' },
+      { feld: form.vorname, text: 'Julia' },
+      { feld: form.nachname, text: 'Bergmann' },
+      { feld: form.email, text: 'julia.bergmann@beispiel.de' },
+      { feld: form.nachricht, text: 'Ich interessiere mich für eine Inhouse-Schulung.' }
+    ];
+    var demoGestoppt = false;
+    var demoTimer = [];
+    function demoStoppen() {
+      if (demoGestoppt) return;
+      demoGestoppt = true;
+      demoTimer.forEach(clearTimeout);
+      demoFelder.forEach(function (d) { d.feld.value = ''; });
+    }
+    form.querySelectorAll('input, textarea').forEach(function (feld) {
+      feld.addEventListener('focus', demoStoppen);
+      feld.addEventListener('input', demoStoppen);
+    });
+
+    function tippen(feld, text, fertig) {
+      var i = 0;
+      (function schritt() {
+        if (demoGestoppt) return;
+        feld.value = text.slice(0, i);
+        i++;
+        if (i <= text.length) demoTimer.push(setTimeout(schritt, 38));
+        else demoTimer.push(setTimeout(fertig, 300));
+      })();
+    }
+    function loeschen(feld, fertig) {
+      var text = feld.value;
+      (function schritt() {
+        if (demoGestoppt) return;
+        text = text.slice(0, -1);
+        feld.value = text;
+        if (text.length > 0) demoTimer.push(setTimeout(schritt, 18));
+        else demoTimer.push(setTimeout(fertig, 150));
+      })();
+    }
+    function tippenAlle(index) {
+      if (demoGestoppt) return;
+      if (index >= demoFelder.length) {
+        demoTimer.push(setTimeout(function () { loeschenAlle(demoFelder.length - 1); }, 2200));
+        return;
+      }
+      tippen(demoFelder[index].feld, demoFelder[index].text, function () { tippenAlle(index + 1); });
+    }
+    function loeschenAlle(index) {
+      if (demoGestoppt) return;
+      if (index < 0) {
+        demoTimer.push(setTimeout(function () { tippenAlle(0); }, 900));
+        return;
+      }
+      loeschen(demoFelder[index].feld, function () { loeschenAlle(index - 1); });
+    }
+
+    var demoIO = new IntersectionObserver(function (entries) {
+      entries.forEach(function (entry) {
+        if (entry.isIntersecting && !demoGestoppt) {
+          demoTimer.push(setTimeout(function () { tippenAlle(0); }, 500));
+          demoIO.unobserve(entry.target);
+        }
+      });
+    }, { threshold: 0.4 });
+    demoIO.observe(form);
+  }
 })();
