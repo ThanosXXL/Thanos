@@ -100,11 +100,16 @@ Unterricht anmelden.
 - In der App: Button **„⬇ App herunterladen (alle Plattformen)"** oben rechts im Header.
 - Direkt: `http://localhost:4173/download.html` (nach `npm run serve` bzw. `start-browser.ps1`).
 
-**Vollautomatischer Download:** Beim Öffnen der Seite startet der Download der **Vollversion**
-für die automatisch erkannte Plattform von selbst (nach 1,5 Sekunden, mit sichtbarem Banner
-und „Abbrechen"-Option) – kein zusätzlicher Klick nötig. Zum reinen Stöbern ohne sofortigen
-Download: `download.html?auto=0` aufrufen. Verifiziert per echtem Headless-Browser-Test: die
-Datei landet tatsächlich im Download-Ordner, nicht nur simuliert.
+**Geräteauswahl mit vollautomatischem Download:** Ganz oben auf der Seite steht eine
+Schnellauswahl mit fünf Buttons (Windows/Mac/Linux/Android/iOS). Klick auf ein Gerät startet
+sofort und vollautomatisch den Download der **Vollversion** für dieses Gerät – ohne weiteren
+Klick nötig.
+
+**Zusätzlich vollautomatisch beim Laden:** Die Seite startet außerdem von selbst den Download
+der Vollversion für die automatisch erkannte Plattform (nach 1,5 Sekunden, mit sichtbarem
+Banner und „Abbrechen"-Option). Zum reinen Stöbern ohne sofortigen Download:
+`download.html?auto=0` aufrufen. Beide Wege sind per echtem Headless-Browser-Test verifiziert:
+die jeweilige Datei landet tatsächlich im Download-Ordner, nicht nur simuliert.
 
 Enthält zusätzlich Download-Links für:
 - **Handzettel für Teilnehmer** (weiche Farben, Hochglanz-3D) – `downloads/Handzettel-Teilnehmer.pdf`

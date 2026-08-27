@@ -65,6 +65,26 @@
   }
   .demo-video-card video, .demo-collage-card img { width: 100%; border-radius: 8px; display: block; margin-bottom: 10px; }
   @media (max-width: 800px) { .demo-showcase { grid-template-columns: 1fr; } }
+
+  .quick-pick-card {
+    position: relative; overflow: hidden; background: var(--white); border: 2px solid var(--soft-dark-red);
+    border-radius: 16px; padding: 22px; margin-bottom: 32px; box-shadow: 0 6px 20px rgba(0,0,0,0.1);
+  }
+  .quick-pick-card::after {
+    content:""; position:absolute; top:-60%; left:-25%; width:55%; height:220%;
+    background: linear-gradient(120deg, rgba(255,255,255,0) 0%, rgba(255,255,255,0.5) 45%, rgba(255,255,255,0) 62%);
+    transform: rotate(18deg); pointer-events:none;
+  }
+  .quick-pick-card h2 { border-bottom: none; padding-bottom: 0; margin-bottom: 6px; }
+  .quick-pick-grid { display:flex; flex-wrap:wrap; gap:12px; margin-top:16px; }
+  .quick-pick-btn {
+    flex: 1 1 140px; display:flex; flex-direction:column; align-items:center; gap:6px;
+    background: var(--dark-blue); color: var(--white); border: none; border-radius: 12px;
+    padding: 16px 10px; cursor: pointer; font-size: 14px; font-family: inherit;
+    transition: background 0.15s, transform 0.1s;
+  }
+  .quick-pick-btn:hover { background: var(--mid-blue); transform: translateY(-2px); }
+  .quick-pick-btn .qp-icon { font-size: 30px; }
 </style>
 </head>
 <body>
@@ -74,6 +94,14 @@
   </header>
 
   <main>
+    <div class="quick-pick-card">
+      <h2>⬇ Vollversion herunterladen</h2>
+      <p class="hint">Gerät auswählen – der Download der Vollversion startet danach sofort und vollautomatisch,
+        ohne weiteren Klick.</p>
+      <div class="quick-pick-grid" id="quickPickGrid"></div>
+      <div class="auto-download-banner" id="quickPickBanner" hidden></div>
+    </div>
+
     <h2>1-Klick-Download nach Plattform</h2>
     <p class="hint">Deine Plattform wird automatisch erkannt und hervorgehoben. Für Windows/Mac/Linux lädt der Button das
       Start-Skript der Vollversion herunter (Node.js muss einmalig installiert sein); für Android/iOS lädt er die
@@ -158,6 +186,37 @@
   for (const p of platforms) {
     try { if (p.match()) { detectedKey = p.key; break; } } catch (e) { /* ignore */ }
   }
+
+  // Löst einen echten Download aus (temporärer <a download>-Link), unabhängig davon, ob ein
+  // sichtbarer Link mit dieser URL bereits im DOM existiert.
+  function triggerDownload(fileUrl) {
+    const a = document.createElement('a');
+    a.href = fileUrl;
+    a.download = '';
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+  }
+
+  // ===== Geräteauswahl oben auf der Seite: Klick -> sofortiger, vollautomatischer =====
+  // ===== Vollversion-Download für das gewählte Gerät, ohne weiteren Klick.          =====
+  const quickPickGrid = document.getElementById('quickPickGrid');
+  const quickPickBanner = document.getElementById('quickPickBanner');
+
+  platforms.forEach((p) => {
+    const btn = document.createElement('button');
+    btn.type = 'button';
+    btn.className = 'quick-pick-btn';
+    btn.innerHTML = `<span class="qp-icon">${p.icon}</span><span>${p.label}</span>`;
+    btn.addEventListener('click', () => {
+      triggerDownload(p.fullFile);
+      quickPickBanner.hidden = false;
+      quickPickBanner.className = 'auto-download-banner done';
+      quickPickBanner.innerHTML = `<span>✅ Vollversion für <strong>${p.label}</strong> wird heruntergeladen:
+        <strong>${p.fullFile.split('/').pop()}</strong></span>`;
+    });
+    quickPickGrid.appendChild(btn);
+  });
 
   platforms.forEach((p) => {
     const card = document.createElement('div');
