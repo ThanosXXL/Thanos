@@ -26,13 +26,17 @@
       "output": "dist"
     },
     "win": {
-      "target": "nsis"
+      "target": "nsis",
+      "artifactName": "Zeiterfassung-${version}-Windows-Setup.${ext}"
     },
     "mac": {
-      "target": "dmg"
+      "target": "dmg",
+      "arch": ["x64", "arm64"],
+      "artifactName": "Zeiterfassung-${version}-macOS-${arch}.${ext}"
     },
     "linux": {
-      "target": "AppImage"
+      "target": ["AppImage", "deb"],
+      "artifactName": "Zeiterfassung-${version}-Linux.${ext}"
     },
     "publish": [
       {
