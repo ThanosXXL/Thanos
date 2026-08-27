@@ -1,0 +1,260 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<title>Inventar - Dashboard – Automatischer Download</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="description" content="Ein Link, ein Klick: startet automatisch den passenden Download für Windows, macOS, Linux, Android oder iOS.">
+<style>
+  :root {
+    --gold: #d4af37;
+    --gold-light: #f4e2a8;
+    --gold-bright: #f7d774;
+    --bronze: #8a5a2b;
+    --bronze-dark: #5c3a1a;
+    --dark-brown: #3b2410;
+  }
+  * { box-sizing: border-box; }
+  html, body {
+    margin: 0;
+    min-height: 100%;
+    font-family: "Segoe UI", Arial, sans-serif;
+    background: linear-gradient(160deg, var(--bronze-dark), var(--bronze) 45%, var(--gold) 100%);
+    color: #fffdf6;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 32px 16px;
+  }
+  .card {
+    width: 100%;
+    max-width: 460px;
+    background: linear-gradient(180deg, #fffdf6, var(--gold-light) 160%);
+    border: 1px solid var(--gold);
+    border-radius: 18px;
+    padding: 32px 28px;
+    text-align: center;
+    color: var(--dark-brown);
+    box-shadow: 0 20px 50px rgba(0, 0, 0, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.85);
+  }
+  .card h1 {
+    margin: 0 0 6px;
+    font-size: 22px;
+  }
+  .card .sub {
+    margin: 0 0 26px;
+    font-size: 13px;
+    color: var(--bronze-dark);
+    opacity: 0.9;
+  }
+  .status {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--bronze-dark);
+    margin-bottom: 18px;
+    min-height: 18px;
+  }
+  .spinner {
+    width: 13px;
+    height: 13px;
+    border: 2px solid var(--bronze);
+    border-top-color: transparent;
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  .btn-gold-lg {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    text-decoration: none;
+    border: none;
+    border-radius: 12px;
+    padding: 16px 30px;
+    font-size: 17px;
+    font-weight: 700;
+    color: var(--dark-brown);
+    width: 100%;
+    justify-content: center;
+    background:
+      linear-gradient(180deg, rgba(255, 255, 255, 0.8) 0%, rgba(255, 255, 255, 0.05) 45%, rgba(255, 255, 255, 0) 100%),
+      linear-gradient(135deg, var(--gold-bright), var(--gold) 55%, var(--bronze) 100%);
+    box-shadow: 0 5px 0 var(--bronze-dark), 0 8px 16px rgba(59, 36, 16, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.6);
+    cursor: pointer;
+  }
+  .btn-gold-lg:active { transform: translateY(4px); box-shadow: 0 1px 0 var(--bronze-dark), 0 2px 6px rgba(59, 36, 16, 0.4); }
+
+  .divider {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin: 22px 0 14px;
+    font-size: 11px;
+    color: var(--bronze-dark);
+    opacity: 0.75;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+  }
+  .divider::before, .divider::after {
+    content: "";
+    flex: 1;
+    height: 1px;
+    background: var(--bronze);
+    opacity: 0.35;
+  }
+
+  .platform-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(84px, 1fr));
+    gap: 8px;
+  }
+  .platform-btn {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 3px;
+    text-decoration: none;
+    color: var(--bronze-dark);
+    background: rgba(255, 255, 255, 0.55);
+    border: 1px solid var(--gold);
+    border-radius: 10px;
+    padding: 10px 4px 8px;
+    font-size: 11.5px;
+    font-weight: 600;
+  }
+  .platform-btn:hover { background: rgba(255, 255, 255, 0.85); }
+  .platform-btn .icon { font-size: 18px; }
+  .platform-btn.is-detected { border-color: var(--bronze-dark); box-shadow: 0 0 0 2px rgba(59, 36, 16, 0.25); }
+
+  .note {
+    margin-top: 18px;
+    font-size: 11.5px;
+    color: var(--bronze-dark);
+    opacity: 0.85;
+    line-height: 1.5;
+  }
+</style>
+</head>
+<body>
+
+  <div class="card">
+    <h1>📦 Inventar - Dashboard</h1>
+    <p class="sub">Ein Link für alle Geräte – der Download startet automatisch für dein System.</p>
+
+    <p class="status" id="status"><span class="spinner"></span><span id="statusText">Erkenne dein Gerät …</span></p>
+
+    <a class="btn-gold-lg" id="mainAction" href="#">⬇ Download wird vorbereitet …</a>
+
+    <div class="divider">oder manuell wählen</div>
+    <div class="platform-grid" id="platformGrid">
+      <a class="platform-btn" data-os="windows" href="https://github.com/ThanosXXL/Thanos/releases/latest/download/InventarDashboard-Downloader.exe">
+        <span class="icon">🪟</span> Windows
+      </a>
+      <a class="platform-btn" data-os="mac" href="https://github.com/ThanosXXL/Thanos/releases/latest/download/InventarDashboard.dmg">
+        <span class="icon">🍎</span> macOS
+      </a>
+      <a class="platform-btn" data-os="linux" href="https://github.com/ThanosXXL/Thanos/releases/latest/download/InventarDashboard.AppImage">
+        <span class="icon">🐧</span> Linux
+      </a>
+      <a class="platform-btn" data-os="android" href="demo-inventar.html">
+        <span class="icon">🤖</span> Android
+      </a>
+      <a class="platform-btn" data-os="ios" href="demo-inventar.html">
+        <span class="icon">📱</span> iOS
+      </a>
+    </div>
+
+    <p class="note" id="note"></p>
+  </div>
+
+  <script>
+    (function () {
+      var PLATFORMS = {
+        windows: {
+          label: 'Windows',
+          href: 'https://github.com/ThanosXXL/Thanos/releases/latest/download/InventarDashboard-Downloader.exe',
+          btn: '⬇ Download für Windows startet …',
+          isRealInstaller: true,
+          note: 'Der Download deines Windows-Installers wurde automatisch gestartet. Falls nichts passiert ist, nutze den Button oben oder wähle unten manuell.'
+        },
+        mac: {
+          label: 'macOS',
+          href: 'https://github.com/ThanosXXL/Thanos/releases/latest/download/InventarDashboard.dmg',
+          btn: '⬇ Download für macOS startet …',
+          isRealInstaller: true,
+          note: 'Der Download deiner macOS-Installationsdatei (.dmg) wurde automatisch gestartet.'
+        },
+        linux: {
+          label: 'Linux',
+          href: 'https://github.com/ThanosXXL/Thanos/releases/latest/download/InventarDashboard.AppImage',
+          btn: '⬇ Download für Linux startet …',
+          isRealInstaller: true,
+          note: 'Der Download deiner Linux-AppImage-Datei wurde automatisch gestartet.'
+        },
+        android: {
+          label: 'Android',
+          href: 'demo-inventar.html',
+          btn: '▶ Demo im Browser öffnen',
+          isRealInstaller: false,
+          note: 'Für Android gibt es keine installierbare App – hier öffnet sich stattdessen automatisch die interaktive Browser-Demo mit Beispieldaten.'
+        },
+        ios: {
+          label: 'iOS',
+          href: 'demo-inventar.html',
+          btn: '▶ Demo im Browser öffnen',
+          isRealInstaller: false,
+          note: 'Für iOS gibt es keine installierbare App – hier öffnet sich stattdessen automatisch die interaktive Browser-Demo mit Beispieldaten.'
+        }
+      };
+
+      function detectOS() {
+        var ua = navigator.userAgent || '';
+        if (/iPhone|iPad|iPod/i.test(ua)) return 'ios';
+        if (/Android/i.test(ua)) return 'android';
+        if (/Mac/i.test(ua)) return 'mac';
+        if (/Linux/i.test(ua)) return 'linux';
+        return 'windows';
+      }
+
+      var detected = detectOS();
+      var info = PLATFORMS[detected];
+
+      var mainAction = document.getElementById('mainAction');
+      var statusText = document.getElementById('statusText');
+      var note = document.getElementById('note');
+      var spinner = document.querySelector('.spinner');
+
+      mainAction.href = info.href;
+      mainAction.textContent = info.btn;
+      if (info.isRealInstaller) mainAction.setAttribute('download', '');
+
+      var card = document.querySelector('[data-os="' + detected + '"]');
+      if (card) card.classList.add('is-detected');
+
+      setTimeout(function () {
+        statusText.textContent = 'Erkannt: ' + info.label;
+        if (spinner) spinner.remove();
+        note.textContent = info.note;
+
+        // Vollautomatischer Start: simuliert den Klick auf den passenden Link,
+        // damit der Download (bzw. bei Android/iOS die Demo) ohne weiteres
+        // Zutun losläuft. Der sichtbare Button bleibt als Fallback, falls der
+        // Browser den automatischen Klick blockiert.
+        var auto = document.createElement('a');
+        auto.href = info.href;
+        if (info.isRealInstaller) auto.setAttribute('download', '');
+        auto.style.display = 'none';
+        document.body.appendChild(auto);
+        auto.click();
+        document.body.removeChild(auto);
+      }, 900);
+    })();
+  </script>
+
+</body>
+</html>
