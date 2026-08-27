@@ -3,7 +3,10 @@
   "version": "2.0.0",
   "description": "Desktop-Zeiterfassung mit PIN-geschütztem Admin-Login und Erinnerungen für Mitarbeiter",
   "main": "main.js",
-  "author": "",
+  "author": {
+    "name": "Zeiterfassung",
+    "email": "noreply@example.invalid"
+  },
   "license": "MIT",
   "scripts": {
     "start": "electron .",
@@ -30,8 +33,9 @@
       "artifactName": "Zeiterfassung-${version}-Windows-Setup.${ext}"
     },
     "mac": {
-      "target": "dmg",
-      "arch": ["x64", "arm64"],
+      "target": [
+        { "target": "dmg", "arch": ["x64", "arm64"] }
+      ],
       "artifactName": "Zeiterfassung-${version}-macOS-${arch}.${ext}"
     },
     "linux": {
