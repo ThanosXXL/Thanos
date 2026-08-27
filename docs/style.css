@@ -11,6 +11,9 @@
   --green-deep: #1c7a41;
   --red: #e0483a;
   --red-deep: #b8271c;
+  --wine: #7a1030;
+  --wine-light: #9c1c40;
+  --wine-deep: #4a0a1e;
   --shadow-soft: 0 6px 16px rgba(120, 60, 0, 0.18);
   --shadow-strong: 0 10px 28px rgba(120, 60, 0, 0.28);
 }
@@ -30,7 +33,7 @@ html, body {
 body {
   margin: 0;
   font-family: 'Segoe UI', 'Helvetica Neue', Arial, sans-serif;
-  background: radial-gradient(circle at top left, #fff6e0 0%, #ffe3b0 45%, #ffd58a 100%);
+  background: radial-gradient(circle at top left, var(--wine-light) 0%, var(--wine) 45%, var(--wine-deep) 100%);
   color: var(--ink);
   min-height: 100vh;
 }
