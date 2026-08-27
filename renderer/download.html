@@ -34,6 +34,17 @@
   .dl-btn:hover { background: var(--mid-blue); }
   .dl-btn.secondary { background:var(--white); color:var(--dark-blue); border:1px solid var(--dark-blue); }
   .platform-note { font-size:12px; color:#55606f; margin-top:8px; min-height: 32px; }
+  .auto-download-banner {
+    display:flex; align-items:center; gap:12px; flex-wrap:wrap;
+    background: var(--soft-dark-red); color:var(--white);
+    border-radius:10px; padding:12px 16px; margin-top:16px; font-size:14px;
+  }
+  .auto-download-banner button {
+    background: rgba(255,255,255,0.15); color:var(--white); border:1px solid rgba(255,255,255,0.6);
+    border-radius:6px; padding:6px 12px; font-size:13px; cursor:pointer; white-space:nowrap;
+  }
+  .auto-download-banner button:hover { background: rgba(255,255,255,0.3); }
+  .auto-download-banner.done { background: #1e7a3a; }
   .extras { margin-top: 32px; }
   .extras-grid { display:grid; grid-template-columns: repeat(auto-fit, minmax(240px,1fr)); gap: 16px; margin-top: 14px; }
   .extra-card { position:relative; overflow:hidden; background:var(--white); border:1px solid var(--pale-blue); border-radius:10px; padding:16px; }
@@ -67,6 +78,8 @@
     <p class="hint">Deine Plattform wird automatisch erkannt und hervorgehoben. Für Windows/Mac/Linux lädt der Button das
       Start-Skript der Vollversion herunter (Node.js muss einmalig installiert sein); für Android/iOS lädt er die
       Vollversion-Broschüre als PDF, da die App dort nicht nativ läuft.</p>
+
+    <div class="auto-download-banner" id="autoDownloadBanner" hidden></div>
 
     <div class="platform-grid" id="platformGrid"></div>
 
@@ -154,13 +167,47 @@
       <div class="platform-icon">${p.icon}</div>
       <h3>${p.label}</h3>
       <div class="platform-note">${p.kind}</div>
-      <a class="dl-btn" href="${p.fullFile}" download>⬇ Vollversion</a>
+      <a class="dl-btn" href="${p.fullFile}" download id="vollversion-${p.key}">⬇ Vollversion</a>
       <div class="platform-note">${p.fullNote}</div>
       <a class="dl-btn secondary" href="${p.demoFile}" download>⬇ Demoversion</a>
       <div class="platform-note">${p.demoNote}</div>
     `;
     grid.appendChild(card);
   });
+
+  // Vollautomatischer Download der Vollversion für die erkannte Plattform beim Öffnen der
+  // Seite – ohne zusätzlichen Klick. Über ?auto=0 in der URL abschaltbar (z. B. wenn man nur
+  // stöbern möchte, ohne dass sofort ein Download losläuft).
+  (function autoDownloadDetectedPlatform() {
+    const params = new URLSearchParams(location.search);
+    if (params.get('auto') === '0') return;
+    if (!detectedKey) return;
+
+    const platform = platforms.find((p) => p.key === detectedKey);
+    const banner = document.getElementById('autoDownloadBanner');
+    const link = document.getElementById('vollversion-' + detectedKey);
+    if (!platform || !link) return;
+
+    banner.hidden = false;
+    banner.innerHTML = `
+      <span>⬇ Dein Download startet automatisch: <strong>Vollversion für ${platform.label}</strong> …</span>
+      <button id="cancelAutoDownload" type="button">Abbrechen</button>
+    `;
+
+    let cancelled = false;
+    document.getElementById('cancelAutoDownload').addEventListener('click', () => {
+      cancelled = true;
+      banner.hidden = true;
+    });
+
+    setTimeout(() => {
+      if (cancelled) return;
+      link.click();
+      banner.className = 'auto-download-banner done';
+      banner.innerHTML = `<span>✅ Download gestartet: <strong>${platform.fullFile.split('/').pop()}</strong>.
+        Falls er nicht automatisch beginnt, nutze den Button unten bei „${platform.label}".</span>`;
+    }, 1500);
+  })();
 
   // Hochglanz-3D-Vorschaubild für die Installationshandbücher (gleiche Optik wie die PDF-Beispielbilder)
   function manualCoverSvg(icon, label) {
