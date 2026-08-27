@@ -14,7 +14,11 @@ function loadData() {
 }
 
 function saveData(data) {
-  fs.writeFileSync(dataFilePath, JSON.stringify(data, null, 2), 'utf-8');
+  // Write to a temp file first and rename into place so a crash/power-loss
+  // mid-write can never leave dozenten-data.json truncated or corrupt.
+  const tmpPath = `${dataFilePath}.tmp`;
+  fs.writeFileSync(tmpPath, JSON.stringify(data, null, 2), 'utf-8');
+  fs.renameSync(tmpPath, dataFilePath);
 }
 
 function createWindow() {
