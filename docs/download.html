@@ -46,6 +46,18 @@
       flex-direction: column;
       align-items: center;
       gap: 10px;
+      text-decoration: none;
+      cursor: pointer;
+      border: 2px solid transparent;
+      transition: transform 0.1s ease, box-shadow 0.15s ease, border-color 0.15s ease;
+    }
+    .dl-card:hover {
+      transform: translateY(-3px);
+      box-shadow: var(--shadow-strong), inset 0 1px 0 #fff;
+      border-color: var(--yellow);
+    }
+    .dl-card:active {
+      transform: translateY(0);
     }
     .dl-icon {
       width: 56px;
@@ -73,6 +85,7 @@
     .dl-card .btn {
       width: 100%;
       margin-top: 4px;
+      pointer-events: none;
     }
     #dl-note {
       margin-top: 36px;
@@ -91,49 +104,50 @@
     <div id="dl-header">
       <div class="brand-orb"></div>
       <h1>Buchhaltung<span class="bang">!</span> herunterladen</h1>
-      <p>Ein Klick genügt – wähle dein Gerät.</p>
+      <p>Gerät auswählen – der Download startet automatisch.</p>
     </div>
 
     <div class="dl-grid">
-      <div class="dl-card">
+      <a class="dl-card" href="https://github.com/ThanosXXL/Thanos/releases/latest/download/Buchhaltung-Windows-Setup.exe" download>
         <div class="dl-icon">🖥</div>
         <h2>Windows</h2>
-        <div class="dl-hint">Installer (.exe) ausführen und den Anweisungen folgen.</div>
-        <a class="btn btn-primary" href="https://github.com/ThanosXXL/Thanos/releases/latest/download/Buchhaltung-Windows-Setup.exe">⬇ Jetzt herunterladen</a>
-      </div>
+        <div class="dl-hint">Installer (.exe) danach ausführen und den Anweisungen folgen.</div>
+        <span class="btn btn-primary">⬇ Automatischer Download</span>
+      </a>
 
-      <div class="dl-card">
+      <a class="dl-card" href="https://github.com/ThanosXXL/Thanos/releases/latest/download/Buchhaltung-macOS.dmg" download>
         <div class="dl-icon">🍎</div>
         <h2>macOS</h2>
-        <div class="dl-hint">.dmg öffnen und in den Programme-Ordner ziehen.</div>
-        <a class="btn btn-primary" href="https://github.com/ThanosXXL/Thanos/releases/latest/download/Buchhaltung-macOS.dmg">⬇ Jetzt herunterladen</a>
-      </div>
+        <div class="dl-hint">.dmg danach öffnen und in den Programme-Ordner ziehen.</div>
+        <span class="btn btn-primary">⬇ Automatischer Download</span>
+      </a>
 
-      <div class="dl-card">
+      <a class="dl-card" href="https://github.com/ThanosXXL/Thanos/releases/latest/download/Buchhaltung-Linux.AppImage" download>
         <div class="dl-icon">🐧</div>
         <h2>Linux</h2>
-        <div class="dl-hint">.AppImage herunterladen, ausführbar machen und starten.</div>
-        <a class="btn btn-primary" href="https://github.com/ThanosXXL/Thanos/releases/latest/download/Buchhaltung-Linux.AppImage">⬇ Jetzt herunterladen</a>
-      </div>
+        <div class="dl-hint">.AppImage danach ausführbar machen und starten.</div>
+        <span class="btn btn-primary">⬇ Automatischer Download</span>
+      </a>
 
-      <div class="dl-card">
+      <a class="dl-card" href="index.html">
         <div class="dl-icon">📱</div>
         <h2>Android</h2>
-        <div class="dl-hint">Öffnet die Web-App – danach im Banner auf „App installieren“ tippen.</div>
-        <a class="btn btn-primary" href="index.html">📲 App öffnen &amp; installieren</a>
-      </div>
+        <div class="dl-hint">Öffnet die Web-App sofort – danach im Banner auf „App installieren“ tippen.</div>
+        <span class="btn btn-primary">📲 App automatisch öffnen</span>
+      </a>
 
-      <div class="dl-card">
+      <a class="dl-card" href="index.html">
         <div class="dl-icon">📱</div>
         <h2>iPhone / iPad</h2>
-        <div class="dl-hint">Öffnet die Web-App – danach „Teilen“ → „Zum Home-Bildschirm“.</div>
-        <a class="btn btn-primary" href="index.html">📲 App öffnen &amp; installieren</a>
-      </div>
+        <div class="dl-hint">Öffnet die Web-App sofort – danach „Teilen“ → „Zum Home-Bildschirm“.</div>
+        <span class="btn btn-primary">📲 App automatisch öffnen</span>
+      </a>
     </div>
 
     <p id="dl-note">
-      Buchhaltung! erkennt dein Betriebssystem auch automatisch – öffne einfach die
-      <a href="index.html">Web-App</a>, ein Banner zeigt dir dann direkt den passenden Download an.
+      Ein Klick auf die Kachel genügt – kein zweiter Klick nötig. Buchhaltung! erkennt dein Betriebssystem
+      auch automatisch – öffne einfach die <a href="index.html">Web-App</a>, ein Banner zeigt dir dann
+      direkt den passenden Download an.
     </p>
   </div>
 </body>
