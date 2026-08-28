@@ -15,7 +15,43 @@ permissions:
   contents: write
 
 jobs:
+  prepare-release:
+    if: github.ref_type == 'tag' || github.event.inputs.publish == 'true'
+    runs-on: ubuntu-latest
+    outputs:
+      tag: ${{ steps.tag.outputs.tag }}
+    steps:
+      - name: Repository auschecken
+        uses: actions/checkout@v4
+
+      - name: Tag bestimmen
+        id: tag
+        run: |
+          if [ "${{ github.ref_type }}" = "tag" ]; then
+            echo "tag=${{ github.ref_name }}" >> "$GITHUB_OUTPUT"
+          else
+            echo "tag=v$(node -p "require('./package.json').version")" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Alten Release/Draft für dieses Tag entfernen (falls vorhanden)
+        run: gh release delete "${{ steps.tag.outputs.tag }}" --yes || true
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Leeren Release anlegen (Installer kommen aus den Build-Jobs dazu)
+        run: |
+          gh release create "${{ steps.tag.outputs.tag }}" \
+            --title "Inventar - Dashboard ${{ steps.tag.outputs.tag }}" \
+            --notes "Automatisch gebaut von GitHub Actions." \
+            --target "${{ github.sha }}"
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
   build:
+    needs: prepare-release
+    # Läuft immer (auch ohne Veröffentlichung); prepare-release läuft nur bei Tag-Push
+    # oder manueller Freigabe, ist sonst "skipped" statt "failure".
+    if: always() && (needs.prepare-release.result == 'success' || needs.prepare-release.result == 'skipped')
     strategy:
       fail-fast: false
       matrix:
@@ -37,16 +73,6 @@ jobs:
       - name: Desktop-App bauen
         run: npm run dist -- --publish never
 
-      - name: Installer als Artifact hochladen
-        uses: actions/upload-artifact@v4
-        with:
-          name: inventar-dashboard-${{ matrix.os }}
-          path: |
-            dist/*.exe
-            dist/*.dmg
-            dist/*.AppImage
-          if-no-files-found: warn
-
       - name: Downloader-App-Abhängigkeiten installieren
         run: npm install
         working-directory: downloader
@@ -55,58 +81,19 @@ jobs:
         run: npm run dist -- --publish never
         working-directory: downloader
 
-      - name: Downloader-App-Artifact hochladen
-        uses: actions/upload-artifact@v4
-        with:
-          name: inventar-dashboard-downloader-${{ matrix.os }}
-          path: |
-            downloader/dist/*.exe
-            downloader/dist/*.dmg
-            downloader/dist/*.AppImage
-          if-no-files-found: warn
-
-  release:
-    needs: build
-    if: github.ref_type == 'tag' || github.event.inputs.publish == 'true'
-    runs-on: ubuntu-latest
-    permissions:
-      contents: write
-    steps:
-      - name: Repository auschecken
-        uses: actions/checkout@v4
-
-      - name: Alle Build-Artifacts herunterladen
-        uses: actions/download-artifact@v4
-        with:
-          path: artifacts
-
-      - name: Installer-Dateien für den Release sammeln
+      # Dateien gehen direkt an den GitHub Release (zählt nicht gegen das
+      # Actions-Artifact-Speicherkontingent, das dieses geteilte Repo bereits
+      # ausgeschöpft hat) statt über actions/upload-artifact.
+      - name: Installer direkt zum Release hochladen
+        if: needs.prepare-release.result == 'success'
+        shell: bash
         run: |
-          mkdir -p release-assets
-          find artifacts -type f \( -name "*.exe" -o -name "*.dmg" -o -name "*.AppImage" \) -exec cp {} release-assets/ \;
-          echo "Gesammelte Release-Dateien:"
-          ls -la release-assets
-
-      - name: Tag bestimmen
-        id: tag
-        run: |
-          if [ "${{ github.ref_type }}" = "tag" ]; then
-            echo "tag=${{ github.ref_name }}" >> "$GITHUB_OUTPUT"
-          else
-            echo "tag=v$(node -p "require('./package.json').version")" >> "$GITHUB_OUTPUT"
+          shopt -s nullglob
+          files=(dist/*.exe dist/*.dmg dist/*.AppImage downloader/dist/*.exe downloader/dist/*.dmg downloader/dist/*.AppImage)
+          if [ ${#files[@]} -eq 0 ]; then
+            echo "Keine Installer-Dateien gefunden."
+            exit 1
           fi
-
-      - name: Alten Draft für dieses Tag entfernen (falls vorhanden)
-        run: gh release delete "${{ steps.tag.outputs.tag }}" --yes || true
-        env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
-      - name: Release veröffentlichen
-        run: |
-          gh release create "${{ steps.tag.outputs.tag }}" release-assets/* \
-            --title "Inventar - Dashboard ${{ steps.tag.outputs.tag }}" \
-            --notes "Automatisch gebaut von GitHub Actions." \
-            --repo "${{ github.repository }}" \
-            --target "${{ github.sha }}"
+          gh release upload "${{ needs.prepare-release.outputs.tag }}" "${files[@]}" --clobber
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
