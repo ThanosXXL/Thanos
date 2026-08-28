@@ -6,7 +6,7 @@ Dieses Handbuch sowie alle enthaltenen Abbildungen sind urheberrechtlich geschü
 Verbreitung oder Bearbeitung – auch auszugsweise – ist ohne vorherige schriftliche Zustimmung nicht
 gestattet, ausgenommen zum internen Gebrauch durch die Administratoren dieser Anwendung.
 
-*Stand: Juli 2026 · Version 1.0.0*
+*Stand: August 2026 · Version 1.1.0*
 
 **Video-Demo:** Ein kurzer Rundgang durch die App (Eintrag erfassen, Jahresübersicht, zweiter
 Administrator, Erinnerung, Einstellungen, Download-Seite) liegt unter
