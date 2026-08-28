@@ -428,6 +428,23 @@ body {
 .section-block.income h2::before { content: '💰 '; }
 .section-block.expense h2::before { content: '🧾 '; }
 
+.entry-search {
+  display: block;
+  width: 100%;
+  font-family: inherit;
+  font-size: 0.85rem;
+  padding: 8px 12px;
+  border-radius: 10px;
+  border: 1px solid #e8c988;
+  background: #fffef8;
+  color: var(--ink);
+  margin-bottom: 10px;
+}
+
+.entry-search:focus {
+  outline: 2px solid var(--orange);
+}
+
 .table-wrap {
   overflow-x: auto;
   border-radius: 12px;

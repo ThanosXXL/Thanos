@@ -8,7 +8,8 @@
   "scripts": {
     "start": "electron .",
     "dist": "electron-builder",
-    "build:web": "node scripts/sync-docs.js"
+    "build:web": "node scripts/sync-docs.js",
+    "build:standalone": "node scripts/build-standalone.js"
   },
   "devDependencies": {
     "electron": "^31.0.0",

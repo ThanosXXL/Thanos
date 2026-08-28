@@ -215,36 +215,50 @@
     await api.saveData(state);
   }
 
+  // Normalizes/backfills a loaded state object into the module-level `state`.
+  // Shared by init() (data from disk/localStorage) and backup import, so an
+  // older or hand-edited backup file gets the same defaults instead of
+  // risking a crash or corrupted UI from missing fields.
+  function applyLoadedState(data) {
+    state = data && typeof data === 'object' ? data : {};
+    if (!Array.isArray(state.administratoren)) state.administratoren = [];
+    if (!state.einstellungen || typeof state.einstellungen !== 'object') state.einstellungen = {};
+
+    while (state.administratoren.length < MAX_ADMINS) {
+      state.administratoren.push(defaultAdmin(state.administratoren.length + 1));
+    }
+
+    state.administratoren.forEach((admin) => {
+      if (typeof admin.id !== 'string' || !admin.id) admin.id = uid();
+      if (typeof admin.name !== 'string' || !admin.name.trim()) admin.name = 'Administrator';
+      if (typeof admin.pin !== 'string') admin.pin = null;
+      if (!admin.jahre || typeof admin.jahre !== 'object') admin.jahre = {};
+    });
+
+    if (!Array.isArray(state.einstellungen.kategorienEinnahmen) || !state.einstellungen.kategorienEinnahmen.length) {
+      state.einstellungen.kategorienEinnahmen = DEFAULT_KAT_EINNAHMEN.slice();
+    }
+    if (!Array.isArray(state.einstellungen.kategorienAusgaben) || !state.einstellungen.kategorienAusgaben.length) {
+      state.einstellungen.kategorienAusgaben = DEFAULT_KAT_AUSGABEN.slice();
+    }
+    if (typeof state.einstellungen.autostart !== 'boolean') state.einstellungen.autostart = false;
+    if (typeof state.einstellungen.letzteErinnerung !== 'string') state.einstellungen.letzteErinnerung = null;
+
+    const now = new Date();
+    if (!state.einstellungen.aktivesJahr) state.einstellungen.aktivesJahr = now.getFullYear();
+    if (!MONAT_KEYS.includes(state.einstellungen.aktiverMonat)) {
+      state.einstellungen.aktiverMonat = MONAT_KEYS[now.getMonth()];
+    }
+    if (!state.administratoren.some((a) => a.id === state.einstellungen.aktiverAdminId)) {
+      state.einstellungen.aktiverAdminId = state.administratoren[0].id;
+    }
+
+    ensureYearForAllAdmins(state.einstellungen.aktivesJahr);
+  }
+
   function init() {
     api.loadData().then((data) => {
-      state = data && typeof data === 'object' ? data : {};
-      if (!Array.isArray(state.administratoren)) state.administratoren = [];
-      if (!state.einstellungen || typeof state.einstellungen !== 'object') state.einstellungen = {};
-
-      while (state.administratoren.length < MAX_ADMINS) {
-        state.administratoren.push(defaultAdmin(state.administratoren.length + 1));
-      }
-
-      state.administratoren.forEach((admin) => {
-        if (typeof admin.pin !== 'string') admin.pin = null;
-        if (!admin.jahre || typeof admin.jahre !== 'object') admin.jahre = {};
-      });
-
-      if (!Array.isArray(state.einstellungen.kategorienEinnahmen) || !state.einstellungen.kategorienEinnahmen.length) {
-        state.einstellungen.kategorienEinnahmen = DEFAULT_KAT_EINNAHMEN.slice();
-      }
-      if (!Array.isArray(state.einstellungen.kategorienAusgaben) || !state.einstellungen.kategorienAusgaben.length) {
-        state.einstellungen.kategorienAusgaben = DEFAULT_KAT_AUSGABEN.slice();
-      }
-      if (typeof state.einstellungen.autostart !== 'boolean') state.einstellungen.autostart = false;
-      if (typeof state.einstellungen.letzteErinnerung !== 'string') state.einstellungen.letzteErinnerung = null;
-
-      const now = new Date();
-      if (!state.einstellungen.aktivesJahr) state.einstellungen.aktivesJahr = now.getFullYear();
-      if (!state.einstellungen.aktiverMonat) state.einstellungen.aktiverMonat = MONAT_KEYS[now.getMonth()];
-      if (!state.einstellungen.aktiverAdminId) state.einstellungen.aktiverAdminId = state.administratoren[0].id;
-
-      ensureYearForAllAdmins(state.einstellungen.aktivesJahr);
+      applyLoadedState(data);
 
       persist();
       render();
@@ -445,6 +459,16 @@
       return block;
     }
 
+    let searchInput = null;
+    if (entries.length > 5) {
+      searchInput = document.createElement('input');
+      searchInput.type = 'search';
+      searchInput.className = 'entry-search';
+      searchInput.placeholder = '🔍 Suchen nach Beschreibung, Kategorie, Zahlungsart…';
+      searchInput.setAttribute('aria-label', `${title} durchsuchen`);
+      block.appendChild(searchInput);
+    }
+
     const wrap = document.createElement('div');
     wrap.className = 'table-wrap';
     const table = document.createElement('table');
@@ -461,9 +485,11 @@
     table.appendChild(thead);
 
     const tbody = document.createElement('tbody');
-    const sorted = entries.slice().sort((a, b) => (a.datum || '').localeCompare(b.datum || ''));
+    const sorted = entries.slice().sort(byDatum);
     sorted.forEach((entry) => {
       const tr = document.createElement('tr');
+      tr.dataset.search = [entry.beschreibung, entry.kategorie, entry.zahlungsart, entry.beleg]
+        .filter(Boolean).join(' ').toLowerCase();
 
       const tdDatum = document.createElement('td');
       tdDatum.textContent = fmtDate(entry.datum);
@@ -541,6 +567,16 @@
 
     wrap.appendChild(table);
     block.appendChild(wrap);
+
+    if (searchInput) {
+      searchInput.addEventListener('input', () => {
+        const q = searchInput.value.trim().toLowerCase();
+        tbody.querySelectorAll('tr').forEach((tr) => {
+          tr.style.display = !q || tr.dataset.search.includes(q) ? '' : 'none';
+        });
+      });
+    }
+
     return block;
   }
 
@@ -698,7 +734,8 @@
 
   // ---------- Delete modal ----------
 
-  function openDeleteModal(text, onConfirm) {
+  function openDeleteModal(text, onConfirm, title) {
+    document.querySelector('#modal-delete h2').textContent = title || 'Eintrag löschen?';
     document.getElementById('delete-text').textContent = text;
     deleteCtx = onConfirm;
     document.getElementById('modal-delete').classList.remove('hidden');
@@ -813,10 +850,16 @@
 
   function removeCurrentPin() {
     if (!pinSetAdmin) return;
-    if (!confirm(`PIN für ${pinSetAdmin.name} wirklich entfernen?`)) return;
-    pinSetAdmin.pin = null;
-    persist();
-    renderSettingsAdminRows();
+    const admin = pinSetAdmin;
+    openDeleteModal(
+      `Für „${admin.name}“ wird kein PIN mehr abgefragt.`,
+      () => {
+        admin.pin = null;
+        persist();
+        renderSettingsAdminRows();
+      },
+      'PIN entfernen?'
+    );
     closePinSetModal();
   }
 
@@ -937,12 +980,16 @@
     return s;
   }
 
+  function byDatum(a, b) {
+    return (a.datum || '').localeCompare(b.datum || '');
+  }
+
   function buildYearCsv(admin, jahr) {
     const rows = [['Monat', 'Typ', 'Datum', 'Beschreibung', 'Kategorie', 'Zahlungsart', 'Beleg-Nr.', 'Betrag']];
     MONAT_KEYS.forEach((mk) => {
       const monat = ensureMonth(admin, jahr, mk);
-      monat.einnahmen.forEach((e) => rows.push([MONAT_LABELS[mk], 'Einnahme', e.datum, e.beschreibung, e.kategorie, e.zahlungsart, e.beleg || '', e.betrag]));
-      monat.ausgaben.forEach((e) => rows.push([MONAT_LABELS[mk], 'Ausgabe', e.datum, e.beschreibung, e.kategorie, e.zahlungsart, e.beleg || '', e.betrag]));
+      monat.einnahmen.slice().sort(byDatum).forEach((e) => rows.push([MONAT_LABELS[mk], 'Einnahme', e.datum, e.beschreibung, e.kategorie, e.zahlungsart, e.beleg || '', e.betrag]));
+      monat.ausgaben.slice().sort(byDatum).forEach((e) => rows.push([MONAT_LABELS[mk], 'Ausgabe', e.datum, e.beschreibung, e.kategorie, e.zahlungsart, e.beleg || '', e.betrag]));
     });
     return rows.map((r) => r.map(csvEscape).join(';')).join('\r\n');
   }
@@ -1134,9 +1181,13 @@
     document.getElementById('btn-backup-import').addEventListener('click', async () => {
       const result = await api.importBackup();
       if (result && !result.canceled && result.data) {
-        state = result.data;
+        applyLoadedState(result.data);
+        unlockedAdmins.clear();
         persist();
+        closeSettingsModal();
         render();
+      } else if (result && result.error) {
+        alert(result.error);
       }
     });
 
@@ -1147,14 +1198,25 @@
     document.getElementById('pin-enter-form').addEventListener('submit', submitPinEnterForm);
     document.getElementById('pin-enter-cancel').addEventListener('click', closePinEnterModal);
 
-    [document.getElementById('modal-entry'), document.getElementById('modal-delete'),
+    const closableOverlays = [document.getElementById('modal-entry'), document.getElementById('modal-delete'),
      document.getElementById('modal-reminder'), document.getElementById('modal-settings'),
-     document.getElementById('modal-pin-set'), document.getElementById('modal-pin-enter')].forEach((overlay) => {
+     document.getElementById('modal-pin-set'), document.getElementById('modal-pin-enter')];
+
+    closableOverlays.forEach((overlay) => {
       overlay.addEventListener('click', (ev) => {
         if (ev.target === overlay && overlay.id !== 'modal-reminder' && overlay.id !== 'modal-pin-enter') {
           overlay.classList.add('hidden');
         }
       });
+    });
+
+    document.addEventListener('keydown', (ev) => {
+      if (ev.key !== 'Escape') return;
+      // Reminder and PIN-entry stay closable only via their own buttons
+      // (reminder must be acknowledged; PIN entry guards a locked admin).
+      const dismissable = closableOverlays.filter((o) => o.id !== 'modal-reminder' && o.id !== 'modal-pin-enter');
+      const open = dismissable.find((o) => !o.classList.contains('hidden'));
+      if (open) open.classList.add('hidden');
     });
 
     if ('serviceWorker' in navigator && (location.protocol === 'https:' || location.hostname === 'localhost')) {

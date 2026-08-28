@@ -18,6 +18,7 @@ npm install       # install dependencies
 npm start          # run the app in development (electron .)
 npm run dist       # build installers into dist/ via electron-builder (win: nsis, mac: dmg, linux: AppImage)
 npm run build:web  # sync renderer/ -> docs/ for the GitHub Pages PWA build
+npm run build:standalone  # rebuild handbuch/Buchhaltung-App.html (single-file, offline-usable app)
 ```
 
 There is no test suite, linter, or build/transpile step — the renderer is plain HTML/CSS/vanilla JS loaded
@@ -48,6 +49,12 @@ Standard Electron three-process split with `contextIsolation: true` and `nodeInt
 - **`docs/`** — a build artifact: an exact copy of `renderer/` produced by `scripts/sync-docs.js` /
   `npm run build:web`, served by GitHub Pages. **Never hand-edit files in `docs/`** — edit `renderer/` and
   re-run the sync script (the `deploy-pages.yml` workflow does this automatically on push to `main`).
+- **`handbuch/Buchhaltung-App.html`** — also a build artifact, produced by `scripts/build-standalone.js` /
+  `npm run build:standalone`: index.html + style.css + renderer.js inlined into one self-contained file that
+  runs the full app offline straight from the filesystem (no server, no install — localStorage fallback),
+  for sending directly to the owner/colleagues. **Never hand-edit it either** — edit `renderer/` and re-run
+  `npm run build:standalone`. Unlike `docs/`, nothing regenerates this automatically on push; re-run it by
+  hand (and re-send the file) whenever `renderer/index.html`, `style.css`, or `renderer.js` change.
 - **`build/icon.png`, `assets/`** — app/tray icon source images (electron-builder auto-generates `.icns`/
   `.ico` from `build/icon.png`).
 
