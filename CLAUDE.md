@@ -43,7 +43,7 @@ Standard Electron three-process split with `contextIsolation: true` and `nodeInt
   - `index.html` — static shell (header with admin tabs, year bar, month tabs, `#content`, install banner,
     footer reminder banner) plus modals for entry add/edit, delete-confirm, reminder, and settings.
   - `renderer.js` — single IIFE holding all app logic and state.
-  - `style.css` — the glossy orange/yellow 3D theme.
+  - `style.css` — the glossy wine-red/yellow 3D theme.
   - `manifest.json`, `sw.js`, `icons/` — PWA support (installable on Android/iOS via "Add to Home Screen").
 - **`docs/`** — a build artifact: an exact copy of `renderer/` produced by `scripts/sync-docs.js` /
   `npm run build:web`, served by GitHub Pages. **Never hand-edit files in `docs/`** — edit `renderer/` and
