@@ -49,7 +49,7 @@ ipcMain.handle('save-data', (event, data) => {
   return true;
 });
 
-ipcMain.handle('upload-document', async (event, dozentId) => {
+ipcMain.handle('upload-document', async (event) => {
   const win = BrowserWindow.fromWebContents(event.sender);
   const result = await dialog.showOpenDialog(win, {
     title: 'PDF-Dokument auswählen',

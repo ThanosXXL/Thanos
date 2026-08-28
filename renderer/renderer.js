@@ -1,8 +1,9 @@
 (function () {
   const MAX_DOZENTEN = 4;
 
-  let state = { dozenten: [] };
+  let state = { dozenten: [], documents: [] };
   let activeDozentId = null;
+  let activeView = 'dozent'; // 'dozent' | 'documents'
 
   const dozentTabs = document.getElementById('dozentTabs');
   const content = document.getElementById('content');
@@ -49,11 +50,11 @@
       todos: [],
       openProjects: [],
       doneProjects: [],
-      chat: [],
-      documents: []
+      chat: []
     };
     state.dozenten.push(dozent);
     activeDozentId = dozent.id;
+    activeView = 'dozent';
     persist();
     closeAddDozentModal();
     render();
@@ -145,13 +146,11 @@
     render();
   }
 
-  async function uploadDocument(dozentId) {
-    const dozent = findDozent(dozentId);
-    if (!dozent) return;
-    const doc = await window.dashboardAPI.uploadDocument(dozentId);
+  async function uploadDocument() {
+    const doc = await window.dashboardAPI.uploadDocument();
     if (!doc) return;
-    if (!Array.isArray(dozent.documents)) dozent.documents = [];
-    dozent.documents.push(doc);
+    if (!Array.isArray(state.documents)) state.documents = [];
+    state.documents.push(doc);
     persist();
     render();
   }
@@ -160,13 +159,11 @@
     window.dashboardAPI.openDocument(fileName);
   }
 
-  function deleteDocument(dozentId, docId) {
-    const dozent = findDozent(dozentId);
-    if (!dozent) return;
-    const doc = dozent.documents.find((d) => d.id === docId);
+  function deleteDocument(docId) {
+    const doc = state.documents.find((d) => d.id === docId);
     if (!doc) return;
     window.dashboardAPI.deleteDocument(doc.fileName);
-    dozent.documents = dozent.documents.filter((d) => d.id !== docId);
+    state.documents = state.documents.filter((d) => d.id !== docId);
     persist();
     render();
   }
@@ -174,14 +171,24 @@
   function renderTabs() {
     dozentTabs.innerHTML = '';
 
+    const documentsTab = document.createElement('div');
+    documentsTab.className = 'dozent-tab documents-tab' + (activeView === 'documents' ? ' active' : '');
+    documentsTab.textContent = '📄 Dokumente';
+    documentsTab.addEventListener('click', () => {
+      activeView = 'documents';
+      render();
+    });
+    dozentTabs.appendChild(documentsTab);
+
     state.dozenten.forEach((dozent) => {
       const tab = document.createElement('div');
-      tab.className = 'dozent-tab' + (dozent.id === activeDozentId ? ' active' : '');
+      tab.className = 'dozent-tab' + (activeView === 'dozent' && dozent.id === activeDozentId ? ' active' : '');
       tab.innerHTML = `<span class="tab-name"></span><span class="remove-x" title="Entfernen">&times;</span>`;
       tab.querySelector('.tab-name').textContent = dozent.name;
 
       tab.querySelector('.tab-name').addEventListener('click', () => {
         activeDozentId = dozent.id;
+        activeView = 'dozent';
         render();
       });
 
@@ -239,6 +246,11 @@
 
   function renderPanel() {
     content.innerHTML = '';
+
+    if (activeView === 'documents') {
+      content.appendChild(buildGlobalDocumentsPanel());
+      return;
+    }
 
     if (!state.dozenten.length) {
       content.appendChild(emptyState);
@@ -357,33 +369,36 @@
     grid.appendChild(doneCol);
     panel.appendChild(grid);
 
-    panel.appendChild(buildDocumentsPanel(dozent));
     panel.appendChild(buildChatPanel(dozent));
 
     content.appendChild(panel);
   }
 
-  function buildDocumentsPanel(dozent) {
+  function buildGlobalDocumentsPanel() {
+    const wrapper = document.createElement('div');
+    wrapper.className = 'dozent-panel';
+
+    const header = document.createElement('div');
+    header.className = 'panel-header';
+    header.innerHTML = `<h2>Dokumente</h2>`;
+    wrapper.appendChild(header);
+
     const panel = document.createElement('div');
     panel.className = 'documents-panel';
-
-    const heading = document.createElement('h3');
-    heading.textContent = 'Dokumente';
-    panel.appendChild(heading);
 
     const uploadRow = document.createElement('div');
     uploadRow.className = 'add-item-row';
     const uploadBtn = document.createElement('button');
     uploadBtn.className = 'btn-primary';
     uploadBtn.textContent = '+ PDF hochladen';
-    uploadBtn.addEventListener('click', () => uploadDocument(dozent.id));
+    uploadBtn.addEventListener('click', () => uploadDocument());
     uploadRow.appendChild(uploadBtn);
     panel.appendChild(uploadRow);
 
     const list = document.createElement('ul');
     list.className = 'documents-list';
 
-    const documents = Array.isArray(dozent.documents) ? dozent.documents : [];
+    const documents = Array.isArray(state.documents) ? state.documents : [];
     if (!documents.length) {
       const empty = document.createElement('li');
       empty.className = 'documents-empty';
@@ -412,7 +427,7 @@
       delBtn.className = 'icon-btn danger';
       delBtn.textContent = '✕';
       delBtn.title = 'Löschen';
-      delBtn.addEventListener('click', () => deleteDocument(dozent.id, doc.id));
+      delBtn.addEventListener('click', () => deleteDocument(doc.id));
 
       li.appendChild(icon);
       li.appendChild(name);
@@ -422,7 +437,8 @@
     });
 
     panel.appendChild(list);
-    return panel;
+    wrapper.appendChild(panel);
+    return wrapper;
   }
 
   function buildChatPanel(dozent) {
@@ -507,8 +523,8 @@
     state = loaded && Array.isArray(loaded.dozenten) ? loaded : { dozenten: [] };
     state.dozenten.forEach((d) => {
       if (!Array.isArray(d.chat)) d.chat = [];
-      if (!Array.isArray(d.documents)) d.documents = [];
     });
+    if (!Array.isArray(state.documents)) state.documents = [];
     activeDozentId = state.dozenten.length ? state.dozenten[0].id : null;
     render();
   }
