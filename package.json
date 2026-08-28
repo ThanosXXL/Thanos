@@ -1,6 +1,6 @@
 {
   "name": "inventar-dashboard",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "description": "Desktop-Dashboard zur Geräteinventar-Verwaltung mit Foto- und Spracherkennung",
   "main": "main.js",
   "author": "",
