@@ -34,16 +34,8 @@ jobs:
       - name: Abhängigkeiten installieren
         run: npm install
 
-      - name: Desktop-App bauen (und bei Tag-Push oder manueller Freigabe veröffentlichen)
-        shell: bash
-        run: |
-          if [ "${{ github.ref_type }}" = "tag" ] || [ "${{ github.event.inputs.publish }}" = "true" ]; then
-            npm run dist -- --publish always
-          else
-            npm run dist
-          fi
-        env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - name: Desktop-App bauen
+        run: npm run dist -- --publish never
 
       - name: Installer als Artifact hochladen
         uses: actions/upload-artifact@v4
@@ -59,17 +51,9 @@ jobs:
         run: npm install
         working-directory: downloader
 
-      - name: Downloader-App bauen (und bei Tag-Push oder manueller Freigabe veröffentlichen)
-        shell: bash
+      - name: Downloader-App bauen
+        run: npm run dist -- --publish never
         working-directory: downloader
-        run: |
-          if [ "${{ github.ref_type }}" = "tag" ] || [ "${{ github.event.inputs.publish }}" = "true" ]; then
-            npm run dist -- --publish always
-          else
-            npm run dist
-          fi
-        env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Downloader-App-Artifact hochladen
         uses: actions/upload-artifact@v4
@@ -80,3 +64,49 @@ jobs:
             downloader/dist/*.dmg
             downloader/dist/*.AppImage
           if-no-files-found: warn
+
+  release:
+    needs: build
+    if: github.ref_type == 'tag' || github.event.inputs.publish == 'true'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - name: Repository auschecken
+        uses: actions/checkout@v4
+
+      - name: Alle Build-Artifacts herunterladen
+        uses: actions/download-artifact@v4
+        with:
+          path: artifacts
+
+      - name: Installer-Dateien für den Release sammeln
+        run: |
+          mkdir -p release-assets
+          find artifacts -type f \( -name "*.exe" -o -name "*.dmg" -o -name "*.AppImage" \) -exec cp {} release-assets/ \;
+          echo "Gesammelte Release-Dateien:"
+          ls -la release-assets
+
+      - name: Tag bestimmen
+        id: tag
+        run: |
+          if [ "${{ github.ref_type }}" = "tag" ]; then
+            echo "tag=${{ github.ref_name }}" >> "$GITHUB_OUTPUT"
+          else
+            echo "tag=v$(node -p "require('./package.json').version")" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Alten Draft für dieses Tag entfernen (falls vorhanden)
+        run: gh release delete "${{ steps.tag.outputs.tag }}" --yes || true
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Release veröffentlichen
+        run: |
+          gh release create "${{ steps.tag.outputs.tag }}" release-assets/* \
+            --title "Inventar - Dashboard ${{ steps.tag.outputs.tag }}" \
+            --notes "Automatisch gebaut von GitHub Actions." \
+            --repo "${{ github.repository }}" \
+            --target "${{ github.sha }}"
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}

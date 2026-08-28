@@ -40,11 +40,6 @@
     "linux": {
       "target": "AppImage",
       "artifactName": "InventarDashboard-Downloader.${ext}"
-    },
-    "publish": [
-      {
-        "provider": "github"
-      }
-    ]
+    }
   }
 }
