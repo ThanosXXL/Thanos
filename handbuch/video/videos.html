@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <meta name="theme-color" content="#7a1030" />
+  <title>Buchhaltung! – Videos</title>
+  <style>
+    :root {
+      --wine: #7a1030;
+      --wine-light: #9c1c40;
+      --wine-deep: #4a0a1e;
+      --yellow: #ffd83d;
+      --ink: #4a2c00;
+      --ink-soft: #8a5a1a;
+      --shadow-soft: 0 6px 16px rgba(74, 10, 30, 0.18);
+      --shadow-strong: 0 10px 28px rgba(74, 10, 30, 0.28);
+    }
+    * { box-sizing: border-box; }
+    html, body { height: 100%; }
+    body {
+      margin: 0;
+      font-family: 'Segoe UI', 'Helvetica Neue', Arial, sans-serif;
+      background: radial-gradient(circle at top left, var(--wine-light) 0%, var(--wine) 45%, var(--wine-deep) 100%);
+      color: var(--ink);
+      min-height: 100vh;
+    }
+    #page {
+      max-width: 900px;
+      margin: 0 auto;
+      padding: 40px 24px 60px;
+    }
+    header {
+      text-align: center;
+      margin-bottom: 36px;
+    }
+    .brand-orb {
+      width: 52px;
+      height: 52px;
+      border-radius: 50%;
+      margin: 0 auto 14px;
+      background: radial-gradient(circle at 32% 28%, #fffbe8 0%, var(--yellow) 30%, var(--wine-light) 70%, var(--wine-deep) 100%);
+      box-shadow: inset -3px -4px 6px rgba(74, 10, 30, 0.45), inset 3px 3px 5px rgba(255, 255, 255, 0.7), 0 3px 6px rgba(74, 10, 30, 0.4);
+    }
+    h1 {
+      margin: 0 0 6px;
+      font-size: 2rem;
+      color: #fff;
+      text-shadow: 0 2px 4px rgba(0, 0, 0, 0.35);
+    }
+    header p {
+      color: #ffe3ec;
+      margin: 0;
+    }
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 22px;
+    }
+    .card {
+      background: linear-gradient(160deg, #fffdf6 0%, #fff3d6 100%);
+      border-radius: 20px;
+      padding: 26px 24px;
+      box-shadow: var(--shadow-soft), inset 0 1px 0 #fff;
+      text-align: center;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 10px;
+      text-decoration: none;
+      cursor: pointer;
+      border: 2px solid transparent;
+      transition: transform 0.1s ease, box-shadow 0.15s ease, border-color 0.15s ease;
+    }
+    .card:hover {
+      transform: translateY(-3px);
+      box-shadow: var(--shadow-strong), inset 0 1px 0 #fff;
+      border-color: var(--yellow);
+    }
+    .card:active { transform: translateY(0); }
+    .thumb-icon {
+      width: 64px;
+      height: 64px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 2rem;
+      color: #fff;
+      margin-bottom: 4px;
+      box-shadow: inset -3px -4px 6px rgba(0, 0, 0, 0.25), inset 3px 3px 5px rgba(255, 255, 255, 0.5), 0 3px 6px rgba(0, 0, 0, 0.25);
+    }
+    .thumb-wine {
+      background: radial-gradient(circle at 32% 28%, #fffbe8 0%, var(--yellow) 25%, var(--wine-light) 65%, var(--wine-deep) 100%);
+    }
+    .thumb-orange {
+      background: radial-gradient(circle at 32% 28%, #fffbe8 0%, #ffd83d 25%, #ff8a00 65%, #d65000 100%);
+    }
+    .card h2 {
+      margin: 0;
+      font-size: 1.2rem;
+      color: var(--ink);
+    }
+    .card .hint {
+      font-size: 0.85rem;
+      color: var(--ink-soft);
+      min-height: 40px;
+    }
+    .badge {
+      display: inline-block;
+      font-size: 0.72rem;
+      font-weight: 700;
+      padding: 3px 10px;
+      border-radius: 999px;
+      color: #fff;
+      text-shadow: 0 1px 1px rgba(0, 0, 0, 0.2);
+    }
+    .badge-wine { background: linear-gradient(180deg, var(--wine-light), var(--wine-deep)); }
+    .badge-orange { background: linear-gradient(180deg, #ffd83d, #d65000); }
+    .btn {
+      font-weight: 700;
+      font-size: 0.92rem;
+      padding: 10px 18px;
+      border-radius: 999px;
+      border: none;
+      color: #fff;
+      text-shadow: 0 1px 1px rgba(0, 0, 0, 0.25);
+      width: 100%;
+      margin-top: 6px;
+      pointer-events: none;
+    }
+    .btn-wine {
+      background: linear-gradient(180deg, var(--yellow) 0%, var(--wine-light) 60%, var(--wine-deep) 100%);
+      box-shadow: 0 4px 0 var(--wine-deep), 0 6px 12px rgba(90, 10, 35, 0.35), inset 0 1px 0 rgba(255, 255, 255, 0.6);
+    }
+    .btn-orange {
+      background: linear-gradient(180deg, #ffd83d 0%, #ff8a00 60%, #d65000 100%);
+      box-shadow: 0 4px 0 #d65000, 0 6px 12px rgba(150, 70, 0, 0.35), inset 0 1px 0 rgba(255, 255, 255, 0.6);
+    }
+    #note {
+      margin-top: 36px;
+      text-align: center;
+      font-size: 0.85rem;
+      color: #ffe3ec;
+    }
+  </style>
+</head>
+<body>
+  <div id="page">
+    <header>
+      <div class="brand-orb"></div>
+      <h1>Buchhaltung<span>!</span> – Promo-Videos</h1>
+      <p>Video auswählen – der Download startet automatisch.</p>
+    </header>
+
+    <div class="grid">
+      <a class="card" href="buchhaltung-promo.mp4" download>
+        <span class="badge badge-wine">Aktuell</span>
+        <div class="thumb-icon thumb-wine">🎬</div>
+        <h2>Weinrot-Design</h2>
+        <div class="hint">Aktuelles Promo-Video (~51s) im weinroten Design mit Original-Hintergrundmusik.</div>
+        <span class="btn btn-wine">⬇ Automatischer Download</span>
+      </a>
+
+      <a class="card" href="buchhaltung-demo.mp4" download>
+        <span class="badge badge-orange">Älter</span>
+        <div class="thumb-icon thumb-orange">🎬</div>
+        <h2>Orange/Gelb-Design</h2>
+        <div class="hint">Früheres Demo-Video im ursprünglichen orange/gelben Design (ohne Musik).</div>
+        <span class="btn btn-orange">⬇ Automatischer Download</span>
+      </a>
+    </div>
+
+    <p id="note">
+      Ein Klick auf die Kachel genügt – kein zweiter Klick nötig. Beide Videos bleiben dauerhaft verfügbar.
+    </p>
+  </div>
+</body>
+</html>
