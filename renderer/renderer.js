@@ -49,7 +49,8 @@
       todos: [],
       openProjects: [],
       doneProjects: [],
-      chat: []
+      chat: [],
+      documents: []
     };
     state.dozenten.push(dozent);
     activeDozentId = dozent.id;
@@ -140,6 +141,32 @@
     const dozent = findDozent(dozentId);
     if (!dozent) return;
     dozent.chat = dozent.chat.filter((m) => m.id !== messageId);
+    persist();
+    render();
+  }
+
+  async function uploadDocument(dozentId) {
+    const dozent = findDozent(dozentId);
+    if (!dozent) return;
+    const doc = await window.dashboardAPI.uploadDocument(dozentId);
+    if (!doc) return;
+    if (!Array.isArray(dozent.documents)) dozent.documents = [];
+    dozent.documents.push(doc);
+    persist();
+    render();
+  }
+
+  function openDocument(fileName) {
+    window.dashboardAPI.openDocument(fileName);
+  }
+
+  function deleteDocument(dozentId, docId) {
+    const dozent = findDozent(dozentId);
+    if (!dozent) return;
+    const doc = dozent.documents.find((d) => d.id === docId);
+    if (!doc) return;
+    window.dashboardAPI.deleteDocument(doc.fileName);
+    dozent.documents = dozent.documents.filter((d) => d.id !== docId);
     persist();
     render();
   }
@@ -330,9 +357,72 @@
     grid.appendChild(doneCol);
     panel.appendChild(grid);
 
+    panel.appendChild(buildDocumentsPanel(dozent));
     panel.appendChild(buildChatPanel(dozent));
 
     content.appendChild(panel);
+  }
+
+  function buildDocumentsPanel(dozent) {
+    const panel = document.createElement('div');
+    panel.className = 'documents-panel';
+
+    const heading = document.createElement('h3');
+    heading.textContent = 'Dokumente';
+    panel.appendChild(heading);
+
+    const uploadRow = document.createElement('div');
+    uploadRow.className = 'add-item-row';
+    const uploadBtn = document.createElement('button');
+    uploadBtn.className = 'btn-primary';
+    uploadBtn.textContent = '+ PDF hochladen';
+    uploadBtn.addEventListener('click', () => uploadDocument(dozent.id));
+    uploadRow.appendChild(uploadBtn);
+    panel.appendChild(uploadRow);
+
+    const list = document.createElement('ul');
+    list.className = 'documents-list';
+
+    const documents = Array.isArray(dozent.documents) ? dozent.documents : [];
+    if (!documents.length) {
+      const empty = document.createElement('li');
+      empty.className = 'documents-empty';
+      empty.textContent = 'Noch keine Dokumente hochgeladen.';
+      list.appendChild(empty);
+    }
+
+    documents.forEach((doc) => {
+      const li = document.createElement('li');
+
+      const icon = document.createElement('span');
+      icon.className = 'document-icon';
+      icon.textContent = 'PDF';
+
+      const name = document.createElement('span');
+      name.className = 'item-text document-name';
+      name.textContent = doc.name;
+      name.title = 'Öffnen';
+      name.addEventListener('click', () => openDocument(doc.fileName));
+
+      const added = document.createElement('span');
+      added.className = 'document-added';
+      added.textContent = doc.addedAt || '';
+
+      const delBtn = document.createElement('button');
+      delBtn.className = 'icon-btn danger';
+      delBtn.textContent = '✕';
+      delBtn.title = 'Löschen';
+      delBtn.addEventListener('click', () => deleteDocument(dozent.id, doc.id));
+
+      li.appendChild(icon);
+      li.appendChild(name);
+      li.appendChild(added);
+      li.appendChild(delBtn);
+      list.appendChild(li);
+    });
+
+    panel.appendChild(list);
+    return panel;
   }
 
   function buildChatPanel(dozent) {
@@ -417,6 +507,7 @@
     state = loaded && Array.isArray(loaded.dozenten) ? loaded : { dozenten: [] };
     state.dozenten.forEach((d) => {
       if (!Array.isArray(d.chat)) d.chat = [];
+      if (!Array.isArray(d.documents)) d.documents = [];
     });
     activeDozentId = state.dozenten.length ? state.dozenten[0].id : null;
     render();

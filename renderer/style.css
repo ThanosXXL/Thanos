@@ -299,6 +299,70 @@ ul.item-list li span.item-text {
   gap: 10px;
 }
 
+.documents-panel {
+  margin-top: 20px;
+  background: var(--white);
+  border: 1px solid var(--pale-blue);
+  border-radius: 10px;
+  padding: 14px;
+  box-shadow: 0 2px 6px rgba(11, 31, 77, 0.08);
+}
+
+.documents-panel h3 {
+  margin: 0 0 12px 0;
+  color: var(--white);
+  background: var(--mid-blue);
+  padding: 8px 10px;
+  border-radius: 6px;
+  font-size: 15px;
+}
+
+ul.documents-list {
+  list-style: none;
+  margin: 10px 0 0 0;
+  padding: 0;
+}
+
+ul.documents-list li {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 7px 6px;
+  border-bottom: 1px solid #eef2f8;
+  font-size: 14px;
+  color: var(--black);
+}
+
+ul.documents-list li.documents-empty {
+  color: #777;
+  font-style: italic;
+}
+
+.document-icon {
+  background: var(--danger);
+  color: var(--white);
+  font-size: 11px;
+  font-weight: bold;
+  padding: 2px 6px;
+  border-radius: 4px;
+  flex-shrink: 0;
+}
+
+.document-name {
+  cursor: pointer;
+}
+
+.document-name:hover {
+  text-decoration: underline;
+  color: var(--mid-blue);
+}
+
+.document-added {
+  font-size: 11px;
+  color: #55606f;
+  white-space: nowrap;
+}
+
 .chat-panel {
   margin-top: 20px;
   background: var(--white);
