@@ -26,7 +26,8 @@ Administrator, Erinnerung, Einstellungen, Download-Seite) liegt unter
 8. [Export & Datensicherung](#8-export--datensicherung)
 9. [Mehrere Administratoren](#9-mehrere-administratoren)
 10. [Buchhaltung! auf anderen Geräten installieren](#10-buchhaltung-auf-anderen-geräten-installieren)
-11. [Häufige Fragen (FAQ)](#11-häufige-fragen-faq)
+11. [Checkliste vor Monatsende](#11-checkliste-vor-monatsende)
+12. [Häufige Fragen (FAQ)](#12-häufige-fragen-faq)
 
 ---
 
@@ -36,8 +37,8 @@ Administrator, Erinnerung, Einstellungen, Download-Seite) liegt unter
 Administratoren**. Jeder Administrator führt seine eigene, vollständig getrennte Buchhaltung mit zwölf
 Monaten (Januar bis Dezember) – unterteilt in **Einnahmen** und **Ausgaben**.
 
-Damit am Monatsende nichts vergessen wird, erinnert die App ab dem **28. jeden Monats täglich um 11:30
-Uhr**, solange ein Monat noch nicht als „abgeschlossen“ markiert wurde.
+Damit am Monatsende nichts vergessen wird, erinnert die App ab dem **28. jeden Monats täglich zwischen
+9:00 und 19:00 Uhr**, solange ein Monat noch nicht als „abgeschlossen“ markiert wurde.
 
 ![Monatsansicht mit Einnahmen und Ausgaben](handbuch/bilder/01-monatsansicht.png)
 *Die Hauptansicht: oben die Administratoren, darunter Jahr und Monate, in der Mitte die Kennzahlen des
@@ -106,8 +107,8 @@ Mit **„📅 Monatsansicht“** geht es zurück zur Detailansicht eines einzeln
 
 ## 6. Die tägliche Erinnerung
 
-Ab dem **28. jeden Monats** prüft die App täglich um **11:30 Uhr**, ob alle vier Administratoren ihren
-aktuellen Monat abgeschlossen haben. Ist das nicht der Fall, erscheint:
+Ab dem **28. jeden Monats** prüft die App **zwischen 9:00 und 19:00 Uhr**, ob alle vier Administratoren
+ihren aktuellen Monat abgeschlossen haben. Ist das nicht der Fall, erscheint:
 
 - ein **Hinweisfenster** mit der Liste der betroffenen Administratoren,
 - dauerhaft ein **Banner** am unteren Bildschirmrand, solange etwas fehlt,
@@ -237,7 +238,32 @@ Web-App führt der Header-Button **„⬇ Alle Downloads“** direkt dorthin.
 
 ---
 
-## 11. Häufige Fragen (FAQ)
+## 11. Checkliste vor Monatsende
+
+Die tägliche Erinnerung (Kapitel 6) markiert nur, ob ein Monat als „abgeschlossen“ gesetzt wurde – sie
+prüft nicht inhaltlich, ob wirklich alles erfasst ist. Vor dem endgültigen Abschließen eines Monats
+empfiehlt sich daher ein kurzer, vollständiger Check:
+
+- [ ] **Alle Belege verbucht** – jede Rechnung, Quittung und jeder Kontoauszugsposten des Monats hat einen
+  passenden Eintrag (Einnahme oder Ausgabe).
+- [ ] **Beträge stimmen** – Betrag je Eintrag mit dem Original (Rechnung/Quittung) verglichen, keine
+  Tippfehler bei Kommastellen.
+- [ ] **Kategorien korrekt** – jeder Eintrag der passenden Kategorie zugeordnet (erleichtert Auswertung und
+  Steuervorbereitung).
+- [ ] **Beleg-Nr. eingetragen**, wo vorhanden – erleichtert die spätere Zuordnung zum Papierbeleg/PDF.
+- [ ] **Saldo plausibel** – Kennzahlen-Karten (Einnahmen/Ausgaben/Saldo) am oberen Rand der Monatsansicht
+  auf offensichtliche Ausreißer geprüft.
+- [ ] **Alle vier Administratoren** durchgegangen, nicht nur der eigene – gerade bei mehreren
+  Administratoren wird das leicht vergessen.
+- [ ] Erst danach die Checkbox **„Monat abgeschlossen“** aktivieren (Kapitel 4).
+
+> **Tipp:** Diese Prüfung lässt sich gut mit der Erinnerung kombinieren – sie erscheint ab dem 28. jeden
+> Monats täglich zwischen 9:00 und 19:00 Uhr, solange noch etwas fehlt. Am besten die Liste einmal in
+> Ruhe durchgehen, statt erst am letzten Tag unter Zeitdruck.
+
+---
+
+## 12. Häufige Fragen (FAQ)
 
 **Was passiert, wenn ich die App über den Infobereich (Tray) schließe?**
 Über das „×“ am Fenster wird die App nur ausgeblendet, nicht beendet – sie läuft im Hintergrund weiter,

@@ -917,8 +917,8 @@
 
   function isReminderWindowNow() {
     const now = new Date();
-    const afterTime = now.getHours() > 11 || (now.getHours() === 11 && now.getMinutes() >= 30);
-    return now.getDate() >= 28 && afterTime;
+    const withinDailyWindow = now.getHours() >= 9 && now.getHours() < 19;
+    return now.getDate() >= 28 && withinDailyWindow;
   }
 
   function getIncompleteAdmins() {

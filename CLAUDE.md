@@ -8,8 +8,8 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 bookkeeping (income and expenses) for up to four *Administratoren* (admins). Each admin has their own
 per-year, per-month ledger for January–December, tracking `einnahmen` (income) and `ausgaben` (expenses).
 Each month can be marked `abgeschlossen` (closed/complete). From the 28th of each month, a daily reminder
-(modal + banner + OS notification) appears at 11:30 local time until every admin's current month is marked
-complete. The UI is in German.
+(modal + banner + OS notification) appears between 9:00 and 19:00 local time until every admin's current
+month is marked complete. The UI is in German.
 
 ## Commands
 
@@ -85,7 +85,7 @@ records — follow this pattern when adding new fields so existing saved files k
 
 ### Reminder logic
 
-`isReminderWindowNow()` returns true from the 28th of the month, after 11:30 local time. `checkReminder()`
+`isReminderWindowNow()` returns true from the 28th of the month, between 9:00 and 19:00 local time. `checkReminder()`
 runs once ~1.2s after load and then every 60s. It always refreshes the persistent footer banner
 (`renderReminderBanner()`), but only pops the modal + fires an OS notification once per calendar day
 (tracked via `einstellungen.letzteErinnerung`), to avoid being annoying while still satisfying "reappears

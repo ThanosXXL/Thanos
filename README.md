@@ -7,8 +7,8 @@ Jeder Administrator führt eine eigene Buchhaltung mit zwölf Monaten (Januar–
 - **Einnahmen** (Datum, Beschreibung, Kategorie, Zahlungsart, Beleg-Nr., Betrag)
 - **Ausgaben** (gleiche Felder)
 
-Jeder Monat kann als **„abgeschlossen“** markiert werden. Ab dem **28. jeden Monats** erscheint täglich um
-**11:30 Uhr** eine Erinnerung, solange ein Monat nicht abgeschlossen wurde.
+Jeder Monat kann als **„abgeschlossen“** markiert werden. Ab dem **28. jeden Monats** erscheint täglich
+**zwischen 9:00 und 19:00 Uhr** eine Erinnerung, solange ein Monat nicht abgeschlossen wurde.
 
 Alle Daten werden lokal gespeichert (Desktop: Benutzerdatenverzeichnis der App / Web: Browser-Speicher) und
 bleiben nach dem Neustart erhalten.

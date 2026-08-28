@@ -1013,7 +1013,7 @@ table.entries tfoot td {
 
       <section class="settings-section">
         <h3>Erinnerung</h3>
-        <p class="hint">Ab dem 28. jeden Monats erscheint täglich um 11:30 Uhr eine Erinnerung, solange der Monat nicht als „abgeschlossen“ markiert ist.</p>
+        <p class="hint">Ab dem 28. jeden Monats erscheint täglich zwischen 9:00 und 19:00 Uhr eine Erinnerung, solange der Monat nicht als „abgeschlossen“ markiert ist.</p>
         <label class="checkbox-row">
           <input type="checkbox" id="setting-autostart" />
           Beim Systemstart automatisch starten (empfohlen, damit die Erinnerung zuverlässig erscheint)
@@ -1997,8 +1997,8 @@ table.entries tfoot td {
 
   function isReminderWindowNow() {
     const now = new Date();
-    const afterTime = now.getHours() > 11 || (now.getHours() === 11 && now.getMinutes() >= 30);
-    return now.getDate() >= 28 && afterTime;
+    const withinDailyWindow = now.getHours() >= 9 && now.getHours() < 19;
+    return now.getDate() >= 28 && withinDailyWindow;
   }
 
   function getIncompleteAdmins() {
