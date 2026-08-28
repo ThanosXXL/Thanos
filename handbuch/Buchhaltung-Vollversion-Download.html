@@ -3,24 +3,44 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
-  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; style-src 'self' 'unsafe-inline'; script-src 'self'; img-src 'self' data:" />
   <meta name="theme-color" content="#7a1030" />
-  <meta name="description" content="Buchhaltung! herunterladen für Windows, macOS, Linux, Android und iOS." />
-  <link rel="icon" href="icons/icon-192.png" />
-  <title>Buchhaltung! – Download</title>
-  <link rel="stylesheet" href="style.css" />
+  <title>Buchhaltung! – Vollversion Download</title>
   <style>
+    :root {
+      --wine: #7a1030;
+      --wine-light: #9c1c40;
+      --wine-deep: #4a0a1e;
+      --yellow: #ffd83d;
+      --ink: #4a2c00;
+      --ink-soft: #8a5a1a;
+      --shadow-soft: 0 6px 16px rgba(74, 10, 30, 0.18);
+      --shadow-strong: 0 10px 28px rgba(74, 10, 30, 0.28);
+    }
+    * { box-sizing: border-box; }
+    html, body { height: 100%; }
+    body {
+      margin: 0;
+      font-family: 'Segoe UI', 'Helvetica Neue', Arial, sans-serif;
+      background: radial-gradient(circle at top left, var(--wine-light) 0%, var(--wine) 45%, var(--wine-deep) 100%);
+      color: var(--ink);
+      min-height: 100vh;
+    }
     #dl-page {
       max-width: 980px;
       margin: 0 auto;
-      padding: 36px 24px 60px;
+      padding: 40px 24px 60px;
     }
     #dl-header {
       text-align: center;
       margin-bottom: 36px;
     }
-    #dl-header .brand-orb {
+    .brand-orb {
+      width: 52px;
+      height: 52px;
+      border-radius: 50%;
       margin: 0 auto 14px;
+      background: radial-gradient(circle at 32% 28%, #fffbe8 0%, var(--yellow) 30%, var(--wine-light) 70%, var(--wine-deep) 100%);
+      box-shadow: inset -3px -4px 6px rgba(74, 10, 30, 0.45), inset 3px 3px 5px rgba(255, 255, 255, 0.7), 0 3px 6px rgba(74, 10, 30, 0.4);
     }
     #dl-header h1 {
       margin: 0 0 6px;
@@ -68,8 +88,8 @@
       align-items: center;
       justify-content: center;
       font-size: 1.8rem;
-      background: radial-gradient(circle at 32% 28%, #fffbe8 0%, var(--yellow) 30%, var(--orange) 70%, var(--orange-deep) 100%);
-      box-shadow: inset -3px -4px 6px rgba(150, 60, 0, 0.45), inset 3px 3px 5px rgba(255, 255, 255, 0.7), 0 3px 6px rgba(120, 60, 0, 0.4);
+      background: radial-gradient(circle at 32% 28%, #fffbe8 0%, var(--yellow) 30%, var(--wine-light) 70%, var(--wine-deep) 100%);
+      box-shadow: inset -3px -4px 6px rgba(74, 10, 30, 0.45), inset 3px 3px 5px rgba(255, 255, 255, 0.7), 0 3px 6px rgba(74, 10, 30, 0.4);
       color: #fff;
       margin-bottom: 4px;
     }
@@ -83,7 +103,18 @@
       color: var(--ink-soft);
       min-height: 32px;
     }
-    .dl-card .btn {
+    .btn {
+      font-family: inherit;
+      font-weight: 700;
+      font-size: 0.92rem;
+      padding: 9px 16px;
+      border-radius: 999px;
+      border: none;
+      color: #fff;
+      text-shadow: 0 1px 1px rgba(0, 0, 0, 0.25);
+      background: linear-gradient(180deg, var(--yellow) 0%, var(--wine-light) 60%, var(--wine-deep) 100%);
+      box-shadow: 0 4px 0 var(--wine-deep), 0 6px 12px rgba(90, 10, 35, 0.35), inset 0 1px 0 rgba(255, 255, 255, 0.6);
+      display: inline-block;
       width: 100%;
       margin-top: 4px;
       pointer-events: none;
@@ -104,7 +135,7 @@
   <div id="dl-page">
     <div id="dl-header">
       <div class="brand-orb"></div>
-      <h1>Buchhaltung<span class="bang">!</span> herunterladen</h1>
+      <h1>Buchhaltung! – Vollversion herunterladen</h1>
       <p>Gerät auswählen – der Download startet automatisch.</p>
     </div>
 
@@ -113,42 +144,41 @@
         <div class="dl-icon">🖥</div>
         <h2>Windows</h2>
         <div class="dl-hint">Installer (.exe) danach ausführen und den Anweisungen folgen.</div>
-        <span class="btn btn-primary">⬇ Automatischer Download</span>
+        <span class="btn">⬇ Automatischer Download</span>
       </a>
 
       <a class="dl-card" href="https://github.com/ThanosXXL/Thanos/releases/latest/download/Buchhaltung-macOS.dmg" download>
         <div class="dl-icon">🍎</div>
         <h2>macOS</h2>
         <div class="dl-hint">.dmg danach öffnen und in den Programme-Ordner ziehen.</div>
-        <span class="btn btn-primary">⬇ Automatischer Download</span>
+        <span class="btn">⬇ Automatischer Download</span>
       </a>
 
       <a class="dl-card" href="https://github.com/ThanosXXL/Thanos/releases/latest/download/Buchhaltung-Linux.AppImage" download>
         <div class="dl-icon">🐧</div>
         <h2>Linux</h2>
         <div class="dl-hint">.AppImage danach ausführbar machen und starten.</div>
-        <span class="btn btn-primary">⬇ Automatischer Download</span>
+        <span class="btn">⬇ Automatischer Download</span>
       </a>
 
-      <a class="dl-card" href="index.html">
+      <a class="dl-card" href="../renderer/index.html">
         <div class="dl-icon">📱</div>
         <h2>Android</h2>
-        <div class="dl-hint">Öffnet die Web-App sofort – danach im Banner auf „App installieren“ tippen.</div>
-        <span class="btn btn-primary">📲 App automatisch öffnen</span>
+        <div class="dl-hint">Öffnet die Web-App sofort – danach im Banner auf „App installieren" tippen.</div>
+        <span class="btn">📲 App automatisch öffnen</span>
       </a>
 
-      <a class="dl-card" href="index.html">
+      <a class="dl-card" href="../renderer/index.html">
         <div class="dl-icon">📱</div>
         <h2>iPhone / iPad</h2>
-        <div class="dl-hint">Öffnet die Web-App sofort – danach „Teilen“ → „Zum Home-Bildschirm“.</div>
-        <span class="btn btn-primary">📲 App automatisch öffnen</span>
+        <div class="dl-hint">Öffnet die Web-App sofort – danach „Teilen" → „Zum Home-Bildschirm".</div>
+        <span class="btn">📲 App automatisch öffnen</span>
       </a>
     </div>
 
     <p id="dl-note">
-      Ein Klick auf die Kachel genügt – kein zweiter Klick nötig. Buchhaltung! erkennt dein Betriebssystem
-      auch automatisch – öffne einfach die <a href="index.html">Web-App</a>, ein Banner zeigt dir dann
-      direkt den passenden Download an.
+      Ein Klick auf die Kachel genügt – kein zweiter Klick nötig. Diese eine Datei reicht aus, um jede
+      Plattform mit einem Klick herunterzuladen.
     </p>
   </div>
 </body>
