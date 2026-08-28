@@ -1,0 +1,2233 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <meta name="theme-color" content="#7a1030" />
+  <meta name="description" content="Buchhaltung! – Desktop- und Web-App zur monatlichen Buchhaltung für bis zu vier Administratoren." />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <meta name="apple-mobile-web-app-title" content="Buchhaltung!" />
+  <title>Buchhaltung! – Direkt nutzen</title>
+  <style>
+:root {
+  --orange: #9c1c40;
+  --orange-deep: #4a0a1e;
+  --yellow: #ffd83d;
+  --yellow-deep: #f2a900;
+  --cream: #fffaf0;
+  --cream-dark: #ffe9c2;
+  --ink: #4a2c00;
+  --ink-soft: #8a5a1a;
+  --green: #2e9e5b;
+  --green-deep: #1c7a41;
+  --red: #e0483a;
+  --red-deep: #b8271c;
+  --wine: #7a1030;
+  --wine-light: #9c1c40;
+  --wine-deep: #4a0a1e;
+  --shadow-soft: 0 6px 16px rgba(74, 10, 30, 0.18);
+  --shadow-strong: 0 10px 28px rgba(74, 10, 30, 0.28);
+}
+
+* {
+  box-sizing: border-box;
+}
+
+.hidden {
+  display: none;
+}
+
+html, body {
+  height: 100%;
+}
+
+body {
+  margin: 0;
+  font-family: 'Segoe UI', 'Helvetica Neue', Arial, sans-serif;
+  background: radial-gradient(circle at top left, var(--wine-light) 0%, var(--wine) 45%, var(--wine-deep) 100%);
+  color: var(--ink);
+  min-height: 100vh;
+}
+
+#app {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+}
+
+/* ---------- Glossy 3D buttons ---------- */
+
+.btn {
+  font-family: inherit;
+  font-weight: 600;
+  font-size: 0.92rem;
+  padding: 9px 16px;
+  border-radius: 999px;
+  border: none;
+  cursor: pointer;
+  color: #fff;
+  text-shadow: 0 1px 1px rgba(0, 0, 0, 0.25);
+  background: linear-gradient(180deg, var(--yellow) 0%, var(--orange) 60%, var(--orange-deep) 100%);
+  box-shadow: 0 4px 0 var(--orange-deep), 0 6px 12px rgba(90, 10, 35, 0.35), inset 0 1px 0 rgba(255, 255, 255, 0.6);
+  transition: transform 0.08s ease, box-shadow 0.08s ease, filter 0.15s ease;
+  display: inline-block;
+  text-decoration: none;
+  text-align: center;
+}
+
+.btn:hover {
+  filter: brightness(1.06);
+}
+
+.btn:active {
+  transform: translateY(3px);
+  box-shadow: 0 1px 0 var(--orange-deep), 0 2px 6px rgba(90, 10, 35, 0.35), inset 0 1px 0 rgba(255, 255, 255, 0.5);
+}
+
+.btn-primary {
+  background: linear-gradient(180deg, var(--yellow) 0%, var(--orange) 60%, var(--orange-deep) 100%);
+}
+
+.btn-outline {
+  background: linear-gradient(180deg, #fffdf6 0%, #fff1d6 100%);
+  color: var(--orange-deep);
+  text-shadow: none;
+  box-shadow: 0 3px 0 #e8c988, 0 5px 10px rgba(90, 10, 35, 0.18), inset 0 1px 0 #fff;
+}
+
+.btn-outline:active {
+  transform: translateY(2px);
+  box-shadow: 0 1px 0 #e8c988, 0 2px 6px rgba(90, 10, 35, 0.18), inset 0 1px 0 #fff;
+}
+
+.btn-danger {
+  background: linear-gradient(180deg, #ff9a7a 0%, var(--red) 60%, var(--red-deep) 100%);
+  box-shadow: 0 4px 0 var(--red-deep), 0 6px 12px rgba(150, 40, 20, 0.35), inset 0 1px 0 rgba(255, 255, 255, 0.6);
+}
+
+.btn-glass {
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.55) 0%, rgba(255, 255, 255, 0.15) 100%);
+  color: var(--ink);
+  text-shadow: none;
+  box-shadow: 0 3px 8px rgba(120, 60, 0, 0.2), inset 0 1px 0 rgba(255, 255, 255, 0.7);
+  backdrop-filter: blur(2px);
+}
+
+.btn-round {
+  width: 38px;
+  height: 38px;
+  padding: 0;
+  border-radius: 50%;
+  font-size: 1.2rem;
+  line-height: 1;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.btn-small {
+  padding: 5px 10px;
+  font-size: 0.78rem;
+}
+
+.btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  transform: none !important;
+}
+
+/* ---------- Header ---------- */
+
+#app-header {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  padding: 14px 24px;
+  background: linear-gradient(180deg, var(--yellow) 0%, var(--orange) 55%, var(--orange-deep) 100%);
+  box-shadow: var(--shadow-strong);
+  position: relative;
+  z-index: 5;
+  flex-wrap: wrap;
+}
+
+#app-header::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.55) 0%, rgba(255, 255, 255, 0) 50%);
+  pointer-events: none;
+}
+
+.brand {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.brand-orb {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: radial-gradient(circle at 32% 28%, #fffbe8 0%, var(--yellow) 30%, var(--orange) 70%, var(--orange-deep) 100%);
+  box-shadow: inset -3px -4px 6px rgba(90, 10, 35, 0.45), inset 3px 3px 5px rgba(255, 255, 255, 0.7), 0 3px 6px rgba(74, 10, 30, 0.4);
+}
+
+.brand h1 {
+  margin: 0;
+  font-size: 1.5rem;
+  color: #fff;
+  text-shadow: 0 2px 3px rgba(120, 40, 0, 0.5), 0 0 1px rgba(0, 0, 0, 0.2);
+  letter-spacing: 0.5px;
+}
+
+.brand .bang {
+  color: #fff6d0;
+}
+
+#admin-tabs {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  flex: 1;
+}
+
+.admin-tab {
+  padding: 8px 16px;
+  border-radius: 999px;
+  border: none;
+  cursor: pointer;
+  font-weight: 600;
+  font-size: 0.9rem;
+  background: rgba(255, 255, 255, 0.35);
+  color: #fff2d8;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.4);
+  transition: all 0.15s ease;
+}
+
+.admin-tab.active {
+  background: linear-gradient(180deg, #fffdf6 0%, #fff1d6 100%);
+  color: var(--orange-deep);
+  text-shadow: none;
+  box-shadow: 0 3px 8px rgba(74, 10, 30, 0.35), inset 0 1px 0 #fff;
+}
+
+.header-actions {
+  display: flex;
+  gap: 10px;
+}
+
+/* ---------- Install / download banner ---------- */
+
+#install-banner {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 10px 24px;
+  background: linear-gradient(90deg, #fff3d6, #ffe3ad);
+  border-bottom: 1px solid #f1cf8a;
+  flex-wrap: wrap;
+}
+
+#install-banner.hidden {
+  display: none;
+}
+
+#install-banner p {
+  margin: 0;
+  font-size: 0.85rem;
+  color: var(--ink-soft);
+  flex: 1;
+  min-width: 220px;
+}
+
+#install-banner .btn {
+  white-space: nowrap;
+}
+
+/* ---------- Year bar & month tabs ---------- */
+
+#year-bar {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 24px;
+  background: linear-gradient(180deg, #fff3d6 0%, #ffe3ad 100%);
+  box-shadow: var(--shadow-soft);
+  flex-wrap: wrap;
+}
+
+#year-label {
+  font-size: 1.15rem;
+  font-weight: 700;
+  color: var(--ink);
+  min-width: 70px;
+  text-align: center;
+}
+
+#btn-overview {
+  margin-left: auto;
+}
+
+#month-tabs {
+  display: flex;
+  gap: 8px;
+  padding: 12px 24px;
+  overflow-x: auto;
+  background: #fff8ea;
+  box-shadow: 0 2px 6px rgba(74, 10, 30, 0.08);
+}
+
+.month-tab {
+  position: relative;
+  padding: 9px 14px 9px 26px;
+  border-radius: 12px;
+  border: none;
+  cursor: pointer;
+  font-weight: 600;
+  font-size: 0.85rem;
+  white-space: nowrap;
+  background: linear-gradient(180deg, #fffdf6 0%, #fff0d2 100%);
+  color: var(--ink-soft);
+  box-shadow: 0 3px 0 #e8c988, inset 0 1px 0 #fff;
+  transition: transform 0.08s ease;
+}
+
+.month-tab:active {
+  transform: translateY(2px);
+}
+
+.month-tab.active {
+  background: linear-gradient(180deg, var(--yellow) 0%, var(--orange) 70%, var(--orange-deep) 100%);
+  color: #fff;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.25);
+  box-shadow: 0 3px 0 var(--orange-deep), 0 5px 10px rgba(90, 10, 35, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.5);
+}
+
+.month-tab .dot {
+  position: absolute;
+  left: 10px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.6);
+}
+
+.dot-done {
+  background: var(--green);
+}
+
+.dot-due {
+  background: var(--red);
+  animation: pulse 1.4s infinite;
+}
+
+.dot-open {
+  background: #c9a35a;
+}
+
+@keyframes pulse {
+  0%, 100% { box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.6), 0 0 0 0 rgba(224, 72, 58, 0.6); }
+  50% { box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.6), 0 0 0 5px rgba(224, 72, 58, 0); }
+}
+
+/* ---------- Content ---------- */
+
+#content {
+  flex: 1;
+  padding: 24px;
+  max-width: 1200px;
+  width: 100%;
+  margin: 0 auto;
+}
+
+.summary-row {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 16px;
+  margin-bottom: 24px;
+}
+
+.summary-card {
+  border-radius: 18px;
+  padding: 18px 20px;
+  background: linear-gradient(160deg, #fffdf6 0%, #fff3d6 100%);
+  box-shadow: var(--shadow-soft), inset 0 1px 0 #fff;
+  position: relative;
+  overflow: hidden;
+}
+
+.summary-card h3 {
+  margin: 0 0 6px;
+  font-size: 0.8rem;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: var(--ink-soft);
+}
+
+.summary-card .value {
+  font-size: 1.6rem;
+  font-weight: 800;
+}
+
+.summary-card.income .value { color: var(--green-deep); }
+.summary-card.expense .value { color: var(--red-deep); }
+.summary-card.balance .value { color: var(--orange-deep); }
+
+.summary-card.status {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  justify-content: center;
+}
+
+.status-toggle {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  cursor: pointer;
+  font-weight: 700;
+}
+
+.status-toggle input {
+  width: 20px;
+  height: 20px;
+  accent-color: var(--green);
+}
+
+.section-block {
+  background: linear-gradient(160deg, #fffdf6 0%, #fff6e0 100%);
+  border-radius: 18px;
+  padding: 18px 20px;
+  box-shadow: var(--shadow-soft), inset 0 1px 0 #fff;
+  margin-bottom: 22px;
+}
+
+.locked-placeholder {
+  text-align: center;
+  padding: 70px 20px;
+}
+
+.locked-placeholder .locked-icon {
+  font-size: 2.6rem;
+  margin-bottom: 14px;
+}
+
+.locked-placeholder p {
+  font-weight: 700;
+  color: var(--ink-soft);
+  margin: 0;
+}
+
+.section-block-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 12px;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.section-block-header h2 {
+  margin: 0;
+  font-size: 1.1rem;
+  color: var(--ink);
+}
+
+.section-block.income h2::before { content: '💰 '; }
+.section-block.expense h2::before { content: '🧾 '; }
+
+.table-wrap {
+  overflow-x: auto;
+  border-radius: 12px;
+}
+
+table.entries {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.9rem;
+  min-width: 700px;
+}
+
+table.entries thead th {
+  background: linear-gradient(180deg, var(--yellow) 0%, var(--orange) 100%);
+  color: #fff;
+  text-shadow: 0 1px 1px rgba(0, 0, 0, 0.2);
+  padding: 10px 12px;
+  text-align: left;
+  position: sticky;
+  top: 0;
+}
+
+table.entries thead th:first-child { border-top-left-radius: 10px; }
+table.entries thead th:last-child { border-top-right-radius: 10px; }
+
+table.entries tbody td {
+  padding: 9px 12px;
+  border-bottom: 1px solid #f1dfb8;
+}
+
+table.entries tbody tr:nth-child(even) {
+  background: rgba(255, 216, 61, 0.1);
+}
+
+table.entries tbody tr:hover {
+  background: rgba(122, 16, 48, 0.12);
+}
+
+table.entries tfoot td {
+  padding: 10px 12px;
+  font-weight: 800;
+  border-top: 2px solid var(--orange);
+}
+
+.amount-cell {
+  font-variant-numeric: tabular-nums;
+  font-weight: 600;
+  text-align: right;
+}
+
+.row-actions {
+  display: flex;
+  gap: 6px;
+}
+
+.icon-btn {
+  border: none;
+  background: rgba(122, 16, 48, 0.15);
+  color: var(--orange-deep);
+  border-radius: 8px;
+  width: 30px;
+  height: 30px;
+  cursor: pointer;
+  font-size: 0.9rem;
+}
+
+.icon-btn:hover {
+  background: rgba(122, 16, 48, 0.3);
+}
+
+.icon-btn.danger {
+  background: rgba(224, 72, 58, 0.15);
+  color: var(--red-deep);
+}
+
+.icon-btn.danger:hover {
+  background: rgba(224, 72, 58, 0.3);
+}
+
+.empty-hint {
+  color: var(--ink-soft);
+  font-style: italic;
+  padding: 10px 4px;
+}
+
+/* ---------- Yearly overview ---------- */
+
+.overview-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.92rem;
+}
+
+.overview-table th {
+  background: linear-gradient(180deg, var(--yellow), var(--orange));
+  color: #fff;
+  padding: 10px;
+  text-shadow: 0 1px 1px rgba(0, 0, 0, 0.2);
+}
+
+.overview-table td {
+  padding: 9px 10px;
+  border-bottom: 1px solid #f1dfb8;
+  text-align: right;
+}
+
+.overview-table td:first-child {
+  text-align: left;
+  font-weight: 700;
+}
+
+.overview-bar-wrap {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  height: 14px;
+  width: 140px;
+}
+
+.overview-bar {
+  height: 100%;
+  border-radius: 4px;
+}
+
+.bar-income { background: linear-gradient(90deg, #7be0a0, var(--green)); }
+.bar-expense { background: linear-gradient(90deg, #ff9a7a, var(--red)); }
+
+/* ---------- Modals ---------- */
+
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(60, 30, 0, 0.45);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 50;
+  padding: 20px;
+}
+
+.modal-overlay.hidden {
+  display: none;
+}
+
+.modal {
+  background: #fffaf0;
+  border-radius: 20px;
+  padding: 26px 28px;
+  width: 100%;
+  max-width: 520px;
+  max-height: 88vh;
+  overflow-y: auto;
+  box-shadow: 0 20px 50px rgba(80, 40, 0, 0.45);
+  border-top: 6px solid var(--orange);
+  position: relative;
+  animation: pop-in 0.14s ease-out;
+}
+
+@keyframes pop-in {
+  from { transform: scale(0.95); opacity: 0; }
+  to { transform: scale(1); opacity: 1; }
+}
+
+.modal h2 {
+  margin-top: 0;
+  color: var(--ink);
+}
+
+.modal-small {
+  max-width: 380px;
+}
+
+#entry-form {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+#entry-form label {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--ink-soft);
+}
+
+#entry-form input,
+#entry-form select {
+  font-family: inherit;
+  font-size: 0.95rem;
+  padding: 9px 10px;
+  border-radius: 10px;
+  border: 1px solid #e8c988;
+  background: #fffef8;
+  color: var(--ink);
+}
+
+#entry-form input:focus,
+#entry-form select:focus {
+  outline: 2px solid var(--orange);
+}
+
+.modal-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  margin-top: 18px;
+  flex-wrap: wrap;
+}
+
+.modal-actions-left {
+  justify-content: flex-start;
+}
+
+#reminder-list {
+  padding-left: 20px;
+}
+
+#reminder-list li {
+  margin-bottom: 6px;
+}
+
+.settings-section {
+  margin-bottom: 20px;
+  padding-bottom: 16px;
+  border-bottom: 1px solid #f1dfb8;
+}
+
+.settings-section:last-of-type {
+  border-bottom: none;
+}
+
+.settings-section h3 {
+  margin: 0 0 10px;
+  font-size: 0.95rem;
+  color: var(--ink);
+}
+
+.settings-section .hint {
+  font-size: 0.82rem;
+  color: var(--ink-soft);
+  margin-top: 0;
+}
+
+.admin-name-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 8px;
+}
+
+.admin-name-row input {
+  flex: 1;
+  padding: 7px 10px;
+  border-radius: 8px;
+  border: 1px solid #e8c988;
+  font-family: inherit;
+}
+
+.pin-status {
+  font-size: 0.78rem;
+  font-weight: 700;
+  padding: 4px 10px;
+  border-radius: 999px;
+  white-space: nowrap;
+}
+
+.pin-status.on {
+  background: rgba(46, 158, 91, 0.18);
+  color: var(--green-deep);
+}
+
+.pin-status.off {
+  background: rgba(138, 90, 26, 0.12);
+  color: var(--ink-soft);
+}
+
+.pin-error {
+  color: var(--red-deep);
+  font-size: 0.85rem;
+  font-weight: 600;
+  margin: -4px 0 4px;
+}
+
+#pin-set-form input,
+#pin-enter-form input {
+  font-family: inherit;
+  font-size: 1.3rem;
+  letter-spacing: 6px;
+  text-align: center;
+  padding: 9px 10px;
+  border-radius: 10px;
+  border: 1px solid #e8c988;
+  background: #fffef8;
+  color: var(--ink);
+  width: 100%;
+}
+
+#pin-set-form label,
+#pin-enter-form label {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--ink-soft);
+  margin-bottom: 12px;
+}
+
+.chip-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 10px;
+}
+
+.chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 5px 10px;
+  border-radius: 999px;
+  background: linear-gradient(180deg, #fff3d6, #ffe3ad);
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: var(--ink);
+  box-shadow: inset 0 1px 0 #fff;
+}
+
+.chip button {
+  border: none;
+  background: none;
+  cursor: pointer;
+  color: var(--red-deep);
+  font-weight: 800;
+}
+
+.chip-add {
+  display: flex;
+  gap: 8px;
+}
+
+.chip-add input {
+  flex: 1;
+  padding: 7px 10px;
+  border-radius: 8px;
+  border: 1px solid #e8c988;
+  font-family: inherit;
+}
+
+.checkbox-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.9rem;
+  cursor: pointer;
+}
+
+.checkbox-row input {
+  width: 18px;
+  height: 18px;
+  accent-color: var(--orange);
+}
+
+/* ---------- Footer / reminder banner ---------- */
+
+#app-footer {
+  padding: 0;
+}
+
+#reminder-banner {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  padding: 10px 20px;
+  background: linear-gradient(90deg, var(--yellow), var(--orange));
+  color: #fff;
+  font-weight: 700;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.25);
+  cursor: pointer;
+}
+
+#reminder-banner.hidden {
+  display: none;
+}
+
+/* ---------- Scrollbar polish ---------- */
+
+::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+
+::-webkit-scrollbar-thumb {
+  background: linear-gradient(180deg, var(--yellow), var(--orange));
+  border-radius: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: #fff3d6;
+}
+
+@media (max-width: 720px) {
+  #app-header, #year-bar, #month-tabs {
+    padding-left: 14px;
+    padding-right: 14px;
+  }
+
+  #content {
+    padding: 14px;
+  }
+}
+
+</style>
+</head>
+<body>
+  <div id="app">
+    <header id="app-header">
+      <div class="brand">
+        <div class="brand-orb"></div>
+        <h1>Buchhaltung<span class="bang">!</span></h1>
+      </div>
+
+      <nav id="admin-tabs" aria-label="Administratoren"></nav>
+
+      <div class="header-actions">
+        <a id="link-downloads" class="btn btn-glass" href="https://github.com/ThanosXXL/Thanos/releases/tag/v1.1.0" title="Buchhaltung! für alle Geräte herunterladen" target="_blank" rel="noopener">⬇ Alle Downloads</a>
+        <button id="btn-lock" class="btn btn-glass hidden" type="button" title="Aktuellen Administrator jetzt sperren">🔒 Sperren</button>
+        <button id="btn-settings" class="btn btn-glass" type="button" title="Einstellungen">⚙ Einstellungen</button>
+      </div>
+    </header>
+
+    <div id="install-banner" class="hidden"></div>
+
+    <div id="year-bar">
+      <button id="year-prev" class="btn btn-round" type="button" aria-label="Vorheriges Jahr">‹</button>
+      <div id="year-label">2026</div>
+      <button id="year-next" class="btn btn-round" type="button" aria-label="Nächstes Jahr">›</button>
+
+      <button id="btn-overview" class="btn btn-outline" type="button">📊 Jahresübersicht</button>
+      <button id="btn-export-year" class="btn btn-outline" type="button">⬇ Jahr exportieren</button>
+    </div>
+
+    <nav id="month-tabs" aria-label="Monate"></nav>
+
+    <main id="content"></main>
+
+    <footer id="app-footer">
+      <span id="reminder-banner" class="hidden"></span>
+    </footer>
+  </div>
+
+  <!-- Modal: Eintrag hinzufügen/bearbeiten -->
+  <div id="modal-entry" class="modal-overlay hidden">
+    <div class="modal glossy-panel">
+      <h2 id="entry-modal-title">Neue Einnahme</h2>
+      <form id="entry-form">
+        <label>
+          Datum
+          <input type="date" id="entry-datum" required />
+        </label>
+        <label>
+          Beschreibung
+          <input type="text" id="entry-beschreibung" maxlength="200" required />
+        </label>
+        <label>
+          Kategorie
+          <select id="entry-kategorie"></select>
+        </label>
+        <label>
+          Zahlungsart
+          <select id="entry-zahlungsart">
+            <option value="Bar">Bar</option>
+            <option value="Überweisung">Überweisung</option>
+            <option value="Karte">Karte</option>
+            <option value="Lastschrift">Lastschrift</option>
+            <option value="Sonstiges">Sonstiges</option>
+          </select>
+        </label>
+        <label>
+          Beleg-Nr. (optional)
+          <input type="text" id="entry-beleg" maxlength="60" />
+        </label>
+        <label>
+          Betrag (€)
+          <input type="number" id="entry-betrag" step="0.01" min="0" required />
+        </label>
+        <div class="modal-actions">
+          <button type="button" class="btn btn-outline" id="entry-cancel">Abbrechen</button>
+          <button type="submit" class="btn btn-primary" id="entry-save">Speichern</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Modal: Löschen bestätigen -->
+  <div id="modal-delete" class="modal-overlay hidden">
+    <div class="modal glossy-panel modal-small">
+      <h2>Eintrag löschen?</h2>
+      <p id="delete-text">Dieser Eintrag wird endgültig entfernt.</p>
+      <div class="modal-actions">
+        <button type="button" class="btn btn-outline" id="delete-cancel">Abbrechen</button>
+        <button type="button" class="btn btn-danger" id="delete-confirm">Löschen</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal: Erinnerung -->
+  <div id="modal-reminder" class="modal-overlay hidden">
+    <div class="modal glossy-panel">
+      <h2>🔔 Erinnerung: Buchhaltung vervollständigen</h2>
+      <p>Der Monat neigt sich dem Ende zu. Bei folgenden Administratoren fehlen noch Einträge oder der Monat wurde nicht abgeschlossen:</p>
+      <ul id="reminder-list"></ul>
+      <div class="modal-actions">
+        <button type="button" class="btn btn-outline" id="reminder-later">Heute nicht mehr erinnern</button>
+        <button type="button" class="btn btn-primary" id="reminder-goto">Jetzt eintragen</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal: Einstellungen -->
+  <div id="modal-settings" class="modal-overlay hidden">
+    <div class="modal glossy-panel">
+      <h2>⚙ Einstellungen</h2>
+
+      <section class="settings-section">
+        <h3>Administratoren</h3>
+        <p class="hint">Optional: PIN pro Administrator festlegen. Beim Wechsel zu einem geschützten Profil
+          wird die PIN abgefragt. Sobald die App minimiert/verlassen wird (z. B. Fenster wechseln, App in
+          den Hintergrund), sperrt sich ein geschütztes Profil automatisch wieder – beim Zurückkehren ist
+          erneut die PIN nötig. Mit „🔒 Sperren“ oben rechts lässt sich das auch jederzeit manuell auslösen.</p>
+        <div id="settings-admin-names"></div>
+      </section>
+
+      <section class="settings-section">
+        <h3>Kategorien Einnahmen</h3>
+        <div id="settings-cat-einnahmen" class="chip-list"></div>
+        <div class="chip-add">
+          <input type="text" id="new-cat-einnahme" placeholder="Neue Kategorie…" maxlength="40" />
+          <button type="button" class="btn btn-outline" id="add-cat-einnahme">+ Hinzufügen</button>
+        </div>
+      </section>
+
+      <section class="settings-section">
+        <h3>Kategorien Ausgaben</h3>
+        <div id="settings-cat-ausgaben" class="chip-list"></div>
+        <div class="chip-add">
+          <input type="text" id="new-cat-ausgabe" placeholder="Neue Kategorie…" maxlength="40" />
+          <button type="button" class="btn btn-outline" id="add-cat-ausgabe">+ Hinzufügen</button>
+        </div>
+      </section>
+
+      <section class="settings-section">
+        <h3>Erinnerung</h3>
+        <p class="hint">Ab dem 28. jeden Monats erscheint täglich um 11:30 Uhr eine Erinnerung, solange der Monat nicht als „abgeschlossen“ markiert ist.</p>
+        <label class="checkbox-row">
+          <input type="checkbox" id="setting-autostart" />
+          Beim Systemstart automatisch starten (empfohlen, damit die Erinnerung zuverlässig erscheint)
+        </label>
+      </section>
+
+      <section class="settings-section">
+        <h3>Datensicherung</h3>
+        <div class="modal-actions modal-actions-left">
+          <button type="button" class="btn btn-outline" id="btn-backup-export">⬇ Sicherung exportieren</button>
+          <button type="button" class="btn btn-outline" id="btn-backup-import">⬆ Sicherung importieren</button>
+        </div>
+      </section>
+
+      <div class="modal-actions">
+        <button type="button" class="btn btn-primary" id="settings-close">Schließen</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal: PIN festlegen/ändern -->
+  <div id="modal-pin-set" class="modal-overlay hidden">
+    <div class="modal glossy-panel modal-small">
+      <h2 id="pin-set-title">PIN festlegen</h2>
+      <form id="pin-set-form">
+        <label>
+          Neue PIN (4 Ziffern)
+          <input type="password" id="pin-set-new" inputmode="numeric" pattern="[0-9]{4}" maxlength="4" autocomplete="off" required />
+        </label>
+        <label>
+          PIN bestätigen
+          <input type="password" id="pin-set-confirm" inputmode="numeric" pattern="[0-9]{4}" maxlength="4" autocomplete="off" required />
+        </label>
+        <p id="pin-set-error" class="pin-error hidden"></p>
+        <div class="modal-actions modal-actions-left">
+          <button type="button" class="btn btn-danger btn-small hidden" id="pin-remove">PIN entfernen</button>
+        </div>
+        <div class="modal-actions">
+          <button type="button" class="btn btn-outline" id="pin-set-cancel">Abbrechen</button>
+          <button type="submit" class="btn btn-primary">Speichern</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Modal: PIN eingeben -->
+  <div id="modal-pin-enter" class="modal-overlay hidden">
+    <div class="modal glossy-panel modal-small">
+      <h2 id="pin-enter-title">PIN erforderlich</h2>
+      <form id="pin-enter-form">
+        <label>
+          PIN
+          <input type="password" id="pin-enter-value" inputmode="numeric" pattern="[0-9]{4}" maxlength="4" autocomplete="off" required />
+        </label>
+        <p id="pin-enter-error" class="pin-error hidden">Falsche PIN. Bitte erneut versuchen.</p>
+        <div class="modal-actions">
+          <button type="button" class="btn btn-outline" id="pin-enter-cancel">Abbrechen</button>
+          <button type="submit" class="btn btn-primary">Bestätigen</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <script>
+(function () {
+  'use strict';
+
+  const MONAT_KEYS = ['01', '02', '03', '04', '05', '06', '07', '08', '09', '10', '11', '12'];
+  const MONAT_LABELS = {
+    '01': 'Januar', '02': 'Februar', '03': 'März', '04': 'April',
+    '05': 'Mai', '06': 'Juni', '07': 'Juli', '08': 'August',
+    '09': 'September', '10': 'Oktober', '11': 'November', '12': 'Dezember'
+  };
+
+  const MAX_ADMINS = 4;
+
+  const DEFAULT_KAT_EINNAHMEN = ['Verkaufserlöse', 'Dienstleistungen', 'Zinserträge', 'Sonstige Einnahmen'];
+  const DEFAULT_KAT_AUSGABEN = ['Miete', 'Gehälter', 'Wareneinkauf', 'Versicherungen', 'Steuern & Abgaben', 'Marketing', 'Bürobedarf', 'Sonstige Ausgaben'];
+
+  const GITHUB_OWNER = 'ThanosXXL';
+  const GITHUB_REPO = 'Thanos';
+  const RELEASE_ASSETS = {
+    windows: 'Buchhaltung-Windows-Setup.exe',
+    mac: 'Buchhaltung-macOS.dmg',
+    linux: 'Buchhaltung-Linux.AppImage'
+  };
+
+  const isElectron = typeof window.dashboardAPI !== 'undefined';
+
+  function uid() {
+    return Date.now().toString(36) + Math.random().toString(36).slice(2, 8);
+  }
+
+  function todayIso() {
+    return new Date().toISOString().slice(0, 10);
+  }
+
+  function fmtEUR(n) {
+    return (Number(n) || 0).toLocaleString('de-DE', { style: 'currency', currency: 'EUR' });
+  }
+
+  function fmtDate(iso) {
+    if (!iso) return '';
+    const parts = iso.split('-');
+    if (parts.length !== 3) return iso;
+    return `${parts[2]}.${parts[1]}.${parts[0]}`;
+  }
+
+  function sumEntries(list) {
+    return (list || []).reduce((s, e) => s + (Number(e.betrag) || 0), 0);
+  }
+
+  function downloadBlob(content, filename, mime) {
+    const blob = new Blob([content], { type: mime });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = filename;
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    setTimeout(() => URL.revokeObjectURL(url), 2000);
+  }
+
+  function createLocalStorageApi() {
+    const KEY = 'buchhaltung-data';
+    return {
+      loadData: async () => {
+        try {
+          const raw = localStorage.getItem(KEY);
+          return raw ? JSON.parse(raw) : { administratoren: [], einstellungen: {} };
+        } catch (err) {
+          return { administratoren: [], einstellungen: {} };
+        }
+      },
+      saveData: async (data) => {
+        localStorage.setItem(KEY, JSON.stringify(data));
+        return true;
+      },
+      showNotification: async (title, body) => {
+        if ('Notification' in window) {
+          if (Notification.permission === 'granted') {
+            new Notification(title, { body });
+          } else if (Notification.permission !== 'denied') {
+            const perm = await Notification.requestPermission();
+            if (perm === 'granted') new Notification(title, { body });
+          }
+        }
+        return true;
+      },
+      getAutostart: async () => false,
+      setAutostart: async () => false,
+      exportCsv: async (defaultName, csvContent) => {
+        downloadBlob(csvContent, defaultName, 'text/csv;charset=utf-8');
+        return { canceled: false };
+      },
+      exportBackup: async (jsonContent) => {
+        downloadBlob(jsonContent, `buchhaltung-backup-${todayIso()}.json`, 'application/json');
+        return { canceled: false };
+      },
+      importBackup: async () => {
+        return new Promise((resolve) => {
+          const input = document.createElement('input');
+          input.type = 'file';
+          input.accept = 'application/json';
+          input.onchange = () => {
+            const file = input.files && input.files[0];
+            if (!file) { resolve({ canceled: true }); return; }
+            const reader = new FileReader();
+            reader.onload = () => {
+              try {
+                resolve({ canceled: false, data: JSON.parse(reader.result) });
+              } catch (err) {
+                resolve({ canceled: true, error: 'Datei konnte nicht gelesen werden.' });
+              }
+            };
+            reader.readAsText(file);
+          };
+          input.click();
+        });
+      },
+      onVisibilityChange: () => {
+        // Der Browser/PWA-Pfad nutzt stattdessen direkt document.visibilitychange.
+      }
+    };
+  }
+
+  const api = isElectron ? window.dashboardAPI : createLocalStorageApi();
+
+  let state = { administratoren: [], einstellungen: {} };
+  let ansicht = 'monat'; // 'monat' | 'uebersicht'
+  let entryModalCtx = null;
+  let deleteCtx = null;
+  let deferredInstallPrompt = null;
+  let pinSetAdmin = null;
+  let pinEnterCtx = null;
+  const unlockedAdmins = new Set();
+
+  function defaultAdmin(n) {
+    return { id: uid(), name: `Administrator ${n}`, jahre: {}, pin: null };
+  }
+
+  async function sha256Hex(text) {
+    const enc = new TextEncoder().encode('buchhaltung-pin::' + text);
+    const buf = await crypto.subtle.digest('SHA-256', enc);
+    return Array.from(new Uint8Array(buf)).map((b) => b.toString(16).padStart(2, '0')).join('');
+  }
+
+  function requestAdminAccess(admin, onSuccess) {
+    if (!admin.pin || unlockedAdmins.has(admin.id)) {
+      onSuccess();
+      return;
+    }
+    pinEnterCtx = { admin, onSuccess };
+    document.getElementById('pin-enter-title').textContent = `PIN erforderlich – ${admin.name}`;
+    document.getElementById('pin-enter-error').classList.add('hidden');
+    const input = document.getElementById('pin-enter-value');
+    input.value = '';
+    document.getElementById('modal-pin-enter').classList.remove('hidden');
+    input.focus();
+  }
+
+  function showLockedPlaceholder(admin) {
+    const monthTabs = document.getElementById('month-tabs');
+    monthTabs.textContent = '';
+    monthTabs.style.display = 'none';
+
+    const content = document.getElementById('content');
+    content.textContent = '';
+    const wrap = document.createElement('div');
+    wrap.className = 'section-block locked-placeholder';
+    const icon = document.createElement('div');
+    icon.className = 'locked-icon';
+    icon.textContent = '🔒';
+    const txt = document.createElement('p');
+    txt.textContent = `${admin.name} ist gesperrt – bitte PIN eingeben.`;
+    wrap.appendChild(icon);
+    wrap.appendChild(txt);
+    content.appendChild(wrap);
+  }
+
+  function lockAdminNow(admin) {
+    unlockedAdmins.delete(admin.id);
+    showLockedPlaceholder(admin);
+    requestAdminAccess(admin, () => render());
+  }
+
+  function handleAppHidden() {
+    unlockedAdmins.clear();
+  }
+
+  function handleAppVisible() {
+    const admin = getActiveAdmin();
+    if (admin && admin.pin && !unlockedAdmins.has(admin.id)) {
+      showLockedPlaceholder(admin);
+      requestAdminAccess(admin, () => render());
+    }
+  }
+
+  function ensureMonth(admin, jahr, monatKey) {
+    if (!admin.jahre[jahr]) admin.jahre[jahr] = { monate: {} };
+    if (!admin.jahre[jahr].monate[monatKey]) {
+      admin.jahre[jahr].monate[monatKey] = { einnahmen: [], ausgaben: [], abgeschlossen: false };
+    }
+    return admin.jahre[jahr].monate[monatKey];
+  }
+
+  function ensureYearForAllAdmins(jahr) {
+    state.administratoren.forEach((admin) => {
+      MONAT_KEYS.forEach((mk) => ensureMonth(admin, jahr, mk));
+    });
+  }
+
+  function getActiveAdmin() {
+    return state.administratoren.find((a) => a.id === state.einstellungen.aktiverAdminId) || state.administratoren[0];
+  }
+
+  async function persist() {
+    await api.saveData(state);
+  }
+
+  function init() {
+    api.loadData().then((data) => {
+      state = data && typeof data === 'object' ? data : {};
+      if (!Array.isArray(state.administratoren)) state.administratoren = [];
+      if (!state.einstellungen || typeof state.einstellungen !== 'object') state.einstellungen = {};
+
+      while (state.administratoren.length < MAX_ADMINS) {
+        state.administratoren.push(defaultAdmin(state.administratoren.length + 1));
+      }
+
+      state.administratoren.forEach((admin) => {
+        if (typeof admin.pin !== 'string') admin.pin = null;
+        if (!admin.jahre || typeof admin.jahre !== 'object') admin.jahre = {};
+      });
+
+      if (!Array.isArray(state.einstellungen.kategorienEinnahmen) || !state.einstellungen.kategorienEinnahmen.length) {
+        state.einstellungen.kategorienEinnahmen = DEFAULT_KAT_EINNAHMEN.slice();
+      }
+      if (!Array.isArray(state.einstellungen.kategorienAusgaben) || !state.einstellungen.kategorienAusgaben.length) {
+        state.einstellungen.kategorienAusgaben = DEFAULT_KAT_AUSGABEN.slice();
+      }
+      if (typeof state.einstellungen.autostart !== 'boolean') state.einstellungen.autostart = false;
+      if (typeof state.einstellungen.letzteErinnerung !== 'string') state.einstellungen.letzteErinnerung = null;
+
+      const now = new Date();
+      if (!state.einstellungen.aktivesJahr) state.einstellungen.aktivesJahr = now.getFullYear();
+      if (!state.einstellungen.aktiverMonat) state.einstellungen.aktiverMonat = MONAT_KEYS[now.getMonth()];
+      if (!state.einstellungen.aktiverAdminId) state.einstellungen.aktiverAdminId = state.administratoren[0].id;
+
+      ensureYearForAllAdmins(state.einstellungen.aktivesJahr);
+
+      persist();
+      render();
+      initInstallBanner();
+
+      setTimeout(() => checkReminder(true), 1200);
+      setInterval(() => checkReminder(true), 60 * 1000);
+
+      if (isElectron) {
+        api.getAutostart().then((val) => { state.einstellungen.autostart = !!val; });
+      }
+    });
+  }
+
+  // ---------- Rendering ----------
+
+  function render() {
+    renderAdminTabs();
+    renderYearBar();
+    renderMonthTabs();
+    renderContent();
+    renderReminderBanner();
+    renderLockButton();
+  }
+
+  function renderLockButton() {
+    const btn = document.getElementById('btn-lock');
+    const admin = getActiveAdmin();
+    btn.classList.toggle('hidden', !(admin && admin.pin));
+  }
+
+  function renderAdminTabs() {
+    const nav = document.getElementById('admin-tabs');
+    nav.textContent = '';
+    state.administratoren.forEach((admin) => {
+      const btn = document.createElement('button');
+      btn.type = 'button';
+      btn.className = 'admin-tab' + (admin.id === state.einstellungen.aktiverAdminId ? ' active' : '');
+      btn.textContent = admin.name;
+      btn.addEventListener('click', () => {
+        requestAdminAccess(admin, () => {
+          state.einstellungen.aktiverAdminId = admin.id;
+          persist();
+          render();
+        });
+      });
+      nav.appendChild(btn);
+    });
+  }
+
+  function renderYearBar() {
+    document.getElementById('year-label').textContent = state.einstellungen.aktivesJahr;
+    const btnOverview = document.getElementById('btn-overview');
+    btnOverview.textContent = ansicht === 'monat' ? '📊 Jahresübersicht' : '📅 Monatsansicht';
+  }
+
+  function renderMonthTabs() {
+    const nav = document.getElementById('month-tabs');
+    nav.textContent = '';
+    if (ansicht !== 'monat') {
+      nav.style.display = 'none';
+      return;
+    }
+    nav.style.display = 'flex';
+
+    const admin = getActiveAdmin();
+    const jahr = state.einstellungen.aktivesJahr;
+
+    MONAT_KEYS.forEach((mk) => {
+      const btn = document.createElement('button');
+      btn.type = 'button';
+      btn.className = 'month-tab' + (mk === state.einstellungen.aktiverMonat ? ' active' : '');
+
+      const dot = document.createElement('span');
+      dot.className = 'dot ' + monthDotClass(admin, jahr, mk);
+      btn.appendChild(dot);
+
+      const label = document.createElement('span');
+      label.textContent = MONAT_LABELS[mk];
+      btn.appendChild(label);
+
+      btn.addEventListener('click', () => {
+        state.einstellungen.aktiverMonat = mk;
+        persist();
+        render();
+      });
+      nav.appendChild(btn);
+    });
+  }
+
+  function monthDotClass(admin, jahr, monatKey) {
+    const monat = admin.jahre[jahr] && admin.jahre[jahr].monate[monatKey];
+    if (monat && monat.abgeschlossen) return 'dot-done';
+    const now = new Date();
+    const isCurrentMonth = Number(jahr) === now.getFullYear() && monatKey === MONAT_KEYS[now.getMonth()];
+    if (isCurrentMonth && now.getDate() >= 28) return 'dot-due';
+    return 'dot-open';
+  }
+
+  function renderContent() {
+    const content = document.getElementById('content');
+    content.textContent = '';
+    const admin = getActiveAdmin();
+    if (!admin) return;
+
+    if (ansicht === 'uebersicht') {
+      content.appendChild(buildYearOverview(admin, state.einstellungen.aktivesJahr));
+    } else {
+      content.appendChild(buildMonthPanel(admin, state.einstellungen.aktivesJahr, state.einstellungen.aktiverMonat));
+    }
+  }
+
+  function buildMonthPanel(admin, jahr, monatKey) {
+    const monat = ensureMonth(admin, jahr, monatKey);
+    const frag = document.createDocumentFragment();
+
+    const einnahmenSum = sumEntries(monat.einnahmen);
+    const ausgabenSum = sumEntries(monat.ausgaben);
+    const saldo = einnahmenSum - ausgabenSum;
+
+    const summaryRow = document.createElement('div');
+    summaryRow.className = 'summary-row';
+
+    summaryRow.appendChild(buildSummaryCard('Einnahmen', fmtEUR(einnahmenSum), 'income'));
+    summaryRow.appendChild(buildSummaryCard('Ausgaben', fmtEUR(ausgabenSum), 'expense'));
+    summaryRow.appendChild(buildSummaryCard('Saldo', fmtEUR(saldo), 'balance'));
+
+    const statusCard = document.createElement('div');
+    statusCard.className = 'summary-card status';
+    const statusH3 = document.createElement('h3');
+    statusH3.textContent = `${MONAT_LABELS[monatKey]} ${jahr}`;
+    statusCard.appendChild(statusH3);
+
+    const label = document.createElement('label');
+    label.className = 'status-toggle';
+    const cb = document.createElement('input');
+    cb.type = 'checkbox';
+    cb.checked = !!monat.abgeschlossen;
+    cb.addEventListener('change', () => {
+      monat.abgeschlossen = cb.checked;
+      persist();
+      render();
+    });
+    label.appendChild(cb);
+    const txt = document.createElement('span');
+    txt.textContent = monat.abgeschlossen ? 'Monat abgeschlossen' : 'Monat noch offen';
+    label.appendChild(txt);
+    statusCard.appendChild(label);
+
+    summaryRow.appendChild(statusCard);
+    frag.appendChild(summaryRow);
+
+    frag.appendChild(buildEntrySection('Einnahmen', 'einnahme', admin, jahr, monatKey, monat.einnahmen));
+    frag.appendChild(buildEntrySection('Ausgaben', 'ausgabe', admin, jahr, monatKey, monat.ausgaben));
+
+    return frag;
+  }
+
+  function buildSummaryCard(title, value, cls) {
+    const card = document.createElement('div');
+    card.className = 'summary-card ' + cls;
+    const h3 = document.createElement('h3');
+    h3.textContent = title;
+    const val = document.createElement('div');
+    val.className = 'value';
+    val.textContent = value;
+    card.appendChild(h3);
+    card.appendChild(val);
+    return card;
+  }
+
+  function buildEntrySection(title, typ, admin, jahr, monatKey, entries) {
+    const block = document.createElement('div');
+    block.className = 'section-block ' + (typ === 'einnahme' ? 'income' : 'expense');
+
+    const header = document.createElement('div');
+    header.className = 'section-block-header';
+    const h2 = document.createElement('h2');
+    h2.textContent = title;
+    header.appendChild(h2);
+
+    const addBtn = document.createElement('button');
+    addBtn.type = 'button';
+    addBtn.className = 'btn btn-primary btn-small';
+    addBtn.textContent = typ === 'einnahme' ? '+ Neue Einnahme' : '+ Neue Ausgabe';
+    addBtn.addEventListener('click', () => openEntryModal(typ, admin, jahr, monatKey, null));
+    header.appendChild(addBtn);
+
+    block.appendChild(header);
+
+    if (!entries.length) {
+      const hint = document.createElement('div');
+      hint.className = 'empty-hint';
+      hint.textContent = typ === 'einnahme'
+        ? 'Noch keine Einnahmen für diesen Monat erfasst.'
+        : 'Noch keine Ausgaben für diesen Monat erfasst.';
+      block.appendChild(hint);
+      return block;
+    }
+
+    const wrap = document.createElement('div');
+    wrap.className = 'table-wrap';
+    const table = document.createElement('table');
+    table.className = 'entries';
+
+    const thead = document.createElement('thead');
+    const headRow = document.createElement('tr');
+    ['Datum', 'Beschreibung', 'Kategorie', 'Zahlungsart', 'Beleg-Nr.', 'Betrag', ''].forEach((h) => {
+      const th = document.createElement('th');
+      th.textContent = h;
+      headRow.appendChild(th);
+    });
+    thead.appendChild(headRow);
+    table.appendChild(thead);
+
+    const tbody = document.createElement('tbody');
+    const sorted = entries.slice().sort((a, b) => (a.datum || '').localeCompare(b.datum || ''));
+    sorted.forEach((entry) => {
+      const tr = document.createElement('tr');
+
+      const tdDatum = document.createElement('td');
+      tdDatum.textContent = fmtDate(entry.datum);
+      tr.appendChild(tdDatum);
+
+      const tdBeschr = document.createElement('td');
+      tdBeschr.textContent = entry.beschreibung || '';
+      tr.appendChild(tdBeschr);
+
+      const tdKat = document.createElement('td');
+      tdKat.textContent = entry.kategorie || '';
+      tr.appendChild(tdKat);
+
+      const tdZahl = document.createElement('td');
+      tdZahl.textContent = entry.zahlungsart || '';
+      tr.appendChild(tdZahl);
+
+      const tdBeleg = document.createElement('td');
+      tdBeleg.textContent = entry.beleg || '–';
+      tr.appendChild(tdBeleg);
+
+      const tdBetrag = document.createElement('td');
+      tdBetrag.className = 'amount-cell';
+      tdBetrag.textContent = fmtEUR(entry.betrag);
+      tr.appendChild(tdBetrag);
+
+      const tdActions = document.createElement('td');
+      const actions = document.createElement('div');
+      actions.className = 'row-actions';
+
+      const editBtn = document.createElement('button');
+      editBtn.type = 'button';
+      editBtn.className = 'icon-btn';
+      editBtn.title = 'Bearbeiten';
+      editBtn.textContent = '✎';
+      editBtn.addEventListener('click', () => openEntryModal(typ, admin, jahr, monatKey, entry.id));
+      actions.appendChild(editBtn);
+
+      const delBtn = document.createElement('button');
+      delBtn.type = 'button';
+      delBtn.className = 'icon-btn danger';
+      delBtn.title = 'Löschen';
+      delBtn.textContent = '🗑';
+      delBtn.addEventListener('click', () => openDeleteModal(
+        `„${entry.beschreibung}“ (${fmtEUR(entry.betrag)}) wird endgültig gelöscht.`,
+        () => {
+          const idx = entries.findIndex((e) => e.id === entry.id);
+          if (idx >= 0) entries.splice(idx, 1);
+          persist();
+          render();
+        }
+      ));
+      actions.appendChild(delBtn);
+
+      tdActions.appendChild(actions);
+      tr.appendChild(tdActions);
+
+      tbody.appendChild(tr);
+    });
+    table.appendChild(tbody);
+
+    const tfoot = document.createElement('tfoot');
+    const footRow = document.createElement('tr');
+    const footLabel = document.createElement('td');
+    footLabel.colSpan = 5;
+    footLabel.textContent = 'Summe';
+    footRow.appendChild(footLabel);
+    const footVal = document.createElement('td');
+    footVal.className = 'amount-cell';
+    footVal.textContent = fmtEUR(sumEntries(entries));
+    footRow.appendChild(footVal);
+    footRow.appendChild(document.createElement('td'));
+    tfoot.appendChild(footRow);
+    table.appendChild(tfoot);
+
+    wrap.appendChild(table);
+    block.appendChild(wrap);
+    return block;
+  }
+
+  function buildYearOverview(admin, jahr) {
+    ensureMonth(admin, jahr, '01');
+    const frag = document.createDocumentFragment();
+
+    const monthlyTotals = MONAT_KEYS.map((mk) => {
+      const monat = ensureMonth(admin, jahr, mk);
+      return { mk, einnahmen: sumEntries(monat.einnahmen), ausgaben: sumEntries(monat.ausgaben) };
+    });
+
+    const maxVal = Math.max(1, ...monthlyTotals.map((m) => Math.max(m.einnahmen, m.ausgaben)));
+
+    const table = document.createElement('table');
+    table.className = 'overview-table';
+
+    const thead = document.createElement('thead');
+    const hr = document.createElement('tr');
+    ['Monat', 'Einnahmen', 'Ausgaben', 'Saldo', 'Vergleich'].forEach((h) => {
+      const th = document.createElement('th');
+      th.textContent = h;
+      hr.appendChild(th);
+    });
+    thead.appendChild(hr);
+    table.appendChild(thead);
+
+    const tbody = document.createElement('tbody');
+    let jahrEinnahmen = 0;
+    let jahrAusgaben = 0;
+
+    monthlyTotals.forEach(({ mk, einnahmen, ausgaben }) => {
+      jahrEinnahmen += einnahmen;
+      jahrAusgaben += ausgaben;
+
+      const tr = document.createElement('tr');
+      const tdMonat = document.createElement('td');
+      tdMonat.textContent = MONAT_LABELS[mk];
+      tr.appendChild(tdMonat);
+
+      const tdE = document.createElement('td');
+      tdE.textContent = fmtEUR(einnahmen);
+      tr.appendChild(tdE);
+
+      const tdA = document.createElement('td');
+      tdA.textContent = fmtEUR(ausgaben);
+      tr.appendChild(tdA);
+
+      const tdS = document.createElement('td');
+      tdS.textContent = fmtEUR(einnahmen - ausgaben);
+      tr.appendChild(tdS);
+
+      const tdBar = document.createElement('td');
+      const barWrap = document.createElement('div');
+      barWrap.className = 'overview-bar-wrap';
+      const barE = document.createElement('div');
+      barE.className = 'overview-bar bar-income';
+      barE.style.width = Math.round((einnahmen / maxVal) * 60) + 'px';
+      const barA = document.createElement('div');
+      barA.className = 'overview-bar bar-expense';
+      barA.style.width = Math.round((ausgaben / maxVal) * 60) + 'px';
+      barWrap.appendChild(barE);
+      barWrap.appendChild(barA);
+      tdBar.appendChild(barWrap);
+      tr.appendChild(tdBar);
+
+      tbody.appendChild(tr);
+    });
+    table.appendChild(tbody);
+
+    const tfoot = document.createElement('tfoot');
+    const footRow = document.createElement('tr');
+    const cells = ['Jahressumme', fmtEUR(jahrEinnahmen), fmtEUR(jahrAusgaben), fmtEUR(jahrEinnahmen - jahrAusgaben), ''];
+    cells.forEach((c) => {
+      const td = document.createElement('td');
+      td.textContent = c;
+      td.style.fontWeight = '800';
+      footRow.appendChild(td);
+    });
+    tfoot.appendChild(footRow);
+    table.appendChild(tfoot);
+
+    const wrap = document.createElement('div');
+    wrap.className = 'section-block';
+    wrap.appendChild(table);
+    frag.appendChild(wrap);
+    return frag;
+  }
+
+  // ---------- Entry modal ----------
+
+  function openEntryModal(typ, admin, jahr, monatKey, entryId) {
+    entryModalCtx = { typ, admin, jahr, monatKey, entryId };
+    const monat = ensureMonth(admin, jahr, monatKey);
+    const list = typ === 'einnahme' ? monat.einnahmen : monat.ausgaben;
+    const existing = entryId ? list.find((e) => e.id === entryId) : null;
+
+    document.getElementById('entry-modal-title').textContent =
+      (existing ? 'Bearbeiten: ' : 'Neu: ') + (typ === 'einnahme' ? 'Einnahme' : 'Ausgabe');
+
+    const katSelect = document.getElementById('entry-kategorie');
+    katSelect.textContent = '';
+    const kategorien = typ === 'einnahme' ? state.einstellungen.kategorienEinnahmen : state.einstellungen.kategorienAusgaben;
+    kategorien.forEach((k) => {
+      const opt = document.createElement('option');
+      opt.value = k;
+      opt.textContent = k;
+      katSelect.appendChild(opt);
+    });
+
+    document.getElementById('entry-datum').value = existing ? existing.datum : todayIso();
+    document.getElementById('entry-beschreibung').value = existing ? existing.beschreibung : '';
+    if (existing) katSelect.value = existing.kategorie;
+    document.getElementById('entry-zahlungsart').value = existing ? existing.zahlungsart : 'Bar';
+    document.getElementById('entry-beleg').value = existing ? (existing.beleg || '') : '';
+    document.getElementById('entry-betrag').value = existing ? existing.betrag : '';
+
+    document.getElementById('modal-entry').classList.remove('hidden');
+  }
+
+  function closeEntryModal() {
+    document.getElementById('modal-entry').classList.add('hidden');
+    entryModalCtx = null;
+  }
+
+  function submitEntryForm(ev) {
+    ev.preventDefault();
+    if (!entryModalCtx) return;
+    const { typ, admin, jahr, monatKey, entryId } = entryModalCtx;
+    const monat = ensureMonth(admin, jahr, monatKey);
+    const list = typ === 'einnahme' ? monat.einnahmen : monat.ausgaben;
+
+    const data = {
+      datum: document.getElementById('entry-datum').value,
+      beschreibung: document.getElementById('entry-beschreibung').value.trim(),
+      kategorie: document.getElementById('entry-kategorie').value,
+      zahlungsart: document.getElementById('entry-zahlungsart').value,
+      beleg: document.getElementById('entry-beleg').value.trim(),
+      betrag: Math.max(0, Number(document.getElementById('entry-betrag').value) || 0)
+    };
+
+    if (!data.beschreibung || !data.datum) return;
+
+    if (entryId) {
+      const existing = list.find((e) => e.id === entryId);
+      Object.assign(existing, data);
+    } else {
+      list.push(Object.assign({ id: uid() }, data));
+    }
+
+    persist();
+    closeEntryModal();
+    render();
+  }
+
+  // ---------- Delete modal ----------
+
+  function openDeleteModal(text, onConfirm) {
+    document.getElementById('delete-text').textContent = text;
+    deleteCtx = onConfirm;
+    document.getElementById('modal-delete').classList.remove('hidden');
+  }
+
+  function closeDeleteModal() {
+    document.getElementById('modal-delete').classList.add('hidden');
+    deleteCtx = null;
+  }
+
+  // ---------- Settings modal ----------
+
+  function openSettingsModal() {
+    renderSettingsAdminRows();
+    renderCategoryChips();
+
+    const autostartRow = document.getElementById('setting-autostart').closest('.settings-section');
+    if (!isElectron) {
+      autostartRow.style.display = 'none';
+    } else {
+      autostartRow.style.display = '';
+      api.getAutostart().then((val) => {
+        document.getElementById('setting-autostart').checked = !!val;
+      });
+    }
+
+    document.getElementById('modal-settings').classList.remove('hidden');
+  }
+
+  function closeSettingsModal() {
+    document.getElementById('modal-settings').classList.add('hidden');
+  }
+
+  function renderSettingsAdminRows() {
+    const namesWrap = document.getElementById('settings-admin-names');
+    namesWrap.textContent = '';
+    state.administratoren.forEach((admin) => {
+      const row = document.createElement('div');
+      row.className = 'admin-name-row';
+
+      const input = document.createElement('input');
+      input.type = 'text';
+      input.maxLength = 60;
+      input.value = admin.name;
+      input.addEventListener('change', () => {
+        admin.name = input.value.trim() || admin.name;
+        persist();
+        renderAdminTabs();
+      });
+      row.appendChild(input);
+
+      const status = document.createElement('span');
+      status.className = 'pin-status ' + (admin.pin ? 'on' : 'off');
+      status.textContent = admin.pin ? 'PIN aktiv' : 'Kein PIN';
+      row.appendChild(status);
+
+      const pinBtn = document.createElement('button');
+      pinBtn.type = 'button';
+      pinBtn.className = 'btn btn-outline btn-small';
+      pinBtn.textContent = admin.pin ? 'PIN ändern' : 'PIN festlegen';
+      pinBtn.addEventListener('click', () => openPinSetModal(admin));
+      row.appendChild(pinBtn);
+
+      namesWrap.appendChild(row);
+    });
+  }
+
+  // ---------- PIN-Schutz ----------
+
+  function openPinSetModal(admin) {
+    pinSetAdmin = admin;
+    document.getElementById('pin-set-title').textContent = admin.pin
+      ? `PIN für ${admin.name} ändern`
+      : `PIN für ${admin.name} festlegen`;
+    document.getElementById('pin-set-new').value = '';
+    document.getElementById('pin-set-confirm').value = '';
+    document.getElementById('pin-set-error').classList.add('hidden');
+    document.getElementById('pin-remove').classList.toggle('hidden', !admin.pin);
+    document.getElementById('modal-pin-set').classList.remove('hidden');
+  }
+
+  function closePinSetModal() {
+    document.getElementById('modal-pin-set').classList.add('hidden');
+    pinSetAdmin = null;
+  }
+
+  function showPinSetError(message) {
+    const el = document.getElementById('pin-set-error');
+    el.textContent = message;
+    el.classList.remove('hidden');
+  }
+
+  async function submitPinSetForm(ev) {
+    ev.preventDefault();
+    if (!pinSetAdmin) return;
+    const val = document.getElementById('pin-set-new').value;
+    const confirmVal = document.getElementById('pin-set-confirm').value;
+    if (!/^[0-9]{4}$/.test(val)) {
+      showPinSetError('Bitte genau 4 Ziffern eingeben.');
+      return;
+    }
+    if (val !== confirmVal) {
+      showPinSetError('Die beiden PINs stimmen nicht überein.');
+      return;
+    }
+    pinSetAdmin.pin = await sha256Hex(val);
+    unlockedAdmins.add(pinSetAdmin.id);
+    persist();
+    renderSettingsAdminRows();
+    closePinSetModal();
+  }
+
+  function removeCurrentPin() {
+    if (!pinSetAdmin) return;
+    if (!confirm(`PIN für ${pinSetAdmin.name} wirklich entfernen?`)) return;
+    pinSetAdmin.pin = null;
+    persist();
+    renderSettingsAdminRows();
+    closePinSetModal();
+  }
+
+  function closePinEnterModal() {
+    document.getElementById('modal-pin-enter').classList.add('hidden');
+    pinEnterCtx = null;
+  }
+
+  async function submitPinEnterForm(ev) {
+    ev.preventDefault();
+    if (!pinEnterCtx) return;
+    const input = document.getElementById('pin-enter-value');
+    const hash = await sha256Hex(input.value);
+    if (hash === pinEnterCtx.admin.pin) {
+      unlockedAdmins.add(pinEnterCtx.admin.id);
+      const onSuccess = pinEnterCtx.onSuccess;
+      closePinEnterModal();
+      onSuccess();
+    } else {
+      document.getElementById('pin-enter-error').classList.remove('hidden');
+      input.value = '';
+      input.focus();
+    }
+  }
+
+  function renderCategoryChips() {
+    buildChipList('settings-cat-einnahmen', state.einstellungen.kategorienEinnahmen);
+    buildChipList('settings-cat-ausgaben', state.einstellungen.kategorienAusgaben);
+  }
+
+  function buildChipList(containerId, list) {
+    const el = document.getElementById(containerId);
+    el.textContent = '';
+    list.forEach((kat, idx) => {
+      const chip = document.createElement('span');
+      chip.className = 'chip';
+      const txt = document.createElement('span');
+      txt.textContent = kat;
+      chip.appendChild(txt);
+      const removeBtn = document.createElement('button');
+      removeBtn.type = 'button';
+      removeBtn.textContent = '×';
+      removeBtn.title = 'Entfernen';
+      removeBtn.addEventListener('click', () => {
+        list.splice(idx, 1);
+        persist();
+        renderCategoryChips();
+      });
+      chip.appendChild(removeBtn);
+      el.appendChild(chip);
+    });
+  }
+
+  // ---------- Reminder logic ----------
+
+  function isReminderWindowNow() {
+    const now = new Date();
+    const afterTime = now.getHours() > 11 || (now.getHours() === 11 && now.getMinutes() >= 30);
+    return now.getDate() >= 28 && afterTime;
+  }
+
+  function getIncompleteAdmins() {
+    const now = new Date();
+    const y = now.getFullYear();
+    const m = MONAT_KEYS[now.getMonth()];
+    return state.administratoren.filter((a) => {
+      const monat = a.jahre[y] && a.jahre[y].monate[m];
+      return !monat || !monat.abgeschlossen;
+    }).map((a) => ({ admin: a, jahr: y, monat: m }));
+  }
+
+  function checkReminder(allowModal) {
+    if (!isReminderWindowNow()) { renderReminderBanner(); return; }
+    const incomplete = getIncompleteAdmins();
+    if (!incomplete.length) { renderReminderBanner(); return; }
+
+    renderReminderBanner();
+
+    const todayStr = todayIso();
+    if (allowModal && state.einstellungen.letzteErinnerung !== todayStr) {
+      showReminderModal(incomplete);
+      state.einstellungen.letzteErinnerung = todayStr;
+      persist();
+      const namen = incomplete.map((i) => i.admin.name).join(', ');
+      api.showNotification('Buchhaltung! – Erinnerung', `Bitte Buchhaltung vervollständigen für: ${namen}`);
+    }
+  }
+
+  function showReminderModal(incomplete) {
+    const list = document.getElementById('reminder-list');
+    list.textContent = '';
+    incomplete.forEach(({ admin, monat }) => {
+      const li = document.createElement('li');
+      li.textContent = `${admin.name} – ${MONAT_LABELS[monat]} noch nicht abgeschlossen`;
+      list.appendChild(li);
+    });
+    document.getElementById('modal-reminder').classList.remove('hidden');
+  }
+
+  function closeReminderModal() {
+    document.getElementById('modal-reminder').classList.add('hidden');
+  }
+
+  function renderReminderBanner() {
+    const banner = document.getElementById('reminder-banner');
+    if (!isReminderWindowNow()) { banner.classList.add('hidden'); return; }
+    const incomplete = getIncompleteAdmins();
+    if (!incomplete.length) { banner.classList.add('hidden'); return; }
+    banner.textContent = `🔔 ${incomplete.length} Administrator(en) müssen die Buchhaltung noch abschließen – zum Ansehen klicken`;
+    banner.classList.remove('hidden');
+  }
+
+  // ---------- CSV / Backup export ----------
+
+  function csvEscape(val) {
+    const s = String(val == null ? '' : val);
+    if (/[";\n]/.test(s)) return '"' + s.replace(/"/g, '""') + '"';
+    return s;
+  }
+
+  function buildYearCsv(admin, jahr) {
+    const rows = [['Monat', 'Typ', 'Datum', 'Beschreibung', 'Kategorie', 'Zahlungsart', 'Beleg-Nr.', 'Betrag']];
+    MONAT_KEYS.forEach((mk) => {
+      const monat = ensureMonth(admin, jahr, mk);
+      monat.einnahmen.forEach((e) => rows.push([MONAT_LABELS[mk], 'Einnahme', e.datum, e.beschreibung, e.kategorie, e.zahlungsart, e.beleg || '', e.betrag]));
+      monat.ausgaben.forEach((e) => rows.push([MONAT_LABELS[mk], 'Ausgabe', e.datum, e.beschreibung, e.kategorie, e.zahlungsart, e.beleg || '', e.betrag]));
+    });
+    return rows.map((r) => r.map(csvEscape).join(';')).join('\r\n');
+  }
+
+  async function exportYear() {
+    const admin = getActiveAdmin();
+    const jahr = state.einstellungen.aktivesJahr;
+    const csv = buildYearCsv(admin, jahr);
+    const name = `Buchhaltung-${admin.name.replace(/[^a-z0-9]+/gi, '_')}-${jahr}.csv`;
+    await api.exportCsv(name, '﻿' + csv);
+  }
+
+  // ---------- Install banner (Desktop / Mobile) ----------
+
+  function detectPlatform() {
+    const ua = navigator.userAgent || '';
+    const platform = navigator.platform || '';
+    if (/android/i.test(ua)) return 'android';
+    if (/iphone|ipad|ipod/i.test(ua) || (platform === 'MacIntel' && navigator.maxTouchPoints > 1)) return 'ios';
+    if (/win/i.test(platform)) return 'windows';
+    if (/mac/i.test(platform)) return 'mac';
+    if (/linux/i.test(platform) && !/android/i.test(ua)) return 'linux';
+    return 'unknown';
+  }
+
+  function isStandalonePwa() {
+    return (window.matchMedia && window.matchMedia('(display-mode: standalone)').matches) || window.navigator.standalone === true;
+  }
+
+  function initInstallBanner() {
+    const banner = document.getElementById('install-banner');
+    if (!banner) return;
+
+    if (isElectron || isStandalonePwa() || sessionStorage.getItem('installBannerDismissed') === '1') {
+      banner.classList.add('hidden');
+      return;
+    }
+
+    const platform = detectPlatform();
+    if (platform === 'unknown') { banner.classList.add('hidden'); return; }
+
+    banner.textContent = '';
+    const text = document.createElement('p');
+    const actionBtn = document.createElement('button');
+    actionBtn.type = 'button';
+    actionBtn.className = 'btn btn-primary btn-small';
+
+    if (RELEASE_ASSETS[platform]) {
+      text.textContent = `Diese App gibt es auch als Desktop-Programm für ${platform === 'windows' ? 'Windows' : platform === 'mac' ? 'macOS' : 'Linux'}.`;
+      actionBtn.textContent = '⬇ Jetzt herunterladen';
+      actionBtn.addEventListener('click', () => {
+        window.open(`https://github.com/${GITHUB_OWNER}/${GITHUB_REPO}/releases/latest/download/${RELEASE_ASSETS[platform]}`, '_blank');
+      });
+    } else if (platform === 'android') {
+      text.textContent = 'Als App installieren: Tippe auf „Installieren“, um Buchhaltung! zum Startbildschirm hinzuzufügen.';
+      actionBtn.textContent = '📲 App installieren';
+      window.addEventListener('beforeinstallprompt', (e) => {
+        e.preventDefault();
+        deferredInstallPrompt = e;
+      });
+      actionBtn.addEventListener('click', async () => {
+        if (deferredInstallPrompt) {
+          deferredInstallPrompt.prompt();
+          await deferredInstallPrompt.userChoice;
+          deferredInstallPrompt = null;
+        }
+      });
+    } else if (platform === 'ios') {
+      text.textContent = 'Als App installieren: Tippe unten auf „Teilen“ und dann auf „Zum Home-Bildschirm“.';
+      actionBtn.textContent = 'Verstanden';
+      actionBtn.addEventListener('click', () => dismissInstallBanner());
+    }
+
+    banner.appendChild(text);
+    banner.appendChild(actionBtn);
+
+    const closeBtn = document.createElement('button');
+    closeBtn.type = 'button';
+    closeBtn.className = 'btn btn-outline btn-small';
+    closeBtn.textContent = '✕';
+    closeBtn.addEventListener('click', dismissInstallBanner);
+    banner.appendChild(closeBtn);
+
+    banner.classList.remove('hidden');
+  }
+
+  function dismissInstallBanner() {
+    sessionStorage.setItem('installBannerDismissed', '1');
+    document.getElementById('install-banner').classList.add('hidden');
+  }
+
+  // ---------- Event wiring ----------
+
+  document.addEventListener('DOMContentLoaded', () => {
+    document.getElementById('year-prev').addEventListener('click', () => {
+      state.einstellungen.aktivesJahr -= 1;
+      ensureYearForAllAdmins(state.einstellungen.aktivesJahr);
+      persist();
+      render();
+    });
+    document.getElementById('year-next').addEventListener('click', () => {
+      state.einstellungen.aktivesJahr += 1;
+      ensureYearForAllAdmins(state.einstellungen.aktivesJahr);
+      persist();
+      render();
+    });
+
+    document.getElementById('btn-overview').addEventListener('click', () => {
+      ansicht = ansicht === 'monat' ? 'uebersicht' : 'monat';
+      render();
+    });
+
+    document.getElementById('btn-export-year').addEventListener('click', exportYear);
+
+    document.getElementById('btn-settings').addEventListener('click', openSettingsModal);
+    document.getElementById('btn-lock').addEventListener('click', () => {
+      const admin = getActiveAdmin();
+      if (admin && admin.pin) lockAdminNow(admin);
+    });
+    document.addEventListener('visibilitychange', () => {
+      if (document.hidden) handleAppHidden();
+      else handleAppVisible();
+    });
+    api.onVisibilityChange((state) => {
+      if (state === 'hidden') handleAppHidden();
+      else handleAppVisible();
+    });
+    document.getElementById('settings-close').addEventListener('click', closeSettingsModal);
+
+    document.getElementById('entry-form').addEventListener('submit', submitEntryForm);
+    document.getElementById('entry-cancel').addEventListener('click', closeEntryModal);
+
+    document.getElementById('delete-cancel').addEventListener('click', closeDeleteModal);
+    document.getElementById('delete-confirm').addEventListener('click', () => {
+      if (deleteCtx) deleteCtx();
+      closeDeleteModal();
+    });
+
+    document.getElementById('reminder-later').addEventListener('click', closeReminderModal);
+    document.getElementById('reminder-goto').addEventListener('click', () => {
+      const incomplete = getIncompleteAdmins();
+      closeReminderModal();
+      if (incomplete.length) {
+        state.einstellungen.aktiverAdminId = incomplete[0].admin.id;
+        state.einstellungen.aktivesJahr = incomplete[0].jahr;
+        state.einstellungen.aktiverMonat = incomplete[0].monat;
+        ansicht = 'monat';
+        persist();
+        render();
+      }
+    });
+
+    document.getElementById('reminder-banner').addEventListener('click', () => {
+      const incomplete = getIncompleteAdmins();
+      if (incomplete.length) showReminderModal(incomplete);
+    });
+
+    document.getElementById('setting-autostart').addEventListener('change', async (ev) => {
+      const val = await api.setAutostart(ev.target.checked);
+      state.einstellungen.autostart = !!val;
+    });
+
+    document.getElementById('add-cat-einnahme').addEventListener('click', () => {
+      const input = document.getElementById('new-cat-einnahme');
+      const val = input.value.trim();
+      if (val && !state.einstellungen.kategorienEinnahmen.includes(val)) {
+        state.einstellungen.kategorienEinnahmen.push(val);
+        persist();
+        renderCategoryChips();
+      }
+      input.value = '';
+    });
+
+    document.getElementById('add-cat-ausgabe').addEventListener('click', () => {
+      const input = document.getElementById('new-cat-ausgabe');
+      const val = input.value.trim();
+      if (val && !state.einstellungen.kategorienAusgaben.includes(val)) {
+        state.einstellungen.kategorienAusgaben.push(val);
+        persist();
+        renderCategoryChips();
+      }
+      input.value = '';
+    });
+
+    document.getElementById('btn-backup-export').addEventListener('click', async () => {
+      await api.exportBackup(JSON.stringify(state, null, 2));
+    });
+
+    document.getElementById('btn-backup-import').addEventListener('click', async () => {
+      const result = await api.importBackup();
+      if (result && !result.canceled && result.data) {
+        state = result.data;
+        persist();
+        render();
+      }
+    });
+
+    document.getElementById('pin-set-form').addEventListener('submit', submitPinSetForm);
+    document.getElementById('pin-set-cancel').addEventListener('click', closePinSetModal);
+    document.getElementById('pin-remove').addEventListener('click', removeCurrentPin);
+
+    document.getElementById('pin-enter-form').addEventListener('submit', submitPinEnterForm);
+    document.getElementById('pin-enter-cancel').addEventListener('click', closePinEnterModal);
+
+    [document.getElementById('modal-entry'), document.getElementById('modal-delete'),
+     document.getElementById('modal-reminder'), document.getElementById('modal-settings'),
+     document.getElementById('modal-pin-set'), document.getElementById('modal-pin-enter')].forEach((overlay) => {
+      overlay.addEventListener('click', (ev) => {
+        if (ev.target === overlay && overlay.id !== 'modal-reminder' && overlay.id !== 'modal-pin-enter') {
+          overlay.classList.add('hidden');
+        }
+      });
+    });
+
+    if ('serviceWorker' in navigator && (location.protocol === 'https:' || location.hostname === 'localhost')) {
+      navigator.serviceWorker.register('sw.js').catch(() => {});
+    }
+
+    init();
+  });
+})();
+
+</script>
+</body>
+</html>
