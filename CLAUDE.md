@@ -44,11 +44,25 @@ The renderer keeps the whole app state in one in-memory `state = { admins: [], e
 
 Shapes:
 - Admin: `{ id, name, pinHash }` — `pinHash` is `simpleHash(pin)`, a non-cryptographic hash (cyrb53); it's a convenience gate for a shared local kiosk machine, not a security boundary. `MAX_ADMINS = 4`.
-- Employee: `{ id, name, reminderStart, reminderEnd, targetHoursPerDay, active, createdBy }` — `reminderStart`/`reminderEnd` are `"HH:MM"` strings (defaults `"06:30"`/`"15:00"`) that drive that employee's own reminder schedule; `targetHoursPerDay` (default `8`) is the daily Soll-Stunden used by the Auswertung tab.
+- Employee: `{ id, name, reminderStart, reminderEnd, targetHoursPerDay, active, createdBy, adminId }` — `reminderStart`/`reminderEnd` are `"HH:MM"` strings (defaults `"06:30"`/`"15:00"`) that drive that employee's own reminder schedule; `targetHoursPerDay` (default `8`) is the daily Soll-Stunden used by the Auswertung tab. `adminId` is `null` for a regular employee, or an admin's id if this record is that admin's own linked time-tracking entry (see below).
 - Time entry: `{ id, employeeId, date, start, end, pauseStart, pauseEnd, note }` — `date` is `"YYYY-MM-DD"`, the four time fields are `"HH:MM"` or `null`. `pauseStart`/`pauseEnd` model a single lunch/break window per day (not multiple breaks) and are subtracted from worked time by `workedHours()`. At most one entry per `(employeeId, date)` pair is expected; `findEntry()` looks it up.
 - Absence: `{ id, employeeId, type, dateFrom, dateTo, note }` — `type` is `'urlaub'` or `'krank'`; `dateFrom`/`dateTo` are inclusive `"YYYY-MM-DD"` date-range strings compared directly (they sort/compare correctly as plain strings, no `Date` parsing needed). Unlike time entries, an absence spans multiple days per record rather than one row per day. `findAbsence(employeeId, date)` looks up whichever absence (if any) covers a given date.
 
 IDs come from the local `uid()` helper (timestamp + random). `load()`/`normalizeEmployees()` back-fill `reminderStart`/`reminderEnd`/`targetHoursPerDay`/`active` on older employee records that predate those fields — follow this pattern when adding new fields to the shapes above so existing saved files keep loading.
+
+### Admins are also employees
+
+Every admin gets their own linked employee record so they clock in/out on the kiosk and get reminded
+exactly like anyone else — admins are not exempt from tracking their own time. `ensureAdminEmployees()`
+(called from `load()`, `addAdmin()`, and after renaming an admin) makes sure each admin in `state.admins`
+has exactly one `state.employees` row with `adminId` set to that admin's id, creating it on first run and
+keeping its `name` in sync with the admin's name; this also self-heals if that row was ever deleted. The
+linked employee otherwise behaves like a normal one (kiosk tile, Pause, Urlaub/Krank, Auswertung, CSV
+export all just work — no special-casing needed there). The "Mitarbeiter" tab table marks these rows with
+a small "Admin" badge next to the name, disables the "Löschen" button while the admin account still exists
+(delete the admin instead, in "Administratoren"), and locks the Name field in the edit modal (rename via
+the admin account instead, to keep the two in sync). Deleting an admin unlinks (`adminId = null`) rather
+than deletes their employee row, so their time history is preserved and the row becomes a normal employee.
 
 ### Reminder engine
 
@@ -75,4 +89,20 @@ At the top of `renderer.js`, if `window.zeitAPI` is absent (i.e. the page is ope
 
 ## Releases (CI)
 
-`.github/workflows/build-release.yml` builds and publishes installers for Windows, macOS, and Linux. It triggers on pushing a `v*` tag (e.g. `v1.0.0`) or manually via **Actions → Build & Release Desktop App → Run workflow**, running `npm run dist -- --publish always` to upload artifacts to GitHub Releases (`publish: github` in `package.json`).
+`.github/workflows/build-release.yml` builds 5 installers across three OS runners: Windows (`nsis`), macOS
+`x64`+`arm64` (two `dmg`s, via `mac.target: [{ target: "dmg", arch: [...] }]` — a top-level `mac.arch` key
+is rejected by electron-builder's schema), and Linux (`AppImage` + `deb`; the `deb` target needs a real
+`author.email` in `package.json` or the build fails). `artifactName` is set explicitly per platform
+(`Zeiterfassung-<version>-<platform>.<ext>`) so a download page can link to predictable filenames.
+
+It triggers on pushing a `v*` tag, or manually via **Actions → Run workflow** with the `publish` checkbox.
+Publishing does **not** use electron-builder's own `--publish` flag — its GitHub integration creates the
+release as a draft when run across a matrix (each OS job only appends assets; nothing ever un-drafts it),
+which left real tag-pushes sitting as invisible, unlisted drafts more than once. Instead a `prepare-release`
+job runs first (only when `ref_type == 'tag'` or `publish == 'true'`): it deletes any stale release/draft for
+the target tag, then `gh release create`s a fresh non-draft one. Each OS job then builds with
+`--publish never` and `gh release upload`s its installers straight into that release — this also sidesteps
+the Actions artifact storage quota (shared across every project in this repo, and exhausted more than once
+this session) since Release assets are billed separately and aren't capped the same way. A plain
+build-only dispatch (`publish` left `false`) skips `prepare-release` and falls back to uploading via
+`actions/upload-artifact` instead (90-day retention, not a permanent Release).

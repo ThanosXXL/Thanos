@@ -263,6 +263,7 @@
     if (!Array.isArray(state.entries)) state.entries = [];
     if (!Array.isArray(state.absences)) state.absences = [];
     normalizeEmployees();
+    ensureAdminEmployees();
   }
 
   function normalizeEmployees() {
@@ -272,6 +273,32 @@
       if (typeof e.active !== 'boolean') e.active = true;
       if (typeof e.targetHoursPerDay !== 'number' || e.targetHoursPerDay < 0) {
         e.targetHoursPerDay = DEFAULT_TARGET_HOURS;
+      }
+      if (typeof e.adminId === 'undefined') e.adminId = null;
+    });
+  }
+
+  // Every admin also gets their own kiosk tile: a linked employee record so
+  // admins clock in/out and get reminded exactly like regular employees.
+  // Runs on load and whenever an admin is added or renamed; heals itself if
+  // that employee record was ever deleted.
+  function ensureAdminEmployees() {
+    state.admins.forEach((admin) => {
+      let emp = state.employees.find((e) => e.adminId === admin.id);
+      if (!emp) {
+        emp = {
+          id: uid(),
+          name: admin.name,
+          reminderStart: '06:30',
+          reminderEnd: '15:00',
+          targetHoursPerDay: DEFAULT_TARGET_HOURS,
+          active: true,
+          createdBy: admin.id,
+          adminId: admin.id
+        };
+        state.employees.push(emp);
+      } else if (emp.name !== admin.name) {
+        emp.name = admin.name;
       }
     });
   }
@@ -305,12 +332,16 @@
     if (state.admins.length >= MAX_ADMINS) return null;
     const admin = { id: uid(), name, pinHash: simpleHash(pin) };
     state.admins.push(admin);
+    ensureAdminEmployees();
     persist();
     return admin;
   }
 
   function removeAdminById(id) {
     state.admins = state.admins.filter((a) => a.id !== id);
+    state.employees.forEach((e) => {
+      if (e.adminId === id) e.adminId = null;
+    });
     if (session.adminId === id) {
       session.adminId = null;
       ui.view = 'kiosk';
@@ -673,6 +704,12 @@
 
         const tdName = document.createElement('td');
         tdName.textContent = emp.name;
+        if (emp.adminId) {
+          const badge = document.createElement('span');
+          badge.className = 'admin-employee-badge';
+          badge.textContent = 'Admin';
+          tdName.appendChild(badge);
+        }
         tr.appendChild(tdName);
 
         const tdStart = document.createElement('td');
@@ -702,6 +739,10 @@
         const delBtn = document.createElement('button');
         delBtn.className = 'icon-btn danger';
         delBtn.textContent = 'Löschen';
+        delBtn.disabled = !!emp.adminId;
+        delBtn.title = emp.adminId
+          ? 'Diese Zeiterfassung gehört zu einem Administrator-Konto. Zum Entfernen den Administrator im Reiter "Administratoren" löschen.'
+          : '';
         delBtn.addEventListener('click', () => {
           openConfirm(
             `"${emp.name}" wirklich löschen? Alle Zeiteinträge dieses Mitarbeiters gehen verloren.`,
@@ -1390,6 +1431,10 @@
       const emp = findEmployee(id);
       employeeModalTitle.textContent = 'Mitarbeiter bearbeiten';
       employeeName.value = emp.name;
+      employeeName.disabled = !!emp.adminId;
+      employeeName.title = emp.adminId
+        ? 'Der Name wird über das Administrator-Konto verwaltet (Reiter „Administratoren“).'
+        : '';
       employeeReminderStart.value = emp.reminderStart;
       employeeReminderEnd.value = emp.reminderEnd;
       employeeTargetHours.value = emp.targetHoursPerDay;
@@ -1397,6 +1442,8 @@
     } else {
       employeeModalTitle.textContent = 'Mitarbeiter hinzufügen';
       employeeName.value = '';
+      employeeName.disabled = false;
+      employeeName.title = '';
       employeeReminderStart.value = '06:30';
       employeeReminderEnd.value = '15:00';
       employeeTargetHours.value = DEFAULT_TARGET_HOURS;
@@ -1493,6 +1540,7 @@
     } else {
       const admin = findAdmin(editingAdminId);
       admin.name = name;
+      ensureAdminEmployees();
       if (pin || pinConfirm) {
         if (!/^\d{4}$/.test(pin)) {
           adminError.textContent = 'Der PIN muss genau 4 Ziffern haben.';
