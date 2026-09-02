@@ -41,11 +41,6 @@
     "linux": {
       "target": ["AppImage", "deb"],
       "artifactName": "Zeiterfassung-${version}-Linux.${ext}"
-    },
-    "publish": [
-      {
-        "provider": "github"
-      }
-    ]
+    }
   }
 }

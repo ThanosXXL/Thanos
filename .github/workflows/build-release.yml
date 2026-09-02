@@ -5,12 +5,53 @@ on:
     tags:
       - "v*"
   workflow_dispatch:
+    inputs:
+      publish:
+        description: "Als echten GitHub Release veröffentlichen (statt nur zu bauen)"
+        type: boolean
+        default: false
 
 permissions:
   contents: write
 
 jobs:
+  prepare-release:
+    if: github.ref_type == 'tag' || github.event.inputs.publish == 'true'
+    runs-on: ubuntu-latest
+    outputs:
+      tag: ${{ steps.tag.outputs.tag }}
+    steps:
+      - name: Repository auschecken
+        uses: actions/checkout@v4
+
+      - name: Tag bestimmen
+        id: tag
+        run: |
+          if [ "${{ github.ref_type }}" = "tag" ]; then
+            echo "tag=${{ github.ref_name }}" >> "$GITHUB_OUTPUT"
+          else
+            echo "tag=v$(node -p "require('./package.json').version")" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Alten Release/Draft für dieses Tag entfernen (falls vorhanden)
+        run: gh release delete "${{ steps.tag.outputs.tag }}" --yes || true
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Leeren Release anlegen (Installer kommen aus den Build-Jobs dazu)
+        run: |
+          gh release create "${{ steps.tag.outputs.tag }}" \
+            --title "Zeiterfassung ${{ steps.tag.outputs.tag }}" \
+            --notes "Automatisch gebaut von GitHub Actions." \
+            --target "${{ github.sha }}"
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
   build:
+    needs: prepare-release
+    # Läuft immer (auch ohne Veröffentlichung); prepare-release läuft nur bei Tag-Push
+    # oder manueller Freigabe, ist sonst "skipped" statt "failure".
+    if: always() && (needs.prepare-release.result == 'success' || needs.prepare-release.result == 'skipped')
     strategy:
       fail-fast: false
       matrix:
@@ -29,18 +70,28 @@ jobs:
       - name: Abhängigkeiten installieren
         run: npm install
 
-      - name: Desktop-App bauen (und bei Tag-Push veröffentlichen)
+      - name: Desktop-App bauen
+        run: npm run dist -- --publish never
+
+      # Dateien gehen direkt an den GitHub Release (zählt nicht gegen das
+      # Actions-Artifact-Speicherkontingent, das dieses geteilte Repo bereits
+      # mehrfach ausgeschöpft hat) statt über actions/upload-artifact.
+      - name: Installer direkt zum Release hochladen
+        if: needs.prepare-release.result == 'success'
         shell: bash
         run: |
-          if [ "${{ github.ref_type }}" = "tag" ]; then
-            npm run dist -- --publish always
-          else
-            npm run dist
+          shopt -s nullglob
+          files=(dist/*.exe dist/*.dmg dist/*.AppImage dist/*.deb)
+          if [ ${#files[@]} -eq 0 ]; then
+            echo "Keine Installer-Dateien gefunden."
+            exit 1
           fi
+          gh release upload "${{ needs.prepare-release.outputs.tag }}" "${files[@]}" --clobber
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Installer als Artifact hochladen
+      - name: Installer als Artifact hochladen (Zwischenspeicher, 90 Tage)
+        if: needs.prepare-release.result != 'success'
         uses: actions/upload-artifact@v4
         with:
           name: zeiterfassung-${{ matrix.os }}
