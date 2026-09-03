@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Datenschutz &ndash; M&amp;C Projectmanagement</title>
+<meta name="description" content="Datenschutzerklärung von M&amp;C Projectmanagement.">
+<meta name="robots" content="noindex">
+<link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Sora:wght@400;500;600;700;800&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+<div class="bg-scene" aria-hidden="true">
+  <div class="orb orb-a"></div>
+  <div class="orb orb-b"></div>
+  <div class="orb orb-c"></div>
+  <div class="grid-floor"></div>
+  <div class="grain" aria-hidden="true"></div>
+</div>
+<div class="cursor-spot" id="cursorSpot" aria-hidden="true"></div>
+
+<a class="skip-link" href="#main">Zum Inhalt springen</a>
+
+<header class="site-header" id="siteHeader">
+  <div class="container header-inner">
+    <a href="index.html#top" class="brand">
+      <span class="brand-mark" aria-hidden="true">
+        <svg viewBox="0 0 48 48" width="34" height="34">
+          <defs>
+            <linearGradient id="brandGrad" x1="0" y1="0" x2="1" y2="1">
+              <stop offset="0" stop-color="#8ef3ff"/>
+              <stop offset="0.55" stop-color="#5b8cff"/>
+              <stop offset="1" stop-color="#c96bff"/>
+            </linearGradient>
+          </defs>
+          <path d="M24 3 L44 14 V34 L24 45 L4 34 V14 Z" fill="url(#brandGrad)" opacity="0.18"/>
+          <path d="M24 3 L44 14 V34 L24 45 L4 34 V14 Z" fill="none" stroke="url(#brandGrad)" stroke-width="2"/>
+          <path d="M14 24 L21 31 L34 17" fill="none" stroke="url(#brandGrad)" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+      </span>
+      <span class="brand-text">MC <strong>Projectmanagement</strong></span>
+    </a>
+
+    <nav class="main-nav" id="mainNav" aria-label="Hauptnavigation">
+      <a href="index.html#top">Zur Startseite</a>
+      <a href="index.html#kontakt" class="nav-cta">Kontakt aufnehmen</a>
+    </nav>
+
+    <button class="nav-toggle" id="navToggle" aria-expanded="false" aria-controls="mainNav" aria-label="Menü öffnen">
+      <span></span><span></span><span></span>
+    </button>
+  </div>
+</header>
+
+<main id="main">
+  <section class="section" style="padding-top:4.5rem">
+    <div class="container" style="max-width:760px">
+      <div class="section-head reveal" style="text-align:left; margin:0 0 2rem;">
+        <p class="eyebrow"><span class="dot"></span> Rechtliches</p>
+        <h1 class="chrome-text" style="font-size:clamp(2rem,4vw,2.8rem)">Datenschutzerklärung</h1>
+      </div>
+
+      <div class="tilt-card reveal" style="padding:2.2rem; --delay:.05s">
+        <div class="sheen"></div>
+        <p style="color:var(--text-1); font-size:1rem; margin-bottom:1.2rem;">
+          Wir nehmen den Schutz Ihrer personenbezogenen Daten sehr ernst. Diese Seite
+          wird derzeit überarbeitet &ndash; die vollständige, DSGVO-konforme
+          Datenschutzerklärung folgt in Kürze.
+        </p>
+        <p style="color:var(--text-2); font-size:.94rem; margin:0;">
+          Bei Fragen zum Datenschutz oder zur Verarbeitung Ihrer Daten (z.&nbsp;B. über
+          unser Kontaktformular) erreichen Sie uns jederzeit unter
+          <a href="mailto:info@mc-projectmanagement.com" style="color:var(--cyan)">info@mc-projectmanagement.com</a>.
+        </p>
+      </div>
+
+      <div class="reveal" style="margin-top:2rem; --delay:.1s">
+        <a href="index.html#top" class="btn btn-glossy btn-ghost"><span>&larr; Zurück zur Startseite</span></a>
+      </div>
+    </div>
+  </section>
+</main>
+
+<footer class="site-footer">
+  <div class="container footer-bottom" style="padding-top:2.4rem">
+    <span>© <span id="year"></span> MC Projectmanagement. Alle Rechte vorbehalten.</span>
+  </div>
+</footer>
+
+<script src="js/script.js"></script>
+</body>
+</html>
