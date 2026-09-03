@@ -65,10 +65,11 @@ mc-projectmanagement/
   Footer-Button und animierter Lauftext im Footer).
 - **Adresse**: „Im II. Westfeld 7, 44388 Dortmund“ (Kontaktkarte & Footer).
 - **Social-Media-Buttons** (Footer, `.social-icons`): YouTube, LinkedIn,
-  Xing und Instagram als glänzende, animierte Icon-Buttons mit
-  durchlaufendem Glanz-Effekt. Die Links sind aktuell Platzhalter (`href="#"`),
-  da die echten Profil-URLs nicht vorlagen – bitte in `index.html` durch die
-  tatsächlichen Profil-Links ersetzen.
+  Xing, Instagram und TikTok als glänzende, animierte Icon-Buttons mit
+  durchlaufendem Glanz-Effekt, verlinkt auf die echten Profile:
+  YouTube (`@InfoMC-Projectmanagement`) und LinkedIn/Xing laufen unter
+  M&C Projectmanagement, Instagram und TikTok (`@mcakademiedo`) aktuell
+  unter der M&C-Akademie-Marke – so wie von den echten Profilen bestätigt.
 - **Telefonnummer**: auf Wunsch entfernt – Kontakt läuft aktuell ausschließlich
   über E-Mail und Adresse. Soll wieder eine Nummer ergänzt werden, einfach
   einen `contact-line`-/`footer-contact-btn`-Block (siehe Aufbau der
