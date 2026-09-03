@@ -37,15 +37,18 @@ mc-projectmanagement/
   Original-Logos nachgebaut, da die echten Logo-Dateien nicht vorlagen.
   Bei Bedarf 1:1 durch die echten Logo-Grafiken ersetzbar.
 - **„Unser Team“-Sektion**: zeigt die echten, von der Original-Seite
-  (`mc-projectmanagement.de/team-1`) übernommenen Namen – Rene Sangmeister
+  (`mc-projectmanagement.de/team-1`) übernommenen Namen, in derselben
+  Reihenfolge wie dort: Madlen Golibersuch (Inhaberin / Kaufmännische
+  Geschäftsführung), Collin Golibersuch (Technische Geschäftsführung &
+  Personal), Malte Kurm (Kaufmännischer Leiter), Rene Sangmeister
   (Bauleiter HKLS) und Andrea Lejk (Projectmanagement / Akademie). Mario
-  Kähler wurde auf Wunsch bewusst nicht übernommen. Da nur ein Foto vom
-  Bildschirm (kein echtes Bilddateien-Material) vorlag, sind die Porträts
+  Kähler wurde auf Wunsch bewusst nicht übernommen. Da nur Fotos vom
+  Bildschirm (kein echtes Bilddateien-Material) vorlagen, sind die Porträts
   aktuell **Initialen-Avatare** (`.member-avatar`) statt echter Fotos –
   bitte durch echte Porträtbilder ersetzen, sobald Bilddateien vorliegen.
-  Falls das Team mehr als diese zwei Personen umfasst, in `index.html`
-  (`.team-members` in der `#team`-Sektion) weitere `.team-member`-Blöcke
-  nach demselben Muster ergänzen.
+  Falls das Team weitere Mitglieder oder Vita-Texte umfasst, in
+  `index.html` (`.team-members` in der `#team`-Sektion) weitere
+  `.team-member`-Blöcke nach demselben Muster ergänzen.
 - **3D-Globus mit Baustellen-Standorten**: reiner CSS-/SVG-Globus mit
   animierten, umlaufenden Pfeilen zu vier Beispiel-Standorten (Berlin, Dubai,
   Singapur, New York) als **Platzhalter-Städte**. Bitte in `index.html`

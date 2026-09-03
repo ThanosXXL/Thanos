@@ -689,8 +689,11 @@ button{ font-family:inherit; }
   transition:transform .3s var(--ease);
 }
 .member-avatar:hover{ transform:translateY(-6px) scale(1.06); }
-.member-1{ background:linear-gradient(155deg, var(--blue), #2e57c9); }
-.member-2{ background:linear-gradient(155deg, var(--purple), #7a2fc9); }
+.member-1{ background:linear-gradient(155deg, var(--gold), var(--gold-2)); }
+.member-2{ background:linear-gradient(155deg, var(--cyan), var(--blue)); }
+.member-3{ background:linear-gradient(155deg, var(--silver), var(--silver-2)); }
+.member-4{ background:linear-gradient(155deg, var(--blue), #2e57c9); }
+.member-5{ background:linear-gradient(155deg, var(--purple), #7a2fc9); }
 .team-photo-caption{ font-size:.8rem; color:var(--text-2); margin:0; max-width:30ch; text-align:center; }
 
 /* Globus mit Loop-Pfeilen zu weltweiten Baustellen */
