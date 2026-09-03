@@ -36,18 +36,21 @@ mc-projectmanagement/
   M&C Akademie) – inklusive Schriftzug innerhalb jedes Logos, im Stil der
   Original-Logos nachgebaut, da die echten Logo-Dateien nicht vorlagen.
   Bei Bedarf 1:1 durch die echten Logo-Grafiken ersetzbar.
-- **„Unser Team“-Sektion**: zeigt die echten, von der Original-Seite
-  (`mc-projectmanagement.de/team-1`) übernommenen Namen, in derselben
-  Reihenfolge wie dort: Madlen Golibersuch (Inhaberin / Kaufmännische
-  Geschäftsführung), Collin Golibersuch (Technische Geschäftsführung &
-  Personal), Malte Kurm (Kaufmännischer Leiter), Rene Sangmeister
-  (Bauleiter HKLS) und Andrea Lejk (Projectmanagement / Akademie). Mario
-  Kähler wurde auf Wunsch bewusst nicht übernommen. Da nur Fotos vom
-  Bildschirm (kein echtes Bilddateien-Material) vorlagen, sind die Porträts
-  aktuell **Initialen-Avatare** (`.member-avatar`) statt echter Fotos –
-  bitte durch echte Porträtbilder ersetzen, sobald Bilddateien vorliegen.
-  Falls das Team weitere Mitglieder oder Vita-Texte umfasst, in
-  `index.html` (`.team-members` in der `#team`-Sektion) weitere
+- **„Unser Team“-Sektion**: zeigt das vollständige, echte Team von
+  `mc-projectmanagement.de/team-1`, in derselben Reihenfolge wie dort
+  (4 Zeilen der Original-Seite): Madlen Golibersuch (Inhaberin /
+  Kaufmännische Geschäftsführung), Collin Golibersuch (Technische
+  Geschäftsführung & Personal), Malte Kurm (Kaufmännischer Leiter),
+  Rene Sangmeister (Bauleiter HKLS), Andrea Lejk (Projectmanagement /
+  Akademie), Thorsten Heymann (Bauleiter HKLS), Heiko Lerchner (Bauleiter
+  HKLS / ELT), Adam Wujciow (Bauleiter ELT), Matthias Gornik (Dozent M&C
+  Akademie), Joachim Melzer (Dozent M&C Akademie) und Deni Cizmar
+  (Bauleiter ELT). Mario Kähler wurde auf Wunsch bewusst nicht übernommen.
+  Da nur Fotos vom Bildschirm (kein echtes Bilddateien-Material) vorlagen,
+  sind die Porträts aktuell **Initialen-Avatare** (`.member-avatar`) statt
+  echter Fotos – bitte durch echte Porträtbilder ersetzen, sobald
+  Bilddateien vorliegen. Weitere Mitglieder oder Vita-Texte lassen sich in
+  `index.html` (`.team-members` in der `#team`-Sektion) als zusätzliche
   `.team-member`-Blöcke nach demselben Muster ergänzen.
 - **3D-Globus mit Baustellen-Standorten**: reiner CSS-/SVG-Globus mit
   animierten, umlaufenden Pfeilen zu vier Beispiel-Standorten (Berlin, Dubai,
