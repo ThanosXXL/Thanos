@@ -36,11 +36,16 @@ mc-projectmanagement/
   M&C Akademie) – inklusive Schriftzug innerhalb jedes Logos, im Stil der
   Original-Logos nachgebaut, da die echten Logo-Dateien nicht vorlagen.
   Bei Bedarf 1:1 durch die echten Logo-Grafiken ersetzbar.
-- **„Unser Team“-Sektion**: Foto-Bereich für die Mitarbeiter ist aktuell ein
-  klar gekennzeichneter **Platzhalter** (vier stilisierte Avatare, Beschriftung
-  „Foto-Platzhalter – hier erscheint das echte Teamfoto“), da kein echtes
-  Foto der 4 Mitarbeiter als Datei vorlag. Bitte das echte Teamfoto in
-  `index.html` (`.team-photo-frame`) einsetzen.
+- **„Unser Team“-Sektion**: zeigt die echten, von der Original-Seite
+  (`mc-projectmanagement.de/team-1`) übernommenen Namen – Rene Sangmeister
+  (Bauleiter HKLS) und Andrea Lejk (Projectmanagement / Akademie). Mario
+  Kähler wurde auf Wunsch bewusst nicht übernommen. Da nur ein Foto vom
+  Bildschirm (kein echtes Bilddateien-Material) vorlag, sind die Porträts
+  aktuell **Initialen-Avatare** (`.member-avatar`) statt echter Fotos –
+  bitte durch echte Porträtbilder ersetzen, sobald Bilddateien vorliegen.
+  Falls das Team mehr als diese zwei Personen umfasst, in `index.html`
+  (`.team-members` in der `#team`-Sektion) weitere `.team-member`-Blöcke
+  nach demselben Muster ergänzen.
 - **3D-Globus mit Baustellen-Standorten**: reiner CSS-/SVG-Globus mit
   animierten, umlaufenden Pfeilen zu vier Beispiel-Standorten (Berlin, Dubai,
   Singapur, New York) als **Platzhalter-Städte**. Bitte in `index.html`
