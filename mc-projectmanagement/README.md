@@ -53,10 +53,10 @@ mc-projectmanagement/
 - **E-Mail**: `info@mc-projectmanagement.com` (Kontaktformular, Kontaktkarte,
   Footer-Button und animierter Lauftext im Footer).
 - **Adresse**: „Im II. Westfeld 7, 44388 Dortmund“ (Kontaktkarte & Footer).
-- **Telefonnummer**: aktuell als Platzhalter `+49 (0) XXX XXX XXXX` /
-  `tel:+49XXXXXXXXXX` hinterlegt – bitte in `index.html` an den beiden
-  Stellen `contact-line` (Kontaktbereich) und `footer-contact-btn` (Footer)
-  durch die echte Nummer ersetzen (Anzeigetext **und** `tel:`-Link).
+- **Telefonnummer**: auf Wunsch entfernt – Kontakt läuft aktuell ausschließlich
+  über E-Mail und Adresse. Soll wieder eine Nummer ergänzt werden, einfach
+  einen `contact-line`-/`footer-contact-btn`-Block (siehe Aufbau der
+  E-Mail-Blöcke) mit `tel:`-Link in `index.html` hinzufügen.
 - **Rechtliches**: Der Footer enthält nur noch „Datenschutz“ (Platzhalter-Link
   `href="#"`, noch auf eine echte Seite zu verweisen) – „Impressum“ wurde auf
   Wunsch entfernt.
