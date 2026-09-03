@@ -162,6 +162,82 @@
   }
 
   /* -------------------------------------------------------------- */
+  /* Cursor-Spotlight: folgt der Maus über die ganze Seite            */
+  /* -------------------------------------------------------------- */
+  var cursorSpot = document.getElementById('cursorSpot');
+  if (cursorSpot && !reducedMotion && window.matchMedia('(hover: hover)').matches) {
+    var spotTicking = false;
+    window.addEventListener('mousemove', function (e) {
+      if (spotTicking) return;
+      spotTicking = true;
+      requestAnimationFrame(function () {
+        cursorSpot.style.setProperty('--cx', e.clientX + 'px');
+        cursorSpot.style.setProperty('--cy', e.clientY + 'px');
+        cursorSpot.classList.add('active');
+        spotTicking = false;
+      });
+    });
+    document.addEventListener('mouseleave', function () {
+      cursorSpot.classList.remove('active');
+    });
+  }
+
+  /* -------------------------------------------------------------- */
+  /* Scroll-Parallax für Hintergrund-Orbs                             */
+  /* -------------------------------------------------------------- */
+  var orbEls = document.querySelectorAll('.orb');
+  if (orbEls.length && !reducedMotion) {
+    var parallaxTicking = false;
+    window.addEventListener('scroll', function () {
+      if (parallaxTicking) return;
+      parallaxTicking = true;
+      requestAnimationFrame(function () {
+        var y = window.scrollY;
+        orbEls.forEach(function (orb, i) {
+          var speed = 0.06 + i * 0.03;
+          orb.style.setProperty('--parallax-y', (y * speed).toFixed(1) + 'px');
+        });
+        parallaxTicking = false;
+      });
+    }, { passive: true });
+  }
+
+  /* -------------------------------------------------------------- */
+  /* Magnet-Buttons: Primär-Buttons folgen der Maus leicht (Haptik)   */
+  /* -------------------------------------------------------------- */
+  var magneticEls = document.querySelectorAll('.btn-primary, .play-btn');
+  if (!reducedMotion) {
+    magneticEls.forEach(function (el) {
+      el.addEventListener('mousemove', function (e) {
+        var rect = el.getBoundingClientRect();
+        var mx = e.clientX - (rect.left + rect.width / 2);
+        var my = e.clientY - (rect.top + rect.height / 2);
+        el.style.transform = 'translate(' + (mx * 0.18).toFixed(1) + 'px,' + (my * 0.28).toFixed(1) + 'px)';
+      });
+      el.addEventListener('mouseleave', function () {
+        el.style.transform = '';
+      });
+    });
+  }
+
+  /* -------------------------------------------------------------- */
+  /* Klick-Ripple auf Glossy-Buttons: haptisches Feedback             */
+  /* -------------------------------------------------------------- */
+  document.querySelectorAll('.btn-glossy').forEach(function (btn) {
+    btn.addEventListener('click', function (e) {
+      var rect = btn.getBoundingClientRect();
+      var ripple = document.createElement('span');
+      var size = Math.max(rect.width, rect.height) * 1.6;
+      ripple.className = 'ripple';
+      ripple.style.width = ripple.style.height = size + 'px';
+      ripple.style.left = (e.clientX - rect.left - size / 2) + 'px';
+      ripple.style.top = (e.clientY - rect.top - size / 2) + 'px';
+      btn.appendChild(ripple);
+      ripple.addEventListener('animationend', function () { ripple.remove(); });
+    });
+  });
+
+  /* -------------------------------------------------------------- */
   /* Sanftes Scrollen für Anker-Links (Fallback zu CSS scroll-behavior) */
   /* -------------------------------------------------------------- */
   document.querySelectorAll('a[href^="#"]').forEach(function (link) {

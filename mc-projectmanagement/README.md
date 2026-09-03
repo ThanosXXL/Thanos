@@ -25,32 +25,53 @@ python3 -m http.server 8080
 mc-projectmanagement/
 ├── index.html        Seiteninhalt (eine Seite mit Anker-Navigation)
 ├── css/style.css      3D-/Glas-/Hochglanz-Design, Animationen, Responsive Layout
-├── js/script.js       Tilt-Effekte, Scroll-Reveal, Zähler, Ticker, Mobile-Nav
+├── js/script.js       Tilt-, Magnet- & Ripple-Effekte, Scroll-Reveal, Zähler, Ticker, Mobile-Nav
 └── assets/favicon.svg Favicon
 ```
 
 ## Inhalte & offene Platzhalter
 
-- **Logo-Leiste ganz oben**: 4 animierte, abstrahierte Marken (ohne Text) der
-  M&C Gruppe – M&C Holding, M&C Projectmanagement, M&C Baumanagement,
-  M&C Akademie – als stilisierte Icon-Marken in 3D/Hochglanz-Optik, da die
-  Original-Logodateien nicht vorlagen. Bei Bedarf können sie 1:1 durch die
-  echten Logo-Grafiken (`assets/`) ersetzt werden.
-- **E-Mail**: `info@mc-projectmanagement.com` (Kontaktformular, Kontaktkarte
-  und animierter Lauftext im Footer).
+- **Logo-Leiste ganz oben**: 4 animierte, ovale 3D-/Hochglanz-Marken der M&C
+  Gruppe (M&C Holding GmbH, M&C Projectmanagement, M&C Baumanagement,
+  M&C Akademie) – inklusive Schriftzug innerhalb jedes Logos, im Stil der
+  Original-Logos nachgebaut, da die echten Logo-Dateien nicht vorlagen.
+  Bei Bedarf 1:1 durch die echten Logo-Grafiken ersetzbar.
+- **„Unser Team“-Sektion**: Foto-Bereich für die Mitarbeiter ist aktuell ein
+  klar gekennzeichneter **Platzhalter** (vier stilisierte Avatare, Beschriftung
+  „Foto-Platzhalter – hier erscheint das echte Teamfoto“), da kein echtes
+  Foto der 4 Mitarbeiter als Datei vorlag. Bitte das echte Teamfoto in
+  `index.html` (`.team-photo-frame`) einsetzen.
+- **3D-Globus mit Baustellen-Standorten**: reiner CSS-/SVG-Globus mit
+  animierten, umlaufenden Pfeilen zu vier Beispiel-Standorten (Berlin, Dubai,
+  Singapur, New York) als **Platzhalter-Städte**. Bitte in `index.html`
+  (`.site-pin` + zugehörige `<path class="flow-path">`-Koordinaten) durch die
+  tatsächlich realisierten Baustellen-Standorte ersetzen.
+- **Video Vorstellung**: Platzhalter-Videoplayer (Play-Button, Equalizer-
+  Animation, Beschriftung „Video-Vorstellung folgt in Kürze“) – bitte durch
+  ein eingebettetes Video (`<video>`- oder YouTube/Vimeo-Embed) ersetzen,
+  sobald eines vorliegt.
+- **E-Mail**: `info@mc-projectmanagement.com` (Kontaktformular, Kontaktkarte,
+  Footer-Button und animierter Lauftext im Footer).
+- **Adresse**: „Im II. Westfeld 7, 44388 Dortmund“ (Kontaktkarte & Footer).
 - **Telefonnummer**: aktuell als Platzhalter `+49 (0) XXX XXX XXXX` /
   `tel:+49XXXXXXXXXX` hinterlegt – bitte in `index.html` an den beiden
   Stellen `contact-line` (Kontaktbereich) und `footer-contact-btn` (Footer)
   durch die echte Nummer ersetzen (Anzeigetext **und** `tel:`-Link).
-- **Rechtliches**: „Impressum“ und „Datenschutz“ im Footer sind Platzhalter-Links
-  (`href="#"`) und müssen noch auf echte Seiten verweisen.
-- **Texte** (Leistungen, Über uns, Referenzen) sind exemplarisch formuliert und
-  sollten fachlich gegengelesen/angepasst werden.
+- **Rechtliches**: Der Footer enthält nur noch „Datenschutz“ (Platzhalter-Link
+  `href="#"`, noch auf eine echte Seite zu verweisen) – „Impressum“ wurde auf
+  Wunsch entfernt.
+- **Texte** (Leistungen, Über uns, Referenzen) sind teils exemplarisch
+  formuliert und sollten fachlich gegengelesen/angepasst werden; der
+  Kontakt-Intro-Text stammt bereits von der echten Seite.
 
-## Design
+## Design & Haptik
 
 - Dunkles, glasartiges 3D-Design mit Verlaufs-„Orbs“, Perspektiven-Tilt auf
   Mauszeigerbewegung (Karten & Logos), Glanzlicht-Sweep auf Buttons,
   Chrome-Farbverlauf-Überschriften und animiertem E-Mail-Ticker im Footer.
+- **Haptik-/Blickfang-Effekte**: Klick-Ripple auf allen Glossy-Buttons,
+  „magnetische“ Primär-Buttons (folgen der Maus leicht), Cursor-Spotlight
+  (folgt der Maus über die ganze Seite), Scroll-Parallax der Hintergrund-Orbs,
+  feine Film-Korn-Textur für mehr Tiefe/Materialität.
 - Berücksichtigt `prefers-reduced-motion` (Animationen werden reduziert/deaktiviert).
 - Vollständig responsiv (Mobile-Navigation, gestapeltes Grid).

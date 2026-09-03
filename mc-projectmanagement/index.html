@@ -18,7 +18,9 @@
   <div class="orb orb-b"></div>
   <div class="orb orb-c"></div>
   <div class="grid-floor"></div>
+  <div class="grain" aria-hidden="true"></div>
 </div>
+<div class="cursor-spot" id="cursorSpot" aria-hidden="true"></div>
 
 <a class="skip-link" href="#main">Zum Inhalt springen</a>
 
@@ -33,9 +35,9 @@
 
     <div class="logo-row">
       <!-- 1: M&C Holding GmbH -->
-      <div class="logo-mark logo-mark-holding" title="M&amp;C Holding GmbH">
+      <div class="logo-mark logo-mark-holding">
         <span class="mark-glow" aria-hidden="true"></span>
-        <svg viewBox="0 0 100 100" role="img" aria-label="Logo M&amp;C Holding GmbH">
+        <svg class="mark-bg" viewBox="0 0 220 100" aria-hidden="true">
           <defs>
             <linearGradient id="gradHolding" x1="0" y1="0" x2="1" y2="1">
               <stop offset="0" stop-color="#f4dfa0"/>
@@ -43,16 +45,20 @@
               <stop offset="1" stop-color="#b98a2e"/>
             </linearGradient>
           </defs>
-          <ellipse cx="50" cy="50" rx="44" ry="27" fill="none" stroke="#0c0d12" stroke-width="5"/>
-          <path d="M14 50 A44 27 0 0 1 74 26" fill="none" stroke="url(#gradHolding)" stroke-width="9" stroke-linecap="round"/>
+          <ellipse cx="110" cy="50" rx="104" ry="45" fill="none" stroke="#0c0d12" stroke-width="5"/>
+          <path d="M18 58 A104 45 0 0 1 176 20" fill="none" stroke="url(#gradHolding)" stroke-width="10" stroke-linecap="round"/>
         </svg>
         <span class="mark-sheen" aria-hidden="true"></span>
+        <span class="mark-text">
+          <strong>M&amp;C Holding</strong>
+          <small>GmbH</small>
+        </span>
       </div>
 
       <!-- 2: M&C Projectmanagement -->
-      <div class="logo-mark logo-mark-pm" title="M&amp;C Projectmanagement">
+      <div class="logo-mark logo-mark-pm">
         <span class="mark-glow" aria-hidden="true"></span>
-        <svg viewBox="0 0 100 100" role="img" aria-label="Logo M&amp;C Projectmanagement">
+        <svg class="mark-bg" viewBox="0 0 220 100" aria-hidden="true">
           <defs>
             <linearGradient id="gradPM" x1="0" y1="0" x2="1" y2="1">
               <stop offset="0" stop-color="#bcd4ff"/>
@@ -60,16 +66,20 @@
               <stop offset="1" stop-color="#2e57c9"/>
             </linearGradient>
           </defs>
-          <ellipse cx="50" cy="50" rx="44" ry="27" fill="none" stroke="#8fa3c4" stroke-width="3" opacity=".6"/>
-          <path d="M14 50 A44 27 0 0 1 74 26" fill="none" stroke="url(#gradPM)" stroke-width="9" stroke-linecap="round"/>
+          <ellipse cx="110" cy="50" rx="104" ry="45" fill="none" stroke="#8fa3c4" stroke-width="3" opacity=".5"/>
+          <path d="M18 58 A104 45 0 0 1 176 20" fill="none" stroke="url(#gradPM)" stroke-width="10" stroke-linecap="round"/>
         </svg>
         <span class="mark-sheen" aria-hidden="true"></span>
+        <span class="mark-text">
+          <strong>M&amp;C</strong>
+          <small>Projectmanagement</small>
+        </span>
       </div>
 
       <!-- 3: M&C Baumanagement -->
-      <div class="logo-mark logo-mark-bau" title="M&amp;C Baumanagement">
+      <div class="logo-mark logo-mark-bau">
         <span class="mark-glow" aria-hidden="true"></span>
-        <svg viewBox="0 0 100 100" role="img" aria-label="Logo M&amp;C Baumanagement">
+        <svg class="mark-bg" viewBox="0 0 220 100" aria-hidden="true">
           <defs>
             <linearGradient id="gradBau" x1="0" y1="0" x2="1" y2="1">
               <stop offset="0" stop-color="#eef0f4"/>
@@ -77,16 +87,20 @@
               <stop offset="1" stop-color="#7d8296"/>
             </linearGradient>
           </defs>
-          <ellipse cx="50" cy="50" rx="44" ry="27" fill="none" stroke="#9aa0b0" stroke-width="3" opacity=".6"/>
-          <path d="M14 50 A44 27 0 0 1 74 26" fill="none" stroke="url(#gradBau)" stroke-width="9" stroke-linecap="round"/>
+          <ellipse cx="110" cy="50" rx="104" ry="45" fill="none" stroke="#9aa0b0" stroke-width="3" opacity=".5"/>
+          <path d="M18 58 A104 45 0 0 1 176 20" fill="none" stroke="url(#gradBau)" stroke-width="10" stroke-linecap="round"/>
         </svg>
         <span class="mark-sheen" aria-hidden="true"></span>
+        <span class="mark-text">
+          <strong>M&amp;C</strong>
+          <small>Baumanagement</small>
+        </span>
       </div>
 
       <!-- 4: M&C Akademie -->
-      <div class="logo-mark logo-mark-akademie" title="M&amp;C Akademie">
+      <div class="logo-mark logo-mark-akademie">
         <span class="mark-glow" aria-hidden="true"></span>
-        <svg viewBox="0 0 100 100" role="img" aria-label="Logo M&amp;C Akademie">
+        <svg class="mark-bg" viewBox="0 0 220 100" aria-hidden="true">
           <defs>
             <linearGradient id="gradAk" x1="0" y1="0" x2="1" y2="1">
               <stop offset="0" stop-color="#ffb0b8"/>
@@ -94,10 +108,14 @@
               <stop offset="1" stop-color="#b3182b"/>
             </linearGradient>
           </defs>
-          <ellipse cx="50" cy="50" rx="44" ry="27" fill="none" stroke="#0c0d12" stroke-width="5"/>
-          <path d="M14 50 A44 27 0 0 1 74 26" fill="none" stroke="url(#gradAk)" stroke-width="9" stroke-linecap="round"/>
+          <ellipse cx="110" cy="50" rx="104" ry="45" fill="none" stroke="#0c0d12" stroke-width="5"/>
+          <path d="M18 58 A104 45 0 0 1 176 20" fill="none" stroke="url(#gradAk)" stroke-width="10" stroke-linecap="round"/>
         </svg>
         <span class="mark-sheen" aria-hidden="true"></span>
+        <span class="mark-text">
+          <strong>M&amp;C</strong>
+          <small>Akademie</small>
+        </span>
       </div>
     </div>
   </div>
@@ -126,9 +144,9 @@
     <nav class="main-nav" id="mainNav" aria-label="Hauptnavigation">
       <a href="#gruppe">Die Gruppe</a>
       <a href="#leistungen">Leistungen</a>
-      <a href="#methodik">Methodik</a>
+      <a href="#video">Video Vorstellung</a>
       <a href="#ueber-uns">Über uns</a>
-      <a href="#referenzen">Referenzen</a>
+      <a href="#team">Unser Team</a>
       <a href="#kontakt" class="nav-cta">Kontakt aufnehmen</a>
     </nav>
 
@@ -316,6 +334,31 @@
     </div>
   </section>
 
+  <!-- VIDEO VORSTELLUNG -->
+  <section class="section" id="video">
+    <div class="container">
+      <div class="section-head reveal">
+        <p class="eyebrow"><span class="dot"></span> Video Vorstellung</p>
+        <h2>Lernen Sie uns in Bewegtbild kennen</h2>
+        <p class="section-lead">Ein kurzer Einblick in unsere Arbeitsweise, unsere Projekte und die Menschen dahinter.</p>
+      </div>
+
+      <div class="tilt-card video-card reveal">
+        <div class="sheen"></div>
+        <div class="video-frame">
+          <span class="video-glow" aria-hidden="true"></span>
+          <button type="button" class="play-btn" aria-label="Video abspielen">
+            <svg viewBox="0 0 24 24" width="26" height="26" aria-hidden="true"><path d="M8 5v14l11-7z" fill="currentColor"/></svg>
+          </button>
+          <div class="video-bars" aria-hidden="true">
+            <span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span>
+          </div>
+          <p class="video-caption">Video-Vorstellung folgt in Kürze</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
   <!-- METHODIK -->
   <section class="section section-alt" id="methodik">
     <div class="container">
@@ -377,6 +420,57 @@
     </div>
   </section>
 
+  <!-- UNSER TEAM & WELTWEITE PRÄSENZ -->
+  <section class="section" id="team">
+    <div class="container">
+      <div class="section-head reveal">
+        <p class="eyebrow"><span class="dot"></span> Unser Team</p>
+        <h2>Die Menschen hinter Ihren Projekten</h2>
+        <p class="section-lead">Ein eingespieltes Team &ndash; im Einsatz bei Bauprojekten rund um den Globus.</p>
+      </div>
+
+      <div class="team-grid">
+        <div class="tilt-card team-photo reveal">
+          <div class="sheen"></div>
+          <div class="team-photo-frame">
+            <div class="team-avatar-row">
+              <span class="team-avatar av-1" aria-hidden="true">👷‍♂️</span>
+              <span class="team-avatar av-2" aria-hidden="true">👷‍♀️</span>
+              <span class="team-avatar av-3" aria-hidden="true">🧑‍💼</span>
+              <span class="team-avatar av-4" aria-hidden="true">👩‍💼</span>
+            </div>
+            <p class="team-photo-caption">Foto-Platzhalter &ndash; hier erscheint das echte Teamfoto</p>
+          </div>
+        </div>
+
+        <div class="tilt-card globe-card reveal" style="--delay:.1s">
+          <div class="sheen"></div>
+          <p class="globe-title">Baustellen, die wir bereits erfolgreich umgesetzt haben</p>
+          <div class="globe-stage">
+            <div class="globe" aria-hidden="true"></div>
+
+            <svg class="globe-arrows" viewBox="0 0 400 320" preserveAspectRatio="none" aria-hidden="true">
+              <defs>
+                <marker id="arrowHead" markerWidth="8" markerHeight="8" refX="5" refY="4" orient="auto">
+                  <path d="M0,0 L8,4 L0,8 Z" fill="var(--cyan)"/>
+                </marker>
+              </defs>
+              <path class="flow-path" d="M255 135 Q 170 40 85 55" fill="none" marker-end="url(#arrowHead)"/>
+              <path class="flow-path" d="M255 145 Q 330 90 340 65" fill="none" marker-end="url(#arrowHead)"/>
+              <path class="flow-path" d="M250 190 Q 320 220 345 235" fill="none" marker-end="url(#arrowHead)"/>
+              <path class="flow-path" d="M150 195 Q 100 230 60 225" fill="none" marker-end="url(#arrowHead)"/>
+            </svg>
+
+            <span class="site-pin" style="left:17%; top:14%;">📍 Berlin</span>
+            <span class="site-pin" style="left:83%; top:16%;">📍 Dubai</span>
+            <span class="site-pin" style="left:86%; top:71%;">📍 Singapur</span>
+            <span class="site-pin" style="left:11%; top:69%;">📍 New York</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
   <!-- REFERENZEN -->
   <section class="section section-alt" id="referenzen">
     <div class="container">
@@ -420,23 +514,25 @@
       <div class="section-head reveal">
         <p class="eyebrow"><span class="dot"></span> Kontakt</p>
         <h2>Sprechen wir über Ihr Projekt</h2>
-        <p class="section-lead">Schreiben Sie uns eine Nachricht &ndash; wir melden uns zeitnah zurück.</p>
+        <p class="section-lead">Ob Beratung, Projektverwirklichung oder Fertigstellung &ndash; bei uns sind Ihre Anliegen in besten Händen. Vereinbaren Sie jetzt ein Erstgespräch und starten Sie mit uns durch!</p>
       </div>
 
       <div class="contact-grid">
         <form class="tilt-card contact-form reveal" action="mailto:info@mc-projectmanagement.com" method="post" enctype="text/plain">
           <div class="sheen"></div>
-          <div class="form-row">
-            <label for="cf-name">Name</label>
-            <input id="cf-name" name="Name" type="text" required autocomplete="name" placeholder="Ihr vollständiger Name">
+          <div class="form-row-pair">
+            <div class="form-row">
+              <label for="cf-first">Vorname</label>
+              <input id="cf-first" name="Vorname" type="text" required autocomplete="given-name" placeholder="Ihr Vorname">
+            </div>
+            <div class="form-row">
+              <label for="cf-last">Nachname</label>
+              <input id="cf-last" name="Nachname" type="text" required autocomplete="family-name" placeholder="Ihr Nachname">
+            </div>
           </div>
           <div class="form-row">
-            <label for="cf-email">E-Mail</label>
+            <label for="cf-email">E-Mail *</label>
             <input id="cf-email" name="E-Mail" type="email" required autocomplete="email" placeholder="ihre@email.de">
-          </div>
-          <div class="form-row">
-            <label for="cf-topic">Thema</label>
-            <input id="cf-topic" name="Thema" type="text" placeholder="z. B. Projektleitung, PMO-Aufbau, Beratung">
           </div>
           <div class="form-row">
             <label for="cf-message">Nachricht</label>
@@ -462,6 +558,13 @@
               <span>
                 <small>E-Mail</small>
                 <strong>info@mc-projectmanagement.com</strong>
+              </span>
+            </a>
+            <a class="contact-line" href="https://maps.google.com/?q=Im+II.+Westfeld+7,+44388+Dortmund" target="_blank" rel="noopener">
+              <span class="contact-ico" aria-hidden="true">📍</span>
+              <span>
+                <small>Adresse</small>
+                <strong>Im II. Westfeld 7, 44388 Dortmund</strong>
               </span>
             </a>
           </div>
@@ -508,10 +611,16 @@
           <strong>info@mc-projectmanagement.com</strong>
         </span>
       </a>
+      <a class="footer-contact-btn" href="https://maps.google.com/?q=Im+II.+Westfeld+7,+44388+Dortmund" target="_blank" rel="noopener">
+        <span class="contact-ico" aria-hidden="true">📍</span>
+        <span>
+          <small>Besuchen Sie uns</small>
+          <strong>Im II. Westfeld 7, 44388 Dortmund</strong>
+        </span>
+      </a>
     </div>
 
     <nav class="footer-links" aria-label="Rechtliches">
-      <a href="#">Impressum</a>
       <a href="#">Datenschutz</a>
       <a href="#top">Nach oben ↑</a>
     </nav>
