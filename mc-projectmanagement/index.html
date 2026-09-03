@@ -1,0 +1,527 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>M&amp;C Projectmanagement &ndash; Teil der M&amp;C Gruppe</title>
+<meta name="description" content="M&amp;C Projectmanagement &ndash; Teil der M&amp;C Gruppe (mit M&amp;C Baumanagement und M&amp;C Akademie) &ndash; begleitet Unternehmen bei Projektleitung, PM-Beratung, agilem Projektmanagement und Prozessoptimierung.">
+<link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Sora:wght@400;500;600;700;800&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+<div class="bg-scene" aria-hidden="true">
+  <div class="orb orb-a"></div>
+  <div class="orb orb-b"></div>
+  <div class="orb orb-c"></div>
+  <div class="grid-floor"></div>
+</div>
+
+<a class="skip-link" href="#main">Zum Inhalt springen</a>
+
+<!-- LOGO-LEISTE: 4 Marken der M&C Gruppe, ohne Text, animiert, 3D & Hochglanz -->
+<section class="logo-strip" aria-label="Die Unternehmen der M&amp;C Gruppe">
+  <div class="container">
+    <div class="logo-strip-head">
+      <p class="logo-strip-eyebrow"><span class="dot"></span> Ein starkes Netzwerk</p>
+      <h1>Die M&amp;C Gruppe</h1>
+      <p>Wir verbinden Kompetenzen aus verschiedenen Branchen und arbeiten gemeinsam daran, Ihre individuellen Ziele zu erreichen.</p>
+    </div>
+
+    <div class="logo-row">
+      <!-- 1: M&C Holding GmbH -->
+      <div class="logo-mark logo-mark-holding" title="M&amp;C Holding GmbH">
+        <span class="mark-glow" aria-hidden="true"></span>
+        <svg viewBox="0 0 100 100" role="img" aria-label="Logo M&amp;C Holding GmbH">
+          <defs>
+            <linearGradient id="gradHolding" x1="0" y1="0" x2="1" y2="1">
+              <stop offset="0" stop-color="#f4dfa0"/>
+              <stop offset="0.5" stop-color="#e7bf6b"/>
+              <stop offset="1" stop-color="#b98a2e"/>
+            </linearGradient>
+          </defs>
+          <ellipse cx="50" cy="50" rx="44" ry="27" fill="none" stroke="#0c0d12" stroke-width="5"/>
+          <path d="M14 50 A44 27 0 0 1 74 26" fill="none" stroke="url(#gradHolding)" stroke-width="9" stroke-linecap="round"/>
+        </svg>
+        <span class="mark-sheen" aria-hidden="true"></span>
+      </div>
+
+      <!-- 2: M&C Projectmanagement -->
+      <div class="logo-mark logo-mark-pm" title="M&amp;C Projectmanagement">
+        <span class="mark-glow" aria-hidden="true"></span>
+        <svg viewBox="0 0 100 100" role="img" aria-label="Logo M&amp;C Projectmanagement">
+          <defs>
+            <linearGradient id="gradPM" x1="0" y1="0" x2="1" y2="1">
+              <stop offset="0" stop-color="#bcd4ff"/>
+              <stop offset="0.5" stop-color="#5b8cff"/>
+              <stop offset="1" stop-color="#2e57c9"/>
+            </linearGradient>
+          </defs>
+          <ellipse cx="50" cy="50" rx="44" ry="27" fill="none" stroke="#8fa3c4" stroke-width="3" opacity=".6"/>
+          <path d="M14 50 A44 27 0 0 1 74 26" fill="none" stroke="url(#gradPM)" stroke-width="9" stroke-linecap="round"/>
+        </svg>
+        <span class="mark-sheen" aria-hidden="true"></span>
+      </div>
+
+      <!-- 3: M&C Baumanagement -->
+      <div class="logo-mark logo-mark-bau" title="M&amp;C Baumanagement">
+        <span class="mark-glow" aria-hidden="true"></span>
+        <svg viewBox="0 0 100 100" role="img" aria-label="Logo M&amp;C Baumanagement">
+          <defs>
+            <linearGradient id="gradBau" x1="0" y1="0" x2="1" y2="1">
+              <stop offset="0" stop-color="#eef0f4"/>
+              <stop offset="0.5" stop-color="#c8ccd8"/>
+              <stop offset="1" stop-color="#7d8296"/>
+            </linearGradient>
+          </defs>
+          <ellipse cx="50" cy="50" rx="44" ry="27" fill="none" stroke="#9aa0b0" stroke-width="3" opacity=".6"/>
+          <path d="M14 50 A44 27 0 0 1 74 26" fill="none" stroke="url(#gradBau)" stroke-width="9" stroke-linecap="round"/>
+        </svg>
+        <span class="mark-sheen" aria-hidden="true"></span>
+      </div>
+
+      <!-- 4: M&C Akademie -->
+      <div class="logo-mark logo-mark-akademie" title="M&amp;C Akademie">
+        <span class="mark-glow" aria-hidden="true"></span>
+        <svg viewBox="0 0 100 100" role="img" aria-label="Logo M&amp;C Akademie">
+          <defs>
+            <linearGradient id="gradAk" x1="0" y1="0" x2="1" y2="1">
+              <stop offset="0" stop-color="#ffb0b8"/>
+              <stop offset="0.5" stop-color="#ff5b6b"/>
+              <stop offset="1" stop-color="#b3182b"/>
+            </linearGradient>
+          </defs>
+          <ellipse cx="50" cy="50" rx="44" ry="27" fill="none" stroke="#0c0d12" stroke-width="5"/>
+          <path d="M14 50 A44 27 0 0 1 74 26" fill="none" stroke="url(#gradAk)" stroke-width="9" stroke-linecap="round"/>
+        </svg>
+        <span class="mark-sheen" aria-hidden="true"></span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<header class="site-header" id="siteHeader">
+  <div class="container header-inner">
+    <a href="#top" class="brand">
+      <span class="brand-mark" aria-hidden="true">
+        <svg viewBox="0 0 48 48" width="34" height="34">
+          <defs>
+            <linearGradient id="brandGrad" x1="0" y1="0" x2="1" y2="1">
+              <stop offset="0" stop-color="#8ef3ff"/>
+              <stop offset="0.55" stop-color="#5b8cff"/>
+              <stop offset="1" stop-color="#c96bff"/>
+            </linearGradient>
+          </defs>
+          <path d="M24 3 L44 14 V34 L24 45 L4 34 V14 Z" fill="url(#brandGrad)" opacity="0.18"/>
+          <path d="M24 3 L44 14 V34 L24 45 L4 34 V14 Z" fill="none" stroke="url(#brandGrad)" stroke-width="2"/>
+          <path d="M14 24 L21 31 L34 17" fill="none" stroke="url(#brandGrad)" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+      </span>
+      <span class="brand-text">MC <strong>Projectmanagement</strong></span>
+    </a>
+
+    <nav class="main-nav" id="mainNav" aria-label="Hauptnavigation">
+      <a href="#gruppe">Die Gruppe</a>
+      <a href="#leistungen">Leistungen</a>
+      <a href="#methodik">Methodik</a>
+      <a href="#ueber-uns">Über uns</a>
+      <a href="#referenzen">Referenzen</a>
+      <a href="#kontakt" class="nav-cta">Kontakt aufnehmen</a>
+    </nav>
+
+    <button class="nav-toggle" id="navToggle" aria-expanded="false" aria-controls="mainNav" aria-label="Menü öffnen">
+      <span></span><span></span><span></span>
+    </button>
+  </div>
+</header>
+
+<main id="main">
+
+  <!-- HERO -->
+  <section class="hero" id="top">
+    <div class="container hero-inner">
+      <div class="hero-copy reveal">
+        <p class="eyebrow"><span class="dot"></span> Projektmanagement &amp; PM-Beratung</p>
+        <h2 class="chrome-text">Projekte, die<br>zuverlässig liefern.</h2>
+        <p class="hero-lead">
+          MC Projectmanagement übernimmt Projektleitung, Interim-Management und Beratung für
+          Unternehmen, die komplexe Vorhaben termingerecht, budgetsicher und mit messbarem
+          Ergebnis umsetzen wollen &ndash; klassisch, agil oder hybrid.
+        </p>
+        <div class="hero-actions">
+          <a href="#kontakt" class="btn btn-glossy btn-primary">
+            <span>Erstgespräch vereinbaren</span>
+          </a>
+          <a href="#leistungen" class="btn btn-glossy btn-ghost">
+            <span>Leistungen entdecken</span>
+          </a>
+        </div>
+        <div class="hero-trust">
+          <div class="trust-item"><strong>15+</strong><span>Jahre PM-Erfahrung</span></div>
+          <div class="trust-item"><strong>120+</strong><span>gesteuerte Projekte</span></div>
+          <div class="trust-item"><strong>98%</strong><span>Termintreue</span></div>
+        </div>
+      </div>
+
+      <div class="hero-stage reveal" style="--delay:.15s">
+        <div class="tilt-card glass-panel" id="heroTilt">
+          <div class="sheen"></div>
+          <div class="panel-header">
+            <span class="panel-dot red"></span><span class="panel-dot amber"></span><span class="panel-dot green"></span>
+            <span class="panel-title">Projektstatus &ndash; Live</span>
+          </div>
+          <div class="panel-body">
+            <div class="kpi-row">
+              <div class="kpi">
+                <span class="kpi-label">Fortschritt</span>
+                <div class="progress-ring" data-value="82">
+                  <svg viewBox="0 0 80 80">
+                    <circle class="ring-bg" cx="40" cy="40" r="34"></circle>
+                    <circle class="ring-fg" cx="40" cy="40" r="34"></circle>
+                  </svg>
+                  <span class="ring-value">82%</span>
+                </div>
+              </div>
+              <div class="kpi-mini">
+                <div><span>Budget</span><strong class="ok">im Plan</strong></div>
+                <div><span>Termin</span><strong class="ok">grün</strong></div>
+                <div><span>Risiko</span><strong class="warn">mittel</strong></div>
+              </div>
+            </div>
+            <ul class="milestone-list">
+              <li><span class="ms-check">✓</span> Konzeption &amp; Kickoff</li>
+              <li><span class="ms-check">✓</span> Anforderungsanalyse</li>
+              <li><span class="ms-check active">➜</span> Umsetzung Sprint 6</li>
+              <li><span class="ms-check">•</span> Rollout &amp; Übergabe</li>
+            </ul>
+          </div>
+        </div>
+        <div class="floater floater-1" aria-hidden="true"></div>
+        <div class="floater floater-2" aria-hidden="true"></div>
+      </div>
+    </div>
+    <div class="hero-fade"></div>
+  </section>
+
+  <!-- LOGOS / BRANCHEN -->
+  <section class="branchen">
+    <div class="container">
+      <p class="branchen-label">Vertrauen aus unterschiedlichsten Branchen</p>
+      <div class="branchen-row">
+        <span>IT &amp; Software</span>
+        <span>Industrie &amp; Produktion</span>
+        <span>Finanzwesen</span>
+        <span>Gesundheitswesen</span>
+        <span>Bauwesen</span>
+        <span>Öffentlicher Sektor</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- UNTERNEHMENSGRUPPE -->
+  <section class="section section-alt" id="gruppe">
+    <div class="container">
+      <div class="section-head reveal">
+        <p class="eyebrow"><span class="dot"></span> Die M&amp;C Gruppe</p>
+        <h2>Drei Marken, ein Netzwerk</h2>
+        <p class="section-lead">Egal ob Sie Teil eines unserer Mitgliedsunternehmen sind oder sich neu informieren möchten &ndash; hier finden Sie passende Lösungen, Inspirationen und Ansprechpartner aus einem starken Netzwerk.</p>
+      </div>
+
+      <div class="units-grid">
+        <article class="tilt-card unit-card unit-pm reveal">
+          <div class="sheen"></div>
+          <div class="unit-icon" aria-hidden="true">
+            <svg viewBox="0 0 100 100"><ellipse cx="50" cy="50" rx="40" ry="24" fill="none" stroke="#5b8cff" stroke-width="8" stroke-linecap="round" stroke-dasharray="145 400"/></svg>
+          </div>
+          <h3>M&amp;C Projectmanagement</h3>
+          <p>Projektleitung, PM-Beratung und agiles Projektmanagement für Vorhaben, die termingerecht und budgetsicher geliefert werden sollen.</p>
+        </article>
+
+        <article class="tilt-card unit-card unit-bau reveal" style="--delay:.08s">
+          <div class="sheen"></div>
+          <div class="unit-icon" aria-hidden="true">
+            <svg viewBox="0 0 100 100"><ellipse cx="50" cy="50" rx="40" ry="24" fill="none" stroke="#c8ccd8" stroke-width="8" stroke-linecap="round" stroke-dasharray="145 400"/></svg>
+          </div>
+          <h3>M&amp;C Baumanagement</h3>
+          <p>Steuerung von Bauprojekten &ndash; von der Planung über die Bauleitung bis zur Übergabe, mit klarem Kosten- und Terminfokus.</p>
+        </article>
+
+        <article class="tilt-card unit-card unit-ak reveal" style="--delay:.16s">
+          <div class="sheen"></div>
+          <div class="unit-icon" aria-hidden="true">
+            <svg viewBox="0 0 100 100"><ellipse cx="50" cy="50" rx="40" ry="24" fill="none" stroke="#ff5b6b" stroke-width="8" stroke-linecap="round" stroke-dasharray="145 400"/></svg>
+          </div>
+          <h3>M&amp;C Akademie</h3>
+          <p>Weiterbildung, Workshops und Zertifizierungsvorbereitung &ndash; damit Wissen im Netzwerk wächst und weitergegeben wird.</p>
+        </article>
+      </div>
+    </div>
+  </section>
+
+  <!-- LEISTUNGEN -->
+  <section class="section" id="leistungen">
+    <div class="container">
+      <div class="section-head reveal">
+        <p class="eyebrow"><span class="dot"></span> Leistungen</p>
+        <h2>Alles, was Ihr Projekt zum Erfolg braucht</h2>
+        <p class="section-lead">Von der Übernahme der Projektleitung bis zum Aufbau eines eigenen PMO &ndash; passgenau für Ihr Vorhaben.</p>
+      </div>
+
+      <div class="card-grid">
+        <article class="tilt-card service-card reveal">
+          <div class="sheen"></div>
+          <div class="card-icon" aria-hidden="true">🧭</div>
+          <h3>Projektleitung &amp; PM-Interim</h3>
+          <p>Wir übernehmen die operative Leitung komplexer Projekte &ndash; als erfahrene Interim-Projektleitung, direkt einsatzbereit.</p>
+        </article>
+
+        <article class="tilt-card service-card reveal" style="--delay:.05s">
+          <div class="sheen"></div>
+          <div class="card-icon" aria-hidden="true">🏗️</div>
+          <h3>PM-Beratung &amp; PMO-Aufbau</h3>
+          <p>Aufbau und Optimierung von Projektmanagement-Strukturen, Standards und Reportings &ndash; inklusive PMO-Etablierung.</p>
+        </article>
+
+        <article class="tilt-card service-card reveal" style="--delay:.1s">
+          <div class="sheen"></div>
+          <div class="card-icon" aria-hidden="true">🔄</div>
+          <h3>Agiles Projektmanagement</h3>
+          <p>Scrum, Kanban und hybride Vorgehensmodelle &ndash; wir begleiten Teams von der Einführung bis zur souveränen Anwendung.</p>
+        </article>
+
+        <article class="tilt-card service-card reveal" style="--delay:.15s">
+          <div class="sheen"></div>
+          <div class="card-icon" aria-hidden="true">⚙️</div>
+          <h3>Prozess- &amp; Organisationsberatung</h3>
+          <p>Wir analysieren Abläufe, decken Engpässe auf und gestalten schlanke, tragfähige Prozesse für Ihr Unternehmen.</p>
+        </article>
+
+        <article class="tilt-card service-card reveal" style="--delay:.2s">
+          <div class="sheen"></div>
+          <div class="card-icon" aria-hidden="true">🎓</div>
+          <h3>Schulungen &amp; Coaching</h3>
+          <p>Praxisnahe Workshops und individuelles Coaching &ndash; auch als Vorbereitung auf PMP-, IPMA- oder PRINCE2-Zertifizierungen.</p>
+        </article>
+
+        <article class="tilt-card service-card reveal" style="--delay:.25s">
+          <div class="sheen"></div>
+          <div class="card-icon" aria-hidden="true">🛡️</div>
+          <h3>Risiko- &amp; Qualitätsmanagement</h3>
+          <p>Systematische Risikofrüherkennung und Qualitätssicherung, damit Ihr Projekt planbar und belastbar bleibt.</p>
+        </article>
+      </div>
+    </div>
+  </section>
+
+  <!-- METHODIK -->
+  <section class="section section-alt" id="methodik">
+    <div class="container">
+      <div class="section-head reveal">
+        <p class="eyebrow"><span class="dot"></span> Vorgehen</p>
+        <h2>Unsere Methodik in vier Schritten</h2>
+        <p class="section-lead">Strukturiert, transparent und auf Ihr Projekt zugeschnitten.</p>
+      </div>
+
+      <div class="steps">
+        <div class="step reveal">
+          <div class="step-num glossy-num">01</div>
+          <h3>Analyse</h3>
+          <p>Zielbild, Rahmenbedingungen und Stakeholder werden gemeinsam geklärt und priorisiert.</p>
+        </div>
+        <div class="step reveal" style="--delay:.08s">
+          <div class="step-num glossy-num">02</div>
+          <h3>Konzept</h3>
+          <p>Projektplan, Steuerungslogik und Meilensteine entstehen passgenau für Ihr Vorhaben.</p>
+        </div>
+        <div class="step reveal" style="--delay:.16s">
+          <div class="step-num glossy-num">03</div>
+          <h3>Umsetzung</h3>
+          <p>Aktive Projektsteuerung mit klarer Kommunikation, Risikomanagement und Reporting.</p>
+        </div>
+        <div class="step reveal" style="--delay:.24s">
+          <div class="step-num glossy-num">04</div>
+          <h3>Erfolgskontrolle</h3>
+          <p>Ergebnisse werden gemessen, dokumentiert und für künftige Projekte nutzbar gemacht.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ÜBER UNS -->
+  <section class="section" id="ueber-uns">
+    <div class="container about-grid">
+      <div class="reveal">
+        <p class="eyebrow"><span class="dot"></span> Über uns</p>
+        <h2>Erfahrung, auf die Sie sich verlassen können</h2>
+        <p class="section-lead" style="margin-bottom:1.5rem">
+          MC Projectmanagement steht für pragmatisches, ergebnisorientiertes Projektmanagement.
+          Wir sprechen die Sprache von Technik und Management gleichermaßen und sorgen dafür,
+          dass Projekte nicht nur geplant, sondern tatsächlich geliefert werden.
+        </p>
+        <ul class="check-list">
+          <li>Zertifizierte Projektmanager (PMP®, IPMA, PRINCE2®)</li>
+          <li>Erfahrung in klassischen, agilen und hybriden Projektumgebungen</li>
+          <li>Branchenübergreifende Projekterfahrung</li>
+          <li>Klare Kommunikation auf allen Ebenen &ndash; von Team bis Vorstand</li>
+        </ul>
+      </div>
+      <div class="stat-grid reveal" style="--delay:.1s">
+        <div class="tilt-card stat-card"><div class="sheen"></div><strong data-count="15" data-suffix="+">0</strong><span>Jahre Erfahrung</span></div>
+        <div class="tilt-card stat-card"><div class="sheen"></div><strong data-count="120" data-suffix="+">0</strong><span>Projekte gesteuert</span></div>
+        <div class="tilt-card stat-card"><div class="sheen"></div><strong data-count="98" data-suffix="%">0</strong><span>Termintreue</span></div>
+        <div class="tilt-card stat-card"><div class="sheen"></div><strong data-count="30" data-suffix="+">0</strong><span>zufriedene Kunden</span></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- REFERENZEN -->
+  <section class="section section-alt" id="referenzen">
+    <div class="container">
+      <div class="section-head reveal">
+        <p class="eyebrow"><span class="dot"></span> Referenzen</p>
+        <h2>Was Kunden über die Zusammenarbeit sagen</h2>
+      </div>
+
+      <div class="quote-grid">
+        <blockquote class="tilt-card quote-card reveal">
+          <div class="sheen"></div>
+          <p>&bdquo;Durch die klare Projektsteuerung haben wir unseren Rollout drei Wochen früher als geplant abgeschlossen.&ldquo;</p>
+          <footer>Leiterin IT, mittelständisches Industrieunternehmen</footer>
+        </blockquote>
+        <blockquote class="tilt-card quote-card reveal" style="--delay:.08s">
+          <div class="sheen"></div>
+          <p>&bdquo;Endlich ein PM-Partner, der Risiken frühzeitig anspricht statt sie zu verwalten.&ldquo;</p>
+          <footer>Geschäftsführung, Finanzdienstleister</footer>
+        </blockquote>
+        <blockquote class="tilt-card quote-card reveal" style="--delay:.16s">
+          <div class="sheen"></div>
+          <p>&bdquo;Das aufgebaute PMO hat unsere Projektlandschaft spürbar transparenter gemacht.&ldquo;</p>
+          <footer>Programmleiter, öffentlicher Auftraggeber</footer>
+        </blockquote>
+      </div>
+    </div>
+  </section>
+
+  <!-- CTA BAND -->
+  <section class="cta-band">
+    <div class="container cta-band-inner reveal">
+      <h2>Bereit für ein Projekt, das liefert?</h2>
+      <p>Lassen Sie uns in einem unverbindlichen Erstgespräch über Ihr Vorhaben sprechen.</p>
+      <a href="#kontakt" class="btn btn-glossy btn-primary btn-lg"><span>Jetzt Kontakt aufnehmen</span></a>
+    </div>
+  </section>
+
+  <!-- KONTAKT -->
+  <section class="section" id="kontakt">
+    <div class="container">
+      <div class="section-head reveal">
+        <p class="eyebrow"><span class="dot"></span> Kontakt</p>
+        <h2>Sprechen wir über Ihr Projekt</h2>
+        <p class="section-lead">Schreiben Sie uns eine Nachricht &ndash; wir melden uns zeitnah zurück.</p>
+      </div>
+
+      <div class="contact-grid">
+        <form class="tilt-card contact-form reveal" action="mailto:info@mc-projectmanagement.com" method="post" enctype="text/plain">
+          <div class="sheen"></div>
+          <div class="form-row">
+            <label for="cf-name">Name</label>
+            <input id="cf-name" name="Name" type="text" required autocomplete="name" placeholder="Ihr vollständiger Name">
+          </div>
+          <div class="form-row">
+            <label for="cf-email">E-Mail</label>
+            <input id="cf-email" name="E-Mail" type="email" required autocomplete="email" placeholder="ihre@email.de">
+          </div>
+          <div class="form-row">
+            <label for="cf-topic">Thema</label>
+            <input id="cf-topic" name="Thema" type="text" placeholder="z. B. Projektleitung, PMO-Aufbau, Beratung">
+          </div>
+          <div class="form-row">
+            <label for="cf-message">Nachricht</label>
+            <textarea id="cf-message" name="Nachricht" rows="5" required placeholder="Erzählen Sie uns kurz von Ihrem Projekt …"></textarea>
+          </div>
+          <button type="submit" class="btn btn-glossy btn-primary"><span>Nachricht senden</span></button>
+        </form>
+
+        <div class="contact-side reveal" style="--delay:.1s">
+          <div class="tilt-card side-card">
+            <div class="sheen"></div>
+            <h3>Direkter Draht</h3>
+            <p>Für dringende Anfragen erreichen Sie uns auch direkt telefonisch oder per E-Mail.</p>
+            <a class="contact-line" href="tel:+49XXXXXXXXXX">
+              <span class="contact-ico" aria-hidden="true">📞</span>
+              <span>
+                <small>Telefon</small>
+                <strong>+49 (0) XXX XXX XXXX</strong>
+              </span>
+            </a>
+            <a class="contact-line" href="mailto:info@mc-projectmanagement.com">
+              <span class="contact-ico" aria-hidden="true">✉️</span>
+              <span>
+                <small>E-Mail</small>
+                <strong>info@mc-projectmanagement.com</strong>
+              </span>
+            </a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+</main>
+
+<!-- FOOTER: animierter E-Mail-Lauftext + Telefon -->
+<footer class="site-footer">
+  <div class="ticker-wrap" aria-label="E-Mail Kontakt">
+    <div class="ticker-track">
+      <span class="ticker-item"><a href="mailto:info@mc-projectmanagement.com">info@mc-projectmanagement.com</a><span class="ticker-sep">✦</span></span>
+      <span class="ticker-item"><a href="mailto:info@mc-projectmanagement.com">info@mc-projectmanagement.com</a><span class="ticker-sep">✦</span></span>
+      <span class="ticker-item"><a href="mailto:info@mc-projectmanagement.com">info@mc-projectmanagement.com</a><span class="ticker-sep">✦</span></span>
+      <span class="ticker-item"><a href="mailto:info@mc-projectmanagement.com">info@mc-projectmanagement.com</a><span class="ticker-sep">✦</span></span>
+      <span class="ticker-item"><a href="mailto:info@mc-projectmanagement.com">info@mc-projectmanagement.com</a><span class="ticker-sep">✦</span></span>
+      <span class="ticker-item"><a href="mailto:info@mc-projectmanagement.com">info@mc-projectmanagement.com</a><span class="ticker-sep">✦</span></span>
+      <span class="ticker-item"><a href="mailto:info@mc-projectmanagement.com">info@mc-projectmanagement.com</a><span class="ticker-sep">✦</span></span>
+      <span class="ticker-item"><a href="mailto:info@mc-projectmanagement.com">info@mc-projectmanagement.com</a><span class="ticker-sep">✦</span></span>
+    </div>
+  </div>
+
+  <div class="container footer-main">
+    <div class="footer-brand">
+      <span class="brand-text">MC <strong>Projectmanagement</strong></span>
+      <p>Projekte erfolgreich steuern &ndash; von der Idee zum Ergebnis.</p>
+    </div>
+
+    <div class="footer-contact-cards">
+      <a class="footer-contact-btn" href="tel:+49XXXXXXXXXX">
+        <span class="contact-ico" aria-hidden="true">📞</span>
+        <span>
+          <small>Rufen Sie uns an</small>
+          <strong>+49 (0) XXX XXX XXXX</strong>
+        </span>
+      </a>
+      <a class="footer-contact-btn" href="mailto:info@mc-projectmanagement.com">
+        <span class="contact-ico" aria-hidden="true">✉️</span>
+        <span>
+          <small>Schreiben Sie uns</small>
+          <strong>info@mc-projectmanagement.com</strong>
+        </span>
+      </a>
+    </div>
+
+    <nav class="footer-links" aria-label="Rechtliches">
+      <a href="#">Impressum</a>
+      <a href="#">Datenschutz</a>
+      <a href="#top">Nach oben ↑</a>
+    </nav>
+  </div>
+
+  <div class="container footer-bottom">
+    <span>© <span id="year"></span> MC Projectmanagement. Alle Rechte vorbehalten.</span>
+  </div>
+</footer>
+
+<script src="js/script.js"></script>
+</body>
+</html>
