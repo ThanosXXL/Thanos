@@ -79,6 +79,26 @@ p.page-lead{ font-size:9.4pt; color:#3C6B5C; line-height:1.5; max-width:165mm; m
 .tip h5{ font-family:'Baloo 2'; font-weight:700; font-size:9pt; color:#0A5C46; margin-bottom:0.5mm; }
 .tip p{ font-size:8.2pt; color:#3C6B5C; line-height:1.45; }
 
+/* ===== screenshot pages ===== */
+.shot-eyebrow{ font-size:8.4pt; font-weight:800; color:#0A6C51; text-transform:uppercase; letter-spacing:1.4pt; margin-bottom:2mm; }
+.shot-frame{
+  margin-top:4mm; border-radius:4.4mm; border:0.3mm solid #CDEBDF; overflow:hidden;
+  background:#fff; box-shadow: 0 6mm 14mm -6mm rgba(6,60,45,0.35), 0 1mm 2mm rgba(6,60,45,0.12);
+}
+.shot-frame .bar{ height:7mm; background:linear-gradient(180deg,#F4FBF8,#EAF6F0); border-bottom:0.25mm solid #DCEFE7; display:flex; align-items:center; gap:1.6mm; padding:0 3.4mm; }
+.shot-frame .bar span{ width:2.4mm; height:2.4mm; border-radius:50%; background:#CDEBDF; }
+.shot-frame img{ display:block; width:100%; height:auto; }
+.shot-caption{ margin-top:4.5mm; font-size:8.2pt; color:#5B8577; font-weight:600; text-align:center; }
+
+/* ===== migration step list (numbered, denser) ===== */
+.mig-grid{ display:grid; grid-template-columns:1fr 1fr; gap:3mm 6mm; margin:5mm 0 6mm; }
+.mig-stat-card{
+  background:linear-gradient(160deg, #ffffff, #EAFBF3); border:0.28mm solid #CDEBDF; border-radius:3.2mm;
+  padding:3.2mm 4mm; display:flex; align-items:center; justify-content:space-between;
+}
+.mig-stat-card .k{ font-size:8.2pt; color:#476357; font-weight:700; }
+.mig-stat-card .v{ font-family:'Baloo 2'; font-weight:700; font-size:10pt; color:#0A5C46; }
+
 /* ===== cover ===== */
 #cover{
   background:
@@ -190,6 +210,19 @@ p.page-lead{ font-size:9.4pt; color:#3C6B5C; line-height:1.5; max-width:165mm; m
   <div class="foot"><div class="fnote">Pharma-Tech Benutzerhandbuch · v4.2</div><div class="pnum">3</div></div>
 </div>
 
+<!-- ============ CH 1 SHOT ============ -->
+<div class="page" data-chapter="1-shot">
+  <div class="head">
+    <div class="brand"><div class="logo"><svg viewBox="0 0 24 24" width="16" height="16" fill="none"><path d="M12 2C9 6 6 9 6 13.5C6 17.6 8.7 21 12 21C15.3 21 18 17.6 18 13.5C18 9 15 6 12 2Z" fill="#0A5C46"/><path d="M12 6C10.3 8.4 9 10.3 9 13" stroke="#EAFBF4" stroke-width="1.6" stroke-linecap="round"/></svg></div><div><div class="brand-name">Pharma-Tech</div><div class="brand-sub">Benutzerhandbuch</div></div></div>
+    <div class="chapter-tag"><div class="k">Kapitel 1</div><div class="v">Beispielbild</div></div>
+  </div>
+  <div class="shot-eyebrow">Beispielansicht</div>
+  <h1 class="page-title" style="font-size:16pt;">Das Dashboard in Pharma-Tech</h1>
+  <div class="shot-frame"><div class="bar"><span></span><span></span><span></span></div><img src="assets/manual-screens/dashboard.png" alt="Ansicht Dashboard"/></div>
+  <div class="shot-caption">Tagesumsatz, Lagerwert, kritische Bestände, offene Rezepte und Kassenstatus auf einen Blick — plus Aufgaben und Umsatzverlauf.</div>
+  <div class="foot"><div class="fnote">Pharma-Tech Benutzerhandbuch · v4.2</div><div class="pnum">4</div></div>
+</div>
+
 <!-- ============ CH 2: Warenwirtschaft ============ -->
 <div class="page" data-chapter="2">
   <div class="head">
@@ -205,7 +238,20 @@ p.page-lead{ font-size:9.4pt; color:#3C6B5C; line-height:1.5; max-width:165mm; m
     <div class="feat-card"><div class="icon-badge"><svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.4"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4.4 3.6-8 8-8s8 3.6 8 8"/></svg></div><div><h4>Lieferantenzuordnung</h4><p>Jeder Artikel ist einem Lieferanten zugeordnet — Nachbestellvorschläge werden direkt dem passenden Lieferanten zugewiesen.</p></div></div>
   </div>
   <div class="tip"><div class="t-icon">📦</div><div><h5>Tipp</h5><p>Offene Nachbestellvorschläge finden Sie gebündelt im Menüpunkt „Bestellungen" unter „KI-Nachbestellvorschläge" — dort genügt ein Klick zum Auslösen.</p></div></div>
-  <div class="foot"><div class="fnote">Pharma-Tech Benutzerhandbuch · v4.2</div><div class="pnum">4</div></div>
+  <div class="foot"><div class="fnote">Pharma-Tech Benutzerhandbuch · v4.2</div><div class="pnum">5</div></div>
+</div>
+
+<!-- ============ CH 2 SHOT ============ -->
+<div class="page" data-chapter="2-shot">
+  <div class="head">
+    <div class="brand"><div class="logo"><svg viewBox="0 0 24 24" width="16" height="16" fill="none"><path d="M12 2C9 6 6 9 6 13.5C6 17.6 8.7 21 12 21C15.3 21 18 17.6 18 13.5C18 9 15 6 12 2Z" fill="#0A5C46"/><path d="M12 6C10.3 8.4 9 10.3 9 13" stroke="#EAFBF4" stroke-width="1.6" stroke-linecap="round"/></svg></div><div><div class="brand-name">Pharma-Tech</div><div class="brand-sub">Benutzerhandbuch</div></div></div>
+    <div class="chapter-tag"><div class="k">Kapitel 2</div><div class="v">Beispielbild</div></div>
+  </div>
+  <div class="shot-eyebrow">Beispielansicht</div>
+  <h1 class="page-title" style="font-size:16pt;">Warenwirtschaft in Pharma-Tech</h1>
+  <div class="shot-frame"><div class="bar"><span></span><span></span><span></span></div><img src="assets/manual-screens/warenwirtschaft.png" alt="Ansicht Warenwirtschaft"/></div>
+  <div class="shot-caption">Bestände, kritische Artikel und KI-Nachbestellvorschläge in der Übersicht.</div>
+  <div class="foot"><div class="fnote">Pharma-Tech Benutzerhandbuch · v4.2</div><div class="pnum">6</div></div>
 </div>
 
 <!-- ============ CH 3: Kasse ============ -->
@@ -222,7 +268,20 @@ p.page-lead{ font-size:9.4pt; color:#3C6B5C; line-height:1.5; max-width:165mm; m
     <div class="step"><div class="step-num">3</div><div class="step-body"><h3>Bezahlung abschließen</h3><p>Pharma-Tech unterstützt Split-Payment — ein Einkauf kann auf mehrere Zahlarten (z. B. Karte und Bar) aufgeteilt werden.</p></div></div>
   </div>
   <div class="tip"><div class="t-icon">✅</div><div><h5>Tipp</h5><p>Der Kassenstatus aller Filialen ist jederzeit im Dashboard sichtbar — so erkennen Sie sofort, falls eine Kasse offline ist.</p></div></div>
-  <div class="foot"><div class="fnote">Pharma-Tech Benutzerhandbuch · v4.2</div><div class="pnum">5</div></div>
+  <div class="foot"><div class="fnote">Pharma-Tech Benutzerhandbuch · v4.2</div><div class="pnum">7</div></div>
+</div>
+
+<!-- ============ CH 3 SHOT ============ -->
+<div class="page" data-chapter="3-shot">
+  <div class="head">
+    <div class="brand"><div class="logo"><svg viewBox="0 0 24 24" width="16" height="16" fill="none"><path d="M12 2C9 6 6 9 6 13.5C6 17.6 8.7 21 12 21C15.3 21 18 17.6 18 13.5C18 9 15 6 12 2Z" fill="#0A5C46"/><path d="M12 6C10.3 8.4 9 10.3 9 13" stroke="#EAFBF4" stroke-width="1.6" stroke-linecap="round"/></svg></div><div><div class="brand-name">Pharma-Tech</div><div class="brand-sub">Benutzerhandbuch</div></div></div>
+    <div class="chapter-tag"><div class="k">Kapitel 3</div><div class="v">Beispielbild</div></div>
+  </div>
+  <div class="shot-eyebrow">Beispielansicht</div>
+  <h1 class="page-title" style="font-size:16pt;">Die Kasse in Pharma-Tech</h1>
+  <div class="shot-frame"><div class="bar"><span></span><span></span><span></span></div><img src="assets/manual-screens/kasse.png" alt="Ansicht Kasse"/></div>
+  <div class="shot-caption">Topseller, Warenkorb und Bezahlvorgang inklusive Split-Payment.</div>
+  <div class="foot"><div class="fnote">Pharma-Tech Benutzerhandbuch · v4.2</div><div class="pnum">8</div></div>
 </div>
 
 <!-- ============ CH 4: Kunden & Rezepte ============ -->
@@ -239,7 +298,20 @@ p.page-lead{ font-size:9.4pt; color:#3C6B5C; line-height:1.5; max-width:165mm; m
     <div class="step"><div class="step-num">3</div><div class="step-body"><h3>Verlauf einsehen</h3><p>Der Verlauf zeigt chronologisch alle Ereignisse — von der Kontoanlage über eingelöste E-Rezepte bis zu Beratungsgesprächen.</p></div></div>
   </div>
   <div class="tip"><div class="t-icon">⚠️</div><div><h5>Tipp</h5><p>Ein farbiges Badge („E-Rezept eingelöst", „Dauermedikation aktiv", „Wechselwirkungshinweis") gibt im Kundenprofil sofort den aktuellen Status wieder.</p></div></div>
-  <div class="foot"><div class="fnote">Pharma-Tech Benutzerhandbuch · v4.2</div><div class="pnum">6</div></div>
+  <div class="foot"><div class="fnote">Pharma-Tech Benutzerhandbuch · v4.2</div><div class="pnum">9</div></div>
+</div>
+
+<!-- ============ CH 4 SHOT ============ -->
+<div class="page" data-chapter="4-shot">
+  <div class="head">
+    <div class="brand"><div class="logo"><svg viewBox="0 0 24 24" width="16" height="16" fill="none"><path d="M12 2C9 6 6 9 6 13.5C6 17.6 8.7 21 12 21C15.3 21 18 17.6 18 13.5C18 9 15 6 12 2Z" fill="#0A5C46"/><path d="M12 6C10.3 8.4 9 10.3 9 13" stroke="#EAFBF4" stroke-width="1.6" stroke-linecap="round"/></svg></div><div><div class="brand-name">Pharma-Tech</div><div class="brand-sub">Benutzerhandbuch</div></div></div>
+    <div class="chapter-tag"><div class="k">Kapitel 4</div><div class="v">Beispielbild</div></div>
+  </div>
+  <div class="shot-eyebrow">Beispielansicht</div>
+  <h1 class="page-title" style="font-size:16pt;">Kunden &amp; Rezepte in Pharma-Tech</h1>
+  <div class="shot-frame"><div class="bar"><span></span><span></span><span></span></div><img src="assets/manual-screens/kunden.png" alt="Ansicht Kunden & Rezepte"/></div>
+  <div class="shot-caption">Kundenliste, Profildetails, Badges und vollständiger Verlauf seit 2023.</div>
+  <div class="foot"><div class="fnote">Pharma-Tech Benutzerhandbuch · v4.2</div><div class="pnum">10</div></div>
 </div>
 
 <!-- ============ CH 5: Bestellungen ============ -->
@@ -255,7 +327,20 @@ p.page-lead{ font-size:9.4pt; color:#3C6B5C; line-height:1.5; max-width:165mm; m
     <div class="step"><div class="step-num">2</div><div class="step-body"><h3>KI-Vorschläge übernehmen</h3><p>Unter „KI-Nachbestellvorschläge" sehen Sie automatisch berechnete Bestellmengen und lösen sie über den Button „Bestellungen auslösen" gesammelt aus.</p></div></div>
   </div>
   <div class="tip"><div class="t-icon">🚚</div><div><h5>Tipp</h5><p>Die Kopfzeile des Bereichs zeigt jederzeit, wie viele offene Bestellungen und verfügbare KI-Vorschläge aktuell bestehen.</p></div></div>
-  <div class="foot"><div class="fnote">Pharma-Tech Benutzerhandbuch · v4.2</div><div class="pnum">7</div></div>
+  <div class="foot"><div class="fnote">Pharma-Tech Benutzerhandbuch · v4.2</div><div class="pnum">11</div></div>
+</div>
+
+<!-- ============ CH 5 SHOT ============ -->
+<div class="page" data-chapter="5-shot">
+  <div class="head">
+    <div class="brand"><div class="logo"><svg viewBox="0 0 24 24" width="16" height="16" fill="none"><path d="M12 2C9 6 6 9 6 13.5C6 17.6 8.7 21 12 21C15.3 21 18 17.6 18 13.5C18 9 15 6 12 2Z" fill="#0A5C46"/><path d="M12 6C10.3 8.4 9 10.3 9 13" stroke="#EAFBF4" stroke-width="1.6" stroke-linecap="round"/></svg></div><div><div class="brand-name">Pharma-Tech</div><div class="brand-sub">Benutzerhandbuch</div></div></div>
+    <div class="chapter-tag"><div class="k">Kapitel 5</div><div class="v">Beispielbild</div></div>
+  </div>
+  <div class="shot-eyebrow">Beispielansicht</div>
+  <h1 class="page-title" style="font-size:16pt;">Bestellungen &amp; Lieferanten in Pharma-Tech</h1>
+  <div class="shot-frame"><div class="bar"><span></span><span></span><span></span></div><img src="assets/manual-screens/bestellungen.png" alt="Ansicht Bestellungen"/></div>
+  <div class="shot-caption">Offene Bestellungen und KI-Nachbestellvorschläge mit Sammel-Auslösung.</div>
+  <div class="foot"><div class="fnote">Pharma-Tech Benutzerhandbuch · v4.2</div><div class="pnum">12</div></div>
 </div>
 
 <!-- ============ CH 6: Analysen ============ -->
@@ -271,7 +356,20 @@ p.page-lead{ font-size:9.4pt; color:#3C6B5C; line-height:1.5; max-width:165mm; m
     <div class="feat-card"><div class="icon-badge"><svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.4"><circle cx="12" cy="12" r="8"/></svg></div><div><h4>Umsatz nach Kategorie</h4><p>Sehen Sie auf einen Blick, welche Produktkategorien am stärksten zum Umsatz beitragen.</p></div></div>
     <div class="feat-card"><div class="icon-badge"><svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.4"><rect x="3" y="3" width="7" height="9" rx="2"/><rect x="14" y="3" width="7" height="5" rx="2"/><rect x="14" y="12" width="7" height="9" rx="2"/><rect x="3" y="16" width="7" height="5" rx="2"/></svg></div><div><h4>Filialvergleich</h4><p>Vergleichen Sie Umsatz, Kunden und Rezepte aller Filialen direkt nebeneinander in einer Tabelle.</p></div></div>
   </div>
-  <div class="foot"><div class="fnote">Pharma-Tech Benutzerhandbuch · v4.2</div><div class="pnum">8</div></div>
+  <div class="foot"><div class="fnote">Pharma-Tech Benutzerhandbuch · v4.2</div><div class="pnum">13</div></div>
+</div>
+
+<!-- ============ CH 6 SHOT ============ -->
+<div class="page" data-chapter="6-shot">
+  <div class="head">
+    <div class="brand"><div class="logo"><svg viewBox="0 0 24 24" width="16" height="16" fill="none"><path d="M12 2C9 6 6 9 6 13.5C6 17.6 8.7 21 12 21C15.3 21 18 17.6 18 13.5C18 9 15 6 12 2Z" fill="#0A5C46"/><path d="M12 6C10.3 8.4 9 10.3 9 13" stroke="#EAFBF4" stroke-width="1.6" stroke-linecap="round"/></svg></div><div><div class="brand-name">Pharma-Tech</div><div class="brand-sub">Benutzerhandbuch</div></div></div>
+    <div class="chapter-tag"><div class="k">Kapitel 6</div><div class="v">Beispielbild</div></div>
+  </div>
+  <div class="shot-eyebrow">Beispielansicht</div>
+  <h1 class="page-title" style="font-size:16pt;">Analysen in Pharma-Tech</h1>
+  <div class="shot-frame"><div class="bar"><span></span><span></span><span></span></div><img src="assets/manual-screens/analysen.png" alt="Ansicht Analysen"/></div>
+  <div class="shot-caption">Umsatzverlauf, Umsatz nach Kategorie und Filialvergleich in einer Ansicht.</div>
+  <div class="foot"><div class="fnote">Pharma-Tech Benutzerhandbuch · v4.2</div><div class="pnum">14</div></div>
 </div>
 
 <!-- ============ CH 7: Team & Notizen ============ -->
@@ -286,7 +384,20 @@ p.page-lead{ font-size:9.4pt; color:#3C6B5C; line-height:1.5; max-width:165mm; m
     <div class="step"><div class="step-num">1</div><div class="step-body"><h3>Team-Chat nutzen</h3><p>Nachrichten an das Team schreiben Sie im Chat-Fenster — sichtbar für alle Kolleginnen und Kollegen der Filiale.</p></div></div>
     <div class="step"><div class="step-num">2</div><div class="step-body"><h3>Schichtübergabe dokumentieren</h3><p>Wichtige Informationen für die nächste Schicht halten Sie im Bereich „Schichtübergabe" fest, damit nichts verloren geht.</p></div></div>
   </div>
-  <div class="foot"><div class="fnote">Pharma-Tech Benutzerhandbuch · v4.2</div><div class="pnum">9</div></div>
+  <div class="foot"><div class="fnote">Pharma-Tech Benutzerhandbuch · v4.2</div><div class="pnum">15</div></div>
+</div>
+
+<!-- ============ CH 7 SHOT ============ -->
+<div class="page" data-chapter="7-shot">
+  <div class="head">
+    <div class="brand"><div class="logo"><svg viewBox="0 0 24 24" width="16" height="16" fill="none"><path d="M12 2C9 6 6 9 6 13.5C6 17.6 8.7 21 12 21C15.3 21 18 17.6 18 13.5C18 9 15 6 12 2Z" fill="#0A5C46"/><path d="M12 6C10.3 8.4 9 10.3 9 13" stroke="#EAFBF4" stroke-width="1.6" stroke-linecap="round"/></svg></div><div><div class="brand-name">Pharma-Tech</div><div class="brand-sub">Benutzerhandbuch</div></div></div>
+    <div class="chapter-tag"><div class="k">Kapitel 7</div><div class="v">Beispielbild</div></div>
+  </div>
+  <div class="shot-eyebrow">Beispielansicht</div>
+  <h1 class="page-title" style="font-size:16pt;">Team &amp; Notizen in Pharma-Tech</h1>
+  <div class="shot-frame"><div class="bar"><span></span><span></span><span></span></div><img src="assets/manual-screens/team.png" alt="Ansicht Team & Notizen"/></div>
+  <div class="shot-caption">Team-Chat und Schichtübergabe direkt in der Anwendung.</div>
+  <div class="foot"><div class="fnote">Pharma-Tech Benutzerhandbuch · v4.2</div><div class="pnum">16</div></div>
 </div>
 
 <!-- ============ CH 8: Datenübernahme ============ -->
@@ -296,13 +407,36 @@ p.page-lead{ font-size:9.4pt; color:#3C6B5C; line-height:1.5; max-width:165mm; m
     <div class="chapter-tag"><div class="k">Kapitel 8</div><div class="v">Datenübernahme</div></div>
   </div>
   <h1 class="page-title">Datenübernahme</h1>
-  <p class="page-lead">Beim Umstieg auf Pharma-Tech bleiben alle Kunden-, Rezept- und Bestelldaten rückwirkend bis Januar 2023 vollständig erhalten.</p>
-  <div class="feat-grid">
-    <div class="feat-card"><div class="icon-badge"><svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.4"><path d="M21 12a9 9 0 1 1-3-6.7"/><path d="M21 3v6h-6"/></svg></div><div><h4>Kundenprofile</h4><p>2 431 von 2 431 Kundenprofilen wurden vollständig übernommen — keine manuelle Neuerfassung nötig.</p></div></div>
-    <div class="feat-card"><div class="icon-badge"><svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.4"><circle cx="12" cy="12" r="8"/></svg></div><div><h4>Bestell- &amp; Kassenhistorie</h4><p>64 118 von 64 118 Vorgängen wurden migriert — durchgängig nachvollziehbar seit 2023.</p></div></div>
+  <p class="page-lead">Der Umstieg von Ihrer bisherigen Apotheken-Software auf Pharma-Tech läuft vollständig automatisiert und ohne Betriebsunterbrechung ab. Alle Kunden-, Rezept- und Bestelldaten bleiben rückwirkend bis einschließlich 01.01.2023 lückenlos erhalten — im Folgenden der komplette Ablauf, Schritt für Schritt.</p>
+  <div class="step-list" style="gap:2.6mm; margin-bottom:4mm;">
+    <div class="step"><div class="step-num">1</div><div class="step-body"><h3>Datenexport aus dem Altsystem</h3><p>Vor der Umstellung wird ein vollständiger Export aus Ihrer bisherigen Software erzeugt: Kundenstammdaten, Rezepthistorie sowie Bestell- und Kassenvorgänge.</p></div></div>
+    <div class="step"><div class="step-num">2</div><div class="step-body"><h3>Automatisiertes Mapping &amp; Import</h3><p>Die exportierten Datensätze werden automatisch den passenden Pharma-Tech-Feldern zugeordnet und importiert — ohne manuelle Neuerfassung durch Ihr Team.</p></div></div>
+    <div class="step"><div class="step-num">3</div><div class="step-body"><h3>Bereinigung &amp; Duplikatprüfung</h3><p>Doppelte oder widersprüchliche Einträge werden automatisch erkannt und bereinigt, bevor die Migration abgeschlossen wird.</p></div></div>
+    <div class="step"><div class="step-num">4</div><div class="step-body"><h3>Verifizierung der Vollständigkeit</h3><p>Jeder migrierte Datensatz wird gegen das Altsystem geprüft — Kundenprofile, Rezepte und Bestellhistorie müssen zu 100&nbsp;% übereinstimmen.</p></div></div>
+    <div class="step"><div class="step-num">5</div><div class="step-body"><h3>Übernahme von Rollen &amp; Zugriffsrechten</h3><p>Bestehende Benutzerrollen (z.&nbsp;B. PTA, PKA, Approbierte Apothekerin) werden mit den passenden Rechten in Pharma-Tech übernommen.</p></div></div>
+    <div class="step"><div class="step-num">6</div><div class="step-body"><h3>DSGVO-konforme Dokumentation &amp; Go-Live</h3><p>Die gesamte Übertragung wird lückenlos dokumentiert. Ihr Team arbeitet ab dem ersten Tag ohne Datenverlust und mit vollständiger Historie weiter.</p></div></div>
   </div>
-  <div class="tip"><div class="t-icon">🔒</div><div><h5>Tipp</h5><p>Im Bereich „Verifizierung" prüfen Sie jederzeit, dass die Migration vollständig und fehlerfrei abgeschlossen ist.</p></div></div>
-  <div class="foot"><div class="fnote">Pharma-Tech Benutzerhandbuch · v4.2</div><div class="pnum">10</div></div>
+  <div class="mig-grid">
+    <div class="mig-stat-card"><div class="k">Kundenprofile übernommen</div><div class="v">2 431 / 2 431 (100&nbsp;%)</div></div>
+    <div class="mig-stat-card"><div class="k">Rezepte &amp; Verordnungen</div><div class="v">18 942 / 18 942 (100&nbsp;%)</div></div>
+    <div class="mig-stat-card"><div class="k">Bestell- &amp; Kassenhistorie</div><div class="v">64 118 / 64 118 (100&nbsp;%)</div></div>
+    <div class="mig-stat-card"><div class="k">Abgedeckter Zeitraum</div><div class="v">01.01.2023 – heute</div></div>
+  </div>
+  <div class="tip"><div class="t-icon">🔒</div><div><h5>Tipp</h5><p>Im Bereich „Verifizierung" prüfen Sie jederzeit, dass die Migration vollständig, DSGVO-konform und fehlerfrei abgeschlossen ist.</p></div></div>
+  <div class="foot"><div class="fnote">Pharma-Tech Benutzerhandbuch · v4.2</div><div class="pnum">17</div></div>
+</div>
+
+<!-- ============ CH 8 SHOT ============ -->
+<div class="page" data-chapter="8-shot">
+  <div class="head">
+    <div class="brand"><div class="logo"><svg viewBox="0 0 24 24" width="16" height="16" fill="none"><path d="M12 2C9 6 6 9 6 13.5C6 17.6 8.7 21 12 21C15.3 21 18 17.6 18 13.5C18 9 15 6 12 2Z" fill="#0A5C46"/><path d="M12 6C10.3 8.4 9 10.3 9 13" stroke="#EAFBF4" stroke-width="1.6" stroke-linecap="round"/></svg></div><div><div class="brand-name">Pharma-Tech</div><div class="brand-sub">Benutzerhandbuch</div></div></div>
+    <div class="chapter-tag"><div class="k">Kapitel 8</div><div class="v">Beispielbild</div></div>
+  </div>
+  <div class="shot-eyebrow">Beispielansicht</div>
+  <h1 class="page-title" style="font-size:16pt;">Datenübernahme in Pharma-Tech</h1>
+  <div class="shot-frame"><div class="bar"><span></span><span></span><span></span></div><img src="assets/manual-screens/migration.png" alt="Ansicht Datenübernahme"/></div>
+  <div class="shot-caption">So sehen Sie den Migrationsstatus, die Kennzahlen der Übernahme und alle Verifizierungsschritte auf einen Blick.</div>
+  <div class="foot"><div class="fnote">Pharma-Tech Benutzerhandbuch · v4.2</div><div class="pnum">18</div></div>
 </div>
 
 <!-- ============ CH 9: Einstellungen ============ -->
@@ -319,7 +453,20 @@ p.page-lead{ font-size:9.4pt; color:#3C6B5C; line-height:1.5; max-width:165mm; m
     <div class="feat-card"><div class="icon-badge"><svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.4"><path d="M3 3h2l2.4 12.4A2 2 0 0 0 9.4 17H18a2 2 0 0 0 2-1.6L21 8H6"/></svg></div><div><h4>Filialverwaltung</h4><p>Legen Sie neue Filialen an und verwalten Sie deren Stammdaten zentral.</p></div></div>
     <div class="feat-card"><div class="icon-badge"><svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.4"><path d="M12 2l2.9 6.3 6.9.7-5.2 4.6 1.6 6.8-6.2-3.6-6.2 3.6 1.6-6.8-5.2-4.6 6.9-.7Z"/></svg></div><div><h4>Integrationen</h4><p>Verbinden Sie z. B. das Kundenbindungsprogramm mit Bonuspunkten &amp; Gutscheinen.</p></div></div>
   </div>
-  <div class="foot"><div class="fnote">Pharma-Tech Benutzerhandbuch · v4.2</div><div class="pnum">11</div></div>
+  <div class="foot"><div class="fnote">Pharma-Tech Benutzerhandbuch · v4.2</div><div class="pnum">19</div></div>
+</div>
+
+<!-- ============ CH 9 SHOT ============ -->
+<div class="page" data-chapter="9-shot">
+  <div class="head">
+    <div class="brand"><div class="logo"><svg viewBox="0 0 24 24" width="16" height="16" fill="none"><path d="M12 2C9 6 6 9 6 13.5C6 17.6 8.7 21 12 21C15.3 21 18 17.6 18 13.5C18 9 15 6 12 2Z" fill="#0A5C46"/><path d="M12 6C10.3 8.4 9 10.3 9 13" stroke="#EAFBF4" stroke-width="1.6" stroke-linecap="round"/></svg></div><div><div class="brand-name">Pharma-Tech</div><div class="brand-sub">Benutzerhandbuch</div></div></div>
+    <div class="chapter-tag"><div class="k">Kapitel 9</div><div class="v">Beispielbild</div></div>
+  </div>
+  <div class="shot-eyebrow">Beispielansicht</div>
+  <h1 class="page-title" style="font-size:16pt;">Einstellungen in Pharma-Tech</h1>
+  <div class="shot-frame"><div class="bar"><span></span><span></span><span></span></div><img src="assets/manual-screens/einstellungen.png" alt="Ansicht Einstellungen"/></div>
+  <div class="shot-caption">Darstellung, Rollen &amp; Rechte, Filialverwaltung und Integrationen zentral verwalten.</div>
+  <div class="foot"><div class="fnote">Pharma-Tech Benutzerhandbuch · v4.2</div><div class="pnum">20</div></div>
 </div>
 
 <!-- ============ CLOSING ============ -->
@@ -339,7 +486,7 @@ p.page-lead{ font-size:9.4pt; color:#3C6B5C; line-height:1.5; max-width:165mm; m
     <div class="contact-card"><div class="k">Telefon</div><div class="v">0800 / 123 456</div></div>
     <div class="contact-card"><div class="k">Erreichbarkeit</div><div class="v">Mo–Fr, 8–18 Uhr</div></div>
   </div>
-  <div class="foot"><div class="fnote">Pharma-Tech Benutzerhandbuch · v4.2</div><div class="pnum">12</div></div>
+  <div class="foot"><div class="fnote">Pharma-Tech Benutzerhandbuch · v4.2</div><div class="pnum">21</div></div>
 </div>
 
 <script>
@@ -386,15 +533,15 @@ drawPill(ctx, w*0.55, h*0.42, 380, 68, -0.42, '#12C79A', '#0A5C46');
 drawPill(ctx, w*0.68, h*0.58, 240, 44, 0.32, '#12C79A', '#083F31');
 
 const toc = [
-  ['1','Dashboard','Startseite mit Kennzahlen','3'],
-  ['2','Warenwirtschaft','Bestände &amp; KI-Nachbestellung','4'],
-  ['3','Kasse','Verkauf &amp; Split-Payment','5'],
-  ['4','Kunden &amp; Rezepte','Historie &amp; Wechselwirkungen','6'],
-  ['5','Bestellungen','Lieferanten &amp; KI-Vorschläge','7'],
-  ['6','Analysen','Umsatz, Kategorien, Filialen','8'],
-  ['7','Team &amp; Notizen','Chat &amp; Schichtübergabe','9'],
-  ['8','Datenübernahme','Migration seit 2023','10'],
-  ['9','Einstellungen','Darstellung, Rollen, Integrationen','11'],
+  ['1','Dashboard','Startseite mit Kennzahlen · inkl. Beispielbild','3'],
+  ['2','Warenwirtschaft','Bestände &amp; KI-Nachbestellung · inkl. Beispielbild','5'],
+  ['3','Kasse','Verkauf &amp; Split-Payment · inkl. Beispielbild','7'],
+  ['4','Kunden &amp; Rezepte','Historie &amp; Wechselwirkungen · inkl. Beispielbild','9'],
+  ['5','Bestellungen','Lieferanten &amp; KI-Vorschläge · inkl. Beispielbild','11'],
+  ['6','Analysen','Umsatz, Kategorien, Filialen · inkl. Beispielbild','13'],
+  ['7','Team &amp; Notizen','Chat &amp; Schichtübergabe · inkl. Beispielbild','15'],
+  ['8','Datenübernahme','Kompletter Migrationsablauf · inkl. Beispielbild','17'],
+  ['9','Einstellungen','Darstellung, Rollen, Integrationen · inkl. Beispielbild','19'],
 ];
 document.getElementById('toc-list').innerHTML = toc.map(r =>
   `<div class="toc-row"><div class="toc-num">${r[0]}</div><div class="toc-title">${r[1]}</div><div class="toc-desc">${r[2]}</div><div class="toc-page">S. ${r[3]}</div></div>`
