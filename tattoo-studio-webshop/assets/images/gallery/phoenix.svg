@@ -1,28 +1,25 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 400">
   <defs>
-    <radialGradient id="bg" cx="50%" cy="35%" r="75%">
-      <stop offset="0%" stop-color="#2a2a32"/>
+    <radialGradient id="bg" cx="42%" cy="30%" r="80%">
+      <stop offset="0%" stop-color="#26262e"/>
       <stop offset="100%" stop-color="#0b0b0f"/>
     </radialGradient>
-    <linearGradient id="ink" x1="0%" y1="0%" x2="100%" y2="100%">
-      <stop offset="0%" stop-color="#fff2d0"/>
-      <stop offset="45%" stop-color="#e08a2a"/>
-      <stop offset="100%" stop-color="#7a2a10"/>
-    </linearGradient>
-    <filter id="gloss" x="-20%" y="-20%" width="140%" height="140%">
+    <filter id="gloss" x="-30%" y="-30%" width="160%" height="160%">
       <feGaussianBlur stdDeviation="2" result="b"/>
-      <feSpecularLighting in="b" surfaceScale="4" specularConstant="0.9" specularExponent="18" lighting-color="#fff" result="s">
-        <fePointLight x="120" y="60" z="150"/>
+      <feSpecularLighting in="b" surfaceScale="4.2" specularConstant="0.85" specularExponent="16" lighting-color="#fff" result="s">
+        <fePointLight x="90" y="50" z="170"/>
       </feSpecularLighting>
       <feComposite in="s" in2="SourceAlpha" operator="in" result="s2"/>
       <feComposite in="SourceGraphic" in2="s2" operator="arithmetic" k1="0" k2="1" k3="1" k4="0"/>
     </filter>
+    <filter id="dropshadow" x="-40%" y="-40%" width="180%" height="180%">
+      <feDropShadow dx="0" dy="10" stdDeviation="10" flood-color="#000" flood-opacity="0.55"/>
+    </filter>
+<linearGradient id="flameGrad" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stop-color="#fff3cf"/><stop offset="45%" stop-color="#f0892e"/><stop offset="100%" stop-color="#8a1a0e"/></linearGradient><linearGradient id="wingGrad" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stop-color="#ffe9b0"/><stop offset="45%" stop-color="#e05a26"/><stop offset="100%" stop-color="#6b0e0e"/></linearGradient><radialGradient id="coreGlow" cx="45%" cy="35%" r="75%"><stop offset="0%" stop-color="#fff8e0"/><stop offset="60%" stop-color="#f0892e"/><stop offset="100%" stop-color="#8a1a0e"/></radialGradient>
   </defs>
   <rect width="400" height="400" fill="url(#bg)"/>
-  <g filter="url(#gloss)" fill="none" stroke="url(#ink)" stroke-width="5" stroke-linecap="round" stroke-linejoin="round">
-    <path d="M200 320 C 190 280, 200 250, 200 220"/>
-    <path d="M200 220 C 150 210, 90 180, 70 120 C 120 130, 150 150, 175 180 C 165 150, 165 110, 190 80 C 200 115, 205 145, 210 170 C 230 140, 260 115, 300 105 C 285 140, 260 165, 235 185 C 270 180, 310 190, 335 220 C 300 225, 265 220, 235 210 C 220 213, 210 218, 200 220 Z"/>
-    <path d="M200 250 C 180 265, 160 270, 145 260 M 200 250 C 220 265, 240 270, 255 260"/>
-    <path d="M200 320 L 185 345 M 200 320 L 215 345"/>
+  <g filter="url(#dropshadow)">
+  <g filter="url(#gloss)">
+<path d="M170,205 C132,182 96,150 66,96 C90,138 84,176 100,206 C112,228 118,244 108,262 C136,256 156,238 166,214 Z" fill="url(#wingGrad)" stroke="#4a0a06" stroke-width="4"/><path d="M230,205 C268,182 304,150 334,96 C310,138 316,176 300,206 C288,228 282,244 292,262 C264,256 244,238 234,214 Z" fill="url(#wingGrad)" stroke="#4a0a06" stroke-width="4"/><path d="M149,187 L103,237" stroke="#4a0a06" stroke-width="2" opacity="0.5"/><path d="M251,187 L297,237" stroke="#4a0a06" stroke-width="2" opacity="0.5"/><path d="M132,172 L96,234" stroke="#4a0a06" stroke-width="2" opacity="0.5"/><path d="M268,172 L304,234" stroke="#4a0a06" stroke-width="2" opacity="0.5"/><path d="M114,157 L88,232" stroke="#4a0a06" stroke-width="2" opacity="0.5"/><path d="M286,157 L312,232" stroke="#4a0a06" stroke-width="2" opacity="0.5"/><path d="M200 178 C182 178,170 200,172 226 C174 254,186 272,200 280 C214 272,226 254,228 226 C230 200,218 178,200 178 Z" fill="url(#coreGlow)" stroke="#5a0f0a" stroke-width="3"/><circle cx="200" cy="160" r="18" fill="url(#coreGlow)" stroke="#5a0f0a" stroke-width="3"/><path d="M200 148 L180 142 L200 156 Z" fill="#ffd27a" stroke="#5a0f0a" stroke-width="2"/><circle cx="207" cy="155" r="3.4" fill="#fff3cf"/><path d="M200 146 L193 131 L197 142" fill="url(#flameGrad)" stroke="#5a0f0a" stroke-width="1.5"/><path d="M200 146 L200 126 L200 142" fill="url(#flameGrad)" stroke="#5a0f0a" stroke-width="1.5"/><path d="M200 146 L207 131 L203 142" fill="url(#flameGrad)" stroke="#5a0f0a" stroke-width="1.5"/><path d="M187,272 C182,327 160,356 156,382" fill="none" stroke="url(#flameGrad)" stroke-width="14" stroke-linecap="round"/><path d="M195,272 C193,338 185,378 184,404" fill="none" stroke="url(#flameGrad)" stroke-width="14" stroke-linecap="round"/><path d="M205,272 C207,338 215,378 216,404" fill="none" stroke="url(#flameGrad)" stroke-width="14" stroke-linecap="round"/><path d="M213,272 C218,327 240,356 244,382" fill="none" stroke="url(#flameGrad)" stroke-width="14" stroke-linecap="round"/><path d="M110 130 q9 -20 0 -32 q-9 12 0 32 Z" fill="url(#flameGrad)" opacity="0.8"/><path d="M290 130 q9 -20 0 -32 q-9 12 0 32 Z" fill="url(#flameGrad)" opacity="0.8"/><path d="M130 320 q9 -20 0 -32 q-9 12 0 32 Z" fill="url(#flameGrad)" opacity="0.8"/><path d="M270 320 q9 -20 0 -32 q-9 12 0 32 Z" fill="url(#flameGrad)" opacity="0.8"/><path d="M188 164 Q200 158 212 164" fill="none" stroke="#fff8e0" stroke-width="3" opacity="0.6" stroke-linecap="round"/><path d="M150 160 C130 150,110 130,96 108" fill="none" stroke="#fff8e0" stroke-width="3" opacity="0.35" stroke-linecap="round"/>  </g>
   </g>
 </svg>
