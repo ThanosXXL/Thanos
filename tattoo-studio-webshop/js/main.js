@@ -43,7 +43,10 @@
   /* ---------------- Scroll-Spy: aktive Navigation ---------------- */
   function setActiveLink(id) {
     navLinks.forEach((link) => {
-      link.classList.toggle('active', link.dataset.section === id);
+      const isActive = link.dataset.section === id;
+      link.classList.toggle('active', isActive);
+      if (isActive) link.setAttribute('aria-current', 'page');
+      else link.removeAttribute('aria-current');
     });
   }
 
@@ -98,17 +101,46 @@
   }
 
   /* ---------------- Booking Modal ---------------- */
+  const modal = modalBackdrop ? modalBackdrop.querySelector('.modal') : null;
+  let lastFocusedEl = null;
+
+  function focusableEls() {
+    if (!modal) return [];
+    return Array.from(
+      modal.querySelectorAll('a[href], button:not([disabled]), input, select, textarea, [tabindex]:not([tabindex="-1"])')
+    ).filter((el) => el.offsetParent !== null);
+  }
+
+  function trapFocus(e) {
+    if (e.key !== 'Tab') return;
+    const els = focusableEls();
+    if (!els.length) return;
+    const first = els[0];
+    const last = els[els.length - 1];
+    if (e.shiftKey && document.activeElement === first) {
+      e.preventDefault();
+      last.focus();
+    } else if (!e.shiftKey && document.activeElement === last) {
+      e.preventDefault();
+      first.focus();
+    }
+  }
+
   function openModal(artistName) {
     if (modalArtistSelect && artistName) {
       const match = Array.from(modalArtistSelect.options).find((opt) => opt.value === artistName);
       if (match) modalArtistSelect.value = artistName;
     }
+    lastFocusedEl = document.activeElement;
     modalBackdrop.classList.add('open');
     document.body.style.overflow = 'hidden';
+    const els = focusableEls();
+    if (els.length) els[0].focus();
   }
   function closeModal() {
     modalBackdrop.classList.remove('open');
     document.body.style.overflow = '';
+    if (lastFocusedEl && typeof lastFocusedEl.focus === 'function') lastFocusedEl.focus();
   }
 
   bookButtons.forEach((btn) => {
@@ -126,7 +158,9 @@
     });
   }
   document.addEventListener('keydown', (e) => {
+    if (!modalBackdrop.classList.contains('open')) return;
     if (e.key === 'Escape') closeModal();
+    else trapFocus(e);
   });
 
   /* ---------------- Modal Tabs: E-Mail vs. Telefon ---------------- */
