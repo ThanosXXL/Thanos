@@ -1,0 +1,353 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Inkarnation Tattoo Studio — Wo Haut zur Leinwand wird</title>
+<meta name="description" content="Inkarnation Tattoo Studio — Tätowierer, Galerie und Online-Terminbuchung per E-Mail oder Telefon.">
+<link rel="icon" type="image/svg+xml" href="assets/images/logo.svg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600;700;900&family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+<div class="bg-fx" aria-hidden="true">
+  <div class="glow glow-1"></div>
+  <div class="glow glow-2"></div>
+  <div class="glow glow-3"></div>
+  <div class="grain"></div>
+</div>
+
+<button id="sidebarToggle" class="sidebar-toggle" aria-label="Menü öffnen" aria-expanded="false" aria-controls="sidebar">
+  <span></span><span></span><span></span>
+</button>
+
+<aside id="sidebar" class="sidebar">
+  <div class="sidebar-brand">
+    <img src="assets/images/logo.svg" alt="" class="brand-icon">
+    <div class="brand-text">
+      <strong>Inkarnation</strong>
+      <span>Tattoo Studio</span>
+    </div>
+  </div>
+
+  <nav class="sidebar-nav" aria-label="Hauptnavigation">
+    <a href="#home" class="nav-link active" data-section="home">
+      <span class="nav-ico">◆</span><span>Start</span>
+    </a>
+    <a href="#artists" class="nav-link" data-section="artists">
+      <span class="nav-ico">◆</span><span>Unsere Tätowierer</span>
+    </a>
+    <a href="#gallery" class="nav-link" data-section="gallery">
+      <span class="nav-ico">◆</span><span>Galerie</span>
+    </a>
+    <a href="#services" class="nav-link" data-section="services">
+      <span class="nav-ico">◆</span><span>Leistungen</span>
+    </a>
+    <a href="#reviews" class="nav-link" data-section="reviews">
+      <span class="nav-ico">◆</span><span>Bewertungen</span>
+    </a>
+    <a href="#contact" class="nav-link" data-section="contact">
+      <span class="nav-ico">◆</span><span>Kontakt</span>
+    </a>
+  </nav>
+
+  <button class="btn btn-glossy sidebar-cta" id="sidebarBookBtn">
+    <span>Termin sichern</span>
+  </button>
+
+  <div class="sidebar-contact">
+    <a href="tel:+49301234567">📞 +49 30 123 456 7</a>
+    <a href="mailto:termine@inkarnation-tattoo.de">✉ termine@inkarnation-tattoo.de</a>
+  </div>
+</aside>
+
+<div class="sidebar-backdrop" id="sidebarBackdrop"></div>
+
+<main id="content">
+
+  <!-- HERO -->
+  <section id="home" class="section hero">
+    <div class="hero-inner">
+      <p class="eyebrow">Berlin · seit 2012 · Award-winning Ink</p>
+      <h1 class="hero-title">
+        <span class="line">HAUT IST</span>
+        <span class="line glossy-text">UNSERE LEINWAND</span>
+      </h1>
+      <p class="hero-sub">
+        Individuelles Design, kompromisslose Hygiene und Nadeln, die Geschichten erzählen.
+        Vier preisgekrönte Artists, ein Studio, eine Vision.
+      </p>
+      <div class="hero-actions">
+        <button class="btn btn-glossy btn-lg" id="heroBookBtn">Termin online vereinbaren</button>
+        <a class="btn btn-ghost btn-lg" href="#gallery">Galerie ansehen</a>
+      </div>
+      <div class="hero-stats">
+        <div class="stat"><strong>12+</strong><span>Jahre Erfahrung</span></div>
+        <div class="stat"><strong>3.400+</strong><span>Tattoos gestochen</span></div>
+        <div class="stat"><strong>4.9★</strong><span>Kundenbewertung</span></div>
+      </div>
+    </div>
+    <div class="hero-orb" aria-hidden="true">
+      <div class="orb-card orb-1"></div>
+      <div class="orb-card orb-2"></div>
+      <div class="orb-card orb-3"></div>
+    </div>
+    <div class="scroll-cue" aria-hidden="true"><span></span>Scrollen</div>
+  </section>
+
+  <!-- ARTISTS -->
+  <section id="artists" class="section">
+    <div class="section-head">
+      <p class="eyebrow">Das Team</p>
+      <h2>Unsere aktuellen Tätowierer</h2>
+      <p class="section-sub">Jeder Artist mit eigener Handschrift — vom filigranen Fineline bis zum großflächigen Japanese-Style.</p>
+    </div>
+
+    <div class="artist-grid">
+
+      <article class="card artist-card tilt">
+        <div class="card-shine"></div>
+        <div class="artist-photo">
+          <img src="assets/images/artists/artist-1.svg" alt="Portrait von Marco Rossi">
+        </div>
+        <div class="artist-body">
+          <h3>Marco Rossi</h3>
+          <span class="artist-role">Studioleiter · Neo-Traditional</span>
+          <p>Spezialisiert auf kräftige Linien, sattes Colorwork und Rosen-Motive mit Hochglanz-Finish.</p>
+          <div class="artist-tags"><span>Neo-Traditional</span><span>Color</span><span>Cover-Up</span></div>
+          <button class="btn btn-glossy btn-block book-btn" data-artist="Marco Rossi">Termin bei Marco</button>
+        </div>
+      </article>
+
+      <article class="card artist-card tilt">
+        <div class="card-shine"></div>
+        <div class="artist-photo">
+          <img src="assets/images/artists/artist-2.svg" alt="Portrait von Lena Vogt">
+        </div>
+        <div class="artist-body">
+          <h3>Lena Vogt</h3>
+          <span class="artist-role">Fineline &amp; Ornamental</span>
+          <p>Feinste Linienführung, Mandalas und minimalistische Designs mit geometrischer Präzision.</p>
+          <div class="artist-tags"><span>Fineline</span><span>Mandala</span><span>Minimal</span></div>
+          <button class="btn btn-glossy btn-block book-btn" data-artist="Lena Vogt">Termin bei Lena</button>
+        </div>
+      </article>
+
+      <article class="card artist-card tilt">
+        <div class="card-shine"></div>
+        <div class="artist-photo">
+          <img src="assets/images/artists/artist-3.svg" alt="Portrait von Sofia Marín">
+        </div>
+        <div class="artist-body">
+          <h3>Sofia Marín</h3>
+          <span class="artist-role">Realism &amp; Portrait</span>
+          <p>Fotorealistische Portraits und Tierdarstellungen mit dramatischem Licht-Schatten-Spiel.</p>
+          <div class="artist-tags"><span>Realism</span><span>Black &amp; Grey</span><span>Portrait</span></div>
+          <button class="btn btn-glossy btn-block book-btn" data-artist="Sofia Marín">Termin bei Sofia</button>
+        </div>
+      </article>
+
+      <article class="card artist-card tilt">
+        <div class="card-shine"></div>
+        <div class="artist-photo">
+          <img src="assets/images/artists/artist-4.svg" alt="Portrait von Kenji Nakamura">
+        </div>
+        <div class="artist-body">
+          <h3>Kenji Nakamura</h3>
+          <span class="artist-role">Japanese &amp; Dragon Art</span>
+          <p>Klassische Irezumi-Motive — Drachen, Phönixe und Wellen in großflächigen Kompositionen.</p>
+          <div class="artist-tags"><span>Japanese</span><span>Dragon</span><span>Large-Scale</span></div>
+          <button class="btn btn-glossy btn-block book-btn" data-artist="Kenji Nakamura">Termin bei Kenji</button>
+        </div>
+      </article>
+
+    </div>
+  </section>
+
+  <!-- GALLERY -->
+  <section id="gallery" class="section">
+    <div class="section-head">
+      <p class="eyebrow">Portfolio</p>
+      <h2>Beispielbilder aus dem Studio</h2>
+      <p class="section-sub">Eine Auswahl unserer Arbeiten — jedes Motiv individuell auf die Haut abgestimmt.</p>
+    </div>
+
+    <div class="gallery-grid">
+      <figure class="card gallery-item tilt" data-caption="Neo-Traditional Rose · Marco">
+        <img src="assets/images/gallery/rose.svg" alt="Neo-Traditional Rosen-Tattoo">
+        <figcaption>Neo-Traditional Rose</figcaption>
+      </figure>
+      <figure class="card gallery-item tilt" data-caption="Fine-Line Skull · Sofia">
+        <img src="assets/images/gallery/skull.svg" alt="Realistisches Totenkopf-Tattoo">
+        <figcaption>Realistic Skull</figcaption>
+      </figure>
+      <figure class="card gallery-item tilt" data-caption="Ornamental Mandala · Lena">
+        <img src="assets/images/gallery/mandala.svg" alt="Ornamentales Mandala-Tattoo">
+        <figcaption>Ornamental Mandala</figcaption>
+      </figure>
+      <figure class="card gallery-item tilt" data-caption="Japanese Dragon · Kenji">
+        <img src="assets/images/gallery/dragon.svg" alt="Japanischer Drachen-Tattoo-Sleeve">
+        <figcaption>Japanese Dragon Sleeve</figcaption>
+      </figure>
+      <figure class="card gallery-item tilt" data-caption="Traditional Anchor · Marco">
+        <img src="assets/images/gallery/anchor.svg" alt="Traditioneller Anker mit Schwalben">
+        <figcaption>Traditional Anchor</figcaption>
+      </figure>
+      <figure class="card gallery-item tilt" data-caption="Phoenix Rising · Kenji">
+        <img src="assets/images/gallery/phoenix.svg" alt="Phönix-Tattoo in Flammen">
+        <figcaption>Phoenix Rising</figcaption>
+      </figure>
+    </div>
+  </section>
+
+  <!-- SERVICES -->
+  <section id="services" class="section">
+    <div class="section-head">
+      <p class="eyebrow">Leistungen</p>
+      <h2>Was wir für dich tun</h2>
+    </div>
+    <div class="services-grid">
+      <div class="card service-card tilt">
+        <div class="service-ico">🎨</div>
+        <h3>Custom Design</h3>
+        <p>Individuelle Entwürfe im Erstgespräch — kostenlos &amp; unverbindlich, abgestimmt auf Körperform und Stil.</p>
+      </div>
+      <div class="card service-card tilt">
+        <div class="service-ico">🩹</div>
+        <h3>Cover-Ups</h3>
+        <p>Alte Tattoos kreativ neu interpretieren — wir verwandeln Reue in ein neues Lieblingsstück.</p>
+      </div>
+      <div class="card service-card tilt">
+        <div class="service-ico">🧴</div>
+        <h3>Aftercare-Beratung</h3>
+        <p>Ausführliche Pflegehinweise und Premium-Healing-Produkte für ein Ergebnis, das lange strahlt.</p>
+      </div>
+      <div class="card service-card tilt">
+        <div class="service-ico">🔒</div>
+        <h3>Hygiene &amp; Sicherheit</h3>
+        <p>Einmalnadeln, medizinische Sterilisation und zertifizierte Hygienestandards nach TÄTOWIER-VO.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- REVIEWS -->
+  <section id="reviews" class="section">
+    <div class="section-head">
+      <p class="eyebrow">Kundenstimmen</p>
+      <h2>Was unsere Gäste sagen</h2>
+    </div>
+    <div class="reviews-grid">
+      <div class="card review-card tilt">
+        <div class="stars">★★★★★</div>
+        <p>„Bestes Studio in Berlin! Marco hat meine Idee perfekt umgesetzt — Beratung, Hygiene und Ergebnis top.“</p>
+        <span class="review-author">— Julia K.</span>
+      </div>
+      <div class="card review-card tilt">
+        <div class="stars">★★★★★</div>
+        <p>„Kenjis Drachen-Sleeve ist ein Kunstwerk. Termin per E-Mail super unkompliziert vereinbart.“</p>
+        <span class="review-author">— Tom B.</span>
+      </div>
+      <div class="card review-card tilt">
+        <div class="stars">★★★★★</div>
+        <p>„Sofias Realism-Portrait meiner Oma hat mich zu Tränen gerührt. Absolute Empfehlung!“</p>
+        <span class="review-author">— Nadine R.</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- CONTACT / BOOKING -->
+  <section id="contact" class="section contact-section">
+    <div class="section-head">
+      <p class="eyebrow">Termin</p>
+      <h2>Jetzt Termin vereinbaren</h2>
+      <p class="section-sub">Online per E-Mail-Formular oder direkt telefonisch — wie es dir lieber ist.</p>
+    </div>
+
+    <div class="contact-grid">
+      <div class="card contact-card">
+        <h3>📞 Telefonisch</h3>
+        <p>Mo–Sa 11:00–19:00 Uhr</p>
+        <a class="btn btn-glossy btn-block" href="tel:+49301234567">+49 30 123 456 7 anrufen</a>
+      </div>
+      <div class="card contact-card">
+        <h3>✉ Per E-Mail</h3>
+        <p>Antwort innerhalb von 24 Stunden</p>
+        <button class="btn btn-glossy btn-block book-btn" data-artist="">Buchungsformular öffnen</button>
+      </div>
+      <div class="card contact-card">
+        <h3>📍 Studio</h3>
+        <p>Inkstraße 13, 10115 Berlin<br>U-Bahn Rosenthaler Platz</p>
+        <a class="btn btn-ghost btn-block" href="https://www.openstreetmap.org/search?query=Berlin" target="_blank" rel="noopener">Anfahrt planen</a>
+      </div>
+    </div>
+  </section>
+
+  <footer class="site-footer">
+    <div class="footer-brand">
+      <img src="assets/images/logo.svg" alt="">
+      <span>Inkarnation Tattoo Studio</span>
+    </div>
+    <p>© 2026 Inkarnation Tattoo Studio · Alle Rechte vorbehalten</p>
+  </footer>
+
+</main>
+
+<!-- BOOKING MODAL -->
+<div class="modal-backdrop" id="modalBackdrop">
+  <div class="modal card" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
+    <button class="modal-close" id="modalClose" aria-label="Schließen">✕</button>
+    <h3 id="modalTitle">Termin anfragen</h3>
+    <p class="modal-sub">Wähle deinen Weg — <strong>online per E-Mail</strong> oder <strong>direkt telefonisch</strong>.</p>
+
+    <div class="modal-tabs">
+      <button class="modal-tab active" data-tab="email">✉ E-Mail</button>
+      <button class="modal-tab" data-tab="phone">📞 Telefon</button>
+    </div>
+
+    <form id="bookingForm" class="modal-pane active" data-pane="email">
+      <label>
+        Name
+        <input type="text" name="name" required placeholder="Dein Name">
+      </label>
+      <label>
+        E-Mail
+        <input type="email" name="email" required placeholder="du@beispiel.de">
+      </label>
+      <label>
+        Telefon (optional)
+        <input type="tel" name="phone" placeholder="+49 ...">
+      </label>
+      <label>
+        Wunsch-Artist
+        <select name="artist" id="modalArtistSelect">
+          <option value="Egal / erste Verfügbarkeit">Egal / erste Verfügbarkeit</option>
+          <option value="Marco Rossi">Marco Rossi — Neo-Traditional</option>
+          <option value="Lena Vogt">Lena Vogt — Fineline</option>
+          <option value="Sofia Marín">Sofia Marín — Realism</option>
+          <option value="Kenji Nakamura">Kenji Nakamura — Japanese</option>
+        </select>
+      </label>
+      <label>
+        Wunschtermin
+        <input type="date" name="date">
+      </label>
+      <label>
+        Nachricht / Idee
+        <textarea name="message" rows="3" placeholder="Motiv, Größe, Körperstelle ..."></textarea>
+      </label>
+      <button type="submit" class="btn btn-glossy btn-block btn-lg">Anfrage per E-Mail senden</button>
+    </form>
+
+    <div class="modal-pane" data-pane="phone">
+      <p class="phone-pane-text">Ruf uns direkt an — wir beraten dich sofort:</p>
+      <a class="btn btn-glossy btn-block btn-lg" href="tel:+49301234567">📞 +49 30 123 456 7</a>
+      <p class="phone-hours">Erreichbar: Mo–Sa, 11:00–19:00 Uhr</p>
+    </div>
+  </div>
+</div>
+
+<script src="js/main.js"></script>
+</body>
+</html>
