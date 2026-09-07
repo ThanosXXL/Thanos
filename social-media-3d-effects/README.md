@@ -69,9 +69,9 @@ Bild auf.
 
 - **Logo austauschen**: `<img src="data:image/jpeg;base64,...">` im `<header>`
   ersetzen (neues Bild als Base64 kodieren, z. B. `base64 -i logo.png`).
-- **Text/Zahlen**: Headline, Subline und die drei Statistik-Werte
-  (`data-count`) im HTML sind Platzhalter – bitte durch echte Kennzahlen der
-  M&C Akademie ersetzen, bevor die Grafik veröffentlicht wird.
+- **Text/Zahlen**: Headline, Subline und die vier Statistik-Werte
+  (`data-count`) im HTML – aktuell über 4.000 Teilnehmende, über 98 %
+  Erfolgsquote, seit 2019, ⌀ 30 Teilnehmer/Schulung – bei Bedarf anpassen.
 - **Echte Zertifikate einbinden**: Im `<script>`-Block das Array `CERTIFICATES`
   bearbeiten. Jeder Eintrag erzeugt entweder eine generierte Urkunde
   (`name`, `course`, `date`, `no`) oder – wenn `image` gesetzt ist – zeigt ein

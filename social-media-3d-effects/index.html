@@ -311,8 +311,8 @@
   }
   .arm.l{ transform:rotate(var(--rl, -14deg)); }
   .arm.r{ transform:rotate(var(--rr, 14deg)); }
-  .figure--center .arm.l{ --rl:-150deg; }
-  .figure--center .arm.r{ --rr:150deg; }
+  .figure--center .arm.l{ --rl:-38deg; }
+  .figure--center .arm.r{ --rr:38deg; }
   .figure--left .arm.r{ --rr:170deg; animation:cheer 2.4s ease-in-out infinite; }
   .figure--right .arm.l{ --rl:-170deg; animation:cheer 2.4s ease-in-out infinite reverse; }
   @keyframes cheer{
@@ -323,17 +323,16 @@
   /* ---------- CERTIFICATE LOOP (real-time rotating carousel) ---------- */
   .cert-loop{
     position:absolute;
-    left:50%; top:-22%;
-    width:98%;
+    left:50%; top:27%;
+    width:86%;
     aspect-ratio:0.68/1;
-    transform:translateX(-50%) rotateZ(-6deg) rotateY(8deg);
-    transform-style:preserve-3d;
+    transform:translateX(-50%) rotateZ(-6deg) rotateY(3deg);
     animation:certWobble 6s ease-in-out infinite;
     z-index:3;
   }
   @keyframes certWobble{
-    0%,100%{ transform:translateX(-50%) rotateZ(-6deg) rotateY(8deg); }
-    50%{ transform:translateX(-50%) rotateZ(-3deg) rotateY(-4deg); }
+    0%,100%{ transform:translateX(-50%) rotateZ(-6deg) rotateY(3deg); }
+    50%{ transform:translateX(-50%) rotateZ(-3deg) rotateY(-1.5deg); }
   }
   .cert-slide{
     position:absolute; inset:0;
@@ -373,11 +372,15 @@
     outline-offset:2px;
     border-radius:0.2em;
     display:flex; flex-direction:column; align-items:center;
-    padding:0.35em 0.3em 0.3em;
+    justify-content:center;
+    gap:0.16em;
+    padding:0.3em 0.25em;
     text-align:center;
+    overflow:hidden;
   }
+  .cert-border > *{ flex-shrink:0; margin:0 !important; }
   .cert-seal{
-    width:22%; aspect-ratio:1/1;
+    width:18%; aspect-ratio:1/1;
     border-radius:50%;
     background:radial-gradient(circle at 35% 30%, var(--gold-soft), var(--gold) 55%, var(--gold-deep) 100%);
     box-shadow:0 3px 8px rgba(0,0,0,0.35), 0 0 0 0.07em rgba(255,255,255,0.6) inset;
@@ -395,52 +398,49 @@
   }
   .cert-kicker{
     font-family:var(--font-body); font-weight:800;
-    font-size:0.32em; letter-spacing:0.14em;
+    font-size:0.26em; letter-spacing:0.1em;
     color:var(--gold-deep);
-    margin-top:0.2em;
+    white-space:nowrap;
   }
   .cert-title{
     font-family:var(--font-serif);
     font-weight:700;
-    font-size:0.62em;
+    font-size:0.58em;
     letter-spacing:0.05em;
     color:var(--ink);
-    margin-top:0.12em;
   }
   .cert-sub{
     font-family:var(--font-body);
-    font-size:0.26em;
+    font-size:0.24em;
     color:var(--text-2);
     text-transform:uppercase;
     letter-spacing:0.08em;
-    margin-top:0.22em;
   }
   .cert-name{
     font-family:var(--font-serif);
     font-style:italic; font-weight:600;
-    font-size:0.44em;
+    font-size:0.29em;
     color:var(--red-deep);
-    margin-top:0.14em;
     padding-bottom:0.1em;
     border-bottom:1px solid var(--gold);
-    max-width:92%;
+    width:100%;
+    box-sizing:border-box;
     white-space:nowrap; overflow:hidden; text-overflow:ellipsis;
   }
   .cert-course{
     font-family:var(--font-body); font-weight:600;
-    font-size:0.28em; color:var(--ink);
-    margin-top:0.2em; padding:0 0.2em;
+    font-size:0.26em; color:var(--ink);
+    padding:0 0.2em;
   }
   .cert-meta{
     font-family:var(--font-body);
-    font-size:0.2em; color:var(--text-2);
-    margin-top:0.22em;
+    font-size:0.19em; color:var(--text-2);
     display:flex; gap:0.4em; align-items:center;
     font-variant-numeric:tabular-nums;
   }
   .cert-sig-row{
     display:flex; justify-content:space-between;
-    width:94%; margin-top:auto; padding-top:0.3em;
+    width:94%; margin-top:0.2em !important; padding-top:0.2em;
   }
   .cert-sig{
     font-family:var(--font-body);
@@ -511,8 +511,8 @@
   .stats-row{
     position:relative; z-index:3;
     display:grid;
-    grid-template-columns:repeat(3, 1fr);
-    gap:0.6em;
+    grid-template-columns:repeat(2, 1fr);
+    gap:0.55em;
     margin-top:1em;
     animation:enter .8s .25s cubic-bezier(.2,.8,.2,1) both;
   }
@@ -520,29 +520,38 @@
     background:var(--glass-fill);
     border:1px solid var(--glass-border);
     border-radius:1em;
-    padding:0.7em 0.4em;
+    padding:0.55em 0.4em;
     text-align:center;
     backdrop-filter:blur(10px);
     box-shadow:0 1px 0 rgba(255,255,255,0.12) inset, 0 10px 20px -12px rgba(0,0,0,0.6);
   }
+  .stat-prefix{
+    display:block;
+    font-family:var(--font-body);
+    font-weight:800;
+    font-size:0.44em;
+    letter-spacing:0.1em;
+    text-transform:uppercase;
+    color:var(--gold);
+  }
   .stat-num{
     font-family:var(--font-display);
     font-weight:700;
-    font-size:1.25em;
+    font-size:1.15em;
     color:var(--text-0);
     font-variant-numeric:tabular-nums;
   }
   .stat-unit{
     font-family:var(--font-display);
     font-weight:700;
-    font-size:1.25em;
+    font-size:1.15em;
     color:var(--gold);
   }
   .stat-label{
     display:block;
-    margin-top:0.2em;
-    font-size:0.56em;
-    letter-spacing:0.08em;
+    margin-top:0.15em;
+    font-size:0.54em;
+    letter-spacing:0.06em;
     text-transform:uppercase;
     color:var(--text-2);
     font-weight:800;
@@ -688,14 +697,15 @@
     </div>
 
     <div class="headline-block">
-      <h1 class="headline">ERFOLG&nbsp;HAT<br>EIN GESICHT.</h1>
+      <h1 class="headline">ERFOLG HAT<br>EINEN NAMEN.</h1>
       <p class="subline">Jedes Zertifikat der M&amp;C Akademie steht für Einsatz, Wachstum &ndash; und den Moment, in dem sich die Arbeit auszahlt.</p>
     </div>
 
     <div class="stats-row">
-      <div class="stat-chip"><span class="stat-num" data-count="4000" data-suffix="+">0</span><span class="stat-label">Teilnehmende</span></div>
-      <div class="stat-chip"><span class="stat-num" data-count="99" data-suffix="%">0</span><span class="stat-label">Erfolgsquote</span></div>
+      <div class="stat-chip"><span class="stat-prefix">Über</span><span class="stat-num" data-count="4000" data-suffix="+" data-group="true">0</span><span class="stat-label">Teilnehmende</span></div>
+      <div class="stat-chip"><span class="stat-prefix">Über</span><span class="stat-num" data-count="98" data-suffix="%">0</span><span class="stat-label">Erfolgsquote</span></div>
       <div class="stat-chip"><span class="stat-num" data-count="2019" data-no-count="true">0</span><span class="stat-label">Seit dem Jahr</span></div>
+      <div class="stat-chip"><span class="stat-prefix">Ø</span><span class="stat-num" data-count="30">0</span><span class="stat-label">Teilnehmer / Schulung</span></div>
     </div>
 
     <a class="cta" href="#">
@@ -744,22 +754,33 @@
       var g = svgEl("g", { "class":"arm " + side });
       g.appendChild(svgEl("path", { d:sleeveD, fill:style.outfit }));
       g.appendChild(svgEl("circle", { cx:handCx, cy:"73", r:"5.2", fill:"url(#skinGrad)" }));
-      var knuckleXs = mirror ? [54, 50, 46] : [6, 10, 14];
-      var rotations = mirror ? [20, 0, -20] : [-20, 0, 20];
-      knuckleXs.forEach(function(kx, i){
+      /* 4 Finger, gefächert oben auf der Hand */
+      var fingerX = [6, 8.5, 11, 13.5];
+      var fingerRot = [-18, -6, 6, 18];
+      fingerX.forEach(function(fx, i){
+        var x = mirror ? (60 - fx) : fx;
+        var rot = mirror ? -fingerRot[i] : fingerRot[i];
         g.appendChild(svgEl("ellipse", {
-          cx:String(kx), cy:"70", rx:"1.9", ry:"3",
+          cx:String(x), cy:"78", rx:"1.7", ry:"2.9",
           fill:"url(#skinGrad)",
-          transform:"rotate(" + rotations[i] + " " + kx + " 70)"
+          transform:"rotate(" + rot + " " + x + " 78)"
         }));
       });
+      /* 1 Daumen, seitlich abgespreizt */
+      var thumbX = mirror ? 54.5 : 5.5;
+      var thumbRot = mirror ? 62 : -62;
+      g.appendChild(svgEl("ellipse", {
+        cx:String(thumbX), cy:"71.5", rx:"2.3", ry:"3.3",
+        fill:"url(#skinGrad)",
+        transform:"rotate(" + thumbRot + " " + thumbX + " 71.5)"
+      }));
       return g;
     }
 
     var earL = svgEl("ellipse", { cx:"18.3", cy:"17", rx:"2.6", ry:"4.2", fill:"url(#skinGrad)" });
     var earR = svgEl("ellipse", { cx:"41.7", cy:"17", rx:"2.6", ry:"4.2", fill:"url(#skinGrad)" });
     var head = svgEl("circle", { cx:"30", cy:"16", r:"12", fill:"url(#skinGrad)" });
-    var hair = svgEl("path", { d:"M18,12 C18,3 42,3 42,12 C42,7.5 36,5 30,5 C24,5 18,7.5 18,12 Z", fill:style.hair });
+    var hair = svgEl("path", { d:"M14,23 C11,1.5 49,1.5 46,23 C46,10.5 39,5.5 30,5.5 C21,5.5 14,10.5 14,23 Z", fill:style.hair });
     var eyeL = svgEl("ellipse", { cx:"25.5", cy:"15", rx:"1.3", ry:"1.6", fill:"rgba(50,32,20,0.75)" });
     var eyeR = svgEl("ellipse", { cx:"34.5", cy:"15", rx:"1.3", ry:"1.6", fill:"rgba(50,32,20,0.75)" });
     var nose = svgEl("path", { d:"M30,15.5 L29,20.3 Q30,21.6 31,20.3", stroke:"rgba(74,42,20,0.5)", "stroke-width":"0.9", fill:"none", "stroke-linecap":"round" });
@@ -969,12 +990,18 @@
     var target = parseFloat(node.getAttribute("data-count"));
     var decimals = parseInt(node.getAttribute("data-decimals") || "0", 10);
     var suffix = node.getAttribute("data-suffix") || "";
+    var grouped = node.hasAttribute("data-group");
+    function fmt(n){
+      return grouped
+        ? n.toLocaleString("de-DE", { minimumFractionDigits:decimals, maximumFractionDigits:decimals })
+        : n.toFixed(decimals);
+    }
     if (node.hasAttribute("data-no-count")) {
-      node.textContent = target.toFixed(decimals) + suffix;
+      node.textContent = fmt(target) + suffix;
       return;
     }
     if (reduceMotion) {
-      node.textContent = target.toFixed(decimals) + suffix;
+      node.textContent = fmt(target) + suffix;
       return;
     }
     var start = null;
@@ -983,7 +1010,7 @@
       if (!start) start = ts;
       var p = Math.min((ts - start) / duration, 1);
       var eased = 1 - Math.pow(1 - p, 3);
-      node.textContent = (target * eased).toFixed(decimals) + suffix;
+      node.textContent = fmt(target * eased) + suffix;
       if (p < 1) requestAnimationFrame(step);
     }
     setTimeout(function(){ requestAnimationFrame(step); }, 500);
