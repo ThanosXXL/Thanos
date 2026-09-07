@@ -2,23 +2,22 @@
 
 Eine einzelne, in sich geschlossene HTML-Datei (`index.html`) für einen animierten
 Social-Media-Post im 4:5-Hochformat (Instagram-Feed-Format). Zeigt das M&C Akademie
-Logo oben links (freigestellt, ohne Rahmen/Box) und eine 3D-Bühnenszene mit drei
-animierten, vollständigen menschlichen Figuren (Kopf mit Gesicht – Augen, Nase,
-Mund, Ohren, Haare –, Rumpf im Outfit, Arme mit Händen/Fingern, Beine mit Schuhen)
-die ein Zertifikat entgegennehmen – inklusive Hochglanz- und Animationseffekten,
-einem in Echtzeit rotierenden Zertifikats-Loop und einem Download-Button.
+Logo oben links (echtes freigestelltes PNG, transparenter Hintergrund) und eine
+3D-Bühnenszene mit drei animierten, vollständigen menschlichen Figuren (Kopf mit
+Gesicht – Augen, Nase, Mund, Ohren, Haare –, Rumpf im Outfit, Arme mit
+Händen/Fingern, Beine mit Schuhen) die ein Zertifikat entgegennehmen – inklusive
+Hochglanz- und Animationseffekten und einem in Echtzeit rotierenden
+Zertifikats-Loop.
 
 Die Figuren sind bewusst als stilisierte, glossy 3D-Illustration gehalten statt als
 echte Fotos: Fotos realer Personen als (nicht tatsächlich existierende) Absolventen
 auszugeben, wäre irreführend. Wer echte Teilnehmerfotos einbinden möchte, kann das
 selbst tun (siehe „Anpassen“).
 
-Kein Build-Schritt, keine Abhängigkeiten, kein `npm install` nötig. Das Logo ist
-als Base64-Bild eingebettet, die Datei funktioniert also offline (nur die
-Google-Fonts "Unbounded", "Manrope" und "Playfair Display" sowie die
-`html2canvas`-Bibliothek für den Download-Button werden online nachgeladen –
-ohne Internetverbindung greifen automatisch System-Schriftarten und der
-Download-Button zeigt einen Hinweis statt zu exportieren).
+Kein Build-Schritt, keine Abhängigkeiten, kein `npm install` nötig. Logo und alle
+Grafiken sind eingebettet, die Datei funktioniert also komplett offline (nur die
+Google-Fonts "Unbounded", "Manrope" und "Playfair Display" werden online
+nachgeladen – ohne Internetverbindung greifen automatisch System-Schriftarten).
 
 ## Ansehen
 
@@ -61,25 +60,11 @@ Oder die Datei einfach per Doppelklick im Browser öffnen.
   einmal über die komplette Grafik (Header, Bühne und Text) – wie eine
   Glasoberfläche, die das Licht einfängt.
 
-## Download-Button
-
-Oben rechts auf der Grafik (neben dem Logo, über dem Datums-Badge) sitzt ein
-kompakter „PNG“-Button. Er exportiert die aktuelle Ansicht (per `html2canvas`,
-2-fache Auflösung) als PNG-Datei und wird beim Export selbst automatisch aus
-dem Bild ausgeblendet (`ignoreElements`), taucht also nicht im exportierten
-Bild auf.
-
-- **Lokal im Browser** (Doppelklick auf `index.html`, oder auf einer eigenen
-  Website eingebunden): funktioniert normal über einen Standard-Browser-Download.
-- **In der Claude-Artifact-Vorschau im Chat**: funktioniert ebenfalls, aber
-  über die Claude-„downloads“-Capability (Bestätigungsdialog des Viewers) statt
-  über einen klassischen Browser-Download – technisch bedingt, da Artifact-Vorschauen
-  aus Sicherheitsgründen keine direkten Datei-Downloads zulassen.
-
 ## Anpassen
 
-- **Logo austauschen**: `<img src="data:image/jpeg;base64,...">` im `<header>`
-  ersetzen (neues Bild als Base64 kodieren, z. B. `base64 -i logo.png`).
+- **Logo austauschen**: `<img src="data:image/png;base64,...">` im `<header>`
+  ersetzen (neues Bild als Base64 kodieren, idealerweise bereits als
+  freigestelltes PNG mit transparentem Hintergrund, z. B. `base64 -i logo.png`).
 - **Text/Zahlen**: Headline, Subline und die vier Statistik-Werte
   (`data-count`) im HTML – aktuell über 4.000 Teilnehmende, über 98 %
   Erfolgsquote, seit 2019, ⌀ 30 Teilnehmer/Schulung – bei Bedarf anpassen.
@@ -101,8 +86,9 @@ Manche In-App-Dateivorschauen (z. B. wenn die Datei über eine Messenger-/
 Sharing-App geöffnet wird, statt in einem echten Browser) sind stark
 eingeschränkte WebViews: sehr große Base64-Bilder können dort fehlschlagen,
 und moderne CSS-Eigenschaften wie `aspect-ratio` werden nicht immer
-unterstützt. Deshalb ist das Logo bewusst klein gehalten (~5 KB statt
-Originalgröße) und die Bühnenhöhe (`.scene-wrap`) ist fest in `em` statt über
+unterstützt. Deshalb ist das Logo bewusst klein gehalten (freigestelltes PNG,
+~27 KB statt >100 KB Originalgröße) und die Bühnenhöhe (`.scene-wrap`) ist
+fest in `em` statt über
 `aspect-ratio`/`flex-grow` berechnet, damit Zertifikat und Figuren dort nicht
 unsichtbar werden. Am zuverlässigsten ist weiterhin ein echter Browser
 (Chrome, Safari, Firefox) – siehe „Ansehen“ oben.
