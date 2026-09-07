@@ -740,22 +740,49 @@
   };
   /* Zusätzliche Strähnen/Textur-Details je Frisur, in Haarfarbe über der Basisform */
   var HAIR_STRANDS = {
+    /* texturierter Crop: gefächerte Spitzen + Pony als Flächen, dazu
+       einzelne helle/dunkle Strähnen-Linien für echte Textur */
     short: [
-      "M19,7 L21,0.5 L23.5,6.5 Z",
-      "M25,4.5 L27.3,-1.5 L29.5,4.5 Z",
-      "M31,4.5 L33.3,-1 L35.5,5.5 Z",
-      "M37,7 L39.3,1.5 L41.5,8 Z",
-      "M26.5,6 C25.3,10 24.8,14.5 26,17.5 C27.6,15 28.2,10.5 27.6,6.5 Z"
+      { d:"M19,7 L21,0.5 L23.5,6.5 Z", kind:"fill" },
+      { d:"M25,4.5 L27.3,-1.5 L29.5,4.5 Z", kind:"fill" },
+      { d:"M31,4.5 L33.3,-1 L35.5,5.5 Z", kind:"fill" },
+      { d:"M37,7 L39.3,1.5 L41.5,8 Z", kind:"fill" },
+      { d:"M26.5,6 C25.3,10 24.8,14.5 26,17.5 C27.6,15 28.2,10.5 27.6,6.5 Z", kind:"fill" },
+      { d:"M17,8 C19,4.5 21,2.3 23.2,1.2", kind:"hi" },
+      { d:"M23.5,6.3 C25.5,3.3 27.6,1.3 29.6,0.6", kind:"hi" },
+      { d:"M31.2,6.3 C33.2,3.3 35.3,1.7 37.3,1", kind:"hi" },
+      { d:"M37.3,9 C39.3,6.3 41.2,4.3 43.2,3", kind:"hi" },
+      { d:"M20.3,9 C22.3,6.3 24.3,4.3 26.3,3.7", kind:"sh" },
+      { d:"M28.2,8 C30.2,5.3 32.2,3.7 34.2,3.7", kind:"sh" },
+      { d:"M36.3,10 C38.3,8 40.2,6.5 42.2,6", kind:"sh" }
     ],
+    /* Curtains / seitlicher Sweep mit Scheitel und Strähnen in Schwungrichtung */
     wave: [
-      "M15,11 C20,8.5 26,11.5 32.5,8.5 C29.5,13.5 22,17 16.5,15.5 C14.8,13.5 14.5,12 15,11 Z",
-      "M40.5,6 L43.3,0 L45.3,7 Z"
+      { d:"M15,11 C20,8.5 26,11.5 32.5,8.5 C29.5,13.5 22,17 16.5,15.5 C14.8,13.5 14.5,12 15,11 Z", kind:"fill" },
+      { d:"M40.5,6 L43.3,0 L45.3,7 Z", kind:"fill" },
+      { d:"M16.3,9 C21.5,7 27,9.5 32.7,7.2", kind:"hi" },
+      { d:"M17,11.6 C22.3,10 27.7,11 33,9", kind:"hi" },
+      { d:"M30,3.3 C29,2 29,1 29.8,0", kind:"sh" },
+      { d:"M41,5 C42.6,2.6 44,1 45.3,0.3", kind:"sh" },
+      { d:"M19,12.3 C24,11 28.7,11.6 33.3,10", kind:"sh" }
     ],
+    /* gewellte Shag-Länge: Gesichts-Strähnen als Flächen + wellige
+       Längslinien für Bewegung/Layering */
     long: [
-      "M13,20 C11.5,24.5 11.5,29 13.5,32.5 C15,29 15,24 14.3,20.3 Z",
-      "M47,20 C48.5,24.5 48.5,29 46.5,32.5 C45,29 45,24 45.7,20.3 Z",
-      "M27,4 L30,-1.5 L33,4 Z"
+      { d:"M13,20 C11.5,24.5 11.5,29 13.5,32.5 C15,29 15,24 14.3,20.3 Z", kind:"fill" },
+      { d:"M47,20 C48.5,24.5 48.5,29 46.5,32.5 C45,29 45,24 45.7,20.3 Z", kind:"fill" },
+      { d:"M27,4 L30,-1.5 L33,4 Z", kind:"fill" },
+      { d:"M15.3,8 C13.5,14 14.8,20.5 13.6,27", kind:"hi" },
+      { d:"M44.7,8 C46.5,14 45.2,20.5 46.4,27", kind:"hi" },
+      { d:"M17.6,8.5 C16,14.3 17.2,20.6 16.1,27", kind:"sh" },
+      { d:"M42.4,8.5 C44,14.3 42.8,20.6 43.9,27", kind:"sh" },
+      { d:"M27,3.3 C26.4,1.6 27,0.4 28,-0.7", kind:"hi" },
+      { d:"M33,3.3 C33.6,1.6 33,0.4 32,-0.7", kind:"hi" }
     ]
+  };
+  var HAIR_STROKE_STYLE = {
+    hi: { stroke:"rgba(255,255,255,0.32)", width:"0.6" },
+    sh: { stroke:"rgba(20,10,5,0.4)", width:"0.55" }
   };
   function buildHumanFigure(role){
     var style = FIGURE_STYLES[role] || FIGURE_STYLES.left;
@@ -806,8 +833,17 @@
     var hair = svgEl("path", { d:HAIR_PATHS[style.hairStyle] || HAIR_PATHS.short, fill:style.hair });
     var hairGroup = svgEl("g", {});
     hairGroup.appendChild(hair);
-    (HAIR_STRANDS[style.hairStyle] || []).forEach(function(d){
-      hairGroup.appendChild(svgEl("path", { d:d, fill:style.hair }));
+    (HAIR_STRANDS[style.hairStyle] || []).forEach(function(strand){
+      if (strand.kind === "fill") {
+        hairGroup.appendChild(svgEl("path", { d:strand.d, fill:style.hair }));
+      } else {
+        var lineStyle = HAIR_STROKE_STYLE[strand.kind];
+        hairGroup.appendChild(svgEl("path", {
+          d:strand.d, fill:"none",
+          stroke:lineStyle.stroke, "stroke-width":lineStyle.width,
+          "stroke-linecap":"round"
+        }));
+      }
     });
     var eyeL = svgEl("ellipse", { cx:"25.5", cy:"15", rx:"1.3", ry:"1.6", fill:"rgba(50,32,20,0.75)" });
     var eyeR = svgEl("ellipse", { cx:"34.5", cy:"15", rx:"1.3", ry:"1.6", fill:"rgba(50,32,20,0.75)" });

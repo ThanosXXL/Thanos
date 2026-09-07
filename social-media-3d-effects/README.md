@@ -46,10 +46,12 @@ Oder die Datei einfach per Doppelklick im Browser öffnen.
   Rumpf, zwei Arme mit Händen (4 Finger + Daumen) und zwei Beine mit
   Schuhen, in Marken-Rot/Gold (mittlere Figur) bzw. dunklem
   Businessoutfit (äußere Figuren). Jede Figur hat eine eigene, an
-  aktuelle Trendfrisuren angelehnte Frisur mit Strähnen-Textur
-  (`HAIR_PATHS` + `HAIR_STRANDS`: `short` = texturierter Crop mit
-  Pony, `wave` = Curtains/seitlicher Sweep, `long` = gewellte
-  Shag-Länge) – bei Bedarf leicht um weitere Stile erweiterbar.
+  aktuelle Trendfrisuren angelehnte Frisur mit echten Strähnen-Linien
+  für Tiefe/Textur statt einer flachen Fläche (`HAIR_PATHS` +
+  `HAIR_STRANDS`, je Strähne als Fläche oder helle/dunkle Stroke-Linie:
+  `short` = texturierter Crop mit Pony, `wave` = Curtains/seitlicher
+  Sweep, `long` = gewellte Shag-Länge) – bei Bedarf leicht um weitere
+  Stile erweiterbar.
 - **Echtzeit-Zertifikats-Loop**: Die gehaltene Urkunde ist kein Standbild,
   sondern eine automatisch alle 3,4 Sekunden weiterschaltende Karussell-Animation
   (Überblendung + 3D-Drehung) durch mehrere Zertifikate – siehe „Anpassen“ unten.
