@@ -2,9 +2,16 @@
 
 Eine einzelne, in sich geschlossene HTML-Datei (`index.html`) für einen animierten
 Social-Media-Post im 4:5-Hochformat (Instagram-Feed-Format). Zeigt das M&C Akademie
-Logo oben links und eine 3D-Bühnenszene mit erfolgreichen Teilnehmern, die ihr
-Zertifikat entgegennehmen – inklusive Hochglanz- und Animationseffekten, einem in
-Echtzeit rotierenden Zertifikats-Loop und einem Download-Button.
+Logo oben links (freigestellt, ohne Rahmen/Box) und eine 3D-Bühnenszene mit drei
+animierten, vollständigen menschlichen Figuren (Kopf mit Gesicht – Augen, Nase,
+Mund, Ohren, Haare –, Rumpf im Outfit, Arme mit Händen/Fingern, Beine mit Schuhen)
+die ein Zertifikat entgegennehmen – inklusive Hochglanz- und Animationseffekten,
+einem in Echtzeit rotierenden Zertifikats-Loop und einem Download-Button.
+
+Die Figuren sind bewusst als stilisierte, glossy 3D-Illustration gehalten statt als
+echte Fotos: Fotos realer Personen als (nicht tatsächlich existierende) Absolventen
+auszugeben, wäre irreführend. Wer echte Teilnehmerfotos einbinden möchte, kann das
+selbst tun (siehe „Anpassen“).
 
 Kein Build-Schritt, keine Abhängigkeiten, kein `npm install` nötig. Das Logo ist
 als Base64-Bild eingebettet, die Datei funktioniert also offline (nur die
@@ -28,11 +35,17 @@ Oder die Datei einfach per Doppelklick im Browser öffnen.
 - **3D-Optik**: Perspektivische Bühne (`perspective`/`preserve-3d`), leicht
   geneigtes Zertifikat, Maus-Parallax-Tilt der gesamten Grafik (Desktop),
   gespiegelte Bodenreflexion für Tiefenwirkung.
-- **Hochglanz**: Laufende Glanzlicht-Sweeps über Logo-Badge, Zertifikat und
-  CTA-Button, Metallic-Schrift-Shimmer auf der Headline, Glassmorphism-Chips.
+- **Hochglanz**: Laufende Glanzlicht-Sweeps über Zertifikat und CTA-Button,
+  Metallic-Schrift-Shimmer auf der Headline, Glassmorphism-Chips, glänzend
+  schattierte Outfits/Haut der Figuren.
 - **Animationen**: Fallendes Konfetti, rotierender Spotlight-Kegel, sanftes
-  Schweben der Figuren, hochzählende Statistik-Zahlen beim Laden, pulsierender
-  CTA-Button. Respektiert `prefers-reduced-motion`.
+  Schweben und Jubel-Armbewegung der Figuren, hochzählende Statistik-Zahlen
+  beim Laden, pulsierender CTA-Button. Respektiert `prefers-reduced-motion`.
+- **Figuren**: Drei per JavaScript als SVG gezeichnete, vollständige
+  Personen (siehe `buildHumanFigure()` im `<script>`-Block) – kein
+  Platzhalter-Icon, sondern Kopf/Haare/Gesicht, Rumpf, zwei Arme mit
+  Händen (Finger angedeutet) und zwei Beine mit Schuhen, in Marken-Rot/Gold
+  (mittlere Figur) bzw. dunklem Businessoutfit (äußere Figuren).
 - **Echtzeit-Zertifikats-Loop**: Die gehaltene Urkunde ist kein Standbild,
   sondern eine automatisch alle 3,4 Sekunden weiterschaltende Karussell-Animation
   (Überblendung + 3D-Drehung) durch mehrere Zertifikate – siehe „Anpassen“ unten.
