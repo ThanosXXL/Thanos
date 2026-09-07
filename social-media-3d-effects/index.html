@@ -130,7 +130,8 @@
 
   .logo-badge{
     flex:none;
-    width:5.6em; height:5.6em;
+    width:8.4em; height:8.4em;
+    margin:-1em 0 -1em -0.5em;
     display:flex; align-items:center; justify-content:center;
     position:relative;
     animation:badgeFloat 5.5s ease-in-out infinite;
@@ -407,8 +408,13 @@
   }
   .cert-course{
     font-family:var(--font-body); font-weight:600;
-    font-size:0.26em; color:var(--ink);
+    font-size:0.23em; color:var(--ink);
     padding:0 0.2em;
+    width:100%;
+    box-sizing:border-box;
+    overflow-wrap:break-word;
+    word-break:break-word;
+    hyphens:auto;
   }
   .cert-meta{
     font-family:var(--font-body);
@@ -476,15 +482,20 @@
   }
   .letter.is-space{ width:0.32em; }
   @keyframes letterChase{
-    0%, 6%{
+    0%{
       color:#fff;
-      text-shadow:0 0 0.15em rgba(255,255,255,0.95), 0 0 0.4em var(--gold-soft), 0 2px 0 rgba(0,0,0,0.35);
-      transform:translateY(-0.05em);
+      text-shadow:0 0 0.25em #fff, 0 0 0.6em var(--gold-soft), 0 0 1em var(--gold), 0 2px 0 rgba(0,0,0,0.35);
+      transform:translateY(-0.14em) scale(1.22) rotateZ(-2deg);
     }
-    16%, 100%{
+    9%{
+      color:#fff;
+      text-shadow:0 0 0.18em rgba(255,255,255,0.9), 0 0 0.45em var(--gold-soft), 0 2px 0 rgba(0,0,0,0.35);
+      transform:translateY(-0.06em) scale(1.08);
+    }
+    22%, 100%{
       color:var(--gold);
       text-shadow:0 2px 0 rgba(0,0,0,0.35);
-      transform:translateY(0);
+      transform:translateY(0) scale(1) rotateZ(0deg);
     }
   }
   .subline{
