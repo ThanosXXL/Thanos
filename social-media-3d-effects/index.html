@@ -462,41 +462,30 @@
     font-family:var(--font-display);
     font-weight:900;
     font-size:1.95em;
-    line-height:1.02;
+    line-height:1.15;
     letter-spacing:-0.01em;
     margin:0;
     text-wrap:balance;
-    filter:drop-shadow(0 2px 0 rgba(0,0,0,0.35));
   }
-  .headline-layer{
-    display:block;
-    background-size:250% 100%;
-    -webkit-background-clip:text;
-    background-clip:text;
-    color:transparent;
+  .headline-line{ display:block; }
+  .letter{
+    display:inline-block;
+    color:var(--gold);
+    text-shadow:0 2px 0 rgba(0,0,0,0.35);
+    animation:letterChase 4s linear infinite;
   }
-  .headline-gold{
-    background-image:linear-gradient(100deg, #fff 6%, var(--gold-soft) 22%, var(--gold) 50%, var(--gold-soft) 78%, #fff 94%);
-    animation:metalShine 5s linear infinite, headlineGold 6s ease-in-out infinite;
-  }
-  .headline-white{
-    position:absolute; inset:0;
-    background-image:linear-gradient(100deg, var(--gold-soft) 6%, #fff 22%, #f6f1e6 50%, #fff 78%, var(--gold-soft) 94%);
-    animation:metalShine 5s linear infinite reverse, headlineWhite 6s ease-in-out infinite;
-  }
-  @keyframes metalShine{
-    0%{ background-position:0% 50%; }
-    100%{ background-position:250% 50%; }
-  }
-  @keyframes headlineGold{
-    0%,38%{ opacity:1; }
-    50%,88%{ opacity:0; }
-    100%{ opacity:1; }
-  }
-  @keyframes headlineWhite{
-    0%,38%{ opacity:0; }
-    50%,88%{ opacity:1; }
-    100%{ opacity:0; }
+  .letter.is-space{ width:0.32em; }
+  @keyframes letterChase{
+    0%, 6%{
+      color:#fff;
+      text-shadow:0 0 0.15em rgba(255,255,255,0.95), 0 0 0.4em var(--gold-soft), 0 2px 0 rgba(0,0,0,0.35);
+      transform:translateY(-0.05em);
+    }
+    16%, 100%{
+      color:var(--gold);
+      text-shadow:0 2px 0 rgba(0,0,0,0.35);
+      transform:translateY(0);
+    }
   }
   .subline{
     font-size:0.78em;
@@ -691,9 +680,9 @@
     </div>
 
     <div class="headline-block">
-      <h1 class="headline">
-        <span class="headline-layer headline-gold">ERFOLG HAT<br>EINEN NAMEN.</span>
-        <span class="headline-layer headline-white" aria-hidden="true">ERFOLG HAT<br>EINEN NAMEN.</span>
+      <h1 class="headline" id="headline" aria-label="Erfolg hat einen Namen.">
+        <span class="headline-line" data-line="ERFOLG HAT"></span>
+        <span class="headline-line" data-line="EINEN NAMEN."></span>
       </h1>
       <p class="subline">Jedes Zertifikat der M&amp;C Akademie steht für Einsatz, Wachstum &ndash; und den Moment, in dem sich die Arbeit auszahlt.</p>
     </div>
@@ -826,6 +815,34 @@
   document.querySelectorAll(".figure[data-role]").forEach(function(figureEl){
     figureEl.insertBefore(buildHumanFigure(figureEl.getAttribute("data-role")), figureEl.firstChild);
   });
+
+  /* --- headline: Buchstabe-für-Buchstabe-Leuchtlauf (Loop) --- */
+  (function(){
+    var lines = document.querySelectorAll("#headline .headline-line");
+    var letters = [];
+    lines.forEach(function(lineEl){
+      var text = lineEl.getAttribute("data-line") || "";
+      text.split("").forEach(function(ch){
+        var span = document.createElement("span");
+        if (ch === " ") {
+          span.className = "letter is-space";
+          span.textContent = " ";
+        } else {
+          span.className = "letter";
+          span.textContent = ch;
+        }
+        lineEl.appendChild(span);
+        letters.push(span);
+      });
+    });
+    var period = 4; /* s, muss zu @keyframes letterChase passen */
+    var travel = period * 0.62; /* Anteil des Loops, in dem die Lichtwelle über den Text läuft */
+    letters.forEach(function(span, i){
+      var delay = -(i / Math.max(letters.length - 1, 1)) * travel;
+      span.style.animationDelay = delay + "s";
+      if (reduceMotion) { span.style.animation = "none"; span.style.color = "var(--gold)"; }
+    });
+  })();
 
   /* --- confetti --- */
   var layer = document.getElementById("confetti");

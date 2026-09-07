@@ -53,9 +53,10 @@ Oder die Datei einfach per Doppelklick im Browser öffnen.
 - **Echtzeit-Zertifikats-Loop**: Die gehaltene Urkunde ist kein Standbild,
   sondern eine automatisch alle 3,4 Sekunden weiterschaltende Karussell-Animation
   (Überblendung + 3D-Drehung) durch mehrere Zertifikate – siehe „Anpassen“ unten.
-- **Headline-Farbloop**: „Erfolg hat einen Namen.“ wechselt fortlaufend
-  zwischen Gold- und Weiß-Metallic (zwei überlagerte Textebenen mit
-  gegenläufiger Überblendung), zusätzlich zum feinen Glanz-Shimmer.
+- **Headline-Leuchtlauf**: „Erfolg hat einen Namen.“ wird pro Buchstabe in
+  einen eigenen `<span>` zerlegt; ein Lichtschein läuft fortlaufend von A bis
+  Z über den Text und wiederholt sich als Loop (`@keyframes letterChase`,
+  Versatz je Buchstabe über `animation-delay`).
 - **Karten-Glanz-Sweep**: Ein diagonaler Lichtreflex läuft alle 8 Sekunden
   einmal über die komplette Grafik (Header, Bühne und Text) – wie eine
   Glasoberfläche, die das Licht einfängt.
