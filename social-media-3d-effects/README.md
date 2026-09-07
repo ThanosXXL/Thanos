@@ -2,9 +2,10 @@
 
 Eine einzelne, in sich geschlossene HTML-Datei (`index.html`) für einen animierten
 Social-Media-Post im 4:5-Hochformat (Instagram-Feed-Format). Zeigt das M&C Akademie
-Logo oben links (großzügig, auf einer glänzenden weißen 3D-Karte mit
-Glanzlicht-Sweep – bewusst mit weißem statt transparentem Hintergrund, da
-Transparenz in manchen Vorschau-Apps schlecht lesbar war) und eine 3D-Bühnenszene
+Logo oben links (großzügig, oval freigestellt per `clip-path` – kein
+rechteckiger Rahmen/keine Ecken sichtbar, weißer statt transparenter
+Hintergrund für zuverlässige Lesbarkeit, dazu ein durchlaufender
+Glanzlicht-Sweep) und eine 3D-Bühnenszene
 mit drei animierten, vollständigen menschlichen Figuren (Kopf mit Gesicht – Augen,
 Nase, Mund, Ohren, Haare –, Rumpf im Outfit, Arme mit Händen/Fingern, Beine mit
 Schuhen) die ein Zertifikat entgegennehmen – inklusive Hochglanz- und
@@ -39,11 +40,10 @@ Oder die Datei einfach per Doppelklick im Browser öffnen.
   Metallic-Schrift-Shimmer auf der Headline, Glassmorphism-Chips, glänzend
   schattierte Outfits/Haut der Figuren.
 - **Animationen**: Fallendes Konfetti, rotierender Spotlight-Kegel, sanftes
-  Schweben und Jubel-Armbewegung der Figuren, pulsierender CTA-Button.
-  Respektiert `prefers-reduced-motion`. Die Statistik-Zahlen erscheinen
-  bewusst sofort mit ihrem finalen Wert (kein Hochzähl-Effekt mehr) – ein
-  Screenshot mitten in einer Zähl-Animation sah sonst wie ein falscher
-  Wert aus.
+  Schweben und Jubel-Armbewegung der Figuren, hochzählende Statistik-Zahlen
+  beim Laden, pulsierender CTA-Button. Respektiert `prefers-reduced-motion`.
+  (Ein Screenshot mitten in der Zähl-Animation zeigt einen Zwischenwert –
+  das ist kein falscher Wert, sondern die Animation läuft noch.)
 - **Figuren**: Drei per JavaScript als SVG gezeichnete, vollständige
   Personen (siehe `buildHumanFigure()` im `<script>`-Block) – kein
   Platzhalter-Icon, sondern Kopf/Gesicht (Augen, Nase, Mund, Ohren),

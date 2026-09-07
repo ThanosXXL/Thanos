@@ -140,6 +140,9 @@
   .logo-badge img{
     display:block;
     width:100%; height:auto;
+    /* Ovale Freistellung statt rechteckiger Ecken – zeigt nur die
+       ovale Logoform, keine viereckige Kontur drumherum. */
+    clip-path:ellipse(50% 50% at 50% 50%);
   }
   .logo-badge::after{
     content:"";
@@ -1019,20 +1022,36 @@
     }, 3400);
   }
 
-  /* --- stats: sofort den finalen Wert anzeigen ---
-     (bewusst ohne Hochzähl-Animation: ein Screenshot/eine Vorschau kann
-     jederzeit einen Zwischenstand einfrieren und fälschlich wie ein
-     falscher Wert aussehen). */
+  /* --- count-up stats --- */
   var nums = document.querySelectorAll(".stat-num");
   nums.forEach(function(node){
     var target = parseFloat(node.getAttribute("data-count"));
     var decimals = parseInt(node.getAttribute("data-decimals") || "0", 10);
     var suffix = node.getAttribute("data-suffix") || "";
     var grouped = node.hasAttribute("data-group");
-    var text = grouped
-      ? target.toLocaleString("de-DE", { minimumFractionDigits:decimals, maximumFractionDigits:decimals })
-      : target.toFixed(decimals);
-    node.textContent = text + suffix;
+    function fmt(n){
+      return grouped
+        ? n.toLocaleString("de-DE", { minimumFractionDigits:decimals, maximumFractionDigits:decimals })
+        : n.toFixed(decimals);
+    }
+    if (node.hasAttribute("data-no-count")) {
+      node.textContent = fmt(target) + suffix;
+      return;
+    }
+    if (reduceMotion) {
+      node.textContent = fmt(target) + suffix;
+      return;
+    }
+    var start = null;
+    var duration = 1600;
+    function step(ts){
+      if (!start) start = ts;
+      var p = Math.min((ts - start) / duration, 1);
+      var eased = 1 - Math.pow(1 - p, 3);
+      node.textContent = fmt(target * eased) + suffix;
+      if (p < 1) requestAnimationFrame(step);
+    }
+    setTimeout(function(){ requestAnimationFrame(step); }, 500);
   });
 
   /* --- pointer 3D tilt --- */
