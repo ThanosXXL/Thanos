@@ -10,6 +10,8 @@ This repository also hosts a second, unrelated project: `omniroute/` is a vendor
 
 A third project, `it-schulung/`, is a separate Electron desktop app for managing up to four IT-Schulungen (IT training courses), built with the same architecture as the Dozenten Dashboard (main/preload/renderer split, `contextIsolation: true`, JSON persistence in `app.getPath('userData')`) but as fully independent code: its own `package.json`, `main.js`, `preload.js`, `renderer/`, and data file (`it-schulung-data.json`, separate from `dozenten-data.json`). Each *Schulung* object is `{ id, name, todos, offeneThemen, abgeschlosseneThemen, chat }` — the training-course equivalent of a *Dozent*. Run it with `npm install` / `npm start` / `npm run dist` from inside `it-schulung/`, not from the repo root. It shares no dependencies, build config, or CI with the Dozenten Dashboard or with `omniroute/`.
 
+A fourth item, `social-media-3d-effects/`, is a single self-contained `index.html` (plus `README.md`) — an animated, 3D/glossy social-media graphic for the M&C Akademie brand (logo top-left, animated certificate-ceremony scene). It is a static asset with no build step, no dependencies, and no relation to the other three projects; open it directly in a browser.
+
 ## Commands
 
 ```bash
