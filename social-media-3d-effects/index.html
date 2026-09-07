@@ -730,9 +730,17 @@
     return el;
   }
   var FIGURE_STYLES = {
-    left:   { outfit: "url(#outfitSideAGrad)", hair: "url(#hairGradDark)" },
-    right:  { outfit: "url(#outfitSideBGrad)", hair: "url(#hairGradWarm)" },
-    center: { outfit: "url(#outfitCenterGrad)", hair: "url(#hairGradDark)" }
+    left:   { outfit: "url(#outfitSideAGrad)", hair: "url(#hairGradDark)", hairStyle: "short" },
+    right:  { outfit: "url(#outfitSideBGrad)", hair: "url(#hairGradWarm)", hairStyle: "long" },
+    center: { outfit: "url(#outfitCenterGrad)", hair: "url(#hairGradDark)", hairStyle: "wave" }
+  };
+  var HAIR_PATHS = {
+    /* kurz / Kurzhaarschnitt */
+    short: "M14,23 C11,1.5 49,1.5 46,23 C46,10.5 39,5.5 30,5.5 C21,5.5 14,10.5 14,23 Z",
+    /* gewellt / toupiert mit seitlichem Schwung */
+    wave: "M13,22 C11,7 18,-3 26,3 C29,-4 32,-4 34,2 C38,-4 50,3 47,22 C47,10.5 41,4.5 34,5.5 C36,2 33,0.5 30,3 C27,0.5 24,3 25,6 C18,5 13,11 13,22 Z",
+    /* lang, über die Ohren bis zu den Schultern */
+    long: "M11,35 C8,3 52,3 49,35 C49,37 45,38 44,34 C45,19 40,9.5 30,9.5 C20,9.5 15,19 16,34 C15,38 11,37 11,35 Z"
   };
   function buildHumanFigure(role){
     var style = FIGURE_STYLES[role] || FIGURE_STYLES.left;
@@ -780,7 +788,7 @@
     var earL = svgEl("ellipse", { cx:"18.3", cy:"17", rx:"2.6", ry:"4.2", fill:"url(#skinGrad)" });
     var earR = svgEl("ellipse", { cx:"41.7", cy:"17", rx:"2.6", ry:"4.2", fill:"url(#skinGrad)" });
     var head = svgEl("circle", { cx:"30", cy:"16", r:"12", fill:"url(#skinGrad)" });
-    var hair = svgEl("path", { d:"M14,23 C11,1.5 49,1.5 46,23 C46,10.5 39,5.5 30,5.5 C21,5.5 14,10.5 14,23 Z", fill:style.hair });
+    var hair = svgEl("path", { d:HAIR_PATHS[style.hairStyle] || HAIR_PATHS.short, fill:style.hair });
     var eyeL = svgEl("ellipse", { cx:"25.5", cy:"15", rx:"1.3", ry:"1.6", fill:"rgba(50,32,20,0.75)" });
     var eyeR = svgEl("ellipse", { cx:"34.5", cy:"15", rx:"1.3", ry:"1.6", fill:"rgba(50,32,20,0.75)" });
     var nose = svgEl("path", { d:"M30,15.5 L29,20.3 Q30,21.6 31,20.3", stroke:"rgba(74,42,20,0.5)", "stroke-width":"0.9", fill:"none", "stroke-linecap":"round" });

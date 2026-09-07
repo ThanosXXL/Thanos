@@ -43,9 +43,12 @@ Oder die Datei einfach per Doppelklick im Browser öffnen.
   beim Laden, pulsierender CTA-Button. Respektiert `prefers-reduced-motion`.
 - **Figuren**: Drei per JavaScript als SVG gezeichnete, vollständige
   Personen (siehe `buildHumanFigure()` im `<script>`-Block) – kein
-  Platzhalter-Icon, sondern Kopf/Haare/Gesicht, Rumpf, zwei Arme mit
-  Händen (Finger angedeutet) und zwei Beine mit Schuhen, in Marken-Rot/Gold
-  (mittlere Figur) bzw. dunklem Businessoutfit (äußere Figuren).
+  Platzhalter-Icon, sondern Kopf/Gesicht (Augen, Nase, Mund, Ohren),
+  Rumpf, zwei Arme mit Händen (4 Finger + Daumen) und zwei Beine mit
+  Schuhen, in Marken-Rot/Gold (mittlere Figur) bzw. dunklem
+  Businessoutfit (äußere Figuren). Jede Figur hat eine eigene Frisur
+  (`HAIR_PATHS`: `short`, `wave`, `long`) – bei Bedarf leicht um
+  weitere Stile erweiterbar.
 - **Echtzeit-Zertifikats-Loop**: Die gehaltene Urkunde ist kein Standbild,
   sondern eine automatisch alle 3,4 Sekunden weiterschaltende Karussell-Animation
   (Überblendung + 3D-Drehung) durch mehrere Zertifikate – siehe „Anpassen“ unten.
