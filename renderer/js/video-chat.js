@@ -106,16 +106,32 @@ const LOCAL_ID = 'me';
     if (!status) return;
     if (connected) {
       status.textContent = `🟢 Verbunden (Raum „${roomClient.roomCode}")`;
+      status.classList.remove('reconnecting');
       status.classList.add('connected');
       connectBtn.hidden = true;
       disconnectBtn.hidden = false;
     } else {
       status.textContent = '🔌 Nicht verbunden (nur lokale Ansicht)';
-      status.classList.remove('connected');
+      status.classList.remove('connected', 'reconnecting');
       connectBtn.hidden = false;
       disconnectBtn.hidden = true;
     }
     updateRoomCodeDisplay();
+  }
+
+  // Verbindung unerwartet weg (z. B. WLAN-Aussetzer) - roomClient versucht selbständig
+  // erneut zu verbinden; hier nur die Statusanzeige, damit es sichtbar ist und der
+  // Trennen-Button aktiv bleibt, um den Versuch bei Bedarf abzubrechen.
+  function updateRoomReconnectingUI(attempt) {
+    const status = document.getElementById('roomStatus');
+    const connectBtn = document.getElementById('roomConnectBtn');
+    const disconnectBtn = document.getElementById('roomDisconnectBtn');
+    if (!status) return;
+    status.textContent = `🟡 Verbindung unterbrochen – verbinde erneut … (Versuch ${attempt})`;
+    status.classList.remove('connected');
+    status.classList.add('reconnecting');
+    connectBtn.hidden = true;
+    disconnectBtn.hidden = false;
   }
 
   // Zeigt den aktuell im Eingabefeld stehenden (oder tatsächlich verbundenen) Raum-Code
@@ -170,6 +186,7 @@ const LOCAL_ID = 'me';
     roomClient.onBroadcast = handleRoomBroadcast;
     roomClient.onConnectionChange = updateRoomStatusUI;
     roomClient.onDataFull = handleDataFull;
+    roomClient.onReconnecting = updateRoomReconnectingUI;
 
     try {
       await roomClient.connect(serverUrl, roomCode, myName, mediaStream);

@@ -9,11 +9,15 @@
 const roomClient = {
   ws: null,
   peerId: null,
+  serverUrl: null,
   roomCode: null,
   myName: '',
   connected: false,
   peers: new Map(), // peerId -> { name, pc, stream }
   localStream: null,
+  _manualDisconnect: false,
+  _reconnectAttempt: 0,
+  _reconnectTimer: null,
 
   onPeerJoined: null, // (peerId, name) => {}
   onPeerLeft: null, // (peerId) => {}
@@ -21,6 +25,7 @@ const roomClient = {
   onBroadcast: null, // (fromPeerId, payload) => {}
   onConnectionChange: null, // (connected) => {}
   onDataFull: null, // (state|null) => {} – Dozenten-Daten-Synchronisation
+  onReconnecting: null, // (attempt) => {} – WLAN-Aussetzer o.ä., Server-Verbindung wird automatisch neu versucht
 
   requestData() {
     this._send({ type: 'data-request' });
@@ -32,7 +37,17 @@ const roomClient = {
   },
 
   connect(serverUrl, roomCode, myName, localStream) {
+    this._manualDisconnect = false;
+    if (this._reconnectTimer) {
+      clearTimeout(this._reconnectTimer);
+      this._reconnectTimer = null;
+    }
+    return this._connectInternal(serverUrl, roomCode, myName, localStream);
+  },
+
+  _connectInternal(serverUrl, roomCode, myName, localStream) {
     return new Promise((resolve, reject) => {
+      this.serverUrl = serverUrl;
       this.roomCode = roomCode;
       this.myName = myName;
       this.localStream = localStream;
@@ -51,6 +66,7 @@ const roomClient = {
 
       ws.addEventListener('open', () => {
         ws.removeEventListener('error', onOpenError);
+        this._reconnectAttempt = 0; // Verbindung steht wieder - Backoff zurücksetzen
         ws.send(JSON.stringify({ type: 'join', room: roomCode, name: myName }));
       });
 
@@ -70,6 +86,7 @@ const roomClient = {
         this.peers.forEach((p) => p.pc && p.pc.close());
         this.peers.clear();
         if (wasConnected && this.onConnectionChange) this.onConnectionChange(false);
+        if (!this._manualDisconnect) this._scheduleReconnect();
       });
 
       ws.addEventListener('error', () => {
@@ -78,7 +95,28 @@ const roomClient = {
     });
   },
 
+  // Verbindung unerwartet weg (z. B. WLAN-Aussetzer im Klassenzimmer) - automatisch mit
+  // wachsender Wartezeit erneut versuchen, statt den Video-Chat dauerhaft zu trennen.
+  _scheduleReconnect() {
+    if (this._reconnectTimer) return;
+    this._reconnectAttempt += 1;
+    const delayMs = Math.min(2000 * 2 ** (this._reconnectAttempt - 1), 16000);
+    if (this.onReconnecting) this.onReconnecting(this._reconnectAttempt);
+    this._reconnectTimer = setTimeout(() => {
+      this._reconnectTimer = null;
+      if (this._manualDisconnect) return;
+      this._connectInternal(this.serverUrl, this.roomCode, this.myName, this.localStream).catch(() => {
+        if (!this._manualDisconnect) this._scheduleReconnect();
+      });
+    }, delayMs);
+  },
+
   disconnect() {
+    this._manualDisconnect = true;
+    if (this._reconnectTimer) {
+      clearTimeout(this._reconnectTimer);
+      this._reconnectTimer = null;
+    }
     if (this.ws) {
       this.ws.close();
       this.ws = null;

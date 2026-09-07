@@ -153,6 +153,32 @@ test('Dozenten-Daten: erster Client ohne Serverdaten wird zur Quelle, zweiter Cl
   b.close();
 });
 
+test('data-update mit ungültiger Form wird ignoriert und überschreibt gespeicherte Daten nicht', async () => {
+  const a = await connect();
+  a.send(JSON.stringify({ type: 'join', room: 'invalid-data-raum', name: 'A' }));
+  await nextMessage(a);
+
+  const goodState = { dozenten: [{ id: 'd1', name: 'Frau Müller' }] };
+  a.send(JSON.stringify({ type: 'data-update', state: goodState }));
+
+  // Kaputte/böswillige Nachrichten: fehlendes dozenten-Array, null, komplett falscher Typ.
+  a.send(JSON.stringify({ type: 'data-update', state: {} }));
+  a.send(JSON.stringify({ type: 'data-update', state: null }));
+  a.send(JSON.stringify({ type: 'data-update', state: 'kaputt' }));
+
+  const b = await connect();
+  b.send(JSON.stringify({ type: 'join', room: 'invalid-data-raum', name: 'B' }));
+  await nextMessage(b);
+
+  b.send(JSON.stringify({ type: 'data-request' }));
+  const bData = await nextMessage(b);
+  assert.equal(bData.type, 'data-full');
+  assert.deepEqual(bData.state, goodState); // weiterhin der zuletzt gültige Stand
+
+  a.close();
+  b.close();
+});
+
 test('peer-left wird gesendet, wenn ein Gerät den Raum verlässt', async () => {
   const a = await connect();
   a.send(JSON.stringify({ type: 'join', room: 'leave-raum', name: 'A' }));

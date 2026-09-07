@@ -21,7 +21,10 @@ const fs = require('fs');
 const path = require('path');
 
 const PORT = Number(process.env.PORT) || 8787;
-const wss = new WebSocketServer({ port: PORT });
+// Grosszügiges, aber endliches Limit (Präsentationen können als Data-URL Teil des
+// Zustands sein) - schützt vor einzelnen, versehentlich riesigen Nachrichten.
+const MAX_PAYLOAD_BYTES = 25 * 1024 * 1024;
+const wss = new WebSocketServer({ port: PORT, maxPayload: MAX_PAYLOAD_BYTES });
 
 // room code -> Map<peerId, { ws, name }>
 const rooms = new Map();
@@ -43,11 +46,22 @@ function loadDataStore() {
 }
 
 function saveDataStore() {
+  // Atomar schreiben (temp-Datei + rename), damit ein Absturz mitten im Schreibvorgang
+  // nicht die einzige gemeinsame Datenkopie beschädigt.
+  const tmpPath = DATA_STORE_PATH + '.tmp';
   try {
-    fs.writeFileSync(DATA_STORE_PATH, JSON.stringify(appData, null, 2), 'utf-8');
+    fs.writeFileSync(tmpPath, JSON.stringify(appData, null, 2), 'utf-8');
+    fs.renameSync(tmpPath, DATA_STORE_PATH);
   } catch (err) {
     console.error('Konnte Dozenten-Daten nicht speichern:', err.message);
   }
+}
+
+// Grobe Formvalidierung für empfangene Dozenten-Daten: verhindert, dass ein defekter
+// oder böswilliger Client mit einer leeren/kaputten Nachricht den gemeinsamen Datenstand
+// aller Geräte überschreibt und dauerhaft speichert.
+function isValidAppState(state) {
+  return !!state && typeof state === 'object' && Array.isArray(state.dozenten);
 }
 
 loadDataStore();
@@ -86,6 +100,7 @@ wss.on('connection', (ws) => {
     }
 
     if (msg.type === 'data-update') {
+      if (!isValidAppState(msg.state)) return; // unbrauchbare Nachricht ignorieren, nichts überschreiben
       appData = msg.state;
       saveDataStore();
       allClients.forEach((client) => {

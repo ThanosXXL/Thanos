@@ -568,6 +568,10 @@ ul.item-list li span.item-text {
   color: #1e7a3a;
 }
 
+.room-status.reconnecting {
+  color: #a86a00;
+}
+
 .room-connect-bar input {
   padding: 6px 8px;
   border: 1px solid #b9c6d9;
