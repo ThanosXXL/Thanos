@@ -46,12 +46,20 @@ Oder die Datei einfach per Doppelklick im Browser öffnen.
   Platzhalter-Icon, sondern Kopf/Gesicht (Augen, Nase, Mund, Ohren),
   Rumpf, zwei Arme mit Händen (4 Finger + Daumen) und zwei Beine mit
   Schuhen, in Marken-Rot/Gold (mittlere Figur) bzw. dunklem
-  Businessoutfit (äußere Figuren). Jede Figur hat eine eigene Frisur
-  (`HAIR_PATHS`: `short`, `wave`, `long`) – bei Bedarf leicht um
-  weitere Stile erweiterbar.
+  Businessoutfit (äußere Figuren). Jede Figur hat eine eigene, an
+  aktuelle Trendfrisuren angelehnte Frisur mit Strähnen-Textur
+  (`HAIR_PATHS` + `HAIR_STRANDS`: `short` = texturierter Crop mit
+  Pony, `wave` = Curtains/seitlicher Sweep, `long` = gewellte
+  Shag-Länge) – bei Bedarf leicht um weitere Stile erweiterbar.
 - **Echtzeit-Zertifikats-Loop**: Die gehaltene Urkunde ist kein Standbild,
   sondern eine automatisch alle 3,4 Sekunden weiterschaltende Karussell-Animation
   (Überblendung + 3D-Drehung) durch mehrere Zertifikate – siehe „Anpassen“ unten.
+- **Headline-Farbloop**: „Erfolg hat einen Namen.“ wechselt fortlaufend
+  zwischen Gold- und Weiß-Metallic (zwei überlagerte Textebenen mit
+  gegenläufiger Überblendung), zusätzlich zum feinen Glanz-Shimmer.
+- **Karten-Glanz-Sweep**: Ein diagonaler Lichtreflex läuft alle 8 Sekunden
+  einmal über die komplette Grafik (Header, Bühne und Text) – wie eine
+  Glasoberfläche, die das Licht einfängt.
 
 ## Download-Button
 
