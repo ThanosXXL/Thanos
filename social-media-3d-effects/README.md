@@ -39,8 +39,11 @@ Oder die Datei einfach per Doppelklick im Browser öffnen.
   Metallic-Schrift-Shimmer auf der Headline, Glassmorphism-Chips, glänzend
   schattierte Outfits/Haut der Figuren.
 - **Animationen**: Fallendes Konfetti, rotierender Spotlight-Kegel, sanftes
-  Schweben und Jubel-Armbewegung der Figuren, hochzählende Statistik-Zahlen
-  beim Laden, pulsierender CTA-Button. Respektiert `prefers-reduced-motion`.
+  Schweben und Jubel-Armbewegung der Figuren, pulsierender CTA-Button.
+  Respektiert `prefers-reduced-motion`. Die Statistik-Zahlen erscheinen
+  bewusst sofort mit ihrem finalen Wert (kein Hochzähl-Effekt mehr) – ein
+  Screenshot mitten in einer Zähl-Animation sah sonst wie ein falscher
+  Wert aus.
 - **Figuren**: Drei per JavaScript als SVG gezeichnete, vollständige
   Personen (siehe `buildHumanFigure()` im `<script>`-Block) – kein
   Platzhalter-Icon, sondern Kopf/Gesicht (Augen, Nase, Mund, Ohren),
