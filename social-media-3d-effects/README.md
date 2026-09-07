@@ -87,5 +87,17 @@ Bild auf.
   9:16-Ausschnitt aufnehmen, da die Datei selbst eine Live-HTML-Animation und
   kein Video ist.
 
+## Kompatibilität mit eingeschränkten Vorschau-Browsern
+
+Manche In-App-Dateivorschauen (z. B. wenn die Datei über eine Messenger-/
+Sharing-App geöffnet wird, statt in einem echten Browser) sind stark
+eingeschränkte WebViews: sehr große Base64-Bilder können dort fehlschlagen,
+und moderne CSS-Eigenschaften wie `aspect-ratio` werden nicht immer
+unterstützt. Deshalb ist das Logo bewusst klein gehalten (~5 KB statt
+Originalgröße) und die Bühnenhöhe (`.scene-wrap`) ist fest in `em` statt über
+`aspect-ratio`/`flex-grow` berechnet, damit Zertifikat und Figuren dort nicht
+unsichtbar werden. Am zuverlässigsten ist weiterhin ein echter Browser
+(Chrome, Safari, Firefox) – siehe „Ansehen“ oben.
+
 Dieses Verzeichnis ist ein eigenständiges Asset ohne Code-Abhängigkeit zum
 Dozenten Dashboard, zu `omniroute/` oder zu `it-schulung/`.
