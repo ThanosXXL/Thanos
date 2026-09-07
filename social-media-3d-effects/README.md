@@ -2,12 +2,13 @@
 
 Eine einzelne, in sich geschlossene HTML-Datei (`index.html`) für einen animierten
 Social-Media-Post im 4:5-Hochformat (Instagram-Feed-Format). Zeigt das M&C Akademie
-Logo oben links (echtes freigestelltes PNG, transparenter Hintergrund) und eine
-3D-Bühnenszene mit drei animierten, vollständigen menschlichen Figuren (Kopf mit
-Gesicht – Augen, Nase, Mund, Ohren, Haare –, Rumpf im Outfit, Arme mit
-Händen/Fingern, Beine mit Schuhen) die ein Zertifikat entgegennehmen – inklusive
-Hochglanz- und Animationseffekten und einem in Echtzeit rotierenden
-Zertifikats-Loop.
+Logo oben links (großzügig, auf einer glänzenden weißen 3D-Karte mit
+Glanzlicht-Sweep – bewusst mit weißem statt transparentem Hintergrund, da
+Transparenz in manchen Vorschau-Apps schlecht lesbar war) und eine 3D-Bühnenszene
+mit drei animierten, vollständigen menschlichen Figuren (Kopf mit Gesicht – Augen,
+Nase, Mund, Ohren, Haare –, Rumpf im Outfit, Arme mit Händen/Fingern, Beine mit
+Schuhen) die ein Zertifikat entgegennehmen – inklusive Hochglanz- und
+Animationseffekten und einem in Echtzeit rotierenden Zertifikats-Loop.
 
 Die Figuren sind bewusst als stilisierte, glossy 3D-Illustration gehalten statt als
 echte Fotos: Fotos realer Personen als (nicht tatsächlich existierende) Absolventen
@@ -66,8 +67,8 @@ Oder die Datei einfach per Doppelklick im Browser öffnen.
 ## Anpassen
 
 - **Logo austauschen**: `<img src="data:image/png;base64,...">` im `<header>`
-  ersetzen (neues Bild als Base64 kodieren, idealerweise bereits als
-  freigestelltes PNG mit transparentem Hintergrund, z. B. `base64 -i logo.png`).
+  ersetzen (neues Bild als Base64 kodieren, idealerweise bereits freigestellt
+  mit weißem Hintergrund, z. B. `base64 -i logo.png`).
 - **Text/Zahlen**: Headline, Subline und die vier Statistik-Werte
   (`data-count`) im HTML – aktuell über 4.000 Teilnehmende, über 98 %
   Erfolgsquote, seit 2019, ⌀ 30 Teilnehmer/Schulung – bei Bedarf anpassen.
