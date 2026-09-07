@@ -4,13 +4,19 @@ name: PWA auf GitHub Pages veröffentlichen
 # auf GitHub Pages, damit sie über eine echte HTTPS-URL installierbar ist
 # (Android "Zum Startbildschirm hinzufügen", iOS Safari "Zum Home-Bildschirm").
 #
-# Läuft vorerst nur manuell und bei Push auf diesen Feature-Branch, um main
-# und andere Branches nicht zu beeinflussen. Nach dem Merge auf main kann der
-# "push"-Trigger unten auf "main" umgestellt werden.
+# Läuft NUR manuell (workflow_dispatch), nicht automatisch bei jedem Push.
+#
+# Grund: GitHub Pages ist für dieses Repository noch nicht aktiviert (Settings → Pages →
+# Source: "GitHub Actions"), und das Standard-GITHUB_TOKEN kann das nicht selbst per API
+# einschalten ("Resource not accessible by integration"). Solange das nicht ein einziges
+# Mal manuell nachgeholt wurde, würde ein automatischer "push"-Trigger bei jedem Commit
+# einen roten CI-Check erzeugen, der aus dem Code heraus nicht behebbar ist.
+#
+# Sobald Pages aktiviert ist, kann dieser Workflow jederzeit manuell über
+# Actions → "PWA auf GitHub Pages veröffentlichen" → "Run workflow" gestartet werden.
+# Danach kann der Trigger unten bei Bedarf wieder auf "push" (z. B. auf main) umgestellt
+# werden.
 on:
-  push:
-    branches:
-      - claude/screenshot-sniping-video-chat-xjl3jf
   workflow_dispatch:
 
 permissions:
