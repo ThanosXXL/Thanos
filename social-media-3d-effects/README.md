@@ -3,12 +3,15 @@
 Eine einzelne, in sich geschlossene HTML-Datei (`index.html`) für einen animierten
 Social-Media-Post im 4:5-Hochformat (Instagram-Feed-Format). Zeigt das M&C Akademie
 Logo oben links und eine 3D-Bühnenszene mit erfolgreichen Teilnehmern, die ihr
-Zertifikat entgegennehmen – inklusive Hochglanz- und Animationseffekten.
+Zertifikat entgegennehmen – inklusive Hochglanz- und Animationseffekten, einem in
+Echtzeit rotierenden Zertifikats-Loop und einem Download-Button.
 
 Kein Build-Schritt, keine Abhängigkeiten, kein `npm install` nötig. Das Logo ist
 als Base64-Bild eingebettet, die Datei funktioniert also offline (nur die
-Google-Fonts "Unbounded" und "Manrope" werden online nachgeladen – ohne
-Internetverbindung greift automatisch die System-Schriftart).
+Google-Fonts "Unbounded", "Manrope" und "Playfair Display" sowie die
+`html2canvas`-Bibliothek für den Download-Button werden online nachgeladen –
+ohne Internetverbindung greifen automatisch System-Schriftarten und der
+Download-Button zeigt einen Hinweis statt zu exportieren).
 
 ## Ansehen
 
@@ -30,6 +33,21 @@ Oder die Datei einfach per Doppelklick im Browser öffnen.
 - **Animationen**: Fallendes Konfetti, rotierender Spotlight-Kegel, sanftes
   Schweben der Figuren, hochzählende Statistik-Zahlen beim Laden, pulsierender
   CTA-Button. Respektiert `prefers-reduced-motion`.
+- **Echtzeit-Zertifikats-Loop**: Die gehaltene Urkunde ist kein Standbild,
+  sondern eine automatisch alle 3,4 Sekunden weiterschaltende Karussell-Animation
+  (Überblendung + 3D-Drehung) durch mehrere Zertifikate – siehe „Anpassen“ unten.
+
+## Download-Button
+
+Der Button „Als PNG herunterladen“ exportiert die aktuelle Ansicht (per
+`html2canvas`, 2-fache Auflösung) als PNG-Datei.
+
+- **Lokal im Browser** (Doppelklick auf `index.html`, oder auf einer eigenen
+  Website eingebunden): funktioniert normal über einen Standard-Browser-Download.
+- **In der Claude-Artifact-Vorschau im Chat**: funktioniert ebenfalls, aber
+  über die Claude-„downloads“-Capability (Bestätigungsdialog des Viewers) statt
+  über einen klassischen Browser-Download – technisch bedingt, da Artifact-Vorschauen
+  aus Sicherheitsgründen keine direkten Datei-Downloads zulassen.
 
 ## Anpassen
 
@@ -38,6 +56,13 @@ Oder die Datei einfach per Doppelklick im Browser öffnen.
 - **Text/Zahlen**: Headline, Subline und die drei Statistik-Werte
   (`data-count`) im HTML sind Platzhalter – bitte durch echte Kennzahlen der
   M&C Akademie ersetzen, bevor die Grafik veröffentlicht wird.
+- **Echte Zertifikate einbinden**: Im `<script>`-Block das Array `CERTIFICATES`
+  bearbeiten. Jeder Eintrag erzeugt entweder eine generierte Urkunde
+  (`name`, `course`, `date`, `no`) oder – wenn `image` gesetzt ist – zeigt ein
+  eingescanntes/fotografiertes Original-Zertifikat als Bild an (Base64 oder
+  Datei-URL). Die mitgelieferten Namen (Max Mustermann, Erika Musterfrau,
+  Jonas Keller) sind Platzhalter und **müssen** vor der Veröffentlichung durch
+  echte Teilnehmer bzw. echte Zertifikatsbilder ersetzt werden.
 - **Als Video exportieren**: Für Instagram/TikTok/Reels die Seite im Browser
   öffnen und mit einem Bildschirmrekorder (z. B. QuickTime, OBS) im 4:5- bzw.
   9:16-Ausschnitt aufnehmen, da die Datei selbst eine Live-HTML-Animation und
