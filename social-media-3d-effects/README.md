@@ -39,8 +39,11 @@ Oder die Datei einfach per Doppelklick im Browser öffnen.
 
 ## Download-Button
 
-Der Button „Als PNG herunterladen“ exportiert die aktuelle Ansicht (per
-`html2canvas`, 2-fache Auflösung) als PNG-Datei.
+Oben rechts auf der Grafik (neben dem Logo, über dem Datums-Badge) sitzt ein
+kompakter „PNG“-Button. Er exportiert die aktuelle Ansicht (per `html2canvas`,
+2-fache Auflösung) als PNG-Datei und wird beim Export selbst automatisch aus
+dem Bild ausgeblendet (`ignoreElements`), taucht also nicht im exportierten
+Bild auf.
 
 - **Lokal im Browser** (Doppelklick auf `index.html`, oder auf einer eigenen
   Website eingebunden): funktioniert normal über einen Standard-Browser-Download.
