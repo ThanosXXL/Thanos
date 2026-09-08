@@ -1,0 +1,13 @@
+{
+  "name": "it-schulung-signaling-server",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Eigenständiger Signaling-Server für den Mehrgeräte-Video-Chat und die Dozenten-Daten-Synchronisation von IT Schulungsmaßnahmen. Absichtlich von der Haupt-App getrennt (kein keytar/Electron), damit er sich auf einer schlanken Node-Umgebung hosten lässt.",
+  "main": "signaling-server.js",
+  "scripts": {
+    "start": "node signaling-server.js"
+  },
+  "dependencies": {
+    "ws": "^8.18.0"
+  }
+}
