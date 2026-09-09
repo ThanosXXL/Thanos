@@ -46,9 +46,13 @@
     const schulung = {
       id: uid(),
       name,
+      erklaerung: '',
+      admin: '',
+      link: '',
       todos: [],
       offeneThemen: [],
       abgeschlosseneThemen: [],
+      teilnehmer: [],
       chat: []
     };
     state.schulungen.push(schulung);
@@ -79,6 +83,15 @@
     }
     persist();
     closeDeleteSchulungModal();
+    render();
+  }
+
+  function updateSchulungField(schulungId, field, value) {
+    const schulung = findSchulung(schulungId);
+    if (!schulung) return;
+    if (schulung[field] === value) return;
+    schulung[field] = value;
+    persist();
     render();
   }
 
@@ -210,6 +223,76 @@
     return col;
   }
 
+  function buildMetaSection(schulung) {
+    const section = document.createElement('div');
+    section.className = 'schulung-meta';
+
+    const adminField = document.createElement('div');
+    adminField.className = 'meta-field';
+    const adminLabel = document.createElement('label');
+    adminLabel.textContent = 'Admin';
+    const adminInput = document.createElement('input');
+    adminInput.type = 'text';
+    adminInput.placeholder = 'Verantwortliche Person';
+    adminInput.value = schulung.admin;
+    adminInput.addEventListener('blur', () =>
+      updateSchulungField(schulung.id, 'admin', adminInput.value.trim())
+    );
+    adminInput.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter') adminInput.blur();
+    });
+    adminField.appendChild(adminLabel);
+    adminField.appendChild(adminInput);
+
+    const linkField = document.createElement('div');
+    linkField.className = 'meta-field link-field';
+    const linkLabel = document.createElement('label');
+    linkLabel.textContent = 'Link – täglicher Live-Termin';
+    const linkRow = document.createElement('div');
+    linkRow.className = 'link-row';
+    const linkInput = document.createElement('input');
+    linkInput.type = 'text';
+    linkInput.placeholder = 'https://...';
+    linkInput.value = schulung.link;
+    linkInput.addEventListener('blur', () =>
+      updateSchulungField(schulung.id, 'link', linkInput.value.trim())
+    );
+    linkInput.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter') linkInput.blur();
+    });
+    const openLinkBtn = document.createElement('button');
+    openLinkBtn.type = 'button';
+    openLinkBtn.textContent = 'Öffnen';
+    openLinkBtn.addEventListener('click', () => {
+      if (schulung.link) window.schulungAPI.openExternal(schulung.link);
+    });
+    linkRow.appendChild(linkInput);
+    linkRow.appendChild(openLinkBtn);
+    linkField.appendChild(linkLabel);
+    linkField.appendChild(linkRow);
+
+    section.appendChild(adminField);
+    section.appendChild(linkField);
+
+    const erklaerungBlock = document.createElement('div');
+    erklaerungBlock.className = 'schulung-erklaerung';
+    const erklaerungLabel = document.createElement('label');
+    erklaerungLabel.textContent = 'Erklärung';
+    const erklaerungInput = document.createElement('textarea');
+    erklaerungInput.placeholder = 'Kurze Erklärung zur Schulung...';
+    erklaerungInput.value = schulung.erklaerung;
+    erklaerungInput.addEventListener('blur', () =>
+      updateSchulungField(schulung.id, 'erklaerung', erklaerungInput.value.trim())
+    );
+    erklaerungBlock.appendChild(erklaerungLabel);
+    erklaerungBlock.appendChild(erklaerungInput);
+
+    const wrapper = document.createElement('div');
+    wrapper.appendChild(section);
+    wrapper.appendChild(erklaerungBlock);
+    return wrapper;
+  }
+
   function renderPanel() {
     content.innerHTML = '';
 
@@ -229,6 +312,8 @@
     header.innerHTML = `<h2></h2>`;
     header.querySelector('h2').textContent = schulung.name;
     panel.appendChild(header);
+
+    panel.appendChild(buildMetaSection(schulung));
 
     const grid = document.createElement('div');
     grid.className = 'lists-grid';
@@ -325,9 +410,34 @@
       }
     });
 
+    // Liste vier: Teilnehmer
+    const teilnehmerCol = buildListColumn({
+      title: 'Liste 4 – Teilnehmer',
+      extraClass: 'teilnehmer',
+      schulungId: schulung.id,
+      listKey: 'teilnehmer',
+      items: schulung.teilnehmer,
+      renderItem: (item) => {
+        const li = document.createElement('li');
+        const span = document.createElement('span');
+        span.className = 'item-text';
+        span.textContent = item.text;
+        const delBtn = document.createElement('button');
+        delBtn.className = 'icon-btn danger';
+        delBtn.textContent = '✕';
+        delBtn.title = 'Löschen';
+        delBtn.addEventListener('click', () => deleteItem(schulung.id, 'teilnehmer', item.id));
+        li.appendChild(span);
+        li.appendChild(delBtn);
+        return li;
+      }
+    });
+    teilnehmerCol.querySelector('input').placeholder = 'Name des Teilnehmers...';
+
     grid.appendChild(todoCol);
     grid.appendChild(openCol);
     grid.appendChild(doneCol);
+    grid.appendChild(teilnehmerCol);
     panel.appendChild(grid);
 
     panel.appendChild(buildChatPanel(schulung));
@@ -417,6 +527,10 @@
     state = loaded && Array.isArray(loaded.schulungen) ? loaded : { schulungen: [] };
     state.schulungen.forEach((s) => {
       if (!Array.isArray(s.chat)) s.chat = [];
+      if (!Array.isArray(s.teilnehmer)) s.teilnehmer = [];
+      if (typeof s.erklaerung !== 'string') s.erklaerung = '';
+      if (typeof s.admin !== 'string') s.admin = '';
+      if (typeof s.link !== 'string') s.link = '';
     });
     activeSchulungId = state.schulungen.length ? state.schulungen[0].id : null;
     render();
