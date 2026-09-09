@@ -1,7 +1,7 @@
 {
   "name": "Dozenten Dashboard",
   "short_name": "Dozenten",
-  "description": "Desktop-Dashboard zur Verwaltung von Dozenten und Baustelle-Tagesreport",
+  "description": "Desktop-Dashboard zur Verwaltung von Dozenten, Aufgaben und Projekten",
   "start_url": "./index.html",
   "scope": "./",
   "display": "standalone",

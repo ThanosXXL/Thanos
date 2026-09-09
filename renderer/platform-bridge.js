@@ -8,11 +8,11 @@
   }
 })();
 
-// Stellt window.dashboardAPI / window.reportAPI bereit, wenn preload.js sie nicht
-// schon injiziert hat (also außerhalb von Electron: Android-App via Capacitor oder
-// normaler Browser/PWA). In Electron bleibt die Electron-IPC-Variante unangetastet.
+// Stellt window.dashboardAPI bereit, wenn preload.js es nicht schon injiziert hat
+// (also außerhalb von Electron: Android-App via Capacitor oder normaler Browser/PWA).
+// In Electron bleibt die Electron-IPC-Variante unangetastet.
 (function () {
-  if (window.dashboardAPI && window.reportAPI) return;
+  if (window.dashboardAPI) return;
 
   var isCapacitor = !!(window.Capacitor && window.Capacitor.isNativePlatform && window.Capacitor.isNativePlatform());
 
@@ -22,49 +22,22 @@
   function capSet(key, value) {
     return window.Capacitor.Plugins.Preferences.set({ key: key, value: value });
   }
-  function capRemove(key) {
-    return window.Capacitor.Plugins.Preferences.remove({ key: key });
-  }
-  function capKeys() {
-    return window.Capacitor.Plugins.Preferences.keys().then(function (r) { return r.keys; });
-  }
 
   function lsGet(key) { return Promise.resolve(localStorage.getItem(key)); }
   function lsSet(key, value) { localStorage.setItem(key, value); return Promise.resolve(); }
-  function lsRemove(key) { localStorage.removeItem(key); return Promise.resolve(); }
-  function lsKeys() {
-    var keys = [];
-    for (var i = 0; i < localStorage.length; i++) keys.push(localStorage.key(i));
-    return Promise.resolve(keys);
-  }
 
   var backend = isCapacitor
-    ? { get: capGet, set: capSet, remove: capRemove, keys: capKeys }
-    : { get: lsGet, set: lsSet, remove: lsRemove, keys: lsKeys };
+    ? { get: capGet, set: capSet }
+    : { get: lsGet, set: lsSet };
 
-  if (!window.dashboardAPI) {
-    window.dashboardAPI = {
-      loadData: function () {
-        return backend.get('dozenten-data').then(function (raw) {
-          try { return raw ? JSON.parse(raw) : { dozenten: [] }; } catch (e) { return { dozenten: [] }; }
-        });
-      },
-      saveData: function (data) {
-        return backend.set('dozenten-data', JSON.stringify(data)).then(function () { return true; });
-      }
-    };
-  }
-
-  if (!window.reportAPI) {
-    window.reportAPI = {
-      storageGet: function (key) { return backend.get(key); },
-      storageSet: function (key, value) { return backend.set(key, value); },
-      storageDelete: function (key) { return backend.remove(key); },
-      storageList: function (prefix) {
-        return backend.keys().then(function (keys) {
-          return keys.filter(function (k) { return k && k.indexOf(prefix || '') === 0; });
-        });
-      }
-    };
-  }
+  window.dashboardAPI = {
+    loadData: function () {
+      return backend.get('dozenten-data').then(function (raw) {
+        try { return raw ? JSON.parse(raw) : { dozenten: [] }; } catch (e) { return { dozenten: [] }; }
+      });
+    },
+    saveData: function (data) {
+      return backend.set('dozenten-data', JSON.stringify(data)).then(function () { return true; });
+    }
+  };
 })();

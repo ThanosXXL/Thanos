@@ -1,11 +1,8 @@
-const CACHE_NAME = 'dozenten-dashboard-v1';
+const CACHE_NAME = 'dozenten-dashboard-v2';
 const ASSETS = [
   './index.html',
-  './tagesreport.html',
   './style.css',
-  './tagesreport.css',
   './renderer.js',
-  './tagesreport.js',
   './platform-bridge.js',
   './manifest.json',
   './icons/icon-192.png',

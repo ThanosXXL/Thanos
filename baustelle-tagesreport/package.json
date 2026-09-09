@@ -1,0 +1,43 @@
+{
+  "name": "baustelle-tagesreport",
+  "version": "1.0.0",
+  "description": "Eigenständige Desktop-App für den Baustelle-Tagesreport (Tagesreport, Status, Bestellstatus, Screenshots)",
+  "main": "main.js",
+  "author": "",
+  "license": "MIT",
+  "scripts": {
+    "start": "electron .",
+    "dist": "electron-builder"
+  },
+  "devDependencies": {
+    "electron": "^31.0.0",
+    "electron-builder": "^24.13.3"
+  },
+  "build": {
+    "appId": "com.baustelle.tagesreport",
+    "productName": "Baustelle Tagesreport",
+    "files": [
+      "main.js",
+      "preload.js",
+      "renderer/**/*",
+      "package.json"
+    ],
+    "directories": {
+      "output": "dist"
+    },
+    "win": {
+      "target": "nsis"
+    },
+    "mac": {
+      "target": "dmg"
+    },
+    "linux": {
+      "target": "AppImage"
+    },
+    "publish": [
+      {
+        "provider": "github"
+      }
+    ]
+  }
+}

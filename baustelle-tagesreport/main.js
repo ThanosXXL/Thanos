@@ -2,14 +2,14 @@ const { app, BrowserWindow, ipcMain } = require('electron');
 const path = require('path');
 const fs = require('fs');
 
-const dataFilePath = path.join(app.getPath('userData'), 'dozenten-data.json');
+const dataFilePath = path.join(app.getPath('userData'), 'tagesreport-data.json');
 
 function loadData() {
   try {
     const raw = fs.readFileSync(dataFilePath, 'utf-8');
     return JSON.parse(raw);
   } catch (err) {
-    return { dozenten: [] };
+    return {};
   }
 }
 
@@ -19,11 +19,11 @@ function saveData(data) {
 
 function createWindow() {
   const win = new BrowserWindow({
-    width: 1200,
-    height: 800,
-    minWidth: 900,
+    width: 480,
+    height: 860,
+    minWidth: 380,
     minHeight: 600,
-    backgroundColor: '#ffffff',
+    backgroundColor: '#14171c',
     webPreferences: {
       preload: path.join(__dirname, 'preload.js'),
       contextIsolation: true,
@@ -35,13 +35,28 @@ function createWindow() {
   win.loadFile(path.join(__dirname, 'renderer', 'index.html'));
 }
 
-ipcMain.handle('load-data', () => {
-  return loadData();
+ipcMain.handle('report-storage-get', (event, key) => {
+  const data = loadData();
+  return Object.prototype.hasOwnProperty.call(data, key) ? data[key] : null;
 });
 
-ipcMain.handle('save-data', (event, data) => {
+ipcMain.handle('report-storage-set', (event, key, value) => {
+  const data = loadData();
+  data[key] = value;
   saveData(data);
   return true;
+});
+
+ipcMain.handle('report-storage-delete', (event, key) => {
+  const data = loadData();
+  delete data[key];
+  saveData(data);
+  return true;
+});
+
+ipcMain.handle('report-storage-list', (event, prefix) => {
+  const data = loadData();
+  return Object.keys(data).filter(k => k.startsWith(prefix || ''));
 });
 
 app.whenReady().then(() => {
