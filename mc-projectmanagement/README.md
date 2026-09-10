@@ -24,6 +24,7 @@ python3 -m http.server 8080
 ```
 mc-projectmanagement/
 ├── index.html        Seiteninhalt (eine Seite mit Anker-Navigation)
+├── impressum.html     Impressum-Seite (nur E-Mail als Kontakt, siehe unten)
 ├── datenschutz.html   Datenschutz-Seite (aktuell Platzhalter, siehe unten)
 ├── css/style.css      3D-/Glas-/Hochglanz-Design, Animationen, Responsive Layout
 ├── js/script.js       Tilt-, Magnet- & Ripple-Effekte, Scroll-Reveal, Zähler, Ticker, Mobile-Nav
@@ -75,14 +76,19 @@ mc-projectmanagement/
   über E-Mail und Adresse. Soll wieder eine Nummer ergänzt werden, einfach
   einen `contact-line`-/`footer-contact-btn`-Block (siehe Aufbau der
   E-Mail-Blöcke) mit `tel:`-Link in `index.html` hinzufügen.
-- **Rechtliches**: Der Footer-Link „Datenschutz“ verweist jetzt auf
-  `datenschutz.html` – eine eigene, im gleichen Design gehaltene Seite mit
-  dem ehrlichen Hinweis „Datenschutzerklärung folgt in Kürze“. Sobald der
-  echte Text vorliegt, einfach den Absatz im `<div class="tilt-card ...">`
-  in `datenschutz.html` ersetzen (Struktur/Design bleiben bestehen).
-  „Impressum“ wurde auf Wunsch entfernt – für eine echte Live-Website ist in
-  Deutschland i. d. R. ein Impressum Pflicht (TMG/DDG), sobald ein
-  Kontaktformular vorhanden ist; ggf. ergänzen, sobald der Text vorliegt.
+- **Rechtliches**: Der Footer enthält wieder „Impressum“ und „Datenschutz“,
+  beide als eigene Seiten im gleichen Design:
+  - `impressum.html` – Angaben gemäß § 5 DDG (M & C Projektmanagement GmbH,
+    Im II. Westfeld 7, 44388 Dortmund), Geschäftsführung (Madlen & Collin
+    Golibersuch) sowie **ausschließlich E-Mail als Kontakt** (keine
+    Telefonnummer, wie gewünscht). Handelsregisternummer, Registergericht
+    und USt-IdNr. sind als Platzhalter markiert, da diese Angaben nicht
+    vorlagen – bitte ergänzen, sobald verfügbar (rechtlich notwendig für
+    ein vollständiges Impressum).
+  - `datenschutz.html` – ehrlicher Hinweis „Datenschutzerklärung folgt in
+    Kürze“. Sobald der echte Text vorliegt, einfach den Absatz im
+    `<div class="tilt-card ...">` ersetzen (Struktur/Design bleiben
+    bestehen).
 - **Texte** (Leistungen, Über uns, Referenzen) sind teils exemplarisch
   formuliert und sollten fachlich gegengelesen/angepasst werden; der
   Kontakt-Intro-Text stammt bereits von der echten Seite.
