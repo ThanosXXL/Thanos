@@ -78,12 +78,16 @@ mc-projectmanagement/
   E-Mail-Blöcke) mit `tel:`-Link in `index.html` hinzufügen.
 - **Rechtliches**: Der Footer enthält wieder „Impressum“ und „Datenschutz“,
   beide als eigene Seiten im gleichen Design:
-  - `impressum.html` – Angaben gemäß § 5 DDG (M & C Projektmanagement GmbH,
-    Im II. Westfeld 7, 44388 Dortmund), Geschäftsführung (Madlen & Collin
+  - `impressum.html` – Angaben gemäß § 5 DDG (M&C Holding GmbH, Im II.
+    Westfeld 7, 44388 Dortmund), Geschäftsführung (Madlen & Collin
     Golibersuch) sowie **ausschließlich E-Mail als Kontakt** (keine
-    Telefonnummer, wie gewünscht). Handelsregisternummer, Registergericht
-    und USt-IdNr. sind als Platzhalter markiert, da diese Angaben nicht
-    vorlagen – bitte ergänzen, sobald verfügbar (rechtlich notwendig für
+    Telefonnummer, wie gewünscht). Enthält zusätzlich die Pflichtabschnitte
+    „Verantwortlich für den Inhalt nach § 18 Abs. 2 MStV“,
+    „EU-Streitschlichtung“ (Link zur OS-Plattform) und
+    „Verbraucherstreitbeilegung“. Handelsregisternummer, Registergericht
+    und USt-IdNr. sind als Platzhalter markiert, da diese Angaben noch
+    nicht vorlagen – bitte in `impressum.html` (Karte „Registereintrag“ /
+    „Umsatzsteuer-ID“) ergänzen, sobald verfügbar (rechtlich notwendig für
     ein vollständiges Impressum).
   - `datenschutz.html` – ehrlicher Hinweis „Datenschutzerklärung folgt in
     Kürze“. Sobald der echte Text vorliegt, einfach den Absatz im
