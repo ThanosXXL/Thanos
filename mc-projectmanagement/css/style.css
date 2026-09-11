@@ -609,14 +609,51 @@ button{ font-family:inherit; }
   overflow:hidden;
   display:flex; flex-direction:column; align-items:center; justify-content:center;
   gap:1.4rem;
-  background:
-    radial-gradient(120% 140% at 20% 0%, rgba(91,140,255,.22), transparent 55%),
-    radial-gradient(120% 140% at 85% 100%, rgba(201,107,255,.2), transparent 55%),
-    linear-gradient(160deg, #12162c, #0a0d1a 70%);
+  background:#0a0d1a;
   border:1px solid var(--line-strong);
 }
+
+/* 4-Panel-Optik (Holding/Baumanagement/Akademie/Projectmanagement), passend zum echten Video */
+.video-panels{ position:absolute; inset:0; display:flex; }
+.video-panel{
+  flex:1; position:relative; overflow:hidden;
+  display:flex; align-items:flex-end; justify-content:center;
+  padding-bottom:12%;
+  border-right:1px solid rgba(255,255,255,.06);
+}
+.video-panel:last-child{ border-right:none; }
+.video-panel em{
+  position:relative; z-index:1;
+  font:700 .68rem/1.2 'Sora', sans-serif; font-style:normal;
+  color:rgba(255,255,255,.55);
+  text-align:center; padding:0 .6rem;
+  letter-spacing:.01em;
+}
+.video-panel::before{
+  content:"";
+  position:absolute; inset:0;
+  background:linear-gradient(200deg, transparent 40%, var(--panel-color) 100%);
+  opacity:.28;
+}
+.video-panel::after{
+  content:"";
+  position:absolute; left:-30%; right:-30%; bottom:-10%; height:55%;
+  background:var(--panel-color);
+  opacity:.16;
+  border-radius:50%;
+  filter:blur(6px);
+}
+.vp-holding{ --panel-color: #e7bf6b; }
+.vp-bau{ --panel-color: #c8ccd8; }
+.vp-akademie{ --panel-color: #ff5b6b; }
+.vp-pm{ --panel-color: #5b8cff; }
+
+@media (max-width: 560px){
+  .video-panel em{ display:none; }
+}
+
 .video-glow{
-  position:absolute; inset:-30%;
+  position:absolute; inset:-30%; z-index:1;
   background:conic-gradient(from 0deg, transparent, rgba(124,230,255,.14), transparent 30%);
   animation:videoSweep 7s linear infinite;
   pointer-events:none;
@@ -644,26 +681,6 @@ button{ font-family:inherit; }
 }
 .play-btn:hover{ transform:scale(1.08); }
 .play-btn svg{ margin-left:3px; }
-
-.video-bars{
-  position:relative; z-index:2;
-  display:flex; align-items:flex-end; gap:4px; height:26px;
-}
-.video-bars span{
-  width:4px; border-radius:2px;
-  background:linear-gradient(180deg, var(--cyan), var(--blue));
-  animation:eqBar 1.2s ease-in-out infinite;
-  opacity:.75;
-}
-.video-bars span:nth-child(1){ height:40%; animation-delay:.0s; }
-.video-bars span:nth-child(2){ height:80%; animation-delay:.1s; }
-.video-bars span:nth-child(3){ height:55%; animation-delay:.2s; }
-.video-bars span:nth-child(4){ height:100%; animation-delay:.3s; }
-.video-bars span:nth-child(5){ height:65%; animation-delay:.4s; }
-.video-bars span:nth-child(6){ height:90%; animation-delay:.5s; }
-.video-bars span:nth-child(7){ height:45%; animation-delay:.6s; }
-.video-bars span:nth-child(8){ height:70%; animation-delay:.7s; }
-@keyframes eqBar{ 0%,100%{ transform:scaleY(.5); } 50%{ transform:scaleY(1); } }
 
 .video-caption{
   position:relative; z-index:2; margin:0;
