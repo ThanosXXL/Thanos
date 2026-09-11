@@ -21,6 +21,20 @@
   window.addEventListener('scroll', onScrollHeader, { passive: true });
 
   /* -------------------------------------------------------------- */
+  /* Scroll-Fortschrittsbalken                                        */
+  /* -------------------------------------------------------------- */
+  var scrollProgress = document.getElementById('scrollProgress');
+  function onScrollProgress() {
+    if (!scrollProgress) return;
+    var scrollable = document.documentElement.scrollHeight - window.innerHeight;
+    var pct = scrollable > 0 ? (window.scrollY / scrollable) * 100 : 0;
+    scrollProgress.style.width = Math.min(100, Math.max(0, pct)) + '%';
+  }
+  onScrollProgress();
+  window.addEventListener('scroll', onScrollProgress, { passive: true });
+  window.addEventListener('resize', onScrollProgress);
+
+  /* -------------------------------------------------------------- */
   /* Mobile Navigation                                                */
   /* -------------------------------------------------------------- */
   var navToggle = document.getElementById('navToggle');

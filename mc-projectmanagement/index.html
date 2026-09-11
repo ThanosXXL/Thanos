@@ -6,6 +6,21 @@
 <title>M&amp;C Projectmanagement &ndash; Teil der M&amp;C Gruppe</title>
 <meta name="description" content="M&amp;C Projectmanagement &ndash; Teil der M&amp;C Gruppe (mit M&amp;C Baumanagement und M&amp;C Akademie) &ndash; begleitet Unternehmen bei Projektleitung, PM-Beratung, agilem Projektmanagement und Prozessoptimierung.">
 <link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
+
+<!-- Open Graph / Social-Media-Vorschau -->
+<meta property="og:type" content="website">
+<meta property="og:locale" content="de_DE">
+<meta property="og:site_name" content="M&amp;C Projectmanagement">
+<meta property="og:title" content="M&amp;C Projectmanagement &ndash; Teil der M&amp;C Gruppe">
+<meta property="og:description" content="Bauleitung, Bauaufsicht &amp; Brandschutz aus einer Hand &ndash; Projekte, die zuverlässig liefern.">
+<meta property="og:image" content="https://mc-projectmanagement.de/assets/og-image.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:url" content="https://mc-projectmanagement.de/">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="M&amp;C Projectmanagement &ndash; Teil der M&amp;C Gruppe">
+<meta name="twitter:description" content="Bauleitung, Bauaufsicht &amp; Brandschutz aus einer Hand &ndash; Projekte, die zuverlässig liefern.">
+<meta name="twitter:image" content="https://mc-projectmanagement.de/assets/og-image.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Sora:wght@400;500;600;700;800&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
@@ -21,6 +36,8 @@
   <div class="grain" aria-hidden="true"></div>
 </div>
 <div class="cursor-spot" id="cursorSpot" aria-hidden="true"></div>
+
+<div class="scroll-progress" id="scrollProgress" aria-hidden="true"></div>
 
 <a class="skip-link" href="#main">Zum Inhalt springen</a>
 
@@ -443,7 +460,7 @@
       <div class="section-head reveal">
         <p class="eyebrow"><span class="dot"></span> Unser Team</p>
         <h2>Die Menschen hinter Ihren Projekten</h2>
-        <p class="section-lead">Ein eingespieltes Team &ndash; im Einsatz bei Bauprojekten rund um den Globus.</p>
+        <p class="section-lead">Ein eingespieltes Team &ndash; bundesweit im Einsatz.</p>
       </div>
 
       <div class="team-roster">
@@ -764,7 +781,7 @@
 
       <div class="tilt-card globe-card reveal" style="--delay:.1s">
         <div class="sheen"></div>
-        <p class="globe-title">Baustellen, die wir bereits erfolgreich umgesetzt haben</p>
+        <p class="globe-title">Unser Netzwerk ist bundesweit aktiv</p>
         <div class="globe-stage">
           <div class="globe" aria-hidden="true"></div>
 
@@ -774,17 +791,20 @@
                 <path d="M0,0 L8,4 L0,8 Z" fill="var(--cyan)"/>
               </marker>
             </defs>
-            <path class="flow-path" d="M255 135 Q 170 40 85 55" fill="none" marker-end="url(#arrowHead)"/>
-            <path class="flow-path" d="M255 145 Q 330 90 340 65" fill="none" marker-end="url(#arrowHead)"/>
-            <path class="flow-path" d="M250 190 Q 320 220 345 235" fill="none" marker-end="url(#arrowHead)"/>
-            <path class="flow-path" d="M150 195 Q 100 230 60 225" fill="none" marker-end="url(#arrowHead)"/>
+            <path class="flow-path" d="M180 130 Q 100 70 60 54" fill="none" marker-end="url(#arrowHead)"/>
+            <path class="flow-path" d="M250 130 Q 310 68 336 50" fill="none" marker-end="url(#arrowHead)"/>
+            <path class="flow-path" d="M262 178 Q 322 208 346 216" fill="none" marker-end="url(#arrowHead)"/>
+            <path class="flow-path" d="M232 200 Q 262 250 266 268" fill="none" marker-end="url(#arrowHead)"/>
+            <path class="flow-path" d="M160 196 Q 92 220 56 222" fill="none" marker-end="url(#arrowHead)"/>
           </svg>
 
-          <span class="site-pin" style="left:17%; top:14%;">📍 Berlin</span>
-          <span class="site-pin" style="left:83%; top:16%;">📍 Dubai</span>
-          <span class="site-pin" style="left:86%; top:71%;">📍 Singapur</span>
-          <span class="site-pin" style="left:11%; top:69%;">📍 New York</span>
+          <span class="site-pin site-pin-hq" style="left:14%; top:16%;">📍 Dortmund (Sitz)</span>
+          <span class="site-pin" style="left:84%; top:14%;">📍 München</span>
+          <span class="site-pin" style="left:87%; top:68%;">📍 Passau</span>
+          <span class="site-pin" style="left:66%; top:84%;">📍 Reit im Winkl</span>
+          <span class="site-pin" style="left:12%; top:70%;">📍 Viechtach</span>
         </div>
+        <p class="globe-note">Standorte der M&amp;C Gruppe und des Netzwerk-Partners MC Projektsteuerung&nbsp;/ MC Generalbau (siehe Referenzen)</p>
       </div>
     </div>
   </section>
@@ -862,6 +882,10 @@
             <label for="cf-message">Nachricht</label>
             <textarea id="cf-message" name="Nachricht" rows="5" required placeholder="Erzählen Sie uns kurz von Ihrem Projekt …"></textarea>
           </div>
+          <label class="form-consent">
+            <input type="checkbox" required>
+            <span>Ich habe die <a href="datenschutz.html" target="_blank" rel="noopener">Datenschutzerklärung</a> zur Kenntnis genommen und bin mit der Verarbeitung meiner Angaben zur Bearbeitung meiner Anfrage einverstanden. *</span>
+          </label>
           <button type="submit" class="btn btn-glossy btn-primary"><span>Nachricht senden</span></button>
         </form>
 

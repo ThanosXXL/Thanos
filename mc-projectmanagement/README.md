@@ -23,12 +23,13 @@ python3 -m http.server 8080
 
 ```
 mc-projectmanagement/
-├── index.html        Seiteninhalt (eine Seite mit Anker-Navigation)
-├── impressum.html     Impressum-Seite (nur E-Mail als Kontakt, siehe unten)
-├── datenschutz.html   Datenschutz-Seite (aktuell Platzhalter, siehe unten)
-├── css/style.css      3D-/Glas-/Hochglanz-Design, Animationen, Responsive Layout
-├── js/script.js       Tilt-, Magnet- & Ripple-Effekte, Scroll-Reveal, Zähler, Ticker, Mobile-Nav
-└── assets/favicon.svg Favicon
+├── index.html          Seiteninhalt (eine Seite mit Anker-Navigation)
+├── impressum.html      Impressum-Seite (nur E-Mail als Kontakt, siehe unten)
+├── datenschutz.html    Datenschutz-Seite (aktuell Platzhalter, siehe unten)
+├── css/style.css       3D-/Glas-/Hochglanz-Design, Animationen, Responsive Layout
+├── js/script.js        Tilt-, Magnet- & Ripple-Effekte, Scroll-Reveal, Scroll-Fortschritt, Zähler, Ticker, Mobile-Nav
+├── assets/favicon.svg  Favicon
+└── assets/og-image.png Social-Media-Vorschaubild (1200×630, Open Graph/Twitter Card)
 ```
 
 ## Inhalte & offene Platzhalter
@@ -57,11 +58,14 @@ mc-projectmanagement/
   `index.html` (`.team-roster` in der `#team`-Sektion) als zusätzliche
   `<article class="tilt-card team-member-card">`-Blöcke nach demselben
   Muster ergänzen.
-- **3D-Globus mit Baustellen-Standorten**: reiner CSS-/SVG-Globus mit
-  animierten, umlaufenden Pfeilen zu vier Beispiel-Standorten (Berlin, Dubai,
-  Singapur, New York) als **Platzhalter-Städte**. Bitte in `index.html`
-  (`.site-pin` + zugehörige `<path class="flow-path">`-Koordinaten) durch die
-  tatsächlich realisierten Baustellen-Standorte ersetzen.
+- **3D-Globus „Unser Netzwerk“**: reiner CSS-/SVG-Globus mit animierten
+  Pfeilen zu den fünf echten, bestätigten Standorten: Dortmund (Sitz,
+  gold hervorgehoben), München, Passau, Reit im Winkl und Viechtach (die
+  drei letzteren laut Unternehmensangaben Referenzorte des Netzwerk-Partners
+  MC Projektsteuerung / MC Generalbau, siehe „Referenzen“). Die zuvor
+  erfundenen Städte (Berlin, Dubai, Singapur, New York) sowie der
+  Textclaim „rund um den Globus“ wurden entfernt, da sie weder belegt
+  waren noch zur angegebenen Vertraulichkeit bei Projektnamen passten.
 - **Video Vorstellung**: Platzhalter-Videoplayer im 4-Panel-Look
   (M&C Holding/Baumanagement/Akademie/Projectmanagement, an das echte
   Firmenvideo angelehnt), Play-Button, Beschriftung „Video-Vorstellung
@@ -100,6 +104,20 @@ mc-projectmanagement/
 - **Texte** (Leistungen, Über uns, Referenzen) sind teils exemplarisch
   formuliert und sollten fachlich gegengelesen/angepasst werden; der
   Kontakt-Intro-Text stammt bereits von der echten Seite.
+
+## Weitere Verbesserungen
+
+- **Open Graph / Twitter Card**: eigens gerendertes Vorschaubild
+  (`assets/og-image.png`, 1200×630, im Chrome-/Hochglanz-Look der Seite)
+  plus Meta-Tags in `index.html`, damit geteilte Links (z. B. über die
+  neuen Social-Buttons) mit Bild, Titel und Beschreibung angezeigt werden.
+  `og:url`/`og:image` verweisen aktuell auf `https://mc-projectmanagement.de/`
+  – bitte anpassen, falls die Seite unter einer anderen Domain live geht.
+- **DSGVO-Einwilligung im Kontaktformular**: Pflicht-Checkbox mit Link zur
+  Datenschutzerklärung, bevor eine Nachricht gesendet werden kann.
+- **Scroll-Fortschrittsbalken**: dünne, glänzende Leiste ganz oben
+  (`.scroll-progress`), die den Lesefortschritt auf allen drei Seiten
+  anzeigt.
 
 ## Design & Haptik
 
