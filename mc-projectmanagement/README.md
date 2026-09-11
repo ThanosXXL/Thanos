@@ -67,10 +67,6 @@ mc-projectmanagement/
   Firmenvideo angelehnt), Play-Button, Beschriftung „Video-Vorstellung
   folgt in Kürze“ – bitte durch ein eingebettetes Video (`<video>`- oder
   YouTube/Vimeo-Embed) ersetzen, sobald eines vorliegt.
-- **Menüpunkt „M&C Akademie Anfrage“**: aktuell auf `#kontakt` verlinkt
-  (Platzhalter-Ziel), da keine eigene Akademie-Anfrageseite/-URL vorlag –
-  bitte den `href` in `index.html` (`.main-nav`) anpassen, falls es eine
-  eigene Zielseite geben soll.
 - **E-Mail**: `info@mc-projectmanagement.com` (Kontaktformular, Kontaktkarte,
   Footer-Button und animierter Lauftext im Footer).
 - **Adresse**: „Im II. Westfeld 7, 44388 Dortmund“ (Kontaktkarte & Footer).
