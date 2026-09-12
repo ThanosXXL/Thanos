@@ -45,9 +45,14 @@
     if (!grid) return;
 
     EXAMPLES.forEach(function (example, index) {
-      var card = document.createElement("div");
+      var card = document.createElement("button");
+      card.type = "button";
       card.className = "example-card reveal";
       card.style.transitionDelay = (index * 0.06) + "s";
+      card.setAttribute(
+        "aria-label",
+        example.title + " (" + example.tag + ") – Beispiel ansehen"
+      );
 
       var chrome = document.createElement("div");
       chrome.className = "example-chrome";
@@ -82,29 +87,25 @@
 
       card.appendChild(label);
 
-      card.addEventListener("click", function () {
-        openLightbox(example);
+      card.addEventListener("click", function (e) {
+        openLightbox(example, e.currentTarget);
       });
 
       grid.appendChild(card);
     });
   }
 
-  function openLightbox(example) {
+  var lastFocusedEl = null;
+
+  function openLightbox(example, triggerEl) {
     var lightbox = document.getElementById("lightbox");
     var frame = document.getElementById("lightboxFrame");
     var title = document.getElementById("lightboxTitle");
     var text = document.getElementById("lightboxText");
+    var closeBtn = document.getElementById("lightboxClose");
     if (!lightbox || !frame || !title || !text) return;
 
     frame.innerHTML = "";
-    frame.style.background = "linear-gradient(160deg, rgba(212,175,55,0.16), rgba(5,11,26,0.5))";
-    frame.style.display = "flex";
-    frame.style.flexDirection = "column";
-    frame.style.justifyContent = "center";
-    frame.style.gap = "10px";
-    frame.style.padding = "22px";
-
     example.blocks.forEach(function (widthPct, i) {
       var block = document.createElement("div");
       block.style.width = widthPct + "%";
@@ -117,15 +118,42 @@
     title.textContent = example.title + " — " + example.tag;
     text.textContent = example.text;
 
+    lastFocusedEl = triggerEl || document.activeElement;
     lightbox.classList.add("open");
     document.body.style.overflow = "hidden";
+    if (closeBtn) closeBtn.focus();
   }
 
   function closeLightbox() {
     var lightbox = document.getElementById("lightbox");
-    if (!lightbox) return;
+    if (!lightbox || !lightbox.classList.contains("open")) return;
     lightbox.classList.remove("open");
     document.body.style.overflow = "";
+    if (lastFocusedEl && typeof lastFocusedEl.focus === "function") {
+      lastFocusedEl.focus();
+    }
+    lastFocusedEl = null;
+  }
+
+  function trapFocus(e) {
+    var lightbox = document.getElementById("lightbox");
+    if (!lightbox || !lightbox.classList.contains("open")) return;
+
+    var focusables = lightbox.querySelectorAll(
+      'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])'
+    );
+    if (!focusables.length) return;
+
+    var first = focusables[0];
+    var last = focusables[focusables.length - 1];
+
+    if (e.shiftKey && document.activeElement === first) {
+      e.preventDefault();
+      last.focus();
+    } else if (!e.shiftKey && document.activeElement === last) {
+      e.preventDefault();
+      first.focus();
+    }
   }
 
   function initLightboxControls() {
@@ -139,6 +167,7 @@
     }
     document.addEventListener("keydown", function (e) {
       if (e.key === "Escape") closeLightbox();
+      if (e.key === "Tab") trapFocus(e);
     });
   }
 
@@ -161,7 +190,9 @@
 
   function initTilt() {
     var card = document.getElementById("tiltCard");
-    if (!card || window.matchMedia("(pointer: coarse)").matches) return;
+    if (!card) return;
+    if (window.matchMedia("(pointer: coarse)").matches) return;
+    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
 
     card.addEventListener("mousemove", function (e) {
       var rect = card.getBoundingClientRect();
@@ -182,11 +213,36 @@
     if (year) year.textContent = new Date().getFullYear();
   }
 
+  function initMobileNav() {
+    var toggle = document.getElementById("navToggle");
+    var nav = document.getElementById("mainNav");
+    if (!toggle || !nav) return;
+
+    function setOpen(isOpen) {
+      nav.classList.toggle("open", isOpen);
+      toggle.setAttribute("aria-expanded", String(isOpen));
+      toggle.setAttribute("aria-label", isOpen ? "Menü schließen" : "Menü öffnen");
+    }
+
+    toggle.addEventListener("click", function () {
+      setOpen(!nav.classList.contains("open"));
+    });
+
+    nav.querySelectorAll("a").forEach(function (link) {
+      link.addEventListener("click", function () { setOpen(false); });
+    });
+
+    document.addEventListener("keydown", function (e) {
+      if (e.key === "Escape") setOpen(false);
+    });
+  }
+
   document.addEventListener("DOMContentLoaded", function () {
     buildGallery();
     initLightboxControls();
     initReveal();
     initTilt();
     initYear();
+    initMobileNav();
   });
 })();
