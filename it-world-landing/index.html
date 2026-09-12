@@ -5,6 +5,13 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>IT-World — Social Media Flyer Design</title>
 <meta name="description" content="IT-World gestaltet hochwertige Social Media Flyer für Instagram, Facebook &amp; Co. Auffällig, professionell, schnell geliefert.">
+<meta name="theme-color" content="#0a1633">
+<!-- Open Graph / Twitter: og:url and og:image need a real hosted domain — add them once this page is deployed. -->
+<meta property="og:type" content="website">
+<meta property="og:title" content="IT-World — Social Media Flyer Design">
+<meta property="og:description" content="Hochglänzende Social Media Flyer im Navy &amp; Gold 3D-Stil. Schnelle Lieferung, unbegrenzte Revisionen.">
+<meta name="twitter:card" content="summary">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%230a1633'/%3E%3Crect x='3' y='3' width='58' height='58' rx='11' fill='none' stroke='%23d4af37' stroke-width='3'/%3E%3Ctext x='32' y='42' text-anchor='middle' font-family='Segoe UI,Arial,sans-serif' font-size='26' font-weight='900' fill='%23d4af37'%3EIT%3C/text%3E%3C/svg%3E">
 <style>
   :root{
     --navy-950:#050b1c;
@@ -36,6 +43,21 @@
   a{color:inherit;text-decoration:none;}
   img{max-width:100%;display:block;}
   ::selection{background:var(--gold-500);color:var(--navy-950);}
+
+  a:focus-visible, button:focus-visible, [tabindex]:focus-visible{
+    outline:3px solid var(--gold-300);
+    outline-offset:3px;
+    border-radius:8px;
+  }
+
+  @media (prefers-reduced-motion: reduce){
+    *, *::before, *::after{
+      animation-duration:0.01ms !important;
+      animation-iteration-count:1 !important;
+      transition-duration:0.01ms !important;
+      scroll-behavior:auto !important;
+    }
+  }
 
   .container{max-width:1180px;margin:0 auto;padding:0 24px;}
 
@@ -86,7 +108,7 @@
   nav.links a:hover::after{width:100%;}
 
   .burger{display:none;flex-direction:column;gap:5px;cursor:pointer;background:none;border:none;padding:6px;}
-  .burger span{width:26px;height:3px;background:var(--gold-400,var(--gold-300));border-radius:2px;}
+  .burger span{width:26px;height:3px;background:var(--gold-300);border-radius:2px;}
 
   /* ---------- buttons ---------- */
   .btn{
@@ -134,7 +156,7 @@
     line-height:1.15;margin:0 0 20px;
     text-shadow:0 2px 0 rgba(0,0,0,.3), 0 0 30px rgba(212,175,55,.15);
   }
-  .hero h1 .gold-text{
+  .gold-text{
     background:linear-gradient(160deg, var(--gold-100), var(--gold-500));
     -webkit-background-clip:text;background-clip:text;color:transparent;
   }
@@ -409,7 +431,7 @@
     <a href="#pakete" class="btn btn-gold" style="padding:10px 22px;font-size:.9rem;">
       <span class="shine"></span>Angebot ansehen
     </a>
-    <button class="burger" id="burgerBtn" aria-label="Menü öffnen"><span></span><span></span><span></span></button>
+    <button class="burger" id="burgerBtn" aria-label="Menü öffnen" aria-expanded="false" aria-controls="navLinks"><span></span><span></span><span></span></button>
   </div>
 </header>
 <div class="gold-rule"></div>
@@ -426,16 +448,17 @@
         24–48&nbsp;Stunden geliefert.
       </p>
       <div class="hero-ctas">
-        <a href="#pakete" class="btn btn-gold"><span class="shine"></span>🚀 Jetzt Auftrag starten</a>
+        <a href="#pakete" class="btn btn-gold"><span class="shine"></span><span aria-hidden="true">🚀</span> Jetzt Auftrag starten</a>
         <a href="#beispiele" class="btn btn-ghost">Beispiele ansehen</a>
       </div>
+      <!-- Platzhalter-Kennzahlen: vor Veröffentlichung durch echte, belegbare Werte ersetzen (z. B. tatsächliche Auftrags- und Bewertungszahlen aus dem Fiverr-Profil). -->
       <div class="trust-row">
         <div><strong>500+</strong>Flyer gestaltet</div>
         <div><strong>4.9★</strong>Kundenbewertung</div>
         <div><strong>24h</strong>Express möglich</div>
       </div>
     </div>
-    <div class="hero-visual">
+    <div class="hero-visual" aria-hidden="true">
       <div class="stack">
         <div class="card-3d back">
           <svg viewBox="0 0 400 400" xmlns="http://www.w3.org/2000/svg"><rect width="400" height="400" fill="#152a56"/></svg>
@@ -477,22 +500,22 @@
     </div>
     <div class="features-grid">
       <div class="feature-card reveal">
-        <div class="feature-icon">⚡</div>
+        <div class="feature-icon" aria-hidden="true">⚡</div>
         <h3>Schnelle Lieferung</h3>
         <p>Erste Entwürfe innerhalb von 24–48 Stunden, Express-Option verfügbar.</p>
       </div>
       <div class="feature-card reveal">
-        <div class="feature-icon">🎨</div>
+        <div class="feature-icon" aria-hidden="true">🎨</div>
         <h3>Individuelles Design</h3>
         <p>Kein Vorlagen-Einheitsbrei — jeder Flyer wird auf deine Marke zugeschnitten.</p>
       </div>
       <div class="feature-card reveal">
-        <div class="feature-icon">♾️</div>
+        <div class="feature-icon" aria-hidden="true">♾️</div>
         <h3>Unbegrenzte Revisionen</h3>
         <p>Wir feilen so lange, bis das Ergebnis wirklich passt.</p>
       </div>
       <div class="feature-card reveal">
-        <div class="feature-icon">📱</div>
+        <div class="feature-icon" aria-hidden="true">📱</div>
         <h3>Alle Formate</h3>
         <p>Instagram Post &amp; Story, Facebook, WhatsApp-Status — passend zugeschnitten.</p>
       </div>
@@ -512,10 +535,10 @@
   <!-- LIGHTBOX -->
   <div class="lightbox" id="lightbox">
     <button class="lb-prev" id="lbPrev" aria-label="Vorheriges Bild">‹</button>
-    <div class="lightbox-inner">
+    <div class="lightbox-inner" role="dialog" aria-modal="true" aria-label="Beispielbild-Vorschau">
       <button class="lb-close" id="lbClose" aria-label="Schließen">✕</button>
       <div id="lbImageHolder"></div>
-      <div class="lightbox-caption" id="lbCaption"></div>
+      <div class="lightbox-caption" id="lbCaption" aria-live="polite"></div>
     </div>
     <button class="lb-next" id="lbNext" aria-label="Nächstes Bild">›</button>
   </div>
@@ -598,21 +621,22 @@
       <span class="eyebrow">Kundenstimmen</span>
       <h2>Was Kunden sagen</h2>
     </div>
+    <!-- Platzhalter-Kundenstimmen: dies sind Beispieltexte. Vor Veröffentlichung durch echte, mit Einverständnis der Kunden eingeholte Bewertungen ersetzen (z. B. aus dem Fiverr-Bewertungsverlauf) — fiktive Reviews als echt auszugeben ist irreführend. -->
     <div class="testi-grid">
       <div class="testi-card reveal">
-        <div class="stars">★★★★★</div>
+        <div class="stars" role="img" aria-label="5 von 5 Sternen">★★★★★</div>
         <p>„Extrem professionelle Umsetzung, schnelle Kommunikation und ein Flyer, der wirklich heraussticht. Absolute Empfehlung!"</p>
-        <div class="testi-author"><div class="avatar">M</div><div><strong>Melanie K.</strong><span>Boutique-Inhaberin</span></div></div>
+        <div class="testi-author"><div class="avatar" aria-hidden="true">M</div><div><strong>Melanie K.</strong><span>Boutique-Inhaberin</span></div></div>
       </div>
       <div class="testi-card reveal">
-        <div class="stars">★★★★★</div>
+        <div class="stars" role="img" aria-label="5 von 5 Sternen">★★★★★</div>
         <p>„Genau das Design, das ich mir vorgestellt hatte — sogar besser. Die Revisionen waren unkompliziert und schnell."</p>
-        <div class="testi-author"><div class="avatar">D</div><div><strong>David R.</strong><span>Fitnessstudio-Betreiber</span></div></div>
+        <div class="testi-author"><div class="avatar" aria-hidden="true">D</div><div><strong>David R.</strong><span>Fitnessstudio-Betreiber</span></div></div>
       </div>
       <div class="testi-card reveal">
-        <div class="stars">★★★★★</div>
+        <div class="stars" role="img" aria-label="5 von 5 Sternen">★★★★★</div>
         <p>„Toppreis-Leistung! Meine Instagram-Posts performen seitdem deutlich besser."</p>
-        <div class="testi-author"><div class="avatar">S</div><div><strong>Sami T.</strong><span>Barbershop-Besitzer</span></div></div>
+        <div class="testi-author"><div class="avatar" aria-hidden="true">S</div><div><strong>Sami T.</strong><span>Barbershop-Besitzer</span></div></div>
       </div>
     </div>
   </section>
@@ -620,9 +644,10 @@
   <!-- FINAL CTA -->
   <section id="kontakt" class="container">
     <div class="cta-final reveal">
-      <h2>Bereit für deinen <span class="gold-text" style="background:linear-gradient(160deg,#faf0d0,#d4af37);-webkit-background-clip:text;background-clip:text;color:transparent;">Social Media Flyer</span>?</h2>
+      <h2>Bereit für deinen <span class="gold-text">Social Media Flyer</span>?</h2>
       <p>Sichere dir jetzt deinen individuellen, hochglänzenden Flyer im IT-World-Stil.</p>
-      <a href="#" class="btn btn-gold" style="font-size:1.1rem;padding:16px 38px;"><span class="shine"></span>🚀 Jetzt auf Fiverr bestellen</a>
+      <!-- TODO: href durch die echte Fiverr-Gig-URL ersetzen, sobald das Gig live ist. -->
+      <a href="#" class="btn btn-gold js-placeholder-link" style="font-size:1.1rem;padding:16px 38px;"><span class="shine"></span><span aria-hidden="true">🚀</span> Jetzt auf Fiverr bestellen</a>
     </div>
   </section>
 </main>
@@ -641,10 +666,19 @@
   var burger = document.getElementById('burgerBtn');
   var navLinks = document.getElementById('navLinks');
   burger.addEventListener('click', function(){
-    navLinks.classList.toggle('open');
+    var isOpen = navLinks.classList.toggle('open');
+    burger.setAttribute('aria-expanded', String(isOpen));
   });
   navLinks.querySelectorAll('a').forEach(function(a){
-    a.addEventListener('click', function(){ navLinks.classList.remove('open'); });
+    a.addEventListener('click', function(){
+      navLinks.classList.remove('open');
+      burger.setAttribute('aria-expanded', 'false');
+    });
+  });
+
+  /* ---------- placeholder links (no real Fiverr gig URL yet) ---------- */
+  document.querySelectorAll('.js-placeholder-link').forEach(function(a){
+    a.addEventListener('click', function(e){ e.preventDefault(); });
   });
 
   /* ---------- scroll reveal ---------- */
@@ -683,7 +717,7 @@
 
   function flyerSVG(f, id){
     return '' +
-    '<svg viewBox="0 0 400 400" xmlns="http://www.w3.org/2000/svg">' +
+    '<svg viewBox="0 0 400 400" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">' +
       '<defs><linearGradient id="g'+id+'" x1="0" y1="0" x2="1" y2="1">' +
         '<stop offset="0%" stop-color="'+f.bg[0]+'"/>' +
         '<stop offset="100%" stop-color="'+f.bg[1]+'"/>' +
@@ -706,8 +740,11 @@
     var item = document.createElement('div');
     item.className = 'gallery-item reveal';
     item.setAttribute('data-index', i);
+    item.setAttribute('role', 'button');
+    item.setAttribute('tabindex', '0');
+    item.setAttribute('aria-label', 'Beispiel ansehen: ' + f.title + ' — ' + f.sub);
     item.innerHTML = flyerSVG(f, 'thumb'+i) +
-      '<div class="gallery-caption"><span>'+f.title+' — '+f.sub+'</span><span class="zoom-hint">+</span></div>';
+      '<div class="gallery-caption"><span>'+f.title+' — '+f.sub+'</span><span class="zoom-hint" aria-hidden="true">+</span></div>';
     grid.appendChild(item);
     io.observe(item);
 
@@ -721,48 +758,72 @@
     item.addEventListener('mouseleave', function(){
       item.style.transform = 'rotateY(0) rotateX(0) scale(1)';
     });
+    item.addEventListener('keydown', function(e){
+      if(e.key === 'Enter' || e.key === ' '){
+        e.preventDefault();
+        openLightbox(i, item);
+      }
+    });
   });
 
   /* ---------- lightbox ---------- */
   var lightbox = document.getElementById('lightbox');
   var lbHolder = document.getElementById('lbImageHolder');
   var lbCaption = document.getElementById('lbCaption');
+  var lbClose = document.getElementById('lbClose');
+  var lbPrev = document.getElementById('lbPrev');
+  var lbNext = document.getElementById('lbNext');
   var current = 0;
+  var lastTrigger = null;
+  var focusables = [lbPrev, lbClose, lbNext];
 
-  function openLightbox(i){
+  function openLightbox(i, triggerEl){
     current = i;
+    lastTrigger = triggerEl || document.activeElement;
     var f = flyers[i];
     lbHolder.innerHTML = flyerSVG(f, 'lb'+i);
     lbCaption.textContent = f.title + ' — ' + f.sub;
     lightbox.classList.add('open');
     document.body.style.overflow = 'hidden';
+    lbClose.focus();
   }
   function closeLightbox(){
     lightbox.classList.remove('open');
     document.body.style.overflow = '';
+    if(lastTrigger && typeof lastTrigger.focus === 'function'){
+      lastTrigger.focus();
+    }
   }
   function step(delta){
     current = (current + delta + flyers.length) % flyers.length;
-    openLightbox(current);
+    openLightbox(current, lastTrigger);
   }
 
   grid.addEventListener('click', function(e){
     var item = e.target.closest('.gallery-item');
     if(!item) return;
-    openLightbox(parseInt(item.getAttribute('data-index'), 10));
+    openLightbox(parseInt(item.getAttribute('data-index'), 10), item);
   });
 
-  document.getElementById('lbClose').addEventListener('click', closeLightbox);
-  document.getElementById('lbPrev').addEventListener('click', function(){ step(-1); });
-  document.getElementById('lbNext').addEventListener('click', function(){ step(1); });
+  lbClose.addEventListener('click', closeLightbox);
+  lbPrev.addEventListener('click', function(){ step(-1); });
+  lbNext.addEventListener('click', function(){ step(1); });
   lightbox.addEventListener('click', function(e){
     if(e.target === lightbox) closeLightbox();
   });
   document.addEventListener('keydown', function(e){
     if(!lightbox.classList.contains('open')) return;
-    if(e.key === 'Escape') closeLightbox();
-    if(e.key === 'ArrowLeft') step(-1);
-    if(e.key === 'ArrowRight') step(1);
+    if(e.key === 'Escape'){ closeLightbox(); return; }
+    if(e.key === 'ArrowLeft'){ step(-1); return; }
+    if(e.key === 'ArrowRight'){ step(1); return; }
+    if(e.key === 'Tab'){
+      var idx = focusables.indexOf(document.activeElement);
+      var nextIdx = e.shiftKey
+        ? (idx <= 0 ? focusables.length - 1 : idx - 1)
+        : (idx === -1 || idx === focusables.length - 1 ? 0 : idx + 1);
+      e.preventDefault();
+      focusables[nextIdx].focus();
+    }
   });
 })();
 </script>
