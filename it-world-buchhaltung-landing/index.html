@@ -261,6 +261,18 @@
   .section-head h2{font-size:clamp(1.6rem,3.2vw,2.4rem);color:var(--white);margin:0 0 14px;font-weight:800;}
   .section-head p{color:var(--white-dim);line-height:1.7;font-size:1.02rem;}
 
+  /* ---------- Demo video ---------- */
+  .video-frame{
+    max-width:920px;margin:0 auto;overflow:hidden;
+  }
+  .video-frame video{
+    display:block;width:100%;height:auto;background:#000;
+  }
+  .video-actions{
+    display:flex;gap:16px;justify-content:center;flex-wrap:wrap;margin-top:32px;
+  }
+  .cta-btn .icon{width:18px;height:18px;vertical-align:-4px;margin-right:6px;}
+
   /* ---------- Gallery ---------- */
   .gallery{
     display:grid;grid-template-columns:repeat(auto-fit, minmax(230px,1fr));
@@ -499,6 +511,8 @@
     <symbol id="icon-clock" viewBox="0 0 24 24"><circle cx="12" cy="12" r="8.5"/><path d="M12 7v5l3.5 2"/></symbol>
     <symbol id="icon-chat" viewBox="0 0 24 24"><path d="M4 5h16v11H8l-4 4V5z"/></symbol>
     <symbol id="icon-tune" viewBox="0 0 24 24"><path d="M4 12h16"/><path d="M9 5l-5 7 5 7"/><path d="M15 5l5 7-5 7"/></symbol>
+    <symbol id="icon-download" viewBox="0 0 24 24"><path d="M12 3v12"/><path d="M7 10l5 5 5-5"/><path d="M4 19h16"/></symbol>
+    <symbol id="icon-play" viewBox="0 0 24 24"><path d="M7 4l13 8-13 8V4z"/></symbol>
   </defs>
 </svg>
 
@@ -516,6 +530,7 @@
     </button>
     <nav id="mainNav">
       <ul>
+        <li><a href="#video">Video</a></li>
         <li><a href="#gallery">Vorschau</a></li>
         <li><a href="#beschreibung">Beschreibung</a></li>
         <li><a href="#funktionen">Funktionen</a></li>
@@ -582,6 +597,27 @@
         </div>
       </div>
     </div>
+  </div>
+</section>
+
+<section class="section" id="video">
+  <div class="section-head reveal">
+    <span class="kicker">Demo-Video</span>
+    <h2>Sehen Sie das Dashboard in Aktion</h2>
+    <p>Ein kurzer Rundgang durch die Oberfläche und die wichtigsten Ansichten – inklusive Hintergrundmusik.</p>
+  </div>
+  <div class="video-frame gold-frame reveal">
+    <video controls preload="metadata" playsinline poster="demo/poster.jpg">
+      <source src="demo/it-world-demo.webm" type="video/webm">
+      <source src="demo/it-world-demo.mp4" type="video/mp4">
+      Ihr Browser unterstützt das Video-Element nicht. Sie können es
+      <a href="demo/it-world-demo.mp4">direkt herunterladen</a>.
+    </video>
+  </div>
+  <div class="video-actions reveal">
+    <a href="demo/it-world-demo.mp4" download="IT-World-Buchhaltung-Dashboard-Demo.mp4" class="cta-btn">
+      <svg class="icon" aria-hidden="true"><use href="#icon-download"/></svg>Video herunterladen
+    </a>
   </div>
 </section>
 
