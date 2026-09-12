@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Demo-Musik – Lounge Band</title>
+  <style>
+    :root {
+      color-scheme: light dark;
+      --bg: #0b1f4d;
+      --card: #12294f;
+      --accent: #5b9bd5;
+      --text: #f4f7fb;
+      --muted: #b7c4dd;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 24px;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+    }
+    .card {
+      width: 100%;
+      max-width: 480px;
+      background: var(--card);
+      border-radius: 16px;
+      padding: 32px;
+      box-shadow: 0 12px 32px rgba(0, 0, 0, 0.35);
+      text-align: center;
+    }
+    h1 {
+      font-size: 1.4rem;
+      margin: 0 0 8px;
+    }
+    p.meta {
+      color: var(--muted);
+      margin: 0 0 24px;
+      font-size: 0.9rem;
+    }
+    audio {
+      width: 100%;
+      margin-bottom: 24px;
+    }
+    a.download {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      background: var(--accent);
+      color: #0b1f4d;
+      font-weight: 600;
+      text-decoration: none;
+      padding: 12px 24px;
+      border-radius: 999px;
+      transition: transform 0.15s ease, filter 0.15s ease;
+    }
+    a.download:hover {
+      filter: brightness(1.08);
+      transform: translateY(-1px);
+    }
+    .note {
+      margin-top: 20px;
+      font-size: 0.78rem;
+      color: var(--muted);
+      line-height: 1.4;
+    }
+  </style>
+</head>
+<body>
+  <div class="card">
+    <h1>🎷 Lounge Band – Demo-Musik</h1>
+    <p class="meta">Hintergrundmusik für das Demo-Video · Dauer: 30 Sekunden</p>
+    <audio controls preload="none" src="lounge-band.mp3"></audio>
+    <div>
+      <a class="download" href="lounge-band.mp3" download="lounge-band.mp3">⬇ lounge-band.mp3 herunterladen</a>
+    </div>
+    <p class="note">
+      Hinweis: Dies ist ein synthetisch erzeugter Lounge-Loop (kein Aufnahme einer echten Band),
+      gedacht als Platzhalter-Hintergrundmusik. Bei Bedarf kann die Länge angepasst werden,
+      sobald die genaue Dauer des Demo-Videos feststeht.
+    </p>
+  </div>
+</body>
+</html>
