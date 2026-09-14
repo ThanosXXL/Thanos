@@ -31,7 +31,8 @@ mc-projectmanagement/
 ├── assets/favicon.svg  Favicon
 ├── assets/og-image.png Social-Media-Vorschaubild (1200×630, Open Graph/Twitter Card)
 ├── assets/video-vorstellung.mp4         Video unter „Video Vorstellung“ (siehe unten)
-└── assets/video-vorstellung-poster.jpg  Vorschaubild des Videos
+├── assets/video-vorstellung-poster.jpg  Vorschaubild des Videos
+└── assets/team/*.jpg                    Echte Team-Porträtfotos (8 von 13 Personen, siehe unten)
 ```
 
 ## Inhalte & offene Platzhalter
@@ -51,10 +52,19 @@ mc-projectmanagement/
   **„Mehr erfahren“-Ausklapper** (`<details class="vita-toggle">`) mit
   den echten Vita-Daten von der Original-Seite: „Bei M&C … seit [Jahr]“,
   Aufgabenliste, ggf. Qualifikationen sowie persönliche E-Mail-Adresse.
-  Da nur Fotos vom Bildschirm (kein echtes Bilddateien-Material) vorlagen,
-  sind die Porträts weiterhin **Initialen-Avatare** (`.member-avatar`)
-  statt echter Fotos – bitte durch echte Porträtbilder ersetzen, sobald
-  Bilddateien vorliegen. Bei Murat Kyküz wurde die auf der Originalseite
+  8 von 13 Personen (Madlen Golibersuch, Collin Golibersuch, Malte Kurm,
+  Andrea Lejk, Rene Sangmeister, Adam Wujciow, Heiko Lerchner, Thorsten
+  Heymann) zeigen inzwischen echte Porträtfotos (`assets/team/*.jpg`,
+  `<img class="member-photo">`), aus den vom Kunden gesendeten
+  Bildschirmfotos der Original-Seite zugeschnitten. Die übrigen 5
+  (Murat Kyküz, Nordin Asrih, Deni Cizmar, Joachim Melzer, Matthias
+  Gornik) zeigen weiterhin **Initialen-Avatare** (`.member-avatar`),
+  da für sie noch kein Foto vorliegt bzw. die Originalseite für
+  Matthias Gornik selbst „Bild folgt in Kürze“ anzeigt – sobald weitere
+  Fotos vorliegen, einfach nach demselben Muster (`assets/team/`-Datei
+  + `<img class="member-photo" src="…" alt="…">` anstelle des
+  `<span class="member-avatar …">`) ergänzen. Bei Murat Kyküz wurde die
+  auf der Originalseite
   fehlerhafte E-Mail-Domain (`mc-prpjectmanagement.de`) zu
   `mc-projectmanagement.de` korrigiert. Weitere Mitglieder lassen sich in
   `index.html` (`.team-roster` in der `#team`-Sektion) als zusätzliche
