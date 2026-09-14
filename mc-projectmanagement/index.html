@@ -376,19 +376,18 @@
 
       <div class="tilt-card video-card reveal">
         <div class="sheen"></div>
-        <div class="video-frame">
-          <div class="video-panels" aria-hidden="true">
-            <span class="video-panel vp-holding"><em>M&amp;C Holding</em></span>
-            <span class="video-panel vp-bau"><em>M&amp;C Baumanagement</em></span>
-            <span class="video-panel vp-akademie"><em>M&amp;C Akademie</em></span>
-            <span class="video-panel vp-pm"><em>M&amp;C Projectmanagement</em></span>
-          </div>
+        <div class="video-frame" id="videoFrame">
+          <video id="introVideo" class="intro-video" poster="assets/video-vorstellung-poster.jpg" preload="metadata" controls playsinline>
+            <source src="assets/video-vorstellung.mp4" type="video/mp4">
+            Ihr Browser unterstützt das Video-Element nicht.
+            <a href="assets/video-vorstellung.mp4">Video herunterladen</a>.
+          </video>
           <span class="video-glow" aria-hidden="true"></span>
-          <button type="button" class="play-btn" aria-label="Video abspielen">
+          <button type="button" class="play-btn" id="videoPlayBtn" aria-label="Video abspielen">
             <svg viewBox="0 0 24 24" width="26" height="26" aria-hidden="true"><path d="M8 5v14l11-7z" fill="currentColor"/></svg>
           </button>
-          <p class="video-caption">Video-Vorstellung folgt in Kürze</p>
         </div>
+        <p class="video-caption">Ein kurzer Rundgang durch unsere Website &ndash; das ausführliche Firmenvideo folgt in Kürze.</p>
       </div>
     </div>
   </section>

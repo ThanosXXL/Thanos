@@ -252,6 +252,18 @@
   });
 
   /* -------------------------------------------------------------- */
+  /* Video Vorstellung: Play-Button steuert das eingebettete Video   */
+  /* -------------------------------------------------------------- */
+  var introVideo = document.getElementById('introVideo');
+  var videoPlayBtn = document.getElementById('videoPlayBtn');
+  if (introVideo && videoPlayBtn) {
+    videoPlayBtn.addEventListener('click', function () { introVideo.play(); });
+    introVideo.addEventListener('play', function () { videoPlayBtn.classList.add('is-hidden'); });
+    introVideo.addEventListener('pause', function () { videoPlayBtn.classList.remove('is-hidden'); });
+    introVideo.addEventListener('ended', function () { videoPlayBtn.classList.remove('is-hidden'); });
+  }
+
+  /* -------------------------------------------------------------- */
   /* Sanftes Scrollen für Anker-Links (Fallback zu CSS scroll-behavior) */
   /* -------------------------------------------------------------- */
   document.querySelectorAll('a[href^="#"]').forEach(function (link) {

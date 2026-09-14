@@ -29,7 +29,9 @@ mc-projectmanagement/
 ├── css/style.css       3D-/Glas-/Hochglanz-Design, Animationen, Responsive Layout
 ├── js/script.js        Tilt-, Magnet- & Ripple-Effekte, Scroll-Reveal, Scroll-Fortschritt, Zähler, Ticker, Mobile-Nav
 ├── assets/favicon.svg  Favicon
-└── assets/og-image.png Social-Media-Vorschaubild (1200×630, Open Graph/Twitter Card)
+├── assets/og-image.png Social-Media-Vorschaubild (1200×630, Open Graph/Twitter Card)
+├── assets/video-vorstellung.mp4         Video unter „Video Vorstellung“ (siehe unten)
+└── assets/video-vorstellung-poster.jpg  Vorschaubild des Videos
 ```
 
 ## Inhalte & offene Platzhalter
@@ -66,11 +68,15 @@ mc-projectmanagement/
   erfundenen Städte (Berlin, Dubai, Singapur, New York) sowie der
   Textclaim „rund um den Globus“ wurden entfernt, da sie weder belegt
   waren noch zur angegebenen Vertraulichkeit bei Projektnamen passten.
-- **Video Vorstellung**: Platzhalter-Videoplayer im 4-Panel-Look
-  (M&C Holding/Baumanagement/Akademie/Projectmanagement, an das echte
-  Firmenvideo angelehnt), Play-Button, Beschriftung „Video-Vorstellung
-  folgt in Kürze“ – bitte durch ein eingebettetes Video (`<video>`- oder
-  YouTube/Vimeo-Embed) ersetzen, sobald eines vorliegt.
+- **Video Vorstellung**: kein Platzhalter mehr, sondern ein echtes,
+  abspielbares `<video>`-Element (`assets/video-vorstellung.mp4` mit
+  `assets/video-vorstellung-poster.jpg` als Vorschaubild), inklusive
+  glänzendem Play-Button-Overlay (`#videoPlayBtn`), das beim Abspielen
+  ausgeblendet und bei Pause/Ende wieder eingeblendet wird
+  (`js/script.js`). Aktuell läuft dort ein kurzer, selbst aufgenommener
+  Rundgang durch die Website mit Hintergrundmusik – bitte durch das
+  ausführliche, echte Firmenvideo ersetzen (einfach `src` im `<source>`
+  sowie `poster` in `index.html` austauschen), sobald eines vorliegt.
 - **E-Mail**: `info@mc-projectmanagement.com` (Kontaktformular, Kontaktkarte,
   Footer-Button und animierter Lauftext im Footer).
 - **Adresse**: „Im II. Westfeld 7, 44388 Dortmund“ (Kontaktkarte & Footer).
@@ -87,16 +93,16 @@ mc-projectmanagement/
 - **Rechtliches**: Der Footer enthält wieder „Impressum“ und „Datenschutz“,
   beide als eigene Seiten im gleichen Design:
   - `impressum.html` – Angaben gemäß § 5 DDG (M&C Holding GmbH, Im II.
-    Westfeld 7, 44388 Dortmund), Geschäftsführung (Madlen & Collin
-    Golibersuch) sowie **ausschließlich E-Mail als Kontakt** (keine
-    Telefonnummer, wie gewünscht). Enthält zusätzlich die Pflichtabschnitte
-    „Verantwortlich für den Inhalt nach § 18 Abs. 2 MStV“,
-    „EU-Streitschlichtung“ (Link zur OS-Plattform) und
-    „Verbraucherstreitbeilegung“. Handelsregisternummer, Registergericht
-    und USt-IdNr. sind als Platzhalter markiert, da diese Angaben noch
-    nicht vorlagen – bitte in `impressum.html` (Karte „Registereintrag“ /
-    „Umsatzsteuer-ID“) ergänzen, sobald verfügbar (rechtlich notwendig für
-    ein vollständiges Impressum).
+    Westfeld 7, 44388 Dortmund), Vertreten durch Madlen Golibersuch
+    (Inhaberin / Kaufmännische Geschäftsführung) sowie **ausschließlich
+    E-Mail als Kontakt** (keine Telefonnummer, wie gewünscht). Enthält
+    zusätzlich die Pflichtabschnitte „Verantwortlich für den Inhalt nach
+    § 18 Abs. 2 MStV“, „EU-Streitschlichtung“ (Link zur OS-Plattform) und
+    „Verbraucherstreitbeilegung“. Die Karte „Registereintrag“
+    (Handelsregisternummer/-gericht) wurde auf Wunsch vollständig entfernt,
+    da diese Angaben nicht existieren bzw. nicht zutreffen; die
+    Umsatzsteuer-ID ist als „nicht bekannt“ ausgewiesen – bitte in
+    `impressum.html` (Karte „Umsatzsteuer-ID“) ergänzen, sobald verfügbar.
   - `datenschutz.html` – ehrlicher Hinweis „Datenschutzerklärung folgt in
     Kürze“. Sobald der echte Text vorliegt, einfach den Absatz im
     `<div class="tilt-card ...">` ersetzen (Struktur/Design bleiben

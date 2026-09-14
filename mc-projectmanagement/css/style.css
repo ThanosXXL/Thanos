@@ -618,49 +618,16 @@ button{ font-family:inherit; }
   aspect-ratio:16/9;
   border-radius:18px;
   overflow:hidden;
-  display:flex; flex-direction:column; align-items:center; justify-content:center;
-  gap:1.4rem;
   background:#0a0d1a;
   border:1px solid var(--line-strong);
+  box-shadow:0 30px 60px -20px rgba(0,0,0,.6);
 }
-
-/* 4-Panel-Optik (Holding/Baumanagement/Akademie/Projectmanagement), passend zum echten Video */
-.video-panels{ position:absolute; inset:0; display:flex; }
-.video-panel{
-  flex:1; position:relative; overflow:hidden;
-  display:flex; align-items:flex-end; justify-content:center;
-  padding-bottom:12%;
-  border-right:1px solid rgba(255,255,255,.06);
-}
-.video-panel:last-child{ border-right:none; }
-.video-panel em{
-  position:relative; z-index:1;
-  font:700 .68rem/1.2 'Sora', sans-serif; font-style:normal;
-  color:rgba(255,255,255,.55);
-  text-align:center; padding:0 .6rem;
-  letter-spacing:.01em;
-}
-.video-panel::before{
-  content:"";
+.intro-video{
   position:absolute; inset:0;
-  background:linear-gradient(200deg, transparent 40%, var(--panel-color) 100%);
-  opacity:.28;
-}
-.video-panel::after{
-  content:"";
-  position:absolute; left:-30%; right:-30%; bottom:-10%; height:55%;
-  background:var(--panel-color);
-  opacity:.16;
-  border-radius:50%;
-  filter:blur(6px);
-}
-.vp-holding{ --panel-color: #e7bf6b; }
-.vp-bau{ --panel-color: #c8ccd8; }
-.vp-akademie{ --panel-color: #ff5b6b; }
-.vp-pm{ --panel-color: #5b8cff; }
-
-@media (max-width: 560px){
-  .video-panel em{ display:none; }
+  width:100%; height:100%;
+  object-fit:cover;
+  background:#0a0d1a;
+  display:block;
 }
 
 .video-glow{
@@ -672,14 +639,14 @@ button{ font-family:inherit; }
 @keyframes videoSweep{ to{ transform:rotate(360deg); } }
 
 .play-btn{
-  position:relative; z-index:2;
+  position:absolute; z-index:2; top:50%; left:50%; transform:translate(-50%,-50%);
   width:78px; height:78px; border-radius:50%;
   display:flex; align-items:center; justify-content:center;
   color:#0a0e22;
   background:linear-gradient(155deg,#eaf2ff,#9fb6ff 50%, #6f86ff);
   box-shadow:0 20px 40px -14px rgba(91,140,255,.7), inset 0 1px 0 rgba(255,255,255,.7);
   border:none; cursor:pointer;
-  transition:transform .3s var(--ease), box-shadow .3s var(--ease);
+  transition:transform .3s var(--ease), box-shadow .3s var(--ease), opacity .25s;
 }
 .play-btn::before{
   content:""; position:absolute; inset:-14px; border-radius:50%;
@@ -690,11 +657,13 @@ button{ font-family:inherit; }
   0%{ transform:scale(.8); opacity:.9; }
   100%{ transform:scale(1.5); opacity:0; }
 }
-.play-btn:hover{ transform:scale(1.08); }
+.play-btn:hover{ transform:translate(-50%,-50%) scale(1.08); }
 .play-btn svg{ margin-left:3px; }
+.play-btn.is-hidden{ opacity:0; pointer-events:none; transform:translate(-50%,-50%) scale(.8); }
 
 .video-caption{
-  position:relative; z-index:2; margin:0;
+  margin:1rem 0 0;
+  text-align:center;
   font-size:.82rem; color:var(--text-2); letter-spacing:.02em;
 }
 
