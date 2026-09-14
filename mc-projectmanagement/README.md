@@ -52,16 +52,16 @@ mc-projectmanagement/
   **„Mehr erfahren“-Ausklapper** (`<details class="vita-toggle">`) mit
   den echten Vita-Daten von der Original-Seite: „Bei M&C … seit [Jahr]“,
   Aufgabenliste, ggf. Qualifikationen sowie persönliche E-Mail-Adresse.
-  8 von 13 Personen (Madlen Golibersuch, Collin Golibersuch, Malte Kurm,
+  10 von 13 Personen (Madlen Golibersuch, Collin Golibersuch, Malte Kurm,
   Andrea Lejk, Rene Sangmeister, Adam Wujciow, Heiko Lerchner, Thorsten
-  Heymann) zeigen inzwischen echte Porträtfotos (`assets/team/*.jpg`,
-  `<img class="member-photo">`), aus den vom Kunden gesendeten
-  Bildschirmfotos der Original-Seite zugeschnitten. Die übrigen 5
-  (Murat Kyküz, Nordin Asrih, Deni Cizmar, Joachim Melzer, Matthias
-  Gornik) zeigen weiterhin **Initialen-Avatare** (`.member-avatar`),
-  da für sie noch kein Foto vorliegt bzw. die Originalseite für
-  Matthias Gornik selbst „Bild folgt in Kürze“ anzeigt – sobald weitere
-  Fotos vorliegen, einfach nach demselben Muster (`assets/team/`-Datei
+  Heymann, Deni Cizmar, Joachim Melzer) zeigen echte Porträtfotos
+  (`assets/team/*.jpg`, `<img class="member-photo">`), aus vom Kunden
+  gesendeten Bildschirmfotos der Original-Seite zugeschnitten
+  (Kopf-/Schulter-Ausschnitt, 480×480). Die übrigen 3 (Murat Kyküz,
+  Nordin Asrih, Matthias Gornik) zeigen weiterhin **Initialen-Avatare**
+  (`.member-avatar`) – für sie zeigt die Originalseite selbst „Bild
+  folgt in Kürze“, es existiert also aktuell kein echtes Foto. Sobald
+  eines vorliegt, einfach nach demselben Muster (`assets/team/`-Datei
   + `<img class="member-photo" src="…" alt="…">` anstelle des
   `<span class="member-avatar …">`) ergänzen. Bei Murat Kyküz wurde die
   auf der Originalseite
