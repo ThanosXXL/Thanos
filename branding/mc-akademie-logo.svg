@@ -1,0 +1,45 @@
+<svg width="280" height="110" viewBox="0 0 560 220" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <radialGradient id="mcPlaque" cx="40%" cy="25%" r="80%">
+      <stop offset="0%" stop-color="#ffffff"/>
+      <stop offset="55%" stop-color="#eeeef1"/>
+      <stop offset="100%" stop-color="#c9c9d1"/>
+    </radialGradient>
+    <linearGradient id="mcBlack" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#55555f"/>
+      <stop offset="30%" stop-color="#17171c"/>
+      <stop offset="70%" stop-color="#08080a"/>
+      <stop offset="100%" stop-color="#000000"/>
+    </linearGradient>
+    <linearGradient id="mcRed" x1="0" y1="0" x2="0.3" y2="1">
+      <stop offset="0%" stop-color="#ff9393"/>
+      <stop offset="35%" stop-color="#e0242f"/>
+      <stop offset="100%" stop-color="#6b0b12"/>
+    </linearGradient>
+    <clipPath id="mcClipBlack"><path d="M25 115 C90 20 470 20 535 115 C470 65 90 65 25 115 Z"/></clipPath>
+    <clipPath id="mcClipRed"><path d="M25 115 C70 205 380 205 460 150 C410 128 80 138 25 115 Z"/></clipPath>
+    <clipPath id="mcClipPlaque"><ellipse cx="280" cy="115" rx="248" ry="82"/></clipPath>
+    <filter id="mcShadow" x="-30%" y="-30%" width="160%" height="160%">
+      <feDropShadow dx="0" dy="6" stdDeviation="7" flood-color="#000000" flood-opacity="0.55"/>
+    </filter>
+  </defs>
+
+  <g filter="url(#mcShadow)">
+    <ellipse cx="280" cy="115" rx="248" ry="82" fill="url(#mcPlaque)"/>
+    <ellipse cx="230" cy="55" rx="190" ry="26" fill="#ffffff" opacity="0.55" clip-path="url(#mcClipPlaque)"/>
+    <ellipse cx="280" cy="115" rx="248" ry="82" fill="none" stroke="#00000022" stroke-width="2"/>
+
+    <path d="M25 115 C90 20 470 20 535 115 C470 65 90 65 25 115 Z" fill="url(#mcBlack)"/>
+    <ellipse cx="200" cy="40" rx="150" ry="12" fill="#ffffff" opacity="0.18" clip-path="url(#mcClipBlack)"/>
+
+    <path d="M25 115 C70 205 380 205 460 150 C410 128 80 138 25 115 Z" fill="url(#mcRed)"/>
+    <ellipse cx="150" cy="168" rx="120" ry="12" fill="#ffffff" opacity="0.22" clip-path="url(#mcClipRed)"/>
+  </g>
+
+  <g font-family="Poppins" font-weight="800" fill="#0a0a0d">
+    <text x="88" y="130" font-size="42" letter-spacing="1">M&amp;C</text>
+    <path d="M198,130 L216,72 L234,130 L222,130 L216,96 L210,130 Z"/>
+    <text x="240" y="130" font-size="38" letter-spacing="2">KADEMIE</text>
+  </g>
+  <path d="M198,148 L470,148 L452,138 M470,148 L452,158" fill="none" stroke="#0a0a0d" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/>
+</svg>
