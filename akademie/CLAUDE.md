@@ -6,6 +6,15 @@ This is a fourth, self-contained sub-project of this repo — unrelated to
 the Dozenten Dashboard, `omniroute/`, or `it-schulung/` — that produces
 polished PDF deliverables from Python/ReportLab scripts, not an app.
 
+> **Always apply to every new script/PDF in this folder, no exceptions:**
+> 1. Logo = `assets/logo_mc_akademie_3d.png` (top of page 1 only).
+> 2. Font = **Work Sans** (`akademie_style.FONT_REGULAR/FONT_BOLD/
+>    FONT_ITALIC/FONT_BOLDITALIC`) — a humanist, warm-reading typeface.
+>    Never `"Helvetica"` / `"Helvetica-Bold"` / any ReportLab base-14 font.
+>
+> These were both explicitly requested and corrected once already; treat
+> them as permanent house style, not per-request choices to re-derive.
+
 ## Directory layout
 
 ```
