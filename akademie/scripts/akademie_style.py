@@ -17,9 +17,32 @@ from reportlab.platypus import (
     KeepTogether,
 )
 from reportlab.pdfgen import canvas as pdfcanvas
+from reportlab.pdfbase import pdfmetrics
+from reportlab.pdfbase.ttfonts import TTFont
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
-LOGO_PATH = os.path.join(BASE_DIR, "..", "assets", "logo_mc_akademie.png")
+
+# Das offizielle M&C AKADEMIE Logo (Originalfoto, unbearbeitet) - dauerhaft
+# unter akademie/assets/ gespeichert und in allen Dokumenten zu verwenden.
+LOGO_PATH = os.path.join(BASE_DIR, "..", "assets", "logo_mc_akademie_original.jpg")
+LOGO_ASPECT = 989 / 508.0
+
+# Humanistische Grotesk-Schrift (Work Sans, Open-Sans-/Lato-Stil) statt der
+# technisch wirkenden Helvetica-Basisschrift.
+FONTS_DIR = os.path.join(BASE_DIR, "..", "assets", "fonts")
+FONT_REGULAR = "WorkSans"
+FONT_BOLD = "WorkSans-Bold"
+FONT_ITALIC = "WorkSans-Italic"
+FONT_BOLDITALIC = "WorkSans-BoldItalic"
+
+pdfmetrics.registerFont(TTFont(FONT_REGULAR, os.path.join(FONTS_DIR, "WorkSans-Regular.ttf")))
+pdfmetrics.registerFont(TTFont(FONT_BOLD, os.path.join(FONTS_DIR, "WorkSans-Bold.ttf")))
+pdfmetrics.registerFont(TTFont(FONT_ITALIC, os.path.join(FONTS_DIR, "WorkSans-Italic.ttf")))
+pdfmetrics.registerFont(TTFont(FONT_BOLDITALIC, os.path.join(FONTS_DIR, "WorkSans-BoldItalic.ttf")))
+pdfmetrics.registerFontFamily(
+    FONT_REGULAR, normal=FONT_REGULAR, bold=FONT_BOLD, italic=FONT_ITALIC,
+    boldItalic=FONT_BOLDITALIC,
+)
 
 NAVY = Color(11 / 255, 22 / 255, 51 / 255)
 NAVY_MID = Color(18 / 255, 40 / 255, 92 / 255)
@@ -33,8 +56,6 @@ CONFIDENTIAL_RED = Color(0.60, 0.08, 0.10)
 
 PAGE_SIZE_PORTRAIT = A4
 PAGE_SIZE_LANDSCAPE = landscape(A4)
-
-LOGO_ASPECT = 726 / 293.0
 
 
 def draw_gradient_rect(c, x, y, w, h, color_top, color_bottom, steps=60, radius=0):
@@ -109,7 +130,7 @@ class GlossyBanner(Flowable):
             top_y = h / 2 + self.font_size * 0.32
 
         if self.kicker:
-            c.setFont("Helvetica-Bold", 7.5)
+            c.setFont(FONT_BOLD, 7.5)
             c.setFillColor(GOLD_LIGHT)
             c.drawString(text_x, h - 0.42 * cm, self.kicker.upper())
 
@@ -117,15 +138,15 @@ class GlossyBanner(Flowable):
         # den rechten Rand des Banners hinauslaufen wuerde.
         max_text_w = w - text_x - 0.5 * cm
         fsize = self.font_size
-        while fsize > 8 and c.stringWidth(self.text, "Helvetica-Bold", fsize) > max_text_w:
+        while fsize > 8 and c.stringWidth(self.text, FONT_BOLD, fsize) > max_text_w:
             fsize -= 0.5
 
-        c.setFont("Helvetica-Bold", fsize)
+        c.setFont(FONT_BOLD, fsize)
         c.setFillColor(colors.white)
         c.drawString(text_x, top_y if not self.kicker else h - 0.42 * cm - self.font_size * 0.95,
                      self.text)
         if self.subtitle:
-            c.setFont("Helvetica", 9.5)
+            c.setFont(FONT_REGULAR, 9.5)
             c.setFillColor(GOLD_LIGHT)
             c.drawString(text_x, 0.42 * cm, self.subtitle)
 
@@ -172,7 +193,7 @@ class InfoBox(Flowable):
         x = self.pad
         if self.label:
             c.saveState()
-            c.setFont("Helvetica-Bold", 8.5)
+            c.setFont(FONT_BOLD, 8.5)
             c.setFillColor(GOLD_DARK)
             c.drawString(x, y - 0.30 * cm, self.label.upper())
             c.restoreState()
@@ -226,11 +247,11 @@ def _header_footer(landscape_mode=False, doc_short_title=""):
         c.setStrokeColor(GOLD)
         c.setLineWidth(0.6)
         c.line(1.7 * cm, 1.35 * cm, page_w - 1.7 * cm, 1.35 * cm)
-        c.setFont("Helvetica", 8.5)
+        c.setFont(FONT_REGULAR, 8.5)
         c.setFillColor(NAVY)
         c.drawCentredString(page_w / 2, 0.95 * cm, f"Seite {c.getPageNumber()}")
         if doc_short_title:
-            c.setFont("Helvetica", 7.5)
+            c.setFont(FONT_REGULAR, 7.5)
             c.setFillColor(Color(0.4, 0.4, 0.45))
             c.drawString(1.7 * cm, 0.95 * cm, doc_short_title)
             c.drawRightString(page_w - 1.7 * cm, 0.95 * cm, "AKADEMIE")
@@ -257,27 +278,27 @@ def get_styles():
     ss = getSampleStyleSheet()
     styles = {}
     styles["DocTitle"] = ParagraphStyle(
-        "DocTitle", parent=ss["Title"], fontName="Helvetica-Bold", fontSize=22,
+        "DocTitle", parent=ss["Title"], fontName=FONT_BOLD, fontSize=22,
         leading=26, textColor=NAVY, alignment=TA_CENTER, spaceAfter=4,
     )
     styles["DocSubtitle"] = ParagraphStyle(
-        "DocSubtitle", parent=ss["Normal"], fontName="Helvetica-Oblique", fontSize=11,
+        "DocSubtitle", parent=ss["Normal"], fontName=FONT_ITALIC, fontSize=11,
         leading=14, textColor=GOLD_DARK, alignment=TA_CENTER, spaceAfter=14,
     )
     styles["Authors"] = ParagraphStyle(
-        "Authors", parent=ss["Normal"], fontName="Helvetica-Bold", fontSize=10.5,
+        "Authors", parent=ss["Normal"], fontName=FONT_BOLD, fontSize=10.5,
         leading=13, textColor=NAVY_MID, alignment=TA_CENTER, spaceAfter=6,
     )
     styles["H1"] = ParagraphStyle(
-        "H1", parent=ss["Heading1"], fontName="Helvetica-Bold", fontSize=14,
+        "H1", parent=ss["Heading1"], fontName=FONT_BOLD, fontSize=14,
         leading=17, textColor=NAVY, spaceBefore=14, spaceAfter=8,
     )
     styles["H2"] = ParagraphStyle(
-        "H2", parent=ss["Heading2"], fontName="Helvetica-Bold", fontSize=11.5,
+        "H2", parent=ss["Heading2"], fontName=FONT_BOLD, fontSize=11.5,
         leading=14.5, textColor=NAVY_MID, spaceBefore=10, spaceAfter=6,
     )
     styles["Body"] = ParagraphStyle(
-        "Body", parent=ss["Normal"], fontName="Helvetica", fontSize=10, leading=14.5,
+        "Body", parent=ss["Normal"], fontName=FONT_REGULAR, fontSize=10, leading=14.5,
         textColor=INK, alignment=TA_JUSTIFY, spaceAfter=6,
     )
     styles["BodyLeft"] = ParagraphStyle(
@@ -287,23 +308,23 @@ def get_styles():
         "Bullet", parent=styles["Body"], alignment=TA_LEFT, leftIndent=0, spaceAfter=3,
     )
     styles["Small"] = ParagraphStyle(
-        "Small", parent=ss["Normal"], fontName="Helvetica", fontSize=8.5, leading=11,
+        "Small", parent=ss["Normal"], fontName=FONT_REGULAR, fontSize=8.5, leading=11,
         textColor=Color(0.35, 0.35, 0.4),
     )
     styles["TableHead"] = ParagraphStyle(
-        "TableHead", parent=ss["Normal"], fontName="Helvetica-Bold", fontSize=9.5,
+        "TableHead", parent=ss["Normal"], fontName=FONT_BOLD, fontSize=9.5,
         leading=12, textColor=colors.white, alignment=TA_LEFT,
     )
     styles["TableCell"] = ParagraphStyle(
-        "TableCell", parent=ss["Normal"], fontName="Helvetica", fontSize=9,
+        "TableCell", parent=ss["Normal"], fontName=FONT_REGULAR, fontSize=9,
         leading=12, textColor=INK, alignment=TA_LEFT,
     )
     styles["Confidential"] = ParagraphStyle(
-        "Confidential", parent=ss["Normal"], fontName="Helvetica-Bold", fontSize=9,
+        "Confidential", parent=ss["Normal"], fontName=FONT_BOLD, fontSize=9,
         leading=12, textColor=colors.white, alignment=TA_CENTER,
     )
     styles["QuestionNum"] = ParagraphStyle(
-        "QuestionNum", parent=ss["Normal"], fontName="Helvetica-Bold", fontSize=12,
+        "QuestionNum", parent=ss["Normal"], fontName=FONT_BOLD, fontSize=12,
         leading=15, textColor=NAVY,
     )
     return styles
@@ -314,7 +335,7 @@ def bullet_list(items, style, bullet_char="•", indent=0.55 * cm):
     for it in items:
         flows.append(ListItem(Paragraph(it, style), leftIndent=indent, value=bullet_char))
     return ListFlowable(flows, bulletType="bullet", start=bullet_char,
-                         leftIndent=indent, bulletFontName="Helvetica-Bold",
+                         leftIndent=indent, bulletFontName=FONT_BOLD,
                          bulletColor=GOLD_DARK)
 
 

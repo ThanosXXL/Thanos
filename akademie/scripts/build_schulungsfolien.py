@@ -44,15 +44,15 @@ def slide_title_banner(kicker, title, subtitle=None):
     c.restoreState()
     tx = x + 0.6 * cm
     if kicker:
-        c.setFont("Helvetica-Bold", 10)
+        c.setFont(A.FONT_BOLD, 10)
         c.setFillColor(A.GOLD_LIGHT)
         c.drawString(tx, y + h - 0.55 * cm, kicker.upper())
-    c.setFont("Helvetica-Bold", 22)
+    c.setFont(A.FONT_BOLD, 22)
     c.setFillColor(colors.white)
     ty = y + h - 1.25 * cm if kicker else y + h / 2 + 6
     c.drawString(tx, ty, title)
     if subtitle:
-        c.setFont("Helvetica", 12)
+        c.setFont(A.FONT_REGULAR, 12)
         c.setFillColor(A.GOLD_LIGHT)
         c.drawString(tx, y + 0.35 * cm, subtitle)
     return y  # bottom of banner
@@ -65,9 +65,9 @@ def bullets(items, top_y, font_size=13.5, leading=0.95 * cm, bold_lead=None):
     for it in items:
         c.setFillColor(A.GOLD_DARK)
         c.circle(x + 0.08 * cm, y + 0.14 * cm, 0.09 * cm, stroke=0, fill=1)
-        c.setFont("Helvetica", font_size)
+        c.setFont(A.FONT_REGULAR, font_size)
         c.setFillColor(A.INK)
-        lines = wrap_text(it, "Helvetica", font_size, max_w)
+        lines = wrap_text(it, A.FONT_REGULAR, font_size, max_w)
         for j, line in enumerate(lines):
             c.drawString(x + 0.45 * cm, y - j * (font_size * 1.15), line)
         y -= leading + (len(lines) - 1) * (font_size * 1.15)
@@ -91,25 +91,25 @@ def wrap_text(text, font, size, max_w):
 
 
 def footer_note(text):
-    c.setFont("Helvetica-Oblique", 9.5)
+    c.setFont(A.FONT_ITALIC, 9.5)
     c.setFillColor(A.GOLD_DARK)
     c.drawString(MARGIN_X + 0.3 * cm, 2.35 * cm, text)
 
 
 # ---------- Slide 1: Titel ----------
 new_slide()
-c.setFont("Helvetica-Bold", 30)
+c.setFont(A.FONT_BOLD, 30)
 c.setFillColor(A.NAVY)
 c.drawCentredString(PAGE_W / 2, CONTENT_TOP - 2.6 * cm, "Fachkurs Ausbau")
-c.setFont("Helvetica-Oblique", 15)
+c.setFont(A.FONT_ITALIC, 15)
 c.setFillColor(A.GOLD_DARK)
 c.drawCentredString(PAGE_W / 2, CONTENT_TOP - 3.5 * cm,
                      "Grundlagen und praxisorientierte Techniken im Innenausbau")
-c.setFont("Helvetica-Bold", 12)
+c.setFont(A.FONT_BOLD, 12)
 c.setFillColor(A.NAVY_MID)
 c.drawCentredString(PAGE_W / 2, CONTENT_TOP - 4.6 * cm,
                      "Erstellt von Matthias Gornik & Athanasios Matziouridis")
-c.setFont("Helvetica", 11)
+c.setFont(A.FONT_REGULAR, 11)
 c.setFillColor(colors.Color(0.35, 0.35, 0.4))
 c.drawCentredString(PAGE_W / 2, CONTENT_TOP - 5.6 * cm,
                      "8 Wochen  •  320 Unterrichtseinheiten  •  "
@@ -203,14 +203,14 @@ c.showPage()
 
 # ---------- Letzte Folie: Dank ----------
 new_slide()
-c.setFont("Helvetica-Bold", 26)
+c.setFont(A.FONT_BOLD, 26)
 c.setFillColor(A.NAVY)
 c.drawCentredString(PAGE_W / 2, CONTENT_TOP - 2.8 * cm, "Vielen Dank für Ihre Teilnahme!")
-c.setFont("Helvetica", 13)
+c.setFont(A.FONT_REGULAR, 13)
 c.setFillColor(A.NAVY_MID)
 c.drawCentredString(PAGE_W / 2, CONTENT_TOP - 3.9 * cm,
                      "Matthias Gornik & Athanasios Matziouridis")
-c.setFont("Helvetica-Oblique", 11)
+c.setFont(A.FONT_ITALIC, 11)
 c.setFillColor(colors.Color(0.35, 0.35, 0.4))
 c.drawCentredString(PAGE_W / 2, CONTENT_TOP - 4.6 * cm, "M&C Akademie – Fachkurs Ausbau")
 c.showPage()
