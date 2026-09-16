@@ -25,11 +25,22 @@ polished PDF deliverables from Python/ReportLab scripts, not an app.
 > 3. Font = **Work Sans** (`akademie_style.FONT_REGULAR/FONT_BOLD/
 >    FONT_ITALIC/FONT_BOLDITALIC`) — a humanist, warm-reading typeface.
 >    Never `"Helvetica"` / `"Helvetica-Bold"` / any ReportLab base-14 font.
+> 4. The logo's own pixel colors are **never altered** — no highlight/
+>    shadow bevel tint, no gloss/sheen overlay drawn *on* the logo artwork
+>    itself (`make_logo_3d.py` only removes the studio background and adds
+>    a drop shadow *behind* the shape). An earlier version added a bevel +
+>    gloss overlay directly on the logo that tinted the reds/blacks — the
+>    user rejected it ("logo original farben"). Any "hochglanz" look comes
+>    from the white card/frame drawn *around* the logo in
+>    `_header_footer`/`draw_attribution_bar`, never from touching the PNG.
+> 5. All logo card/plate backgrounds (`_header_footer`'s header plate,
+>    `draw_attribution_bar`'s chip) are **flat white** (`colors.white`),
+>    not a light-gray gradient — the user explicitly corrected a subtle
+>    off-white/gray gradient version ("hintergrund weiss").
 >
-> All three were explicitly requested and confirmed once already (rule 2
-> after an explicit follow-up correcting an earlier "page 1 only, full
-> stop" version); treat them as permanent house style, not per-request
-> choices to re-derive.
+> All were explicitly requested and confirmed once already (rules 2, 4, 5
+> each after an explicit follow-up correcting an earlier version); treat
+> them as permanent house style, not per-request choices to re-derive.
 
 ## Directory layout
 
@@ -41,7 +52,7 @@ akademie/
     fonts/WorkSans-*.ttf           # Regular/Bold/Italic/BoldItalic — the house typeface
   scripts/
     akademie_style.py              # shared layout module — import this, don't duplicate
-    make_logo_3d.py                # regenerates the 3D/gloss logo from the original photo
+    make_logo_3d.py                # regenerates the cutout+shadow logo from the original photo
     build_*.py                     # one script per deliverable, run standalone
   output/
     *.pdf                          # generated deliverables, committed to the repo
@@ -51,16 +62,24 @@ akademie/
 
 - **File:** `assets/logo_mc_akademie_3d.png`. This is the real M&C Akademie
   logo the user provided (`logo_mc_akademie_original.jpg`), run through
-  `make_logo_3d.py` to add a 3D bevel/emboss edge, a diagonal glass-reflex
-  gloss streak, a soft top sheen, and a drop shadow — **shapes, colors and
-  text of the original are unchanged**, only light/depth was added.
+  `make_logo_3d.py`, which only (a) removes the light studio background
+  (alpha cutout) and (b) adds a soft drop shadow behind the shape for a
+  floating/3D presence. **The logo's own colors and pixels are pixel-for-
+  pixel the original photo's — no bevel, highlight/shadow tint, or gloss
+  overlay is drawn on the artwork itself.** An earlier version of
+  `make_logo_3d.py` did add such an overlay (bevel edges + a diagonal
+  gloss streak + a top sheen) and the user explicitly rejected it as
+  altering the original colors — don't reintroduce that.
 - **Never** invent a placeholder/generic logo, and never re-crop, re-color,
   or swap in a different image for "AKADEMIE" branding. If a new logo photo
   is ever supplied, save it as the new `logo_mc_akademie_original.jpg`,
   rerun `make_logo_3d.py`, and update nothing else.
-- **Placement:** top-center of the page, inside the glossy card/frame drawn
-  by `akademie_style._header_footer` (light gradient plate + gold border +
-  gloss highlight — this frame is separate styling, not baked into the PNG).
+- **Placement:** top-center of the page, inside a **flat white** card/frame
+  (`colors.white`, not a gradient) drawn by `akademie_style._header_footer`
+  — gold border + a subtle gloss-highlight overlay on the *card*, never on
+  the logo PNG itself. Same for the small per-chapter attribution chip
+  (`draw_attribution_bar`). An earlier version used a light-gray gradient
+  card background; the user explicitly asked for a plain white background.
 - **Big page-header logo only on page 1** of every document (including
   every slide deck's first slide only, not every slide). Later pages use
   a compact header with no logo so content gets the reclaimed vertical
@@ -164,6 +183,11 @@ every subsequent one, tracking a slide counter.
   heading (every page a chapter starts on, not just page 1) — corrected
   from an earlier draft that (mis-)read "page 1 only" as applying here
   too; the user explicitly re-asked for per-chapter placement twice.
+- Logo artwork colors are the untouched original photo, no bevel/gloss
+  tint on the PNG itself — corrected from an earlier version that added
+  a highlight/shadow bevel + gloss overlay directly on the logo.
+- Logo card/plate backgrounds are flat white, not a light-gray gradient —
+  corrected from an earlier version.
 - When a new request is genuinely ambiguous on branding/design (a new
   logo, a different font, color scheme) or otherwise irreversible/costly to
   redo, ask before implementing rather than guessing — per explicit user

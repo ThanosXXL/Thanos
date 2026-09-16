@@ -161,8 +161,14 @@ def draw_attribution_bar(c, x, y, w, h, text=ATTRIBUTION_TEXT):
     fuer flieszende Dokumente) und dem Folien-Skript (direktes Canvas-Zeichnen)."""
     c.saveState()
     radius = 4
-    draw_gradient_rect(c, x, y, w, h, Color(0.98, 0.98, 1.0),
-                        Color(0.91, 0.92, 0.95), radius=radius)
+    if radius:
+        p = c.beginPath()
+        p.roundRect(x, y, w, h, radius)
+        c.clipPath(p, stroke=0, fill=0)
+    c.setFillColor(colors.white)
+    c.rect(x, y, w, h, stroke=0, fill=1)
+    c.restoreState()
+    c.saveState()
     c.setStrokeColor(GOLD)
     c.setLineWidth(0.7)
     c.roundRect(x + 0.4, y + 0.4, w - 0.8, h - 0.8, radius, stroke=1, fill=0)
@@ -281,8 +287,13 @@ def _header_footer(landscape_mode=False, doc_short_title="", show_logo=True):
             c.roundRect(plate_x + 0.06 * cm, plate_y - 0.05 * cm, plate_w, plate_h, 8,
                         stroke=0, fill=1)
             c.restoreState()
-            draw_gradient_rect(c, plate_x, plate_y, plate_w, plate_h,
-                                Color(0.98, 0.98, 1.0), Color(0.88, 0.89, 0.93), radius=8)
+            c.saveState()
+            p = c.beginPath()
+            p.roundRect(plate_x, plate_y, plate_w, plate_h, 8)
+            c.clipPath(p, stroke=0, fill=0)
+            c.setFillColor(colors.white)
+            c.rect(plate_x, plate_y, plate_w, plate_h, stroke=0, fill=1)
+            c.restoreState()
             c.saveState()
             c.setStrokeColor(GOLD)
             c.setLineWidth(0.8)
