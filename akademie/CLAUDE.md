@@ -7,12 +7,19 @@ the Dozenten Dashboard, `omniroute/`, or `it-schulung/` — that produces
 polished PDF deliverables from Python/ReportLab scripts, not an app.
 
 > **Always apply to every new script/PDF in this folder, no exceptions:**
-> 1. Logo = `assets/logo_mc_akademie_3d.png` (top of page 1 only).
-> 2. Font = **Work Sans** (`akademie_style.FONT_REGULAR/FONT_BOLD/
+> 1. Logo = `assets/logo_mc_akademie_3d.png` (top of page 1 **only** — not
+>    repeated per chapter, not on every page; confirmed explicitly after
+>    the user asked about per-chapter placement and clarified "auf jeder
+>    ersten Seite", i.e. page 1 of each document).
+> 2. Directly under the main title/subtitle on that same page 1, the
+>    authors line **"Erstellt von Matthias Gornik & Athanasios
+>    Matziouridis"** (the `Authors` paragraph style in `get_styles()`) —
+>    logo and this byline always travel together on page 1.
+> 3. Font = **Work Sans** (`akademie_style.FONT_REGULAR/FONT_BOLD/
 >    FONT_ITALIC/FONT_BOLDITALIC`) — a humanist, warm-reading typeface.
 >    Never `"Helvetica"` / `"Helvetica-Bold"` / any ReportLab base-14 font.
 >
-> These were both explicitly requested and corrected once already; treat
+> All three were explicitly requested and confirmed once already; treat
 > them as permanent house style, not per-request choices to re-derive.
 
 ## Directory layout
