@@ -14,37 +14,38 @@ def sec(num, title, kicker_prefix="ABSCHNITT"):
     return A.chapter_heading(f"{num}. {title}", kicker=f"{kicker_prefix} {num}")
 
 story = []
-story.append(Paragraph("Fachkurs Ausbau", S["DocTitle"]))
-story.append(Paragraph("Grundlagen und praxisorientierte Techniken im Innenausbau",
+story.append(Paragraph("Fachbauleiter", S["DocTitle"]))
+story.append(Paragraph("Weiterbildung zur Fachbauleitung im Bauwesen",
                         S["DocSubtitle"]))
-story.append(Paragraph("Erstellt von Matthias Gornik &amp; Athanasios Matziouridis",
-                        S["Authors"]))
 story.append(Spacer(1, 0.5 * cm))
 
 story.extend(sec(1, "Überschrift"))
 story.append(Spacer(1, 0.2 * cm))
 story.append(Paragraph(
-    "Fachkurs Ausbau – Grundlagen und praxisorientierte Techniken im Innenausbau",
+    "Fachbauleiter – Weiterbildung zur Fachbauleitung im Bauwesen",
     S["Body"]))
 story.append(Spacer(1, 0.3 * cm))
 
 story.extend(sec(2, "Kursbeschreibung"))
 story.append(Spacer(1, 0.2 * cm))
 story.append(Paragraph(
-    "Der Kurs vermittelt grundlegende und erweiterte Kenntnisse im Bereich "
-    "Ausbauarbeiten. Teilnehmer lernen die wichtigsten Techniken des Innenausbaus "
-    "kennen und wenden diese praxisnah an. Der Schwerpunkt liegt auf der "
-    "fachgerechten Ausführung von Arbeiten im Trockenbau, Boden- und "
-    "Wandgestaltung sowie einfachen Montage- und Installationsarbeiten im "
-    "Innenbereich. Theorie und Praxis sind eng miteinander verknüpft, um ein "
-    "sicheres und anwendungsorientiertes Arbeiten zu gewährleisten.", S["Body"]))
+    "Die Weiterbildung vermittelt das fachliche, rechtliche und "
+    "organisatorische Rüstzeug für die eigenverantwortliche Leitung und "
+    "Überwachung von Bauvorhaben. Teilnehmer lernen die wesentlichen "
+    "Grundlagen der Bauleitung kennen – von Baurecht und VOB über "
+    "Ausschreibung, Vergabe und Abrechnung bis hin zu Terminplanung, "
+    "Kostenkontrolle, Qualitätssicherung, Arbeitssicherheit und "
+    "Nachtragsmanagement. Theorie wird durchgehend mit praxisnahen "
+    "Beispielen und Fallstudien aus dem Baualltag verknüpft, damit das "
+    "Gelernte unmittelbar auf der Baustelle angewendet werden kann.",
+    S["Body"]))
 story.append(Spacer(1, 0.3 * cm))
 
 story.extend(sec(3, "Schulungszeitraum"))
 story.append(Spacer(1, 0.2 * cm))
 story.append(A.bullet_list([
-    "Dauer: 8 Wochen (320 Unterrichtseinheiten)",
-    "Unterrichtszeiten: Montag bis Freitag, 08:00 Uhr – 15:00 Uhr",
+    "Dauer: 6 Tage (48 Unterrichtseinheiten)",
+    "Unterrichtszeiten: 08:00 Uhr – 16:00 Uhr",
     "Der Zeitraum kann je nach Bildungsträger angepasst werden.",
 ], S["Bullet"]))
 story.append(Spacer(1, 0.3 * cm))
@@ -52,28 +53,32 @@ story.append(Spacer(1, 0.3 * cm))
 story.extend(sec(4, "Seminarziel"))
 story.append(Spacer(1, 0.2 * cm))
 story.append(Paragraph(
-    "Ziel des Seminars ist es, den Teilnehmern grundlegende handwerkliche "
-    "Kompetenzen im Ausbau zu vermitteln. Nach Abschluss sind sie in der Lage, "
-    "einfache Ausbauarbeiten selbstständig und fachgerecht auszuführen sowie "
-    "typische Materialien und Werkzeuge sicher einzusetzen.", S["Body"]))
+    "Ziel der Weiterbildung ist es, die Teilnehmer zu befähigen, "
+    "Bauvorhaben eigenständig fachlich, rechtlich, terminlich und "
+    "wirtschaftlich zu leiten und zu überwachen. Nach Abschluss können "
+    "sie Bauverträge und VOB-Regelungen sicher anwenden, Bauabläufe "
+    "planen und steuern, Kosten kontrollieren, die Qualität der "
+    "Ausführung überwachen und Nachträge sowie Mängel sachgerecht "
+    "managen.", S["Body"]))
 story.append(Spacer(1, 0.3 * cm))
 
 story.extend(sec(5, "Abschluss"))
 story.append(Spacer(1, 0.2 * cm))
 story.append(Paragraph(
-    "Teilnahmebescheinigung oder Zertifikat (je nach Kursanbieter und "
-    "Prüfungsleistung)", S["Body"]))
+    "Teilnahmebescheinigung oder Zertifikat „Geprüfter Fachbauleiter“ "
+    "(je nach Kursanbieter und Prüfungsleistung)", S["Body"]))
 story.append(Spacer(1, 0.3 * cm))
 
 story.extend(sec(6, "Zielgruppe"))
 story.append(Spacer(1, 0.2 * cm))
-story.append(Paragraph("Der Kurs richtet sich an:", S["Body"]))
+story.append(Paragraph("Die Weiterbildung richtet sich an:", S["Body"]))
 story.append(A.bullet_list([
-    "Einsteiger im Bau- und Ausbaugewerbe",
-    "Quereinsteiger ohne oder mit geringen Vorkenntnissen",
-    "Auszubildende zur Vorbereitung oder Vertiefung",
-    "Hilfskräfte im Bauwesen",
-    "Personen mit Interesse an handwerklichen Tätigkeiten im Innenausbau",
+    "Poliere und Vorarbeiter mit Berufserfahrung auf der Baustelle",
+    "Meister und Techniker im Bauwesen",
+    "Bauingenieure und Architekten zu Beginn der Bauleitungstätigkeit",
+    "Facharbeiter mit einschlägiger Erfahrung, die Bauleitungsaufgaben "
+    "übernehmen möchten",
+    "Personen mit Interesse an einer Fach- oder Bauleitungsfunktion",
 ], S["Bullet"]))
 story.append(Spacer(1, 0.3 * cm))
 
@@ -81,10 +86,9 @@ story.extend(sec(7, "Unterrichtsmaterial"))
 story.append(Spacer(1, 0.2 * cm))
 story.append(A.bullet_list([
     "Skript / Schulungsunterlagen",
-    "Praxisbezogene Arbeitsblätter",
-    "Werkzeuge und Materialien für Übungen (z. B. Trockenbauplatten, Profile, "
-    "Dämmstoffe)",
-    "Sicherheitsausrüstung (PSA)",
+    "Gesetzestexte und VOB-Auszüge (VOB/A, VOB/B, VOB/C)",
+    "Praxisbeispiele und Fallstudien aus dem Baualltag",
+    "Vorlagen (z. B. Bautagebuch, Nachtragsformular, Mängelliste)",
     "Ggf. digitale Präsentationen und Videos",
 ], S["Bullet"]))
 story.append(Spacer(1, 0.3 * cm))
@@ -92,20 +96,21 @@ story.append(Spacer(1, 0.3 * cm))
 story.extend(sec(8, "Inhalte"))
 story.append(Spacer(1, 0.2 * cm))
 story.append(A.bullet_list([
-    "Grundlagen des Innenausbaus",
-    "Materialkunde (Gipskarton, Holz, Dämmstoffe, Profile)",
-    "Mess- und Anreißtechniken",
-    "Trockenbaukonstruktionen (Wände, Decken, Verkleidungen)",
-    "Spachtel- und Schleiftechniken",
-    "Bodenaufbau und einfache Bodenverlegung",
-    "Montage von Bauelementen (z. B. Türen, Leisten)",
-    "Arbeitssicherheit und Unfallverhütung",
-    "Werkzeugkunde und richtige Handhabung",
-    "Praktische Übungen und Projektarbeit",
+    "Grundlagen der Bauleitung und Fachbauleitung",
+    "Baurecht und Genehmigungsverfahren",
+    "Vertragsrecht und VOB (VOB/A, VOB/B, VOB/C)",
+    "Ausschreibung, Vergabe und Abrechnung (AVA)",
+    "Bauablaufplanung und Terminmanagement",
+    "Kalkulation und Kostenkontrolle",
+    "Qualitätsmanagement und Bauüberwachung",
+    "Arbeitssicherheit und Gesundheitsschutz auf der Baustelle",
+    "Nachtragsmanagement",
+    "Mängelmanagement, Abnahme und Gewährleistung",
+    "Personalführung, Kommunikation und Dokumentation",
 ], S["Bullet"]))
 
 A.build_flowing_document(
     story, os.path.join(OUT_DIR, "Kursbeschreibung.pdf"), A.PAGE_SIZE_PORTRAIT,
-    "Kursbeschreibung – Fachkurs Ausbau",
+    "Kursbeschreibung – Fachbauleiter",
 )
 print("done")

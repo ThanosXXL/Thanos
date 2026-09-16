@@ -40,102 +40,105 @@ class AnswerLines(Flowable):
 QUESTIONS = [
     dict(
         kind="mc",
-        topic="Materialkunde",
-        text="Welches Material wird typischerweise zur Beplankung von "
-             "nichttragenden Trockenbau-Ständerwänden verwendet?",
+        topic="VOB",
+        text="Welcher Teil der VOB regelt die Allgemeinen "
+             "Vertragsbedingungen für die Ausführung von Bauleistungen "
+             "(Rechte und Pflichten zwischen Auftraggeber und "
+             "Auftragnehmer)?",
         options=[
-            "Gipskartonplatten",
-            "Fliesen",
-            "Betonfertigteile",
-            "Glasscheiben",
+            "VOB/B",
+            "VOB/A",
+            "VOB/C",
+            "VOB/D",
         ],
         correct=0,
-        explanation="Gipskartonplatten (GK) sind der Standardwerkstoff zur "
-                     "Beplankung von Trockenbau-Ständerwänden. Je nach "
-                     "Anforderung kommen Sonderausführungen (z. B. "
-                     "feuchtraum-, feuer- oder schallschutzhemmend) zum "
-                     "Einsatz.",
+        explanation="Die VOB/B enthält die Allgemeinen Vertragsbedingungen "
+                     "für die Ausführung von Bauleistungen, u. a. zu "
+                     "Ausführungsfristen, Behinderung, Abnahme, "
+                     "Gewährleistung und Kündigung. Die VOB/A regelt die "
+                     "Vergabe, die VOB/C die technischen "
+                     "Vertragsbedingungen je Gewerk.",
     ),
     dict(
         kind="open",
-        topic="Mess- und Anreißtechniken",
-        text="Nennen Sie zwei Werkzeuge für Mess- und Anreißarbeiten im "
-             "Trockenbau und beschreiben Sie kurz deren jeweiligen "
-             "Einsatzzweck.",
+        topic="Bauablaufplanung",
+        text="Nennen Sie zwei Methoden der Bauablaufplanung und "
+             "beschreiben Sie kurz deren jeweiligen Nutzen.",
         lines=4,
-        explanation="Beispielsweise: Wasserwaage/Laser-Kreuzlinie zum "
-                     "Übertragen horizontaler und vertikaler Bezugslinien; "
-                     "Schlagschnur zum schnellen Übertragen langer, gerader "
-                     "Linien; Zollstock/Bandmaß zur Ermittlung der "
-                     "Grundmaße; Winkel/Streichmaß für rechtwinklige "
-                     "Anrisse und Zuschnitte. Zwei korrekt benannte "
-                     "Werkzeuge mit passendem Einsatzzweck gelten als "
-                     "vollständig richtig beantwortet.",
+        explanation="Beispielsweise: Balkenplan (Gantt-Diagramm) zur "
+                     "übersichtlichen Darstellung der Gewerketermine; "
+                     "Netzplantechnik zur Ermittlung des kritischen Pfads "
+                     "und der Pufferzeiten bei komplexen Bauvorhaben. Zwei "
+                     "korrekt benannte Methoden mit passendem Nutzen "
+                     "gelten als vollständig richtig beantwortet.",
     ),
     dict(
         kind="mc",
         topic="Arbeitssicherheit",
-        text="Welche persönliche Schutzausrüstung (PSA) ist bei Spachtel- "
-             "und Schleifarbeiten im Innenausbau mindestens erforderlich?",
+        text="Wer erstellt gemäß Baustellenverordnung den Sicherheits- "
+             "und Gesundheitsschutzplan (SiGe-Plan) bei Baustellen mit "
+             "mehreren Arbeitgebern?",
         options=[
-            "Schutzbrille und Staubmaske (mindestens FFP2)",
-            "Ausschließlich Arbeitshandschuhe",
-            "Sicherheitsschuhe allein genügen",
-            "Bei kurzen Arbeiten ist keine PSA notwendig",
+            "Der Sicherheits- und Gesundheitsschutzkoordinator (SiGeKo)",
+            "Jeder Subunternehmer für sich allein",
+            "Ausschließlich der Bauherr persönlich",
+            "Die zuständige Bauaufsichtsbehörde",
         ],
         correct=0,
-        explanation="Bei Spachtel- und insbesondere Schleifarbeiten "
-                     "entsteht feiner Gipsstaub. Erforderlich sind daher "
-                     "mindestens Schutzbrille und eine Staubmaske der "
-                     "Klasse FFP2, ergänzt um die übrige Basis-PSA "
-                     "(Sicherheitsschuhe, ggf. Handschuhe).",
+        explanation="Bei Baustellen, auf denen Beschäftigte mehrerer "
+                     "Arbeitgeber tätig sind, ist ein Sicherheits- und "
+                     "Gesundheitsschutzkoordinator (SiGeKo) zu bestellen, "
+                     "der u. a. den SiGe-Plan erstellt bzw. erstellen "
+                     "lässt und die Zusammenarbeit der Gewerke "
+                     "koordiniert.",
     ),
     dict(
         kind="open",
-        topic="Trockenbaukonstruktionen",
-        text="Beschreiben Sie den grundsätzlichen Aufbau einer "
-             "nichttragenden Trockenbau-Ständerwand – von der "
-             "Unterkonstruktion bis zur fertigen Oberfläche.",
+        topic="Mängelmanagement",
+        text="Beschreiben Sie den grundsätzlichen Ablauf von der "
+             "Mängelfeststellung bis zur Mängelbeseitigung im Rahmen der "
+             "Gewährleistung.",
         lines=5,
-        explanation="Erwarteter Ablauf: (1) UW-Profile lotrecht/fluchtgerecht "
-                     "an Boden und Decke anlegen und befestigen, (2) "
-                     "CW-Ständerprofile im vorgeschriebenen Raster setzen "
-                     "und ausrichten, (3) Dämmung und Installationsebene "
-                     "einbringen, (4) Beplankung mit Gipskartonplatten mit "
-                     "versetzten Stoßfugen, (5) Verspachteln der Fugen "
-                     "(Bandage, mehrlagiger Spachtelaufbau) und "
-                     "Zwischen-/Endschliff, (6) ggf. Oberflächenbehandlung.",
+        explanation="Erwarteter Ablauf: (1) Mängelfeststellung und "
+                     "Dokumentation (z. B. Fotos, Bautagebuch), (2) "
+                     "schriftliche Mängelanzeige an den Auftragnehmer mit "
+                     "angemessener Fristsetzung zur Nachbesserung, (3) "
+                     "Nachbesserung durch den Auftragnehmer innerhalb der "
+                     "Frist, (4) bei erfolgloser Fristsetzung ggf. "
+                     "Ersatzvornahme durch Dritte auf Kosten des "
+                     "Auftragnehmers, (5) Abnahme/Prüfung der "
+                     "Nachbesserung.",
     ),
     dict(
         kind="mc",
-        topic="Bodenverlegung",
-        text="Was ist beim Verlegen eines schwimmenden Laminat- oder "
-             "Vinylbodens unbedingt zu beachten?",
+        topic="Nachtragsmanagement",
+        text="Was ist die Grundvoraussetzung für einen berechtigten "
+             "Nachtrag nach VOB/B?",
         options=[
-            "Ausreichende Dehnungsfugen an Wänden und Übergängen einplanen",
-            "Der Boden wird vollflächig fest mit dem Untergrund verklebt",
-            "Eine Trittschalldämmung ist grundsätzlich nicht erforderlich",
-            "Der Untergrund muss nicht auf Ebenheit geprüft werden",
+            "Eine Leistungsänderung oder zusätzliche Leistung, die vom "
+            "ursprünglichen Vertrag abweicht und rechtzeitig angezeigt "
+            "wird",
+            "Der Auftragnehmer entscheidet allein, ohne vorherige Anzeige",
+            "Nachträge sind nach VOB/B grundsätzlich nicht zulässig",
+            "Eine mündliche Absprache auf der Baustelle genügt in jedem "
+            "Fall",
         ],
         correct=0,
-        explanation="Schwimmend verlegte Böden benötigen Bewegungsspielraum: "
-                     "An Wänden und Übergängen sind Dehnungsfugen "
-                     "einzuplanen, damit der Belag bei Temperatur- und "
-                     "Feuchteschwankungen arbeiten kann. Untergrundebenheit "
-                     "und Trittschalldämmung sind zusätzlich zwingend zu "
-                     "prüfen bzw. einzubauen.",
+        explanation="Ein Nachtrag setzt voraus, dass die auszuführende "
+                     "Leistung vom ursprünglichen Vertrag abweicht "
+                     "(Leistungsänderung oder zusätzliche Leistung) und "
+                     "dass diese Änderung dem Auftraggeber rechtzeitig, "
+                     "in der Regel vor Ausführung, angezeigt wird.",
     ),
 ]
 
 
 def build(confidential: bool, out_path: str, doc_title: str):
     story = []
-    story.append(Paragraph("Abschlussprüfung – Fachkurs Ausbau", S["DocTitle"]))
+    story.append(Paragraph("Abschlussprüfung – Fachbauleiter", S["DocTitle"]))
     story.append(Paragraph(
-        "Grundlagen und praxisorientierte Techniken im Innenausbau",
+        "Weiterbildung zur Fachbauleitung im Bauwesen",
         S["DocSubtitle"]))
-    story.append(Paragraph("Erstellt von Matthias Gornik &amp; Athanasios Matziouridis",
-                            S["Authors"]))
 
     if confidential:
         story.append(Spacer(1, 0.3 * cm))
@@ -146,9 +149,10 @@ def build(confidential: bool, out_path: str, doc_title: str):
         story.append(Spacer(1, 0.15 * cm))
         story.append(Paragraph(
             "Dieses Dokument enthält die Musterlösungen zu den 5 "
-            "Prüfungsfragen des Fachkurses Ausbau. Es dient ausschließlich "
-            "der internen Verwendung durch die Dozentinnen und Dozenten und "
-            "darf nicht an Teilnehmende weitergegeben werden.", S["Small"]))
+            "Prüfungsfragen der Weiterbildung Fachbauleiter. Es dient "
+            "ausschließlich der internen Verwendung durch die "
+            "Dozentinnen und Dozenten und darf nicht an Teilnehmende "
+            "weitergegeben werden.", S["Small"]))
     else:
         story.append(Spacer(1, 0.15 * cm))
         story.append(Paragraph("Prüfungsfragen für Teilnehmerinnen und "
@@ -197,7 +201,7 @@ def build(confidential: bool, out_path: str, doc_title: str):
 
 
 build(False, os.path.join(OUT_DIR, "Pruefungsfragen.pdf"),
-      "Prüfungsfragen – Fachkurs Ausbau")
+      "Prüfungsfragen – Fachbauleiter")
 build(True, os.path.join(OUT_DIR, "Pruefungsfragen_Loesungen_Dozenten.pdf"),
       "Prüfungsfragen mit Lösungen – nur für Dozenten")
 print("done")

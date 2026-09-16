@@ -152,59 +152,54 @@ class GlossyBanner(Flowable):
             c.drawString(text_x, 0.42 * cm, self.subtitle)
 
 
-ATTRIBUTION_TEXT = "Erstellt von Matthias Gornik & Athanasios Matziouridis"
-
-
-def draw_attribution_bar(c, x, y, w, h, text=ATTRIBUTION_TEXT):
-    """Zeichnet die Logo-Miniatur + 'Erstellt von ...'-Zeile an (x, y) mit
-    Breite w / Hoehe h. Gemeinsam genutzt von ChapterAttribution (Flowable,
-    fuer flieszende Dokumente) und dem Folien-Skript (direktes Canvas-Zeichnen)."""
-    c.saveState()
+def draw_attribution_bar(c, x, y, w, h):
+    """Zeichnet eine kleine Logo-Miniatur (kompaktes Chip, kein Text/Name)
+    an (x, y), Hoehe h. Gemeinsam genutzt von ChapterAttribution (Flowable,
+    fuer flieszende Dokumente) und dem Folien-Skript (direktes Canvas-Zeichnen).
+    `w` ist nur die verfuegbare Breite; das Chip selbst ist inhaltsbreit
+    (nur so breit wie das Logo + Rand), kein voller Balken."""
+    pad = 0.16 * cm
+    logo_h = h - 2 * pad
+    logo_w = logo_h * LOGO_ASPECT
+    chip_w = pad + 0.14 * cm + logo_w + pad
     radius = 4
-    if radius:
-        p = c.beginPath()
-        p.roundRect(x, y, w, h, radius)
-        c.clipPath(p, stroke=0, fill=0)
+
+    c.saveState()
+    p = c.beginPath()
+    p.roundRect(x, y, chip_w, h, radius)
+    c.clipPath(p, stroke=0, fill=0)
     c.setFillColor(colors.white)
-    c.rect(x, y, w, h, stroke=0, fill=1)
+    c.rect(x, y, chip_w, h, stroke=0, fill=1)
     c.restoreState()
     c.saveState()
     c.setStrokeColor(GOLD)
     c.setLineWidth(0.7)
-    c.roundRect(x + 0.4, y + 0.4, w - 0.8, h - 0.8, radius, stroke=1, fill=0)
+    c.roundRect(x + 0.4, y + 0.4, chip_w - 0.8, h - 0.8, radius, stroke=1, fill=0)
     c.setFillColor(GOLD)
     c.rect(x, y, 0.12 * cm, h, stroke=0, fill=1)
     c.restoreState()
 
-    pad = 0.16 * cm
-    logo_h = h - 2 * pad
-    logo_w = logo_h * LOGO_ASPECT
     logo_x = x + pad + 0.14 * cm
     logo_y = y + pad
     c.drawImage(LOGO_PATH, logo_x, logo_y, width=logo_w, height=logo_h,
                 mask="auto", preserveAspectRatio=True)
 
-    c.setFont(FONT_ITALIC, 7.8)
-    c.setFillColor(GOLD_DARK)
-    c.drawString(logo_x + logo_w + 0.3 * cm, y + h / 2 - 2.6, text)
-
 
 class ChapterAttribution(Flowable):
-    """Kompakte Zeile mit Logo-Miniatur + 'Erstellt von ...', direkt unter
-    jeder Kapitel-/Abschnittsueberschrift (GlossyBanner) platziert."""
+    """Kompaktes Logo-Chip (ohne Namen/Text), direkt unter jeder Kapitel-/
+    Abschnittsueberschrift (GlossyBanner) platziert."""
 
-    def __init__(self, width=None, height=0.62 * cm, text=ATTRIBUTION_TEXT):
+    def __init__(self, width=None, height=0.62 * cm):
         super().__init__()
         self.width = width
         self.height = height
-        self.text = text
 
     def wrap(self, availWidth, availHeight):
         self.width = availWidth
         return self.width, self.height
 
     def draw(self):
-        draw_attribution_bar(self.canv, 0, 0, self.width, self.height, self.text)
+        draw_attribution_bar(self.canv, 0, 0, self.width, self.height)
 
 
 class InfoBox(Flowable):

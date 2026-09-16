@@ -9,38 +9,50 @@ polished PDF deliverables from Python/ReportLab scripts, not an app.
 > **Always apply to every new script/PDF in this folder, no exceptions:**
 > 1. **Big page header logo** = `assets/logo_mc_akademie_3d.png`, top of
 >    **page 1 only** of each document (not repeated on every page) —
->    inside the glossy card frame drawn by `_header_footer`. Directly
->    under the main title/subtitle on that same page 1 sits the authors
->    line **"Erstellt von Matthias Gornik & Athanasios Matziouridis"**
->    (the `Authors` paragraph style) — logo and this byline travel
->    together on page 1.
+>    inside a **flat white** card frame drawn by `_header_footer`.
 > 2. **Every single chapter/section heading**, throughout every document
->    (all pages, not just page 1), gets a small logo + the same authors
->    byline directly underneath it — use `akademie_style.chapter_heading(
->    text, kicker=...)` (`story.extend(...)`, not `.append`, it returns a
->    list) for any flowing document, or `draw_attribution_bar(c, x, y, w,
->    h)` right under a canvas-drawn banner (see `build_schulungsfolien.py`
->    `slide_title_banner`). Never add a bare `GlossyBanner` without the
->    attribution bar under it.
-> 3. Font = **Work Sans** (`akademie_style.FONT_REGULAR/FONT_BOLD/
+>    (all pages, not just page 1), gets a small logo chip directly
+>    underneath it — use `akademie_style.chapter_heading(text, kicker=...)`
+>    (`story.extend(...)`, not `.append`, it returns a list) for any
+>    flowing document, or `draw_attribution_bar(c, x, y, w, h)` right
+>    under a canvas-drawn banner (see `build_schulungsfolien.py`
+>    `slide_title_banner`). Never add a bare `GlossyBanner` without it.
+> 3. **No personal names anywhere, ever** — no "Erstellt von ...", no
+>    author byline, on the title page or under chapter headings or
+>    anywhere else. Only the M&C Akademie logo identifies authorship.
+>    An earlier version showed "Erstellt von Matthias Gornik & Athanasios
+>    Matziouridis" throughout; the user explicitly had it removed
+>    ("erstelt Namen müssen raus") — **don't reintroduce any person's
+>    name.** `ChapterAttribution`/`draw_attribution_bar` draw the logo
+>    chip only, no text; `get_styles()["Authors"]` exists for backward
+>    compatibility but must not be used in any story.
+> 4. Font = **Work Sans** (`akademie_style.FONT_REGULAR/FONT_BOLD/
 >    FONT_ITALIC/FONT_BOLDITALIC`) — a humanist, warm-reading typeface.
 >    Never `"Helvetica"` / `"Helvetica-Bold"` / any ReportLab base-14 font.
-> 4. The logo's own pixel colors are **never altered** — no highlight/
+> 5. The logo's own pixel colors are **never altered** — no highlight/
 >    shadow bevel tint, no gloss/sheen overlay drawn *on* the logo artwork
 >    itself (`make_logo_3d.py` only removes the studio background and adds
->    a drop shadow *behind* the shape). An earlier version added a bevel +
->    gloss overlay directly on the logo that tinted the reds/blacks — the
->    user rejected it ("logo original farben"). Any "hochglanz" look comes
->    from the white card/frame drawn *around* the logo in
->    `_header_footer`/`draw_attribution_bar`, never from touching the PNG.
-> 5. All logo card/plate backgrounds (`_header_footer`'s header plate,
+>    a drop shadow *behind* the shape). Any "hochglanz" look comes from
+>    the white card/frame drawn *around* the logo, never from touching
+>    the PNG.
+> 6. All logo card/plate backgrounds (`_header_footer`'s header plate,
 >    `draw_attribution_bar`'s chip) are **flat white** (`colors.white`),
->    not a light-gray gradient — the user explicitly corrected a subtle
->    off-white/gray gradient version ("hintergrund weiss").
+>    not a gradient.
+> 7. Course subject is **"Fachbauleiter"** (a Weiterbildung zur
+>    Fachbauleitung im Bauwesen — construction-site supervision/technical
+>    site-management training), **6 Tage (48 UE), 08:00–16:00 Uhr**. An
+>    earlier version of all 6 documents was about a completely different
+>    course ("Fachkurs Ausbau", interior-finishing trades, 8 Wochen/320
+>    UE) — that subject and duration are gone, don't reintroduce them.
+> 8. Schulungsfolien get **substantially more text per slide** than a bare
+>    3-bullet summary: an italic intro paragraph (`intro_paragraph()`)
+>    plus 5–8 fuller-sentence bullets per topic (`bullets()`), per
+>    explicit user request ("deutlich mehr Text mit allem was dazu
+>    gehört"). Split a topic into two slides rather than cramming it thin.
 >
-> All were explicitly requested and confirmed once already (rules 2, 4, 5
-> each after an explicit follow-up correcting an earlier version); treat
-> them as permanent house style, not per-request choices to re-derive.
+> All were explicitly requested and confirmed once already (most after an
+> explicit follow-up correcting an earlier version); treat them as
+> permanent house style, not per-request choices to re-derive.
 
 ## Directory layout
 
@@ -88,12 +100,13 @@ akademie/
   documents, and via the `hf_first`/`hf_later` + slide-counter pattern in
   `build_schulungsfolien.py` for the canvas-drawn slide deck. Reuse these,
   don't re-derive per script.
-- **Separately, a small logo thumbnail travels with every chapter/section
-  heading**, on every page, via `ChapterAttribution` /
+- **Separately, a small logo thumbnail (no text/name) travels with every
+  chapter/section heading**, on every page, via `ChapterAttribution` /
   `draw_attribution_bar()` (see next section) — this is intentionally
   different from the page-1-only big header and is not a contradiction:
   the big letterhead-style logo is page-1-only, the small per-chapter
   attribution chip is everywhere a chapter starts.
+- **No personal names anywhere** — see rule 3 in the callout above.
 - To regenerate the logo asset itself (e.g. to tune effect strength), edit
   and rerun `scripts/make_logo_3d.py` — it reads the original photo and
   overwrites `logo_mc_akademie_3d.png`. Don't hand-edit the PNG.
@@ -117,15 +130,17 @@ Import this from every build script rather than reimplementing layout:
 - Colors: `NAVY`, `NAVY_MID`, `NAVY_LIGHT`, `GOLD`, `GOLD_LIGHT`, `GOLD_DARK`,
   `INK`, `LIGHT_BG`, `CONFIDENTIAL_RED`.
 - `get_styles()` → dict of ParagraphStyles (`DocTitle`, `DocSubtitle`,
-  `Authors`, `H1`/`H2`, `Body`/`BodyLeft`/`Bullet`/`Small`, table + exam
-  styles) — use these instead of ad-hoc `ParagraphStyle(...)` calls.
+  `H1`/`H2`, `Body`/`BodyLeft`/`Bullet`/`Small`, table + exam styles) — use
+  these instead of ad-hoc `ParagraphStyle(...)` calls. `Authors` still
+  exists for backward compatibility but must not be used (see "no
+  personal names" rule above).
 - `GlossyBanner` — the navy/gold gradient chapter-heading banner with
   auto-shrinking font size (won't overflow on long titles), with a
   `kicker=` like `"KAPITEL 3"` or `"ABSCHNITT 2"`. **Don't use this
   directly for chapter headings** — use `chapter_heading()` below instead,
   which bundles it with the required attribution bar.
 - `ChapterAttribution` / `draw_attribution_bar(c, x, y, w, h)` — the small
-  logo-thumbnail + "Erstellt von ..." bar that must sit directly under
+  logo-thumbnail chip (no text, no name) that must sit directly under
   every chapter/section heading. `chapter_heading()` (below) already
   includes it for flowing documents; for canvas-drawn content call
   `draw_attribution_bar` yourself right after drawing the banner.
@@ -153,7 +168,11 @@ Import this from every build script rather than reimplementing layout:
 For a canvas-drawn deck (not flowing text, e.g. more slides), follow the
 `build_schulungsfolien.py` pattern: call `header_footer_landscape(...,
 show_logo=True)` once for the first `showPage()` and `show_logo=False` for
-every subsequent one, tracking a slide counter.
+every subsequent one, tracking a slide counter. Use `topic_slide(idx_label,
+title, intro, items)` (banner + attribution chip + `intro_paragraph()` +
+`bullets()`) for each topic — this is the pattern that gives slides
+substantially more text than a bare 3-bullet list (see rule 8 above); split
+a dense topic into two `topic_slide()` calls rather than shrinking fonts.
 
 ## Conventions
 
@@ -188,6 +207,18 @@ every subsequent one, tracking a slide counter.
   a highlight/shadow bevel + gloss overlay directly on the logo.
 - Logo card/plate backgrounds are flat white, not a light-gray gradient —
   corrected from an earlier version.
+- No personal names anywhere in any document (not on the title page, not
+  in the per-chapter attribution chip) — corrected from an earlier
+  version that showed "Erstellt von Matthias Gornik & Athanasios
+  Matziouridis" throughout; only the logo identifies authorship now.
+- Course subject is "Fachbauleiter" (Weiterbildung zur Fachbauleitung im
+  Bauwesen), 6 Tage / 48 UE — corrected from an earlier version about a
+  different course ("Fachkurs Ausbau", interior finishing, 8 Wochen/320
+  UE). If the subject ever changes again, rewrite content in all 6
+  documents consistently, not just the title/duration fields.
+- Schulungsfolien carry substantially more text per topic (intro
+  paragraph + 5–8 detailed bullets, via `topic_slide()`) — corrected from
+  an earlier version with only 3 short bullet fragments per slide.
 - When a new request is genuinely ambiguous on branding/design (a new
   logo, a different font, color scheme) or otherwise irreversible/costly to
   redo, ask before implementing rather than guessing — per explicit user
