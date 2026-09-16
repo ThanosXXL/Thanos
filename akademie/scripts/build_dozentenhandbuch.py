@@ -201,12 +201,9 @@ story.append(A.bullet_list([
     "Kursfeedback der Teilnehmenden einholen",
 ], S["Bullet"]))
 
-doc = SimpleDocTemplate(
-    os.path.join(OUT_DIR, "Dozentenhandbuch.pdf"), pagesize=A.PAGE_SIZE_PORTRAIT,
-    topMargin=A.get_content_top_offset(), bottomMargin=2 * cm,
-    leftMargin=1.9 * cm, rightMargin=1.9 * cm,
-    title="Dozentenhandbuch – Fachkurs Ausbau", author="M&C Akademie",
+A.build_flowing_document(
+    story, os.path.join(OUT_DIR, "Dozentenhandbuch.pdf"), A.PAGE_SIZE_PORTRAIT,
+    "Dozentenhandbuch – Fachkurs Ausbau (nur für Dozenten)",
+    title="Dozentenhandbuch – Fachkurs Ausbau",
 )
-hf = A.header_footer_portrait("Dozentenhandbuch – Fachkurs Ausbau (nur für Dozenten)")
-doc.build(story, onFirstPage=hf, onLaterPages=hf)
 print("done")

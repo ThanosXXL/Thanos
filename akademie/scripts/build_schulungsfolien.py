@@ -11,7 +11,8 @@ from reportlab.lib import colors
 import akademie_style as A
 
 PAGE_W, PAGE_H = A.PAGE_SIZE_LANDSCAPE
-hf = A.header_footer_landscape("Schulungsfolien – Fachkurs Ausbau")
+hf_first = A.header_footer_landscape("Schulungsfolien – Fachkurs Ausbau", show_logo=True)
+hf_later = A.header_footer_landscape("Schulungsfolien – Fachkurs Ausbau", show_logo=False)
 fake_doc = SimpleNamespace(pagesize=A.PAGE_SIZE_LANDSCAPE)
 
 c = pdfcanvas.Canvas(os.path.join(OUT_DIR, "Schulungsfolien.pdf"),
@@ -19,12 +20,25 @@ c = pdfcanvas.Canvas(os.path.join(OUT_DIR, "Schulungsfolien.pdf"),
 c.setTitle("Schulungsfolien – Fachkurs Ausbau")
 c.setAuthor("M&C Akademie")
 
-CONTENT_TOP = PAGE_H - A.get_content_top_offset(landscape_mode=True)
+CONTENT_TOP_FIRST = PAGE_H - A.get_content_top_offset(landscape_mode=True, show_logo=True)
+CONTENT_TOP_LATER = PAGE_H - A.get_content_top_offset(landscape_mode=True, show_logo=False)
+CONTENT_TOP = CONTENT_TOP_FIRST
 MARGIN_X = 1.7 * cm
+
+_slide_count = [0]
 
 
 def new_slide():
-    hf(c, fake_doc)
+    # Logo erscheint nur auf der allerersten Folie; Folgefolien nutzen einen
+    # kompakteren Kopfbereich mit mehr Platz fuer Inhalt.
+    global CONTENT_TOP
+    _slide_count[0] += 1
+    if _slide_count[0] == 1:
+        hf_first(c, fake_doc)
+        CONTENT_TOP = CONTENT_TOP_FIRST
+    else:
+        hf_later(c, fake_doc)
+        CONTENT_TOP = CONTENT_TOP_LATER
 
 
 def slide_title_banner(kicker, title, subtitle=None):

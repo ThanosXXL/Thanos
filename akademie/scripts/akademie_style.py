@@ -205,7 +205,7 @@ class InfoBox(Flowable):
             f.drawOn(c, x, y)
 
 
-def _header_footer(landscape_mode=False, doc_short_title=""):
+def _header_footer(landscape_mode=False, doc_short_title="", show_logo=True):
     def _draw(c: pdfcanvas.Canvas, doc):
         page_w, page_h = doc.pagesize
         c.saveState()
@@ -223,24 +223,31 @@ def _header_footer(landscape_mode=False, doc_short_title=""):
         plate_y = logo_y - plate_pad_y
         plate_w = logo_w + 2 * plate_pad_x
         plate_h = logo_h + 2 * plate_pad_y
-        c.saveState()
-        c.setFillColor(Color(0, 0, 0, alpha=0.07))
-        c.roundRect(plate_x + 0.06 * cm, plate_y - 0.05 * cm, plate_w, plate_h, 8,
-                    stroke=0, fill=1)
-        c.restoreState()
-        draw_gradient_rect(c, plate_x, plate_y, plate_w, plate_h,
-                            Color(0.98, 0.98, 1.0), Color(0.88, 0.89, 0.93), radius=8)
-        c.saveState()
-        c.setStrokeColor(GOLD)
-        c.setLineWidth(0.8)
-        c.roundRect(plate_x, plate_y, plate_w, plate_h, 8, stroke=1, fill=0)
-        c.restoreState()
-        draw_gloss_highlight(c, plate_x, plate_y, plate_w, plate_h, radius=8)
 
-        c.drawImage(LOGO_PATH, logo_x, logo_y, width=logo_w, height=logo_h,
-                    mask="auto", preserveAspectRatio=True)
+        # Das Logo erscheint nur auf der ersten Seite; auf Folgeseiten bleibt
+        # der reservierte Kopfbereich frei (nur Goldrahmen oben + Trennlinie).
+        if show_logo:
+            c.saveState()
+            c.setFillColor(Color(0, 0, 0, alpha=0.07))
+            c.roundRect(plate_x + 0.06 * cm, plate_y - 0.05 * cm, plate_w, plate_h, 8,
+                        stroke=0, fill=1)
+            c.restoreState()
+            draw_gradient_rect(c, plate_x, plate_y, plate_w, plate_h,
+                                Color(0.98, 0.98, 1.0), Color(0.88, 0.89, 0.93), radius=8)
+            c.saveState()
+            c.setStrokeColor(GOLD)
+            c.setLineWidth(0.8)
+            c.roundRect(plate_x, plate_y, plate_w, plate_h, 8, stroke=1, fill=0)
+            c.restoreState()
+            draw_gloss_highlight(c, plate_x, plate_y, plate_w, plate_h, radius=8)
 
-        rule_y = plate_y - 0.22 * cm
+            c.drawImage(LOGO_PATH, logo_x, logo_y, width=logo_w, height=logo_h,
+                        mask="auto", preserveAspectRatio=True)
+
+        if show_logo:
+            rule_y = plate_y - 0.22 * cm
+        else:
+            rule_y = page_h - 0.28 * cm - 0.6 * cm
         draw_gradient_rect(c, 1.7 * cm, rule_y, page_w - 3.4 * cm, 0.055 * cm,
                             GOLD_DARK, GOLD_LIGHT)
 
@@ -260,19 +267,54 @@ def _header_footer(landscape_mode=False, doc_short_title=""):
     return _draw
 
 
-def header_footer_portrait(doc_short_title=""):
-    return _header_footer(False, doc_short_title)
+def header_footer_portrait(doc_short_title="", show_logo=True):
+    return _header_footer(False, doc_short_title, show_logo)
 
 
-def header_footer_landscape(doc_short_title=""):
-    return _header_footer(True, doc_short_title)
+def header_footer_landscape(doc_short_title="", show_logo=True):
+    return _header_footer(True, doc_short_title, show_logo)
 
 
-def get_content_top_offset(landscape_mode=False):
+def get_content_top_offset(landscape_mode=False, show_logo=True):
+    if not show_logo:
+        return 0.28 * cm + 0.6 * cm + 0.055 * cm + 0.35 * cm
     logo_w = 6.6 * cm if not landscape_mode else 5.8 * cm
     logo_h = logo_w / LOGO_ASPECT
     plate_pad_y = 0.30 * cm
     return 0.28 * cm + plate_pad_y + logo_h + plate_pad_y + 0.22 * cm + 0.35 * cm
+
+
+def build_flowing_document(story, out_path, pagesize, doc_short_title, title=None,
+                            author="M&C Akademie", landscape_mode=False,
+                            left_margin=1.9 * cm, right_margin=1.9 * cm,
+                            bottom_margin=2 * cm):
+    """Baut ein mehrseitiges PDF, bei dem das Logo nur auf Seite 1 erscheint;
+    Folgeseiten nutzen einen kompakten Kopfbereich (mehr Platz fuer Inhalt)."""
+    from reportlab.platypus import BaseDocTemplate, PageTemplate, Frame, NextPageTemplate
+
+    page_w, page_h = pagesize
+    frame_w = page_w - left_margin - right_margin
+
+    top_first = get_content_top_offset(landscape_mode, show_logo=True)
+    top_later = get_content_top_offset(landscape_mode, show_logo=False)
+
+    frame_first = Frame(left_margin, bottom_margin, frame_w,
+                         page_h - top_first - bottom_margin, id="first",
+                         leftPadding=0, rightPadding=0, topPadding=0, bottomPadding=0)
+    frame_later = Frame(left_margin, bottom_margin, frame_w,
+                         page_h - top_later - bottom_margin, id="later",
+                         leftPadding=0, rightPadding=0, topPadding=0, bottomPadding=0)
+
+    hf = header_footer_landscape if landscape_mode else header_footer_portrait
+    tmpl_first = PageTemplate(id="First", frames=[frame_first],
+                               onPage=hf(doc_short_title, show_logo=True))
+    tmpl_later = PageTemplate(id="Later", frames=[frame_later],
+                               onPage=hf(doc_short_title, show_logo=False))
+
+    doc = BaseDocTemplate(out_path, pagesize=pagesize, title=title or doc_short_title,
+                           author=author)
+    doc.addPageTemplates([tmpl_first, tmpl_later])
+    doc.build([NextPageTemplate("Later")] + list(story))
 
 
 def get_styles():

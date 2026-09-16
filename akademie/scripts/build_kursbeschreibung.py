@@ -104,12 +104,8 @@ story.append(A.bullet_list([
     "Praktische Übungen und Projektarbeit",
 ], S["Bullet"]))
 
-doc = SimpleDocTemplate(
-    os.path.join(OUT_DIR, "Kursbeschreibung.pdf"), pagesize=A.PAGE_SIZE_PORTRAIT,
-    topMargin=A.get_content_top_offset(), bottomMargin=2 * cm,
-    leftMargin=1.9 * cm, rightMargin=1.9 * cm,
-    title="Kursbeschreibung – Fachkurs Ausbau", author="M&C Akademie",
+A.build_flowing_document(
+    story, os.path.join(OUT_DIR, "Kursbeschreibung.pdf"), A.PAGE_SIZE_PORTRAIT,
+    "Kursbeschreibung – Fachkurs Ausbau",
 )
-hf = A.header_footer_portrait("Kursbeschreibung – Fachkurs Ausbau")
-doc.build(story, onFirstPage=hf, onLaterPages=hf)
 print("done")

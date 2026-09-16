@@ -238,12 +238,8 @@ story.append(A.InfoBox([
               "Matziouridis gerne im Unterricht.", S["BodyLeft"]),
 ], label="Kontakt"))
 
-doc = SimpleDocTemplate(
-    os.path.join(OUT_DIR, "Teilnehmerhandbuch.pdf"), pagesize=A.PAGE_SIZE_PORTRAIT,
-    topMargin=A.get_content_top_offset(), bottomMargin=2 * cm,
-    leftMargin=1.9 * cm, rightMargin=1.9 * cm,
-    title="Teilnehmerhandbuch – Fachkurs Ausbau", author="M&C Akademie",
+A.build_flowing_document(
+    story, os.path.join(OUT_DIR, "Teilnehmerhandbuch.pdf"), A.PAGE_SIZE_PORTRAIT,
+    "Teilnehmerhandbuch – Fachkurs Ausbau",
 )
-hf = A.header_footer_portrait("Teilnehmerhandbuch – Fachkurs Ausbau")
-doc.build(story, onFirstPage=hf, onLaterPages=hf)
 print("done")

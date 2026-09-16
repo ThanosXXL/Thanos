@@ -193,14 +193,7 @@ def build(confidential: bool, out_path: str, doc_title: str):
         block.append(Spacer(1, 0.55 * cm))
         story.append(KeepTogether(block))
 
-    doc = SimpleDocTemplate(
-        out_path, pagesize=A.PAGE_SIZE_PORTRAIT,
-        topMargin=A.get_content_top_offset(), bottomMargin=2 * cm,
-        leftMargin=1.9 * cm, rightMargin=1.9 * cm,
-        title=doc_title, author="M&C Akademie",
-    )
-    hf = A.header_footer_portrait(doc_title)
-    doc.build(story, onFirstPage=hf, onLaterPages=hf)
+    A.build_flowing_document(story, out_path, A.PAGE_SIZE_PORTRAIT, doc_title)
 
 
 build(False, os.path.join(OUT_DIR, "Pruefungsfragen.pdf"),
