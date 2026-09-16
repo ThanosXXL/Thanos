@@ -33,7 +33,7 @@ story.append(A.InfoBox([
 story.append(PageBreak())
 
 def chapter(num, title, intro, points=None, box=None, box_label=None):
-    story.append(A.GlossyBanner(f"{num}. {title}", kicker=f"KAPITEL {num}"))
+    story.extend(A.chapter_heading(f"{num}. {title}", kicker=f"KAPITEL {num}"))
     story.append(Spacer(1, 0.25 * cm))
     if isinstance(intro, list):
         for p in intro:
@@ -89,8 +89,8 @@ chapter(3, "Didaktische Leitlinien",
     ])
 
 # Wochenplan Tabelle
-story.append(A.GlossyBanner("4. Stoffverteilungsplan (Wochenübersicht)",
-                             kicker="KAPITEL 4"))
+story.extend(A.chapter_heading("4. Stoffverteilungsplan (Wochenübersicht)",
+                                kicker="KAPITEL 4"))
 story.append(Spacer(1, 0.25 * cm))
 story.append(Paragraph(
     "Bei 40 UE pro Woche ergibt sich folgende Verteilung der Kursinhalte auf "
@@ -183,8 +183,8 @@ chapter(8, "Hinweise zur Unterrichtsgestaltung je Themenblock",
         "Montage) bewusst rotieren lassen",
     ])
 
-story.append(A.GlossyBanner("9. Checkliste Kursstart / Kursabschluss",
-                             kicker="KAPITEL 9"))
+story.extend(A.chapter_heading("9. Checkliste Kursstart / Kursabschluss",
+                                kicker="KAPITEL 9"))
 story.append(Spacer(1, 0.25 * cm))
 story.append(Paragraph("<b>Vor Kursstart</b>", S["H2"]))
 story.append(A.bullet_list([

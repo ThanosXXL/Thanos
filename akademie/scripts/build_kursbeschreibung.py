@@ -11,7 +11,7 @@ styles = A.get_styles()
 S = styles
 
 def sec(num, title, kicker_prefix="ABSCHNITT"):
-    return A.GlossyBanner(f"{num}. {title}", kicker=f"{kicker_prefix} {num}")
+    return A.chapter_heading(f"{num}. {title}", kicker=f"{kicker_prefix} {num}")
 
 story = []
 story.append(Paragraph("Fachkurs Ausbau", S["DocTitle"]))
@@ -21,14 +21,14 @@ story.append(Paragraph("Erstellt von Matthias Gornik &amp; Athanasios Matziourid
                         S["Authors"]))
 story.append(Spacer(1, 0.5 * cm))
 
-story.append(sec(1, "Überschrift"))
+story.extend(sec(1, "Überschrift"))
 story.append(Spacer(1, 0.2 * cm))
 story.append(Paragraph(
     "Fachkurs Ausbau – Grundlagen und praxisorientierte Techniken im Innenausbau",
     S["Body"]))
 story.append(Spacer(1, 0.3 * cm))
 
-story.append(sec(2, "Kursbeschreibung"))
+story.extend(sec(2, "Kursbeschreibung"))
 story.append(Spacer(1, 0.2 * cm))
 story.append(Paragraph(
     "Der Kurs vermittelt grundlegende und erweiterte Kenntnisse im Bereich "
@@ -40,7 +40,7 @@ story.append(Paragraph(
     "sicheres und anwendungsorientiertes Arbeiten zu gewährleisten.", S["Body"]))
 story.append(Spacer(1, 0.3 * cm))
 
-story.append(sec(3, "Schulungszeitraum"))
+story.extend(sec(3, "Schulungszeitraum"))
 story.append(Spacer(1, 0.2 * cm))
 story.append(A.bullet_list([
     "Dauer: 8 Wochen (320 Unterrichtseinheiten)",
@@ -49,7 +49,7 @@ story.append(A.bullet_list([
 ], S["Bullet"]))
 story.append(Spacer(1, 0.3 * cm))
 
-story.append(sec(4, "Seminarziel"))
+story.extend(sec(4, "Seminarziel"))
 story.append(Spacer(1, 0.2 * cm))
 story.append(Paragraph(
     "Ziel des Seminars ist es, den Teilnehmern grundlegende handwerkliche "
@@ -58,14 +58,14 @@ story.append(Paragraph(
     "typische Materialien und Werkzeuge sicher einzusetzen.", S["Body"]))
 story.append(Spacer(1, 0.3 * cm))
 
-story.append(sec(5, "Abschluss"))
+story.extend(sec(5, "Abschluss"))
 story.append(Spacer(1, 0.2 * cm))
 story.append(Paragraph(
     "Teilnahmebescheinigung oder Zertifikat (je nach Kursanbieter und "
     "Prüfungsleistung)", S["Body"]))
 story.append(Spacer(1, 0.3 * cm))
 
-story.append(sec(6, "Zielgruppe"))
+story.extend(sec(6, "Zielgruppe"))
 story.append(Spacer(1, 0.2 * cm))
 story.append(Paragraph("Der Kurs richtet sich an:", S["Body"]))
 story.append(A.bullet_list([
@@ -77,7 +77,7 @@ story.append(A.bullet_list([
 ], S["Bullet"]))
 story.append(Spacer(1, 0.3 * cm))
 
-story.append(sec(7, "Unterrichtsmaterial"))
+story.extend(sec(7, "Unterrichtsmaterial"))
 story.append(Spacer(1, 0.2 * cm))
 story.append(A.bullet_list([
     "Skript / Schulungsunterlagen",
@@ -89,7 +89,7 @@ story.append(A.bullet_list([
 ], S["Bullet"]))
 story.append(Spacer(1, 0.3 * cm))
 
-story.append(sec(8, "Inhalte"))
+story.extend(sec(8, "Inhalte"))
 story.append(Spacer(1, 0.2 * cm))
 story.append(A.bullet_list([
     "Grundlagen des Innenausbaus",

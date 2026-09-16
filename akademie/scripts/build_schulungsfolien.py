@@ -69,7 +69,11 @@ def slide_title_banner(kicker, title, subtitle=None):
         c.setFont(A.FONT_REGULAR, 12)
         c.setFillColor(A.GOLD_LIGHT)
         c.drawString(tx, y + 0.35 * cm, subtitle)
-    return y  # bottom of banner
+
+    attrib_h = 0.55 * cm
+    attrib_y = y - 0.18 * cm - attrib_h
+    A.draw_attribution_bar(c, x, attrib_y, w, attrib_h)
+    return attrib_y  # bottom of banner + Logo-/Autorenzeile
 
 
 def bullets(items, top_y, font_size=13.5, leading=0.95 * cm, bold_lead=None):

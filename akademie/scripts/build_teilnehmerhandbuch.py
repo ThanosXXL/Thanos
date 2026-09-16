@@ -39,7 +39,7 @@ def title_page():
     story.append(PageBreak())
 
 def chapter(num, title, intro, points=None, box=None, kicker="KAPITEL"):
-    story.append(A.GlossyBanner(f"{num}. {title}", kicker=f"{kicker} {num}"))
+    story.extend(A.chapter_heading(f"{num}. {title}", kicker=f"{kicker} {num}"))
     story.append(Spacer(1, 0.25 * cm))
     if isinstance(intro, list):
         for p in intro:
@@ -212,7 +212,7 @@ chapter(11, "Lernkontrolle und Prüfungsvorbereitung",
     ])
 
 # 12 Glossar
-story.append(A.GlossyBanner("12. Glossar", kicker="KAPITEL 12"))
+story.extend(A.chapter_heading("12. Glossar", kicker="KAPITEL 12"))
 story.append(Spacer(1, 0.25 * cm))
 glossary = [
     ("CW-/UW-Profil", "Metallprofile für die Unterkonstruktion von "
