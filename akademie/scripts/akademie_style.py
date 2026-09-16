@@ -22,10 +22,11 @@ from reportlab.pdfbase.ttfonts import TTFont
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 
-# Das offizielle M&C AKADEMIE Logo (Originalfoto, unbearbeitet) - dauerhaft
-# unter akademie/assets/ gespeichert und in allen Dokumenten zu verwenden.
-LOGO_PATH = os.path.join(BASE_DIR, "..", "assets", "logo_mc_akademie_original.jpg")
-LOGO_ASPECT = 989 / 508.0
+# Das offizielle M&C AKADEMIE Logo, veredelt mit 3D-/Hochglanz-Effekten
+# (Bevel-Kanten, Glasreflex, Schlagschatten) auf Basis des Original-Fotos -
+# dauerhaft unter akademie/assets/ gespeichert, siehe make_logo_3d.py.
+LOGO_PATH = os.path.join(BASE_DIR, "..", "assets", "logo_mc_akademie_3d.png")
+LOGO_ASPECT = 870 / 437.0
 
 # Humanistische Grotesk-Schrift (Work Sans, Open-Sans-/Lato-Stil) statt der
 # technisch wirkenden Helvetica-Basisschrift.
