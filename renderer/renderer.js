@@ -20,7 +20,10 @@
   }
 
   function persist() {
-    window.dashboardAPI.saveData(state);
+    window.dashboardAPI.saveData(state).catch((err) => {
+      console.error('Speichern fehlgeschlagen:', err);
+      alert('Speichern fehlgeschlagen. Die letzte Änderung wurde möglicherweise nicht gespeichert.');
+    });
   }
 
   function findDozent(id) {
@@ -196,7 +199,7 @@
       input.focus();
     });
     input.addEventListener('keydown', (e) => {
-      if (e.key === 'Enter') addBtn.click();
+      if (e.key === 'Enter' && !e.isComposing) addBtn.click();
     });
     addRow.appendChild(input);
     addRow.appendChild(addBtn);
@@ -383,7 +386,7 @@
       input.focus();
     });
     input.addEventListener('keydown', (e) => {
-      if (e.key === 'Enter') sendBtn.click();
+      if (e.key === 'Enter' && !e.isComposing) sendBtn.click();
     });
     inputRow.appendChild(input);
     inputRow.appendChild(sendBtn);
@@ -406,7 +409,7 @@
   document.getElementById('cancelAddDozent').addEventListener('click', closeAddDozentModal);
   document.getElementById('confirmAddDozent').addEventListener('click', confirmAddDozent);
   newDozentNameInput.addEventListener('keydown', (e) => {
-    if (e.key === 'Enter') confirmAddDozent();
+    if (e.key === 'Enter' && !e.isComposing) confirmAddDozent();
   });
 
   document.getElementById('cancelDeleteDozent').addEventListener('click', closeDeleteDozentModal);
