@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<title>FotoNetz</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <header class="app-header">
+    <div class="logo">
+      <svg class="logo-cam" viewBox="0 0 120 90" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+        <defs>
+          <linearGradient id="bodyGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+            <stop offset="0%" stop-color="#1c2b45"/>
+            <stop offset="45%" stop-color="#0f1a2e"/>
+            <stop offset="100%" stop-color="#04070d"/>
+          </linearGradient>
+          <linearGradient id="topGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+            <stop offset="0%" stop-color="#2f4b78"/>
+            <stop offset="100%" stop-color="#1c2b45"/>
+          </linearGradient>
+          <radialGradient id="lensGrad" cx="35%" cy="30%" r="75%">
+            <stop offset="0%" stop-color="#ffffff"/>
+            <stop offset="18%" stop-color="#cfe0ff"/>
+            <stop offset="45%" stop-color="#5b8def"/>
+            <stop offset="72%" stop-color="#1e3a6b"/>
+            <stop offset="100%" stop-color="#04070d"/>
+          </radialGradient>
+          <radialGradient id="lensRim" cx="50%" cy="50%" r="50%">
+            <stop offset="80%" stop-color="#020409" stop-opacity="0"/>
+            <stop offset="100%" stop-color="#020409"/>
+          </radialGradient>
+          <linearGradient id="glint" x1="0%" y1="0%" x2="100%" y2="100%">
+            <stop offset="0%" stop-color="#ffffff" stop-opacity="0"/>
+            <stop offset="45%" stop-color="#ffffff" stop-opacity="0.9"/>
+            <stop offset="60%" stop-color="#ffffff" stop-opacity="0"/>
+          </linearGradient>
+          <clipPath id="lensClip">
+            <circle cx="60" cy="52" r="24"/>
+          </clipPath>
+        </defs>
+
+        <rect x="4" y="26" width="112" height="58" rx="12" fill="url(#bodyGrad)"/>
+        <rect x="4" y="26" width="112" height="10" rx="5" fill="url(#topGrad)"/>
+        <rect x="40" y="10" width="34" height="18" rx="5" fill="url(#topGrad)"/>
+        <circle cx="98" cy="38" r="4.5" fill="#ffffff"/>
+
+        <circle cx="60" cy="52" r="27" fill="#020409"/>
+        <circle cx="60" cy="52" r="24" fill="url(#lensGrad)"/>
+        <circle cx="60" cy="52" r="24" fill="url(#lensRim)"/>
+        <circle cx="60" cy="52" r="10" fill="#04070d" opacity="0.55"/>
+
+        <g clip-path="url(#lensClip)">
+          <rect class="logo-glint" x="-10" y="0" width="30" height="90" fill="url(#glint)" transform="rotate(20 60 52)"/>
+        </g>
+      </svg>
+      <h1>Foto<span>Netz</span></h1>
+    </div>
+    <p class="tagline">Der digitale Alltagsbegleiter für Fotografinnen &amp; Fotografen</p>
+  </header>
+
+  <nav class="auftrag-tabs" id="auftragTabs">
+    <!-- Auftrags-Tabs werden hier eingefügt -->
+  </nav>
+
+  <main id="content">
+    <div class="empty-state" id="emptyState">
+      <p>Noch keine Aufträge angelegt.</p>
+      <button id="addAuftragEmptyBtn" class="btn-primary">+ Auftrag hinzufügen</button>
+    </div>
+  </main>
+
+  <!-- Modal: Auftrag hinzufügen -->
+  <div class="modal-overlay" id="addAuftragModal">
+    <div class="modal">
+      <h2>Neuen Auftrag hinzufügen</h2>
+      <input type="text" id="newAuftragName" placeholder="Titel des Auftrags (z. B. Hochzeit Meier)" maxlength="60">
+      <div class="modal-actions">
+        <button id="cancelAddAuftrag" class="btn-secondary">Abbrechen</button>
+        <button id="confirmAddAuftrag" class="btn-primary">Hinzufügen</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal: Auftrag löschen bestätigen -->
+  <div class="modal-overlay" id="deleteAuftragModal">
+    <div class="modal">
+      <h2>Auftrag entfernen?</h2>
+      <p id="deleteAuftragText"></p>
+      <div class="modal-actions">
+        <button id="cancelDeleteAuftrag" class="btn-secondary">Abbrechen</button>
+        <button id="confirmDeleteAuftrag" class="btn-danger">Entfernen</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal: Bild bearbeiten -->
+  <div class="modal-overlay" id="imageEditorModal">
+    <div class="modal image-editor-modal">
+      <h2>Bild bearbeiten</h2>
+      <div class="editor-canvas-wrap">
+        <canvas id="editorCanvas"></canvas>
+      </div>
+      <div class="editor-controls">
+        <label>Helligkeit
+          <input type="range" id="editBrightness" min="50" max="150" value="100">
+        </label>
+        <label>Kontrast
+          <input type="range" id="editContrast" min="50" max="150" value="100">
+        </label>
+        <label>Sättigung
+          <input type="range" id="editSaturation" min="0" max="200" value="100">
+        </label>
+        <button id="editRotateBtn" class="btn-secondary" type="button">⟳ Drehen</button>
+      </div>
+      <div class="modal-actions">
+        <button id="cancelEditImage" class="btn-secondary">Abbrechen</button>
+        <button id="saveEditedImageBtn" class="btn-primary">Als neue Version speichern</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="renderer.js"></script>
+</body>
+</html>
