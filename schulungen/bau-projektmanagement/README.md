@@ -20,6 +20,7 @@ keine Abhängigkeiten oder Build-Konfiguration mit diesen Projekten.
 | `Dozentenhandbuch.pdf` | Nur Dozenten | Wie Teilnehmerhandbuch, zusätzlich mit didaktischen Hinweisen (Zeittakt, Methodik-Tipps) je Schulungstag. |
 | `Schulungsfolien.pdf` | Präsentation | Foliensatz im Querformat, ein Kernthema pro Folie, für den Beamer-Einsatz im Kurs. |
 | `Pruefungsfragen.pdf` | Teilnehmende | 5 Prüfungsfragen als interaktives PDF-Formular — Antwortoptionen sind direkt anklickbar (Radio-Buttons), **ohne** Lösungen. Zum Herunterladen und Ausfüllen am Bildschirm. |
+| `Pruefungsfragen_Druckversion.pdf` | Teilnehmende | Identische 5 Fragen als reine Druckvorlage: leere Kästchen zum handschriftlichen Ankreuzen statt Formularfeldern, plus Kopfzeile für Name/Datum/Schulungstag. Für den Papier-Einsatz im Kurs. |
 | `Pruefungsfragen_Loesungen_Dozenten.pdf` | **Nur Dozenten** | Identische 5 Fragen, richtige Antwort grün markiert, inkl. Erläuterung je Frage. Nicht an Teilnehmende weitergeben. |
 | `Teilnehmerliste.pdf` | Organisation | Ausfüllbares Formular zum Eintragen aller Teilnehmenden (Name, Firma, E-Mail je Person direkt am Bildschirm ausfüllbar) plus Unterschriftenspalten Tag 1–6 als Anwesenheitsnachweis. Reicht für bis zu 32 Personen (2 Seiten à 16 Zeilen). |
 
@@ -55,7 +56,7 @@ cd schulungen/bau-projektmanagement/src
 npm install
 npm run logo         # optional: 3D-/Hochglanz-Logo aus assets/logo-original.jpg neu erzeugen
 npm run icons        # optional: Beispielbilder/Icons aus svg-icons.js neu rendern
-npm run build:all    # erzeugt alle 7 PDFs neu in ../pdf/
+npm run build:all    # erzeugt alle 8 PDFs neu in ../pdf/
 ```
 
 Voraussetzung: ein lokal installierter bzw. von Playwright heruntergeladener

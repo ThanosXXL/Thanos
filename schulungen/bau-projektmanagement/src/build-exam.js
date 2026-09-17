@@ -20,9 +20,14 @@ const GREEN_LINE = rgb(0.298, 0.549, 0.29);
 const GREEN_TXT = rgb(0.11, 0.23, 0.105);
 const LIGHT_LINE = rgb(0.85, 0.86, 0.87);
 
-async function buildExam({ fuerDozenten }) {
+// variant: 'interaktiv' (anklickbare Formularfelder) | 'loesung' (Dozentenversion mit Lösungen) | 'druck' (leere Kästchen zum Ausdrucken/Ankreuzen)
+async function buildExam({ variant }) {
+  const fuerDozenten = variant === 'loesung';
+  const istDruck = variant === 'druck';
+
   const pdfDoc = await PDFDocument.create();
-  pdfDoc.setTitle(`Prüfungsfragen – ${meta.titel}${fuerDozenten ? ' (Dozentenversion mit Lösungen)' : ''}`);
+  const titelZusatz = fuerDozenten ? ' (Dozentenversion mit Lösungen)' : istDruck ? ' (Druckversion)' : '';
+  pdfDoc.setTitle(`Prüfungsfragen – ${meta.titel}${titelZusatz}`);
   pdfDoc.setAuthor(meta.akademie);
   pdfDoc.setLanguage('de');
 
@@ -64,13 +69,21 @@ async function buildExam({ fuerDozenten }) {
     return page;
   }
 
-  const kickerLabel = (fuerDozenten ? 'PRÜFUNGSFRAGEN — DOZENTENVERSION MIT LÖSUNGEN' : 'PRÜFUNGSFRAGEN');
+  const kickerLabel = fuerDozenten
+    ? 'PRÜFUNGSFRAGEN — DOZENTENVERSION MIT LÖSUNGEN'
+    : istDruck
+    ? 'PRÜFUNGSFRAGEN — DRUCKVERSION'
+    : 'PRÜFUNGSFRAGEN';
 
   // --- Deckblatt ---
   let page = newPage(kickerLabel);
   let y = PAGE_H - MARGIN_TOP - 40;
 
-  const doctypeText = fuerDozenten ? 'DOZENTENVERSION MIT LÖSUNGEN' : 'TEILNEHMERVERSION — ZUM AUSFÜLLEN';
+  const doctypeText = fuerDozenten
+    ? 'DOZENTENVERSION MIT LÖSUNGEN'
+    : istDruck
+    ? 'DRUCKVERSION — ZUM AUSDRUCKEN UND ANKREUZEN'
+    : 'TEILNEHMERVERSION — ZUM AUSFÜLLEN';
   const doctypeWidth = fontBold.widthOfTextAtSize(doctypeText, 11);
   page.drawRectangle({
     x: (PAGE_W - (doctypeWidth + 28)) / 2,
@@ -124,6 +137,8 @@ async function buildExam({ fuerDozenten }) {
   y -= 20;
   const introText = fuerDozenten
     ? 'Diese Version enthält die richtigen Lösungen sowie Erläuterungen zu jeder Frage. Sie ist ausschließlich für Dozentinnen und Dozenten der ' + meta.akademie + ' zur Auswertung der Abschlussprüfung bestimmt und darf nicht an Teilnehmende weitergegeben werden.'
+    : istDruck
+    ? 'Diese Version ist zum Ausdrucken gedacht: Bitte Namen und Datum auf der ersten Fragenseite handschriftlich eintragen und bei jeder Frage das Kästchen (☐) vor der aus Ihrer Sicht richtigen Antwort ankreuzen. Es ist jeweils genau eine Antwort richtig.'
     : 'Dieses interaktive PDF-Dokument kann heruntergeladen und direkt am Bildschirm ausgefüllt werden: Klicken Sie bei jeder Frage auf die von Ihnen gewählte Antwortoption (A, B, C oder D). Es ist jeweils genau eine Antwort richtig. Speichern Sie das ausgefüllte Dokument abschließend als Nachweis Ihrer Prüfungsteilnahme.';
   const introLines = wrapText(introText, fontRegular, 10.5, PAGE_W - 2 * MARGIN_X - 40);
   let iy = y;
@@ -139,6 +154,30 @@ async function buildExam({ fuerDozenten }) {
 
   const letters = ['A', 'B', 'C', 'D'];
   const contentWidth = PAGE_W - 2 * MARGIN_X;
+
+  if (istDruck) {
+    // Handschriftliche Kopfzeile: Name, Datum, Schulungstag
+    const felder = [
+      { label: 'Name, Vorname:', width: contentWidth * 0.44 },
+      { label: 'Datum:', width: contentWidth * 0.24 },
+      { label: 'Schulungstag:', width: contentWidth * 0.28 },
+    ];
+    let fx = MARGIN_X;
+    for (const f of felder) {
+      page.drawText(f.label, { x: fx, y, size: 9.5, font: fontBold, color: BLACK });
+      const lw = fontBold.widthOfTextAtSize(f.label, 9.5);
+      page.drawLine({
+        start: { x: fx + lw + 6, y: y - 2 },
+        end: { x: fx + f.width - 6, y: y - 2 },
+        thickness: 0.8,
+        color: BLACK,
+      });
+      fx += f.width;
+    }
+    y -= 30;
+    page.drawLine({ start: { x: MARGIN_X, y }, end: { x: PAGE_W - MARGIN_X, y }, thickness: 0.5, color: LIGHT_LINE });
+    y -= 18;
+  }
 
   for (let qi = 0; qi < examQuestions.length; qi++) {
     const q = examQuestions[qi];
@@ -203,6 +242,25 @@ async function buildExam({ fuerDozenten }) {
           font: fontBold,
           color: isCorrect ? rgb(1, 1, 1) : BLACK,
         });
+      } else if (istDruck) {
+        // Leeres Kästchen zum handschriftlichen Ankreuzen (kein Formularfeld), Buchstabe daneben
+        const boxSize = 13;
+        page.drawRectangle({
+          x: MARGIN_X + 6,
+          y: y - boxHeight / 2 + 3 - boxSize / 2,
+          width: boxSize,
+          height: boxSize,
+          borderColor: BLACK,
+          borderWidth: 1.3,
+          color: rgb(1, 1, 1),
+        });
+        page.drawText(letter, {
+          x: MARGIN_X + 6 + boxSize + 6,
+          y: y - boxHeight / 2 + 3 - 3.2,
+          size: 9,
+          font: fontBold,
+          color: BLACK,
+        });
       } else {
         // Anklickbares Formularfeld (Radio-Button) je Antwortoption
         const radioGroupName = `frage_${qi + 1}`;
@@ -260,6 +318,8 @@ async function buildExam({ fuerDozenten }) {
   const total = pages.length;
   const dokName = fuerDozenten
     ? 'Bau & Projektmanagement — Prüfungsfragen (Dozentenversion mit Lösungen)'
+    : istDruck
+    ? 'Bau & Projektmanagement — Prüfungsfragen (Druckversion)'
     : 'Bau & Projektmanagement — Prüfungsfragen (Teilnehmerversion)';
   pages.forEach((p, idx) => {
     const footerText = `${dokName} · Seite ${idx + 1} von ${total}`;
@@ -282,12 +342,15 @@ async function buildExam({ fuerDozenten }) {
   const bytes = await pdfDoc.save();
   const outName = fuerDozenten
     ? 'Pruefungsfragen_Loesungen_Dozenten.pdf'
+    : istDruck
+    ? 'Pruefungsfragen_Druckversion.pdf'
     : 'Pruefungsfragen.pdf';
   fs.writeFileSync(path.join(outDir, outName), bytes);
   console.log('PDF erstellt:', outName);
 }
 
 (async () => {
-  await buildExam({ fuerDozenten: false });
-  await buildExam({ fuerDozenten: true });
+  await buildExam({ variant: 'interaktiv' });
+  await buildExam({ variant: 'loesung' });
+  await buildExam({ variant: 'druck' });
 })();
