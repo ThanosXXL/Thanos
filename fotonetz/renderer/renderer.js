@@ -30,6 +30,17 @@
 
   let pendingDeleteId = null;
 
+  const imageEditorModal = document.getElementById('imageEditorModal');
+  const editorCanvas = document.getElementById('editorCanvas');
+  const editorCtx = editorCanvas.getContext('2d');
+  const editBrightness = document.getElementById('editBrightness');
+  const editContrast = document.getElementById('editContrast');
+  const editSaturation = document.getElementById('editSaturation');
+  const editRotateBtn = document.getElementById('editRotateBtn');
+
+  let videoSelection = new Set();
+  let editorState = null; // { auftragId, image, rotation }
+
   function uid() {
     return Date.now().toString(36) + Math.random().toString(36).slice(2, 8);
   }
@@ -72,7 +83,8 @@
       offeneEdits: [],
       fertigeEdits: [],
       referenzen: [],
-      chat: []
+      chat: [],
+      medien: { bilder: [], musikStueck: null, videos: [] }
     };
     state.auftraege.push(auftrag);
     activeAuftragId = auftrag.id;
@@ -173,6 +185,165 @@
     if (!auftrag) return;
     auftrag.chat = auftrag.chat.filter((m) => m.id !== messageId);
     persist();
+    render();
+  }
+
+  function ensureMedien(auftrag) {
+    if (!auftrag.medien || typeof auftrag.medien !== 'object') {
+      auftrag.medien = { bilder: [], musikStueck: null, videos: [] };
+    }
+    return auftrag.medien;
+  }
+
+  async function importImages(auftragId) {
+    const neueBilder = await window.studioAPI.importImages(auftragId);
+    if (!neueBilder || !neueBilder.length) return;
+    const auftrag = findAuftrag(auftragId);
+    if (!auftrag) return;
+    const medien = ensureMedien(auftrag);
+    neueBilder.forEach((b) => medien.bilder.push({ ...b, quelle: 'original' }));
+    persist();
+    render();
+  }
+
+  async function deleteBild(auftragId, bildId) {
+    const auftrag = findAuftrag(auftragId);
+    if (!auftrag) return;
+    const medien = ensureMedien(auftrag);
+    const bild = medien.bilder.find((b) => b.id === bildId);
+    if (!bild) return;
+    await window.studioAPI.deleteMediaFile(bild.pfad);
+    medien.bilder = medien.bilder.filter((b) => b.id !== bildId);
+    videoSelection.delete(bildId);
+    persist();
+    render();
+  }
+
+  function toggleVideoSelection(bildId) {
+    if (videoSelection.has(bildId)) videoSelection.delete(bildId);
+    else videoSelection.add(bildId);
+    render();
+  }
+
+  async function pickMusic(auftragId) {
+    const musikStueck = await window.studioAPI.pickMusic(auftragId);
+    if (!musikStueck) return;
+    const auftrag = findAuftrag(auftragId);
+    if (!auftrag) return;
+    const medien = ensureMedien(auftrag);
+    medien.musikStueck = musikStueck;
+    persist();
+    render();
+  }
+
+  function entferneMusik(auftragId) {
+    const auftrag = findAuftrag(auftragId);
+    if (!auftrag) return;
+    const medien = ensureMedien(auftrag);
+    medien.musikStueck = null;
+    persist();
+    render();
+  }
+
+  async function generateVideo(auftragId, sekundenProBild, buttonEl) {
+    const auftrag = findAuftrag(auftragId);
+    if (!auftrag) return;
+    const medien = ensureMedien(auftrag);
+    const bildPfade = medien.bilder
+      .filter((b) => videoSelection.has(b.id))
+      .map((b) => b.pfad);
+    if (!bildPfade.length) return;
+
+    const originalLabel = buttonEl.textContent;
+    buttonEl.disabled = true;
+    buttonEl.textContent = 'Video wird erstellt...';
+    try {
+      const video = await window.studioAPI.createSlideshowVideo({
+        auftragId,
+        bildPfade,
+        sekundenProBild,
+        musikPfad: medien.musikStueck ? medien.musikStueck.pfad : null
+      });
+      medien.videos.push(video);
+      videoSelection.clear();
+      persist();
+    } catch (err) {
+      window.alert('Video konnte nicht erstellt werden: ' + err.message);
+    } finally {
+      buttonEl.disabled = false;
+      buttonEl.textContent = originalLabel;
+      render();
+    }
+  }
+
+  async function deleteVideo(auftragId, videoId) {
+    const auftrag = findAuftrag(auftragId);
+    if (!auftrag) return;
+    const medien = ensureMedien(auftrag);
+    const video = medien.videos.find((v) => v.id === videoId);
+    if (!video) return;
+    await window.studioAPI.deleteMediaFile(video.pfad);
+    medien.videos = medien.videos.filter((v) => v.id !== videoId);
+    persist();
+    render();
+  }
+
+  function openImageEditor(auftragId, bild) {
+    const image = new Image();
+    image.onload = () => {
+      editorState = { auftragId, bild, image, rotation: 0 };
+      editBrightness.value = 100;
+      editContrast.value = 100;
+      editSaturation.value = 100;
+      drawEditorCanvas();
+      imageEditorModal.classList.add('visible');
+    };
+    image.src = bild.url;
+  }
+
+  function closeImageEditor() {
+    editorState = null;
+    imageEditorModal.classList.remove('visible');
+  }
+
+  function drawEditorCanvas() {
+    if (!editorState) return;
+    const { image, rotation } = editorState;
+    const maxWidth = 760;
+    const scale = Math.min(1, maxWidth / image.naturalWidth);
+    const w = image.naturalWidth * scale;
+    const h = image.naturalHeight * scale;
+    const swapped = rotation % 180 !== 0;
+
+    editorCanvas.width = swapped ? h : w;
+    editorCanvas.height = swapped ? w : h;
+
+    editorCtx.save();
+    editorCtx.filter = `brightness(${editBrightness.value}%) contrast(${editContrast.value}%) saturate(${editSaturation.value}%)`;
+    editorCtx.translate(editorCanvas.width / 2, editorCanvas.height / 2);
+    editorCtx.rotate((rotation * Math.PI) / 180);
+    editorCtx.drawImage(image, -w / 2, -h / 2, w, h);
+    editorCtx.restore();
+  }
+
+  function rotateEditorImage() {
+    if (!editorState) return;
+    editorState.rotation = (editorState.rotation + 90) % 360;
+    drawEditorCanvas();
+  }
+
+  async function saveEditedImage() {
+    if (!editorState) return;
+    const { auftragId } = editorState;
+    const dataUrl = editorCanvas.toDataURL('image/jpeg', 0.92);
+    const gespeichert = await window.studioAPI.saveEditedImage({ auftragId, dataUrl });
+    const auftrag = findAuftrag(auftragId);
+    if (auftrag) {
+      const medien = ensureMedien(auftrag);
+      medien.bilder.push({ ...gespeichert, quelle: 'bearbeitet' });
+      persist();
+    }
+    closeImageEditor();
     render();
   }
 
@@ -557,9 +728,170 @@
     grid.appendChild(referenzenCol);
     panel.appendChild(grid);
 
+    panel.appendChild(buildMedienPanel(auftrag));
     panel.appendChild(buildChatPanel(auftrag));
 
     content.appendChild(panel);
+  }
+
+  function buildMedienPanel(auftrag) {
+    const medien = ensureMedien(auftrag);
+    const panel = document.createElement('div');
+    panel.className = 'medien-panel';
+
+    const heading = document.createElement('h3');
+    heading.textContent = 'Medien – Bilder bearbeiten & Video erstellen';
+    panel.appendChild(heading);
+
+    const toolbar = document.createElement('div');
+    toolbar.className = 'medien-toolbar';
+
+    const importBtn = document.createElement('button');
+    importBtn.className = 'btn-primary';
+    importBtn.type = 'button';
+    importBtn.textContent = '+ Bilder importieren';
+    importBtn.addEventListener('click', () => importImages(auftrag.id));
+    toolbar.appendChild(importBtn);
+
+    panel.appendChild(toolbar);
+
+    const grid = document.createElement('div');
+    grid.className = 'medien-grid';
+    if (!medien.bilder.length) {
+      const hint = document.createElement('p');
+      hint.className = 'medien-hint';
+      hint.textContent = 'Noch keine Bilder importiert.';
+      grid.appendChild(hint);
+    }
+    medien.bilder.forEach((bild) => {
+      const card = document.createElement('div');
+      card.className = 'medien-card';
+
+      const img = document.createElement('img');
+      img.src = bild.url;
+      img.alt = bild.dateiname;
+      card.appendChild(img);
+
+      const selectLabel = document.createElement('label');
+      selectLabel.className = 'medien-select-label';
+      const selectBox = document.createElement('input');
+      selectBox.type = 'checkbox';
+      selectBox.checked = videoSelection.has(bild.id);
+      selectBox.addEventListener('change', () => toggleVideoSelection(bild.id));
+      selectLabel.appendChild(selectBox);
+      selectLabel.appendChild(document.createTextNode(' Für Video'));
+      card.appendChild(selectLabel);
+
+      if (bild.quelle === 'bearbeitet') {
+        const tag = document.createElement('span');
+        tag.className = 'medien-tag';
+        tag.textContent = 'bearbeitet';
+        card.appendChild(tag);
+      }
+
+      const actions = document.createElement('div');
+      actions.className = 'medien-card-actions';
+      const editBtn = document.createElement('button');
+      editBtn.className = 'icon-btn';
+      editBtn.textContent = '✎ Bearbeiten';
+      editBtn.addEventListener('click', () => openImageEditor(auftrag.id, bild));
+      const delBtn = document.createElement('button');
+      delBtn.className = 'icon-btn danger';
+      delBtn.textContent = '✕';
+      delBtn.title = 'Löschen';
+      delBtn.addEventListener('click', () => deleteBild(auftrag.id, bild.id));
+      actions.appendChild(editBtn);
+      actions.appendChild(delBtn);
+      card.appendChild(actions);
+
+      grid.appendChild(card);
+    });
+    panel.appendChild(grid);
+
+    const videoBuilder = document.createElement('div');
+    videoBuilder.className = 'video-builder';
+
+    const sekundenLabel = document.createElement('label');
+    sekundenLabel.className = 'sekunden-label';
+    sekundenLabel.textContent = 'Sekunden pro Bild';
+    const sekundenInput = document.createElement('input');
+    sekundenInput.type = 'number';
+    sekundenInput.min = '1';
+    sekundenInput.max = '15';
+    sekundenInput.value = '3';
+    sekundenLabel.appendChild(sekundenInput);
+    videoBuilder.appendChild(sekundenLabel);
+
+    const musikBtn = document.createElement('button');
+    musikBtn.className = 'btn-secondary';
+    musikBtn.type = 'button';
+    musikBtn.textContent = medien.musikStueck
+      ? `🎵 ${medien.musikStueck.dateiname}`
+      : '🎵 Hintergrundmusik wählen';
+    musikBtn.addEventListener('click', () => pickMusic(auftrag.id));
+    videoBuilder.appendChild(musikBtn);
+
+    if (medien.musikStueck) {
+      const removeMusikBtn = document.createElement('button');
+      removeMusikBtn.className = 'icon-btn danger';
+      removeMusikBtn.title = 'Musik entfernen';
+      removeMusikBtn.textContent = '✕';
+      removeMusikBtn.addEventListener('click', () => entferneMusik(auftrag.id));
+      videoBuilder.appendChild(removeMusikBtn);
+    }
+
+    const generateBtn = document.createElement('button');
+    generateBtn.className = 'btn-primary';
+    generateBtn.type = 'button';
+    generateBtn.textContent = '🎬 Video erstellen';
+    generateBtn.disabled = !videoSelection.size;
+    generateBtn.title = generateBtn.disabled ? 'Zuerst Bilder für das Video auswählen' : '';
+    generateBtn.addEventListener('click', () =>
+      generateVideo(auftrag.id, Number(sekundenInput.value) || 3, generateBtn)
+    );
+    videoBuilder.appendChild(generateBtn);
+
+    panel.appendChild(videoBuilder);
+
+    if (medien.videos.length) {
+      const videoList = document.createElement('div');
+      videoList.className = 'video-list';
+      medien.videos.forEach((video) => {
+        const row = document.createElement('div');
+        row.className = 'video-row';
+
+        const name = document.createElement('span');
+        name.className = 'video-name';
+        name.textContent = `${video.dateiname} (${video.sekunden}s)`;
+        row.appendChild(name);
+
+        const playBtn = document.createElement('button');
+        playBtn.className = 'btn-secondary';
+        playBtn.type = 'button';
+        playBtn.textContent = '▶ Abspielen';
+        playBtn.addEventListener('click', () => window.studioAPI.openMediaPath(video.pfad));
+        row.appendChild(playBtn);
+
+        const revealBtn = document.createElement('button');
+        revealBtn.className = 'btn-secondary';
+        revealBtn.type = 'button';
+        revealBtn.textContent = 'Ordner öffnen';
+        revealBtn.addEventListener('click', () => window.studioAPI.revealMediaPath(video.pfad));
+        row.appendChild(revealBtn);
+
+        const delBtn = document.createElement('button');
+        delBtn.className = 'icon-btn danger';
+        delBtn.textContent = '✕';
+        delBtn.title = 'Löschen';
+        delBtn.addEventListener('click', () => deleteVideo(auftrag.id, video.id));
+        row.appendChild(delBtn);
+
+        videoList.appendChild(row);
+      });
+      panel.appendChild(videoList);
+    }
+
+    return panel;
   }
 
   function buildChatPanel(auftrag) {
@@ -638,6 +970,13 @@
   document.getElementById('cancelDeleteAuftrag').addEventListener('click', closeDeleteAuftragModal);
   document.getElementById('confirmDeleteAuftrag').addEventListener('click', confirmDeleteAuftrag);
 
+  document.getElementById('cancelEditImage').addEventListener('click', closeImageEditor);
+  document.getElementById('saveEditedImageBtn').addEventListener('click', saveEditedImage);
+  editRotateBtn.addEventListener('click', rotateEditorImage);
+  [editBrightness, editContrast, editSaturation].forEach((slider) => {
+    slider.addEventListener('input', drawEditorCanvas);
+  });
+
   async function init() {
     const loaded = await window.studioAPI.loadData();
     state = loaded && Array.isArray(loaded.auftraege) ? loaded : { auftraege: [] };
@@ -657,6 +996,7 @@
       if (!ZAHLUNGSSTATUS.some((s) => s.value === a.zahlungsstatus)) {
         a.zahlungsstatus = ZAHLUNGSSTATUS[0].value;
       }
+      ensureMedien(a);
     });
     activeAuftragId = state.auftraege.length ? state.auftraege[0].id : null;
     render();

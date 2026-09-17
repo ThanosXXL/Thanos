@@ -94,6 +94,32 @@
     </div>
   </div>
 
+  <!-- Modal: Bild bearbeiten -->
+  <div class="modal-overlay" id="imageEditorModal">
+    <div class="modal image-editor-modal">
+      <h2>Bild bearbeiten</h2>
+      <div class="editor-canvas-wrap">
+        <canvas id="editorCanvas"></canvas>
+      </div>
+      <div class="editor-controls">
+        <label>Helligkeit
+          <input type="range" id="editBrightness" min="50" max="150" value="100">
+        </label>
+        <label>Kontrast
+          <input type="range" id="editContrast" min="50" max="150" value="100">
+        </label>
+        <label>Sättigung
+          <input type="range" id="editSaturation" min="0" max="200" value="100">
+        </label>
+        <button id="editRotateBtn" class="btn-secondary" type="button">⟳ Drehen</button>
+      </div>
+      <div class="modal-actions">
+        <button id="cancelEditImage" class="btn-secondary">Abbrechen</button>
+        <button id="saveEditedImageBtn" class="btn-primary">Als neue Version speichern</button>
+      </div>
+    </div>
+  </div>
+
   <script src="renderer.js"></script>
 </body>
 </html>

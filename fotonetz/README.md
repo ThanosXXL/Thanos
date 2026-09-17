@@ -14,8 +14,24 @@ Notizen sowie vier Listen:
 4. **Liste 4 – Referenzen** (Inspirations-Links, Moodboard-Stichworte)
 
 Bearbeitungen lassen sich per Klick von "Offen" nach "Fertig" verschieben (und zurück). Dazu kommt ein
-Chat-/Notizen-Verlauf pro Auftrag. Alle Daten werden lokal gespeichert (im Benutzerdatenverzeichnis der App)
-und bleiben nach dem Neustart erhalten.
+Chat-/Notizen-Verlauf pro Auftrag. Jeder Auftrag hat außerdem eine Auftragsart (Hochzeit, Portrait, Event, ...),
+ein Honorar-Feld und einen farbcodierten Zahlungsstatus (Offen/Angezahlt/Bezahlt). Alle Daten werden lokal
+gespeichert (im Benutzerdatenverzeichnis der App) und bleiben nach dem Neustart erhalten.
+
+### Medien: Bilder bearbeiten & Video erstellen
+
+Jeder Auftrag hat einen eigenen Medien-Bereich:
+
+- **Bilder importieren** – beliebig viele Fotos (JPG/PNG/WebP) von der Festplatte hinzufügen.
+- **Bildbearbeitung** – Helligkeit, Kontrast, Sättigung und 90°-Drehung direkt im Canvas-Editor; die
+  bearbeitete Version wird als neues Bild gespeichert, das Original bleibt erhalten.
+- **Video erstellen** – ausgewählte Bilder als Diashow-Video (mit einstellbarer Sekundenzahl pro Bild)
+  zusammenfügen, optional mit einer selbst gewählten Hintergrundmusik-Datei unterlegt (wird automatisch
+  auf die exakte Videolänge geloopt/getrimmt). Fertige Videos lassen sich direkt abspielen oder im
+  Dateimanager anzeigen.
+
+Alle importierten/bearbeiteten Dateien und erzeugten Videos liegen lokal unter dem Benutzerdatenverzeichnis
+der App (`fotonetz-media/<Auftrag>/...`) – nichts wird hochgeladen.
 
 Dies ist eine eigenständige App, komplett getrennt vom **[Dozenten Dashboard](../README.md)** und dem
 **[IT-Schulung Dashboard](../it-schulung/README.md)** in diesem Repository (eigener Code, eigenes
