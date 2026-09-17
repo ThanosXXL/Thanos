@@ -15,7 +15,8 @@ const MIME_BY_EXT = {
   '.jpeg': 'image/jpeg',
   '.webp': 'image/webp',
   '.gif': 'image/gif',
-  '.bmp': 'image/bmp'
+  '.bmp': 'image/bmp',
+  '.svg': 'image/svg+xml'
 };
 
 function loadData() {
@@ -85,7 +86,7 @@ ipcMain.handle('select-logo', async () => {
   const result = await dialog.showOpenDialog(mainWindow, {
     title: 'Logo auswählen',
     properties: ['openFile'],
-    filters: [{ name: 'Bilder', extensions: ['png', 'jpg', 'jpeg', 'webp'] }]
+    filters: [{ name: 'Bilder', extensions: ['png', 'jpg', 'jpeg', 'webp', 'svg'] }]
   });
   if (result.canceled || result.filePaths.length === 0) return null;
   const filePath = result.filePaths[0];

@@ -1,0 +1,250 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 800" width="800" height="800">
+  <defs>
+    <!-- Hintergrund -->
+    <radialGradient id="bgGrad" cx="50%" cy="38%" r="75%">
+      <stop offset="0%" stop-color="#1C1608"/>
+      <stop offset="45%" stop-color="#0D0904"/>
+      <stop offset="100%" stop-color="#000000"/>
+    </radialGradient>
+    <radialGradient id="vignette" cx="50%" cy="50%" r="72%">
+      <stop offset="55%" stop-color="#000000" stop-opacity="0"/>
+      <stop offset="100%" stop-color="#000000" stop-opacity="0.85"/>
+    </radialGradient>
+
+    <!-- Kamerakörper: glänzendes Schwarz mit Gold-Kanten -->
+    <linearGradient id="bodyGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#3C3C3C"/>
+      <stop offset="15%" stop-color="#161616"/>
+      <stop offset="50%" stop-color="#050505"/>
+      <stop offset="85%" stop-color="#141414"/>
+      <stop offset="100%" stop-color="#000000"/>
+    </linearGradient>
+
+    <linearGradient id="edgeGold" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#2E2000"/>
+      <stop offset="15%" stop-color="#B8860B"/>
+      <stop offset="50%" stop-color="#FFE9A8"/>
+      <stop offset="85%" stop-color="#B8860B"/>
+      <stop offset="100%" stop-color="#2E2000"/>
+    </linearGradient>
+
+    <!-- Objektiv: konzentrische goldene Glasringe -->
+    <radialGradient id="ringGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#FFF3C4"/>
+      <stop offset="25%" stop-color="#F4CE6B"/>
+      <stop offset="50%" stop-color="#B8860B"/>
+      <stop offset="75%" stop-color="#7A5A0A"/>
+      <stop offset="100%" stop-color="#2E2000"/>
+    </radialGradient>
+
+    <radialGradient id="lensOuter" cx="40%" cy="35%" r="65%">
+      <stop offset="0%" stop-color="#FFF7DE"/>
+      <stop offset="30%" stop-color="#F6D97A"/>
+      <stop offset="65%" stop-color="#C79A2E"/>
+      <stop offset="100%" stop-color="#3B2900"/>
+    </radialGradient>
+    <radialGradient id="lensInner" cx="38%" cy="32%" r="70%">
+      <stop offset="0%" stop-color="#FFFDF2"/>
+      <stop offset="25%" stop-color="#FFE9A0"/>
+      <stop offset="60%" stop-color="#D4A017"/>
+      <stop offset="100%" stop-color="#241800"/>
+    </radialGradient>
+    <radialGradient id="lensCore" cx="35%" cy="30%" r="75%">
+      <stop offset="0%" stop-color="#FFFFFF"/>
+      <stop offset="40%" stop-color="#FFD65C"/>
+      <stop offset="100%" stop-color="#1A1100"/>
+    </radialGradient>
+
+    <!-- Gebürstetes dunkles Metall für die Blendenlamellen -->
+    <radialGradient id="bladeMetalGrad" cx="35%" cy="28%" r="80%">
+      <stop offset="0%" stop-color="#5A5A5A"/>
+      <stop offset="45%" stop-color="#232323"/>
+      <stop offset="100%" stop-color="#000000"/>
+    </radialGradient>
+
+    <linearGradient id="topGloss" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#FFFFFF" stop-opacity="0.5"/>
+      <stop offset="100%" stop-color="#FFFFFF" stop-opacity="0"/>
+    </linearGradient>
+
+    <linearGradient id="sweepGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#FFE9A8" stop-opacity="0"/>
+      <stop offset="45%" stop-color="#FFE9A8" stop-opacity="0"/>
+      <stop offset="50%" stop-color="#FFF6D9" stop-opacity="0.95"/>
+      <stop offset="55%" stop-color="#FFE9A8" stop-opacity="0"/>
+      <stop offset="100%" stop-color="#FFE9A8" stop-opacity="0"/>
+    </linearGradient>
+
+    <radialGradient id="bokehGrad" cx="40%" cy="35%" r="65%">
+      <stop offset="0%" stop-color="#FFE9A8" stop-opacity="0.9"/>
+      <stop offset="60%" stop-color="#B8860B" stop-opacity="0.35"/>
+      <stop offset="100%" stop-color="#B8860B" stop-opacity="0"/>
+    </radialGradient>
+
+    <clipPath id="lensClip">
+      <circle cx="400" cy="360" r="150"/>
+    </clipPath>
+    <clipPath id="frameClip">
+      <rect x="0" y="0" width="800" height="800" rx="36"/>
+    </clipPath>
+
+    <filter id="softShadow" x="-50%" y="-50%" width="200%" height="200%">
+      <feDropShadow dx="0" dy="14" stdDeviation="18" flood-color="#000000" flood-opacity="0.55"/>
+    </filter>
+  </defs>
+
+  <g clip-path="url(#frameClip)">
+    <rect x="0" y="0" width="800" height="800" fill="url(#bgGrad)"/>
+
+    <!-- Lichtstrahlen -->
+    <g opacity="0.16" stroke="#F4CE6B" stroke-width="2">
+      <line x1="400" y1="360" x2="60" y2="0"/>
+      <line x1="400" y1="360" x2="260" y2="0"/>
+      <line x1="400" y1="360" x2="540" y2="0"/>
+      <line x1="400" y1="360" x2="740" y2="0"/>
+      <line x1="400" y1="360" x2="20" y2="800"/>
+      <line x1="400" y1="360" x2="780" y2="800"/>
+    </g>
+
+    <!-- Bokeh Loop -->
+    <g>
+      <circle cx="120" cy="140" r="24" fill="url(#bokehGrad)">
+        <animate attributeName="cy" values="140;105;140" dur="6s" repeatCount="indefinite"/>
+        <animate attributeName="opacity" values="0.5;0.9;0.5" dur="6s" repeatCount="indefinite"/>
+      </circle>
+      <circle cx="675" cy="190" r="17" fill="url(#bokehGrad)">
+        <animate attributeName="cy" values="190;225;190" dur="5s" repeatCount="indefinite"/>
+        <animate attributeName="opacity" values="0.4;0.85;0.4" dur="5s" repeatCount="indefinite"/>
+      </circle>
+      <circle cx="95" cy="660" r="18" fill="url(#bokehGrad)">
+        <animate attributeName="cy" values="660;625;660" dur="7s" repeatCount="indefinite"/>
+        <animate attributeName="opacity" values="0.5;0.9;0.5" dur="7s" repeatCount="indefinite"/>
+      </circle>
+      <circle cx="705" cy="650" r="28" fill="url(#bokehGrad)">
+        <animate attributeName="cy" values="650;695;650" dur="8s" repeatCount="indefinite"/>
+        <animate attributeName="opacity" values="0.45;0.85;0.45" dur="8s" repeatCount="indefinite"/>
+      </circle>
+    </g>
+
+    <!-- ===== KAMERA ===== -->
+    <g filter="url(#softShadow)">
+      <!-- Handgriff-Wulst rechts -->
+      <rect x="600" y="245" width="60" height="150" rx="26" fill="url(#bodyGrad)" stroke="url(#edgeGold)" stroke-width="3"/>
+
+      <!-- Hauptkörper -->
+      <rect x="200" y="245" width="420" height="200" rx="26" fill="url(#bodyGrad)" stroke="url(#edgeGold)" stroke-width="4"/>
+
+      <!-- Sucherhöcker oben -->
+      <rect x="345" y="180" width="130" height="75" rx="14" fill="url(#bodyGrad)" stroke="url(#edgeGold)" stroke-width="3"/>
+      <rect x="370" y="150" width="80" height="40" rx="8" fill="url(#bodyGrad)" stroke="url(#edgeGold)" stroke-width="2.5"/>
+
+      <!-- Blitzschuh -->
+      <rect x="386" y="140" width="48" height="14" rx="3" fill="#0A0A0A" stroke="url(#edgeGold)" stroke-width="1.5"/>
+    </g>
+
+    <!-- Auslöseknopf -->
+    <ellipse cx="590" cy="235" rx="16" ry="10" fill="url(#lensOuter)"/>
+
+    <!-- Griffstruktur (Linien) -->
+    <g stroke="url(#edgeGold)" stroke-width="2" opacity="0.5">
+      <line x1="612" y1="270" x2="612" y2="370"/>
+      <line x1="624" y1="270" x2="624" y2="370"/>
+      <line x1="636" y1="270" x2="636" y2="370"/>
+    </g>
+
+    <!-- Objektiv-Tubus (Gold-Fassung bleibt) -->
+    <circle cx="400" cy="360" r="165" fill="url(#ringGrad)"/>
+    <circle cx="400" cy="360" r="150" fill="#050505"/>
+
+    <!-- Mechanische Blende statt rundem "Auge": Metallscheibe -->
+    <circle cx="400" cy="360" r="140" fill="url(#bladeMetalGrad)"/>
+
+    <!-- Sechs Blendenlamellen, die eine Hexagon-Öffnung bilden -->
+    <g>
+      <polygon points="400,225 512,292.5 512,427.5 400,495 288,427.5 288,292.5"
+               fill="none" stroke="url(#edgeGold)" stroke-width="2" opacity="0.6"/>
+      <path fill="url(#bladeMetalGrad)" stroke="#000000" stroke-width="1.5"
+            d="M400,225 L460,360 L400,320 L288,292.5 Z"/>
+      <path fill="url(#bladeMetalGrad)" stroke="#000000" stroke-width="1.5"
+            d="M512,292.5 L400,360 L440,320 L512,427.5 Z" transform="rotate(0 400 360)"/>
+      <g stroke="#000000" stroke-width="1.5" fill="url(#bladeMetalGrad)">
+        <path d="M400,225 L460,326 L400,360 L340,326 Z"/>
+        <path d="M512,292.5 L451,360 L400,360 L460,326 Z"/>
+        <path d="M512,427.5 L451,360 L460,394 L512,427.5 Z"/>
+        <path d="M400,495 L460,394 L400,360 L340,394 Z"/>
+        <path d="M288,427.5 L349,360 L400,360 L340,394 Z"/>
+        <path d="M288,292.5 L349,360 L340,326 L288,292.5 Z"/>
+      </g>
+    </g>
+
+    <!-- Zentrale Öffnung -->
+    <polygon points="400,320 451,342 469,360 451,378 400,400 349,378 331,360 349,342"
+             fill="#050403" stroke="url(#edgeGold)" stroke-width="1.5"/>
+
+    <g fill="none" stroke="#FFF6D9" stroke-width="3.5" opacity="0.4">
+      <circle cx="400" cy="360" r="140"/>
+    </g>
+
+    <!-- Glanz auf der Blende -->
+    <g clip-path="url(#lensClip)">
+      <ellipse cx="335" cy="250" rx="150" ry="80" fill="url(#topGloss)"/>
+    </g>
+
+    <!-- Wandernder Glanzstreifen -->
+    <g clip-path="url(#lensClip)">
+      <rect x="-400" y="0" width="400" height="700" fill="url(#sweepGrad)" transform="rotate(25 400 360)">
+        <animateTransform attributeName="transform"
+          type="translate"
+          values="-50 0; 900 0; -50 0"
+          keyTimes="0; 0.5; 1"
+          dur="3.2s"
+          repeatCount="indefinite"
+          additive="sum"/>
+      </rect>
+    </g>
+
+    <!-- Rotierende Blendenlamellen -->
+    <g transform-origin="400 360" opacity="0.4">
+      <g stroke="#FFE9A8" stroke-width="2">
+        <line x1="400" y1="360" x2="400" y2="230"/>
+        <line x1="400" y1="360" x2="512" y2="295"/>
+        <line x1="400" y1="360" x2="512" y2="425"/>
+        <line x1="400" y1="360" x2="400" y2="490"/>
+        <line x1="400" y1="360" x2="288" y2="425"/>
+        <line x1="400" y1="360" x2="288" y2="295"/>
+      </g>
+      <animateTransform attributeName="transform"
+        type="rotate"
+        from="0 400 360"
+        to="360 400 360"
+        dur="9s"
+        repeatCount="indefinite"/>
+    </g>
+
+    <!-- Schriftzug -->
+    <text x="400" y="640" text-anchor="middle"
+          font-family="Palatino, 'Palatino Linotype', 'Book Antiqua', Georgia, 'Times New Roman', serif"
+          font-size="90" font-weight="600" letter-spacing="1"
+          fill="#FFFFFF"
+          stroke="#B8860B" stroke-width="1">
+      FotoWelt
+    </text>
+
+    <clipPath id="textClip">
+      <text x="400" y="640" text-anchor="middle"
+            font-family="Palatino, 'Palatino Linotype', 'Book Antiqua', Georgia, 'Times New Roman', serif"
+            font-size="90" font-weight="600" letter-spacing="1">FotoWelt</text>
+    </clipPath>
+    <g clip-path="url(#textClip)">
+      <rect x="-300" y="540" width="200" height="140" fill="#FFF6D9" opacity="0">
+        <animate attributeName="opacity" values="0;0;0.9;0;0" keyTimes="0;0.35;0.5;0.65;1" dur="3.2s" repeatCount="indefinite"/>
+        <animateTransform attributeName="transform" type="translate"
+          values="-300 0; 900 0" dur="3.2s" repeatCount="indefinite"/>
+      </rect>
+    </g>
+
+    <rect x="270" y="666" width="260" height="5" rx="2.5" fill="url(#ringGrad)" opacity="0.95"/>
+
+    <rect x="0" y="0" width="800" height="800" fill="url(#vignette)"/>
+  </g>
+</svg>

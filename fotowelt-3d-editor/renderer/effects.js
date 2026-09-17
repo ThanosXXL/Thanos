@@ -374,6 +374,8 @@
     const span = Math.sqrt(w * w + h * h) * 1.4;
     const travel = span * 2;
     const center = -span + phase * travel;
+    // Schmales, klar begrenztes Glanzband (statt eines breiten Wash-outs), damit die
+    // eigentliche Logo-Zeichnung unter dem Sweep lesbar bleibt.
     const halfBand = span * 0.5;
     const x0 = dirX * (center - halfBand);
     const y0 = dirY * (center - halfBand);
@@ -381,7 +383,9 @@
     const y1 = dirY * (center + halfBand);
     const grad = ctx.createLinearGradient(x0, y0, x1, y1);
     grad.addColorStop(0, 'rgba(255,241,196,0)');
-    grad.addColorStop(0.5, 'rgba(255,241,196,0.95)');
+    grad.addColorStop(0.46, 'rgba(255,241,196,0)');
+    grad.addColorStop(0.5, 'rgba(255,241,196,0.55)');
+    grad.addColorStop(0.54, 'rgba(255,241,196,0)');
     grad.addColorStop(1, 'rgba(255,241,196,0)');
     ctx.save();
     ctx.globalCompositeOperation = 'screen';
