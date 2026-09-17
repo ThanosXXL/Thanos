@@ -364,8 +364,42 @@
     blendMode: 'source-over',
     visible: true,
     loopEnabled: true,
-    loopSpeed: 2.5
+    loopSpeed: 2.5,
+    motionType: 'float'
   };
+
+  const LOGO_MOTION_TYPES = [
+    { value: 'none', label: 'Keine' },
+    { value: 'float', label: 'Schweben' },
+    { value: 'rotate', label: 'Rotieren' },
+    { value: 'pulse', label: 'Pulsieren' },
+    { value: 'wobble', label: 'Wippen' }
+  ];
+
+  /* Echte Bewegung des Logos selbst (nicht nur der Glanz-Sweep): liefert einen Versatz/
+     Zusatzdrehung/Zusatzskalierung relativ zur eingestellten Basis-Position, abhängig von
+     der Zeit. Nutzt dieselbe loopSpeed wie der Glanz-Sweep, damit beides synchron läuft. */
+  function computeLogoMotion(logo, w, h, time) {
+    const motionType = logo.motionType || 'none';
+    if (motionType === 'none' || time == null) {
+      return { dx: 0, dy: 0, extraRotation: 0, scale: 1 };
+    }
+    const loopSpeed = Math.max(0.3, logo.loopSpeed || 2.5);
+    const phase = (((time % loopSpeed) + loopSpeed) % loopSpeed) / loopSpeed;
+    const angle2pi = phase * Math.PI * 2;
+    switch (motionType) {
+      case 'float':
+        return { dx: 0, dy: Math.sin(angle2pi) * h * 0.02, extraRotation: 0, scale: 1 };
+      case 'rotate':
+        return { dx: 0, dy: 0, extraRotation: angle2pi, scale: 1 };
+      case 'pulse':
+        return { dx: 0, dy: 0, extraRotation: 0, scale: 1 + Math.sin(angle2pi) * 0.07 };
+      case 'wobble':
+        return { dx: 0, dy: 0, extraRotation: ((Math.sin(angle2pi) * 12 * Math.PI) / 180), scale: 1 };
+      default:
+        return { dx: 0, dy: 0, extraRotation: 0, scale: 1 };
+    }
+  }
 
   function drawLogoShine(ctx, w, h, phase) {
     const angle = (42 * Math.PI) / 180;
@@ -429,14 +463,19 @@
     const cy = (logo.y / 100) * h;
     const rotation = ((logo.rotation || 0) * Math.PI) / 180;
     const opacity = clamp((logo.opacity != null ? logo.opacity : 100) / 100, 0, 1);
+    const motion = computeLogoMotion(logo, w, h, time);
+    const effCx = cx + motion.dx;
+    const effCy = cy + motion.dy;
+    const effRotation = rotation + motion.extraRotation;
 
     const layer = getScratchCanvas('logo', w, h);
     const lctx = layer.getContext('2d');
     lctx.setTransform(1, 0, 0, 1, 0, 0);
     lctx.clearRect(0, 0, w, h);
     lctx.save();
-    lctx.translate(cx, cy);
-    lctx.rotate(rotation);
+    lctx.translate(effCx, effCy);
+    lctx.rotate(effRotation);
+    lctx.scale(motion.scale, motion.scale);
     lctx.drawImage(logoImage, -logoW / 2, -logoH / 2, logoW, logoH);
     lctx.restore();
 
@@ -449,8 +488,9 @@
       sctx.setTransform(1, 0, 0, 1, 0, 0);
       sctx.clearRect(0, 0, w, h);
       sctx.save();
-      sctx.translate(cx, cy);
-      sctx.rotate(rotation);
+      sctx.translate(effCx, effCy);
+      sctx.rotate(effRotation);
+      sctx.scale(motion.scale, motion.scale);
       drawLogoShine(sctx, logoW, logoH, phase);
       sctx.restore();
 
@@ -638,6 +678,7 @@
     DEFAULT_EFFECTS,
     DEFAULT_LOGO,
     EFFECT_GROUPS,
+    LOGO_MOTION_TYPES,
     PRESETS,
     renderBase,
     compositeLogo,
