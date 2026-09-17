@@ -127,6 +127,34 @@
     return project.images.find((im) => im.id === project.activeImageId) || null;
   }
 
+  function createBlackPlaceholderDataUrl(w, h) {
+    const canvas = document.createElement('canvas');
+    canvas.width = w;
+    canvas.height = h;
+    const ctx = canvas.getContext('2d');
+    ctx.fillStyle = '#000000';
+    ctx.fillRect(0, 0, w, h);
+    return canvas.toDataURL('image/png');
+  }
+
+  // Das mitgelieferte FotoWelt-Kamera-Logo, groß und mit Glanz-Loop – Standard für das
+  // allererste Projekt, damit es dauerhaft (über die normale Persistenz) erhalten bleibt.
+  function createDefaultLogo() {
+    return Object.assign({}, FotoEffects.DEFAULT_LOGO, {
+      path: null,
+      name: 'FotoWelt Logo',
+      dataUrl: 'assets/fotowelt-logo.svg',
+      x: 50,
+      y: 50,
+      scale: 200,
+      rotation: 0,
+      opacity: 100,
+      loopEnabled: true,
+      loopSpeed: 2.6,
+      blendMode: 'source-over'
+    });
+  }
+
   function createEmptyProject(name) {
     return {
       id: uid(),
@@ -976,6 +1004,15 @@
       }
     } else {
       const project = createEmptyProject('Mein erstes Projekt');
+      const blackBg = {
+        id: uid(),
+        name: 'Schwarzer Hintergrund',
+        dataUrl: createBlackPlaceholderDataUrl(1920, 1080),
+        effects: Object.assign({}, FotoEffects.DEFAULT_EFFECTS)
+      };
+      project.images.push(blackBg);
+      project.activeImageId = blackBg.id;
+      project.logo = createDefaultLogo();
       state = { projects: [project], activeProjectId: project.id };
     }
     renderProjectSelect();
