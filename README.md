@@ -1,6 +1,5 @@
 [![Dozenten Dashboard](https://img.shields.io/badge/📋_Dozenten_Dashboard-0b1f4d?style=for-the-badge)](README.md)
 [![IT-Schulung Dashboard](https://img.shields.io/badge/💻_IT--Schulung_Dashboard-5b9bd5?style=for-the-badge)](it-schulung/README.md)
-[![FotoWelt](https://img.shields.io/badge/✨_FotoWelt-7c5cff?style=for-the-badge)](fotowelt-3d-editor/README.md)
 
 # Dozenten Dashboard
 
@@ -8,7 +7,7 @@ Dieses Repository enthält mehrere eigenständige Desktop-Apps, jede mit eigenem
 
 - **Dozenten Dashboard** (dieses Verzeichnis) – Verwaltung von Dozenten, Aufgaben und Projekten
 - **[IT-Schulung Dashboard](it-schulung/README.md)** (`it-schulung/`) – Verwaltung von IT-Schulungen, Aufgaben und Themen
-- **[FotoWelt](fotowelt-3d-editor/README.md)** (`fotowelt-3d-editor/`) – Bildbearbeitung mit 3D-/Hochglanz-Effekten, Logo-Compositing und Export als Loop-Video mit Musik
+- **FotoWelt** (`fotowelt-3d-editor/`) – Bildbearbeitung mit 3D-/Hochglanz-Effekten, Logo-Compositing und Export als Loop-Video mit Musik
 
 Desktop-Dashboard (Electron) zur Verwaltung von bis zu vier Dozenten. Jeder Dozent hat drei Listen:
 

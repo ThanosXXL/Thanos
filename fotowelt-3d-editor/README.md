@@ -1,7 +1,3 @@
-[![Dozenten Dashboard](https://img.shields.io/badge/📋_Dozenten_Dashboard-0b1f4d?style=for-the-badge)](../README.md)
-[![IT-Schulung Dashboard](https://img.shields.io/badge/💻_IT--Schulung_Dashboard-5b9bd5?style=for-the-badge)](../it-schulung/README.md)
-[![FotoWelt](https://img.shields.io/badge/✨_FotoWelt-7c5cff?style=for-the-badge)](README.md)
-
 # FotoWelt
 
 Desktop-Bildbearbeitungsprogramm (Electron) für **3D-Stil- und Hochglanz-Effekte**, Logo-Compositing auf
@@ -30,9 +26,7 @@ Hintergrundbildern und den Export als **Loop-Video mit Hintergrundmusik**.
 Der Export läuft lokal über ein mitgeliefertes `ffmpeg` (kein separates Installieren von ffmpeg nötig).
 Dafür muss vor dem Export eine Hintergrundmusik ausgewählt sein, da die Loop-Länge daran ausgerichtet wird.
 
-Dies ist eine eigenständige App, komplett getrennt vom **[Dozenten Dashboard](../README.md)** und vom
-**[IT-Schulung Dashboard](../it-schulung/README.md)** in diesem Repository (eigener Code, eigenes
-`package.json`, eigene Datendatei). Keine der Apps teilt Abhängigkeiten oder Build-Konfiguration.
+Dies ist eine eigenständige App mit eigenem Code, eigenem `package.json` und eigener Datendatei.
 
 ## Installation (für Entwicklung)
 
