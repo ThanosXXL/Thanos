@@ -441,6 +441,24 @@ input[type="checkbox"] {
   background: radial-gradient(circle at center, rgba(232,171,31,0.08), transparent 70%);
 }
 
+.preview-overlay[hidden] {
+  display: none;
+}
+
+.image-actions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.image-actions .hint {
+  margin: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
 .playback-bar {
   display: flex;
   align-items: center;

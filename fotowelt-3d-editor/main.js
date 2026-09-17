@@ -1,4 +1,4 @@
-const { app, BrowserWindow, ipcMain, dialog, shell } = require('electron');
+const { app, BrowserWindow, ipcMain, dialog, shell, clipboard, nativeImage } = require('electron');
 const path = require('path');
 const fs = require('fs');
 const os = require('os');
@@ -144,6 +144,27 @@ ipcMain.handle('select-export-path', async (event, defaultName) => {
 
 ipcMain.handle('show-in-folder', (event, filePath) => {
   shell.showItemInFolder(filePath);
+  return true;
+});
+
+ipcMain.handle('save-image', async (event, defaultName, buffer) => {
+  const result = await dialog.showSaveDialog(mainWindow, {
+    title: 'Bild speichern',
+    defaultPath: defaultName || 'fotowelt-bild.png',
+    filters: [{ name: 'PNG-Bild', extensions: ['png'] }]
+  });
+  if (result.canceled || !result.filePath) return null;
+  fs.writeFileSync(result.filePath, Buffer.from(buffer));
+  return result.filePath;
+});
+
+ipcMain.handle('copy-image-to-clipboard', (event, buffer) => {
+  clipboard.writeImage(nativeImage.createFromBuffer(Buffer.from(buffer)));
+  return true;
+});
+
+ipcMain.handle('copy-text-to-clipboard', (event, text) => {
+  clipboard.writeText(text);
   return true;
 });
 

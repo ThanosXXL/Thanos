@@ -31,6 +31,9 @@
 
   const previewCanvas = document.getElementById('previewCanvas');
   const previewEmptyEl = document.getElementById('previewEmpty');
+  const btnSaveImage = document.getElementById('btnSaveImage');
+  const btnShareImage = document.getElementById('btnShareImage');
+  const imageActionsHint = document.getElementById('imageActionsHint');
   const btnPlayPause = document.getElementById('btnPlayPause');
   const transitionDurationInput = document.getElementById('transitionDuration');
   const transitionValueEl = document.getElementById('transitionValue');
@@ -301,6 +304,56 @@
   btnPlayPause.addEventListener('click', () => {
     if (playing) stopPlayback();
     else startPlayback();
+  });
+
+  // ---------- Bild speichern & teilen ----------
+  // Schnelle Aktionen für das AKTUELL bearbeitete Einzelbild (mit Effekten + Logo), unabhängig
+  // vom vollen Loop-Video-Export weiter unten.
+
+  async function renderActiveImageToBlob() {
+    const project = getActiveProject();
+    const image = getActiveImage();
+    if (!project || !image) return null;
+    const imgEl = imageElements.get(image.id) || (await loadImageElement(image.dataUrl));
+    const [width, height] = project.resolution.split('x').map(Number);
+    const canvas = document.createElement('canvas');
+    canvas.width = width;
+    canvas.height = height;
+    const ctx = canvas.getContext('2d');
+    FotoEffects.renderBase(ctx, width, height, { image: imgEl, effects: image.effects });
+    FotoEffects.compositeLogo(ctx, width, height, { logoImage: logoElement, logo: project.logo, time: null });
+    return new Promise((resolve) => canvas.toBlob(resolve, 'image/png'));
+  }
+
+  btnSaveImage.addEventListener('click', async () => {
+    const image = getActiveImage();
+    if (!image) {
+      toast('Bitte zuerst ein Bild auswählen.', true);
+      return;
+    }
+    const blob = await renderActiveImageToBlob();
+    if (!blob) return;
+    const buffer = new Uint8Array(await blob.arrayBuffer());
+    const baseName = sanitizeFileName(image.name.replace(/\.[^.]+$/, '')) || 'fotowelt-bild';
+    const savedPath = await window.editorAPI.saveImage(`${baseName}.png`, buffer);
+    if (savedPath) {
+      toast('Bild gespeichert.');
+      imageActionsHint.textContent = `Gespeichert: ${savedPath}`;
+    }
+  });
+
+  btnShareImage.addEventListener('click', async () => {
+    const image = getActiveImage();
+    if (!image) {
+      toast('Bitte zuerst ein Bild auswählen.', true);
+      return;
+    }
+    const blob = await renderActiveImageToBlob();
+    if (!blob) return;
+    const buffer = new Uint8Array(await blob.arrayBuffer());
+    await window.editorAPI.copyImageToClipboard(buffer);
+    imageActionsHint.textContent = 'In der Zwischenablage – jetzt irgendwo einfügen (Mail, Chat, Dokument …).';
+    toast('Bild in die Zwischenablage kopiert.');
   });
 
   // ---------- Projekte ----------
@@ -966,7 +1019,14 @@
       showBtn.className = 'btn-ghost';
       showBtn.textContent = 'Im Ordner anzeigen';
       showBtn.addEventListener('click', () => window.editorAPI.showInFolder(result.outputPath));
-      exportResultEl.append(successText, showBtn);
+      const shareBtn = document.createElement('button');
+      shareBtn.className = 'btn-ghost';
+      shareBtn.textContent = '📤 Pfad kopieren (Teilen)';
+      shareBtn.addEventListener('click', async () => {
+        await window.editorAPI.copyTextToClipboard(result.outputPath);
+        toast('Dateipfad kopiert – zum Teilen einfügen.');
+      });
+      exportResultEl.append(successText, showBtn, shareBtn);
       toast('Export abgeschlossen!');
     } catch (err) {
       toast('Export fehlgeschlagen: ' + (err && err.message ? err.message : String(err)), true);

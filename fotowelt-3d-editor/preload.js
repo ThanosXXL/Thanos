@@ -10,6 +10,10 @@ contextBridge.exposeInMainWorld('editorAPI', {
   selectExportPath: (defaultName) => ipcRenderer.invoke('select-export-path', defaultName),
   showInFolder: (filePath) => ipcRenderer.invoke('show-in-folder', filePath),
 
+  saveImage: (defaultName, buffer) => ipcRenderer.invoke('save-image', defaultName, buffer),
+  copyImageToClipboard: (buffer) => ipcRenderer.invoke('copy-image-to-clipboard', buffer),
+  copyTextToClipboard: (text) => ipcRenderer.invoke('copy-text-to-clipboard', text),
+
   exportBegin: () => ipcRenderer.invoke('export-begin'),
   exportWriteFrame: (tempDir, imageIndex, subFrameIndex, buffer) =>
     ipcRenderer.invoke('export-write-frame', tempDir, imageIndex, subFrameIndex, buffer),
