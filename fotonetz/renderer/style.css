@@ -490,6 +490,31 @@ ul.item-list li span.item-text {
   background: rgba(255, 255, 255, 0.08);
 }
 
+.save-btn {
+  font-size: 13px;
+}
+
+.save-btn.saved {
+  color: #4fe0af;
+  background: rgba(47, 191, 143, 0.15);
+}
+
+.field-with-save {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.field-with-save input {
+  flex: 1;
+}
+
+.notizen-save-row {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 6px;
+}
+
 /* ---------- Buttons ---------- */
 
 .btn-primary {
@@ -523,6 +548,41 @@ ul.item-list li span.item-text {
   cursor: pointer;
   font-size: 14px;
   font-weight: 600;
+}
+
+/* ---------- Interaktions-Effekte (Hover / Klick) ---------- */
+
+button:not(:disabled),
+.auftrag-tab,
+.medien-card,
+select {
+  transition: transform 0.15s ease, box-shadow 0.15s ease, filter 0.15s ease, background 0.15s ease;
+}
+
+.btn-primary:hover:not(:disabled),
+.btn-secondary:hover:not(:disabled),
+.btn-danger:hover:not(:disabled),
+.add-auftrag-btn:hover:not(:disabled) {
+  transform: translateY(-2px);
+  filter: brightness(1.12);
+}
+
+.btn-primary:active:not(:disabled),
+.btn-secondary:active:not(:disabled),
+.btn-danger:active:not(:disabled),
+.add-auftrag-btn:active:not(:disabled),
+.icon-btn:active {
+  transform: scale(0.94);
+}
+
+.icon-btn:hover {
+  transform: translateY(-1px) scale(1.05);
+}
+
+.medien-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 12px 30px rgba(59, 130, 246, 0.35);
+  border-color: rgba(96, 200, 255, 0.5);
 }
 
 .panel-header {
@@ -669,12 +729,17 @@ ul.item-list li span.item-text {
   gap: 6px;
 }
 
-.medien-card img {
+.medien-card img,
+.medien-card video {
   width: 100%;
   height: 110px;
   object-fit: cover;
   border-radius: 6px;
   background: #000000;
+}
+
+.medien-card-video video {
+  object-fit: contain;
 }
 
 .medien-select-label {

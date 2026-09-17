@@ -5,6 +5,7 @@ contextBridge.exposeInMainWorld('studioAPI', {
   saveData: (data) => ipcRenderer.invoke('save-data', data),
   openExternal: (url) => ipcRenderer.invoke('open-external', url),
   importImages: (auftragId) => ipcRenderer.invoke('import-images', auftragId),
+  importVideos: (auftragId) => ipcRenderer.invoke('import-videos', auftragId),
   pickMusic: (auftragId) => ipcRenderer.invoke('pick-music', auftragId),
   saveEditedImage: (payload) => ipcRenderer.invoke('save-edited-image', payload),
   createSlideshowVideo: (payload) => ipcRenderer.invoke('create-slideshow-video', payload),

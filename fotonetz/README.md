@@ -14,21 +14,25 @@ Notizen sowie vier Listen:
 4. **Liste 4 – Referenzen** (Inspirations-Links, Moodboard-Stichworte)
 
 Bearbeitungen lassen sich per Klick von "Offen" nach "Fertig" verschieben (und zurück). Dazu kommt ein
-Chat-/Notizen-Verlauf pro Auftrag. Jeder Auftrag hat außerdem eine Auftragsart (Hochzeit, Portrait, Event, ...),
-ein Honorar-Feld und einen farbcodierten Zahlungsstatus (Offen/Angezahlt/Bezahlt). Alle Daten werden lokal
-gespeichert (im Benutzerdatenverzeichnis der App) und bleiben nach dem Neustart erhalten.
+Chat-/Notizen-Verlauf pro Auftrag. Jeder Auftrag hat außerdem eine Auftragsart (Hochzeit, Verlobung/Paarshooting,
+Taufe, Portrait, Familie, Business/Corporate, Werbung, Event, Produkt, Sonstiges), ein Honorar-Feld und einen
+farbcodierten Zahlungsstatus (Offen/Angezahlt/Bezahlt). Die wichtigsten Textfelder (Kunde, Termin, Link, Honorar,
+Notizen) haben neben dem automatischen Speichern beim Verlassen des Feldes auch einen expliziten
+💾-Speichern-Button mit kurzer ✓-Bestätigung. Alle Daten werden lokal gespeichert (im Benutzerdatenverzeichnis
+der App) und bleiben nach dem Neustart erhalten.
 
 ### Medien: Bilder bearbeiten & Video erstellen
 
-Jeder Auftrag hat einen eigenen Medien-Bereich:
+Jeder Auftrag hat eine gemeinsame Medien-Galerie für Bilder und Videos:
 
 - **Bilder importieren** – beliebig viele Fotos (JPG/PNG/WebP) von der Festplatte hinzufügen.
+- **Videos importieren** – vorhandene Videodateien (MP4/MOV/WebM/AVI/MKV) direkt hinzufügen, ohne erneutes
+  Rendern; sie erscheinen zusammen mit den Bildern in derselben Galerie und lassen sich dort direkt abspielen.
 - **Bildbearbeitung** – Helligkeit, Kontrast, Sättigung und 90°-Drehung direkt im Canvas-Editor; die
   bearbeitete Version wird als neues Bild gespeichert, das Original bleibt erhalten.
-- **Video erstellen** – ausgewählte Bilder als Diashow-Video (mit einstellbarer Sekundenzahl pro Bild)
-  zusammenfügen, optional mit einer selbst gewählten Hintergrundmusik-Datei unterlegt (wird automatisch
-  auf die exakte Videolänge geloopt/getrimmt). Fertige Videos lassen sich direkt abspielen oder im
-  Dateimanager anzeigen.
+- **Video erstellen** – ausgewählte Bilder als Diashow-Video (mit einstellbarer Sekundenzahl pro Bild) mit
+  weichen Überblendungen zwischen den Bildern zusammenfügen, optional mit einer selbst gewählten
+  Hintergrundmusik-Datei unterlegt (wird automatisch auf die exakte Videolänge geloopt/getrimmt).
 
 Alle importierten/bearbeiteten Dateien und erzeugten Videos liegen lokal unter dem Benutzerdatenverzeichnis
 der App (`fotonetz-media/<Auftrag>/...`) – nichts wird hochgeladen.

@@ -3,9 +3,11 @@
   const AUFTRAGSARTEN = [
     'Hochzeit',
     'Verlobung / Paarshooting',
+    'Taufe',
     'Portrait',
     'Familie',
     'Business / Corporate',
+    'Werbung',
     'Event',
     'Produkt',
     'Sonstiges'
@@ -202,6 +204,17 @@
     if (!auftrag) return;
     const medien = ensureMedien(auftrag);
     neueBilder.forEach((b) => medien.bilder.push({ ...b, quelle: 'original' }));
+    persist();
+    render();
+  }
+
+  async function importVideos(auftragId) {
+    const neueVideos = await window.studioAPI.importVideos(auftragId);
+    if (!neueVideos || !neueVideos.length) return;
+    const auftrag = findAuftrag(auftragId);
+    if (!auftrag) return;
+    const medien = ensureMedien(auftrag);
+    neueVideos.forEach((v) => medien.videos.push(v));
     persist();
     render();
   }
@@ -422,6 +435,32 @@
     return col;
   }
 
+  let justSavedKey = null;
+  let justSavedTimer = null;
+
+  function flagJustSaved(key) {
+    justSavedKey = key;
+    if (justSavedTimer) clearTimeout(justSavedTimer);
+    justSavedTimer = setTimeout(() => {
+      justSavedKey = null;
+    }, 1000);
+  }
+
+  function buildSaveButton(key, onSave) {
+    const btn = document.createElement('button');
+    btn.type = 'button';
+    btn.className = 'icon-btn save-btn';
+    const isJustSaved = justSavedKey === key;
+    btn.title = isJustSaved ? 'Gespeichert' : 'Speichern';
+    btn.textContent = isJustSaved ? '✓' : '💾';
+    if (isJustSaved) btn.classList.add('saved');
+    btn.addEventListener('click', () => {
+      flagJustSaved(key);
+      onSave();
+    });
+    return btn;
+  }
+
   function buildMetaSection(auftrag) {
     const section = document.createElement('div');
     section.className = 'auftrag-meta';
@@ -458,8 +497,14 @@
     kundeInput.addEventListener('keydown', (e) => {
       if (e.key === 'Enter') kundeInput.blur();
     });
+    const kundeRow = document.createElement('div');
+    kundeRow.className = 'field-with-save';
+    kundeRow.appendChild(kundeInput);
+    kundeRow.appendChild(
+      buildSaveButton(auftrag.id + ':kunde', () => updateAuftragField(auftrag.id, 'kunde', kundeInput.value.trim()))
+    );
     kundeField.appendChild(kundeLabel);
-    kundeField.appendChild(kundeInput);
+    kundeField.appendChild(kundeRow);
 
     const terminField = document.createElement('div');
     terminField.className = 'meta-field';
@@ -475,8 +520,14 @@
     terminInput.addEventListener('keydown', (e) => {
       if (e.key === 'Enter') terminInput.blur();
     });
+    const terminRow = document.createElement('div');
+    terminRow.className = 'field-with-save';
+    terminRow.appendChild(terminInput);
+    terminRow.appendChild(
+      buildSaveButton(auftrag.id + ':termin', () => updateAuftragField(auftrag.id, 'termin', terminInput.value.trim()))
+    );
     terminField.appendChild(terminLabel);
-    terminField.appendChild(terminInput);
+    terminField.appendChild(terminRow);
 
     const linkField = document.createElement('div');
     linkField.className = 'meta-field link-field';
@@ -501,6 +552,9 @@
       if (auftrag.link) window.studioAPI.openExternal(auftrag.link);
     });
     linkRow.appendChild(linkInput);
+    linkRow.appendChild(
+      buildSaveButton(auftrag.id + ':link', () => updateAuftragField(auftrag.id, 'link', linkInput.value.trim()))
+    );
     linkRow.appendChild(openLinkBtn);
     linkField.appendChild(linkLabel);
     linkField.appendChild(linkRow);
@@ -519,8 +573,14 @@
     preisInput.addEventListener('keydown', (e) => {
       if (e.key === 'Enter') preisInput.blur();
     });
+    const preisRow = document.createElement('div');
+    preisRow.className = 'field-with-save';
+    preisRow.appendChild(preisInput);
+    preisRow.appendChild(
+      buildSaveButton(auftrag.id + ':preis', () => updateAuftragField(auftrag.id, 'preis', preisInput.value.trim()))
+    );
     preisField.appendChild(preisLabel);
-    preisField.appendChild(preisInput);
+    preisField.appendChild(preisRow);
 
     const zahlungField = document.createElement('div');
     zahlungField.className = 'meta-field';
@@ -561,6 +621,12 @@
     );
     notizenBlock.appendChild(notizenLabel);
     notizenBlock.appendChild(notizenInput);
+    const notizenSaveRow = document.createElement('div');
+    notizenSaveRow.className = 'notizen-save-row';
+    notizenSaveRow.appendChild(
+      buildSaveButton(auftrag.id + ':notizen', () => updateAuftragField(auftrag.id, 'notizen', notizenInput.value.trim()))
+    );
+    notizenBlock.appendChild(notizenSaveRow);
 
     const wrapper = document.createElement('div');
     wrapper.appendChild(section);
@@ -753,16 +819,24 @@
     importBtn.addEventListener('click', () => importImages(auftrag.id));
     toolbar.appendChild(importBtn);
 
+    const importVideoBtn = document.createElement('button');
+    importVideoBtn.className = 'btn-primary';
+    importVideoBtn.type = 'button';
+    importVideoBtn.textContent = '+ Videos importieren';
+    importVideoBtn.addEventListener('click', () => importVideos(auftrag.id));
+    toolbar.appendChild(importVideoBtn);
+
     panel.appendChild(toolbar);
 
     const grid = document.createElement('div');
     grid.className = 'medien-grid';
-    if (!medien.bilder.length) {
+    if (!medien.bilder.length && !medien.videos.length) {
       const hint = document.createElement('p');
       hint.className = 'medien-hint';
-      hint.textContent = 'Noch keine Bilder importiert.';
+      hint.textContent = 'Noch keine Bilder oder Videos vorhanden.';
       grid.appendChild(hint);
     }
+
     medien.bilder.forEach((bild) => {
       const card = document.createElement('div');
       card.className = 'medien-card';
@@ -806,6 +880,42 @@
 
       grid.appendChild(card);
     });
+
+    medien.videos.forEach((video) => {
+      const card = document.createElement('div');
+      card.className = 'medien-card medien-card-video';
+
+      const videoEl = document.createElement('video');
+      videoEl.src = video.url;
+      videoEl.controls = true;
+      videoEl.preload = 'metadata';
+      videoEl.muted = true;
+      card.appendChild(videoEl);
+
+      const tag = document.createElement('span');
+      tag.className = 'medien-tag';
+      tag.textContent = video.quelle === 'importiert' ? 'importiert' : `Video · ${video.sekunden}s`;
+      card.appendChild(tag);
+
+      const actions = document.createElement('div');
+      actions.className = 'medien-card-actions';
+      const revealBtn = document.createElement('button');
+      revealBtn.className = 'icon-btn';
+      revealBtn.textContent = '📁 Ordner';
+      revealBtn.title = 'Im Dateimanager anzeigen';
+      revealBtn.addEventListener('click', () => window.studioAPI.revealMediaPath(video.pfad));
+      const delBtn = document.createElement('button');
+      delBtn.className = 'icon-btn danger';
+      delBtn.textContent = '✕';
+      delBtn.title = 'Löschen';
+      delBtn.addEventListener('click', () => deleteVideo(auftrag.id, video.id));
+      actions.appendChild(revealBtn);
+      actions.appendChild(delBtn);
+      card.appendChild(actions);
+
+      grid.appendChild(card);
+    });
+
     panel.appendChild(grid);
 
     const videoBuilder = document.createElement('div');
@@ -852,44 +962,6 @@
     videoBuilder.appendChild(generateBtn);
 
     panel.appendChild(videoBuilder);
-
-    if (medien.videos.length) {
-      const videoList = document.createElement('div');
-      videoList.className = 'video-list';
-      medien.videos.forEach((video) => {
-        const row = document.createElement('div');
-        row.className = 'video-row';
-
-        const name = document.createElement('span');
-        name.className = 'video-name';
-        name.textContent = `${video.dateiname} (${video.sekunden}s)`;
-        row.appendChild(name);
-
-        const playBtn = document.createElement('button');
-        playBtn.className = 'btn-secondary';
-        playBtn.type = 'button';
-        playBtn.textContent = '▶ Abspielen';
-        playBtn.addEventListener('click', () => window.studioAPI.openMediaPath(video.pfad));
-        row.appendChild(playBtn);
-
-        const revealBtn = document.createElement('button');
-        revealBtn.className = 'btn-secondary';
-        revealBtn.type = 'button';
-        revealBtn.textContent = 'Ordner öffnen';
-        revealBtn.addEventListener('click', () => window.studioAPI.revealMediaPath(video.pfad));
-        row.appendChild(revealBtn);
-
-        const delBtn = document.createElement('button');
-        delBtn.className = 'icon-btn danger';
-        delBtn.textContent = '✕';
-        delBtn.title = 'Löschen';
-        delBtn.addEventListener('click', () => deleteVideo(auftrag.id, video.id));
-        row.appendChild(delBtn);
-
-        videoList.appendChild(row);
-      });
-      panel.appendChild(videoList);
-    }
 
     return panel;
   }
@@ -996,7 +1068,10 @@
       if (!ZAHLUNGSSTATUS.some((s) => s.value === a.zahlungsstatus)) {
         a.zahlungsstatus = ZAHLUNGSSTATUS[0].value;
       }
-      ensureMedien(a);
+      const medien = ensureMedien(a);
+      medien.videos.forEach((v) => {
+        if (v.quelle !== 'importiert' && v.quelle !== 'erstellt') v.quelle = 'erstellt';
+      });
     });
     activeAuftragId = state.auftraege.length ? state.auftraege[0].id : null;
     render();

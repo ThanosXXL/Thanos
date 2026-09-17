@@ -67,25 +67,49 @@ function runFfmpeg(args) {
   });
 }
 
+function slideshowTransitionDuration(secondsPerImage) {
+  return Math.min(1, secondsPerImage / 2);
+}
+
+function slideshowTotalDuration(imageCount, secondsPerImage) {
+  const transition = slideshowTransitionDuration(secondsPerImage);
+  return imageCount * secondsPerImage - (imageCount - 1) * transition;
+}
+
 function buildSlideshowArgs(images, secondsPerImage, outputPath) {
+  const transition = slideshowTransitionDuration(secondsPerImage);
   const args = [];
   images.forEach((img) => {
     args.push('-loop', '1', '-t', String(secondsPerImage), '-i', img);
   });
-  const filterParts = images.map(
+
+  const scaleParts = images.map(
     (_, i) =>
-      `[${i}:v]scale=1280:720:force_original_aspect_ratio=decrease,pad=1280:720:(ow-iw)/2:(oh-ih)/2,setsar=1,fps=25[v${i}]`
+      `[${i}:v]scale=1280:720:force_original_aspect_ratio=decrease,pad=1280:720:(ow-iw)/2:(oh-ih)/2,setsar=1,fps=25,format=yuv420p[s${i}]`
   );
-  const concatInputs = images.map((_, i) => `[v${i}]`).join('');
-  const filterComplex = `${filterParts.join(';')};${concatInputs}concat=n=${images.length}:v=1:a=0[outv]`;
-  args.push(
-    '-y',
-    '-filter_complex', filterComplex,
-    '-map', '[outv]',
-    '-c:v', 'libx264',
-    '-pix_fmt', 'yuv420p',
-    outputPath
-  );
+
+  let filterComplex;
+  if (images.length === 1) {
+    filterComplex = `${scaleParts[0]}`;
+    args.push('-y', '-filter_complex', filterComplex, '-map', '[s0]');
+  } else {
+    const xfadeParts = [];
+    let runningDuration = secondsPerImage;
+    let previousLabel = 's0';
+    for (let i = 1; i < images.length; i++) {
+      const offset = runningDuration - transition;
+      const outLabel = i === images.length - 1 ? 'outv' : `x${i}`;
+      xfadeParts.push(
+        `[${previousLabel}][s${i}]xfade=transition=fade:duration=${transition}:offset=${offset.toFixed(3)}[${outLabel}]`
+      );
+      runningDuration = runningDuration + secondsPerImage - transition;
+      previousLabel = outLabel;
+    }
+    filterComplex = `${scaleParts.join(';')};${xfadeParts.join(';')}`;
+    args.push('-y', '-filter_complex', filterComplex, '-map', '[outv]');
+  }
+
+  args.push('-c:v', 'libx264', '-pix_fmt', 'yuv420p', outputPath);
   return args;
 }
 
@@ -157,6 +181,25 @@ ipcMain.handle('import-images', async (event, auftragId) => {
   });
 });
 
+ipcMain.handle('import-videos', async (event, auftragId) => {
+  const result = await dialog.showOpenDialog({
+    title: 'Videos importieren',
+    properties: ['openFile', 'multiSelections'],
+    filters: [{ name: 'Videos', extensions: ['mp4', 'mov', 'webm', 'avi', 'mkv'] }]
+  });
+  if (result.canceled || !result.filePaths.length) return [];
+
+  const dir = videoDir(auftragId);
+  return result.filePaths.map((src) => {
+    const id = uid();
+    const ext = path.extname(src).toLowerCase() || '.mp4';
+    const dateiname = `${id}${ext}`;
+    const dest = path.join(dir, dateiname);
+    fs.copyFileSync(src, dest);
+    return { id, dateiname, ...toMediaEntry(dest), quelle: 'importiert' };
+  });
+});
+
 ipcMain.handle('pick-music', async (event, auftragId) => {
   const result = await dialog.showOpenDialog({
     title: 'Hintergrundmusik wählen',
@@ -218,7 +261,8 @@ ipcMain.handle('create-slideshow-video', async (event, { auftragId, bildPfade, s
     id,
     dateiname,
     ...toMediaEntry(finalPath),
-    sekunden: sekunden * gueltigeBilder.length
+    quelle: 'erstellt',
+    sekunden: Math.round(slideshowTotalDuration(gueltigeBilder.length, sekunden) * 10) / 10
   };
 });
 
