@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8" />
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self' 'unsafe-inline' data: file: blob:;" />
+  <title>FotoWelt 3D Editor</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <header class="topbar">
+    <div class="brand">
+      <span class="brand-icon">✨</span>
+      <span class="brand-text">FotoWelt <strong>3D</strong> Editor</span>
+    </div>
+    <div class="project-controls">
+      <select id="projectSelect" title="Projekt wählen"></select>
+      <button id="btnNewProject" class="btn-ghost">+ Neues Projekt</button>
+      <button id="btnRenameProject" class="btn-ghost">Umbenennen</button>
+      <button id="btnDeleteProject" class="btn-ghost btn-danger">Löschen</button>
+    </div>
+  </header>
+
+  <main class="workspace">
+    <aside class="panel panel-left">
+      <section class="card">
+        <div class="card-header">
+          <h2>Bilder · FotoWelt</h2>
+        </div>
+        <button id="btnAddImages" class="btn-primary btn-block">+ Bilder importieren</button>
+        <p class="hint">Reihenfolge per Ziehen ändern. Bild anklicken, um seine Effekte rechts zu bearbeiten.</p>
+        <ul id="imageList" class="image-list"></ul>
+      </section>
+
+      <section class="card">
+        <div class="card-header">
+          <h2>Logo / Wasserzeichen</h2>
+        </div>
+        <div class="logo-row">
+          <button id="btnAddLogo" class="btn-secondary btn-block">Logo importieren</button>
+          <button id="btnRemoveLogo" class="btn-ghost btn-danger" hidden>Entfernen</button>
+        </div>
+        <img id="logoPreview" class="logo-preview" hidden alt="Logo-Vorschau" />
+        <div id="logoControls" class="controls" hidden>
+          <label class="control-row">
+            <span>Position X</span>
+            <input id="logoX" type="range" min="0" max="100" step="1" />
+            <output id="logoXValue"></output>
+          </label>
+          <label class="control-row">
+            <span>Position Y</span>
+            <input id="logoY" type="range" min="0" max="100" step="1" />
+            <output id="logoYValue"></output>
+          </label>
+          <label class="control-row">
+            <span>Größe</span>
+            <input id="logoScale" type="range" min="10" max="200" step="1" />
+            <output id="logoScaleValue"></output>
+          </label>
+          <label class="control-row">
+            <span>Rotation</span>
+            <input id="logoRotation" type="range" min="-180" max="180" step="1" />
+            <output id="logoRotationValue"></output>
+          </label>
+          <label class="control-row">
+            <span>Deckkraft</span>
+            <input id="logoOpacity" type="range" min="0" max="100" step="1" />
+            <output id="logoOpacityValue"></output>
+          </label>
+          <label class="control-row">
+            <span>Mischmodus</span>
+            <select id="logoBlendMode">
+              <option value="source-over">Normal</option>
+              <option value="multiply">Multiplizieren</option>
+              <option value="screen">Aufhellen (Screen)</option>
+              <option value="overlay">Ineinanderkopieren</option>
+              <option value="lighten">Aufhellen</option>
+              <option value="darken">Abdunkeln</option>
+              <option value="hard-light">Hartes Licht</option>
+              <option value="soft-light">Weiches Licht</option>
+            </select>
+          </label>
+          <label class="control-row control-row-checkbox">
+            <span>Sichtbar</span>
+            <input id="logoVisible" type="checkbox" checked />
+          </label>
+        </div>
+      </section>
+
+      <section class="card">
+        <div class="card-header">
+          <h2>Hintergrundmusik</h2>
+        </div>
+        <button id="btnAddMusic" class="btn-secondary btn-block">Musik auswählen</button>
+        <div id="musicInfo" class="hint">Keine Musik ausgewählt – die Loop-Länge richtet sich nach der Musik.</div>
+        <audio id="audioPlayer" hidden></audio>
+      </section>
+    </aside>
+
+    <section class="panel panel-center">
+      <div class="preview-frame">
+        <canvas id="previewCanvas" width="960" height="540"></canvas>
+        <div class="preview-overlay" id="previewEmpty">Importiere Bilder, um die 3D-Hochglanz-Vorschau zu sehen</div>
+      </div>
+
+      <div class="playback-bar card">
+        <button id="btnPlayPause" class="btn-primary">▶ Loop abspielen</button>
+        <label class="control-row">
+          <span>Übergang</span>
+          <input id="transitionDuration" type="range" min="0.2" max="3" step="0.1" value="1" />
+          <output id="transitionValue">1.0s</output>
+        </label>
+        <label class="control-row">
+          <span>Auflösung</span>
+          <select id="resolutionSelect">
+            <option value="1920x1080">1920×1080 · 16:9</option>
+            <option value="1080x1080">1080×1080 · 1:1</option>
+            <option value="1080x1920">1080×1920 · 9:16</option>
+            <option value="3840x2160">3840×2160 · 4K</option>
+          </select>
+        </label>
+      </div>
+
+      <div class="export-bar card">
+        <button id="btnExport" class="btn-primary btn-large btn-block">🎬 Loop exportieren (Video + Musik)</button>
+        <div id="exportProgressWrap" class="progress-wrap" hidden>
+          <div class="progress-track"><div id="exportProgressBar" class="progress-bar"></div></div>
+          <span id="exportProgressLabel">0%</span>
+          <button id="btnCancelExport" class="btn-ghost btn-danger">Abbrechen</button>
+        </div>
+        <div id="exportResult" class="hint"></div>
+      </div>
+    </section>
+
+    <aside class="panel panel-right">
+      <section class="card">
+        <div class="card-header">
+          <h2>Presets</h2>
+        </div>
+        <div id="presetList" class="preset-list"></div>
+        <button id="btnSavePreset" class="btn-secondary btn-block">+ Aktuelle Einstellungen als Preset</button>
+      </section>
+
+      <section class="card">
+        <div class="card-header">
+          <h2>Effekte <span id="activeImageName" class="active-image-name">– kein Bild ausgewählt</span></h2>
+          <button id="btnApplyAll" class="btn-ghost">Auf alle anwenden</button>
+        </div>
+        <button id="btnResetEffects" class="btn-ghost">Zurücksetzen</button>
+        <div id="effectGroups" class="effect-groups"></div>
+      </section>
+    </aside>
+  </main>
+
+  <div id="toast" class="toast" hidden></div>
+
+  <script src="effects.js"></script>
+  <script src="renderer.js"></script>
+</body>
+</html>

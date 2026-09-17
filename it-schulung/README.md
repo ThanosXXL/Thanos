@@ -1,5 +1,6 @@
 [![Dozenten Dashboard](https://img.shields.io/badge/📋_Dozenten_Dashboard-0b1f4d?style=for-the-badge)](../README.md)
 [![IT-Schulung Dashboard](https://img.shields.io/badge/💻_IT--Schulung_Dashboard-5b9bd5?style=for-the-badge)](README.md)
+[![FotoWelt 3D Editor](https://img.shields.io/badge/✨_FotoWelt_3D_Editor-7c5cff?style=for-the-badge)](../fotowelt-3d-editor/README.md)
 
 # IT-Schulung Dashboard
 
