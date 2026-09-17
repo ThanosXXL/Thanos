@@ -43,6 +43,11 @@
   const btnCancelExport = document.getElementById('btnCancelExport');
   const exportResultEl = document.getElementById('exportResult');
 
+  const suggestionCard = document.getElementById('suggestionCard');
+  const suggestionText = document.getElementById('suggestionText');
+  const btnSuggestionAccept = document.getElementById('btnSuggestionAccept');
+  const btnSuggestionReject = document.getElementById('btnSuggestionReject');
+
   const presetListEl = document.getElementById('presetList');
   const btnSavePreset = document.getElementById('btnSavePreset');
   const activeImageNameEl = document.getElementById('activeImageName');
@@ -56,6 +61,8 @@
   const imageElements = new Map();
   let logoElement = null;
   const frameCache = new Map();
+  const dismissedSuggestions = new Set();
+  let currentSuggestion = null;
 
   let playing = false;
   let playStartTime = 0;
@@ -425,6 +432,7 @@
     project.images = project.images.filter((im) => im.id !== id);
     imageElements.delete(id);
     frameCache.delete(id);
+    dismissedSuggestions.delete(id);
     if (project.activeImageId === id) {
       project.activeImageId = project.images.length ? project.images[0].id : null;
     }
@@ -666,6 +674,7 @@
       hint.className = 'hint';
       hint.textContent = 'Wähle links ein Bild aus der Liste, um seine Effekte zu bearbeiten.';
       effectGroupsEl.appendChild(hint);
+      updateSuggestion();
       return;
     }
     FotoEffects.EFFECT_GROUPS.forEach((group, gi) => {
@@ -681,7 +690,48 @@
       details.appendChild(wrap);
       effectGroupsEl.appendChild(details);
     });
+    updateSuggestion();
   }
+
+  // ---------- Automatische Verbesserung ----------
+
+  function updateSuggestion() {
+    const image = getActiveImage();
+    if (!image || dismissedSuggestions.has(image.id)) {
+      currentSuggestion = null;
+      suggestionCard.hidden = true;
+      return;
+    }
+    const imgEl = imageElements.get(image.id);
+    const suggestion = imgEl ? FotoEffects.suggestImprovement(imgEl, image.effects) : null;
+    if (!suggestion) {
+      currentSuggestion = null;
+      suggestionCard.hidden = true;
+      return;
+    }
+    currentSuggestion = suggestion;
+    suggestionText.textContent = suggestion.description;
+    suggestionCard.hidden = false;
+  }
+
+  btnSuggestionAccept.addEventListener('click', () => {
+    const image = getActiveImage();
+    if (!image || !currentSuggestion) return;
+    Object.assign(image.effects, currentSuggestion.changes);
+    suggestionCard.hidden = true;
+    currentSuggestion = null;
+    buildEffectPanel();
+    schedulePersist();
+    toast('Verbesserung übernommen.');
+  });
+
+  btnSuggestionReject.addEventListener('click', () => {
+    const image = getActiveImage();
+    if (!image) return;
+    dismissedSuggestions.add(image.id);
+    currentSuggestion = null;
+    suggestionCard.hidden = true;
+  });
 
   btnApplyAll.addEventListener('click', () => {
     const project = getActiveProject();
@@ -701,6 +751,7 @@
     const image = getActiveImage();
     if (!image) return;
     image.effects = Object.assign({}, FotoEffects.DEFAULT_EFFECTS);
+    dismissedSuggestions.delete(image.id);
     buildEffectPanel();
     scheduleRender();
     schedulePersist();

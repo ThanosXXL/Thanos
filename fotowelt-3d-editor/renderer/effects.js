@@ -561,6 +561,75 @@
     });
   }
 
+  /* Analysiert die rohen Bildpixel (unabhängig von aktuell gesetzten Effekten) auf
+     mittlere Leuchtdichte, Kontrastumfang und Sättigung – an einer kleinen, herunter-
+     skalierten Stichprobe, damit das schnell bleibt. */
+  function analyzeImageStats(imageEl) {
+    const sampleSize = 64;
+    const canvas = document.createElement('canvas');
+    canvas.width = sampleSize;
+    canvas.height = sampleSize;
+    const ctx = canvas.getContext('2d');
+    drawCover(ctx, imageEl, sampleSize, sampleSize);
+    const data = ctx.getImageData(0, 0, sampleSize, sampleSize).data;
+    let sumLum = 0;
+    let minLum = 255;
+    let maxLum = 0;
+    let sumSat = 0;
+    let count = 0;
+    for (let i = 0; i < data.length; i += 4) {
+      const r = data[i];
+      const g = data[i + 1];
+      const b = data[i + 2];
+      const lum = 0.299 * r + 0.587 * g + 0.114 * b;
+      sumLum += lum;
+      if (lum < minLum) minLum = lum;
+      if (lum > maxLum) maxLum = lum;
+      const max = Math.max(r, g, b);
+      const min = Math.min(r, g, b);
+      sumSat += max === 0 ? 0 : (max - min) / max;
+      count++;
+    }
+    return { meanLum: sumLum / count, range: maxLum - minLum, meanSat: sumSat / count };
+  }
+
+  /* Leitet aus der Bildstatistik konkrete Ziel-Effektwerte ab und vergleicht sie mit den
+     aktuell gesetzten Werten. Die Zielwerte hängen NUR von den rohen Bildpixeln ab (nicht
+     von bereits gesetzten Effekten) – wird ein Vorschlag angenommen, wird beim nächsten
+     Aufruf also kein weiterer Vorschlag mehr erzeugt (kein Aufschaukeln bei Mehrfachklick). */
+  function suggestImprovement(imageEl, currentEffects) {
+    if (!imageEl) return null;
+    const stats = analyzeImageStats(imageEl);
+    const fx = Object.assign({}, DEFAULT_EFFECTS, currentEffects || {});
+    const changes = {};
+    const reasons = [];
+    const MIN_DELTA = 8;
+
+    const targetBrightness = clamp(Math.round(100 + (128 - stats.meanLum) * 0.55), 60, 170);
+    if (Math.abs(targetBrightness - fx.brightness) >= MIN_DELTA) {
+      changes.brightness = targetBrightness;
+      const diff = targetBrightness - fx.brightness;
+      reasons.push(`Helligkeit ${diff > 0 ? '+' : '−'}${Math.abs(diff)}%`);
+    }
+
+    const targetContrast = clamp(Math.round(100 + (140 - stats.range) * 0.35), 100, 150);
+    if (targetContrast - fx.contrast >= MIN_DELTA) {
+      changes.contrast = targetContrast;
+      reasons.push(`Kontrast +${targetContrast - fx.contrast}%`);
+    }
+
+    const targetSaturation =
+      stats.meanSat < 0.3 ? clamp(Math.round(100 + (0.34 - stats.meanSat) * 110), 105, 160) : 100;
+    if (Math.abs(targetSaturation - fx.saturation) >= MIN_DELTA) {
+      changes.saturation = targetSaturation;
+      const diff = targetSaturation - fx.saturation;
+      reasons.push(`Sättigung ${diff > 0 ? '+' : '−'}${Math.abs(diff)}%`);
+    }
+
+    if (!Object.keys(changes).length) return null;
+    return { changes, description: 'Vorschlag: ' + reasons.join(', ') + '.' };
+  }
+
   window.FotoEffects = {
     DEFAULT_EFFECTS,
     DEFAULT_LOGO,
@@ -568,6 +637,7 @@
     PRESETS,
     renderBase,
     compositeLogo,
-    renderComposite
+    renderComposite,
+    suggestImprovement
   };
 })();

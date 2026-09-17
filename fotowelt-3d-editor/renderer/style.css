@@ -465,6 +465,21 @@ input[type="checkbox"] {
   transition: width 0.15s ease;
 }
 
+.suggestion-card {
+  border-color: rgba(232, 171, 31, 0.55);
+  box-shadow: 0 0 0 1px rgba(232, 171, 31, 0.25), 0 10px 24px rgba(0, 0, 0, 0.4);
+}
+
+.suggestion-actions {
+  display: flex;
+  gap: 8px;
+  margin-top: 10px;
+}
+
+.suggestion-actions button {
+  flex: 1;
+}
+
 .preset-list {
   display: grid;
   grid-template-columns: 1fr 1fr;
