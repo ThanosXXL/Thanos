@@ -1,12 +1,14 @@
 [![Dozenten Dashboard](https://img.shields.io/badge/📋_Dozenten_Dashboard-0b1f4d?style=for-the-badge)](README.md)
 [![IT-Schulung Dashboard](https://img.shields.io/badge/💻_IT--Schulung_Dashboard-5b9bd5?style=for-the-badge)](it-schulung/README.md)
+[![FotoNetz](https://img.shields.io/badge/📷_FotoNetz-3b82f6?style=for-the-badge)](fotonetz/README.md)
 
 # Dozenten Dashboard
 
-Dieses Repository enthält zwei eigenständige Desktop-Apps, jede mit eigenem Code:
+Dieses Repository enthält drei eigenständige Desktop-Apps, jede mit eigenem Code:
 
 - **Dozenten Dashboard** (dieses Verzeichnis) – Verwaltung von Dozenten, Aufgaben und Projekten
 - **[IT-Schulung Dashboard](it-schulung/README.md)** (`it-schulung/`) – Verwaltung von IT-Schulungen, Aufgaben und Themen
+- **[FotoNetz](fotonetz/README.md)** (`fotonetz/`) – Verwaltung von Fotografen-Aufträgen, Aufgaben und Bearbeitungsstatus
 
 Desktop-Dashboard (Electron) zur Verwaltung von bis zu vier Dozenten. Jeder Dozent hat drei Listen:
 

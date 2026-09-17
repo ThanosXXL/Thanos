@@ -1,0 +1,576 @@
+(function () {
+  const MAX_AUFTRAEGE = 6;
+
+  let state = { auftraege: [] };
+  let activeAuftragId = null;
+
+  const auftragTabs = document.getElementById('auftragTabs');
+  const content = document.getElementById('content');
+  const emptyState = document.getElementById('emptyState');
+
+  const addAuftragModal = document.getElementById('addAuftragModal');
+  const newAuftragNameInput = document.getElementById('newAuftragName');
+  const deleteAuftragModal = document.getElementById('deleteAuftragModal');
+  const deleteAuftragText = document.getElementById('deleteAuftragText');
+
+  let pendingDeleteId = null;
+
+  function uid() {
+    return Date.now().toString(36) + Math.random().toString(36).slice(2, 8);
+  }
+
+  function persist() {
+    window.studioAPI.saveData(state);
+  }
+
+  function findAuftrag(id) {
+    return state.auftraege.find((a) => a.id === id);
+  }
+
+  function openAddAuftragModal() {
+    if (state.auftraege.length >= MAX_AUFTRAEGE) return;
+    newAuftragNameInput.value = '';
+    addAuftragModal.classList.add('visible');
+    newAuftragNameInput.focus();
+  }
+
+  function closeAddAuftragModal() {
+    addAuftragModal.classList.remove('visible');
+  }
+
+  function confirmAddAuftrag() {
+    const titel = newAuftragNameInput.value.trim();
+    if (!titel) return;
+    if (state.auftraege.length >= MAX_AUFTRAEGE) return;
+
+    const auftrag = {
+      id: uid(),
+      titel,
+      kunde: '',
+      termin: '',
+      link: '',
+      notizen: '',
+      todos: [],
+      offeneEdits: [],
+      fertigeEdits: [],
+      referenzen: [],
+      chat: []
+    };
+    state.auftraege.push(auftrag);
+    activeAuftragId = auftrag.id;
+    persist();
+    closeAddAuftragModal();
+    render();
+  }
+
+  function openDeleteAuftragModal(id) {
+    const auftrag = findAuftrag(id);
+    if (!auftrag) return;
+    pendingDeleteId = id;
+    deleteAuftragText.textContent = `Soll "${auftrag.titel}" wirklich entfernt werden? Alle zugehörigen Listen gehen verloren.`;
+    deleteAuftragModal.classList.add('visible');
+  }
+
+  function closeDeleteAuftragModal() {
+    pendingDeleteId = null;
+    deleteAuftragModal.classList.remove('visible');
+  }
+
+  function confirmDeleteAuftrag() {
+    if (!pendingDeleteId) return;
+    state.auftraege = state.auftraege.filter((a) => a.id !== pendingDeleteId);
+    if (activeAuftragId === pendingDeleteId) {
+      activeAuftragId = state.auftraege.length ? state.auftraege[0].id : null;
+    }
+    persist();
+    closeDeleteAuftragModal();
+    render();
+  }
+
+  function updateAuftragField(auftragId, field, value) {
+    const auftrag = findAuftrag(auftragId);
+    if (!auftrag) return;
+    if (auftrag[field] === value) return;
+    auftrag[field] = value;
+    persist();
+    render();
+  }
+
+  function addItem(auftragId, listKey, text) {
+    const auftrag = findAuftrag(auftragId);
+    if (!auftrag || !text.trim()) return;
+    auftrag[listKey].push({ id: uid(), text: text.trim(), done: false });
+    persist();
+    render();
+  }
+
+  function deleteItem(auftragId, listKey, itemId) {
+    const auftrag = findAuftrag(auftragId);
+    if (!auftrag) return;
+    auftrag[listKey] = auftrag[listKey].filter((i) => i.id !== itemId);
+    persist();
+    render();
+  }
+
+  function toggleTodo(auftragId, itemId) {
+    const auftrag = findAuftrag(auftragId);
+    if (!auftrag) return;
+    const item = auftrag.todos.find((i) => i.id === itemId);
+    if (!item) return;
+    item.done = !item.done;
+    persist();
+    render();
+  }
+
+  function moveEdit(auftragId, itemId, fromKey, toKey) {
+    const auftrag = findAuftrag(auftragId);
+    if (!auftrag) return;
+    const idx = auftrag[fromKey].findIndex((i) => i.id === itemId);
+    if (idx === -1) return;
+    const [item] = auftrag[fromKey].splice(idx, 1);
+    auftrag[toKey].push(item);
+    persist();
+    render();
+  }
+
+  function addChatMessage(auftragId, text) {
+    const auftrag = findAuftrag(auftragId);
+    if (!auftrag || !text.trim()) return;
+    auftrag.chat.push({
+      id: uid(),
+      text: text.trim(),
+      time: new Date().toLocaleString('de-DE', {
+        day: '2-digit',
+        month: '2-digit',
+        hour: '2-digit',
+        minute: '2-digit'
+      })
+    });
+    persist();
+    render();
+  }
+
+  function deleteChatMessage(auftragId, messageId) {
+    const auftrag = findAuftrag(auftragId);
+    if (!auftrag) return;
+    auftrag.chat = auftrag.chat.filter((m) => m.id !== messageId);
+    persist();
+    render();
+  }
+
+  function renderTabs() {
+    auftragTabs.innerHTML = '';
+
+    state.auftraege.forEach((auftrag) => {
+      const tab = document.createElement('div');
+      tab.className = 'auftrag-tab' + (auftrag.id === activeAuftragId ? ' active' : '');
+
+      const nameSpan = document.createElement('span');
+      nameSpan.className = 'tab-name';
+      nameSpan.textContent = auftrag.titel;
+
+      const removeSpan = document.createElement('span');
+      removeSpan.className = 'remove-x';
+      removeSpan.title = 'Entfernen';
+      removeSpan.textContent = '×';
+
+      nameSpan.addEventListener('click', () => {
+        activeAuftragId = auftrag.id;
+        render();
+      });
+
+      removeSpan.addEventListener('click', (e) => {
+        e.stopPropagation();
+        openDeleteAuftragModal(auftrag.id);
+      });
+
+      tab.appendChild(nameSpan);
+      tab.appendChild(removeSpan);
+      auftragTabs.appendChild(tab);
+    });
+
+    const addBtn = document.createElement('button');
+    addBtn.className = 'add-auftrag-btn';
+    addBtn.textContent = '+ Auftrag hinzufügen';
+    addBtn.disabled = state.auftraege.length >= MAX_AUFTRAEGE;
+    addBtn.title = addBtn.disabled ? `Maximal ${MAX_AUFTRAEGE} Aufträge` : '';
+    addBtn.addEventListener('click', openAddAuftragModal);
+    auftragTabs.appendChild(addBtn);
+  }
+
+  function buildListColumn({ title, extraClass, auftragId, listKey, items, placeholder, renderItem }) {
+    const col = document.createElement('div');
+    col.className = 'list-column' + (extraClass ? ' ' + extraClass : '');
+
+    const heading = document.createElement('h3');
+    heading.textContent = title;
+    col.appendChild(heading);
+
+    const addRow = document.createElement('div');
+    addRow.className = 'add-item-row';
+    const input = document.createElement('input');
+    input.type = 'text';
+    input.placeholder = placeholder || 'Neuer Eintrag...';
+    const addBtn = document.createElement('button');
+    addBtn.textContent = '+';
+    addBtn.addEventListener('click', () => {
+      addItem(auftragId, listKey, input.value);
+      input.value = '';
+      input.focus();
+    });
+    input.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter') addBtn.click();
+    });
+    addRow.appendChild(input);
+    addRow.appendChild(addBtn);
+    col.appendChild(addRow);
+
+    const ul = document.createElement('ul');
+    ul.className = 'item-list';
+    items.forEach((item) => ul.appendChild(renderItem(item)));
+    col.appendChild(ul);
+
+    return col;
+  }
+
+  function buildMetaSection(auftrag) {
+    const section = document.createElement('div');
+    section.className = 'auftrag-meta';
+
+    const kundeField = document.createElement('div');
+    kundeField.className = 'meta-field';
+    const kundeLabel = document.createElement('label');
+    kundeLabel.textContent = 'Kunde';
+    const kundeInput = document.createElement('input');
+    kundeInput.type = 'text';
+    kundeInput.placeholder = 'Name des Kunden';
+    kundeInput.value = auftrag.kunde;
+    kundeInput.addEventListener('blur', () =>
+      updateAuftragField(auftrag.id, 'kunde', kundeInput.value.trim())
+    );
+    kundeInput.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter') kundeInput.blur();
+    });
+    kundeField.appendChild(kundeLabel);
+    kundeField.appendChild(kundeInput);
+
+    const terminField = document.createElement('div');
+    terminField.className = 'meta-field';
+    const terminLabel = document.createElement('label');
+    terminLabel.textContent = 'Termin & Ort';
+    const terminInput = document.createElement('input');
+    terminInput.type = 'text';
+    terminInput.placeholder = 'z. B. 12.10. – Schloss Bellevue';
+    terminInput.value = auftrag.termin;
+    terminInput.addEventListener('blur', () =>
+      updateAuftragField(auftrag.id, 'termin', terminInput.value.trim())
+    );
+    terminInput.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter') terminInput.blur();
+    });
+    terminField.appendChild(terminLabel);
+    terminField.appendChild(terminInput);
+
+    const linkField = document.createElement('div');
+    linkField.className = 'meta-field link-field';
+    const linkLabel = document.createElement('label');
+    linkLabel.textContent = 'Galerie- / Liefer-Link';
+    const linkRow = document.createElement('div');
+    linkRow.className = 'link-row';
+    const linkInput = document.createElement('input');
+    linkInput.type = 'text';
+    linkInput.placeholder = 'https://...';
+    linkInput.value = auftrag.link;
+    linkInput.addEventListener('blur', () =>
+      updateAuftragField(auftrag.id, 'link', linkInput.value.trim())
+    );
+    linkInput.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter') linkInput.blur();
+    });
+    const openLinkBtn = document.createElement('button');
+    openLinkBtn.type = 'button';
+    openLinkBtn.textContent = 'Öffnen';
+    openLinkBtn.addEventListener('click', () => {
+      if (auftrag.link) window.studioAPI.openExternal(auftrag.link);
+    });
+    linkRow.appendChild(linkInput);
+    linkRow.appendChild(openLinkBtn);
+    linkField.appendChild(linkLabel);
+    linkField.appendChild(linkRow);
+
+    section.appendChild(kundeField);
+    section.appendChild(terminField);
+    section.appendChild(linkField);
+
+    const notizenBlock = document.createElement('div');
+    notizenBlock.className = 'auftrag-notizen';
+    const notizenLabel = document.createElement('label');
+    notizenLabel.textContent = 'Notizen';
+    const notizenInput = document.createElement('textarea');
+    notizenInput.placeholder = 'Ausrüstung, Wünsche des Kunden, Stil, Locations ...';
+    notizenInput.value = auftrag.notizen;
+    notizenInput.addEventListener('blur', () =>
+      updateAuftragField(auftrag.id, 'notizen', notizenInput.value.trim())
+    );
+    notizenBlock.appendChild(notizenLabel);
+    notizenBlock.appendChild(notizenInput);
+
+    const wrapper = document.createElement('div');
+    wrapper.appendChild(section);
+    wrapper.appendChild(notizenBlock);
+    return wrapper;
+  }
+
+  function renderPanel() {
+    content.innerHTML = '';
+
+    if (!state.auftraege.length) {
+      content.appendChild(emptyState);
+      return;
+    }
+
+    const auftrag = findAuftrag(activeAuftragId) || state.auftraege[0];
+    activeAuftragId = auftrag.id;
+
+    const panel = document.createElement('div');
+    panel.className = 'auftrag-panel';
+
+    const header = document.createElement('div');
+    header.className = 'panel-header';
+    const h2 = document.createElement('h2');
+    h2.textContent = auftrag.titel;
+    header.appendChild(h2);
+    panel.appendChild(header);
+
+    panel.appendChild(buildMetaSection(auftrag));
+
+    const grid = document.createElement('div');
+    grid.className = 'lists-grid';
+
+    // Liste eins: To-Do-Liste
+    const todoCol = buildListColumn({
+      title: 'Liste 1 – To-Do-Liste',
+      extraClass: '',
+      auftragId: auftrag.id,
+      listKey: 'todos',
+      items: auftrag.todos,
+      placeholder: 'Neue Aufgabe...',
+      renderItem: (item) => {
+        const li = document.createElement('li');
+        if (item.done) li.classList.add('completed');
+        const checkbox = document.createElement('input');
+        checkbox.type = 'checkbox';
+        checkbox.checked = item.done;
+        checkbox.addEventListener('change', () => toggleTodo(auftrag.id, item.id));
+        const span = document.createElement('span');
+        span.className = 'item-text';
+        span.textContent = item.text;
+        const delBtn = document.createElement('button');
+        delBtn.className = 'icon-btn danger';
+        delBtn.textContent = '✕';
+        delBtn.title = 'Löschen';
+        delBtn.addEventListener('click', () => deleteItem(auftrag.id, 'todos', item.id));
+        li.appendChild(checkbox);
+        li.appendChild(span);
+        li.appendChild(delBtn);
+        return li;
+      }
+    });
+
+    // Liste zwei: Offene Bearbeitungen
+    const openCol = buildListColumn({
+      title: 'Liste 2 – Offene Bearbeitungen',
+      extraClass: 'open',
+      auftragId: auftrag.id,
+      listKey: 'offeneEdits',
+      items: auftrag.offeneEdits,
+      placeholder: 'z. B. Portraits sichten...',
+      renderItem: (item) => {
+        const li = document.createElement('li');
+        const span = document.createElement('span');
+        span.className = 'item-text';
+        span.textContent = item.text;
+        const doneBtn = document.createElement('button');
+        doneBtn.className = 'icon-btn';
+        doneBtn.textContent = '✓';
+        doneBtn.title = 'Als fertig markieren';
+        doneBtn.addEventListener('click', () =>
+          moveEdit(auftrag.id, item.id, 'offeneEdits', 'fertigeEdits')
+        );
+        const delBtn = document.createElement('button');
+        delBtn.className = 'icon-btn danger';
+        delBtn.textContent = '✕';
+        delBtn.title = 'Löschen';
+        delBtn.addEventListener('click', () => deleteItem(auftrag.id, 'offeneEdits', item.id));
+        li.appendChild(span);
+        li.appendChild(doneBtn);
+        li.appendChild(delBtn);
+        return li;
+      }
+    });
+
+    // Liste drei: Fertige Bearbeitungen
+    const doneCol = buildListColumn({
+      title: 'Liste 3 – Fertige Bearbeitungen',
+      extraClass: 'done',
+      auftragId: auftrag.id,
+      listKey: 'fertigeEdits',
+      items: auftrag.fertigeEdits,
+      placeholder: 'z. B. Highlight-Reel exportiert...',
+      renderItem: (item) => {
+        const li = document.createElement('li');
+        li.classList.add('completed');
+        const span = document.createElement('span');
+        span.className = 'item-text';
+        span.textContent = item.text;
+        const undoBtn = document.createElement('button');
+        undoBtn.className = 'icon-btn';
+        undoBtn.textContent = '↺';
+        undoBtn.title = 'Zurück zu offenen Bearbeitungen';
+        undoBtn.addEventListener('click', () =>
+          moveEdit(auftrag.id, item.id, 'fertigeEdits', 'offeneEdits')
+        );
+        const delBtn = document.createElement('button');
+        delBtn.className = 'icon-btn danger';
+        delBtn.textContent = '✕';
+        delBtn.title = 'Löschen';
+        delBtn.addEventListener('click', () => deleteItem(auftrag.id, 'fertigeEdits', item.id));
+        li.appendChild(span);
+        li.appendChild(undoBtn);
+        li.appendChild(delBtn);
+        return li;
+      }
+    });
+
+    // Liste vier: Referenzen / Moodboard
+    const referenzenCol = buildListColumn({
+      title: 'Liste 4 – Referenzen',
+      extraClass: 'referenzen',
+      auftragId: auftrag.id,
+      listKey: 'referenzen',
+      items: auftrag.referenzen,
+      placeholder: 'Inspirations-Link oder Stichwort...',
+      renderItem: (item) => {
+        const li = document.createElement('li');
+        const span = document.createElement('span');
+        span.className = 'item-text';
+        span.textContent = item.text;
+        const delBtn = document.createElement('button');
+        delBtn.className = 'icon-btn danger';
+        delBtn.textContent = '✕';
+        delBtn.title = 'Löschen';
+        delBtn.addEventListener('click', () => deleteItem(auftrag.id, 'referenzen', item.id));
+        li.appendChild(span);
+        li.appendChild(delBtn);
+        return li;
+      }
+    });
+
+    grid.appendChild(todoCol);
+    grid.appendChild(openCol);
+    grid.appendChild(doneCol);
+    grid.appendChild(referenzenCol);
+    panel.appendChild(grid);
+
+    panel.appendChild(buildChatPanel(auftrag));
+
+    content.appendChild(panel);
+  }
+
+  function buildChatPanel(auftrag) {
+    const panel = document.createElement('div');
+    panel.className = 'chat-panel';
+
+    const heading = document.createElement('h3');
+    heading.textContent = 'Chat / Notizen';
+    panel.appendChild(heading);
+
+    const messages = document.createElement('div');
+    messages.className = 'chat-messages';
+    auftrag.chat.forEach((msg) => {
+      const bubble = document.createElement('div');
+      bubble.className = 'chat-bubble';
+
+      const text = document.createElement('span');
+      text.className = 'chat-text';
+      text.textContent = msg.text;
+
+      const time = document.createElement('span');
+      time.className = 'chat-time';
+      time.textContent = msg.time;
+
+      const delBtn = document.createElement('button');
+      delBtn.className = 'icon-btn danger chat-delete';
+      delBtn.textContent = '✕';
+      delBtn.title = 'Nachricht löschen';
+      delBtn.addEventListener('click', () => deleteChatMessage(auftrag.id, msg.id));
+
+      bubble.appendChild(text);
+      bubble.appendChild(time);
+      bubble.appendChild(delBtn);
+      messages.appendChild(bubble);
+    });
+    panel.appendChild(messages);
+
+    const inputRow = document.createElement('div');
+    inputRow.className = 'add-item-row chat-input-row';
+    const input = document.createElement('input');
+    input.type = 'text';
+    input.placeholder = 'Nachricht schreiben...';
+    const sendBtn = document.createElement('button');
+    sendBtn.textContent = 'Senden';
+    sendBtn.addEventListener('click', () => {
+      addChatMessage(auftrag.id, input.value);
+      input.value = '';
+      input.focus();
+    });
+    input.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter') sendBtn.click();
+    });
+    inputRow.appendChild(input);
+    inputRow.appendChild(sendBtn);
+    panel.appendChild(inputRow);
+
+    requestAnimationFrame(() => {
+      messages.scrollTop = messages.scrollHeight;
+    });
+
+    return panel;
+  }
+
+  function render() {
+    renderTabs();
+    renderPanel();
+  }
+
+  document.getElementById('addAuftragEmptyBtn').addEventListener('click', openAddAuftragModal);
+  document.getElementById('cancelAddAuftrag').addEventListener('click', closeAddAuftragModal);
+  document.getElementById('confirmAddAuftrag').addEventListener('click', confirmAddAuftrag);
+  newAuftragNameInput.addEventListener('keydown', (e) => {
+    if (e.key === 'Enter') confirmAddAuftrag();
+  });
+
+  document.getElementById('cancelDeleteAuftrag').addEventListener('click', closeDeleteAuftragModal);
+  document.getElementById('confirmDeleteAuftrag').addEventListener('click', confirmDeleteAuftrag);
+
+  async function init() {
+    const loaded = await window.studioAPI.loadData();
+    state = loaded && Array.isArray(loaded.auftraege) ? loaded : { auftraege: [] };
+    state.auftraege.forEach((a) => {
+      if (!Array.isArray(a.chat)) a.chat = [];
+      if (!Array.isArray(a.referenzen)) a.referenzen = [];
+      if (!Array.isArray(a.offeneEdits)) a.offeneEdits = [];
+      if (!Array.isArray(a.fertigeEdits)) a.fertigeEdits = [];
+      if (!Array.isArray(a.todos)) a.todos = [];
+      if (typeof a.kunde !== 'string') a.kunde = '';
+      if (typeof a.termin !== 'string') a.termin = '';
+      if (typeof a.link !== 'string') a.link = '';
+      if (typeof a.notizen !== 'string') a.notizen = '';
+      if (typeof a.titel !== 'string') a.titel = a.name || 'Auftrag';
+    });
+    activeAuftragId = state.auftraege.length ? state.auftraege[0].id : null;
+    render();
+  }
+
+  init();
+})();
