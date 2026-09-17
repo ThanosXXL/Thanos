@@ -24,7 +24,6 @@
   const logoVisible = document.getElementById('logoVisible');
   const logoLoopEnabled = document.getElementById('logoLoopEnabled');
   const logoLoopSpeed = document.getElementById('logoLoopSpeed');
-  const logoMotionType = document.getElementById('logoMotionType');
 
   const btnAddMusic = document.getElementById('btnAddMusic');
   const musicInfo = document.getElementById('musicInfo');
@@ -60,13 +59,6 @@
   const effectGroupsEl = document.getElementById('effectGroups');
 
   const toastEl = document.getElementById('toast');
-
-  FotoEffects.LOGO_MOTION_TYPES.forEach((opt) => {
-    const el = document.createElement('option');
-    el.value = opt.value;
-    el.textContent = opt.label;
-    logoMotionType.appendChild(el);
-  });
 
   let state = { projects: [], activeProjectId: null };
   const imageElements = new Map();
@@ -579,7 +571,6 @@
     logoLoopEnabled.checked = logo.loopEnabled !== false;
     logoLoopSpeed.value = logo.loopSpeed != null ? logo.loopSpeed : 2.5;
     document.getElementById('logoLoopSpeedValue').textContent = (logo.loopSpeed != null ? logo.loopSpeed : 2.5).toFixed(1) + 's';
-    logoMotionType.value = logo.motionType || 'none';
   }
 
   btnAddLogo.addEventListener('click', async () => {
@@ -652,13 +643,6 @@
     if (!project || !project.logo) return;
     project.logo.loopSpeed = parseFloat(logoLoopSpeed.value);
     document.getElementById('logoLoopSpeedValue').textContent = parseFloat(logoLoopSpeed.value).toFixed(1) + 's';
-    schedulePersist();
-  });
-
-  logoMotionType.addEventListener('change', () => {
-    const project = getActiveProject();
-    if (!project || !project.logo) return;
-    project.logo.motionType = logoMotionType.value;
     schedulePersist();
   });
 
