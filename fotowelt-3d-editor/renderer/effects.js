@@ -388,26 +388,30 @@
       return { dx: 0, dy: 0, extraRotation: 0, scale: 1 };
     }
     const loopSpeed = Math.max(0.3, logo.loopSpeed || 2.5);
+    const cycleIndex = Math.floor(time / loopSpeed);
+    // Jeder zweite Loop läuft spiegelverkehrt, damit die Bewegung nicht immer im selben
+    // Muster startet, sondern die Richtung von Durchlauf zu Durchlauf wechselt.
+    const dirSign = cycleIndex % 2 === 0 ? 1 : -1;
     const phase = (((time % loopSpeed) + loopSpeed) % loopSpeed) / loopSpeed;
     const angle2pi = phase * Math.PI * 2;
     switch (motionType) {
       case 'float':
-        return { dx: 0, dy: Math.sin(angle2pi) * h * 0.045, extraRotation: 0, scale: 1 };
+        return { dx: 0, dy: Math.sin(angle2pi) * h * 0.045 * dirSign, extraRotation: 0, scale: 1 };
       case 'swing':
-        return { dx: Math.sin(angle2pi) * w * 0.09, dy: 0, extraRotation: 0, scale: 1 };
+        return { dx: Math.sin(angle2pi) * w * 0.09 * dirSign, dy: 0, extraRotation: 0, scale: 1 };
       case 'pulseSwing':
         return {
-          dx: Math.sin(angle2pi) * w * 0.08,
+          dx: Math.sin(angle2pi) * w * 0.08 * dirSign,
           dy: 0,
           extraRotation: 0,
           scale: 1 + Math.sin(angle2pi) * 0.12
         };
       case 'rotate':
-        return { dx: 0, dy: 0, extraRotation: angle2pi, scale: 1 };
+        return { dx: 0, dy: 0, extraRotation: angle2pi * dirSign, scale: 1 };
       case 'pulse':
         return { dx: 0, dy: 0, extraRotation: 0, scale: 1 + Math.sin(angle2pi) * 0.14 };
       case 'wobble':
-        return { dx: 0, dy: 0, extraRotation: ((Math.sin(angle2pi) * 18 * Math.PI) / 180), scale: 1 };
+        return { dx: 0, dy: 0, extraRotation: ((Math.sin(angle2pi) * 18 * Math.PI) / 180) * dirSign, scale: 1 };
       default:
         return { dx: 0, dy: 0, extraRotation: 0, scale: 1 };
     }
