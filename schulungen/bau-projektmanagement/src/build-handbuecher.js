@@ -7,24 +7,24 @@ require('fs').mkdirSync(outDir, { recursive: true });
 
 (async () => {
   const teilnehmerHtml = page({
-    title: 'Teilnehmerhandbuch – Bau- und Projektmanagement',
+    title: 'Teilnehmerhandbuch – Bau & Projektmanagement',
     content: buildHandbuch({ fuerDozenten: false }),
   });
   await renderPdf({
     html: teilnehmerHtml,
-    outPath: path.join(outDir, 'Teilnehmerhandbuch_Bau-und-Projektmanagement.pdf'),
+    outPath: path.join(outDir, 'Teilnehmerhandbuch.pdf'),
     dokumentTyp: 'Teilnehmerhandbuch',
-    dokumentName: 'Bau- und Projektmanagement — Teilnehmerhandbuch',
+    dokumentName: 'Bau & Projektmanagement — Teilnehmerhandbuch',
   });
 
   const dozentenHtml = page({
-    title: 'Dozentenhandbuch – Bau- und Projektmanagement',
+    title: 'Dozentenhandbuch – Bau & Projektmanagement',
     content: buildHandbuch({ fuerDozenten: true }),
   });
   await renderPdf({
     html: dozentenHtml,
-    outPath: path.join(outDir, 'Dozentenhandbuch_Bau-und-Projektmanagement.pdf'),
+    outPath: path.join(outDir, 'Dozentenhandbuch.pdf'),
     dokumentTyp: 'Dozentenhandbuch — Nur für Dozenten',
-    dokumentName: 'Bau- und Projektmanagement — Dozentenhandbuch',
+    dokumentName: 'Bau & Projektmanagement — Dozentenhandbuch',
   });
 })();

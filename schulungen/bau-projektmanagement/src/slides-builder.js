@@ -1,4 +1,14 @@
 const { meta, days, tagesraster } = require('./content');
+const { iconDataUri, fontFaceCss } = require('./pdf-common');
+
+const DAY_ICON = {
+  1: 'day1-organigramm',
+  2: 'day2-ausschreibung',
+  3: 'day3-terminplanung',
+  4: 'day4-kosten',
+  5: 'day5-sicherheit',
+  6: 'day6-kommunikation',
+};
 
 function toBullets(text) {
   return text
@@ -8,13 +18,25 @@ function toBullets(text) {
 }
 
 const slideStyle = `
+  ${fontFaceCss}
   :root {
     --brand-red: #d5121f;
     --brand-black: #1a1a1a;
     --grey-bg: #f4f5f6;
   }
   * { box-sizing: border-box; }
-  body { margin: 0; font-family: 'Arial', 'Helvetica', sans-serif; color: var(--brand-black); }
+  body { margin: 0; font-family: 'Nunito', 'Arial', sans-serif; color: var(--brand-black); }
+  h1, h2, h3 { font-weight: 800; }
+  .hero-img { max-width: 460px; width: 70%; margin: 6px 0 26px 0; }
+  .divider-icon-wrap {
+    width: 132px; height: 132px;
+    background: #fff;
+    border-radius: 20px;
+    display: flex; align-items: center; justify-content: center;
+    margin-bottom: 18px;
+    box-shadow: 0 8px 18px rgba(0,0,0,0.4);
+  }
+  .divider-icon-wrap img { width: 96px; height: 96px; object-fit: contain; }
   .slide {
     width: 100%;
     height: 165mm;
@@ -122,6 +144,7 @@ function titleSlide() {
     <div class="kicker">Schulungsfolien</div>
     <h1>${meta.titel}</h1>
     <h2>${meta.untertitel}</h2>
+    <img class="hero-img" src="${iconDataUri('hero-skyline')}" alt="">
     <div class="pillbar">
       <div class="pill"><b>${meta.dauerTage}</b> Tage</div>
       <div class="pill"><b>${meta.stundenProTag}</b> Std. / Tag</div>
@@ -161,6 +184,7 @@ function dividerSlide(d) {
   return `
   <div class="slide divider">
     <div class="big-num">${d.nr}</div>
+    <div class="divider-icon-wrap"><img src="${iconDataUri(DAY_ICON[d.nr])}" alt=""></div>
     <div class="tag">Tag ${d.nr}</div>
     <h1>${d.titel}</h1>
     <ul>${d.lernziele.map(l => `<li>${l}</li>`).join('')}</ul>

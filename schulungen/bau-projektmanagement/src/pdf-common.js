@@ -5,7 +5,53 @@ const { chromium } = require('playwright');
 const logoPath = path.join(__dirname, 'assets', 'logo-3d-glossy.png');
 const logoDataUri = 'data:image/png;base64,' + fs.readFileSync(logoPath).toString('base64');
 
+const iconsDir = path.join(__dirname, 'assets', 'icons');
+function iconDataUri(name) {
+  return 'data:image/png;base64,' + fs.readFileSync(path.join(iconsDir, name + '.png')).toString('base64');
+}
+
+const fontsDir = path.join(__dirname, 'assets', 'fonts');
+function fontBase64(file) {
+  return fs.readFileSync(path.join(fontsDir, file)).toString('base64');
+}
+
+// Nunito – eine runde, humanistische Groteskschrift (statt eines nüchternen
+// Systemfonts wie Arial), lokal eingebettet als @font-face-Data-URIs.
+const fontFaceCss = `
+  @font-face {
+    font-family: 'Nunito';
+    font-style: normal;
+    font-weight: 400;
+    src: url(data:font/ttf;base64,${fontBase64('Nunito-Regular.ttf')}) format('truetype');
+  }
+  @font-face {
+    font-family: 'Nunito';
+    font-style: normal;
+    font-weight: 600;
+    src: url(data:font/ttf;base64,${fontBase64('Nunito-SemiBold.ttf')}) format('truetype');
+  }
+  @font-face {
+    font-family: 'Nunito';
+    font-style: normal;
+    font-weight: 700;
+    src: url(data:font/ttf;base64,${fontBase64('Nunito-Bold.ttf')}) format('truetype');
+  }
+  @font-face {
+    font-family: 'Nunito';
+    font-style: normal;
+    font-weight: 800;
+    src: url(data:font/ttf;base64,${fontBase64('Nunito-ExtraBold.ttf')}) format('truetype');
+  }
+  @font-face {
+    font-family: 'Nunito';
+    font-style: italic;
+    font-weight: 400;
+    src: url(data:font/ttf;base64,${fontBase64('Nunito-Italic.ttf')}) format('truetype');
+  }
+`;
+
 const baseStyle = `
+  ${fontFaceCss}
   :root {
     --brand-red: #d5121f;
     --brand-black: #1a1a1a;
@@ -14,13 +60,29 @@ const baseStyle = `
   }
   * { box-sizing: border-box; }
   body {
-    font-family: 'Arial', 'Helvetica', sans-serif;
+    font-family: 'Nunito', 'Arial', sans-serif;
     color: var(--brand-black);
     font-size: 11pt;
     line-height: 1.5;
     margin: 0;
   }
-  h1, h2, h3, h4 { font-family: 'Arial', 'Helvetica', sans-serif; color: var(--brand-black); }
+  h1, h2, h3, h4 { font-family: 'Nunito', 'Arial', sans-serif; font-weight: 800; color: var(--brand-black); }
+  .beispielbild {
+    display: block;
+    margin: 0 auto 14px auto;
+  }
+  .thema-icon {
+    width: 54px;
+    height: 54px;
+    object-fit: contain;
+    flex: none;
+  }
+  .day-hero {
+    width: 100%;
+    max-width: 460px;
+    display: block;
+    margin: 0 auto 22px auto;
+  }
   .cover {
     height: 235mm;
     display: flex;
@@ -288,4 +350,4 @@ async function renderPdf({ html, outPath, dokumentTyp, dokumentName, landscape =
   console.log('PDF erstellt:', outPath);
 }
 
-module.exports = { page, renderPdf, logoDataUri };
+module.exports = { page, renderPdf, logoDataUri, iconDataUri, fontFaceCss, fontBase64 };

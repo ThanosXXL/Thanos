@@ -1,9 +1,9 @@
 // Zentrale Inhaltsquelle für alle Dokumente der Schulung
-// "Bau- und Projektmanagement" der M&C Akademie
+// "Bau & Projektmanagement" der M&C Akademie
 
 const meta = {
   akademie: 'M&C Akademie',
-  titel: 'Bau- und Projektmanagement',
+  titel: 'Bau & Projektmanagement',
   untertitel: 'Kompaktschulung für Fach- und Führungskräfte im Baugewerbe',
   dauerTage: 6,
   stundenProTag: 9,
@@ -28,7 +28,7 @@ const tagesraster = [
 const days = [
   {
     nr: 1,
-    titel: 'Grundlagen des Bau- und Projektmanagements',
+    titel: 'Grundlagen des Bau & Projektmanagements',
     lernziele: [
       'Grundbegriffe und Phasenmodelle des Projektmanagements sicher anwenden',
       'Rollen und Verantwortlichkeiten im Bauprojekt unterscheiden',
@@ -319,6 +319,38 @@ const didaktischeHinweise = {
   6: 'Für das Rollenspiel genügend Vorbereitungszeit (ca. 15 Minuten) und Rollenkarten austeilen. Prüfung erst nach vollständiger Wiederholungsrunde starten, damit alle Teilnehmenden gut vorbereitet sind.',
 };
 
+const kursbeschreibung = {
+  kurzbeschreibung: 'Die Kompaktschulung „Bau & Projektmanagement" vermittelt in sechs Tagen praxisnah die zentralen Methoden und Werkzeuge, um Bauprojekte von der Planung bis zur Abnahme sicher zu steuern — von Ausschreibung und Vergabe über Termin- und Kostenmanagement bis zu Qualität, Baurecht und Arbeitssicherheit.',
+  zielgruppe: [
+    'Bau- und Projektleiter/innen sowie Poliere mit Steuerungsverantwortung',
+    'Technische Angestellte in Bauunternehmen, Bauträgern und Planungsbüros',
+    'Mitarbeitende der öffentlichen Hand mit Aufgaben in Bauprojekten',
+    'Quereinsteiger/innen und Berufsrückkehrer/innen mit erster Bauerfahrung',
+  ],
+  voraussetzungen: 'Grundkenntnisse im Bauwesen sind hilfreich, aber keine zwingende Teilnahmevoraussetzung. Die Schulung richtet sich sowohl an Berufseinsteiger/innen als auch an erfahrene Fachkräfte, die ihr Projektmanagement-Wissen strukturieren und vertiefen möchten.',
+  nutzen: [
+    'Bauprojekte strukturiert planen, ausschreiben und vergeben',
+    'Termine mit Netzplan- und Taktplanungstechniken realistisch steuern',
+    'Kosten über alle Planungsstufen hinweg im Griff behalten',
+    'Qualität, Arbeitssicherheit und rechtliche Grundlagen sicher anwenden',
+    'Souverän kommunizieren und Konflikte im Bauprojekt lösen',
+  ],
+  methodik: [
+    'Kompakter Fachvortrag mit Praxisbeispielen aus dem Baualltag',
+    'Einzel- und Gruppenübungen zu Terminplanung, Kosten und Vergabe',
+    'Fallstudien und eine abschließende Praxissimulation (Baubesprechung)',
+    'Schulungsunterlagen: Teilnehmerhandbuch, Foliensatz, Prüfungsfragen',
+  ],
+  unterlagen: [
+    'Teilnehmerhandbuch mit allen Inhalten der 6 Schulungstage',
+    'Schulungsfolien als Nachschlagewerk',
+    'Prüfungsfragen zur Abschlussprüfung (interaktiv ausfüllbar)',
+    'Teilnehmerliste zur Anwesenheitsdokumentation',
+  ],
+  pruefung: 'Am Nachmittag von Tag 6 findet eine schriftliche Abschlussprüfung mit 5 Multiple-Choice-Fragen statt. Bei mindestens 4 richtigen Antworten erhalten die Teilnehmenden das Zertifikat der M&C Akademie.',
+  anmeldung: 'Anmeldung und Terminabstimmung über die M&C Akademie. Kontaktdaten und Anmeldeformular werden von der Akademie ergänzt.',
+};
+
 // 5 Prüfungsfragen mit je 4 Antwortoptionen (genau eine korrekt)
 const examQuestions = [
   {
@@ -378,4 +410,4 @@ const examQuestions = [
   },
 ];
 
-module.exports = { meta, tagesraster, days, didaktischeHinweise, examQuestions };
+module.exports = { meta, tagesraster, days, didaktischeHinweise, examQuestions, kursbeschreibung };

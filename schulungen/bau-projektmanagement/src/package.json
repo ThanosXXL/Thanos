@@ -2,15 +2,19 @@
   "name": "bau-projektmanagement-pdf-generator",
   "version": "1.0.0",
   "private": true,
-  "description": "Generiert die PDF-Schulungsunterlagen 'Bau- und Projektmanagement' der M&C Akademie. Eigenständiges Skript-Set, unabhängig von der Dozenten-Dashboard-App im Repo-Root.",
+  "description": "Generiert die PDF-Schulungsunterlagen 'Bau & Projektmanagement' der M&C Akademie. Eigenständiges Skript-Set, unabhängig von der Dozenten-Dashboard-App im Repo-Root.",
   "scripts": {
     "logo": "node make-logo.js",
+    "icons": "node render-icons.js",
+    "build:kursbeschreibung": "node build-kursbeschreibung.js",
     "build:handbuecher": "node build-handbuecher.js",
     "build:folien": "node build-folien.js",
     "build:exam": "node build-exam.js",
-    "build:all": "npm run build:handbuecher && npm run build:folien && npm run build:exam"
+    "build:teilnehmerliste": "node build-teilnehmerliste.js",
+    "build:all": "npm run build:kursbeschreibung && npm run build:handbuecher && npm run build:folien && npm run build:exam && npm run build:teilnehmerliste"
   },
   "dependencies": {
+    "@pdf-lib/fontkit": "^1.1.1",
     "pdf-lib": "^1.17.1",
     "playwright": "^1.47.0"
   }

@@ -1,7 +1,8 @@
 const fs = require('fs');
 const path = require('path');
-const { PDFDocument, StandardFonts, rgb } = require('pdf-lib');
+const { PDFDocument, rgb } = require('pdf-lib');
 const { meta, examQuestions } = require('./content');
+const { registerFonts, embedLogo, embedIcon, wrapText } = require('./pdf-lib-common');
 
 const outDir = path.join(__dirname, '..', 'pdf');
 fs.mkdirSync(outDir, { recursive: true });
@@ -19,35 +20,19 @@ const GREEN_LINE = rgb(0.298, 0.549, 0.29);
 const GREEN_TXT = rgb(0.11, 0.23, 0.105);
 const LIGHT_LINE = rgb(0.85, 0.86, 0.87);
 
-function wrapText(text, font, size, maxWidth) {
-  const words = text.split(/\s+/);
-  const lines = [];
-  let line = '';
-  for (const w of words) {
-    const test = line ? line + ' ' + w : w;
-    if (font.widthOfTextAtSize(test, size) > maxWidth && line) {
-      lines.push(line);
-      line = w;
-    } else {
-      line = test;
-    }
-  }
-  if (line) lines.push(line);
-  return lines;
-}
-
 async function buildExam({ fuerDozenten }) {
   const pdfDoc = await PDFDocument.create();
   pdfDoc.setTitle(`Prüfungsfragen – ${meta.titel}${fuerDozenten ? ' (Dozentenversion mit Lösungen)' : ''}`);
   pdfDoc.setAuthor(meta.akademie);
   pdfDoc.setLanguage('de');
 
-  const fontRegular = await pdfDoc.embedFont(StandardFonts.Helvetica);
-  const fontBold = await pdfDoc.embedFont(StandardFonts.HelveticaBold);
-  const fontOblique = await pdfDoc.embedFont(StandardFonts.HelveticaOblique);
+  const fonts = await registerFonts(pdfDoc);
+  const fontRegular = fonts.regular;
+  const fontBold = fonts.bold;
+  const fontOblique = fonts.italic;
 
-  const logoBytes = fs.readFileSync(path.join(__dirname, 'assets', 'logo-3d-glossy.png'));
-  const logoImg = await pdfDoc.embedPng(logoBytes);
+  const logoImg = await embedLogo(pdfDoc);
+  const examIcon = await embedIcon(pdfDoc, 'pruefung-klemmbrett');
   const logoDims = logoImg.scale(1);
   const logoDrawWidth = 170;
   const logoDrawHeight = (logoDims.height / logoDims.width) * logoDrawWidth;
@@ -101,11 +86,22 @@ async function buildExam({ fuerDozenten }) {
     font: fontBold,
     color: rgb(1, 1, 1),
   });
-  y -= 60;
+  y -= 30;
+
+  const iconDims = examIcon.scale(1);
+  const iconDrawWidth = 64;
+  const iconDrawHeight = (iconDims.height / iconDims.width) * iconDrawWidth;
+  page.drawImage(examIcon, {
+    x: (PAGE_W - iconDrawWidth) / 2,
+    y: y - iconDrawHeight,
+    width: iconDrawWidth,
+    height: iconDrawHeight,
+  });
+  y -= iconDrawHeight + 22;
 
   const title = 'Prüfungsfragen';
-  const titleWidth = fontBold.widthOfTextAtSize(title, 26);
-  page.drawText(title, { x: (PAGE_W - titleWidth) / 2, y, size: 26, font: fontBold, color: BLACK });
+  const titleWidth = fonts.extrabold.widthOfTextAtSize(title, 26);
+  page.drawText(title, { x: (PAGE_W - titleWidth) / 2, y, size: 26, font: fonts.extrabold, color: BLACK });
   y -= 32;
 
   const subtitle = meta.titel;
@@ -263,8 +259,8 @@ async function buildExam({ fuerDozenten }) {
   // --- Fußzeile mit fortlaufender Seitenzahl (unten mittig) ---
   const total = pages.length;
   const dokName = fuerDozenten
-    ? 'Bau- und Projektmanagement — Prüfungsfragen (Dozentenversion mit Lösungen)'
-    : 'Bau- und Projektmanagement — Prüfungsfragen (Teilnehmerversion)';
+    ? 'Bau & Projektmanagement — Prüfungsfragen (Dozentenversion mit Lösungen)'
+    : 'Bau & Projektmanagement — Prüfungsfragen (Teilnehmerversion)';
   pages.forEach((p, idx) => {
     const footerText = `${dokName} · Seite ${idx + 1} von ${total}`;
     const w = fontRegular.widthOfTextAtSize(footerText, 8);
@@ -285,8 +281,8 @@ async function buildExam({ fuerDozenten }) {
 
   const bytes = await pdfDoc.save();
   const outName = fuerDozenten
-    ? 'Pruefungsfragen_Bau-und-Projektmanagement_Dozentenversion-mit-Loesungen.pdf'
-    : 'Pruefungsfragen_Bau-und-Projektmanagement_Teilnehmerversion-interaktiv.pdf';
+    ? 'Pruefungsfragen_Loesungen_Dozenten.pdf'
+    : 'Pruefungsfragen.pdf';
   fs.writeFileSync(path.join(outDir, outName), bytes);
   console.log('PDF erstellt:', outName);
 }

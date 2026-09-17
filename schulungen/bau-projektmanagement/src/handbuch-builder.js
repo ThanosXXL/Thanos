@@ -1,4 +1,14 @@
 const { meta, tagesraster, days, didaktischeHinweise } = require('./content');
+const { iconDataUri } = require('./pdf-common');
+
+const DAY_ICON = {
+  1: 'day1-organigramm',
+  2: 'day2-ausschreibung',
+  3: 'day3-terminplanung',
+  4: 'day4-kosten',
+  5: 'day5-sicherheit',
+  6: 'day6-kommunikation',
+};
 
 function zeitrasterTable() {
   return `
@@ -21,6 +31,7 @@ function coverPage({ doctypeLabel, titelZusatz }) {
     <div class="doctype">${doctypeLabel}</div>
     <h1>${meta.titel}</h1>
     <h2>${meta.untertitel}${titelZusatz ? ' — ' + titelZusatz : ''}</h2>
+    <img class="beispielbild" src="${iconDataUri('hero-skyline')}" style="width:100%; max-width:400px; margin:6px auto 26px auto;">
     <div class="meta-box">
       <div><b>Veranstalter:</b> ${meta.akademie}</div>
       <div><b>Dauer:</b> ${meta.dauerTage} Tage à ${meta.stundenProTag} Stunden (${meta.gesamtstunden} Std. gesamt)</div>
@@ -54,7 +65,7 @@ function ueberblickPage() {
   return `
   <div class="toc">
     <h1 class="section-title">Überblick &amp; Zeitraster</h1>
-    <p style="text-align:justify;">Die Schulung „${meta.titel}" vermittelt Fach- und Führungskräften aus dem Baugewerbe an ${meta.dauerTage} Tagen die wesentlichen Methoden und Werkzeuge des Bau- und Projektmanagements — von der Projektinitiierung über Ausschreibung, Termin- und Kostenplanung bis hin zu Qualitätssicherung, Baurecht und Abschlussprüfung. Jeder Schulungstag umfasst ${meta.stundenProTag} Zeitstunden und folgt dem nachstehenden Zeitraster.</p>
+    <p style="text-align:justify;">Die Schulung „${meta.titel}" vermittelt Fach- und Führungskräften aus dem Baugewerbe an ${meta.dauerTage} Tagen die wesentlichen Methoden und Werkzeuge des Bau & Projektmanagements — von der Projektinitiierung über Ausschreibung, Termin- und Kostenplanung bis hin zu Qualitätssicherung, Baurecht und Abschlussprüfung. Jeder Schulungstag umfasst ${meta.stundenProTag} Zeitstunden und folgt dem nachstehenden Zeitraster.</p>
     <h3 style="margin-top:22px;">Tägliches Zeitraster (${meta.stundenProTag} Stunden)</h3>
     ${zeitrasterTable()}
     <h3>Lernzielübersicht</h3>
@@ -73,6 +84,7 @@ function daySection(d, { fuerDozenten }) {
     <div class="day-header">
       <div class="day-badge">${d.nr}</div>
       <h1>Tag ${d.nr}: ${d.titel}</h1>
+      <img class="thema-icon" style="margin-left:auto;" src="${iconDataUri(DAY_ICON[d.nr])}" alt="">
     </div>
     <div class="lernziele">
       <h4>Lernziele des Tages</h4>

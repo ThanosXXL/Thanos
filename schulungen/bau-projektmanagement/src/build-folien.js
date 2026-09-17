@@ -7,15 +7,15 @@ require('fs').mkdirSync(outDir, { recursive: true });
 
 (async () => {
   const html = page({
-    title: 'Schulungsfolien – Bau- und Projektmanagement',
+    title: 'Schulungsfolien – Bau & Projektmanagement',
     content: buildFolien(),
     style: slideStyle,
   });
   await renderPdf({
     html,
-    outPath: path.join(outDir, 'Schulungsfolien_Bau-und-Projektmanagement.pdf'),
+    outPath: path.join(outDir, 'Schulungsfolien.pdf'),
     dokumentTyp: 'Schulungsfolien',
-    dokumentName: 'Bau- und Projektmanagement — Schulungsfolien',
+    dokumentName: 'Bau & Projektmanagement — Schulungsfolien',
     landscape: true,
   });
 })();
