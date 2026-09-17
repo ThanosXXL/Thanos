@@ -355,8 +355,117 @@
     return { scale, skewX, skewY };
   }
 
-  function renderComposite(ctx, w, h, opts) {
-    const { image, effects, logoImage, logo } = opts;
+  const DEFAULT_LOGO = {
+    x: 82,
+    y: 85,
+    scale: 60,
+    rotation: 0,
+    opacity: 90,
+    blendMode: 'source-over',
+    visible: true,
+    loopEnabled: true,
+    loopSpeed: 2.5
+  };
+
+  function drawLogoShine(ctx, w, h, phase) {
+    const angle = (42 * Math.PI) / 180;
+    const dirX = Math.cos(angle);
+    const dirY = Math.sin(angle);
+    const span = Math.sqrt(w * w + h * h) * 1.4;
+    const travel = span * 2;
+    const center = -span + phase * travel;
+    const halfBand = span * 0.5;
+    const x0 = dirX * (center - halfBand);
+    const y0 = dirY * (center - halfBand);
+    const x1 = dirX * (center + halfBand);
+    const y1 = dirY * (center + halfBand);
+    const grad = ctx.createLinearGradient(x0, y0, x1, y1);
+    grad.addColorStop(0, 'rgba(255,241,196,0)');
+    grad.addColorStop(0.5, 'rgba(255,241,196,0.95)');
+    grad.addColorStop(1, 'rgba(255,241,196,0)');
+    ctx.save();
+    ctx.globalCompositeOperation = 'screen';
+    ctx.fillStyle = grad;
+    ctx.fillRect(-w, -h, w * 2, h * 2);
+    ctx.restore();
+  }
+
+  // Zwei wiederverwendbare, transparente Zwischen-Ebenen für das Logo: eine für das Logo
+  // selbst, eine für den Glanz-Sweep. Der Sweep wird per 'source-atop' exakt auf die
+  // Alpha-Form des Logos maskiert (rund/transparent/Text – nicht nur sein rechteckiges
+  // Bounding-Box), bevor das Ergebnis auf den eigentlichen Frame kommt. drawLogoShine()
+  // setzt intern selbst globalCompositeOperation='screen', darum braucht der Sweep eine
+  // eigene Ebene statt direkt mit 'source-atop' auf die Logo-Ebene zu zeichnen.
+  const scratchCanvases = {};
+
+  function getScratchCanvas(key, w, h) {
+    let canvas = scratchCanvases[key];
+    if (!canvas) {
+      canvas = document.createElement('canvas');
+      scratchCanvases[key] = canvas;
+    }
+    if (canvas.width !== w || canvas.height !== h) {
+      canvas.width = w;
+      canvas.height = h;
+    }
+    return canvas;
+  }
+
+  /* Zeichnet nur das Logo (mit optionalem animiertem Gold-Glanz-Loop) auf eine bereits
+     vorhandene Canvas-Ebene. Getrennt von renderBase(), damit die Logo-Animation
+     unabhängig vom (teuren, gecachten) Bild-Effekt-Rendering jeden Frame neu gezeichnet
+     werden kann. */
+  function compositeLogo(ctx, w, h, opts) {
+    const { logoImage, logo, time } = opts;
+    if (!logoImage || !logo || logo.visible === false) return;
+    const logoScale = (logo.scale || 100) / 100;
+    const logoW = w * 0.28 * logoScale;
+    const logoH = logoW * (logoImage.height / logoImage.width);
+    const cx = (logo.x / 100) * w;
+    const cy = (logo.y / 100) * h;
+    const rotation = ((logo.rotation || 0) * Math.PI) / 180;
+    const opacity = clamp((logo.opacity != null ? logo.opacity : 100) / 100, 0, 1);
+
+    const layer = getScratchCanvas('logo', w, h);
+    const lctx = layer.getContext('2d');
+    lctx.setTransform(1, 0, 0, 1, 0, 0);
+    lctx.clearRect(0, 0, w, h);
+    lctx.save();
+    lctx.translate(cx, cy);
+    lctx.rotate(rotation);
+    lctx.drawImage(logoImage, -logoW / 2, -logoH / 2, logoW, logoH);
+    lctx.restore();
+
+    if (logo.loopEnabled !== false && time != null) {
+      const loopSpeed = Math.max(0.3, logo.loopSpeed || 2.5);
+      const phase = (((time % loopSpeed) + loopSpeed) % loopSpeed) / loopSpeed;
+
+      const shine = getScratchCanvas('shine', w, h);
+      const sctx = shine.getContext('2d');
+      sctx.setTransform(1, 0, 0, 1, 0, 0);
+      sctx.clearRect(0, 0, w, h);
+      sctx.save();
+      sctx.translate(cx, cy);
+      sctx.rotate(rotation);
+      drawLogoShine(sctx, logoW, logoH, phase);
+      sctx.restore();
+
+      lctx.save();
+      lctx.globalCompositeOperation = 'source-atop';
+      lctx.drawImage(shine, 0, 0);
+      lctx.restore();
+    }
+
+    ctx.save();
+    ctx.globalAlpha = opacity;
+    ctx.globalCompositeOperation = logo.blendMode || 'source-over';
+    ctx.drawImage(layer, 0, 0);
+    ctx.restore();
+  }
+
+  /* Rendert nur Hintergrundbild + Bild-Effekte (ohne Logo) – das ist der teure, gecachte Teil. */
+  function renderBase(ctx, w, h, opts) {
+    const { image, effects } = opts;
     const fx = Object.assign({}, DEFAULT_EFFECTS, effects || {});
 
     ctx.save();
@@ -437,28 +546,28 @@
     ctx.drawImage(base, 0, 0);
     ctx.restore();
 
-    if (logoImage && logo && logo.visible !== false) {
-      ctx.save();
-      const logoScale = (logo.scale || 100) / 100;
-      const logoW = w * 0.28 * logoScale;
-      const logoH = logoW * (logoImage.height / logoImage.width);
-      const cx = (logo.x / 100) * w;
-      const cy = (logo.y / 100) * h;
-      ctx.translate(cx, cy);
-      ctx.rotate(((logo.rotation || 0) * Math.PI) / 180);
-      ctx.globalAlpha = clamp((logo.opacity != null ? logo.opacity : 100) / 100, 0, 1);
-      ctx.globalCompositeOperation = logo.blendMode || 'source-over';
-      ctx.drawImage(logoImage, -logoW / 2, -logoH / 2, logoW, logoH);
-      ctx.restore();
-    }
-
     ctx.restore();
+  }
+
+  /* Einmal-Rendering von Hintergrund + Logo in einem Zug (für Export-Einzelframes ohne
+     Logo-Loop-Animation, oder als Bequemlichkeits-Wrapper). logoTime steuert die Phase
+     des Glanz-Loops (0, wenn nicht angegeben). */
+  function renderComposite(ctx, w, h, opts) {
+    renderBase(ctx, w, h, opts);
+    compositeLogo(ctx, w, h, {
+      logoImage: opts.logoImage,
+      logo: opts.logo,
+      time: opts.logoTime != null ? opts.logoTime : 0
+    });
   }
 
   window.FotoEffects = {
     DEFAULT_EFFECTS,
+    DEFAULT_LOGO,
     EFFECT_GROUPS,
     PRESETS,
+    renderBase,
+    compositeLogo,
     renderComposite
   };
 })();

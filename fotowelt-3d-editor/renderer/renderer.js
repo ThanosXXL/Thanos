@@ -22,6 +22,8 @@
   const logoOpacity = document.getElementById('logoOpacity');
   const logoBlendMode = document.getElementById('logoBlendMode');
   const logoVisible = document.getElementById('logoVisible');
+  const logoLoopEnabled = document.getElementById('logoLoopEnabled');
+  const logoLoopSpeed = document.getElementById('logoLoopSpeed');
 
   const btnAddMusic = document.getElementById('btnAddMusic');
   const musicInfo = document.getElementById('musicInfo');
@@ -57,8 +59,7 @@
 
   let playing = false;
   let playStartTime = 0;
-  let rafId = null;
-  let renderScheduled = false;
+  const clockStart = performance.now();
   let persistTimer = null;
 
   function uid() {
@@ -134,13 +135,16 @@
   }
 
   // ---------- Rendering pipeline ----------
+  // Der Bild-Hintergrund (teure Effekte: Weichzeichner, Duoton, Grain, …) wird pro Bild
+  // gecacht und nur bei Änderung neu berechnet. Das Logo wird JEDEN Frame separat obendrauf
+  // gezeichnet, damit sein Gold-Glanz-Loop unabhängig vom Cache kontinuierlich animiert.
 
-  function frameCacheKey(image, project, w, h) {
-    return JSON.stringify(image.effects) + '|' + JSON.stringify(project.logo) + '|' + w + 'x' + h;
+  function baseCacheKey(image, w, h) {
+    return JSON.stringify(image.effects) + '|' + w + 'x' + h;
   }
 
-  function getPreviewCanvas(image, project, w, h) {
-    const key = frameCacheKey(image, project, w, h);
+  function getBaseCanvas(image, w, h) {
+    const key = baseCacheKey(image, w, h);
     const cached = frameCache.get(image.id);
     if (cached && cached.key === key) return cached.canvas;
 
@@ -150,39 +154,60 @@
     const ctx = canvas.getContext('2d');
     const imgEl = imageElements.get(image.id);
     if (imgEl) {
-      FotoEffects.renderComposite(ctx, w, h, {
-        image: imgEl,
-        effects: image.effects,
-        logoImage: project.logo ? logoElement : null,
-        logo: project.logo
-      });
+      FotoEffects.renderBase(ctx, w, h, { image: imgEl, effects: image.effects });
     }
     frameCache.set(image.id, { key, canvas });
     return canvas;
   }
 
-  function renderPreview() {
-    const project = getActiveProject();
-    if (!project) return;
-    const { w, h } = computePreviewSize(project.resolution);
-    previewCanvas.width = w;
-    previewCanvas.height = h;
-    previewEmptyEl.hidden = project.images.length > 0;
-    if (playing || !project.images.length) return;
-    const image = getActiveImage() || project.images[0];
-    const canvas = getPreviewCanvas(image, project, w, h);
-    const ctx = previewCanvas.getContext('2d');
-    ctx.clearRect(0, 0, w, h);
-    ctx.drawImage(canvas, 0, 0);
-  }
+  // scheduleRender() ist aus Kompatibilität an vielen Stellen aufgerufen, aber die
+  // durchgehende mainLoop() unten liest Zustand live – ein manuelles Neuzeichnen ist
+  // nicht mehr nötig.
+  function scheduleRender() {}
 
-  function scheduleRender() {
-    if (renderScheduled) return;
-    renderScheduled = true;
-    requestAnimationFrame(() => {
-      renderScheduled = false;
-      renderPreview();
-    });
+  function mainLoop() {
+    const project = getActiveProject();
+    const ctx = previewCanvas.getContext('2d');
+    if (!project || !project.images.length) {
+      previewEmptyEl.hidden = false;
+      ctx.clearRect(0, 0, previewCanvas.width, previewCanvas.height);
+      requestAnimationFrame(mainLoop);
+      return;
+    }
+    previewEmptyEl.hidden = true;
+    const { w, h } = computePreviewSize(project.resolution);
+    if (previewCanvas.width !== w || previewCanvas.height !== h) {
+      previewCanvas.width = w;
+      previewCanvas.height = h;
+    }
+
+    let idx, nextIdx, alpha;
+    if (playing) {
+      const elapsed = (performance.now() - playStartTime) / 1000;
+      ({ idx, nextIdx, alpha } = getFrameAtTime(project, elapsed));
+    } else {
+      const activeImage = getActiveImage() || project.images[0];
+      idx = project.images.indexOf(activeImage);
+      if (idx < 0) idx = 0;
+      nextIdx = idx;
+      alpha = 0;
+    }
+
+    ctx.clearRect(0, 0, w, h);
+    ctx.globalAlpha = 1;
+    ctx.drawImage(getBaseCanvas(project.images[idx], w, h), 0, 0);
+    if (alpha > 0) {
+      ctx.globalAlpha = alpha;
+      ctx.drawImage(getBaseCanvas(project.images[nextIdx], w, h), 0, 0);
+      ctx.globalAlpha = 1;
+    }
+
+    if (project.logo && logoElement) {
+      const nowSec = (performance.now() - clockStart) / 1000;
+      FotoEffects.compositeLogo(ctx, w, h, { logoImage: logoElement, logo: project.logo, time: nowSec });
+    }
+
+    requestAnimationFrame(mainLoop);
   }
 
   // ---------- Playback (Loop-Vorschau mit weichen Übergängen + Musik) ----------
@@ -217,32 +242,6 @@
     return { idx: n - 1, nextIdx: n - 1, alpha: 0 };
   }
 
-  function drawPlaybackFrame(elapsed) {
-    const project = getActiveProject();
-    if (!project || !project.images.length) return;
-    const { w, h } = computePreviewSize(project.resolution);
-    previewCanvas.width = w;
-    previewCanvas.height = h;
-    const { idx, nextIdx, alpha } = getFrameAtTime(project, elapsed);
-    const ctx = previewCanvas.getContext('2d');
-    const canvasA = getPreviewCanvas(project.images[idx], project, w, h);
-    ctx.globalAlpha = 1;
-    ctx.drawImage(canvasA, 0, 0);
-    if (alpha > 0) {
-      const canvasB = getPreviewCanvas(project.images[nextIdx], project, w, h);
-      ctx.globalAlpha = alpha;
-      ctx.drawImage(canvasB, 0, 0);
-      ctx.globalAlpha = 1;
-    }
-  }
-
-  function tick() {
-    if (!playing) return;
-    const elapsed = (performance.now() - playStartTime) / 1000;
-    drawPlaybackFrame(elapsed);
-    rafId = requestAnimationFrame(tick);
-  }
-
   function startPlayback() {
     const project = getActiveProject();
     if (!project || !project.images.length) {
@@ -256,16 +255,12 @@
       audioPlayer.currentTime = 0;
       audioPlayer.play().catch(() => {});
     }
-    tick();
   }
 
   function stopPlayback() {
     playing = false;
     btnPlayPause.textContent = '▶ Loop abspielen';
-    if (rafId) cancelAnimationFrame(rafId);
-    rafId = null;
     audioPlayer.pause();
-    renderPreview();
   }
 
   btnPlayPause.addEventListener('click', () => {
@@ -315,7 +310,6 @@
     buildPresetList();
     refreshLogoUI();
     refreshMusicInfo();
-    renderPreview();
   }
 
   projectSelect.addEventListener('change', () => {
@@ -485,6 +479,9 @@
     document.getElementById('logoOpacityValue').textContent = logo.opacity + '%';
     logoBlendMode.value = logo.blendMode;
     logoVisible.checked = logo.visible !== false;
+    logoLoopEnabled.checked = logo.loopEnabled !== false;
+    logoLoopSpeed.value = logo.loopSpeed != null ? logo.loopSpeed : 2.5;
+    document.getElementById('logoLoopSpeedValue').textContent = (logo.loopSpeed != null ? logo.loopSpeed : 2.5).toFixed(1) + 's';
   }
 
   btnAddLogo.addEventListener('click', async () => {
@@ -492,21 +489,13 @@
     if (!logo) return;
     const project = getActiveProject();
     if (!project) return;
-    project.logo = {
+    project.logo = Object.assign({}, FotoEffects.DEFAULT_LOGO, {
       path: logo.path,
       name: logo.name,
-      dataUrl: logo.dataUrl,
-      x: 82,
-      y: 85,
-      scale: 60,
-      rotation: 0,
-      opacity: 90,
-      blendMode: 'source-over',
-      visible: true
-    };
+      dataUrl: logo.dataUrl
+    });
     logoElement = await loadImageElement(logo.dataUrl);
     refreshLogoUI();
-    scheduleRender();
     schedulePersist();
   });
 
@@ -550,7 +539,21 @@
     const project = getActiveProject();
     if (!project || !project.logo) return;
     project.logo.visible = logoVisible.checked;
-    scheduleRender();
+    schedulePersist();
+  });
+
+  logoLoopEnabled.addEventListener('change', () => {
+    const project = getActiveProject();
+    if (!project || !project.logo) return;
+    project.logo.loopEnabled = logoLoopEnabled.checked;
+    schedulePersist();
+  });
+
+  logoLoopSpeed.addEventListener('input', () => {
+    const project = getActiveProject();
+    if (!project || !project.logo) return;
+    project.logo.loopSpeed = parseFloat(logoLoopSpeed.value);
+    document.getElementById('logoLoopSpeedValue').textContent = parseFloat(logoLoopSpeed.value).toFixed(1) + 's';
     schedulePersist();
   });
 
@@ -813,22 +816,46 @@
 
       const tempDir = await window.editorAPI.exportBegin();
 
+      const subFps = 8;
+      const animateLogo = !!(project.logo && project.logo.visible !== false && project.logo.loopEnabled !== false && logoElement);
+
       for (let i = 0; i < n; i++) {
         const image = project.images[i];
         const imgEl = imageElements.get(image.id) || (await loadImageElement(image.dataUrl));
-        const canvas = document.createElement('canvas');
-        canvas.width = width;
-        canvas.height = height;
-        const ctx = canvas.getContext('2d');
-        FotoEffects.renderComposite(ctx, width, height, {
-          image: imgEl,
-          effects: image.effects,
-          logoImage: logoElement,
-          logo: project.logo
-        });
-        const blob = await new Promise((resolve) => canvas.toBlob(resolve, 'image/png'));
-        const buffer = new Uint8Array(await blob.arrayBuffer());
-        await window.editorAPI.exportWriteFrame(tempDir, i, buffer);
+
+        const baseCanvas = document.createElement('canvas');
+        baseCanvas.width = width;
+        baseCanvas.height = height;
+        FotoEffects.renderBase(baseCanvas.getContext('2d'), width, height, { image: imgEl, effects: image.effects });
+
+        if (animateLogo) {
+          const subFrameCount = Math.max(2, Math.round(clipDuration * subFps));
+          for (let k = 0; k < subFrameCount; k++) {
+            const canvas = document.createElement('canvas');
+            canvas.width = width;
+            canvas.height = height;
+            const ctx = canvas.getContext('2d');
+            ctx.drawImage(baseCanvas, 0, 0);
+            FotoEffects.compositeLogo(ctx, width, height, {
+              logoImage: logoElement,
+              logo: project.logo,
+              time: k / subFps
+            });
+            const blob = await new Promise((resolve) => canvas.toBlob(resolve, 'image/png'));
+            const buffer = new Uint8Array(await blob.arrayBuffer());
+            await window.editorAPI.exportWriteFrame(tempDir, i, k, buffer);
+          }
+        } else {
+          const canvas = document.createElement('canvas');
+          canvas.width = width;
+          canvas.height = height;
+          const ctx = canvas.getContext('2d');
+          ctx.drawImage(baseCanvas, 0, 0);
+          FotoEffects.compositeLogo(ctx, width, height, { logoImage: logoElement, logo: project.logo, time: null });
+          const blob = await new Promise((resolve) => canvas.toBlob(resolve, 'image/png'));
+          const buffer = new Uint8Array(await blob.arrayBuffer());
+          await window.editorAPI.exportWriteFrame(tempDir, i, 0, buffer);
+        }
         setExportProgress(Math.round(((i + 1) / n) * 30), `Rendere Bild ${i + 1} von ${n} …`);
       }
 
@@ -847,7 +874,9 @@
         height,
         fps: 30,
         musicPath: project.music.path,
-        outputPath
+        outputPath,
+        animateLogo,
+        subFps
       });
 
       setExportProgress(100, 'Fertig!');
@@ -886,6 +915,7 @@
         if (!p.customPresets) p.customPresets = [];
         if (p.transitionDuration == null) p.transitionDuration = 1;
         if (!p.resolution) p.resolution = '1920x1080';
+        if (p.logo) p.logo = Object.assign({}, FotoEffects.DEFAULT_LOGO, p.logo);
         p.images.forEach((im) => {
           im.effects = Object.assign({}, FotoEffects.DEFAULT_EFFECTS, im.effects);
         });
@@ -901,5 +931,6 @@
     onProjectSwitched();
   }
 
+  requestAnimationFrame(mainLoop);
   init();
 })();

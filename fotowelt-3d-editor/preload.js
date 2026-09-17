@@ -11,7 +11,8 @@ contextBridge.exposeInMainWorld('editorAPI', {
   showInFolder: (filePath) => ipcRenderer.invoke('show-in-folder', filePath),
 
   exportBegin: () => ipcRenderer.invoke('export-begin'),
-  exportWriteFrame: (tempDir, index, buffer) => ipcRenderer.invoke('export-write-frame', tempDir, index, buffer),
+  exportWriteFrame: (tempDir, imageIndex, subFrameIndex, buffer) =>
+    ipcRenderer.invoke('export-write-frame', tempDir, imageIndex, subFrameIndex, buffer),
   exportRenderVideo: (params) => ipcRenderer.invoke('export-render-video', params),
   exportCancel: () => ipcRenderer.invoke('export-cancel'),
   onExportProgress: (callback) => {

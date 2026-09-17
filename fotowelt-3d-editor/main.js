@@ -152,8 +152,16 @@ ipcMain.handle('export-begin', () => {
   return tempDir;
 });
 
-ipcMain.handle('export-write-frame', (event, tempDir, index, buffer) => {
-  const filePath = path.join(tempDir, `frame_${String(index).padStart(4, '0')}.png`);
+function framePattern(tempDir, imageIndex) {
+  return path.join(tempDir, `img${imageIndex}_frame_%04d.png`);
+}
+
+function frameFilePath(tempDir, imageIndex, subFrameIndex) {
+  return path.join(tempDir, `img${imageIndex}_frame_${String(subFrameIndex).padStart(4, '0')}.png`);
+}
+
+ipcMain.handle('export-write-frame', (event, tempDir, imageIndex, subFrameIndex, buffer) => {
+  const filePath = frameFilePath(tempDir, imageIndex, subFrameIndex);
   fs.writeFileSync(filePath, Buffer.from(buffer));
   return filePath;
 });
@@ -191,13 +199,10 @@ ipcMain.handle('export-render-video', async (event, params) => {
     height,
     fps,
     musicPath,
-    outputPath
+    outputPath,
+    animateLogo,
+    subFps
   } = params;
-
-  const framePaths = [];
-  for (let i = 0; i < frameCount; i++) {
-    framePaths.push(path.join(tempDir, `frame_${String(i).padStart(4, '0')}.png`));
-  }
 
   const { filterComplex, finalLabel } = buildFilterComplex({
     frameCount,
@@ -212,9 +217,13 @@ ipcMain.handle('export-render-video', async (event, params) => {
   const audioFilter = `afade=t=in:st=0:d=0.6,afade=t=out:st=${fadeOutStart.toFixed(2)}:d=1`;
 
   const args = ['-y', '-loglevel', 'error', '-progress', 'pipe:1', '-nostats'];
-  framePaths.forEach((framePath) => {
-    args.push('-loop', '1', '-t', String(clipDuration), '-i', framePath);
-  });
+  for (let i = 0; i < frameCount; i++) {
+    if (animateLogo) {
+      args.push('-framerate', String(subFps), '-start_number', '0', '-t', String(clipDuration), '-i', framePattern(tempDir, i));
+    } else {
+      args.push('-loop', '1', '-t', String(clipDuration), '-i', frameFilePath(tempDir, i, 0));
+    }
+  }
   args.push('-i', musicPath);
   args.push('-filter_complex', filterComplex);
   args.push('-map', `[${finalLabel}]`);
