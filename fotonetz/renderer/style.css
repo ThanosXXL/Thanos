@@ -218,6 +218,13 @@ main#content {
   color: var(--ink-dim);
 }
 
+.title-group {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
 .auftrag-panel h2 {
   margin: 0 0 6px;
   font-size: 24px;
@@ -226,6 +233,19 @@ main#content {
   -webkit-background-clip: text;
   background-clip: text;
   color: transparent;
+}
+
+.art-badge {
+  display: inline-block;
+  margin-bottom: 6px;
+  padding: 4px 12px;
+  border-radius: 20px;
+  font-size: 12px;
+  font-weight: 600;
+  color: #05070d;
+  background: linear-gradient(120deg, var(--accent-cyan), var(--accent-blue));
+  box-shadow: 0 3px 10px rgba(59, 130, 246, 0.3);
+  white-space: nowrap;
 }
 
 .auftrag-meta {
@@ -252,6 +272,7 @@ main#content {
 }
 
 .meta-field input,
+.meta-field select,
 .auftrag-notizen textarea,
 .add-item-row input,
 .modal input {
@@ -262,18 +283,39 @@ main#content {
   font-family: inherit;
 }
 
-.meta-field input {
+.meta-field input,
+.meta-field select {
   padding: 9px 11px;
   font-size: 13px;
 }
 
+.meta-field select {
+  cursor: pointer;
+}
+
 .meta-field input:focus,
+.meta-field select:focus,
 .auftrag-notizen textarea:focus,
 .add-item-row input:focus,
 .modal input:focus {
   outline: none;
   border-color: var(--accent-blue);
   box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.22);
+}
+
+.zahlungsstatus-select.status-offen {
+  border-color: rgba(239, 74, 95, 0.5);
+  color: #ff8a9a;
+}
+
+.zahlungsstatus-select.status-angezahlt {
+  border-color: rgba(255, 215, 110, 0.5);
+  color: #ffd76e;
+}
+
+.zahlungsstatus-select.status-bezahlt {
+  border-color: rgba(47, 191, 143, 0.5);
+  color: #4fe0af;
 }
 
 .link-field .link-row {

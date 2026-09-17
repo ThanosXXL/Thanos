@@ -1,5 +1,20 @@
 (function () {
   const MAX_AUFTRAEGE = 6;
+  const AUFTRAGSARTEN = [
+    'Hochzeit',
+    'Verlobung / Paarshooting',
+    'Portrait',
+    'Familie',
+    'Business / Corporate',
+    'Event',
+    'Produkt',
+    'Sonstiges'
+  ];
+  const ZAHLUNGSSTATUS = [
+    { value: 'offen', label: 'Offen' },
+    { value: 'angezahlt', label: 'Angezahlt' },
+    { value: 'bezahlt', label: 'Bezahlt' }
+  ];
 
   let state = { auftraege: [] };
   let activeAuftragId = null;
@@ -46,9 +61,12 @@
     const auftrag = {
       id: uid(),
       titel,
+      art: AUFTRAGSARTEN[0],
       kunde: '',
       termin: '',
       link: '',
+      preis: '',
+      zahlungsstatus: ZAHLUNGSSTATUS[0].value,
       notizen: '',
       todos: [],
       offeneEdits: [],
@@ -237,6 +255,24 @@
     const section = document.createElement('div');
     section.className = 'auftrag-meta';
 
+    const artField = document.createElement('div');
+    artField.className = 'meta-field';
+    const artLabel = document.createElement('label');
+    artLabel.textContent = 'Auftragsart';
+    const artSelect = document.createElement('select');
+    AUFTRAGSARTEN.forEach((art) => {
+      const option = document.createElement('option');
+      option.value = art;
+      option.textContent = art;
+      if (art === auftrag.art) option.selected = true;
+      artSelect.appendChild(option);
+    });
+    artSelect.addEventListener('change', () =>
+      updateAuftragField(auftrag.id, 'art', artSelect.value)
+    );
+    artField.appendChild(artLabel);
+    artField.appendChild(artSelect);
+
     const kundeField = document.createElement('div');
     kundeField.className = 'meta-field';
     const kundeLabel = document.createElement('label');
@@ -298,9 +334,49 @@
     linkField.appendChild(linkLabel);
     linkField.appendChild(linkRow);
 
+    const preisField = document.createElement('div');
+    preisField.className = 'meta-field';
+    const preisLabel = document.createElement('label');
+    preisLabel.textContent = 'Honorar';
+    const preisInput = document.createElement('input');
+    preisInput.type = 'text';
+    preisInput.placeholder = 'z. B. 1.200 €';
+    preisInput.value = auftrag.preis;
+    preisInput.addEventListener('blur', () =>
+      updateAuftragField(auftrag.id, 'preis', preisInput.value.trim())
+    );
+    preisInput.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter') preisInput.blur();
+    });
+    preisField.appendChild(preisLabel);
+    preisField.appendChild(preisInput);
+
+    const zahlungField = document.createElement('div');
+    zahlungField.className = 'meta-field';
+    const zahlungLabel = document.createElement('label');
+    zahlungLabel.textContent = 'Zahlungsstatus';
+    const zahlungSelect = document.createElement('select');
+    zahlungSelect.className = 'zahlungsstatus-select status-' + auftrag.zahlungsstatus;
+    ZAHLUNGSSTATUS.forEach(({ value, label }) => {
+      const option = document.createElement('option');
+      option.value = value;
+      option.textContent = label;
+      if (value === auftrag.zahlungsstatus) option.selected = true;
+      zahlungSelect.appendChild(option);
+    });
+    zahlungSelect.addEventListener('change', () => {
+      zahlungSelect.className = 'zahlungsstatus-select status-' + zahlungSelect.value;
+      updateAuftragField(auftrag.id, 'zahlungsstatus', zahlungSelect.value);
+    });
+    zahlungField.appendChild(zahlungLabel);
+    zahlungField.appendChild(zahlungSelect);
+
+    section.appendChild(artField);
     section.appendChild(kundeField);
     section.appendChild(terminField);
     section.appendChild(linkField);
+    section.appendChild(preisField);
+    section.appendChild(zahlungField);
 
     const notizenBlock = document.createElement('div');
     notizenBlock.className = 'auftrag-notizen';
@@ -337,9 +413,18 @@
 
     const header = document.createElement('div');
     header.className = 'panel-header';
+    const titleGroup = document.createElement('div');
+    titleGroup.className = 'title-group';
     const h2 = document.createElement('h2');
     h2.textContent = auftrag.titel;
-    header.appendChild(h2);
+    titleGroup.appendChild(h2);
+    if (auftrag.art) {
+      const artBadge = document.createElement('span');
+      artBadge.className = 'art-badge';
+      artBadge.textContent = auftrag.art;
+      titleGroup.appendChild(artBadge);
+    }
+    header.appendChild(titleGroup);
     panel.appendChild(header);
 
     panel.appendChild(buildMetaSection(auftrag));
@@ -567,6 +652,11 @@
       if (typeof a.link !== 'string') a.link = '';
       if (typeof a.notizen !== 'string') a.notizen = '';
       if (typeof a.titel !== 'string') a.titel = a.name || 'Auftrag';
+      if (typeof a.art !== 'string' || !a.art) a.art = AUFTRAGSARTEN[0];
+      if (typeof a.preis !== 'string') a.preis = '';
+      if (!ZAHLUNGSSTATUS.some((s) => s.value === a.zahlungsstatus)) {
+        a.zahlungsstatus = ZAHLUNGSSTATUS[0].value;
+      }
     });
     activeAuftragId = state.auftraege.length ? state.auftraege[0].id : null;
     render();
