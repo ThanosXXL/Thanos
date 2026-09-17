@@ -365,11 +365,13 @@
     visible: true,
     loopEnabled: true,
     loopSpeed: 2.5,
-    motionType: 'float'
+    motionType: 'pulseSwing'
   };
 
   const LOGO_MOTION_TYPES = [
     { value: 'none', label: 'Keine' },
+    { value: 'pulseSwing', label: 'Pulsieren + Seitlich' },
+    { value: 'swing', label: 'Seitlich (rechts/links)' },
     { value: 'float', label: 'Schweben' },
     { value: 'rotate', label: 'Rotieren' },
     { value: 'pulse', label: 'Pulsieren' },
@@ -378,7 +380,8 @@
 
   /* Echte Bewegung des Logos selbst (nicht nur der Glanz-Sweep): liefert einen Versatz/
      Zusatzdrehung/Zusatzskalierung relativ zur eingestellten Basis-Position, abhängig von
-     der Zeit. Nutzt dieselbe loopSpeed wie der Glanz-Sweep, damit beides synchron läuft. */
+     der Zeit. Nutzt dieselbe loopSpeed wie der Glanz-Sweep, damit beides synchron läuft.
+     Kräftigere, lebendigere Amplituden als eine erste, zu vorsichtige Fassung. */
   function computeLogoMotion(logo, w, h, time) {
     const motionType = logo.motionType || 'none';
     if (motionType === 'none' || time == null) {
@@ -389,13 +392,22 @@
     const angle2pi = phase * Math.PI * 2;
     switch (motionType) {
       case 'float':
-        return { dx: 0, dy: Math.sin(angle2pi) * h * 0.02, extraRotation: 0, scale: 1 };
+        return { dx: 0, dy: Math.sin(angle2pi) * h * 0.045, extraRotation: 0, scale: 1 };
+      case 'swing':
+        return { dx: Math.sin(angle2pi) * w * 0.09, dy: 0, extraRotation: 0, scale: 1 };
+      case 'pulseSwing':
+        return {
+          dx: Math.sin(angle2pi) * w * 0.08,
+          dy: 0,
+          extraRotation: 0,
+          scale: 1 + Math.sin(angle2pi) * 0.12
+        };
       case 'rotate':
         return { dx: 0, dy: 0, extraRotation: angle2pi, scale: 1 };
       case 'pulse':
-        return { dx: 0, dy: 0, extraRotation: 0, scale: 1 + Math.sin(angle2pi) * 0.07 };
+        return { dx: 0, dy: 0, extraRotation: 0, scale: 1 + Math.sin(angle2pi) * 0.14 };
       case 'wobble':
-        return { dx: 0, dy: 0, extraRotation: ((Math.sin(angle2pi) * 12 * Math.PI) / 180), scale: 1 };
+        return { dx: 0, dy: 0, extraRotation: ((Math.sin(angle2pi) * 18 * Math.PI) / 180), scale: 1 };
       default:
         return { dx: 0, dy: 0, extraRotation: 0, scale: 1 };
     }
