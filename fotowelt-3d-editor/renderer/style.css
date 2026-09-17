@@ -106,13 +106,28 @@ h2 {
   filter: drop-shadow(0 0 8px var(--gold-bright));
 }
 
-.brand strong {
+.brand-text-wrap {
+  display: flex;
+  flex-direction: column;
+  line-height: 1.15;
+}
+
+.brand-text {
+  font-size: 20px;
+  font-weight: 700;
   background: linear-gradient(120deg, var(--gold-deep), var(--gold-bright), var(--gold-deep));
   background-size: 220% auto;
   -webkit-background-clip: text;
   background-clip: text;
   color: transparent;
   animation: goldShimmer 3.2s linear infinite;
+}
+
+.brand-tagline {
+  font-size: 11px;
+  font-weight: 400;
+  color: var(--text-muted);
+  letter-spacing: 0.02em;
 }
 
 @keyframes goldShimmer {

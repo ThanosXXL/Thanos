@@ -19,7 +19,7 @@
   },
   "build": {
     "appId": "com.fotowelt.editor3d",
-    "productName": "FotoWelt 3D Editor",
+    "productName": "FotoWelt",
     "files": [
       "main.js",
       "preload.js",

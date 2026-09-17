@@ -1,8 +1,8 @@
 [![Dozenten Dashboard](https://img.shields.io/badge/📋_Dozenten_Dashboard-0b1f4d?style=for-the-badge)](../README.md)
 [![IT-Schulung Dashboard](https://img.shields.io/badge/💻_IT--Schulung_Dashboard-5b9bd5?style=for-the-badge)](../it-schulung/README.md)
-[![FotoWelt 3D Editor](https://img.shields.io/badge/✨_FotoWelt_3D_Editor-7c5cff?style=for-the-badge)](README.md)
+[![FotoWelt](https://img.shields.io/badge/✨_FotoWelt-7c5cff?style=for-the-badge)](README.md)
 
-# FotoWelt 3D Editor
+# FotoWelt
 
 Desktop-Bildbearbeitungsprogramm (Electron) für **3D-Stil- und Hochglanz-Effekte**, Logo-Compositing auf
 Hintergrundbildern und den Export als **Loop-Video mit Hintergrundmusik**.
@@ -17,7 +17,10 @@ Hintergrundbildern und den Export als **Loop-Video mit Hintergrundmusik**.
   Spiegelung sowie ein rundbarer Rahmen
 - **Presets** (Hochglanz 3D, Chrom Metallic, Neon Glow, Film Noir, Warmes Duoton, Spiegel-Reflex) plus
   eigene, speicherbare Presets
-- **Logo/Wasserzeichen**: Position, Größe, Rotation, Deckkraft und Mischmodus frei einstellbar
+- **Logo/Wasserzeichen**: Position, Größe, Rotation, Deckkraft und Mischmodus frei einstellbar, plus ein
+  animierter Gold-Glanz-Loop (an/aus, Tempo einstellbar) – live in der Vorschau und im Export
+- **Automatische Verbesserung**: analysiert das aktive Bild und schlägt bei Bedarf Helligkeit/Kontrast/
+  Sättigung vor, die sich per Klick annehmen oder ablehnen lassen
 - **Live-Vorschau** als abspielbarer Loop mit weichen Überblendungen zwischen den Bildern, synchron zur
   Hintergrundmusik
 - **Export** als MP4: alle Bilder werden mit weichen Übergängen zu einem Loop zusammengefügt, dessen
