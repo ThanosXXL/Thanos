@@ -1169,7 +1169,19 @@
 
   btnExport.addEventListener('click', async () => {
     const project = getActiveProject();
-    if (!project || !project.images.length) {
+    if (!project) return;
+    const isCollageExport = project.previewMode === 'collage';
+
+    let collageTemplate = null;
+    let collageSlotImages = null;
+    if (isCollageExport) {
+      collageTemplate = getCollageTemplate(project);
+      collageSlotImages = collageTemplate ? buildSlotImages(project, collageTemplate) : null;
+      if (!collageTemplate || !collageSlotImages.some((s) => s)) {
+        toast('Bitte zuerst eine Collage-Vorlage wählen und Bilder zuordnen.', true);
+        return;
+      }
+    } else if (!project.images.length) {
       toast('Bitte zuerst mindestens ein Bild importieren.', true);
       return;
     }
@@ -1177,23 +1189,35 @@
       toast('Bitte zuerst Hintergrundmusik auswählen – die Loop-Länge wird daran ausgerichtet.', true);
       return;
     }
-    const n = project.images.length;
-    const d = project.transitionDuration;
     const audioDuration = project.music.duration;
     if (!audioDuration || audioDuration < 1) {
       toast('Die Musikdatei konnte nicht analysiert werden.', true);
       return;
     }
-    const t = (audioDuration - d) / n;
-    if (t <= d || t <= 0.3) {
-      toast('Zu viele Bilder oder Übergang zu lang für die Musiklänge. Übergang verkürzen oder weniger Bilder verwenden.', true);
-      return;
+
+    // Eine Collage ist EIN Motiv (kein Bilderwechsel) – die Loop-Länge entspricht
+    // direkt der Musiklänge, kein Übergang zwischen mehreren Szenen nötig.
+    let n, d, t, clipDuration, offsets;
+    if (isCollageExport) {
+      n = 1;
+      d = 0;
+      t = audioDuration;
+      clipDuration = audioDuration;
+      offsets = [];
+    } else {
+      n = project.images.length;
+      d = project.transitionDuration;
+      t = (audioDuration - d) / n;
+      if (t <= d || t <= 0.3) {
+        toast('Zu viele Bilder oder Übergang zu lang für die Musiklänge. Übergang verkürzen oder weniger Bilder verwenden.', true);
+        return;
+      }
+      clipDuration = t + d;
+      offsets = [];
+      for (let k = 1; k < n; k++) offsets.push(k * t);
     }
 
     const [width, height] = project.resolution.split('x').map(Number);
-    const clipDuration = t + d;
-    const offsets = [];
-    for (let k = 1; k < n; k++) offsets.push(k * t);
 
     stopPlayback();
     btnExport.disabled = true;
@@ -1223,13 +1247,26 @@
       );
 
       for (let i = 0; i < n; i++) {
-        const image = project.images[i];
-        const imgEl = imageElements.get(image.id) || (await loadImageElement(image.dataUrl));
-
         const baseCanvas = document.createElement('canvas');
         baseCanvas.width = width;
         baseCanvas.height = height;
-        FotoEffects.renderBase(baseCanvas.getContext('2d'), width, height, { image: imgEl, effects: image.effects });
+
+        if (isCollageExport) {
+          // Collage-Basis (Felder + Rand-Effekt) OHNE Logo – das Logo kommt gleich
+          // separat pro Subframe obendrauf, damit sein Glanz-Loop animieren kann.
+          FotoEffects.renderCollage(baseCanvas.getContext('2d'), width, height, {
+            template: collageTemplate,
+            slotImages: collageSlotImages,
+            logoImage: null,
+            logo: null,
+            time: null,
+            borderStyle: project.collage.borderStyle
+          });
+        } else {
+          const image = project.images[i];
+          const imgEl = imageElements.get(image.id) || (await loadImageElement(image.dataUrl));
+          FotoEffects.renderBase(baseCanvas.getContext('2d'), width, height, { image: imgEl, effects: image.effects });
+        }
 
         if (animateLogo) {
           const subFrameCount = Math.max(2, Math.round(clipDuration * subFps));
@@ -1259,7 +1296,10 @@
           const buffer = new Uint8Array(await blob.arrayBuffer());
           await window.editorAPI.exportWriteFrame(tempDir, i, 0, buffer);
         }
-        setExportProgress(Math.round(((i + 1) / n) * 30), `Rendere Bild ${i + 1} von ${n} …`);
+        setExportProgress(
+          Math.round(((i + 1) / n) * 30),
+          isCollageExport ? 'Rendere Collage …' : `Rendere Bild ${i + 1} von ${n} …`
+        );
       }
 
       unsubscribe = window.editorAPI.onExportProgress((percent) => {
