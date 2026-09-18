@@ -669,6 +669,24 @@
     ctx.restore();
   }
 
+  /* Druckgrößen für Speichern & Teilen: feste, cm-genaue Zielgrößen statt freier
+     Pixel-Auflösung, damit das gespeicherte/geteilte Bild direkt für einen echten
+     Fotoabzug passt. 300 DPI ist der Branchenstandard für Fotoqualität im Druck. */
+  const PRINT_DPI = 300;
+  function cmToPx(cm) {
+    return Math.round((cm / 2.54) * PRINT_DPI);
+  }
+  const PHOTO_SIZES = [
+    { id: '10x15', label: '10 × 15 cm (häufigste)', widthCm: 10, heightCm: 15 },
+    { id: '9x13', label: '9 × 13 cm (klassisch)', widthCm: 9, heightCm: 13 },
+    { id: '13x18', label: '13 × 18 cm (beliebte)', widthCm: 13, heightCm: 18 }
+  ];
+  const COLLAGE_SIZES = [
+    { id: '30x40', label: '30 × 40 cm', widthCm: 30, heightCm: 40 },
+    { id: '40x50', label: '40 × 50 cm', widthCm: 40, heightCm: 50 },
+    { id: '50x70', label: '50 × 70 cm', widthCm: 50, heightCm: 70 }
+  ];
+
   /* Wählbare Rand-Effekte für die einzelnen Collage-Felder – zusätzlich zu den pro Bild
      einstellbaren Effekten, damit auch der Übergang zwischen den Feldern gestaltet
      werden kann (z. B. edler Gold-Rahmen oder Leucht-Rand statt einer schlichten Lücke). */
@@ -1020,6 +1038,10 @@
     PRESETS,
     COLLAGE_TEMPLATES,
     COLLAGE_BORDER_STYLES,
+    PRINT_DPI,
+    PHOTO_SIZES,
+    COLLAGE_SIZES,
+    cmToPx,
     renderBase,
     compositeLogo,
     renderComposite,

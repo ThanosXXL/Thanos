@@ -113,6 +113,10 @@
         </div>
         <p class="hint">Vorlage wählen, dann jedem Feld eines deiner importierten Bilder zuordnen – jedes Feld behält seine eigenen Effekte.</p>
         <div id="collageTemplateGrid" class="collage-template-grid"></div>
+        <div class="print-size-block">
+          <span class="print-size-label">Collagen-Größe</span>
+          <div id="collageSizeRow" class="print-size-row"></div>
+        </div>
         <label class="control-row">
           <span>Rand-Effekt</span>
           <select id="collageBorderStyle">
@@ -144,9 +148,15 @@
       </div>
 
       <div class="image-actions card">
-        <button id="btnSaveImage" class="btn-secondary">💾 Bild speichern</button>
-        <button id="btnShareImage" class="btn-secondary">📤 Teilen</button>
-        <span id="imageActionsHint" class="hint"></span>
+        <div class="print-size-block">
+          <span id="printSizeLabel" class="print-size-label">Bildergröße</span>
+          <div id="printSizeRow" class="print-size-row"></div>
+        </div>
+        <div class="image-actions-buttons">
+          <button id="btnSaveImage" class="btn-secondary">💾 Bild speichern</button>
+          <button id="btnShareImage" class="btn-secondary">📤 Teilen</button>
+          <span id="imageActionsHint" class="hint"></span>
+        </div>
       </div>
 
       <div class="playback-bar card">

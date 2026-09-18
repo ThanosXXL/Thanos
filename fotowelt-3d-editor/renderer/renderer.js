@@ -32,6 +32,8 @@
   const collageTemplateGrid = document.getElementById('collageTemplateGrid');
   const collageBorderStyle = document.getElementById('collageBorderStyle');
   const collageSlotList = document.getElementById('collageSlotList');
+  const collageSizeRow = document.getElementById('collageSizeRow');
+  const printSizeRow = document.getElementById('printSizeRow');
   const btnModeSingle = document.getElementById('btnModeSingle');
   const btnModeCollage = document.getElementById('btnModeCollage');
 
@@ -176,7 +178,9 @@
       resolution: '1920x1080',
       customPresets: [],
       previewMode: 'single',
-      collage: { templateId: null, slots: [], borderStyle: 'none' }
+      collage: { templateId: null, slots: [], borderStyle: 'none' },
+      photoSize: '10x15',
+      collageSize: '30x40'
     };
   }
 
@@ -373,10 +377,19 @@
   // Schnelle Aktionen für das AKTUELL bearbeitete Einzelbild (mit Effekten + Logo), unabhängig
   // vom vollen Loop-Video-Export weiter unten.
 
+  function getActivePrintSize(project) {
+    const isCollage = project.previewMode === 'collage';
+    const list = isCollage ? FotoEffects.COLLAGE_SIZES : FotoEffects.PHOTO_SIZES;
+    const id = isCollage ? project.collageSize : project.photoSize;
+    return list.find((s) => s.id === id) || list[0];
+  }
+
   async function renderCurrentViewToBlob() {
     const project = getActiveProject();
     if (!project) return null;
-    const [width, height] = project.resolution.split('x').map(Number);
+    const size = getActivePrintSize(project);
+    const width = FotoEffects.cmToPx(size.widthCm);
+    const height = FotoEffects.cmToPx(size.heightCm);
     const canvas = document.createElement('canvas');
     canvas.width = width;
     canvas.height = height;
@@ -427,9 +440,11 @@
     const buffer = new Uint8Array(await blob.arrayBuffer());
     const isCollage = project.previewMode === 'collage';
     const image = getActiveImage();
+    const size = getActivePrintSize(project);
+    const sizeSuffix = `${size.widthCm}x${size.heightCm}cm`;
     const baseName = isCollage
-      ? sanitizeFileName(project.name) + '-collage'
-      : sanitizeFileName(image.name.replace(/\.[^.]+$/, '')) || 'fotowelt-bild';
+      ? sanitizeFileName(project.name) + '-collage-' + sizeSuffix
+      : (sanitizeFileName(image.name.replace(/\.[^.]+$/, '')) || 'fotowelt-bild') + '-' + sizeSuffix;
     const savedPath = await window.editorAPI.saveImage(`${baseName}.png`, buffer);
     if (savedPath) {
       toast('Bild gespeichert.');
@@ -496,6 +511,8 @@
     btnModeCollage.classList.toggle('active', !!project && project.previewMode === 'collage');
     buildCollageTemplateGrid();
     buildCollageSlotList();
+    buildPhotoSizeButtons();
+    buildCollageSizeButtons();
   }
 
   projectSelect.addEventListener('change', () => {
@@ -835,6 +852,44 @@
     project.collage.borderStyle = collageBorderStyle.value;
     schedulePersist();
   });
+
+  // ---------- Druckgrößen (Bildergröße / Collagen-Größe) ----------
+  // Feste cm-Zielgrößen für Speichern & Teilen, statt freier Pixel-Auflösung –
+  // das gespeicherte/geteilte Bild passt dann direkt für einen echten Fotoabzug.
+
+  function buildPhotoSizeButtons() {
+    printSizeRow.innerHTML = '';
+    const project = getActiveProject();
+    if (!project) return;
+    FotoEffects.PHOTO_SIZES.forEach((size) => {
+      const btn = document.createElement('button');
+      btn.className = 'print-size-btn' + (project.photoSize === size.id ? ' active' : '');
+      btn.textContent = size.label;
+      btn.addEventListener('click', () => {
+        project.photoSize = size.id;
+        buildPhotoSizeButtons();
+        schedulePersist();
+      });
+      printSizeRow.appendChild(btn);
+    });
+  }
+
+  function buildCollageSizeButtons() {
+    collageSizeRow.innerHTML = '';
+    const project = getActiveProject();
+    if (!project) return;
+    FotoEffects.COLLAGE_SIZES.forEach((size) => {
+      const btn = document.createElement('button');
+      btn.className = 'print-size-btn' + (project.collageSize === size.id ? ' active' : '');
+      btn.textContent = size.label;
+      btn.addEventListener('click', () => {
+        project.collageSize = size.id;
+        buildCollageSizeButtons();
+        schedulePersist();
+      });
+      collageSizeRow.appendChild(btn);
+    });
+  }
 
   function buildCollageSlotList() {
     collageSlotList.innerHTML = '';
@@ -1273,6 +1328,8 @@
         if (!p.previewMode) p.previewMode = 'single';
         if (!p.collage) p.collage = { templateId: null, slots: [], borderStyle: 'none' };
         if (!p.collage.borderStyle) p.collage.borderStyle = 'none';
+        if (!p.photoSize) p.photoSize = '10x15';
+        if (!p.collageSize) p.collageSize = '30x40';
         if (p.logo) p.logo = Object.assign({}, FotoEffects.DEFAULT_LOGO, p.logo);
         p.images.forEach((im) => {
           im.effects = Object.assign({}, FotoEffects.DEFAULT_EFFECTS, im.effects);
