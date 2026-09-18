@@ -1,0 +1,297 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' file: data:; media-src 'self' file:; script-src 'self'; connect-src 'self';">
+<title>VideoWelt</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Great+Vibes&family=Montserrat:wght@400;600;700;800&family=Open+Sans:wght@400;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+  <div id="splash" class="splash">
+    <div class="splash-stage">
+      <div class="ground-glow"></div>
+      <div class="logo-wrap">
+        <div class="camera-icon">
+          <div class="cam-group">
+            <div class="cam-viewfinder gold-surface"></div>
+            <div class="cam-body gold-surface"></div>
+            <div class="cam-foot gold-surface"></div>
+            <div class="cam-lens-mount gold-surface"></div>
+            <div class="cam-lens-ring"></div>
+            <div class="cam-lens-glass"></div>
+            <div class="cam-rec-dot"></div>
+          </div>
+          <div class="sheen"></div>
+        </div>
+        <div class="wordmark">VideoWelt</div>
+        <div class="tagline">Alles für dein Video</div>
+      </div>
+    </div>
+  </div>
+
+  <div id="app" class="app hidden">
+    <header class="topbar">
+      <div class="brand">
+        <div class="brand-cam gold-surface"></div>
+        <span class="brand-word">VideoWelt</span>
+      </div>
+      <nav class="menubar" id="menubar">
+        <div class="menu" data-menu="datei">
+          <button type="button" class="menu-trigger">Datei</button>
+          <div class="menu-dropdown">
+            <button type="button" data-action="new-project">Neues Projekt</button>
+            <button type="button" data-action="open-project">Öffnen…</button>
+            <button type="button" data-action="save-project">Speichern <span class="menu-shortcut">Strg+S</span></button>
+            <button type="button" data-action="save-project-as">Speichern unter…</button>
+            <div class="menu-divider"></div>
+            <button type="button" data-action="reopen-last-project">Letztes Projekt fortsetzen</button>
+            <button type="button" data-action="show-last-export">Letzten Export im Ordner zeigen</button>
+            <div class="menu-divider"></div>
+            <button type="button" data-action="export">Video exportieren…</button>
+            <button type="button" data-action="export-frame">📷 Standbild exportieren (scharfes Bild)</button>
+          </div>
+        </div>
+        <div class="menu" data-menu="bearbeiten">
+          <button type="button" class="menu-trigger">Bearbeiten</button>
+          <div class="menu-dropdown">
+            <button type="button" data-action="undo" id="menu-undo">Rückgängig <span class="menu-shortcut">Strg+Z</span></button>
+            <button type="button" data-action="redo" id="menu-redo">Wiederholen <span class="menu-shortcut">Strg+Y</span></button>
+            <div class="menu-divider"></div>
+            <button type="button" data-action="duplicate-clip">Clip duplizieren <span class="menu-shortcut">Strg+D</span></button>
+            <button type="button" data-action="delete-clip">Auswahl löschen <span class="menu-shortcut">Entf</span></button>
+            <button type="button" data-action="deselect">Auswahl aufheben</button>
+          </div>
+        </div>
+        <div class="menu" data-menu="einfuegen">
+          <button type="button" class="menu-trigger">Einfügen</button>
+          <div class="menu-dropdown">
+            <button type="button" data-action="import-video">Video importieren…</button>
+            <button type="button" data-action="import-audio">Audio importieren…</button>
+            <button type="button" data-action="import-demo-music">🎵 Demo-Musik hinzufügen</button>
+            <button type="button" data-action="import-intro-logo">🎬 VideoWelt-Intro einfügen</button>
+            <div class="menu-divider"></div>
+            <button type="button" data-action="add-text">Text-Einblendung hinzufügen</button>
+          </div>
+        </div>
+        <div class="menu" data-menu="clip">
+          <button type="button" class="menu-trigger">Clip</button>
+          <div class="menu-dropdown">
+            <button type="button" data-action="split">Schneiden (Split am Playhead)</button>
+            <button type="button" data-action="duplicate-clip">Clip duplizieren</button>
+            <div class="menu-divider"></div>
+            <button type="button" data-action="loop-sequence">🔁 Als Schleife wiederholen (erneut klicken für mehr)</button>
+            <button type="button" data-action="boomerang-loop">🪃 Boomerang-Loop erstellen (hin &amp; zurück)</button>
+            <button type="button" data-action="toggle-reversed">🔄 Rückwärts abspielen umschalten</button>
+            <div class="menu-divider"></div>
+            <button type="button" data-action="slowmo-75">🐢 Zeitlupen-Kopie 75%</button>
+            <button type="button" data-action="slowmo-50">🐢 Zeitlupen-Kopie 50%</button>
+            <button type="button" data-action="slowmo-25">🐢 Zeitlupen-Kopie 25%</button>
+            <div class="menu-divider"></div>
+            <button type="button" data-action="reset-effects">Effekte zurücksetzen</button>
+            <button type="button" data-action="toggle-mute">Stumm umschalten</button>
+            <div class="menu-divider"></div>
+            <button type="button" data-action="delete-clip">Aus Timeline entfernen</button>
+          </div>
+        </div>
+        <div class="menu" data-menu="effekte">
+          <button type="button" class="menu-trigger">Effekte</button>
+          <div class="menu-dropdown">
+            <button type="button" data-action="preset-reset">Zurücksetzen</button>
+            <div class="menu-divider"></div>
+            <button type="button" data-action="preset-bw">Schwarz-Weiß</button>
+            <button type="button" data-action="preset-sepia">Sepia</button>
+            <button type="button" data-action="preset-warm">Warm</button>
+            <button type="button" data-action="preset-cool">Kalt</button>
+            <button type="button" data-action="preset-cinematic">Kino-Look</button>
+            <div class="menu-divider"></div>
+            <button type="button" data-action="toggle-vignette">Vignette umschalten</button>
+            <button type="button" data-action="toggle-flip">Horizontal spiegeln</button>
+          </div>
+        </div>
+        <div class="menu" data-menu="ansicht">
+          <button type="button" class="menu-trigger">Ansicht</button>
+          <div class="menu-dropdown">
+            <button type="button" data-action="zoom-in">Timeline vergrößern</button>
+            <button type="button" data-action="zoom-out">Timeline verkleinern</button>
+            <button type="button" data-action="zoom-reset">Zoom zurücksetzen</button>
+          </div>
+        </div>
+        <div class="menu" data-menu="hilfe">
+          <button type="button" class="menu-trigger">Hilfe</button>
+          <div class="menu-dropdown">
+            <button type="button" data-action="show-shortcuts">Tastenkürzel</button>
+            <button type="button" data-action="show-about">Über VideoWelt</button>
+          </div>
+        </div>
+      </nav>
+      <input type="text" class="project-name" id="project-name-display" title="Projektname">
+      <span class="save-state" id="save-state"></span>
+      <button type="button" data-action="export" class="tb-btn tb-btn-gold">Exportieren</button>
+    </header>
+
+    <main class="workspace">
+      <aside class="panel media-panel">
+        <h2>Medienbibliothek</h2>
+        <div class="media-list" id="media-list"></div>
+      </aside>
+
+      <section class="center-col">
+        <div class="preview-wrap">
+          <div class="preview-stage" id="preview-stage">
+            <video id="video-a" class="preview-video active" muted playsinline></video>
+            <video id="video-b" class="preview-video" muted playsinline></video>
+            <div class="fade-overlay" id="fade-overlay"></div>
+            <div class="text-overlay-layer" id="text-overlay-layer"></div>
+            <div class="preview-empty" id="preview-empty">Timeline ist leer – Video importieren und in die Spur ziehen</div>
+          </div>
+          <div class="transport">
+            <button id="btn-play" class="tb-btn">▶ Wiedergabe</button>
+            <span class="time-display" id="time-display">00:00 / 00:00</span>
+            <input type="range" id="seek-bar" min="0" max="1000" value="0" class="seek-bar">
+          </div>
+        </div>
+
+        <div class="timeline-wrap">
+          <div class="timeline-toolbar">
+            <button data-action="split" class="tb-btn">Schneiden (Split)</button>
+            <button data-action="delete-clip" class="tb-btn">Löschen</button>
+            <span class="tb-sep"></span>
+            <button data-action="zoom-out" class="tb-btn">−</button>
+            <span class="zoom-label">Zoom</span>
+            <button data-action="zoom-in" class="tb-btn">+</button>
+          </div>
+          <div class="timeline-scroll" id="timeline-scroll">
+            <div class="timeline" id="timeline">
+              <div class="track track-ruler">
+                <span class="track-label"></span>
+                <div class="track-body ruler-body" id="ruler"></div>
+              </div>
+              <div class="track track-video" id="track-video">
+                <span class="track-label">Video</span>
+                <div class="track-body" id="track-video-body"></div>
+              </div>
+              <div class="track track-audio" id="track-audio">
+                <span class="track-label">Audio</span>
+                <div class="track-body" id="track-audio-body"></div>
+              </div>
+              <div class="track track-text" id="track-text">
+                <span class="track-label">Text</span>
+                <div class="track-body" id="track-text-body"></div>
+              </div>
+              <div class="playhead" id="playhead"></div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <aside class="panel props-panel" id="props-panel">
+        <h2>Eigenschaften</h2>
+        <div id="props-content" class="props-content">
+          <p class="hint">Wähle einen Clip in der Timeline aus, um Effekte zu bearbeiten.</p>
+        </div>
+      </aside>
+    </main>
+  </div>
+
+  <div class="modal-backdrop hidden" id="export-modal">
+    <div class="modal">
+      <h2>Video exportieren</h2>
+      <label>Format
+        <select id="export-format">
+          <option value="mp4">MP4 (H.264)</option>
+          <option value="mov">MOV (H.264)</option>
+          <option value="webm">WebM (VP9)</option>
+        </select>
+      </label>
+      <label>Auflösung / Format
+        <select id="export-resolution">
+          <optgroup label="YouTube (16:9 Querformat)">
+            <option value="3840x2160">YouTube 4K (3840×2160)</option>
+            <option value="1920x1080" selected>YouTube Full HD (1920×1080)</option>
+            <option value="1280x720">YouTube HD (1280×720)</option>
+          </optgroup>
+          <optgroup label="YouTube Shorts / Instagram Reels &amp; Story / Facebook Stories (9:16)">
+            <option value="1080x1920">Hochformat Full HD (1080×1920)</option>
+            <option value="720x1280">Hochformat HD (720×1280)</option>
+          </optgroup>
+          <optgroup label="Instagram Feed / Facebook Feed (1:1)">
+            <option value="1080x1080">Quadrat (1080×1080)</option>
+          </optgroup>
+          <optgroup label="Sonstiges">
+            <option value="854x480">SD (854×480)</option>
+          </optgroup>
+        </select>
+      </label>
+      <label>Qualität
+        <select id="export-quality">
+          <option value="hoch">Hoch</option>
+          <option value="mittel" selected>Mittel</option>
+          <option value="niedrig">Niedrig (kleine Datei)</option>
+        </select>
+      </label>
+      <label>Bildrate (FPS)
+        <select id="export-fps">
+          <option value="24">24</option>
+          <option value="30" selected>30</option>
+          <option value="60">60</option>
+        </select>
+      </label>
+      <div class="modal-progress hidden" id="export-progress-wrap">
+        <div class="progress-bar"><div class="progress-fill" id="export-progress-fill"></div></div>
+        <span id="export-progress-label">0%</span>
+      </div>
+      <div class="modal-actions">
+        <button data-action="cancel-export" class="tb-btn">Abbrechen</button>
+        <button data-action="start-export" class="tb-btn tb-btn-gold" id="start-export-btn">Exportieren &amp; Speichern</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="modal-backdrop hidden" id="shortcuts-modal">
+    <div class="modal">
+      <h2>Tastenkürzel</h2>
+      <table class="shortcuts-table">
+        <tr><td>Leertaste</td><td>Wiedergabe / Pause</td></tr>
+        <tr><td>Strg+Z</td><td>Rückgängig</td></tr>
+        <tr><td>Strg+Y / Strg+Umschalt+Z</td><td>Wiederholen</td></tr>
+        <tr><td>Strg+S</td><td>Projekt speichern</td></tr>
+        <tr><td>Strg+D</td><td>Clip duplizieren</td></tr>
+        <tr><td>Entf</td><td>Auswahl löschen</td></tr>
+        <tr><td>Strg + / Strg −</td><td>Timeline vergrößern / verkleinern</td></tr>
+      </table>
+      <div class="modal-actions">
+        <button type="button" data-action="close-shortcuts" class="tb-btn tb-btn-gold">Schließen</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="modal-backdrop hidden" id="about-modal">
+    <div class="modal">
+      <h2>Über VideoWelt</h2>
+      <p>VideoWelt ist eine eigenständige Desktop-Software zum Bearbeiten, Erstellen und Schneiden von
+        Videos, mit echter Verarbeitung über ein gebündeltes ffmpeg. Schneiden, Effekte, Übergänge,
+        Text-Einblendungen, Hintergrundmusik und Export – alles in einer App.</p>
+      <div class="modal-actions">
+        <button type="button" data-action="close-about" class="tb-btn tb-btn-gold">Schließen</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="modal-backdrop hidden" id="export-done-modal">
+    <div class="modal">
+      <h2>Export abgeschlossen</h2>
+      <p id="export-done-text"></p>
+      <div class="modal-actions">
+        <button data-action="close-export-done" class="tb-btn">Schließen</button>
+        <button data-action="show-in-folder" class="tb-btn tb-btn-gold">Im Ordner anzeigen / Teilen</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="renderer.js"></script>
+</body>
+</html>
