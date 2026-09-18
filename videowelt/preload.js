@@ -4,7 +4,9 @@ contextBridge.exposeInMainWorld('videoWeltAPI', {
   importVideos: () => ipcRenderer.invoke('import-media', { kind: 'video' }),
   importAudio: () => ipcRenderer.invoke('import-media', { kind: 'audio' }),
   importDemoMusic: () => ipcRenderer.invoke('import-demo-music'),
+  importIntroLogo: () => ipcRenderer.invoke('import-intro-logo'),
   exportVideo: (state, settings) => ipcRenderer.invoke('export-video', { state, settings }),
+  exportFrame: (payload) => ipcRenderer.invoke('export-frame', payload),
   onExportProgress: (callback) => {
     const listener = (event, progress) => callback(progress);
     ipcRenderer.on('export-progress', listener);

@@ -1,9 +1,10 @@
 const { app, BrowserWindow, ipcMain, dialog, shell } = require('electron');
 const path = require('path');
 const fs = require('fs');
-const { probeMedia, generateThumbnail, runExport, SAMPLES_DIR } = require('./ffmpeg-export');
+const { probeMedia, generateThumbnail, runExport, extractStillFrame, SAMPLES_DIR } = require('./ffmpeg-export');
 
 const DEMO_MUSIC_PATH = path.join(SAMPLES_DIR, 'demo-musik.mp3');
+const INTRO_LOGO_PATH = path.join(SAMPLES_DIR, 'intro-logo.mp4');
 
 const thumbDir = path.join(app.getPath('userData'), 'videowelt-thumbnails');
 const settingsFile = path.join(app.getPath('userData'), 'videowelt-settings.json');
@@ -117,6 +118,15 @@ ipcMain.handle('import-demo-music', async () => {
   return { item };
 });
 
+ipcMain.handle('import-intro-logo', async () => {
+  if (!fs.existsSync(INTRO_LOGO_PATH)) {
+    return { error: 'Das eingebaute VideoWelt-Intro wurde nicht gefunden.' };
+  }
+  const item = await probeToMediaItem(INTRO_LOGO_PATH, 'VideoWelt-Intro');
+  if (item.error) return { error: item.error };
+  return { item };
+});
+
 ipcMain.handle('export-video', async (event, { state, settings }) => {
   const format = settings.format || 'mp4';
   const result = await dialog.showSaveDialog(mainWindow, {
@@ -134,6 +144,21 @@ ipcMain.handle('export-video', async (event, { state, settings }) => {
       if (!sender.isDestroyed()) sender.send('export-progress', progress);
     });
     return { canceled: false, path: outputPath };
+  } catch (err) {
+    return { canceled: false, error: err.message || String(err) };
+  }
+});
+
+ipcMain.handle('export-frame', async (event, { mediaPath, sourceTime, effects, suggestedName }) => {
+  const result = await dialog.showSaveDialog(mainWindow, {
+    title: 'Standbild exportieren',
+    defaultPath: (suggestedName || 'VideoWelt-Standbild') + '.png',
+    filters: [{ name: 'PNG-Bild', extensions: ['png'] }]
+  });
+  if (result.canceled || !result.filePath) return { canceled: true };
+  try {
+    await extractStillFrame(mediaPath, sourceTime, effects, result.filePath);
+    return { canceled: false, path: result.filePath };
   } catch (err) {
     return { canceled: false, error: err.message || String(err) };
   }

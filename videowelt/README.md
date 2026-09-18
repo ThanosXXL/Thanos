@@ -17,17 +17,26 @@ Build-Konfiguration und keine CI.
 - **Menüleiste** mit Datei, Bearbeiten, Einfügen, Clip, Effekte, Ansicht und Hilfe – inklusive Rückgängig/Wiederholen
   (Strg+Z / Strg+Y), Clip duplizieren (Strg+D), Tastenkürzel-Übersicht und "Über VideoWelt"
 - **Medienbibliothek**: Video- und Audiodateien importieren (MP4, MOV, AVI, MKV, WebM, MP3, WAV, AAC, …)
+- **VideoWelt-Intro**: das animierte 3D-Logo als fertiger Clip, mit einem Klick an den Anfang der Timeline
+  eingefügt (inkl. Überblendung in den nächsten Clip)
 - **Timeline** mit Video-, Audio- und Text-Spur: Clips schneiden, trimmen (per Ziehen an den Rändern),
   in Reihenfolge bringen, duplizieren, teilen (Split am Playhead), löschen – mit voller Rückgängig/Wiederholen-Historie
+- **Loop- und Zeitlupen-Sequenzen**: ein ausgewählter Clip lässt sich per Menü als eigenständige, einzeln
+  bearbeitbare Wiederholung ("Als Schleife wiederholen") oder als Zeitlupen-Kopie (0,5×) direkt danach in die
+  Timeline einfügen
 - **Effekte pro Clip**: Helligkeit, Kontrast, Sättigung, Graustufen, Sepia, Weichzeichnen, Schärfen, Farbton (Hue),
-  Vignette, horizontal/vertikal spiegeln, Rotation, Geschwindigkeit (0,25×–4×), Ein-/Ausblenden,
-  Stummschaltung/Lautstärke – live in der Vorschau sichtbar
+  Vignette, horizontal/vertikal spiegeln, Rotation, Geschwindigkeit (0,25×–4×, inkl. weicher Zeitlupe per
+  Bewegungsinterpolation für ruckelfreie Slow-Motion), Ein-/Ausblenden, Stummschaltung/Lautstärke – live in
+  der Vorschau sichtbar
+- **Standbild-Export**: die aktuelle Vorschauposition als scharfes PNG in voller Quellauflösung speichern –
+  inklusive der auf den Clip angewendeten Effekte
 - **Effekt-Presets** im Menü "Effekte": Schwarz-Weiß, Sepia, Warm, Kalt, Kino-Look – mit einem Klick auf den
   ausgewählten Clip anwendbar
 - **Übergänge** zwischen Clips: über 35 Varianten (Überblenden, Schwarz-/Weiß-/Grau-Blende, Wischen, Gleiten,
   weiches Wischen, Kreis-/Rechteck-Formen, Öffnen/Schließen, Diagonal, Verpixeln, Radial, Zoom u.v.m.), live in
   der Vorschau animiert
-- **Text-Einblendungen**: frei positionierbar, mit Schriftgröße und Farbe, zeitlich begrenzt
+- **Text-Einblendungen**: frei positionierbar, mit Schriftgröße, Farbe und Schriftart (Montserrat oder das
+  humanistische Open Sans) wählbar, zeitlich begrenzt
 - **Hintergrundmusik/Audiospur** unabhängig von der Video-Timeline positionierbar, mit Lautstärke und Ein-/Ausblenden;
   ein Klick auf "Auf Videolänge anpassen" passt Start/Ende automatisch an die Gesamtlänge des Videos an und
   wiederholt die Musik nahtlos in einer Schleife, falls sie kürzer ist. Ein eingebauter Demo-Musiktitel

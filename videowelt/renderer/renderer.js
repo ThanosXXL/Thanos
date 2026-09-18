@@ -117,7 +117,7 @@
     return {
       brightness: 0, contrast: 1, saturation: 1, grayscale: false, sepia: false,
       blur: 0, rotate: 0, speed: 1, fadeIn: 0, fadeOut: 0, muted: false, volume: 1,
-      hue: 0, sharpen: 0, vignette: false, flipH: false, flipV: false
+      hue: 0, sharpen: 0, vignette: false, flipH: false, flipV: false, smoothSlowmo: false
     };
   }
 
@@ -270,14 +270,18 @@
     else if (action === 'reopen-last-project') tryReopenLastProject();
     else if (action === 'show-last-export') showLastExport();
     else if (action === 'export') openExportModal();
+    else if (action === 'export-frame') exportCurrentFrame();
     else if (action === 'undo') undo();
     else if (action === 'redo') redo();
     else if (action === 'duplicate-clip') duplicateSelectedClip();
+    else if (action === 'loop-sequence') loopSequence();
+    else if (action === 'slowmo-sequence') slowmoSequence();
     else if (action === 'delete-clip') deleteSelected();
     else if (action === 'deselect') deselectAll();
     else if (action === 'import-video') importVideos();
     else if (action === 'import-audio') importAudio();
     else if (action === 'import-demo-music') importDemoMusic();
+    else if (action === 'import-intro-logo') importIntroLogo();
     else if (action === 'add-text') addTextOverlay();
     else if (action === 'split') splitAtPlayhead();
     else if (action === 'reset-effects') resetSelectedClipEffects();
@@ -475,6 +479,27 @@
       fitAudioToVideoLength(added);
       ui.selection = { type: 'audio', id: added.id };
     }
+    markUnsaved();
+    renderAll();
+  }
+
+  async function importIntroLogo() {
+    const result = await window.videoWeltAPI.importIntroLogo();
+    if (result.error) { alert(result.error); return; }
+    let media = state.mediaLibrary.find((m) => m.path === result.item.path);
+    if (!media) {
+      media = result.item;
+      state.mediaLibrary.push(media);
+    }
+    pushHistory();
+    const clip = {
+      id: uid('clip'), mediaId: media.id,
+      inPoint: 0, outPoint: media.duration || 1,
+      effects: defaultEffects(),
+      transitionOut: { type: 'fade', duration: 0.6 }
+    };
+    state.timeline.videoTrack.unshift(clip);
+    ui.selection = { type: 'video', id: clip.id };
     markUnsaved();
     renderAll();
   }
@@ -968,7 +993,7 @@
     const item = {
       id: uid('txt'), text: 'Dein Text',
       start: ui.playhead, end: ui.playhead + 3,
-      x: 0.5, y: 0.85, fontSize: 42, color: '#ffffff'
+      x: 0.5, y: 0.85, fontSize: 42, color: '#ffffff', fontFamily: 'Montserrat'
     };
     state.timeline.textOverlays.push(item);
     ui.selection = { type: 'text', id: item.id };
@@ -1070,6 +1095,33 @@
       state.timeline.textOverlays.push(copy);
       ui.selection = { type: 'text', id: copy.id };
     }
+    markUnsaved();
+    renderAll();
+  }
+
+  function loopSequence() {
+    const clip = getSelectedVideoClip();
+    if (!clip) { alert('Bitte zuerst einen Videoclip in der Timeline auswählen.'); return; }
+    const idx = state.timeline.videoTrack.indexOf(clip);
+    pushHistory();
+    const copy = JSON.parse(JSON.stringify(clip));
+    copy.id = uid('clip');
+    state.timeline.videoTrack.splice(idx + 1, 0, copy);
+    ui.selection = { type: 'video', id: copy.id };
+    markUnsaved();
+    renderAll();
+  }
+
+  function slowmoSequence() {
+    const clip = getSelectedVideoClip();
+    if (!clip) { alert('Bitte zuerst einen Videoclip in der Timeline auswählen.'); return; }
+    const idx = state.timeline.videoTrack.indexOf(clip);
+    pushHistory();
+    const copy = JSON.parse(JSON.stringify(clip));
+    copy.id = uid('clip');
+    copy.effects.speed = clamp((clip.effects.speed || 1) * 0.5, 0.25, 4);
+    state.timeline.videoTrack.splice(idx + 1, 0, copy);
+    ui.selection = { type: 'video', id: copy.id };
     markUnsaved();
     renderAll();
   }
@@ -1301,6 +1353,7 @@
     root.appendChild(trimRow);
 
     addSlider(root, 'Geschwindigkeit', { min: 0.25, max: 4, step: 0.05, value: clip.effects.speed, format: (v) => v.toFixed(2) + 'x' }, (v) => { clip.effects.speed = v; afterClipEdit(clip); });
+    addCheckbox(root, 'Weiche Zeitlupe (nur bei < 1x wirksam)', clip.effects.smoothSlowmo, (v) => { clip.effects.smoothSlowmo = v; });
     addSlider(root, 'Helligkeit', { min: -1, max: 1, step: 0.05, value: clip.effects.brightness, format: (v) => Math.round(v * 100) + '%' }, (v) => { clip.effects.brightness = v; liveFilterUpdate(clip); });
     addSlider(root, 'Kontrast', { min: 0, max: 3, step: 0.05, value: clip.effects.contrast, format: (v) => Math.round(v * 100) + '%' }, (v) => { clip.effects.contrast = v; liveFilterUpdate(clip); });
     addSlider(root, 'Sättigung', { min: 0, max: 3, step: 0.05, value: clip.effects.saturation, format: (v) => Math.round(v * 100) + '%' }, (v) => { clip.effects.saturation = v; liveFilterUpdate(clip); });
@@ -1408,6 +1461,10 @@
     addSlider(root, 'Position horizontal', { min: 0, max: 1, step: 0.01, value: item.x, format: (v) => Math.round(v * 100) + '%' }, (v) => { item.x = v; updateTextOverlayPreview(); });
     addSlider(root, 'Position vertikal', { min: 0, max: 1, step: 0.01, value: item.y, format: (v) => Math.round(v * 100) + '%' }, (v) => { item.y = v; updateTextOverlayPreview(); });
     addSlider(root, 'Schriftgröße', { min: 14, max: 120, step: 1, value: item.fontSize, format: (v) => v + 'px' }, (v) => { item.fontSize = v; updateTextOverlayPreview(); });
+    addSelect(root, 'Schriftart', [
+      { value: 'Montserrat', label: 'Montserrat (geometrisch)' },
+      { value: 'Open Sans', label: 'Open Sans (humanistisch)' }
+    ], item.fontFamily || 'Montserrat', (v) => { item.fontFamily = v; updateTextOverlayPreview(); });
 
     const colorWrap = document.createElement('label');
     colorWrap.appendChild(document.createTextNode('Farbe'));
@@ -1624,6 +1681,7 @@
         div.style.top = (item.y * 100) + '%';
         div.style.fontSize = (item.fontSize || 42) + 'px';
         div.style.color = item.color || '#ffffff';
+        div.style.fontFamily = "'" + (item.fontFamily || 'Montserrat') + "', sans-serif";
         layer.appendChild(div);
       }
     });
@@ -1671,6 +1729,29 @@
   }
 
   // ---------- Export ----------
+
+  async function exportCurrentFrame() {
+    const item = findClipAtTime(ui.playhead);
+    if (!item) {
+      alert('Kein Videobild an der aktuellen Position. Bewege den Playhead auf einen Clip in der Timeline.');
+      return;
+    }
+    const media = getMedia(item.clip.mediaId);
+    if (!media) return;
+    const speed = clamp(item.clip.effects.speed || 1, 0.25, 4);
+    const sourceTime = item.clip.inPoint + (ui.playhead - item.start) * speed;
+    const result = await window.videoWeltAPI.exportFrame({
+      mediaPath: media.path,
+      sourceTime,
+      effects: item.clip.effects,
+      suggestedName: (state.projectName || 'VideoWelt') + '-Standbild'
+    });
+    if (result.canceled) return;
+    if (result.error) { alert('Standbild-Export fehlgeschlagen: ' + result.error); return; }
+    lastExportPath = result.path;
+    el.exportDoneText.textContent = 'Das Standbild wurde erfolgreich gespeichert:\n' + result.path;
+    el.exportDoneModal.classList.remove('hidden');
+  }
 
   function openExportModal() {
     if (!state.timeline.videoTrack.length) {

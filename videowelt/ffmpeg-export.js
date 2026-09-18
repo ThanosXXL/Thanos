@@ -142,8 +142,9 @@ function buildAssSubtitleFile(textOverlays, targetRes) {
     const y = Math.round(clamp(ov.y != null ? ov.y : 0.85, 0, 1) * targetRes.h);
     const fontsize = Math.round(clamp(ov.fontSize || 42, 8, 200));
     const color = hexToAssColor(ov.color || '#ffffff');
+    const fontFamily = (ov.fontFamily || 'Montserrat').replace(/[{}\\]/g, '');
     const text = escapeAssText(ov.text || '');
-    const overrides = `{\\pos(${x},${y})\\fs${fontsize}\\c${color}}`;
+    const overrides = `{\\pos(${x},${y})\\fs${fontsize}\\c${color}\\fn${fontFamily}}`;
     lines.push(`Dialogue: 0,${toAssTime(start)},${toAssTime(end)},Default,,0,0,0,,${overrides}${text}`);
   });
 
@@ -156,19 +157,8 @@ function clamp(v, min, max) {
   return Math.min(max, Math.max(min, Number(v)));
 }
 
-function buildVideoFilterChain(clip, mediaItem, targetRes, index, fps) {
-  const fx = clip.effects || {};
-  const inPoint = Number(clip.inPoint) || 0;
-  const outPoint = Number(clip.outPoint) || (mediaItem.duration || inPoint + 1);
-  const speed = clamp(fx.speed || 1, 0.25, 4);
-  const rawDuration = Math.max(0.05, outPoint - inPoint);
-  const effDuration = rawDuration / speed;
-
+function buildTransformFilterParts(fx) {
   const parts = [];
-  parts.push(`trim=start=${inPoint}:end=${outPoint}`);
-  parts.push('setpts=PTS-STARTPTS');
-  if (speed !== 1) parts.push(`setpts=${(1 / speed).toFixed(6)}*PTS`);
-
   if (fx.flipH) parts.push('hflip');
   if (fx.flipV) parts.push('vflip');
 
@@ -176,17 +166,11 @@ function buildVideoFilterChain(clip, mediaItem, targetRes, index, fps) {
   if (rotate === 90) parts.push('transpose=1');
   else if (rotate === 180) parts.push('transpose=1,transpose=1');
   else if (rotate === 270) parts.push('transpose=2');
+  return parts;
+}
 
-  parts.push(
-    `scale=${targetRes.w}:${targetRes.h}:force_original_aspect_ratio=decrease`
-  );
-  parts.push(`pad=${targetRes.w}:${targetRes.h}:(ow-iw)/2:(oh-ih)/2:color=black`);
-  parts.push('setsar=1');
-  // xfade (and downstream concat) require a known, constant frame rate;
-  // without this, a source with variable/unknown fps metadata makes xfade
-  // fail with "inputs needs to be a constant frame rate".
-  parts.push(`fps=${fps}`);
-
+function buildColorFilterParts(fx) {
+  const parts = [];
   const brightness = clamp(fx.brightness || 0, -1, 1);
   const contrast = clamp(fx.contrast != null ? fx.contrast : 1, 0, 3);
   const saturation = fx.grayscale ? 0 : clamp(fx.saturation != null ? fx.saturation : 1, 0, 3);
@@ -205,6 +189,43 @@ function buildVideoFilterChain(clip, mediaItem, targetRes, index, fps) {
   if (sharpen > 0) parts.push(`unsharp=5:5:${sharpen}:5:5:0`);
   if (fx.vignette) parts.push('vignette');
 
+  return parts;
+}
+
+function buildVideoFilterChain(clip, mediaItem, targetRes, index, fps) {
+  const fx = clip.effects || {};
+  const inPoint = Number(clip.inPoint) || 0;
+  const outPoint = Number(clip.outPoint) || (mediaItem.duration || inPoint + 1);
+  const speed = clamp(fx.speed || 1, 0.25, 4);
+  const rawDuration = Math.max(0.05, outPoint - inPoint);
+  const effDuration = rawDuration / speed;
+
+  const parts = [];
+  parts.push(`trim=start=${inPoint}:end=${outPoint}`);
+  parts.push('setpts=PTS-STARTPTS');
+  if (speed !== 1) parts.push(`setpts=${(1 / speed).toFixed(6)}*PTS`);
+
+  parts.push(...buildTransformFilterParts(fx));
+
+  parts.push(
+    `scale=${targetRes.w}:${targetRes.h}:force_original_aspect_ratio=decrease`
+  );
+  parts.push(`pad=${targetRes.w}:${targetRes.h}:(ow-iw)/2:(oh-ih)/2:color=black`);
+  parts.push('setsar=1');
+  // xfade (and downstream concat) require a known, constant frame rate;
+  // without this, a source with variable/unknown fps metadata makes xfade
+  // fail with "inputs needs to be a constant frame rate". For slow motion
+  // with smoothSlowmo on, minterpolate generates the extra in-between
+  // frames motion-compensated (judder-free) and also pins the frame rate,
+  // so it replaces the plain fps filter rather than stacking with it.
+  if (fx.smoothSlowmo && speed < 1) {
+    parts.push(`minterpolate=fps=${fps}:mi_mode=mci:mc_mode=aobmc:me_mode=bidir:vsbmc=1`);
+  } else {
+    parts.push(`fps=${fps}`);
+  }
+
+  parts.push(...buildColorFilterParts(fx));
+
   const fadeIn = clamp(fx.fadeIn || 0, 0, effDuration / 2);
   const fadeOut = clamp(fx.fadeOut || 0, 0, effDuration / 2);
   if (fadeIn > 0) parts.push(`fade=t=in:st=0:d=${fadeIn}`);
@@ -213,6 +234,24 @@ function buildVideoFilterChain(clip, mediaItem, targetRes, index, fps) {
   parts.push('format=yuv420p');
 
   return { filter: `[${index}:v]${parts.join(',')}[v${index}]`, effDuration, hasAudio: mediaItem.hasAudio !== false };
+}
+
+function extractStillFrame(mediaPath, sourceTime, effects, outputPath) {
+  const fx = effects || {};
+  // Full source resolution, no scale/pad — a still grabbed for its own sake
+  // should be as sharp as the source allows, not clamped to export/preview size.
+  const filterParts = [...buildTransformFilterParts(fx), ...buildColorFilterParts(fx)];
+
+  return new Promise((resolve, reject) => {
+    const command = ffmpeg(mediaPath).seekInput(Math.max(0, Number(sourceTime) || 0));
+    if (filterParts.length) command.videoFilters(filterParts.join(','));
+    command
+      .outputOptions(['-frames:v', '1'])
+      .output(outputPath)
+      .on('error', (err) => reject(new Error((err && err.message) || 'Standbild-Export fehlgeschlagen')))
+      .on('end', () => resolve(outputPath))
+      .run();
+  });
 }
 
 function buildAudioFilterChain(clip, mediaItem, index) {
@@ -505,4 +544,4 @@ function runExport(state, settings, outputPath, onProgress) {
   });
 }
 
-module.exports = { probeMedia, generateThumbnail, runExport, RESOLUTIONS, SAMPLES_DIR };
+module.exports = { probeMedia, generateThumbnail, runExport, extractStillFrame, RESOLUTIONS, SAMPLES_DIR };
