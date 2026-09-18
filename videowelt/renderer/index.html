@@ -84,7 +84,12 @@
             <button type="button" data-action="duplicate-clip">Clip duplizieren</button>
             <div class="menu-divider"></div>
             <button type="button" data-action="loop-sequence">🔁 Als Schleife wiederholen (erneut klicken für mehr)</button>
-            <button type="button" data-action="slowmo-sequence">🐢 Zeitlupen-Kopie einfügen (0,5×)</button>
+            <button type="button" data-action="boomerang-loop">🪃 Boomerang-Loop erstellen (hin &amp; zurück)</button>
+            <button type="button" data-action="toggle-reversed">🔄 Rückwärts abspielen umschalten</button>
+            <div class="menu-divider"></div>
+            <button type="button" data-action="slowmo-75">🐢 Zeitlupen-Kopie 75%</button>
+            <button type="button" data-action="slowmo-50">🐢 Zeitlupen-Kopie 50%</button>
+            <button type="button" data-action="slowmo-25">🐢 Zeitlupen-Kopie 25%</button>
             <div class="menu-divider"></div>
             <button type="button" data-action="reset-effects">Effekte zurücksetzen</button>
             <button type="button" data-action="toggle-mute">Stumm umschalten</button>
@@ -204,18 +209,20 @@
       </label>
       <label>Auflösung / Format
         <select id="export-resolution">
-          <optgroup label="Querformat (16:9)">
-            <option value="3840x2160">4K (3840×2160)</option>
-            <option value="1920x1080" selected>Full HD (1920×1080)</option>
-            <option value="1280x720">HD (1280×720)</option>
-            <option value="854x480">SD (854×480)</option>
+          <optgroup label="YouTube (16:9 Querformat)">
+            <option value="3840x2160">YouTube 4K (3840×2160)</option>
+            <option value="1920x1080" selected>YouTube Full HD (1920×1080)</option>
+            <option value="1280x720">YouTube HD (1280×720)</option>
           </optgroup>
-          <optgroup label="Hochformat – Story/Reels/TikTok (9:16)">
-            <option value="1080x1920">Full HD Hochformat (1080×1920)</option>
-            <option value="720x1280">HD Hochformat (720×1280)</option>
+          <optgroup label="YouTube Shorts / Instagram Reels &amp; Story / Facebook Stories (9:16)">
+            <option value="1080x1920">Hochformat Full HD (1080×1920)</option>
+            <option value="720x1280">Hochformat HD (720×1280)</option>
           </optgroup>
-          <optgroup label="Quadratisch (1:1)">
+          <optgroup label="Instagram Feed / Facebook Feed (1:1)">
             <option value="1080x1080">Quadrat (1080×1080)</option>
+          </optgroup>
+          <optgroup label="Sonstiges">
+            <option value="854x480">SD (854×480)</option>
           </optgroup>
         </select>
       </label>

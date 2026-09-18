@@ -117,7 +117,7 @@
     return {
       brightness: 0, contrast: 1, saturation: 1, grayscale: false, sepia: false,
       blur: 0, rotate: 0, speed: 1, fadeIn: 0, fadeOut: 0, muted: false, volume: 1,
-      hue: 0, sharpen: 0, vignette: false, flipH: false, flipV: false, smoothSlowmo: false
+      hue: 0, sharpen: 0, vignette: false, flipH: false, flipV: false, smoothSlowmo: false, reversed: false
     };
   }
 
@@ -275,7 +275,11 @@
     else if (action === 'redo') redo();
     else if (action === 'duplicate-clip') duplicateSelectedClip();
     else if (action === 'loop-sequence') loopSequence();
-    else if (action === 'slowmo-sequence') slowmoSequence();
+    else if (action === 'boomerang-loop') createBoomerangLoop();
+    else if (action === 'toggle-reversed') toggleSelectedClipReversed();
+    else if (action === 'slowmo-75') slowmoSequenceAt(0.75);
+    else if (action === 'slowmo-50') slowmoSequenceAt(0.5);
+    else if (action === 'slowmo-25') slowmoSequenceAt(0.25);
     else if (action === 'delete-clip') deleteSelected();
     else if (action === 'deselect') deselectAll();
     else if (action === 'import-video') importVideos();
@@ -708,7 +712,8 @@
 
       const label = document.createElement('span');
       label.className = 'clip-label';
-      label.textContent = media ? media.name : 'Clip';
+      const namePart = media ? media.name : 'Clip';
+      label.textContent = clip.effects.reversed ? '🔄 ' + namePart : namePart;
       div.appendChild(label);
 
       const leftHandle = document.createElement('div');
@@ -1112,14 +1117,38 @@
     renderAll();
   }
 
-  function slowmoSequence() {
+  function slowmoSequenceAt(targetSpeed) {
     const clip = getSelectedVideoClip();
     if (!clip) { alert('Bitte zuerst einen Videoclip in der Timeline auswählen.'); return; }
     const idx = state.timeline.videoTrack.indexOf(clip);
     pushHistory();
     const copy = JSON.parse(JSON.stringify(clip));
     copy.id = uid('clip');
-    copy.effects.speed = clamp((clip.effects.speed || 1) * 0.5, 0.25, 4);
+    copy.effects.speed = clamp(targetSpeed, 0.25, 4);
+    state.timeline.videoTrack.splice(idx + 1, 0, copy);
+    ui.selection = { type: 'video', id: copy.id };
+    markUnsaved();
+    renderAll();
+  }
+
+  function toggleSelectedClipReversed() {
+    const clip = getSelectedVideoClip();
+    if (!clip) { alert('Bitte zuerst einen Videoclip in der Timeline auswählen.'); return; }
+    pushHistory();
+    clip.effects.reversed = !clip.effects.reversed;
+    markUnsaved();
+    renderAll();
+  }
+
+  function createBoomerangLoop() {
+    const clip = getSelectedVideoClip();
+    if (!clip) { alert('Bitte zuerst einen Videoclip in der Timeline auswählen.'); return; }
+    const idx = state.timeline.videoTrack.indexOf(clip);
+    pushHistory();
+    clip.transitionOut = { type: 'none', duration: 0.4 };
+    const copy = JSON.parse(JSON.stringify(clip));
+    copy.id = uid('clip');
+    copy.effects.reversed = !copy.effects.reversed;
     state.timeline.videoTrack.splice(idx + 1, 0, copy);
     ui.selection = { type: 'video', id: copy.id };
     markUnsaved();
@@ -1366,6 +1395,13 @@
     addCheckbox(root, 'Horizontal spiegeln', clip.effects.flipH, (v) => { clip.effects.flipH = v; liveFilterUpdate(clip); });
     addCheckbox(root, 'Vertikal spiegeln', clip.effects.flipV, (v) => { clip.effects.flipV = v; liveFilterUpdate(clip); });
     addCheckbox(root, 'Vignette', clip.effects.vignette, (v) => { clip.effects.vignette = v; liveFilterUpdate(clip); });
+    addCheckbox(root, 'Rückwärts abspielen', clip.effects.reversed, (v) => { clip.effects.reversed = v; });
+    if (clip.effects.reversed) {
+      const reversedHint = document.createElement('p');
+      reversedHint.className = 'hint';
+      reversedHint.textContent = '🔄 Wird beim Export rückwärts abgespielt (in der Live-Vorschau nicht darstellbar).';
+      root.appendChild(reversedHint);
+    }
     addSlider(root, 'Einblenden (Fade-In)', { min: 0, max: 3, step: 0.1, value: clip.effects.fadeIn, format: (v) => v.toFixed(1) + 's' }, (v) => { clip.effects.fadeIn = v; });
     addSlider(root, 'Ausblenden (Fade-Out)', { min: 0, max: 3, step: 0.1, value: clip.effects.fadeOut, format: (v) => v.toFixed(1) + 's' }, (v) => { clip.effects.fadeOut = v; });
 

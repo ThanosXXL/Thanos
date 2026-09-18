@@ -50,7 +50,10 @@ const RESOLUTIONS = {
   '3840x2160': { w: 3840, h: 2160 },
   '1920x1080': { w: 1920, h: 1080 },
   '1280x720': { w: 1280, h: 720 },
-  '854x480': { w: 854, h: 480 }
+  '854x480': { w: 854, h: 480 },
+  '1080x1920': { w: 1080, h: 1920 },
+  '720x1280': { w: 720, h: 1280 },
+  '1080x1080': { w: 1080, h: 1080 }
 };
 
 function probeMedia(filePath) {
@@ -204,6 +207,7 @@ function buildVideoFilterChain(clip, mediaItem, targetRes, index, fps) {
   parts.push(`trim=start=${inPoint}:end=${outPoint}`);
   parts.push('setpts=PTS-STARTPTS');
   if (speed !== 1) parts.push(`setpts=${(1 / speed).toFixed(6)}*PTS`);
+  if (fx.reversed) parts.push('reverse');
 
   parts.push(...buildTransformFilterParts(fx));
 
@@ -276,6 +280,7 @@ function buildAudioFilterChain(clip, mediaItem, index) {
     }
     parts.push(`atempo=${remaining.toFixed(6)}`);
   }
+  if (fx.reversed) parts.push('areverse');
   parts.push(`volume=${muted ? 0 : clamp(fx.volume != null ? fx.volume : 1, 0, 4)}`);
   return `[${index}:a]${parts.join(',')}[a${index}]`;
 }
