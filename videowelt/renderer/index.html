@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' file: data:; media-src 'self' file:; script-src 'self'; connect-src 'self';">
+<title>VideoWelt</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Great+Vibes&family=Montserrat:wght@400;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+  <div id="splash" class="splash">
+    <div class="splash-stage">
+      <div class="ground-glow"></div>
+      <div class="logo-wrap">
+        <div class="camera-icon">
+          <div class="cam-group">
+            <div class="cam-viewfinder gold-surface"></div>
+            <div class="cam-body gold-surface"></div>
+            <div class="cam-foot gold-surface"></div>
+            <div class="cam-lens-mount gold-surface"></div>
+            <div class="cam-lens-ring"></div>
+            <div class="cam-lens-glass"></div>
+            <div class="cam-rec-dot"></div>
+          </div>
+          <div class="sheen"></div>
+        </div>
+        <div class="wordmark">VideoWelt</div>
+        <div class="tagline">Alles für dein Video</div>
+      </div>
+    </div>
+  </div>
+
+  <div id="app" class="app hidden">
+    <header class="topbar">
+      <div class="brand">
+        <div class="brand-cam gold-surface"></div>
+        <span class="brand-word">VideoWelt</span>
+      </div>
+      <nav class="toolbar" id="toolbar">
+        <button data-action="new-project" class="tb-btn">Neues Projekt</button>
+        <button data-action="open-project" class="tb-btn">Öffnen</button>
+        <button data-action="save-project" class="tb-btn">Speichern</button>
+        <button data-action="save-project-as" class="tb-btn">Speichern unter</button>
+        <span class="tb-sep"></span>
+        <button data-action="import-video" class="tb-btn">Video importieren</button>
+        <button data-action="import-audio" class="tb-btn">Audio importieren</button>
+        <button data-action="add-text" class="tb-btn">Text hinzufügen</button>
+        <span class="tb-sep"></span>
+        <button data-action="export" class="tb-btn tb-btn-gold">Exportieren</button>
+      </nav>
+      <input type="text" class="project-name" id="project-name-display" title="Projektname">
+      <span class="save-state" id="save-state"></span>
+    </header>
+
+    <main class="workspace">
+      <aside class="panel media-panel">
+        <h2>Medienbibliothek</h2>
+        <div class="media-list" id="media-list"></div>
+      </aside>
+
+      <section class="center-col">
+        <div class="preview-wrap">
+          <div class="preview-stage" id="preview-stage">
+            <video id="video-a" class="preview-video active" muted playsinline></video>
+            <video id="video-b" class="preview-video" muted playsinline></video>
+            <div class="fade-overlay" id="fade-overlay"></div>
+            <div class="text-overlay-layer" id="text-overlay-layer"></div>
+            <div class="preview-empty" id="preview-empty">Timeline ist leer – Video importieren und in die Spur ziehen</div>
+          </div>
+          <div class="transport">
+            <button id="btn-play" class="tb-btn">▶ Wiedergabe</button>
+            <span class="time-display" id="time-display">00:00 / 00:00</span>
+            <input type="range" id="seek-bar" min="0" max="1000" value="0" class="seek-bar">
+          </div>
+        </div>
+
+        <div class="timeline-wrap">
+          <div class="timeline-toolbar">
+            <button data-action="split" class="tb-btn">Schneiden (Split)</button>
+            <button data-action="delete-clip" class="tb-btn">Löschen</button>
+            <span class="tb-sep"></span>
+            <button data-action="zoom-out" class="tb-btn">−</button>
+            <span class="zoom-label">Zoom</span>
+            <button data-action="zoom-in" class="tb-btn">+</button>
+          </div>
+          <div class="timeline-scroll" id="timeline-scroll">
+            <div class="timeline" id="timeline">
+              <div class="track track-ruler">
+                <span class="track-label"></span>
+                <div class="track-body ruler-body" id="ruler"></div>
+              </div>
+              <div class="track track-video" id="track-video">
+                <span class="track-label">Video</span>
+                <div class="track-body" id="track-video-body"></div>
+              </div>
+              <div class="track track-audio" id="track-audio">
+                <span class="track-label">Audio</span>
+                <div class="track-body" id="track-audio-body"></div>
+              </div>
+              <div class="track track-text" id="track-text">
+                <span class="track-label">Text</span>
+                <div class="track-body" id="track-text-body"></div>
+              </div>
+              <div class="playhead" id="playhead"></div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <aside class="panel props-panel" id="props-panel">
+        <h2>Eigenschaften</h2>
+        <div id="props-content" class="props-content">
+          <p class="hint">Wähle einen Clip in der Timeline aus, um Effekte zu bearbeiten.</p>
+        </div>
+      </aside>
+    </main>
+  </div>
+
+  <div class="modal-backdrop hidden" id="export-modal">
+    <div class="modal">
+      <h2>Video exportieren</h2>
+      <label>Format
+        <select id="export-format">
+          <option value="mp4">MP4 (H.264)</option>
+          <option value="mov">MOV (H.264)</option>
+          <option value="webm">WebM (VP9)</option>
+        </select>
+      </label>
+      <label>Auflösung
+        <select id="export-resolution">
+          <option value="3840x2160">4K (3840×2160)</option>
+          <option value="1920x1080" selected>Full HD (1920×1080)</option>
+          <option value="1280x720">HD (1280×720)</option>
+          <option value="854x480">SD (854×480)</option>
+        </select>
+      </label>
+      <label>Qualität
+        <select id="export-quality">
+          <option value="hoch">Hoch</option>
+          <option value="mittel" selected>Mittel</option>
+          <option value="niedrig">Niedrig (kleine Datei)</option>
+        </select>
+      </label>
+      <label>Bildrate (FPS)
+        <select id="export-fps">
+          <option value="24">24</option>
+          <option value="30" selected>30</option>
+          <option value="60">60</option>
+        </select>
+      </label>
+      <div class="modal-progress hidden" id="export-progress-wrap">
+        <div class="progress-bar"><div class="progress-fill" id="export-progress-fill"></div></div>
+        <span id="export-progress-label">0%</span>
+      </div>
+      <div class="modal-actions">
+        <button data-action="cancel-export" class="tb-btn">Abbrechen</button>
+        <button data-action="start-export" class="tb-btn tb-btn-gold" id="start-export-btn">Exportieren &amp; Speichern</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="modal-backdrop hidden" id="export-done-modal">
+    <div class="modal">
+      <h2>Export abgeschlossen</h2>
+      <p id="export-done-text"></p>
+      <div class="modal-actions">
+        <button data-action="close-export-done" class="tb-btn">Schließen</button>
+        <button data-action="show-in-folder" class="tb-btn tb-btn-gold">Im Ordner anzeigen / Teilen</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="renderer.js"></script>
+</body>
+</html>

@@ -1,12 +1,14 @@
 [![Dozenten Dashboard](https://img.shields.io/badge/📋_Dozenten_Dashboard-0b1f4d?style=for-the-badge)](README.md)
 [![IT-Schulung Dashboard](https://img.shields.io/badge/💻_IT--Schulung_Dashboard-5b9bd5?style=for-the-badge)](it-schulung/README.md)
+[![VideoWelt](https://img.shields.io/badge/🎬_VideoWelt-f4c430?style=for-the-badge&labelColor=000000)](videowelt/README.md)
 
 # Dozenten Dashboard
 
-Dieses Repository enthält zwei eigenständige Desktop-Apps, jede mit eigenem Code:
+Dieses Repository enthält mehrere eigenständige Desktop-Apps, jede mit eigenem Code:
 
 - **Dozenten Dashboard** (dieses Verzeichnis) – Verwaltung von Dozenten, Aufgaben und Projekten
 - **[IT-Schulung Dashboard](it-schulung/README.md)** (`it-schulung/`) – Verwaltung von IT-Schulungen, Aufgaben und Themen
+- **[VideoWelt](videowelt/README.md)** (`videowelt/`) – Videobearbeitungs-Software (Schneiden, Effekte, Export)
 
 Desktop-Dashboard (Electron) zur Verwaltung von bis zu vier Dozenten. Jeder Dozent hat drei Listen:
 
