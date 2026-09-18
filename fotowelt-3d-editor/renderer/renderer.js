@@ -29,6 +29,11 @@
   const musicInfo = document.getElementById('musicInfo');
   const audioPlayer = document.getElementById('audioPlayer');
 
+  const collageTemplateGrid = document.getElementById('collageTemplateGrid');
+  const collageSlotList = document.getElementById('collageSlotList');
+  const btnModeSingle = document.getElementById('btnModeSingle');
+  const btnModeCollage = document.getElementById('btnModeCollage');
+
   const previewCanvas = document.getElementById('previewCanvas');
   const previewEmptyEl = document.getElementById('previewEmpty');
   const btnSaveImage = document.getElementById('btnSaveImage');
@@ -168,7 +173,9 @@
       music: null,
       transitionDuration: 1,
       resolution: '1920x1080',
-      customPresets: []
+      customPresets: [],
+      previewMode: 'single',
+      collage: { templateId: null, slots: [] }
     };
   }
 
@@ -203,10 +210,65 @@
   // nicht mehr nötig.
   function scheduleRender() {}
 
+  function getCollageTemplate(project) {
+    if (!project || !project.collage || !project.collage.templateId) return null;
+    return FotoEffects.COLLAGE_TEMPLATES.find((t) => t.id === project.collage.templateId) || null;
+  }
+
+  function buildSlotImages(project, template) {
+    const slots = (project.collage && project.collage.slots) || [];
+    return template.slots.map((_, i) => {
+      const imageId = slots[i];
+      if (!imageId) return null;
+      const imageObj = project.images.find((im) => im.id === imageId);
+      const imgEl = imageElements.get(imageId);
+      if (!imageObj || !imgEl) return null;
+      return { image: imgEl, effects: imageObj.effects };
+    });
+  }
+
   function mainLoop() {
     const project = getActiveProject();
     const ctx = previewCanvas.getContext('2d');
-    if (!project || !project.images.length) {
+    if (!project) {
+      previewEmptyEl.hidden = false;
+      ctx.clearRect(0, 0, previewCanvas.width, previewCanvas.height);
+      requestAnimationFrame(mainLoop);
+      return;
+    }
+
+    const nowSec = (performance.now() - clockStart) / 1000;
+
+    if (project.previewMode === 'collage') {
+      const template = getCollageTemplate(project);
+      const slotImages = template ? buildSlotImages(project, template) : [];
+      const hasAnyImage = slotImages.some((s) => s);
+      if (!template || !hasAnyImage) {
+        previewEmptyEl.textContent = 'Wähle eine Collage-Vorlage und ordne Bilder den Feldern zu.';
+        previewEmptyEl.hidden = false;
+        ctx.clearRect(0, 0, previewCanvas.width, previewCanvas.height);
+        requestAnimationFrame(mainLoop);
+        return;
+      }
+      previewEmptyEl.hidden = true;
+      const { w, h } = computePreviewSize(project.resolution);
+      if (previewCanvas.width !== w || previewCanvas.height !== h) {
+        previewCanvas.width = w;
+        previewCanvas.height = h;
+      }
+      FotoEffects.renderCollage(ctx, w, h, {
+        template,
+        slotImages,
+        logoImage: project.logo && logoElement ? logoElement : null,
+        logo: project.logo,
+        time: nowSec
+      });
+      requestAnimationFrame(mainLoop);
+      return;
+    }
+
+    if (!project.images.length) {
+      previewEmptyEl.textContent = 'Importiere Bilder, um die 3D-Hochglanz-Vorschau zu sehen';
       previewEmptyEl.hidden = false;
       ctx.clearRect(0, 0, previewCanvas.width, previewCanvas.height);
       requestAnimationFrame(mainLoop);
@@ -241,7 +303,6 @@
     }
 
     if (project.logo && logoElement) {
-      const nowSec = (performance.now() - clockStart) / 1000;
       FotoEffects.compositeLogo(ctx, w, h, { logoImage: logoElement, logo: project.logo, time: nowSec });
     }
 
@@ -310,31 +371,62 @@
   // Schnelle Aktionen für das AKTUELL bearbeitete Einzelbild (mit Effekten + Logo), unabhängig
   // vom vollen Loop-Video-Export weiter unten.
 
-  async function renderActiveImageToBlob() {
+  async function renderCurrentViewToBlob() {
     const project = getActiveProject();
-    const image = getActiveImage();
-    if (!project || !image) return null;
-    const imgEl = imageElements.get(image.id) || (await loadImageElement(image.dataUrl));
+    if (!project) return null;
     const [width, height] = project.resolution.split('x').map(Number);
     const canvas = document.createElement('canvas');
     canvas.width = width;
     canvas.height = height;
     const ctx = canvas.getContext('2d');
+
+    if (project.previewMode === 'collage') {
+      const template = getCollageTemplate(project);
+      if (!template) return null;
+      const slotImages = buildSlotImages(project, template);
+      if (!slotImages.some((s) => s)) return null;
+      FotoEffects.renderCollage(ctx, width, height, {
+        template,
+        slotImages,
+        logoImage: logoElement,
+        logo: project.logo,
+        time: null
+      });
+      return new Promise((resolve) => canvas.toBlob(resolve, 'image/png'));
+    }
+
+    const image = getActiveImage();
+    if (!image) return null;
+    const imgEl = imageElements.get(image.id) || (await loadImageElement(image.dataUrl));
     FotoEffects.renderBase(ctx, width, height, { image: imgEl, effects: image.effects });
     FotoEffects.compositeLogo(ctx, width, height, { logoImage: logoElement, logo: project.logo, time: null });
     return new Promise((resolve) => canvas.toBlob(resolve, 'image/png'));
   }
 
+  function currentViewIsReady() {
+    const project = getActiveProject();
+    if (!project) return false;
+    if (project.previewMode === 'collage') {
+      const template = getCollageTemplate(project);
+      return !!(template && buildSlotImages(project, template).some((s) => s));
+    }
+    return !!getActiveImage();
+  }
+
   btnSaveImage.addEventListener('click', async () => {
-    const image = getActiveImage();
-    if (!image) {
-      toast('Bitte zuerst ein Bild auswählen.', true);
+    if (!currentViewIsReady()) {
+      toast('Bitte zuerst ein Bild bzw. eine Collage mit Bildern auswählen.', true);
       return;
     }
-    const blob = await renderActiveImageToBlob();
+    const project = getActiveProject();
+    const blob = await renderCurrentViewToBlob();
     if (!blob) return;
     const buffer = new Uint8Array(await blob.arrayBuffer());
-    const baseName = sanitizeFileName(image.name.replace(/\.[^.]+$/, '')) || 'fotowelt-bild';
+    const isCollage = project.previewMode === 'collage';
+    const image = getActiveImage();
+    const baseName = isCollage
+      ? sanitizeFileName(project.name) + '-collage'
+      : sanitizeFileName(image.name.replace(/\.[^.]+$/, '')) || 'fotowelt-bild';
     const savedPath = await window.editorAPI.saveImage(`${baseName}.png`, buffer);
     if (savedPath) {
       toast('Bild gespeichert.');
@@ -343,12 +435,11 @@
   });
 
   btnShareImage.addEventListener('click', async () => {
-    const image = getActiveImage();
-    if (!image) {
-      toast('Bitte zuerst ein Bild auswählen.', true);
+    if (!currentViewIsReady()) {
+      toast('Bitte zuerst ein Bild bzw. eine Collage mit Bildern auswählen.', true);
       return;
     }
-    const blob = await renderActiveImageToBlob();
+    const blob = await renderCurrentViewToBlob();
     if (!blob) return;
     const buffer = new Uint8Array(await blob.arrayBuffer());
     await window.editorAPI.copyImageToClipboard(buffer);
@@ -398,6 +489,10 @@
     buildPresetList();
     refreshLogoUI();
     refreshMusicInfo();
+    btnModeSingle.classList.toggle('active', (project ? project.previewMode : 'single') !== 'collage');
+    btnModeCollage.classList.toggle('active', !!project && project.previewMode === 'collage');
+    buildCollageTemplateGrid();
+    buildCollageSlotList();
   }
 
   projectSelect.addEventListener('change', () => {
@@ -517,8 +612,12 @@
     if (project.activeImageId === id) {
       project.activeImageId = project.images.length ? project.images[0].id : null;
     }
+    if (project.collage && project.collage.slots) {
+      project.collage.slots = project.collage.slots.map((slotId) => (slotId === id ? null : slotId));
+    }
     renderImageList();
     buildEffectPanel();
+    buildCollageSlotList();
     scheduleRender();
     schedulePersist();
   }
@@ -541,6 +640,7 @@
     }
     renderImageList();
     buildEffectPanel();
+    buildCollageSlotList();
     scheduleRender();
     schedulePersist();
   });
@@ -668,6 +768,104 @@
     scheduleRender();
     schedulePersist();
   });
+
+  // ---------- Vorschau-Modus (Einzelbild / Collage) ----------
+
+  function setPreviewMode(mode) {
+    const project = getActiveProject();
+    if (!project) return;
+    project.previewMode = mode;
+    btnModeSingle.classList.toggle('active', mode === 'single');
+    btnModeCollage.classList.toggle('active', mode === 'collage');
+    schedulePersist();
+  }
+
+  btnModeSingle.addEventListener('click', () => setPreviewMode('single'));
+  btnModeCollage.addEventListener('click', () => setPreviewMode('collage'));
+
+  // ---------- Collagen ----------
+  // Vorlagen kombinieren mehrere der bereits importierten (echten) Bilder in festen
+  // Feldern; jedes Feld behält die für das jeweilige Bild eingestellten Effekte.
+
+  function buildCollageTemplateGrid() {
+    collageTemplateGrid.innerHTML = '';
+    const project = getActiveProject();
+    if (!project) return;
+    FotoEffects.COLLAGE_TEMPLATES.forEach((template) => {
+      const btn = document.createElement('button');
+      btn.className = 'collage-template-btn' + (project.collage.templateId === template.id ? ' active' : '');
+      btn.title = template.name;
+      template.slots.forEach((slot) => {
+        const preview = document.createElement('span');
+        preview.className = 'slot-preview';
+        preview.style.left = slot.x * 100 + '%';
+        preview.style.top = slot.y * 100 + '%';
+        preview.style.width = slot.w * 100 + '%';
+        preview.style.height = slot.h * 100 + '%';
+        btn.appendChild(preview);
+      });
+      btn.addEventListener('click', () => selectCollageTemplate(template.id));
+      collageTemplateGrid.appendChild(btn);
+    });
+  }
+
+  function selectCollageTemplate(templateId) {
+    const project = getActiveProject();
+    if (!project) return;
+    const template = FotoEffects.COLLAGE_TEMPLATES.find((t) => t.id === templateId);
+    if (!template) return;
+    const oldSlots = project.collage.slots || [];
+    project.collage = {
+      templateId,
+      slots: template.slots.map((_, i) => oldSlots[i] || null)
+    };
+    buildCollageTemplateGrid();
+    buildCollageSlotList();
+    schedulePersist();
+  }
+
+  function buildCollageSlotList() {
+    collageSlotList.innerHTML = '';
+    const project = getActiveProject();
+    if (!project) return;
+    const template = getCollageTemplate(project);
+    if (!template) {
+      const hint = document.createElement('p');
+      hint.className = 'hint';
+      hint.textContent = 'Wähle oben eine Vorlage aus.';
+      collageSlotList.appendChild(hint);
+      return;
+    }
+    template.slots.forEach((slot, i) => {
+      const row = document.createElement('div');
+      row.className = 'collage-slot-row';
+
+      const label = document.createElement('span');
+      label.className = 'slot-label';
+      label.textContent = `Feld ${i + 1}`;
+
+      const select = document.createElement('select');
+      const emptyOpt = document.createElement('option');
+      emptyOpt.value = '';
+      emptyOpt.textContent = '– kein Bild –';
+      select.appendChild(emptyOpt);
+      project.images.forEach((image) => {
+        const opt = document.createElement('option');
+        opt.value = image.id;
+        opt.textContent = image.name;
+        if (project.collage.slots[i] === image.id) opt.selected = true;
+        select.appendChild(opt);
+      });
+      select.addEventListener('change', () => {
+        project.collage.slots[i] = select.value || null;
+        if (select.value) selectImage(select.value);
+        schedulePersist();
+      });
+
+      row.append(label, select);
+      collageSlotList.appendChild(row);
+    });
+  }
 
   // ---------- Übergang & Auflösung ----------
 
@@ -1060,6 +1258,8 @@
         if (!p.customPresets) p.customPresets = [];
         if (p.transitionDuration == null) p.transitionDuration = 1;
         if (!p.resolution) p.resolution = '1920x1080';
+        if (!p.previewMode) p.previewMode = 'single';
+        if (!p.collage) p.collage = { templateId: null, slots: [] };
         if (p.logo) p.logo = Object.assign({}, FotoEffects.DEFAULT_LOGO, p.logo);
         p.images.forEach((im) => {
           im.effects = Object.assign({}, FotoEffects.DEFAULT_EFFECTS, im.effects);

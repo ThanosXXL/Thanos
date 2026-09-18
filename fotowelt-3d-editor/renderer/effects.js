@@ -368,6 +368,66 @@
     motionType: 'pulseSwing'
   };
 
+  /* Collage-Vorlagen: feste Layouts aus mehreren Bildfeldern (0..1-Bruchteile der
+     Leinwand). Jede Vorlage kombiniert das reale importierte Bildmaterial (kein
+     synthetischer Platzhalter) mit den pro Bild bereits einstellbaren Hochglanz-/3D-
+     Effekten, plus dem Logo obendrauf – für Collagen statt Einzelbild-Ansicht. */
+  const COLLAGE_TEMPLATES = [
+    {
+      id: 'duo-h',
+      name: 'Zweiteilig · Nebeneinander',
+      slots: [
+        { x: 0, y: 0, w: 0.5, h: 1 },
+        { x: 0.5, y: 0, w: 0.5, h: 1 }
+      ]
+    },
+    {
+      id: 'duo-v',
+      name: 'Zweiteilig · Übereinander',
+      slots: [
+        { x: 0, y: 0, w: 1, h: 0.5 },
+        { x: 0, y: 0.5, w: 1, h: 0.5 }
+      ]
+    },
+    {
+      id: 'hero-left',
+      name: 'Großbild Links + 2',
+      slots: [
+        { x: 0, y: 0, w: 0.62, h: 1 },
+        { x: 0.62, y: 0, w: 0.38, h: 0.5 },
+        { x: 0.62, y: 0.5, w: 0.38, h: 0.5 }
+      ]
+    },
+    {
+      id: 'hero-top',
+      name: 'Großbild Oben + 2',
+      slots: [
+        { x: 0, y: 0, w: 1, h: 0.6 },
+        { x: 0, y: 0.6, w: 0.5, h: 0.4 },
+        { x: 0.5, y: 0.6, w: 0.5, h: 0.4 }
+      ]
+    },
+    {
+      id: 'trio',
+      name: 'Dreispaltig',
+      slots: [
+        { x: 0, y: 0, w: 1 / 3, h: 1 },
+        { x: 1 / 3, y: 0, w: 1 / 3, h: 1 },
+        { x: 2 / 3, y: 0, w: 1 / 3, h: 1 }
+      ]
+    },
+    {
+      id: 'grid4',
+      name: 'Raster 2×2',
+      slots: [
+        { x: 0, y: 0, w: 0.5, h: 0.5 },
+        { x: 0.5, y: 0, w: 0.5, h: 0.5 },
+        { x: 0, y: 0.5, w: 0.5, h: 0.5 },
+        { x: 0.5, y: 0.5, w: 0.5, h: 0.5 }
+      ]
+    }
+  ];
+
   const LOGO_MOTION_TYPES = [
     { value: 'none', label: 'Keine' },
     { value: 'pulseSwing', label: 'Pulsieren + Seitlich' },
@@ -609,6 +669,41 @@
     ctx.restore();
   }
 
+  /* Rendert eine Collage: mehrere Bilder gleichzeitig in den Feldern einer Vorlage,
+     jedes mit seinen eigenen (bereits pro Bild einstellbaren) Effekten, plus Logo
+     obendrauf. slotImages ist parallel zu template.slots: { image, effects } oder null,
+     wenn dem Feld noch kein Bild zugeordnet ist. */
+  function renderCollage(ctx, w, h, opts) {
+    const { template, slotImages, logoImage, logo, time } = opts;
+    ctx.save();
+    ctx.setTransform(1, 0, 0, 1, 0, 0);
+    ctx.clearRect(0, 0, w, h);
+    ctx.fillStyle = '#000000';
+    ctx.fillRect(0, 0, w, h);
+    const gap = Math.max(2, Math.round(Math.min(w, h) * 0.014));
+    (template.slots || []).forEach((slot, i) => {
+      const sx = Math.round(slot.x * w);
+      const sy = Math.round(slot.y * h);
+      const sw = Math.round(slot.w * w);
+      const sh = Math.round(slot.h * h);
+      const ix = sx + Math.ceil(gap / 2);
+      const iy = sy + Math.ceil(gap / 2);
+      const iw = Math.max(2, sw - gap);
+      const ih = Math.max(2, sh - gap);
+      const entry = slotImages && slotImages[i];
+      if (!entry || !entry.image) return;
+      const tile = document.createElement('canvas');
+      tile.width = iw;
+      tile.height = ih;
+      renderBase(tile.getContext('2d'), iw, ih, { image: entry.image, effects: entry.effects });
+      ctx.drawImage(tile, ix, iy);
+    });
+    ctx.restore();
+    if (logoImage && logo) {
+      compositeLogo(ctx, w, h, { logoImage, logo, time });
+    }
+  }
+
   /* Einmal-Rendering von Hintergrund + Logo in einem Zug (für Export-Einzelframes ohne
      Logo-Loop-Animation, oder als Bequemlichkeits-Wrapper). logoTime steuert die Phase
      des Glanz-Loops (0, wenn nicht angegeben). */
@@ -696,9 +791,11 @@
     EFFECT_GROUPS,
     LOGO_MOTION_TYPES,
     PRESETS,
+    COLLAGE_TEMPLATES,
     renderBase,
     compositeLogo,
     renderComposite,
+    renderCollage,
     suggestImprovement
   };
 })();

@@ -409,6 +409,27 @@ input[type="checkbox"] {
   gap: 14px;
 }
 
+.preview-mode-toggle {
+  display: flex;
+  gap: 8px;
+}
+
+.mode-btn {
+  background: var(--bg-elevated);
+  border: 1px solid var(--border);
+  color: var(--text-muted);
+  font-size: 12px;
+  padding: 8px 14px;
+  border-radius: 10px;
+}
+
+.mode-btn.active {
+  background: linear-gradient(135deg, var(--gold-deep), var(--gold), var(--gold-bright));
+  border-color: transparent;
+  color: #1a1206;
+  font-weight: 600;
+}
+
 .preview-frame {
   position: relative;
   flex: 1;
@@ -571,6 +592,67 @@ input[type="checkbox"] {
 
 .effect-group .controls {
   margin-top: 8px;
+}
+
+.collage-template-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 8px;
+  margin: 10px 0;
+}
+
+.collage-template-btn {
+  position: relative;
+  aspect-ratio: 4 / 3;
+  background: #0a0906;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 5px;
+  cursor: pointer;
+}
+
+.collage-template-btn:hover {
+  border-color: var(--gold-deep);
+}
+
+.collage-template-btn.active {
+  border-color: var(--gold);
+  box-shadow: 0 0 0 2px rgba(232,171,31,0.35) inset;
+}
+
+.collage-template-btn .slot-preview {
+  position: absolute;
+  background: linear-gradient(135deg, var(--gold-deep), var(--gold-bright));
+  opacity: 0.55;
+  border-radius: 2px;
+}
+
+.collage-template-btn.active .slot-preview {
+  opacity: 0.9;
+}
+
+.collage-slot-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.collage-slot-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 12px;
+  color: var(--text-muted);
+}
+
+.collage-slot-row .slot-label {
+  width: 58px;
+  flex-shrink: 0;
+}
+
+.collage-slot-row select {
+  flex: 1;
+  font-size: 12px;
 }
 
 .toast {

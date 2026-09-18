@@ -106,9 +106,22 @@
         <div id="musicInfo" class="hint">Keine Musik ausgewählt – die Loop-Länge richtet sich nach der Musik.</div>
         <audio id="audioPlayer" hidden></audio>
       </section>
+
+      <section class="card">
+        <div class="card-header">
+          <h2>Collagen</h2>
+        </div>
+        <p class="hint">Vorlage wählen, dann jedem Feld eines deiner importierten Bilder zuordnen – jedes Feld behält seine eigenen Effekte.</p>
+        <div id="collageTemplateGrid" class="collage-template-grid"></div>
+        <div id="collageSlotList" class="collage-slot-list"></div>
+      </section>
     </aside>
 
     <section class="panel panel-center">
+      <div class="preview-mode-toggle">
+        <button id="btnModeSingle" class="mode-btn active">🖼 Einzelbild</button>
+        <button id="btnModeCollage" class="mode-btn">🧩 Collage</button>
+      </div>
       <div class="preview-frame">
         <canvas id="previewCanvas" width="960" height="540"></canvas>
         <div class="preview-overlay" id="previewEmpty">Importiere Bilder, um die 3D-Hochglanz-Vorschau zu sehen</div>
