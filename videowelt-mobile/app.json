@@ -1,0 +1,58 @@
+{
+  "expo": {
+    "name": "VideoWelt",
+    "slug": "videowelt-mobile",
+    "scheme": "videowelt",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "icon": "./assets/icon.png",
+    "userInterfaceStyle": "dark",
+    "backgroundColor": "#0a0a0a",
+    "plugins": [
+      "expo-video",
+      [
+        "expo-image-picker",
+        {
+          "photosPermission": "VideoWelt braucht Zugriff auf deine Videos, um sie zu importieren.",
+          "videoPermission": "VideoWelt braucht Zugriff auf deine Videos, um sie zu importieren."
+        }
+      ],
+      [
+        "expo-media-library",
+        {
+          "photosPermission": "VideoWelt braucht Zugriff auf deine Mediathek, um Videos zu importieren.",
+          "savePhotosPermission": "VideoWelt speichert deine exportierten Videos in der Mediathek.",
+          "isAccessMediaLocationEnabled": true
+        }
+      ],
+      "./plugins/withFfmpegKitFull.js"
+    ],
+    "ios": {
+      "supportsTablet": true,
+      "bundleIdentifier": "com.videowelt.mobile",
+      "infoPlist": {
+        "NSPhotoLibraryUsageDescription": "VideoWelt braucht Zugriff auf deine Mediathek, um Videos zu importieren und Exporte zu speichern.",
+        "NSPhotoLibraryAddUsageDescription": "VideoWelt speichert exportierte Videos in deiner Mediathek."
+      }
+    },
+    "android": {
+      "package": "com.videowelt.mobile",
+      "adaptiveIcon": {
+        "backgroundColor": "#0a0a0a",
+        "foregroundImage": "./assets/android-icon-foreground.png",
+        "backgroundImage": "./assets/android-icon-background.png",
+        "monochromeImage": "./assets/android-icon-monochrome.png"
+      },
+      "predictiveBackGestureEnabled": false,
+      "permissions": [
+        "READ_MEDIA_VIDEO",
+        "READ_MEDIA_IMAGES",
+        "READ_EXTERNAL_STORAGE",
+        "WRITE_EXTERNAL_STORAGE"
+      ]
+    },
+    "web": {
+      "favicon": "./assets/favicon.png"
+    }
+  }
+}
