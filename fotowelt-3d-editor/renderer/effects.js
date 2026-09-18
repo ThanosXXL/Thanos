@@ -678,8 +678,97 @@
     { value: 'glow', label: 'Leucht-Rand' },
     { value: 'shadow', label: 'Schlagschatten' },
     { value: 'chrome', label: 'Chrom-Rand' },
-    { value: 'neon', label: 'Neon-Rand' }
+    { value: 'neon', label: 'Neon-Rand' },
+    { value: 'flowers', label: '🌸 Blumen-Rand' },
+    { value: 'hearts', label: '💕 Herzen-Rand' },
+    { value: 'stars', label: '⭐ Sterne-Rand' },
+    { value: 'confetti', label: '🎉 Konfetti-Ecken' },
+    { value: 'polaroid', label: '📷 Polaroid-Rahmen' }
   ];
+
+  // Deterministisch statt Math.random(): renderCollage() läuft in der laufenden
+  // mainLoop() jeden Frame neu, ein echter Zufall würde die Deko bei jedem Frame
+  // neu würfeln und flackern. Gleicher seed -> immer derselbe "Zufalls"-Wert.
+  function seeded(seed) {
+    const x = Math.sin(seed * 12.9898) * 43758.5453;
+    return x - Math.floor(x);
+  }
+
+  /* Liefert einen Punkt auf dem Umfang eines Rechtecks bei Bogenlänge d (im
+     Uhrzeigersinn ab oben links) – zum gleichmäßigen Verteilen von Deko-Motiven
+     entlang des Rands eines Collage-Felds. */
+  function pointOnRectPerimeter(x, y, w, h, d) {
+    if (d < w) return { x: x + d, y, angle: 0 };
+    d -= w;
+    if (d < h) return { x: x + w, y: y + d, angle: Math.PI / 2 };
+    d -= h;
+    if (d < w) return { x: x + w - d, y: y + h, angle: Math.PI };
+    d -= w;
+    return { x, y: y + h - d, angle: (Math.PI * 3) / 2 };
+  }
+
+  function forEachBorderPoint(x, y, w, h, spacing, seedBase, fn) {
+    const perimeter = 2 * (w + h);
+    const count = Math.max(6, Math.round(perimeter / spacing));
+    for (let i = 0; i < count; i++) {
+      const d = (i / count) * perimeter;
+      const pt = pointOnRectPerimeter(x, y, w, h, d);
+      fn(pt, i, seeded(seedBase + i));
+    }
+  }
+
+  function drawFlower(ctx, cx, cy, r, hue) {
+    ctx.save();
+    ctx.translate(cx, cy);
+    for (let p = 0; p < 5; p++) {
+      const angle = (p / 5) * Math.PI * 2;
+      ctx.save();
+      ctx.rotate(angle);
+      ctx.beginPath();
+      ctx.fillStyle = `hsl(${hue}, 72%, 74%)`;
+      ctx.ellipse(0, -r * 0.55, r * 0.42, r * 0.62, 0, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.restore();
+    }
+    ctx.beginPath();
+    ctx.fillStyle = '#ffd75e';
+    ctx.arc(0, 0, r * 0.4, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.restore();
+  }
+
+  function drawHeart(ctx, cx, cy, r, color) {
+    ctx.save();
+    ctx.translate(cx, cy);
+    ctx.scale(r / 10, r / 10);
+    ctx.beginPath();
+    ctx.moveTo(0, 3);
+    ctx.bezierCurveTo(0, 0, -5, -4, -8, -1);
+    ctx.bezierCurveTo(-11, 2, -8, 6, 0, 10);
+    ctx.bezierCurveTo(8, 6, 11, 2, 8, -1);
+    ctx.bezierCurveTo(5, -4, 0, 0, 0, 3);
+    ctx.closePath();
+    ctx.fillStyle = color;
+    ctx.fill();
+    ctx.restore();
+  }
+
+  function drawStar(ctx, cx, cy, r, color) {
+    ctx.save();
+    ctx.beginPath();
+    for (let i = 0; i < 10; i++) {
+      const angle = (Math.PI / 5) * i - Math.PI / 2;
+      const rad = i % 2 === 0 ? r : r * 0.42;
+      const px = cx + Math.cos(angle) * rad;
+      const py = cy + Math.sin(angle) * rad;
+      if (i === 0) ctx.moveTo(px, py);
+      else ctx.lineTo(px, py);
+    }
+    ctx.closePath();
+    ctx.fillStyle = color;
+    ctx.fill();
+    ctx.restore();
+  }
 
   function drawCollageTileBorder(ctx, x, y, w, h, style) {
     if (!style || style === 'none') return;
@@ -740,6 +829,65 @@
         const lw2 = Math.max(1, short * 0.004);
         ctx.lineWidth = lw2;
         ctx.strokeRect(x + lw * 3, y + lw * 3, w - lw * 6, h - lw * 6);
+        break;
+      }
+      case 'flowers': {
+        const r = Math.max(6, short * 0.03);
+        forEachBorderPoint(x, y, w, h, r * 3.4, x + y, (pt, i, rnd) => {
+          drawFlower(ctx, pt.x, pt.y, r * (0.8 + rnd * 0.4), (i * 47 + x) % 360);
+        });
+        break;
+      }
+      case 'hearts': {
+        const r = Math.max(6, short * 0.026);
+        const colors = ['#ff6f91', '#ff9ab5', '#ff4d6d'];
+        forEachBorderPoint(x, y, w, h, r * 3.2, x + y + 7, (pt, i, rnd) => {
+          drawHeart(ctx, pt.x, pt.y, r * (0.8 + rnd * 0.4), colors[i % colors.length]);
+        });
+        break;
+      }
+      case 'stars': {
+        const r = Math.max(5, short * 0.024);
+        const colors = ['#ffd75e', '#fff2c4', '#ffe27a'];
+        ctx.shadowColor = 'rgba(255,215,94,0.7)';
+        ctx.shadowBlur = short * 0.02;
+        forEachBorderPoint(x, y, w, h, r * 3, x + y + 13, (pt, i, rnd) => {
+          drawStar(ctx, pt.x, pt.y, r * (0.75 + rnd * 0.5), colors[i % colors.length]);
+        });
+        break;
+      }
+      case 'confetti': {
+        const colors = ['#ff8fab', '#8fd9c4', '#8fc1ff', '#ffd75e', '#c9a0ff'];
+        const corners = [
+          { cx: x, cy: y },
+          { cx: x + w, cy: y },
+          { cx: x, cy: y + h },
+          { cx: x + w, cy: y + h }
+        ];
+        corners.forEach((c, ci) => {
+          const tw = Math.max(22, short * 0.11);
+          const th = Math.max(9, short * 0.038);
+          for (let k = 0; k < 2; k++) {
+            const rnd = seeded(x + y + ci * 31 + k * 7);
+            ctx.save();
+            ctx.translate(c.cx, c.cy);
+            ctx.rotate((rnd - 0.5) * Math.PI * 0.7);
+            ctx.globalAlpha = 0.85;
+            ctx.fillStyle = colors[(ci + k) % colors.length];
+            ctx.fillRect(-tw / 2, -th / 2, tw, th);
+            ctx.restore();
+          }
+        });
+        break;
+      }
+      case 'polaroid': {
+        const border = Math.max(6, short * 0.022);
+        const bottomExtra = border * 2.4;
+        ctx.fillStyle = '#faf6ec';
+        ctx.fillRect(x, y, w, border);
+        ctx.fillRect(x, y, border, h);
+        ctx.fillRect(x + w - border, y, border, h);
+        ctx.fillRect(x, y + h - bottomExtra, w, bottomExtra);
         break;
       }
     }
