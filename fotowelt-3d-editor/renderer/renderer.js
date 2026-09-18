@@ -30,6 +30,7 @@
   const audioPlayer = document.getElementById('audioPlayer');
 
   const collageTemplateGrid = document.getElementById('collageTemplateGrid');
+  const collageBorderStyle = document.getElementById('collageBorderStyle');
   const collageSlotList = document.getElementById('collageSlotList');
   const btnModeSingle = document.getElementById('btnModeSingle');
   const btnModeCollage = document.getElementById('btnModeCollage');
@@ -175,7 +176,7 @@
       resolution: '1920x1080',
       customPresets: [],
       previewMode: 'single',
-      collage: { templateId: null, slots: [] }
+      collage: { templateId: null, slots: [], borderStyle: 'none' }
     };
   }
 
@@ -261,7 +262,8 @@
         slotImages,
         logoImage: project.logo && logoElement ? logoElement : null,
         logo: project.logo,
-        time: nowSec
+        time: nowSec,
+        borderStyle: project.collage.borderStyle
       });
       requestAnimationFrame(mainLoop);
       return;
@@ -390,7 +392,8 @@
         slotImages,
         logoImage: logoElement,
         logo: project.logo,
-        time: null
+        time: null,
+        borderStyle: project.collage.borderStyle
       });
       return new Promise((resolve) => canvas.toBlob(resolve, 'image/png'));
     }
@@ -791,6 +794,7 @@
     collageTemplateGrid.innerHTML = '';
     const project = getActiveProject();
     if (!project) return;
+    collageBorderStyle.value = project.collage.borderStyle || 'none';
     FotoEffects.COLLAGE_TEMPLATES.forEach((template) => {
       const btn = document.createElement('button');
       btn.className = 'collage-template-btn' + (project.collage.templateId === template.id ? ' active' : '');
@@ -817,12 +821,20 @@
     const oldSlots = project.collage.slots || [];
     project.collage = {
       templateId,
-      slots: template.slots.map((_, i) => oldSlots[i] || null)
+      slots: template.slots.map((_, i) => oldSlots[i] || null),
+      borderStyle: project.collage.borderStyle || 'none'
     };
     buildCollageTemplateGrid();
     buildCollageSlotList();
     schedulePersist();
   }
+
+  collageBorderStyle.addEventListener('change', () => {
+    const project = getActiveProject();
+    if (!project) return;
+    project.collage.borderStyle = collageBorderStyle.value;
+    schedulePersist();
+  });
 
   function buildCollageSlotList() {
     collageSlotList.innerHTML = '';
@@ -1259,7 +1271,8 @@
         if (p.transitionDuration == null) p.transitionDuration = 1;
         if (!p.resolution) p.resolution = '1920x1080';
         if (!p.previewMode) p.previewMode = 'single';
-        if (!p.collage) p.collage = { templateId: null, slots: [] };
+        if (!p.collage) p.collage = { templateId: null, slots: [], borderStyle: 'none' };
+        if (!p.collage.borderStyle) p.collage.borderStyle = 'none';
         if (p.logo) p.logo = Object.assign({}, FotoEffects.DEFAULT_LOGO, p.logo);
         p.images.forEach((im) => {
           im.effects = Object.assign({}, FotoEffects.DEFAULT_EFFECTS, im.effects);

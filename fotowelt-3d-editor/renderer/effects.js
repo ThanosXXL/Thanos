@@ -669,12 +669,90 @@
     ctx.restore();
   }
 
+  /* Wählbare Rand-Effekte für die einzelnen Collage-Felder – zusätzlich zu den pro Bild
+     einstellbaren Effekten, damit auch der Übergang zwischen den Feldern gestaltet
+     werden kann (z. B. edler Gold-Rahmen oder Leucht-Rand statt einer schlichten Lücke). */
+  const COLLAGE_BORDER_STYLES = [
+    { value: 'none', label: 'Kein Rahmen' },
+    { value: 'gold', label: 'Gold-Rahmen' },
+    { value: 'glow', label: 'Leucht-Rand' },
+    { value: 'shadow', label: 'Schlagschatten' },
+    { value: 'chrome', label: 'Chrom-Rand' },
+    { value: 'neon', label: 'Neon-Rand' }
+  ];
+
+  function drawCollageTileBorder(ctx, x, y, w, h, style) {
+    if (!style || style === 'none') return;
+    const short = Math.min(w, h);
+    ctx.save();
+    switch (style) {
+      case 'gold': {
+        const lw = Math.max(2, short * 0.012);
+        const grad = ctx.createLinearGradient(x, y, x + w, y + h);
+        grad.addColorStop(0, '#b8860b');
+        grad.addColorStop(0.5, '#ffd75e');
+        grad.addColorStop(1, '#b8860b');
+        ctx.strokeStyle = grad;
+        ctx.lineWidth = lw;
+        ctx.strokeRect(x + lw / 2, y + lw / 2, w - lw, h - lw);
+        break;
+      }
+      case 'glow': {
+        const lw = Math.max(2, short * 0.008);
+        ctx.shadowColor = 'rgba(255,215,94,0.9)';
+        ctx.shadowBlur = Math.max(10, short * 0.05);
+        ctx.strokeStyle = 'rgba(255,241,196,0.85)';
+        ctx.lineWidth = lw;
+        ctx.strokeRect(x + lw, y + lw, w - lw * 2, h - lw * 2);
+        break;
+      }
+      case 'shadow': {
+        ctx.shadowColor = 'rgba(0,0,0,0.75)';
+        ctx.shadowBlur = Math.max(12, short * 0.06);
+        ctx.shadowOffsetY = Math.max(4, short * 0.015);
+        ctx.strokeStyle = 'rgba(0,0,0,0.35)';
+        ctx.lineWidth = 1;
+        ctx.strokeRect(x, y, w, h);
+        break;
+      }
+      case 'chrome': {
+        const lw = Math.max(3, short * 0.015);
+        const grad = ctx.createLinearGradient(x, y, x, y + h);
+        grad.addColorStop(0, 'rgba(255,255,255,0.9)');
+        grad.addColorStop(0.25, 'rgba(120,120,130,0.5)');
+        grad.addColorStop(0.5, 'rgba(255,255,255,0.85)');
+        grad.addColorStop(0.75, 'rgba(80,80,90,0.6)');
+        grad.addColorStop(1, 'rgba(255,255,255,0.9)');
+        ctx.strokeStyle = grad;
+        ctx.lineWidth = lw;
+        ctx.strokeRect(x + lw / 2, y + lw / 2, w - lw, h - lw);
+        break;
+      }
+      case 'neon': {
+        const lw = Math.max(2, short * 0.008);
+        ctx.shadowColor = 'rgba(0,234,255,0.9)';
+        ctx.shadowBlur = Math.max(14, short * 0.06);
+        ctx.strokeStyle = 'rgba(0,234,255,0.9)';
+        ctx.lineWidth = lw;
+        ctx.strokeRect(x + lw, y + lw, w - lw * 2, h - lw * 2);
+        ctx.shadowBlur = 0;
+        ctx.strokeStyle = 'rgba(255,215,94,0.7)';
+        const lw2 = Math.max(1, short * 0.004);
+        ctx.lineWidth = lw2;
+        ctx.strokeRect(x + lw * 3, y + lw * 3, w - lw * 6, h - lw * 6);
+        break;
+      }
+    }
+    ctx.restore();
+  }
+
   /* Rendert eine Collage: mehrere Bilder gleichzeitig in den Feldern einer Vorlage,
      jedes mit seinen eigenen (bereits pro Bild einstellbaren) Effekten, plus Logo
      obendrauf. slotImages ist parallel zu template.slots: { image, effects } oder null,
-     wenn dem Feld noch kein Bild zugeordnet ist. */
+     wenn dem Feld noch kein Bild zugeordnet ist. borderStyle ist einer der
+     COLLAGE_BORDER_STYLES-Werte und wird um jedes gefüllte Feld herum gezeichnet. */
   function renderCollage(ctx, w, h, opts) {
-    const { template, slotImages, logoImage, logo, time } = opts;
+    const { template, slotImages, logoImage, logo, time, borderStyle } = opts;
     ctx.save();
     ctx.setTransform(1, 0, 0, 1, 0, 0);
     ctx.clearRect(0, 0, w, h);
@@ -697,6 +775,7 @@
       tile.height = ih;
       renderBase(tile.getContext('2d'), iw, ih, { image: entry.image, effects: entry.effects });
       ctx.drawImage(tile, ix, iy);
+      drawCollageTileBorder(ctx, ix, iy, iw, ih, borderStyle);
     });
     ctx.restore();
     if (logoImage && logo) {
@@ -792,6 +871,7 @@
     LOGO_MOTION_TYPES,
     PRESETS,
     COLLAGE_TEMPLATES,
+    COLLAGE_BORDER_STYLES,
     renderBase,
     compositeLogo,
     renderComposite,
