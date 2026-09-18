@@ -169,6 +169,9 @@ function buildVideoFilterChain(clip, mediaItem, targetRes, index, fps) {
   parts.push('setpts=PTS-STARTPTS');
   if (speed !== 1) parts.push(`setpts=${(1 / speed).toFixed(6)}*PTS`);
 
+  if (fx.flipH) parts.push('hflip');
+  if (fx.flipV) parts.push('vflip');
+
   const rotate = Number(fx.rotate) || 0;
   if (rotate === 90) parts.push('transpose=1');
   else if (rotate === 180) parts.push('transpose=1,transpose=1');
@@ -195,6 +198,12 @@ function buildVideoFilterChain(clip, mediaItem, targetRes, index, fps) {
   }
   const blur = clamp(fx.blur || 0, 0, 20);
   if (blur > 0) parts.push(`boxblur=${blur}:1`);
+
+  const hue = clamp(fx.hue || 0, -180, 180);
+  if (hue) parts.push(`hue=h=${hue}`);
+  const sharpen = clamp(fx.sharpen || 0, 0, 5);
+  if (sharpen > 0) parts.push(`unsharp=5:5:${sharpen}:5:5:0`);
+  if (fx.vignette) parts.push('vignette');
 
   const fadeIn = clamp(fx.fadeIn || 0, 0, effDuration / 2);
   const fadeOut = clamp(fx.fadeOut || 0, 0, effDuration / 2);
@@ -232,15 +241,26 @@ function buildAudioFilterChain(clip, mediaItem, index) {
   return `[${index}:a]${parts.join(',')}[a${index}]`;
 }
 
+const XFADE_NAMES = new Set([
+  'fade', 'fadeblack', 'fadewhite', 'fadegrays', 'dissolve',
+  'wipeleft', 'wiperight', 'wipeup', 'wipedown',
+  'slideleft', 'slideright', 'slideup', 'slidedown',
+  'smoothleft', 'smoothright', 'smoothup', 'smoothdown',
+  'circleopen', 'circleclose', 'circlecrop', 'rectcrop',
+  'vertopen', 'vertclose', 'horzopen', 'horzclose',
+  'diagtl', 'diagtr', 'diagbl', 'diagbr',
+  'pixelize', 'radial', 'hblur', 'zoomin', 'squeezeh', 'squeezev', 'distance'
+]);
+
 function transitionName(type) {
-  if (type === 'fadeblack') return 'fadeblack';
-  if (type === 'crossfade') return 'fade';
+  if (type === 'crossfade') return 'fade'; // legacy alias from older saved projects
+  if (XFADE_NAMES.has(type)) return type;
   return 'fade';
 }
 
 function transitionDuration(clip) {
   const t = clip.transitionOut || {};
-  if (t.type === 'crossfade' || t.type === 'fadeblack') {
+  if (t.type && t.type !== 'none') {
     return clamp(t.duration || 0.5, 0.1, 5);
   }
   return 0.04;
@@ -338,7 +358,7 @@ function runExport(state, settings, outputPath, onProgress) {
 
   let videoOut;
   let audioOut = null;
-  const anyTransition = videoClips.some((c) => c.transitionOut && (c.transitionOut.type === 'crossfade' || c.transitionOut.type === 'fadeblack'));
+  const anyTransition = videoClips.some((c) => c.transitionOut && c.transitionOut.type && c.transitionOut.type !== 'none');
   const anyClipAudio = audioLabels.some((l) => l !== null);
 
   if (videoLabels.length === 1) {

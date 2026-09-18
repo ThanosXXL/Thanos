@@ -14,19 +14,27 @@ Build-Konfiguration und keine CI.
 
 ## Funktionen
 
+- **Menüleiste** mit Datei, Bearbeiten, Einfügen, Clip, Effekte, Ansicht und Hilfe – inklusive Rückgängig/Wiederholen
+  (Strg+Z / Strg+Y), Clip duplizieren (Strg+D), Tastenkürzel-Übersicht und "Über VideoWelt"
 - **Medienbibliothek**: Video- und Audiodateien importieren (MP4, MOV, AVI, MKV, WebM, MP3, WAV, AAC, …)
 - **Timeline** mit Video-, Audio- und Text-Spur: Clips schneiden, trimmen (per Ziehen an den Rändern),
-  in Reihenfolge bringen, teilen (Split am Playhead), löschen
-- **Effekte pro Clip**: Helligkeit, Kontrast, Sättigung, Graustufen, Sepia, Weichzeichnen, Rotation,
-  Geschwindigkeit (0,25×–4×), Ein-/Ausblenden, Stummschaltung/Lautstärke – live in der Vorschau sichtbar
-- **Übergänge** zwischen Clips: Überblenden (Crossfade) oder Schwarzblende, live in der Vorschau animiert
+  in Reihenfolge bringen, duplizieren, teilen (Split am Playhead), löschen – mit voller Rückgängig/Wiederholen-Historie
+- **Effekte pro Clip**: Helligkeit, Kontrast, Sättigung, Graustufen, Sepia, Weichzeichnen, Schärfen, Farbton (Hue),
+  Vignette, horizontal/vertikal spiegeln, Rotation, Geschwindigkeit (0,25×–4×), Ein-/Ausblenden,
+  Stummschaltung/Lautstärke – live in der Vorschau sichtbar
+- **Effekt-Presets** im Menü "Effekte": Schwarz-Weiß, Sepia, Warm, Kalt, Kino-Look – mit einem Klick auf den
+  ausgewählten Clip anwendbar
+- **Übergänge** zwischen Clips: über 35 Varianten (Überblenden, Schwarz-/Weiß-/Grau-Blende, Wischen, Gleiten,
+  weiches Wischen, Kreis-/Rechteck-Formen, Öffnen/Schließen, Diagonal, Verpixeln, Radial, Zoom u.v.m.), live in
+  der Vorschau animiert
 - **Text-Einblendungen**: frei positionierbar, mit Schriftgröße und Farbe, zeitlich begrenzt
 - **Hintergrundmusik/Audiospur** unabhängig von der Video-Timeline positionierbar, mit Lautstärke und Ein-/Ausblenden;
   ein Klick auf "Auf Videolänge anpassen" passt Start/Ende automatisch an die Gesamtlänge des Videos an und
   wiederholt die Musik nahtlos in einer Schleife, falls sie kürzer ist. Ein eingebauter Demo-Musiktitel
   ("🎵 Demo-Musik") lässt sich per Klick hinzufügen und wird direkt auf die aktuelle Videolänge zugeschnitten
-- **Export** in MP4 (H.264), MOV (H.264) oder WebM (VP9), Auflösung von SD bis 4K, wählbare Qualität und
-  Bildrate, mit Fortschrittsanzeige
+- **Export** in MP4 (H.264), MOV (H.264) oder WebM (VP9); Auflösung von SD bis 4K im Querformat, plus
+  Hochformat-Presets für Story/Reels/TikTok (9:16) und quadratisch (1:1) für Social Media, wählbare
+  Qualität und Bildrate, mit Fortschrittsanzeige
 - **Projekte speichern/öffnen** (`.vwproj`) sowie das zuletzt bearbeitete Projekt beim Start wieder anbieten
 - **Teilen**: fertige Datei direkt im Dateimanager anzeigen lassen
 

@@ -33,10 +33,91 @@
     return 'file://' + encodeURI(pathName);
   }
 
+  const TRANSITION_GROUPS = [
+    { label: 'Kein Übergang', options: [{ value: 'none', label: 'Hartschnitt' }] },
+    {
+      label: 'Überblenden', options: [
+        { value: 'fade', label: 'Überblenden' },
+        { value: 'fadeblack', label: 'Schwarzblende' },
+        { value: 'fadewhite', label: 'Weißblende' },
+        { value: 'fadegrays', label: 'Graublende' },
+        { value: 'dissolve', label: 'Auflösen' }
+      ]
+    },
+    {
+      label: 'Wischen', options: [
+        { value: 'wipeleft', label: 'Wischen nach links' },
+        { value: 'wiperight', label: 'Wischen nach rechts' },
+        { value: 'wipeup', label: 'Wischen nach oben' },
+        { value: 'wipedown', label: 'Wischen nach unten' }
+      ]
+    },
+    {
+      label: 'Gleiten', options: [
+        { value: 'slideleft', label: 'Gleiten nach links' },
+        { value: 'slideright', label: 'Gleiten nach rechts' },
+        { value: 'slideup', label: 'Gleiten nach oben' },
+        { value: 'slidedown', label: 'Gleiten nach unten' }
+      ]
+    },
+    {
+      label: 'Weiches Wischen', options: [
+        { value: 'smoothleft', label: 'Weich nach links' },
+        { value: 'smoothright', label: 'Weich nach rechts' },
+        { value: 'smoothup', label: 'Weich nach oben' },
+        { value: 'smoothdown', label: 'Weich nach unten' }
+      ]
+    },
+    {
+      label: 'Formen', options: [
+        { value: 'circleopen', label: 'Kreis öffnen' },
+        { value: 'circleclose', label: 'Kreis schließen' },
+        { value: 'circlecrop', label: 'Kreis-Zuschnitt' },
+        { value: 'rectcrop', label: 'Rechteck-Zuschnitt' }
+      ]
+    },
+    {
+      label: 'Öffnen / Schließen', options: [
+        { value: 'vertopen', label: 'Vertikal öffnen' },
+        { value: 'vertclose', label: 'Vertikal schließen' },
+        { value: 'horzopen', label: 'Horizontal öffnen' },
+        { value: 'horzclose', label: 'Horizontal schließen' }
+      ]
+    },
+    {
+      label: 'Diagonal', options: [
+        { value: 'diagtl', label: 'Diagonal oben-links' },
+        { value: 'diagtr', label: 'Diagonal oben-rechts' },
+        { value: 'diagbl', label: 'Diagonal unten-links' },
+        { value: 'diagbr', label: 'Diagonal unten-rechts' }
+      ]
+    },
+    {
+      label: 'Spezial', options: [
+        { value: 'pixelize', label: 'Verpixeln' },
+        { value: 'radial', label: 'Radial' },
+        { value: 'hblur', label: 'Bewegungsunschärfe' },
+        { value: 'zoomin', label: 'Hineinzoomen' },
+        { value: 'squeezeh', label: 'Horizontal quetschen' },
+        { value: 'squeezev', label: 'Vertikal quetschen' },
+        { value: 'distance', label: 'Distanz-Morph' }
+      ]
+    }
+  ];
+
+  function transitionLabel(type) {
+    for (const group of TRANSITION_GROUPS) {
+      const found = group.options.find((o) => o.value === type);
+      if (found) return found.label;
+    }
+    return type;
+  }
+
   function defaultEffects() {
     return {
       brightness: 0, contrast: 1, saturation: 1, grayscale: false, sepia: false,
-      blur: 0, rotate: 0, speed: 1, fadeIn: 0, fadeOut: 0, muted: false, volume: 1
+      blur: 0, rotate: 0, speed: 1, fadeIn: 0, fadeOut: 0, muted: false, volume: 1,
+      hue: 0, sharpen: 0, vignette: false, flipH: false, flipV: false
     };
   }
 
@@ -52,6 +133,10 @@
   let currentProjectPath = null;
   let lastExportPath = null;
   let dirty = false;
+
+  const MAX_HISTORY = 50;
+  let undoStack = [];
+  let redoStack = [];
 
   const ui = {
     selection: null,
@@ -75,6 +160,7 @@
   async function init() {
     cacheEls();
     bindGlobalEvents();
+    updateUndoRedoMenu();
     renderAll();
 
     setTimeout(() => {
@@ -119,13 +205,23 @@
     el.startExportBtn = qs('start-export-btn');
     el.exportDoneModal = qs('export-done-modal');
     el.exportDoneText = qs('export-done-text');
+    el.menubar = qs('menubar');
+    el.menuUndo = qs('menu-undo');
+    el.menuRedo = qs('menu-redo');
+    el.shortcutsModal = qs('shortcuts-modal');
+    el.aboutModal = qs('about-modal');
   }
 
   function bindGlobalEvents() {
-    qs('toolbar').addEventListener('click', onToolbarClick);
+    document.querySelector('.topbar').addEventListener('click', onHeaderClick);
+    document.addEventListener('click', (e) => {
+      if (!e.target.closest('#menubar')) closeAllMenus();
+    });
     document.querySelector('.timeline-toolbar').addEventListener('click', onTimelineToolbarClick);
     el.exportModal.addEventListener('click', onExportModalClick);
     el.exportDoneModal.addEventListener('click', onExportDoneModalClick);
+    el.shortcutsModal.addEventListener('click', onSimpleModalClick);
+    el.aboutModal.addEventListener('click', onSimpleModalClick);
     el.btnPlay.addEventListener('click', () => { ui.playing ? pause() : play(); });
     el.seekBar.addEventListener('input', () => {
       pause();
@@ -133,34 +229,106 @@
       seekTo((parseFloat(el.seekBar.value) / 1000) * total);
     });
     el.projectNameInput.addEventListener('change', () => {
+      pushHistory();
       state.projectName = el.projectNameInput.value.trim() || 'Unbenanntes Projekt';
       markUnsaved();
     });
     el.timelineScroll.addEventListener('mousedown', onTimelineScrollMouseDown);
-    document.addEventListener('keydown', (e) => {
-      if (e.code === 'Space' && document.activeElement === document.body) {
-        e.preventDefault();
-        ui.playing ? pause() : play();
-      }
-    });
+    document.addEventListener('keydown', onGlobalKeyDown);
     window.addEventListener('beforeunload', () => { pause(); });
   }
 
-  // ---------- Toolbar / action dispatch ----------
+  // ---------- Menu bar / action dispatch ----------
 
-  function onToolbarClick(e) {
+  function closeAllMenus() {
+    document.querySelectorAll('.menu.open').forEach((m) => m.classList.remove('open'));
+  }
+
+  function toggleMenu(menuEl) {
+    const wasOpen = menuEl.classList.contains('open');
+    closeAllMenus();
+    if (!wasOpen) menuEl.classList.add('open');
+  }
+
+  function onHeaderClick(e) {
+    const trigger = e.target.closest('.menu-trigger');
+    if (trigger) {
+      toggleMenu(trigger.parentElement);
+      return;
+    }
     const btn = e.target.closest('[data-action]');
-    if (!btn) return;
-    const action = btn.dataset.action;
+    if (!btn || btn.disabled) return;
+    closeAllMenus();
+    dispatchAction(btn.dataset.action);
+  }
+
+  function dispatchAction(action) {
     if (action === 'new-project') newProject();
     else if (action === 'open-project') openProject();
     else if (action === 'save-project') saveProject(false);
     else if (action === 'save-project-as') saveProject(true);
+    else if (action === 'reopen-last-project') tryReopenLastProject();
+    else if (action === 'show-last-export') showLastExport();
+    else if (action === 'export') openExportModal();
+    else if (action === 'undo') undo();
+    else if (action === 'redo') redo();
+    else if (action === 'duplicate-clip') duplicateSelectedClip();
+    else if (action === 'delete-clip') deleteSelected();
+    else if (action === 'deselect') deselectAll();
     else if (action === 'import-video') importVideos();
     else if (action === 'import-audio') importAudio();
     else if (action === 'import-demo-music') importDemoMusic();
     else if (action === 'add-text') addTextOverlay();
-    else if (action === 'export') openExportModal();
+    else if (action === 'split') splitAtPlayhead();
+    else if (action === 'reset-effects') resetSelectedClipEffects();
+    else if (action === 'toggle-mute') toggleSelectedClipMute();
+    else if (action === 'preset-reset') applyPreset('reset');
+    else if (action === 'preset-bw') applyPreset('bw');
+    else if (action === 'preset-sepia') applyPreset('sepia');
+    else if (action === 'preset-warm') applyPreset('warm');
+    else if (action === 'preset-cool') applyPreset('cool');
+    else if (action === 'preset-cinematic') applyPreset('cinematic');
+    else if (action === 'toggle-vignette') toggleSelectedClipVignette();
+    else if (action === 'toggle-flip') toggleSelectedClipFlip();
+    else if (action === 'zoom-in') zoomTimeline(1.3);
+    else if (action === 'zoom-out') zoomTimeline(1 / 1.3);
+    else if (action === 'zoom-reset') { ui.pxPerSecond = 60; renderTimeline(); }
+    else if (action === 'show-shortcuts') el.shortcutsModal.classList.remove('hidden');
+    else if (action === 'close-shortcuts') el.shortcutsModal.classList.add('hidden');
+    else if (action === 'show-about') el.aboutModal.classList.remove('hidden');
+    else if (action === 'close-about') el.aboutModal.classList.add('hidden');
+  }
+
+  function onSimpleModalClick(e) {
+    const btn = e.target.closest('[data-action]');
+    if (!btn) return;
+    dispatchAction(btn.dataset.action);
+  }
+
+  function onGlobalKeyDown(e) {
+    if (e.code === 'Space' && document.activeElement === document.body) {
+      e.preventDefault();
+      ui.playing ? pause() : play();
+      return;
+    }
+    if (e.key === 'Escape') {
+      closeAllMenus();
+      el.shortcutsModal.classList.add('hidden');
+      el.aboutModal.classList.add('hidden');
+      return;
+    }
+    const tag = document.activeElement && document.activeElement.tagName;
+    if (tag === 'INPUT' || tag === 'TEXTAREA' || tag === 'SELECT') return;
+
+    const ctrl = e.ctrlKey || e.metaKey;
+    if (!ctrl) return;
+    const key = e.key.toLowerCase();
+    if (key === 'z' && !e.shiftKey) { e.preventDefault(); undo(); }
+    else if (key === 'y' || (key === 'z' && e.shiftKey)) { e.preventDefault(); redo(); }
+    else if (key === 's') { e.preventDefault(); saveProject(false); }
+    else if (key === 'd') { e.preventDefault(); duplicateSelectedClip(); }
+    else if (key === '+' || key === '=') { e.preventDefault(); zoomTimeline(1.3); }
+    else if (key === '-') { e.preventDefault(); zoomTimeline(1 / 1.3); }
   }
 
   function onTimelineToolbarClick(e) {
@@ -213,6 +381,7 @@
     ui.selection = null;
     ui.playhead = 0;
     ui.activeClipId = null;
+    resetHistory();
     renderAll();
     markSaved();
   }
@@ -251,6 +420,7 @@
     ui.selection = null;
     ui.playhead = 0;
     ui.activeClipId = null;
+    resetHistory();
     renderAll();
     markSaved();
   }
@@ -310,6 +480,7 @@
   }
 
   function addMediaToTimeline(media) {
+    pushHistory();
     if (media.hasVideo) {
       const clip = {
         id: uid('clip'), mediaId: media.id,
@@ -526,7 +697,7 @@
         const badge = document.createElement('div');
         badge.className = 'transition-badge';
         badge.textContent = clip.transitionOut.type === 'fadeblack' ? '◐' : '⇄';
-        badge.title = clip.transitionOut.type === 'fadeblack' ? 'Schwarzblende' : 'Überblenden';
+        badge.title = transitionLabel(clip.transitionOut.type);
         div.appendChild(badge);
       }
 
@@ -635,7 +806,9 @@
       const startX = e.clientX;
       const origIn = item.inPoint;
       const origOut = item.outPoint;
+      let historyPushed = false;
       function onMove(ev) {
+        if (!historyPushed) { pushHistory(); historyPushed = true; }
         const deltaSec = (ev.clientX - startX) / ui.pxPerSecond;
         if (side === 'left') {
           item.inPoint = clamp(origIn + deltaSec, 0, origOut - 0.1);
@@ -665,7 +838,9 @@
       const startX = e.clientX;
       const origStart = item.start;
       const origEnd = item.end;
+      let historyPushed = false;
       function onMove(ev) {
+        if (!historyPushed) { pushHistory(); historyPushed = true; }
         const deltaSec = (ev.clientX - startX) / ui.pxPerSecond;
         if (side === 'left') item.start = clamp(origStart + deltaSec, 0, origEnd - 0.2);
         else item.end = clamp(origEnd + deltaSec, origStart + 0.2, 100000);
@@ -689,9 +864,11 @@
       const startX = e.clientX;
       const origStart = item.start || 0;
       let moved = false;
+      let historyPushed = false;
       function onMove(ev) {
         if (Math.abs(ev.clientX - startX) > 3) moved = true;
         if (!moved) return;
+        if (!historyPushed) { pushHistory(); historyPushed = true; }
         item.start = clamp(origStart + (ev.clientX - startX) / ui.pxPerSecond, 0, 100000);
         renderTimeline();
       }
@@ -713,9 +890,11 @@
       const origStart = item.start;
       const span = item.end - item.start;
       let moved = false;
+      let historyPushed = false;
       function onMove(ev) {
         if (Math.abs(ev.clientX - startX) > 3) moved = true;
         if (!moved) return;
+        if (!historyPushed) { pushHistory(); historyPushed = true; }
         const newStart = clamp(origStart + (ev.clientX - startX) / ui.pxPerSecond, 0, 100000);
         item.start = newStart;
         item.end = newStart + span;
@@ -737,6 +916,7 @@
   function splitAtPlayhead() {
     const found = videoTrackLayout().find((l) => ui.playhead > l.start + 0.02 && ui.playhead < l.start + l.dur - 0.02);
     if (!found) return;
+    pushHistory();
     const clip = found.clip;
     const idx = state.timeline.videoTrack.indexOf(clip);
     const localOut = ui.playhead - found.start;
@@ -758,6 +938,7 @@
   }
 
   function removeClip(kind, id) {
+    pushHistory();
     if (kind === 'video') state.timeline.videoTrack = state.timeline.videoTrack.filter((c) => c.id !== id);
     else if (kind === 'audio') {
       state.timeline.audioTrack = state.timeline.audioTrack.filter((c) => c.id !== id);
@@ -774,6 +955,7 @@
   function swapClips(i, j) {
     const arr = state.timeline.videoTrack;
     if (j < 0 || j >= arr.length) return;
+    pushHistory();
     const tmp = arr[i];
     arr[i] = arr[j];
     arr[j] = tmp;
@@ -782,6 +964,7 @@
   }
 
   function addTextOverlay() {
+    pushHistory();
     const item = {
       id: uid('txt'), text: 'Dein Text',
       start: ui.playhead, end: ui.playhead + 3,
@@ -790,6 +973,174 @@
     state.timeline.textOverlays.push(item);
     ui.selection = { type: 'text', id: item.id };
     markUnsaved();
+    renderAll();
+  }
+
+  // ---------- Undo / Redo history ----------
+
+  function snapshotState() {
+    return JSON.stringify({ state, selection: ui.selection });
+  }
+
+  function pushHistory() {
+    undoStack.push(snapshotState());
+    if (undoStack.length > MAX_HISTORY) undoStack.shift();
+    redoStack.length = 0;
+    updateUndoRedoMenu();
+  }
+
+  function applySnapshot(json) {
+    const data = JSON.parse(json);
+    state = data.state;
+    ui.selection = data.selection;
+    ui.activeClipId = null;
+    pause();
+    markUnsaved();
+    renderAll();
+  }
+
+  function undo() {
+    if (!undoStack.length) return;
+    const current = snapshotState();
+    const prev = undoStack.pop();
+    redoStack.push(current);
+    applySnapshot(prev);
+    updateUndoRedoMenu();
+  }
+
+  function redo() {
+    if (!redoStack.length) return;
+    const current = snapshotState();
+    const next = redoStack.pop();
+    undoStack.push(current);
+    applySnapshot(next);
+    updateUndoRedoMenu();
+  }
+
+  function updateUndoRedoMenu() {
+    if (el.menuUndo) el.menuUndo.disabled = undoStack.length === 0;
+    if (el.menuRedo) el.menuRedo.disabled = redoStack.length === 0;
+  }
+
+  function resetHistory() {
+    undoStack = [];
+    redoStack = [];
+    updateUndoRedoMenu();
+  }
+
+  // ---------- More menu actions ----------
+
+  function deselectAll() {
+    ui.selection = null;
+    renderProps();
+    renderTimeline();
+  }
+
+  function showLastExport() {
+    if (!lastExportPath) { alert('Es wurde in dieser Sitzung noch nichts exportiert.'); return; }
+    window.videoWeltAPI.showItemInFolder(lastExportPath);
+  }
+
+  function duplicateSelectedClip() {
+    if (!ui.selection) return;
+    pushHistory();
+    if (ui.selection.type === 'video') {
+      const idx = state.timeline.videoTrack.findIndex((c) => c.id === ui.selection.id);
+      if (idx === -1) return;
+      const copy = JSON.parse(JSON.stringify(state.timeline.videoTrack[idx]));
+      copy.id = uid('clip');
+      state.timeline.videoTrack.splice(idx + 1, 0, copy);
+      ui.selection = { type: 'video', id: copy.id };
+    } else if (ui.selection.type === 'audio') {
+      const orig = state.timeline.audioTrack.find((a) => a.id === ui.selection.id);
+      if (!orig) return;
+      const copy = JSON.parse(JSON.stringify(orig));
+      copy.id = uid('aud');
+      copy.start = (orig.start || 0) + audioItemEffDuration(orig) + 0.2;
+      state.timeline.audioTrack.push(copy);
+      ui.selection = { type: 'audio', id: copy.id };
+    } else if (ui.selection.type === 'text') {
+      const orig = state.timeline.textOverlays.find((t) => t.id === ui.selection.id);
+      if (!orig) return;
+      const copy = JSON.parse(JSON.stringify(orig));
+      copy.id = uid('txt');
+      const span = orig.end - orig.start;
+      copy.start = orig.end + 0.2;
+      copy.end = copy.start + span;
+      state.timeline.textOverlays.push(copy);
+      ui.selection = { type: 'text', id: copy.id };
+    }
+    markUnsaved();
+    renderAll();
+  }
+
+  function getSelectedVideoClip() {
+    if (!ui.selection || ui.selection.type !== 'video') return null;
+    return state.timeline.videoTrack.find((c) => c.id === ui.selection.id) || null;
+  }
+
+  function resetSelectedClipEffects() {
+    const clip = getSelectedVideoClip();
+    if (!clip) return;
+    pushHistory();
+    clip.effects = defaultEffects();
+    markUnsaved();
+    liveFilterUpdate(clip);
+    renderAll();
+  }
+
+  function toggleSelectedClipMute() {
+    const clip = getSelectedVideoClip();
+    if (!clip) return;
+    pushHistory();
+    clip.effects.muted = !clip.effects.muted;
+    markUnsaved();
+    renderAll();
+  }
+
+  function toggleSelectedClipVignette() {
+    const clip = getSelectedVideoClip();
+    if (!clip) return;
+    pushHistory();
+    clip.effects.vignette = !clip.effects.vignette;
+    markUnsaved();
+    liveFilterUpdate(clip);
+    renderAll();
+  }
+
+  function toggleSelectedClipFlip() {
+    const clip = getSelectedVideoClip();
+    if (!clip) return;
+    pushHistory();
+    clip.effects.flipH = !clip.effects.flipH;
+    markUnsaved();
+    liveFilterUpdate(clip);
+    renderAll();
+  }
+
+  function applyPreset(name) {
+    const clip = getSelectedVideoClip();
+    if (!clip) {
+      alert('Bitte zuerst einen Videoclip in der Timeline auswählen.');
+      return;
+    }
+    pushHistory();
+    const fx = clip.effects;
+    if (name === 'reset') {
+      Object.assign(fx, defaultEffects());
+    } else if (name === 'bw') {
+      fx.grayscale = true; fx.sepia = false; fx.contrast = 1.15; fx.hue = 0;
+    } else if (name === 'sepia') {
+      fx.sepia = true; fx.grayscale = false; fx.saturation = 0.9;
+    } else if (name === 'warm') {
+      fx.grayscale = false; fx.sepia = false; fx.saturation = 1.2; fx.brightness = 0.03; fx.hue = 8;
+    } else if (name === 'cool') {
+      fx.grayscale = false; fx.sepia = false; fx.saturation = 1.05; fx.hue = -12;
+    } else if (name === 'cinematic') {
+      fx.contrast = 1.2; fx.saturation = 0.85; fx.vignette = true; fx.brightness = -0.03;
+    }
+    markUnsaved();
+    liveFilterUpdate(clip);
     renderAll();
   }
 
@@ -820,12 +1171,15 @@
     const input = document.createElement('input');
     input.type = 'range';
     input.min = String(opts.min); input.max = String(opts.max); input.step = String(opts.step); input.value = String(opts.value);
+    let historyPushed = false;
     input.addEventListener('input', () => {
+      if (!historyPushed) { pushHistory(); historyPushed = true; }
       const v = parseFloat(input.value);
       badge.textContent = opts.format ? opts.format(v) : String(v);
       onChange(v);
       markUnsaved();
     });
+    input.addEventListener('change', () => { historyPushed = false; });
     wrap.appendChild(input);
     root.appendChild(wrap);
     return input;
@@ -838,7 +1192,7 @@
     input.type = 'checkbox';
     input.checked = checked;
     input.id = uid('chk');
-    input.addEventListener('change', () => { onChange(input.checked); markUnsaved(); });
+    input.addEventListener('change', () => { pushHistory(); onChange(input.checked); markUnsaved(); });
     const label = document.createElement('label');
     label.htmlFor = input.id;
     label.textContent = labelText;
@@ -859,7 +1213,29 @@
       if (String(opt.value) === String(value)) o.selected = true;
       select.appendChild(o);
     });
-    select.addEventListener('change', () => { onChange(select.value); markUnsaved(); });
+    select.addEventListener('change', () => { pushHistory(); onChange(select.value); markUnsaved(); });
+    wrap.appendChild(select);
+    root.appendChild(wrap);
+    return select;
+  }
+
+  function addGroupedSelect(root, labelText, groups, value, onChange) {
+    const wrap = document.createElement('label');
+    wrap.appendChild(document.createTextNode(labelText));
+    const select = document.createElement('select');
+    groups.forEach((group) => {
+      const og = document.createElement('optgroup');
+      og.label = group.label;
+      group.options.forEach((opt) => {
+        const o = document.createElement('option');
+        o.value = String(opt.value);
+        o.textContent = opt.label;
+        if (String(opt.value) === String(value)) o.selected = true;
+        og.appendChild(o);
+      });
+      select.appendChild(og);
+    });
+    select.addEventListener('change', () => { pushHistory(); onChange(select.value); markUnsaved(); });
     wrap.appendChild(select);
     root.appendChild(wrap);
     return select;
@@ -872,7 +1248,7 @@
     input.type = 'number';
     input.step = String(step);
     input.value = String(Math.round(value * 100) / 100);
-    input.addEventListener('change', () => { onChange(parseFloat(input.value) || 0); markUnsaved(); });
+    input.addEventListener('change', () => { pushHistory(); onChange(parseFloat(input.value) || 0); markUnsaved(); });
     wrap.appendChild(input);
     root.appendChild(wrap);
     return input;
@@ -883,7 +1259,13 @@
     wrap.appendChild(document.createTextNode(labelText));
     const ta = document.createElement('textarea');
     ta.value = value;
-    ta.addEventListener('input', () => { onInput(ta.value); markUnsaved(); });
+    let historyPushed = false;
+    ta.addEventListener('input', () => {
+      if (!historyPushed) { pushHistory(); historyPushed = true; }
+      onInput(ta.value);
+      markUnsaved();
+    });
+    ta.addEventListener('blur', () => { historyPushed = false; });
     wrap.appendChild(ta);
     root.appendChild(wrap);
     return ta;
@@ -925,7 +1307,12 @@
     addCheckbox(root, 'Graustufen', clip.effects.grayscale, (v) => { clip.effects.grayscale = v; liveFilterUpdate(clip); });
     addCheckbox(root, 'Sepia', clip.effects.sepia, (v) => { clip.effects.sepia = v; liveFilterUpdate(clip); });
     addSlider(root, 'Weichzeichnen', { min: 0, max: 20, step: 1, value: clip.effects.blur, format: (v) => v + 'px' }, (v) => { clip.effects.blur = v; liveFilterUpdate(clip); });
+    addSlider(root, 'Schärfen', { min: 0, max: 5, step: 0.25, value: clip.effects.sharpen || 0, format: (v) => v.toFixed(2) }, (v) => { clip.effects.sharpen = v; });
+    addSlider(root, 'Farbton (Hue)', { min: -180, max: 180, step: 5, value: clip.effects.hue || 0, format: (v) => v + '°' }, (v) => { clip.effects.hue = v; liveFilterUpdate(clip); });
     addSelect(root, 'Rotation', [{ value: 0, label: '0°' }, { value: 90, label: '90°' }, { value: 180, label: '180°' }, { value: 270, label: '270°' }], clip.effects.rotate, (v) => { clip.effects.rotate = parseInt(v, 10); liveFilterUpdate(clip); });
+    addCheckbox(root, 'Horizontal spiegeln', clip.effects.flipH, (v) => { clip.effects.flipH = v; liveFilterUpdate(clip); });
+    addCheckbox(root, 'Vertikal spiegeln', clip.effects.flipV, (v) => { clip.effects.flipV = v; liveFilterUpdate(clip); });
+    addCheckbox(root, 'Vignette', clip.effects.vignette, (v) => { clip.effects.vignette = v; liveFilterUpdate(clip); });
     addSlider(root, 'Einblenden (Fade-In)', { min: 0, max: 3, step: 0.1, value: clip.effects.fadeIn, format: (v) => v.toFixed(1) + 's' }, (v) => { clip.effects.fadeIn = v; });
     addSlider(root, 'Ausblenden (Fade-Out)', { min: 0, max: 3, step: 0.1, value: clip.effects.fadeOut, format: (v) => v.toFixed(1) + 's' }, (v) => { clip.effects.fadeOut = v; });
 
@@ -935,11 +1322,7 @@
     }
 
     if (idx < state.timeline.videoTrack.length - 1) {
-      addSelect(root, 'Übergang zum nächsten Clip', [
-        { value: 'none', label: 'Kein Übergang (Hartschnitt)' },
-        { value: 'crossfade', label: 'Überblenden' },
-        { value: 'fadeblack', label: 'Schwarzblende' }
-      ], clip.transitionOut.type, (v) => { clip.transitionOut.type = v; renderTimeline(); });
+      addGroupedSelect(root, 'Übergang zum nächsten Clip', TRANSITION_GROUPS, clip.transitionOut.type, (v) => { clip.transitionOut.type = v; renderTimeline(); });
       addSlider(root, 'Übergangsdauer', { min: 0.2, max: 3, step: 0.1, value: clip.transitionOut.duration, format: (v) => v.toFixed(1) + 's' }, (v) => { clip.transitionOut.duration = v; });
     }
 
@@ -1057,11 +1440,19 @@
     const c = clamp(fx.contrast != null ? fx.contrast : 1, 0, 3);
     const s = fx.grayscale ? 0 : clamp(fx.saturation != null ? fx.saturation : 1, 0, 3);
     const blurPx = clamp(fx.blur || 0, 0, 20) * 0.5;
+    const hue = clamp(fx.hue || 0, -180, 180);
     let filter = 'brightness(' + b + ') contrast(' + c + ') saturate(' + s + ')';
+    if (hue) filter += ' hue-rotate(' + hue + 'deg)';
     if (fx.sepia) filter += ' sepia(0.7)';
     if (blurPx > 0) filter += ' blur(' + blurPx + 'px)';
     videoEl.style.filter = filter;
-    videoEl.style.transform = fx.rotate ? 'rotate(' + fx.rotate + 'deg)' : '';
+    videoEl.style.boxShadow = fx.vignette ? 'inset 0 0 100px 30px rgba(0,0,0,0.55)' : '';
+
+    const transforms = [];
+    if (fx.flipH) transforms.push('scaleX(-1)');
+    if (fx.flipV) transforms.push('scaleY(-1)');
+    if (fx.rotate) transforms.push('rotate(' + fx.rotate + 'deg)');
+    videoEl.style.transform = transforms.join(' ');
   }
 
   function loadClipIntoFront(item, seekLocalOutputTime) {

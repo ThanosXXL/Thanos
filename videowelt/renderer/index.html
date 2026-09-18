@@ -39,21 +39,87 @@
         <div class="brand-cam gold-surface"></div>
         <span class="brand-word">VideoWelt</span>
       </div>
-      <nav class="toolbar" id="toolbar">
-        <button data-action="new-project" class="tb-btn">Neues Projekt</button>
-        <button data-action="open-project" class="tb-btn">Öffnen</button>
-        <button data-action="save-project" class="tb-btn">Speichern</button>
-        <button data-action="save-project-as" class="tb-btn">Speichern unter</button>
-        <span class="tb-sep"></span>
-        <button data-action="import-video" class="tb-btn">Video importieren</button>
-        <button data-action="import-audio" class="tb-btn">Audio importieren</button>
-        <button data-action="import-demo-music" class="tb-btn">🎵 Demo-Musik</button>
-        <button data-action="add-text" class="tb-btn">Text hinzufügen</button>
-        <span class="tb-sep"></span>
-        <button data-action="export" class="tb-btn tb-btn-gold">Exportieren</button>
+      <nav class="menubar" id="menubar">
+        <div class="menu" data-menu="datei">
+          <button type="button" class="menu-trigger">Datei</button>
+          <div class="menu-dropdown">
+            <button type="button" data-action="new-project">Neues Projekt</button>
+            <button type="button" data-action="open-project">Öffnen…</button>
+            <button type="button" data-action="save-project">Speichern <span class="menu-shortcut">Strg+S</span></button>
+            <button type="button" data-action="save-project-as">Speichern unter…</button>
+            <div class="menu-divider"></div>
+            <button type="button" data-action="reopen-last-project">Letztes Projekt fortsetzen</button>
+            <button type="button" data-action="show-last-export">Letzten Export im Ordner zeigen</button>
+            <div class="menu-divider"></div>
+            <button type="button" data-action="export">Exportieren…</button>
+          </div>
+        </div>
+        <div class="menu" data-menu="bearbeiten">
+          <button type="button" class="menu-trigger">Bearbeiten</button>
+          <div class="menu-dropdown">
+            <button type="button" data-action="undo" id="menu-undo">Rückgängig <span class="menu-shortcut">Strg+Z</span></button>
+            <button type="button" data-action="redo" id="menu-redo">Wiederholen <span class="menu-shortcut">Strg+Y</span></button>
+            <div class="menu-divider"></div>
+            <button type="button" data-action="duplicate-clip">Clip duplizieren <span class="menu-shortcut">Strg+D</span></button>
+            <button type="button" data-action="delete-clip">Auswahl löschen <span class="menu-shortcut">Entf</span></button>
+            <button type="button" data-action="deselect">Auswahl aufheben</button>
+          </div>
+        </div>
+        <div class="menu" data-menu="einfuegen">
+          <button type="button" class="menu-trigger">Einfügen</button>
+          <div class="menu-dropdown">
+            <button type="button" data-action="import-video">Video importieren…</button>
+            <button type="button" data-action="import-audio">Audio importieren…</button>
+            <button type="button" data-action="import-demo-music">🎵 Demo-Musik hinzufügen</button>
+            <div class="menu-divider"></div>
+            <button type="button" data-action="add-text">Text-Einblendung hinzufügen</button>
+          </div>
+        </div>
+        <div class="menu" data-menu="clip">
+          <button type="button" class="menu-trigger">Clip</button>
+          <div class="menu-dropdown">
+            <button type="button" data-action="split">Schneiden (Split am Playhead)</button>
+            <button type="button" data-action="duplicate-clip">Clip duplizieren</button>
+            <button type="button" data-action="reset-effects">Effekte zurücksetzen</button>
+            <button type="button" data-action="toggle-mute">Stumm umschalten</button>
+            <div class="menu-divider"></div>
+            <button type="button" data-action="delete-clip">Aus Timeline entfernen</button>
+          </div>
+        </div>
+        <div class="menu" data-menu="effekte">
+          <button type="button" class="menu-trigger">Effekte</button>
+          <div class="menu-dropdown">
+            <button type="button" data-action="preset-reset">Zurücksetzen</button>
+            <div class="menu-divider"></div>
+            <button type="button" data-action="preset-bw">Schwarz-Weiß</button>
+            <button type="button" data-action="preset-sepia">Sepia</button>
+            <button type="button" data-action="preset-warm">Warm</button>
+            <button type="button" data-action="preset-cool">Kalt</button>
+            <button type="button" data-action="preset-cinematic">Kino-Look</button>
+            <div class="menu-divider"></div>
+            <button type="button" data-action="toggle-vignette">Vignette umschalten</button>
+            <button type="button" data-action="toggle-flip">Horizontal spiegeln</button>
+          </div>
+        </div>
+        <div class="menu" data-menu="ansicht">
+          <button type="button" class="menu-trigger">Ansicht</button>
+          <div class="menu-dropdown">
+            <button type="button" data-action="zoom-in">Timeline vergrößern</button>
+            <button type="button" data-action="zoom-out">Timeline verkleinern</button>
+            <button type="button" data-action="zoom-reset">Zoom zurücksetzen</button>
+          </div>
+        </div>
+        <div class="menu" data-menu="hilfe">
+          <button type="button" class="menu-trigger">Hilfe</button>
+          <div class="menu-dropdown">
+            <button type="button" data-action="show-shortcuts">Tastenkürzel</button>
+            <button type="button" data-action="show-about">Über VideoWelt</button>
+          </div>
+        </div>
       </nav>
       <input type="text" class="project-name" id="project-name-display" title="Projektname">
       <span class="save-state" id="save-state"></span>
+      <button type="button" data-action="export" class="tb-btn tb-btn-gold">Exportieren</button>
     </header>
 
     <main class="workspace">
@@ -130,12 +196,21 @@
           <option value="webm">WebM (VP9)</option>
         </select>
       </label>
-      <label>Auflösung
+      <label>Auflösung / Format
         <select id="export-resolution">
-          <option value="3840x2160">4K (3840×2160)</option>
-          <option value="1920x1080" selected>Full HD (1920×1080)</option>
-          <option value="1280x720">HD (1280×720)</option>
-          <option value="854x480">SD (854×480)</option>
+          <optgroup label="Querformat (16:9)">
+            <option value="3840x2160">4K (3840×2160)</option>
+            <option value="1920x1080" selected>Full HD (1920×1080)</option>
+            <option value="1280x720">HD (1280×720)</option>
+            <option value="854x480">SD (854×480)</option>
+          </optgroup>
+          <optgroup label="Hochformat – Story/Reels/TikTok (9:16)">
+            <option value="1080x1920">Full HD Hochformat (1080×1920)</option>
+            <option value="720x1280">HD Hochformat (720×1280)</option>
+          </optgroup>
+          <optgroup label="Quadratisch (1:1)">
+            <option value="1080x1080">Quadrat (1080×1080)</option>
+          </optgroup>
         </select>
       </label>
       <label>Qualität
@@ -159,6 +234,36 @@
       <div class="modal-actions">
         <button data-action="cancel-export" class="tb-btn">Abbrechen</button>
         <button data-action="start-export" class="tb-btn tb-btn-gold" id="start-export-btn">Exportieren &amp; Speichern</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="modal-backdrop hidden" id="shortcuts-modal">
+    <div class="modal">
+      <h2>Tastenkürzel</h2>
+      <table class="shortcuts-table">
+        <tr><td>Leertaste</td><td>Wiedergabe / Pause</td></tr>
+        <tr><td>Strg+Z</td><td>Rückgängig</td></tr>
+        <tr><td>Strg+Y / Strg+Umschalt+Z</td><td>Wiederholen</td></tr>
+        <tr><td>Strg+S</td><td>Projekt speichern</td></tr>
+        <tr><td>Strg+D</td><td>Clip duplizieren</td></tr>
+        <tr><td>Entf</td><td>Auswahl löschen</td></tr>
+        <tr><td>Strg + / Strg −</td><td>Timeline vergrößern / verkleinern</td></tr>
+      </table>
+      <div class="modal-actions">
+        <button type="button" data-action="close-shortcuts" class="tb-btn tb-btn-gold">Schließen</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="modal-backdrop hidden" id="about-modal">
+    <div class="modal">
+      <h2>Über VideoWelt</h2>
+      <p>VideoWelt ist eine eigenständige Desktop-Software zum Bearbeiten, Erstellen und Schneiden von
+        Videos, mit echter Verarbeitung über ein gebündeltes ffmpeg. Schneiden, Effekte, Übergänge,
+        Text-Einblendungen, Hintergrundmusik und Export – alles in einer App.</p>
+      <div class="modal-actions">
+        <button type="button" data-action="close-about" class="tb-btn tb-btn-gold">Schließen</button>
       </div>
     </div>
   </div>

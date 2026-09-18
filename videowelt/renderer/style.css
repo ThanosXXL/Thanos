@@ -178,6 +178,39 @@ html, body {
   text-shadow: 0 0 10px rgba(255,255,255,0.35);
 }
 .toolbar { display: flex; align-items: center; gap: 8px; flex: 1; flex-wrap: wrap; }
+
+/* ---------- Menu bar ---------- */
+.menubar { display: flex; align-items: center; gap: 2px; position: relative; flex: 1; }
+.menu { position: relative; }
+.menu-trigger {
+  background: none; border: none; color: var(--text);
+  font-family: 'Montserrat', sans-serif; font-weight: 600; font-size: 12.5px;
+  padding: 9px 13px; cursor: pointer; border-radius: 6px;
+}
+.menu-trigger:hover { background: #1c1a16; color: var(--gold); }
+.menu.open .menu-trigger { background: #1c1a16; color: var(--gold); }
+.menu-dropdown {
+  display: none;
+  position: absolute; top: 100%; left: 0; margin-top: 4px;
+  background: var(--bg-panel); border: 1px solid var(--border); border-radius: 8px;
+  min-width: 250px; padding: 6px; box-shadow: 0 12px 30px rgba(0,0,0,0.6); z-index: 50;
+}
+.menu.open .menu-dropdown { display: block; }
+.menu-dropdown button {
+  display: flex; align-items: center; justify-content: space-between;
+  width: 100%; background: none; border: none; color: var(--text);
+  font-family: 'Montserrat', sans-serif; font-size: 12.5px; font-weight: 500;
+  padding: 8px 10px; border-radius: 5px; cursor: pointer; text-align: left;
+}
+.menu-dropdown button:hover { background: #241f14; color: var(--gold); }
+.menu-dropdown button:disabled { opacity: 0.4; cursor: default; }
+.menu-dropdown button:disabled:hover { background: none; color: var(--text); }
+.menu-shortcut { color: var(--text-dim); font-size: 10.5px; margin-left: 14px; white-space: nowrap; }
+.menu-divider { height: 1px; background: var(--border); margin: 5px 4px; }
+
+.shortcuts-table { width: 100%; border-collapse: collapse; margin: 10px 0; }
+.shortcuts-table td { padding: 7px 4px; border-bottom: 1px solid var(--border); font-size: 12.5px; }
+.shortcuts-table td:first-child { color: var(--gold); font-weight: 600; white-space: nowrap; padding-right: 16px; }
 .tb-sep { width: 1px; height: 24px; background: var(--border); margin: 0 4px; }
 .tb-btn {
   background: #1c1a16;
