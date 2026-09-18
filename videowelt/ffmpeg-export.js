@@ -1,14 +1,29 @@
 const ffmpeg = require('fluent-ffmpeg');
-const ffmpegPath = require('ffmpeg-static');
-const ffprobePath = require('ffprobe-static').path;
 const path = require('path');
 const fs = require('fs');
 const os = require('os');
 
+// Spawning ffmpeg/ffprobe (and reading the font/sample directories below) goes
+// through the OS's real exec/fs calls, which cannot see inside an asar
+// archive — only Electron's own patched fs/require can. electron-builder
+// unpacks anything matched by "asarUnpack" into a sibling app.asar.unpacked
+// directory, but the paths below still point inside app.asar unless we
+// redirect them ourselves, so packaged builds need this rewrite; it is a
+// no-op both in dev (no asar) and for ffmpeg-static/ffprobe-static, which
+// only ever return a path is inside app.asar when actually packaged.
+function unpackAsarPath(p) {
+  if (!p) return p;
+  return p.replace(/([\\/])app\.asar([\\/])/, '$1app.asar.unpacked$2');
+}
+
+const ffmpegPath = unpackAsarPath(require('ffmpeg-static'));
+const ffprobePath = unpackAsarPath(require('ffprobe-static').path);
+
 ffmpeg.setFfmpegPath(ffmpegPath);
 ffmpeg.setFfprobePath(ffprobePath);
 
-const FONTS_DIR = path.join(__dirname, 'build', 'fonts');
+const FONTS_DIR = unpackAsarPath(path.join(__dirname, 'build', 'fonts'));
+const SAMPLES_DIR = unpackAsarPath(path.join(__dirname, 'build', 'samples'));
 
 // Generate a fontconfig config (with an absolute <dir>, since a relative one
 // resolves against the process cwd, not the config file's location) that
@@ -232,16 +247,24 @@ function transitionDuration(clip) {
 }
 
 function buildAudioTrackFilter(item, index) {
-  const fx = item;
-  const inPoint = Number(item.inPoint) || 0;
-  const outPoint = Number(item.outPoint) || inPoint + 1;
   const start = Number(item.start) || 0;
   const parts = [];
-  parts.push(`atrim=start=${inPoint}:end=${outPoint}`);
+  let dur;
+  if (item.loop && item.stretchDuration) {
+    // The input itself is repeated via "-stream_loop -1" (see runExport),
+    // so here we just cut the now-effectively-infinite stream to the exact
+    // stretched length instead of the original inPoint/outPoint range.
+    dur = Math.max(0.05, item.stretchDuration);
+    parts.push(`atrim=start=0:duration=${dur}`);
+  } else {
+    const inPoint = Number(item.inPoint) || 0;
+    const outPoint = Number(item.outPoint) || inPoint + 1;
+    dur = Math.max(0.05, outPoint - inPoint);
+    parts.push(`atrim=start=${inPoint}:end=${outPoint}`);
+  }
   parts.push('asetpts=PTS-STARTPTS');
   const vol = clamp(item.volume != null ? item.volume : 1, 0, 4);
   parts.push(`volume=${vol}`);
-  const dur = Math.max(0.05, outPoint - inPoint);
   const fadeIn = clamp(item.fadeIn || 0, 0, dur / 2);
   const fadeOut = clamp(item.fadeOut || 0, 0, dur / 2);
   if (fadeIn > 0) parts.push(`afade=t=in:st=0:d=${fadeIn}`);
@@ -285,6 +308,11 @@ function runExport(state, settings, outputPath, onProgress) {
     const media = mediaById[item.mediaId];
     if (!media) throw new Error('Audiospur verweist auf fehlendes Medium: ' + item.mediaId);
     command.input(media.path);
+    if (item.loop && item.stretchDuration) {
+      // Repeats the whole input indefinitely; buildAudioTrackFilter() always
+      // cuts this back down with a matching atrim=duration=stretchDuration.
+      command.inputOptions(['-stream_loop', '-1']);
+    }
     inputIndexOf[item.id] = nextInput++;
   });
 
@@ -457,4 +485,4 @@ function runExport(state, settings, outputPath, onProgress) {
   });
 }
 
-module.exports = { probeMedia, generateThumbnail, runExport, RESOLUTIONS };
+module.exports = { probeMedia, generateThumbnail, runExport, RESOLUTIONS, SAMPLES_DIR };

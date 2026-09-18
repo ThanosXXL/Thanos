@@ -21,7 +21,10 @@ Build-Konfiguration und keine CI.
   Geschwindigkeit (0,25×–4×), Ein-/Ausblenden, Stummschaltung/Lautstärke – live in der Vorschau sichtbar
 - **Übergänge** zwischen Clips: Überblenden (Crossfade) oder Schwarzblende, live in der Vorschau animiert
 - **Text-Einblendungen**: frei positionierbar, mit Schriftgröße und Farbe, zeitlich begrenzt
-- **Hintergrundmusik/Audiospur** unabhängig von der Video-Timeline positionierbar, mit Lautstärke und Ein-/Ausblenden
+- **Hintergrundmusik/Audiospur** unabhängig von der Video-Timeline positionierbar, mit Lautstärke und Ein-/Ausblenden;
+  ein Klick auf "Auf Videolänge anpassen" passt Start/Ende automatisch an die Gesamtlänge des Videos an und
+  wiederholt die Musik nahtlos in einer Schleife, falls sie kürzer ist. Ein eingebauter Demo-Musiktitel
+  ("🎵 Demo-Musik") lässt sich per Klick hinzufügen und wird direkt auf die aktuelle Videolänge zugeschnitten
 - **Export** in MP4 (H.264), MOV (H.264) oder WebM (VP9), Auflösung von SD bis 4K, wählbare Qualität und
   Bildrate, mit Fortschrittsanzeige
 - **Projekte speichern/öffnen** (`.vwproj`) sowie das zuletzt bearbeitete Projekt beim Start wieder anbieten

@@ -158,6 +158,7 @@
     else if (action === 'save-project-as') saveProject(true);
     else if (action === 'import-video') importVideos();
     else if (action === 'import-audio') importAudio();
+    else if (action === 'import-demo-music') importDemoMusic();
     else if (action === 'add-text') addTextOverlay();
     else if (action === 'export') openExportModal();
   }
@@ -290,6 +291,24 @@
     }
   }
 
+  async function importDemoMusic() {
+    const result = await window.videoWeltAPI.importDemoMusic();
+    if (result.error) { alert(result.error); return; }
+    let media = state.mediaLibrary.find((m) => m.path === result.item.path);
+    if (!media) {
+      media = result.item;
+      state.mediaLibrary.push(media);
+    }
+    addMediaToTimeline(media);
+    const added = state.timeline.audioTrack[state.timeline.audioTrack.length - 1];
+    if (added && added.mediaId === media.id) {
+      fitAudioToVideoLength(added);
+      ui.selection = { type: 'audio', id: added.id };
+    }
+    markUnsaved();
+    renderAll();
+  }
+
   function addMediaToTimeline(media) {
     if (media.hasVideo) {
       const clip = {
@@ -302,11 +321,12 @@
       ui.selection = { type: 'video', id: clip.id };
     } else if (media.hasAudio) {
       const lastEnd = (state.timeline.audioTrack || []).reduce(
-        (m, i) => Math.max(m, (i.start || 0) + Math.max(0.05, i.outPoint - i.inPoint)), 0);
+        (m, i) => Math.max(m, (i.start || 0) + audioItemEffDuration(i)), 0);
       const item = {
         id: uid('aud'), mediaId: media.id,
         inPoint: 0, outPoint: media.duration || 1,
-        start: lastEnd, volume: 1, fadeIn: 0, fadeOut: 0
+        start: lastEnd, volume: 1, fadeIn: 0, fadeOut: 0,
+        loop: false, stretchDuration: null
       };
       state.timeline.audioTrack.push(item);
       ui.selection = { type: 'audio', id: item.id };
@@ -339,12 +359,42 @@
     return last.start + last.dur;
   }
 
+  function audioItemEffDuration(item) {
+    if (item.loop && item.stretchDuration) return Math.max(0.05, item.stretchDuration);
+    return Math.max(0.05, item.outPoint - item.inPoint);
+  }
+
   function totalProjectDuration() {
     const videoDur = videoTrackTotalDuration();
     const audioEnd = (state.timeline.audioTrack || []).reduce(
-      (m, i) => Math.max(m, (i.start || 0) + Math.max(0.05, i.outPoint - i.inPoint)), 0);
+      (m, i) => Math.max(m, (i.start || 0) + audioItemEffDuration(i)), 0);
     const textEnd = (state.timeline.textOverlays || []).reduce((m, i) => Math.max(m, i.end || 0), 0);
     return Math.max(videoDur, audioEnd, textEnd);
+  }
+
+  function clearAudioLoop(item) {
+    item.loop = false;
+    item.stretchDuration = null;
+  }
+
+  function fitAudioToVideoLength(item) {
+    const media = getMedia(item.mediaId);
+    if (!media) return;
+    const needed = videoTrackTotalDuration();
+    if (needed <= 0) {
+      alert('Die Video-Timeline ist noch leer. Füge zuerst ein Video hinzu, bevor du die Musik daran anpasst.');
+      return;
+    }
+    item.start = 0;
+    item.inPoint = 0;
+    if ((media.duration || 0) >= needed) {
+      item.outPoint = needed;
+      clearAudioLoop(item);
+    } else {
+      item.outPoint = media.duration || needed;
+      item.loop = true;
+      item.stretchDuration = needed;
+    }
   }
 
   function findClipAtTime(t) {
@@ -496,7 +546,7 @@
     el.trackAudioBody.style.width = width + 'px';
     (state.timeline.audioTrack || []).forEach((item) => {
       const media = getMedia(item.mediaId);
-      const dur = Math.max(0.05, item.outPoint - item.inPoint);
+      const dur = audioItemEffDuration(item);
       const div = document.createElement('div');
       div.className = 'clip clip-audio' + (isSelected('audio', item.id) ? ' selected' : '');
       div.style.left = ((item.start || 0) * ui.pxPerSecond) + 'px';
@@ -507,15 +557,24 @@
       label.textContent = media ? media.name : 'Audio';
       div.appendChild(label);
 
-      const leftHandle = document.createElement('div');
-      leftHandle.className = 'clip-trim-handle left';
-      div.appendChild(leftHandle);
-      const rightHandle = document.createElement('div');
-      rightHandle.className = 'clip-trim-handle right';
-      div.appendChild(rightHandle);
-
-      bindTrimHandle(leftHandle, item, media, 'left');
-      bindTrimHandle(rightHandle, item, media, 'right');
+      if (item.loop) {
+        // Looping stretches the clip to the video length; trim handles would
+        // edit the (now irrelevant) single-play source range, so skip them.
+        const badge = document.createElement('div');
+        badge.className = 'transition-badge';
+        badge.textContent = '🔁';
+        badge.title = 'Wiederholt sich (Loop), bis das Video endet';
+        div.appendChild(badge);
+      } else {
+        const leftHandle = document.createElement('div');
+        leftHandle.className = 'clip-trim-handle left';
+        div.appendChild(leftHandle);
+        const rightHandle = document.createElement('div');
+        rightHandle.className = 'clip-trim-handle right';
+        div.appendChild(rightHandle);
+        bindTrimHandle(leftHandle, item, media, 'left');
+        bindTrimHandle(rightHandle, item, media, 'right');
+      }
       bindMoveDrag(div, item, 'audio');
 
       el.trackAudioBody.appendChild(div);
@@ -911,10 +970,32 @@
     nameP.textContent = media ? media.name : 'Audio';
     root.appendChild(nameP);
 
+    const fitBtn = document.createElement('button');
+    fitBtn.type = 'button';
+    fitBtn.className = 'tb-btn';
+    fitBtn.style.width = '100%';
+    fitBtn.textContent = 'Auf Videolänge anpassen';
+    fitBtn.title = 'Setzt Start/Ende so, dass die Musik genauso lang wie die Video-Timeline ist (wiederholt sich in einer Schleife, falls sie kürzer ist)';
+    fitBtn.addEventListener('click', () => {
+      fitAudioToVideoLength(item);
+      markUnsaved();
+      renderTimeline();
+      renderProps();
+      if (!ui.playing) updateAudioTrackPreview();
+    });
+    root.appendChild(fitBtn);
+
+    if (item.loop) {
+      const loopHint = document.createElement('p');
+      loopHint.className = 'hint';
+      loopHint.textContent = '🔁 Wird in einer Schleife wiederholt, bis das Video endet.';
+      root.appendChild(loopHint);
+    }
+
     const trimRow = document.createElement('div');
     trimRow.className = 'props-row';
-    addNumberField(trimRow, 'Start im Original (s)', item.inPoint, 0.1, (v) => { item.inPoint = clamp(v, 0, item.outPoint - 0.1); renderTimeline(); });
-    addNumberField(trimRow, 'Ende im Original (s)', item.outPoint, 0.1, (v) => { item.outPoint = clamp(v, item.inPoint + 0.1, media ? media.duration : v); renderTimeline(); });
+    addNumberField(trimRow, 'Start im Original (s)', item.inPoint, 0.1, (v) => { item.inPoint = clamp(v, 0, item.outPoint - 0.1); clearAudioLoop(item); renderTimeline(); renderProps(); });
+    addNumberField(trimRow, 'Ende im Original (s)', item.outPoint, 0.1, (v) => { item.outPoint = clamp(v, item.inPoint + 0.1, media ? media.duration : v); clearAudioLoop(item); renderTimeline(); renderProps(); });
     root.appendChild(trimRow);
 
     addNumberField(root, 'Position auf Timeline (s)', item.start || 0, 0.1, (v) => { item.start = Math.max(0, v); renderTimeline(); });
@@ -1172,7 +1253,7 @@
     (state.timeline.audioTrack || []).forEach((item) => {
       const media = getMedia(item.mediaId);
       if (!media) return;
-      const dur = Math.max(0.05, item.outPoint - item.inPoint);
+      const dur = audioItemEffDuration(item);
       const start = item.start || 0;
       const within = ui.playhead >= start && ui.playhead < start + dur;
       if (!within) return;
@@ -1182,8 +1263,15 @@
         a.src = toFileUrl(media.path);
         a.dataset.mediaPath = media.path;
       }
+      a.loop = !!item.loop;
       a.volume = clamp(item.volume != null ? item.volume : 1, 0, 1);
-      const target = item.inPoint + (ui.playhead - start);
+      const elapsed = ui.playhead - start;
+      // Native <audio loop> restarts playback on its own; here we only
+      // correct drift, wrapping the target into the source's own length so
+      // scrubbing while looped doesn't seek past the end of the file.
+      const target = item.loop && media.duration
+        ? item.inPoint + (elapsed % Math.max(0.05, media.duration))
+        : item.inPoint + elapsed;
       if (Math.abs(a.currentTime - target) > 0.2) a.currentTime = target;
       if (ui.playing) { if (a.paused) a.play().catch(() => {}); }
       else if (!a.paused) a.pause();

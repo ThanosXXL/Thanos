@@ -3,6 +3,7 @@ const { contextBridge, ipcRenderer } = require('electron');
 contextBridge.exposeInMainWorld('videoWeltAPI', {
   importVideos: () => ipcRenderer.invoke('import-media', { kind: 'video' }),
   importAudio: () => ipcRenderer.invoke('import-media', { kind: 'audio' }),
+  importDemoMusic: () => ipcRenderer.invoke('import-demo-music'),
   exportVideo: (state, settings) => ipcRenderer.invoke('export-video', { state, settings }),
   onExportProgress: (callback) => {
     const listener = (event, progress) => callback(progress);

@@ -1,7 +1,9 @@
 const { app, BrowserWindow, ipcMain, dialog, shell } = require('electron');
 const path = require('path');
 const fs = require('fs');
-const { probeMedia, generateThumbnail, runExport } = require('./ffmpeg-export');
+const { probeMedia, generateThumbnail, runExport, SAMPLES_DIR } = require('./ffmpeg-export');
+
+const DEMO_MUSIC_PATH = path.join(SAMPLES_DIR, 'demo-musik.mp3');
 
 const thumbDir = path.join(app.getPath('userData'), 'videowelt-thumbnails');
 const settingsFile = path.join(app.getPath('userData'), 'videowelt-settings.json');
@@ -46,6 +48,50 @@ function createWindow() {
 
 let mainWindow = null;
 
+async function probeToMediaItem(filePath, displayName) {
+  const id = 'm_' + Date.now() + '_' + Math.random().toString(36).slice(2, 9);
+  try {
+    const meta = await probeMedia(filePath);
+    let thumbnail = null;
+    if (meta.hasVideo) {
+      ensureThumbDir();
+      const thumbPath = path.join(thumbDir, id + '.jpg');
+      try {
+        await generateThumbnail(filePath, thumbPath, Math.min(1, meta.duration / 2));
+        thumbnail = thumbPath;
+      } catch (err) {
+        thumbnail = null;
+      }
+    }
+    return {
+      id,
+      path: filePath,
+      name: displayName || path.basename(filePath),
+      duration: meta.duration,
+      width: meta.width,
+      height: meta.height,
+      fps: meta.fps,
+      hasAudio: meta.hasAudio,
+      hasVideo: meta.hasVideo,
+      thumbnail
+    };
+  } catch (err) {
+    return {
+      id,
+      path: filePath,
+      name: displayName || path.basename(filePath),
+      duration: 0,
+      width: 0,
+      height: 0,
+      fps: 30,
+      hasAudio: false,
+      hasVideo: false,
+      thumbnail: null,
+      error: 'Datei konnte nicht gelesen werden'
+    };
+  }
+}
+
 ipcMain.handle('import-media', async (event, { kind }) => {
   const extensions = kind === 'audio' ? AUDIO_EXTENSIONS : VIDEO_EXTENSIONS;
   const result = await dialog.showOpenDialog(mainWindow, {
@@ -55,51 +101,20 @@ ipcMain.handle('import-media', async (event, { kind }) => {
   });
   if (result.canceled) return [];
 
-  ensureThumbDir();
   const items = [];
   for (const filePath of result.filePaths) {
-    try {
-      const meta = await probeMedia(filePath);
-      const id = 'm_' + Date.now() + '_' + Math.random().toString(36).slice(2, 9);
-      let thumbnail = null;
-      if (meta.hasVideo) {
-        const thumbPath = path.join(thumbDir, id + '.jpg');
-        try {
-          await generateThumbnail(filePath, thumbPath, Math.min(1, meta.duration / 2));
-          thumbnail = thumbPath;
-        } catch (err) {
-          thumbnail = null;
-        }
-      }
-      items.push({
-        id,
-        path: filePath,
-        name: path.basename(filePath),
-        duration: meta.duration,
-        width: meta.width,
-        height: meta.height,
-        fps: meta.fps,
-        hasAudio: meta.hasAudio,
-        hasVideo: meta.hasVideo,
-        thumbnail
-      });
-    } catch (err) {
-      items.push({
-        id: 'm_' + Date.now() + '_' + Math.random().toString(36).slice(2, 9),
-        path: filePath,
-        name: path.basename(filePath),
-        duration: 0,
-        width: 0,
-        height: 0,
-        fps: 30,
-        hasAudio: false,
-        hasVideo: false,
-        thumbnail: null,
-        error: 'Datei konnte nicht gelesen werden'
-      });
-    }
+    items.push(await probeToMediaItem(filePath));
   }
   return items;
+});
+
+ipcMain.handle('import-demo-music', async () => {
+  if (!fs.existsSync(DEMO_MUSIC_PATH)) {
+    return { error: 'Die eingebaute Demo-Musik wurde nicht gefunden.' };
+  }
+  const item = await probeToMediaItem(DEMO_MUSIC_PATH, 'Demo-Musik (VideoWelt)');
+  if (item.error) return { error: item.error };
+  return { item };
 });
 
 ipcMain.handle('export-video', async (event, { state, settings }) => {

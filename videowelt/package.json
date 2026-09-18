@@ -25,12 +25,17 @@
     "files": [
       "main.js",
       "preload.js",
+      "ffmpeg-export.js",
       "renderer/**/*",
+      "build/fonts/**/*",
+      "build/samples/**/*",
       "package.json"
     ],
     "asarUnpack": [
       "node_modules/ffmpeg-static/**",
-      "node_modules/ffprobe-static/**"
+      "node_modules/ffprobe-static/**",
+      "build/fonts/**",
+      "build/samples/**"
     ],
     "directories": {
       "output": "dist"
