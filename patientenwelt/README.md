@@ -21,9 +21,25 @@ Markenname, Überschriften, Patientennamen-Banner und aktive Tabs. Sie ist unabh
 - **Abrechnung**: Leistungen (Ziffer, Bezeichnung, Betrag) je Patient erfassen, nach
   Privatliquidation/KV/BG filtern, Rechnung für die Privatliquidation erzeugen und drucken;
   dazu praxisweite Sammelübersichten je Kategorie über die Seitenleiste — siehe „Abrechnung" unten
-- Umfangreiche Seitenleiste analog zur Referenz-Praxissoftware (Praxisgebühr, Registrierung,
-  Formulare, Warteliste, Auswertung, Patientenverwaltung usw.); Menüpunkte ohne hinterlegte Funktion
-  zeigen bewusst einen ehrlichen "noch nicht verfügbar"-Hinweis statt totem UI
+- Umfangreiche Seitenleiste analog zur Referenz-Praxissoftware — **jeder Menüpunkt hat eine echte
+  Funktion**, keine toten Platzhalter mehr:
+  - **Praxis**: Praxisgebühr Info (historischer Hinweis, seit 2013 abgeschafft), Praxisgebühr
+    Kassenbuch (Bareinnahmen/-ausgaben mit laufendem Saldo), Registrierung Versichertenkarte
+    (manuelle Status-Erfassung je Patient, da kein eGK-Terminal angebunden ist), Formulare
+    (Vorlagen anlegen), Druckauftrag Formular (Vorlage + Patient wählen, drucken, wird protokolliert),
+    Recallfunktion (Wiedervorstellungen mit Fälligkeitsdatum), Warteliste (Eintragen/Nachsehen als
+    eine gemeinsame Tagesansicht mit Status wartet → aufgerufen → fertig)
+  - **Behandlung** (je Patient): Laborwerterfassung (strukturiert: Parameter/Wert/Einheit/
+    Referenzbereich), Leistungsstatus (offen/abgerechnet/bezahlt je Abrechnungsposition),
+    Verordnungsstatus (offen/eingelöst/storniert je Rezept)
+  - **Patientenverwaltung** (je Patient): Scheinrückseite (Freitext-Notizen), Übergabe Patient
+    (Übergabevermerke zwischen Behandelnden), Patientendaten duplizieren (z. B. für
+    Familienangehörige — übernimmt Nachname/Krankenkasse, nicht Geburtsdatum/Vers.-Nr. oder
+    Einträge), Archivinformation SD/MD (zwei Referenzfelder, eine gemeinsame Ansicht)
+  - **Auswertung** (praxisweit): Analyse allgemein (Geschlechterverteilung, Durchschnittsalter,
+    neue Patienten), Analyse Leistungen (Summen je Abrechnungskategorie, häufigste Ziffern),
+    Analyse Verordnungen (häufigste Medikamente, Status-Verteilung)
+  - **Weitere Services**: Katalog zusätzlicher Selbstzahlerleistungen (z. B. IGeL) mit Preis
 - Bedienkomfort: Enter speichert/bestätigt das offene Formular, Escape schließt es
 - **Datensicherheit**: verschlüsselte Datenablage (AES-256-GCM), Anmeldung mit Benutzerrollen
   (Administrator/Mitarbeiter), automatische Sperre nach Inaktivität, Audit-Protokoll, automatische
@@ -166,13 +182,20 @@ des Buttons (für die Tab-Hervorhebung) das Text-Clipping nicht überschreibt �
 Glanztext-Stellen dasselbe Muster verwenden, falls das Element selbst schon einen Hintergrund per
 `background`-Shorthand setzt.
 
-### Seitenleiste: echte Funktionen vs. Platzhalter
+### Seitenleiste: `MENU_GROUPS` und `MENU_ACTIONS`
 
-`renderer.js` unterscheidet zwei Arten von Seitenleisten-Einträgen: fest verdrahtete Funktionen
-(Patient wählen/erfassen/ändern, Verlauf, Rezepte, Laborwerte, Termine, Kalender, Abrechnung,
-Briefe, Benutzerverwaltung/Protokoll/Datensicherung für Admins) und `PLACEHOLDER_GROUPS` —
-Menüpunkte, die es in der Referenz-Praxissoftware gibt, für die diese App aber keine Funktion
-hinterlegt. Ein Klick darauf setzt `ui.viewMode = 'placeholder'` und zeigt `renderPlaceholderView()`.
-Neue echte Funktionen sollten aus `PLACEHOLDER_GROUPS` entfernt und als eigener Tab/eigenes Panel
-verdrahtet werden, statt den Platzhalter-Mechanismus zu missbrauchen — „Abrechnung" war ursprünglich
-selbst ein Platzhalter und wurde nach diesem Muster durch eine echte Sidebar-Gruppe ersetzt.
+`renderer.js` verdrahtet jeden Seitenleisten-Eintrag mit einer echten Funktion. Fest im Markup
+verankerte Kern-Navigation (Patient wählen/erfassen/ändern, Verlauf, Rezepte, Laborwerte, Termine,
+Kalender, Abrechnung, Briefe, Benutzerverwaltung/Protokoll/Datensicherung/Datenexport für Admins)
+lebt direkt in `renderSidebar()`. Alle übrigen, aus der Referenz-Praxissoftware übernommenen
+Menüpunkte (Praxisgebühr, Registrierung, Formulare, Warteliste, Auswertung, Patientenverwaltung
+usw.) sind in `MENU_GROUPS` (Gruppierung/Reihenfolge der Labels) und `MENU_ACTIONS` (pro Label:
+`onClick`, optional `activeViewMode` für die Sidebar-Hervorhebung, optional `requiresPatient` für
+patientenbezogene Werkzeuge) definiert; `sidebarActionBtn(label)` schlägt das Label in
+`MENU_ACTIONS` nach und rendert Klick-Handler/Deaktivierung/Hervorhebung daraus. Mehrere Labels
+dürfen bewusst auf dieselbe Ansicht zeigen (z. B. „Warteliste Eintragen"/„Warteliste Nachsehen" auf
+`'warteliste'`, „Archivinformation SD"/„MD" auf `'tool-archivinfo'`) — dann trägt nur eines der
+beiden Labels das `activeViewMode`, damit nicht zwei Menüpunkte gleichzeitig aktiv erscheinen. Eine
+neue Funktion hinzufügen heißt: Render-Funktion schreiben, einen `viewMode`-Zweig in
+`renderContent()` ergänzen und einen Eintrag in `MENU_ACTIONS` hinzufügen — kein separater
+Platzhalter-Mechanismus mehr vorhanden.

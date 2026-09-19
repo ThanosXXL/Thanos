@@ -36,12 +36,21 @@
     'Juli', 'August', 'September', 'Oktober', 'November', 'Dezember'
   ];
 
-  const ENTRY_LIST_KEYS = ['journal', 'rezepte', 'termine', 'briefe', 'labor'];
+  const ENTRY_LIST_KEYS = [
+    'journal', 'rezepte', 'termine', 'briefe', 'labor',
+    'laborwerte', 'krankenscheine', 'uebergaben'
+  ];
+
+  const VERORDNUNGSSTATUS_LABEL = { offen: 'Offen', eingeloest: 'Eingelöst', storniert: 'Storniert' };
+  const LEISTUNGSSTATUS_LABEL = { offen: 'Offen', abgerechnet: 'Abgerechnet', bezahlt: 'Bezahlt' };
+  const VERSICHERTENKARTE_STATUS_LABEL = { ungeprueft: 'Ungeprüft', geprueft: 'Geprüft', abgelaufen: 'Abgelaufen' };
+  const WARTELISTE_STATUS_LABEL = { wartet: 'Wartet', aufgerufen: 'Aufgerufen', fertig: 'Fertig' };
+  const WARTELISTE_STATUS_ORDER = ['wartet', 'aufgerufen', 'fertig'];
 
   let state = { patients: [] };
 
   const ui = {
-    viewMode: 'list', // 'list' | 'patient' | 'placeholder'
+    viewMode: 'list', // 'list' | 'patient' | …
     selectedPatientId: null,
     activeTab: 'basis',
     searchQuery: '',
@@ -49,7 +58,6 @@
     entryModalCategory: null, // 'journal' | 'rezepte' | 'termine' | 'briefe' | 'labor'
     sortKey: 'name', // 'name' | 'geburtsdatum' | 'geschlecht' | 'versicherung'
     sortDir: 'asc', // 'asc' | 'desc'
-    placeholderLabel: null, // aktuell angezeigter Platzhalter-Menüpunkt, wenn viewMode === 'placeholder'
     billingKategorie: 'privat', // 'privat' | 'gkv' | 'bg' – für viewMode === 'billing'
     abrechnungFilter: 'alle', // 'alle' | 'privat' | 'gkv' | 'bg' – Filter im Patienten-Tab "Abrechnung"
     invoicePatientId: null // für viewMode === 'invoice'
@@ -152,6 +160,38 @@
     return state.patients.find((p) => p.id === id) || null;
   }
 
+  // Füllt bei älteren, bereits gespeicherten Datensätzen neu hinzugekommene Felder
+  // mit sinnvollen Leerwerten auf, damit bestehende Dateien weiter laden.
+  function normalizePatient(patient) {
+    ENTRY_LIST_KEYS.concat(['abrechnung']).forEach((key) => {
+      if (!Array.isArray(patient[key])) patient[key] = [];
+    });
+    if (!patient.versichertenkarte || typeof patient.versichertenkarte !== 'object') {
+      patient.versichertenkarte = { status: 'ungeprueft', geprueftAm: '', gueltigBis: '' };
+    }
+    if (typeof patient.scheinrueckseite !== 'string') patient.scheinrueckseite = '';
+    if (!patient.archivinfo || typeof patient.archivinfo !== 'object') {
+      patient.archivinfo = { sd: '', md: '' };
+    }
+    if (typeof patient.erstelltAm !== 'string') patient.erstelltAm = '';
+    patient.abrechnung.forEach((e) => { if (!e.status) e.status = 'offen'; });
+    patient.rezepte.forEach((e) => { if (!e.status) e.status = 'offen'; });
+    return patient;
+  }
+
+  function normalizeState(s) {
+    const next = (s && Array.isArray(s.patients)) ? s : { patients: [] };
+    if (!Array.isArray(next.auditLog)) next.auditLog = [];
+    if (!Array.isArray(next.kassenbuch)) next.kassenbuch = [];
+    if (!Array.isArray(next.formVorlagen)) next.formVorlagen = [];
+    if (!Array.isArray(next.druckauftraege)) next.druckauftraege = [];
+    if (!Array.isArray(next.recalls)) next.recalls = [];
+    if (!Array.isArray(next.warteliste)) next.warteliste = [];
+    if (!Array.isArray(next.zusatzleistungen)) next.zusatzleistungen = [];
+    next.patients.forEach(normalizePatient);
+    return next;
+  }
+
   async function persist() {
     const result = await window.patientenweltAPI.saveData(state);
     if (result && result.success === false) {
@@ -188,9 +228,11 @@
     el.toolLaborBtn.disabled = !hasPatient;
   }
 
-  // Menüpunkte ohne hinterlegte Funktion (siehe Referenz-Screenshot der Praxissoftware).
-  // Sie führen bewusst zu einer ehrlichen "noch nicht verfügbar"-Anzeige statt zu totem UI.
-  const PLACEHOLDER_GROUPS = [
+  // Menügruppen und die dahinterliegenden echten Funktionen (siehe Referenz-Screenshot
+  // der Praxissoftware). Jeder Menüpunkt hat jetzt eine reale Funktion statt eines
+  // Platzhalters; einige Beschriftungen (z. B. "Archivinformation SD"/"MD") führen
+  // bewusst zur selben zusammengefassten Ansicht, statt Daten künstlich zu splitten.
+  const MENU_GROUPS = [
     {
       afterGroup: 'Praxis',
       items: [
@@ -220,6 +262,50 @@
     }
   ];
 
+  function gotoView(viewMode) {
+    ui.viewMode = viewMode;
+    render();
+  }
+
+  const MENU_ACTIONS = {
+    'Praxisgebühr Info': { activeViewMode: 'praxisgebuehr-info', onClick: () => gotoView('praxisgebuehr-info') },
+    'Praxisgebühr Kassenbuch': { activeViewMode: 'kassenbuch', onClick: () => gotoView('kassenbuch') },
+    'Registrierung Versichertenkarte': { activeViewMode: 'versichertenkarten', onClick: () => gotoView('versichertenkarten') },
+    'Krankenscheinabgabe': { activeViewMode: 'tool-krankenscheine', requiresPatient: true, onClick: () => gotoView('tool-krankenscheine') },
+    'Formulare': { activeViewMode: 'formulare', onClick: () => gotoView('formulare') },
+    'Druckauftrag Formular': { activeViewMode: 'druckauftrag', onClick: () => gotoView('druckauftrag') },
+    'Recallfunktion': { activeViewMode: 'recall', onClick: () => gotoView('recall') },
+    // Beide Warteliste-Einträge führen bewusst zur selben Ansicht (Eintragen + Nachsehen
+    // sind dort kombiniert) — nur einer trägt die Hervorhebung, damit nicht zwei
+    // Menüpunkte gleichzeitig als aktiv erscheinen.
+    'Warteliste Eintragen': { onClick: () => gotoView('warteliste') },
+    'Warteliste Nachsehen': { activeViewMode: 'warteliste', onClick: () => gotoView('warteliste') },
+
+    'Laborwerterfassung': { activeViewMode: 'tool-laborwerte', requiresPatient: true, onClick: () => gotoView('tool-laborwerte') },
+    'Leistungsstatus': { activeViewMode: 'tool-leistungsstatus', requiresPatient: true, onClick: () => gotoView('tool-leistungsstatus') },
+    'Verordnungsstatus': { activeViewMode: 'tool-verordnungsstatus', requiresPatient: true, onClick: () => gotoView('tool-verordnungsstatus') },
+
+    'Scheinrückseite': { activeViewMode: 'tool-scheinrueckseite', requiresPatient: true, onClick: () => gotoView('tool-scheinrueckseite') },
+    'Übergabe Patient': { activeViewMode: 'tool-uebergaben', requiresPatient: true, onClick: () => gotoView('tool-uebergaben') },
+    'Patientendaten duplizieren': {
+      requiresPatient: true,
+      onClick: () => {
+        const patient = getPatient(ui.selectedPatientId);
+        if (patient) duplicatePatient(patient);
+      }
+    },
+    // Beide Archivinformation-Einträge zeigen dieselbe kombinierte Ansicht (SD+MD
+    // zusammen); auch hier trägt nur einer die Aktiv-Hervorhebung.
+    'Archivinformation SD': { requiresPatient: true, onClick: () => gotoView('tool-archivinfo') },
+    'Archivinformation MD': { activeViewMode: 'tool-archivinfo', requiresPatient: true, onClick: () => gotoView('tool-archivinfo') },
+
+    'Analyse allgemein': { activeViewMode: 'analyse-allgemein', onClick: () => gotoView('analyse-allgemein') },
+    'Analyse Leistungen': { activeViewMode: 'analyse-leistungen', onClick: () => gotoView('analyse-leistungen') },
+    'Analyse Verordnungen': { activeViewMode: 'analyse-verordnungen', onClick: () => gotoView('analyse-verordnungen') },
+
+    'Weitere Services': { activeViewMode: 'weitere-services', onClick: () => gotoView('weitere-services') }
+  };
+
   function renderSidebar() {
     el.sidebar.replaceChildren();
     const hasPatient = !!ui.selectedPatientId;
@@ -233,13 +319,13 @@
     el.sidebar.appendChild(sidebarNavBtn('Patientendaten ändern', false, () => {
       if (hasPatient) openEditPatientModal(ui.selectedPatientId);
     }, !hasPatient));
-    appendPlaceholderItems('Praxis');
+    appendMenuGroupItems('Praxis');
 
     el.sidebar.appendChild(sidebarGroupTitle('Behandlung'));
     el.sidebar.appendChild(sidebarNavBtn('Verlauf (Journal)', hasPatient && ui.viewMode === 'patient' && ui.activeTab === 'journal', () => selectTab('journal'), !hasPatient));
     el.sidebar.appendChild(sidebarNavBtn('Rezepte', hasPatient && ui.viewMode === 'patient' && ui.activeTab === 'rezepte', () => selectTab('rezepte'), !hasPatient));
     el.sidebar.appendChild(sidebarNavBtn('Laborwerte', hasPatient && ui.viewMode === 'patient' && ui.activeTab === 'labor', () => selectTab('labor'), !hasPatient));
-    appendPlaceholderItems('Behandlung');
+    appendMenuGroupItems('Behandlung');
 
     el.sidebar.appendChild(sidebarGroupTitle('Termine & Kommunikation'));
     el.sidebar.appendChild(sidebarNavBtn('Termine', hasPatient && ui.viewMode === 'patient' && ui.activeTab === 'termine', () => selectTab('termine'), !hasPatient));
@@ -259,10 +345,10 @@
       ));
     });
 
-    PLACEHOLDER_GROUPS.filter((g) => g.title).forEach((group) => {
+    MENU_GROUPS.filter((g) => g.title).forEach((group) => {
       el.sidebar.appendChild(sidebarGroupTitle(group.title));
       group.items.forEach((label) => {
-        el.sidebar.appendChild(sidebarPlaceholderBtn(label));
+        el.sidebar.appendChild(sidebarActionBtn(label));
       });
     });
 
@@ -289,21 +375,20 @@
     }
   }
 
-  function appendPlaceholderItems(afterGroup) {
-    const group = PLACEHOLDER_GROUPS.find((g) => g.afterGroup === afterGroup);
+  function appendMenuGroupItems(afterGroup) {
+    const group = MENU_GROUPS.find((g) => g.afterGroup === afterGroup);
     if (!group) return;
     group.items.forEach((label) => {
-      el.sidebar.appendChild(sidebarPlaceholderBtn(label));
+      el.sidebar.appendChild(sidebarActionBtn(label));
     });
   }
 
-  function sidebarPlaceholderBtn(label) {
-    const active = ui.viewMode === 'placeholder' && ui.placeholderLabel === label;
-    return sidebarNavBtn(label, active, () => {
-      ui.viewMode = 'placeholder';
-      ui.placeholderLabel = label;
-      render();
-    });
+  function sidebarActionBtn(label) {
+    const action = MENU_ACTIONS[label];
+    if (!action) return sidebarNavBtn(label, false, () => {}, true);
+    const disabled = !!action.requiresPatient && !ui.selectedPatientId;
+    const active = !!action.activeViewMode && ui.viewMode === action.activeViewMode;
+    return sidebarNavBtn(label, active, action.onClick, disabled);
   }
 
   function sidebarGroupTitle(text) {
@@ -335,11 +420,6 @@
   function renderContent() {
     el.content.replaceChildren();
 
-    if (ui.viewMode === 'placeholder') {
-      el.content.appendChild(renderPlaceholderView(ui.placeholderLabel));
-      return;
-    }
-
     if (ui.viewMode === 'users' && currentUser && currentUser.role === 'admin') {
       el.content.appendChild(renderUsersView());
       return;
@@ -357,6 +437,80 @@
 
     if (ui.viewMode === 'export' && currentUser && currentUser.role === 'admin') {
       el.content.appendChild(renderExportView());
+      return;
+    }
+
+    if (ui.viewMode === 'praxisgebuehr-info') {
+      el.content.appendChild(renderPraxisgebuehrInfoView());
+      return;
+    }
+    if (ui.viewMode === 'kassenbuch') {
+      el.content.appendChild(renderKassenbuchView());
+      return;
+    }
+    if (ui.viewMode === 'versichertenkarten') {
+      el.content.appendChild(renderVersichertenkartenView());
+      return;
+    }
+    if (ui.viewMode === 'formulare') {
+      el.content.appendChild(renderFormulareView());
+      return;
+    }
+    if (ui.viewMode === 'druckauftrag') {
+      el.content.appendChild(renderDruckauftragView());
+      return;
+    }
+    if (ui.viewMode === 'recall') {
+      el.content.appendChild(renderRecallView());
+      return;
+    }
+    if (ui.viewMode === 'warteliste') {
+      el.content.appendChild(renderWartelisteView());
+      return;
+    }
+    if (ui.viewMode === 'analyse-allgemein') {
+      el.content.appendChild(renderAnalyseAllgemeinView());
+      return;
+    }
+    if (ui.viewMode === 'analyse-leistungen') {
+      el.content.appendChild(renderAnalyseLeistungenView());
+      return;
+    }
+    if (ui.viewMode === 'analyse-verordnungen') {
+      el.content.appendChild(renderAnalyseVerordnungenView());
+      return;
+    }
+    if (ui.viewMode === 'weitere-services') {
+      el.content.appendChild(renderWeitereServicesView());
+      return;
+    }
+
+    if (ui.viewMode === 'tool-laborwerte') {
+      renderPatientToolView((p) => renderEntryListPanel(p, 'laborwerte'));
+      return;
+    }
+    if (ui.viewMode === 'tool-krankenscheine') {
+      renderPatientToolView((p) => renderEntryListPanel(p, 'krankenscheine'));
+      return;
+    }
+    if (ui.viewMode === 'tool-uebergaben') {
+      renderPatientToolView((p) => renderEntryListPanel(p, 'uebergaben'));
+      return;
+    }
+    if (ui.viewMode === 'tool-leistungsstatus') {
+      renderPatientToolView(renderLeistungsstatusView);
+      return;
+    }
+    if (ui.viewMode === 'tool-verordnungsstatus') {
+      renderPatientToolView(renderVerordnungsstatusView);
+      return;
+    }
+    if (ui.viewMode === 'tool-scheinrueckseite') {
+      renderPatientToolView(renderScheinrueckseiteView);
+      return;
+    }
+    if (ui.viewMode === 'tool-archivinfo') {
+      renderPatientToolView(renderArchivinfoView);
       return;
     }
 
@@ -524,20 +678,6 @@
 
     wrap.appendChild(card);
     return wrap;
-  }
-
-  function renderPlaceholderView(label) {
-    const card = document.createElement('div');
-    card.className = 'panel-card';
-    const empty = document.createElement('div');
-    empty.className = 'empty-state';
-    const heading = document.createElement('h2');
-    heading.textContent = label;
-    const p = document.createElement('p');
-    p.textContent = 'Diese Funktion ist in dieser Version von PatientenWelt noch nicht verfügbar.';
-    empty.append(heading, p);
-    card.appendChild(empty);
-    return card;
   }
 
   // ---------- Sicherheit: Benutzerverwaltung / Protokoll / Datensicherung ----------
@@ -844,7 +984,7 @@
           async () => {
             const res = await window.patientenweltAPI.restoreBackup(b.filename);
             if (res && res.success) {
-              state = res.state;
+              state = normalizeState(res.state);
               logAction('Backup wiederhergestellt', formatDateTime(b.mtime));
               await persist();
               loadBackupsView();
@@ -1078,14 +1218,25 @@
   function patientCSVRows(patient) {
     const rows = [];
     (patient.journal || []).forEach((e) => rows.push(['Verlauf', e.datum, '', e.typ || '', e.text || '', '']));
-    (patient.rezepte || []).forEach((e) => rows.push(['Rezept', e.datum, '', e.medikament || '', e.hinweis || '', '']));
+    (patient.rezepte || []).forEach((e) => rows.push([
+      'Rezept', e.datum, '', e.medikament || '',
+      `${e.hinweis || ''} [${VERORDNUNGSSTATUS_LABEL[e.status] || VERORDNUNGSSTATUS_LABEL.offen}]`.trim(), ''
+    ]));
     (patient.termine || []).forEach((e) => rows.push(['Termin', e.datum, e.uhrzeit || '', e.grund || '', '', '']));
     (patient.briefe || []).forEach((e) => rows.push(['Brief', e.datum, '', e.betreff || '', e.text || '', '']));
     (patient.labor || []).forEach((e) => rows.push(['Laborwert', e.datum, '', '', e.text || '', '']));
     (patient.abrechnung || []).forEach((e) => rows.push([
       ABRECHNUNG_KATEGORIEN[e.kategorie] || e.kategorie || '',
-      e.datum, '', e.ziffer || '', e.bezeichnung || '',
+      e.datum, '', e.ziffer || '', `${e.bezeichnung || ''} [${LEISTUNGSSTATUS_LABEL[e.status] || LEISTUNGSSTATUS_LABEL.offen}]`,
       e.betrag != null ? String(e.betrag).replace('.', ',') : ''
+    ]));
+    (patient.laborwerte || []).forEach((e) => rows.push([
+      'Laborwerterfassung', e.datum, '', e.parameter || '',
+      `${e.wert || ''} ${e.einheit || ''}${e.referenzbereich ? ' (Ref: ' + e.referenzbereich + ')' : ''}`.trim(), ''
+    ]));
+    (patient.krankenscheine || []).forEach((e) => rows.push(['Krankenschein', e.datum, '', e.art || '', e.notiz || '', '']));
+    (patient.uebergaben || []).forEach((e) => rows.push([
+      'Übergabe', e.datum, '', [e.von, e.an].filter(Boolean).join(' → '), e.text || '', ''
     ]));
     return rows.sort((a, b) => (a[1] || '').localeCompare(b[1] || ''));
   }
@@ -1327,7 +1478,10 @@
     termine: { title: 'Termine', addLabel: '+ Termin' },
     briefe: { title: 'Briefe', addLabel: '+ Brief' },
     labor: { title: 'Laborwerte', addLabel: '+ Laborwert' },
-    abrechnung: { title: 'Abrechnung', addLabel: '+ Leistung' }
+    abrechnung: { title: 'Abrechnung', addLabel: '+ Leistung' },
+    laborwerte: { title: 'Laborwerterfassung', addLabel: '+ Laborwert (strukturiert)' },
+    krankenscheine: { title: 'Krankenscheinabgabe', addLabel: '+ Krankenschein' },
+    uebergaben: { title: 'Übergabe Patient', addLabel: '+ Übergabe' }
   };
 
   function formatEuro(value) {
@@ -1466,7 +1620,8 @@
 
   function entryDisplayText(category, entry) {
     if (category === 'rezepte') {
-      return entry.hinweis ? `${entry.medikament} — ${entry.hinweis}` : entry.medikament;
+      const base = entry.hinweis ? `${entry.medikament} — ${entry.hinweis}` : entry.medikament;
+      return `${base} [${VERORDNUNGSSTATUS_LABEL[entry.status] || VERORDNUNGSSTATUS_LABEL.offen}]`;
     }
     if (category === 'termine') {
       return entry.grund;
@@ -1475,7 +1630,18 @@
       return entry.betreff ? `${entry.betreff}: ${entry.text}` : entry.text;
     }
     if (category === 'abrechnung') {
-      return `Ziffer ${entry.ziffer} — ${entry.bezeichnung} (${formatEuro(entry.betrag)})`;
+      return `Ziffer ${entry.ziffer} — ${entry.bezeichnung} (${formatEuro(entry.betrag)}) — ${LEISTUNGSSTATUS_LABEL[entry.status] || LEISTUNGSSTATUS_LABEL.offen}`;
+    }
+    if (category === 'laborwerte') {
+      const ref = entry.referenzbereich ? ` (Ref: ${entry.referenzbereich})` : '';
+      return `${entry.parameter}: ${entry.wert || ''} ${entry.einheit || ''}${ref}`.trim();
+    }
+    if (category === 'krankenscheine') {
+      return entry.notiz ? `${entry.art} — ${entry.notiz}` : entry.art;
+    }
+    if (category === 'uebergaben') {
+      const wer = [entry.von, entry.an].filter(Boolean).join(' → ');
+      return wer ? `${wer}: ${entry.text}` : entry.text;
     }
     return entry.text;
   }
@@ -1597,6 +1763,1140 @@
     return card;
   }
 
+  // ---------- Praxisweite Werkzeuge (Formulare, Kassenbuch, Recall, Warteliste, Analyse) ----------
+
+  function renderPraxisgebuehrInfoView() {
+    const card = document.createElement('div');
+    card.className = 'panel-card';
+    const heading = document.createElement('h2');
+    heading.textContent = 'Praxisgebühr Info';
+    card.appendChild(heading);
+
+    [
+      'Die gesetzliche Praxisgebühr (10 € pro Quartal beim ersten Arztbesuch) wurde zum 1. Januar 2013 in Deutschland vollständig abgeschafft und wird seither von keiner gesetzlichen Krankenkasse mehr erhoben.',
+      'Dieser Menüpunkt dient daher rein informativ als Erinnerung an die frühere Regelung. Für Barzahlungen in der Praxis – etwa Selbstzahlerleistungen oder Rezeptgebühren – steht das „Praxisgebühr Kassenbuch" als einfaches, laufendes Kassenbuch zur Verfügung.'
+    ].forEach((text) => {
+      const p = document.createElement('p');
+      p.className = 'entry-empty';
+      p.textContent = text;
+      card.appendChild(p);
+    });
+
+    const btn = document.createElement('button');
+    btn.className = 'btn-glossy btn-secondary btn-small';
+    btn.textContent = 'Zum Kassenbuch';
+    btn.addEventListener('click', () => {
+      ui.viewMode = 'kassenbuch';
+      render();
+    });
+    card.appendChild(btn);
+
+    return card;
+  }
+
+  function renderKassenbuchView() {
+    const wrap = document.createDocumentFragment();
+    const card = document.createElement('div');
+    card.className = 'panel-card';
+    const heading = document.createElement('h2');
+    heading.textContent = 'Praxisgebühr Kassenbuch';
+    card.appendChild(heading);
+
+    const formGrid = document.createElement('div');
+    formGrid.className = 'form-grid';
+    const datumLabel = fieldLabel('Datum', 'kbDatum', 'date');
+    const datumInput = datumLabel.querySelector('input');
+    datumInput.value = todayISO();
+    const artLabel = selectField('Art', 'kbArt', [['einnahme', 'Einnahme'], ['ausgabe', 'Ausgabe']]);
+    const artSelect = artLabel.querySelector('select');
+    const betragLabel = fieldLabel('Betrag (€)', 'kbBetrag', 'number');
+    const betragInput = betragLabel.querySelector('input');
+    betragInput.step = '0.01';
+    betragInput.min = '0';
+    const beschreibungLabel = fieldLabel('Beschreibung', 'kbBeschreibung', 'text');
+    const beschreibungInput = beschreibungLabel.querySelector('input');
+    formGrid.append(datumLabel, artLabel, betragLabel, beschreibungLabel);
+    card.appendChild(formGrid);
+
+    const addBtn = document.createElement('button');
+    addBtn.className = 'btn-glossy btn-primary btn-small';
+    addBtn.textContent = '+ Eintragen';
+    addBtn.addEventListener('click', () => {
+      const betrag = parseFloat(betragInput.value);
+      const beschreibung = beschreibungInput.value.trim();
+      if (!(betrag > 0) || !beschreibung) return;
+      state.kassenbuch.push({ id: uid(), datum: datumInput.value || todayISO(), art: artSelect.value, betrag, beschreibung });
+      logAction('Kassenbucheintrag hinzugefügt', `${artSelect.value === 'einnahme' ? 'Einnahme' : 'Ausgabe'}: ${formatEuro(betrag)}`);
+      persist();
+      render();
+    });
+    card.appendChild(addBtn);
+    wrap.appendChild(card);
+
+    const listCard = document.createElement('div');
+    listCard.className = 'panel-card';
+    const entries = state.kassenbuch.slice().sort((a, b) => (a.datum || '').localeCompare(b.datum || ''));
+    if (entries.length === 0) {
+      const p = document.createElement('p');
+      p.className = 'entry-empty';
+      p.textContent = 'Noch keine Kassenbucheinträge.';
+      listCard.appendChild(p);
+    } else {
+      const table = document.createElement('table');
+      table.className = 'patient-table';
+      const thead = document.createElement('thead');
+      const headRow = document.createElement('tr');
+      ['Datum', 'Art', 'Betrag', 'Beschreibung', ''].forEach((h) => {
+        const th = document.createElement('th');
+        th.textContent = h;
+        headRow.appendChild(th);
+      });
+      thead.appendChild(headRow);
+      table.appendChild(thead);
+      const tbody = document.createElement('tbody');
+      let saldo = 0;
+      entries.forEach((e) => {
+        saldo += e.art === 'einnahme' ? (Number(e.betrag) || 0) : -(Number(e.betrag) || 0);
+        const tr = document.createElement('tr');
+        [formatDate(e.datum), e.art === 'einnahme' ? 'Einnahme' : 'Ausgabe', formatEuro(e.betrag), e.beschreibung].forEach((val) => {
+          const td = document.createElement('td');
+          td.textContent = val;
+          tr.appendChild(td);
+        });
+        const tdActions = document.createElement('td');
+        const delBtn = document.createElement('button');
+        delBtn.className = 'btn-glossy btn-danger btn-icon';
+        delBtn.textContent = '✕';
+        delBtn.addEventListener('click', () => {
+          state.kassenbuch = state.kassenbuch.filter((x) => x.id !== e.id);
+          logAction('Kassenbucheintrag gelöscht', e.beschreibung);
+          persist();
+          render();
+        });
+        tdActions.appendChild(delBtn);
+        tr.appendChild(tdActions);
+        tbody.appendChild(tr);
+      });
+      table.appendChild(tbody);
+      listCard.appendChild(table);
+
+      const sumRow = document.createElement('div');
+      sumRow.className = 'billing-sum-row';
+      sumRow.textContent = `Saldo: ${formatEuro(saldo)}`;
+      listCard.appendChild(sumRow);
+    }
+    wrap.appendChild(listCard);
+
+    return wrap;
+  }
+
+  function renderVersichertenkartenView() {
+    const card = document.createElement('div');
+    card.className = 'panel-card';
+    const heading = document.createElement('h2');
+    heading.textContent = 'Registrierung Versichertenkarte';
+    card.appendChild(heading);
+
+    const hint = document.createElement('p');
+    hint.className = 'entry-empty';
+    hint.textContent = 'Manuelle Erfassung, da kein eGK-Kartenterminal/TI-Konnektor angebunden ist.';
+    card.appendChild(hint);
+
+    if (state.patients.length === 0) {
+      const p = document.createElement('p');
+      p.className = 'entry-empty';
+      p.textContent = 'Noch keine Patienten angelegt.';
+      card.appendChild(p);
+      return card;
+    }
+
+    const table = document.createElement('table');
+    table.className = 'patient-table';
+    const thead = document.createElement('thead');
+    const headRow = document.createElement('tr');
+    ['Patient', 'Status', 'Gültig bis', 'Geprüft am', ''].forEach((h) => {
+      const th = document.createElement('th');
+      th.textContent = h;
+      headRow.appendChild(th);
+    });
+    thead.appendChild(headRow);
+    table.appendChild(thead);
+
+    const tbody = document.createElement('tbody');
+    state.patients
+      .slice()
+      .sort((a, b) => `${a.nachname} ${a.vorname}`.localeCompare(`${b.nachname} ${b.vorname}`, 'de'))
+      .forEach((patient) => {
+        const tr = document.createElement('tr');
+        const tdName = document.createElement('td');
+        tdName.textContent = `${patient.nachname}, ${patient.vorname}`;
+        tr.appendChild(tdName);
+
+        const tdStatus = document.createElement('td');
+        const select = document.createElement('select');
+        Object.entries(VERSICHERTENKARTE_STATUS_LABEL).forEach(([value, label]) => {
+          const opt = document.createElement('option');
+          opt.value = value;
+          opt.textContent = label;
+          select.appendChild(opt);
+        });
+        select.value = patient.versichertenkarte.status || 'ungeprueft';
+        tdStatus.appendChild(select);
+        tr.appendChild(tdStatus);
+
+        const tdGueltig = document.createElement('td');
+        const gueltigInput = document.createElement('input');
+        gueltigInput.type = 'date';
+        gueltigInput.value = patient.versichertenkarte.gueltigBis || '';
+        tdGueltig.appendChild(gueltigInput);
+        tr.appendChild(tdGueltig);
+
+        const tdGeprueft = document.createElement('td');
+        tdGeprueft.textContent = patient.versichertenkarte.geprueftAm ? formatDateTime(patient.versichertenkarte.geprueftAm) : '–';
+        tr.appendChild(tdGeprueft);
+
+        const tdActions = document.createElement('td');
+        const saveBtn = document.createElement('button');
+        saveBtn.className = 'btn-glossy btn-primary btn-small';
+        saveBtn.textContent = 'Speichern';
+        saveBtn.addEventListener('click', () => {
+          patient.versichertenkarte = {
+            status: select.value,
+            gueltigBis: gueltigInput.value,
+            geprueftAm: new Date().toISOString()
+          };
+          logAction('Versichertenkarte geprüft', `${patient.nachname}, ${patient.vorname}`);
+          persist();
+          render();
+        });
+        tdActions.appendChild(saveBtn);
+        tr.appendChild(tdActions);
+
+        tbody.appendChild(tr);
+      });
+    table.appendChild(tbody);
+    card.appendChild(table);
+
+    return card;
+  }
+
+  function renderFormulareView() {
+    const wrap = document.createDocumentFragment();
+    const card = document.createElement('div');
+    card.className = 'panel-card';
+    const heading = document.createElement('h2');
+    heading.textContent = 'Formulare';
+    card.appendChild(heading);
+
+    const formGrid = document.createElement('div');
+    formGrid.className = 'form-grid';
+    const titelLabel = fieldLabel('Titel', 'formTitel', 'text');
+    const titelInput = titelLabel.querySelector('input');
+    const textLabel = textAreaField('Text/Vorlage', 'formText');
+    const textArea = textLabel.querySelector('textarea');
+    formGrid.append(titelLabel, textLabel);
+    card.appendChild(formGrid);
+
+    const addBtn = document.createElement('button');
+    addBtn.className = 'btn-glossy btn-primary btn-small';
+    addBtn.textContent = '+ Vorlage anlegen';
+    addBtn.addEventListener('click', () => {
+      const titel = titelInput.value.trim();
+      if (!titel) return;
+      state.formVorlagen.push({ id: uid(), titel, text: textArea.value.trim() });
+      logAction('Formularvorlage angelegt', titel);
+      persist();
+      render();
+    });
+    card.appendChild(addBtn);
+    wrap.appendChild(card);
+
+    const listCard = document.createElement('div');
+    listCard.className = 'panel-card';
+    if (state.formVorlagen.length === 0) {
+      const p = document.createElement('p');
+      p.className = 'entry-empty';
+      p.textContent = 'Noch keine Formularvorlagen angelegt.';
+      listCard.appendChild(p);
+    } else {
+      const list = document.createElement('ul');
+      list.className = 'entry-list';
+      state.formVorlagen.forEach((v) => {
+        const li = document.createElement('li');
+        li.className = 'entry-row';
+        const text = document.createElement('div');
+        text.className = 'entry-text';
+        text.textContent = v.titel;
+        li.appendChild(text);
+        const delBtn = document.createElement('button');
+        delBtn.className = 'btn-glossy btn-danger btn-icon';
+        delBtn.textContent = '✕';
+        delBtn.addEventListener('click', () => {
+          state.formVorlagen = state.formVorlagen.filter((x) => x.id !== v.id);
+          logAction('Formularvorlage gelöscht', v.titel);
+          persist();
+          render();
+        });
+        li.appendChild(delBtn);
+        list.appendChild(li);
+      });
+      listCard.appendChild(list);
+    }
+    wrap.appendChild(listCard);
+
+    return wrap;
+  }
+
+  function renderDruckauftragView() {
+    const wrap = document.createDocumentFragment();
+    const card = document.createElement('div');
+    card.className = 'panel-card';
+    const heading = document.createElement('h2');
+    heading.textContent = 'Druckauftrag Formular';
+    card.appendChild(heading);
+
+    if (state.formVorlagen.length === 0) {
+      const p = document.createElement('p');
+      p.className = 'entry-empty';
+      p.textContent = 'Noch keine Formularvorlagen vorhanden. Zuerst unter „Formulare" eine Vorlage anlegen.';
+      card.appendChild(p);
+      const btn = document.createElement('button');
+      btn.className = 'btn-glossy btn-secondary btn-small';
+      btn.textContent = 'Zu Formulare';
+      btn.addEventListener('click', () => { ui.viewMode = 'formulare'; render(); });
+      card.appendChild(btn);
+      wrap.appendChild(card);
+      return wrap;
+    }
+
+    const formGrid = document.createElement('div');
+    formGrid.className = 'form-grid';
+    const vorlageLabel = selectField('Formularvorlage', 'druckVorlage', state.formVorlagen.map((v) => [v.id, v.titel]));
+    const vorlageSelect = vorlageLabel.querySelector('select');
+    const patientLabel = selectField('Patient (optional)', 'druckPatient', patientSelectOptions(true));
+    const patientSelect = patientLabel.querySelector('select');
+    formGrid.append(vorlageLabel, patientLabel);
+    card.appendChild(formGrid);
+
+    const previewCard = document.createElement('div');
+    previewCard.className = 'panel-card';
+    const previewTitle = document.createElement('h3');
+    const previewText = document.createElement('p');
+    previewText.style.whiteSpace = 'pre-wrap';
+    previewCard.append(previewTitle, previewText);
+
+    function updatePreview() {
+      const vorlage = state.formVorlagen.find((v) => v.id === vorlageSelect.value);
+      previewTitle.textContent = vorlage ? vorlage.titel : '';
+      previewText.textContent = vorlage ? vorlage.text : '';
+    }
+    vorlageSelect.addEventListener('change', updatePreview);
+    updatePreview();
+
+    const actionBar = document.createElement('div');
+    actionBar.className = 'list-toolbar no-print';
+    const printBtn = document.createElement('button');
+    printBtn.className = 'btn-glossy btn-primary btn-small';
+    printBtn.textContent = 'Drucken';
+    printBtn.addEventListener('click', () => {
+      const vorlage = state.formVorlagen.find((v) => v.id === vorlageSelect.value);
+      if (!vorlage) return;
+      const patient = patientSelect.value ? getPatient(patientSelect.value) : null;
+      state.druckauftraege.push({
+        id: uid(),
+        datum: new Date().toISOString(),
+        formVorlageId: vorlage.id,
+        formTitel: vorlage.titel,
+        patientId: patient ? patient.id : null,
+        patientName: patient ? `${patient.nachname}, ${patient.vorname}` : ''
+      });
+      logAction('Druckauftrag erstellt', patient ? `${vorlage.titel} — ${patient.nachname}, ${patient.vorname}` : vorlage.titel);
+      persist();
+      window.print();
+      render();
+    });
+    actionBar.appendChild(printBtn);
+
+    wrap.append(card, previewCard, actionBar);
+
+    const logCard = document.createElement('div');
+    logCard.className = 'panel-card no-print';
+    const logHeading = document.createElement('h3');
+    logHeading.textContent = 'Bisherige Druckaufträge';
+    logCard.appendChild(logHeading);
+    const jobs = state.druckauftraege.slice().sort((a, b) => (b.datum || '').localeCompare(a.datum || '')).slice(0, 20);
+    if (jobs.length === 0) {
+      const p = document.createElement('p');
+      p.className = 'entry-empty';
+      p.textContent = 'Noch keine Druckaufträge.';
+      logCard.appendChild(p);
+    } else {
+      const list = document.createElement('ul');
+      list.className = 'entry-list';
+      jobs.forEach((j) => {
+        const li = document.createElement('li');
+        li.className = 'entry-row';
+        const date = document.createElement('div');
+        date.className = 'entry-date';
+        date.textContent = formatDateTime(j.datum);
+        li.appendChild(date);
+        const text = document.createElement('div');
+        text.className = 'entry-text';
+        text.textContent = j.patientName ? `${j.formTitel} — ${j.patientName}` : j.formTitel;
+        li.appendChild(text);
+        list.appendChild(li);
+      });
+      logCard.appendChild(list);
+    }
+    wrap.appendChild(logCard);
+
+    return wrap;
+  }
+
+  function renderRecallView() {
+    const wrap = document.createDocumentFragment();
+    const card = document.createElement('div');
+    card.className = 'panel-card';
+    const heading = document.createElement('h2');
+    heading.textContent = 'Recallfunktion';
+    card.appendChild(heading);
+
+    if (state.patients.length === 0) {
+      const p = document.createElement('p');
+      p.className = 'entry-empty';
+      p.textContent = 'Zuerst mindestens einen Patienten anlegen.';
+      card.appendChild(p);
+      wrap.appendChild(card);
+      return wrap;
+    }
+
+    const formGrid = document.createElement('div');
+    formGrid.className = 'form-grid';
+    const patientLabel = selectField('Patient', 'recallPatient', patientSelectOptions(false));
+    const patientSelect = patientLabel.querySelector('select');
+    const grundLabel = fieldLabel('Grund', 'recallGrund', 'text');
+    const grundInput = grundLabel.querySelector('input');
+    const faelligLabel = fieldLabel('Fällig am', 'recallFaellig', 'date');
+    const faelligInput = faelligLabel.querySelector('input');
+    faelligInput.value = todayISO();
+    formGrid.append(patientLabel, grundLabel, faelligLabel);
+    card.appendChild(formGrid);
+
+    const addBtn = document.createElement('button');
+    addBtn.className = 'btn-glossy btn-primary btn-small';
+    addBtn.textContent = '+ Recall anlegen';
+    addBtn.addEventListener('click', () => {
+      const grund = grundInput.value.trim();
+      const patient = getPatient(patientSelect.value);
+      if (!grund || !patient) return;
+      state.recalls.push({
+        id: uid(),
+        patientId: patient.id,
+        patientName: `${patient.nachname}, ${patient.vorname}`,
+        grund,
+        faelligAm: faelligInput.value || todayISO(),
+        erledigt: false
+      });
+      logAction('Recall angelegt', `${patient.nachname}, ${patient.vorname} — ${grund}`);
+      persist();
+      render();
+    });
+    card.appendChild(addBtn);
+    wrap.appendChild(card);
+
+    const listCard = document.createElement('div');
+    listCard.className = 'panel-card';
+    const offen = state.recalls.filter((r) => !r.erledigt).sort((a, b) => (a.faelligAm || '').localeCompare(b.faelligAm || ''));
+    const erledigt = state.recalls.filter((r) => r.erledigt);
+    if (offen.length === 0) {
+      const p = document.createElement('p');
+      p.className = 'entry-empty';
+      p.textContent = 'Keine offenen Recalls.';
+      listCard.appendChild(p);
+    } else {
+      const today = todayISO();
+      const list = document.createElement('ul');
+      list.className = 'entry-list';
+      offen.forEach((r) => {
+        const li = document.createElement('li');
+        li.className = 'entry-row';
+        const date = document.createElement('div');
+        date.className = 'entry-date';
+        date.textContent = formatDate(r.faelligAm);
+        if (r.faelligAm && r.faelligAm < today) date.style.color = 'var(--danger)';
+        li.appendChild(date);
+        const text = document.createElement('div');
+        text.className = 'entry-text';
+        text.textContent = `${r.patientName} — ${r.grund}`;
+        li.appendChild(text);
+        const doneBtn = document.createElement('button');
+        doneBtn.className = 'btn-glossy btn-secondary btn-small';
+        doneBtn.textContent = 'Erledigt';
+        doneBtn.addEventListener('click', () => {
+          r.erledigt = true;
+          logAction('Recall erledigt', `${r.patientName} — ${r.grund}`);
+          persist();
+          render();
+        });
+        li.appendChild(doneBtn);
+        const delBtn = document.createElement('button');
+        delBtn.className = 'btn-glossy btn-danger btn-icon';
+        delBtn.textContent = '✕';
+        delBtn.addEventListener('click', () => {
+          state.recalls = state.recalls.filter((x) => x.id !== r.id);
+          persist();
+          render();
+        });
+        li.appendChild(delBtn);
+        list.appendChild(li);
+      });
+      listCard.appendChild(list);
+    }
+    wrap.appendChild(listCard);
+
+    if (erledigt.length > 0) {
+      const doneCard = document.createElement('div');
+      doneCard.className = 'panel-card';
+      const doneHeading = document.createElement('h3');
+      doneHeading.textContent = `Erledigt (${erledigt.length})`;
+      doneCard.appendChild(doneHeading);
+      wrap.appendChild(doneCard);
+    }
+
+    return wrap;
+  }
+
+  function renderWartelisteView() {
+    const wrap = document.createDocumentFragment();
+    const today = todayISO();
+    const card = document.createElement('div');
+    card.className = 'panel-card';
+    const heading = document.createElement('h2');
+    heading.textContent = 'Warteliste';
+    card.appendChild(heading);
+
+    const hint = document.createElement('p');
+    hint.className = 'entry-empty';
+    hint.textContent = `Heutige Warteliste (${formatDate(today)}).`;
+    card.appendChild(hint);
+
+    if (state.patients.length === 0) {
+      const p = document.createElement('p');
+      p.className = 'entry-empty';
+      p.textContent = 'Zuerst mindestens einen Patienten anlegen.';
+      card.appendChild(p);
+      wrap.appendChild(card);
+      return wrap;
+    }
+
+    const formGrid = document.createElement('div');
+    formGrid.className = 'form-grid';
+    const patientLabel = selectField('Patient', 'wlPatient', patientSelectOptions(false));
+    const patientSelect = patientLabel.querySelector('select');
+    const ankunftLabel = fieldLabel('Ankunftszeit', 'wlAnkunft', 'time');
+    const ankunftInput = ankunftLabel.querySelector('input');
+    const now = new Date();
+    ankunftInput.value = `${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}`;
+    formGrid.append(patientLabel, ankunftLabel);
+    card.appendChild(formGrid);
+
+    const addBtn = document.createElement('button');
+    addBtn.className = 'btn-glossy btn-primary btn-small';
+    addBtn.textContent = '+ Eintragen';
+    addBtn.addEventListener('click', () => {
+      const patient = getPatient(patientSelect.value);
+      if (!patient) return;
+      state.warteliste.push({
+        id: uid(),
+        datum: today,
+        ankunftszeit: ankunftInput.value || '',
+        patientId: patient.id,
+        patientName: `${patient.nachname}, ${patient.vorname}`,
+        status: 'wartet'
+      });
+      logAction('In Warteliste eingetragen', `${patient.nachname}, ${patient.vorname}`);
+      persist();
+      render();
+    });
+    card.appendChild(addBtn);
+    wrap.appendChild(card);
+
+    const listCard = document.createElement('div');
+    listCard.className = 'panel-card';
+    const todaysList = state.warteliste
+      .filter((w) => w.datum === today)
+      .sort((a, b) => (a.ankunftszeit || '').localeCompare(b.ankunftszeit || ''));
+
+    if (todaysList.length === 0) {
+      const p = document.createElement('p');
+      p.className = 'entry-empty';
+      p.textContent = 'Noch niemand auf der heutigen Warteliste.';
+      listCard.appendChild(p);
+    } else {
+      const list = document.createElement('ul');
+      list.className = 'entry-list';
+      todaysList.forEach((w) => {
+        const li = document.createElement('li');
+        li.className = 'entry-row';
+        const date = document.createElement('div');
+        date.className = 'entry-date';
+        date.textContent = w.ankunftszeit || '–';
+        li.appendChild(date);
+        const text = document.createElement('div');
+        text.className = 'entry-text';
+        text.textContent = w.patientName;
+        li.appendChild(text);
+        const statusBadge = document.createElement('span');
+        statusBadge.className = 'role-badge' + (w.status === 'fertig' ? ' role-admin' : '');
+        statusBadge.textContent = WARTELISTE_STATUS_LABEL[w.status] || w.status;
+        li.appendChild(statusBadge);
+        const currentIdx = WARTELISTE_STATUS_ORDER.indexOf(w.status);
+        if (currentIdx < WARTELISTE_STATUS_ORDER.length - 1) {
+          const nextBtn = document.createElement('button');
+          nextBtn.className = 'btn-glossy btn-secondary btn-small';
+          nextBtn.textContent = WARTELISTE_STATUS_LABEL[WARTELISTE_STATUS_ORDER[currentIdx + 1]];
+          nextBtn.addEventListener('click', () => {
+            w.status = WARTELISTE_STATUS_ORDER[currentIdx + 1];
+            persist();
+            render();
+          });
+          li.appendChild(nextBtn);
+        }
+        const delBtn = document.createElement('button');
+        delBtn.className = 'btn-glossy btn-danger btn-icon';
+        delBtn.textContent = '✕';
+        delBtn.addEventListener('click', () => {
+          state.warteliste = state.warteliste.filter((x) => x.id !== w.id);
+          persist();
+          render();
+        });
+        li.appendChild(delBtn);
+        list.appendChild(li);
+      });
+      listCard.appendChild(list);
+    }
+    wrap.appendChild(listCard);
+
+    return wrap;
+  }
+
+  function renderAnalyseAllgemeinView() {
+    const wrap = document.createDocumentFragment();
+    wrap.appendChild(renderOverviewStats());
+
+    const card = document.createElement('div');
+    card.className = 'panel-card';
+    const heading = document.createElement('h2');
+    heading.textContent = 'Analyse allgemein';
+    card.appendChild(heading);
+
+    const grid = document.createElement('div');
+    grid.className = 'stat-grid';
+
+    const now = new Date();
+    const cutoff = new Date();
+    cutoff.setDate(cutoff.getDate() - 30);
+    const neuLetzte30Tage = state.patients.filter((p) => p.erstelltAm && new Date(p.erstelltAm) >= cutoff).length;
+
+    const geschlechter = { w: 0, m: 0, d: 0 };
+    let ageSum = 0;
+    let ageCount = 0;
+    state.patients.forEach((p) => {
+      if (p.geschlecht && geschlechter[p.geschlecht] !== undefined) geschlechter[p.geschlecht] += 1;
+      if (p.geburtsdatum) {
+        const birth = new Date(p.geburtsdatum);
+        if (!Number.isNaN(birth.getTime())) {
+          ageSum += (now.getFullYear() - birth.getFullYear());
+          ageCount += 1;
+        }
+      }
+    });
+
+    const stats = [
+      { value: neuLetzte30Tage, label: 'Neue Patienten (30 Tage)' },
+      { value: geschlechter.w, label: 'weiblich' },
+      { value: geschlechter.m, label: 'männlich' },
+      { value: geschlechter.d, label: 'divers' },
+      { value: ageCount > 0 ? Math.round(ageSum / ageCount) : 0, label: 'Durchschnittsalter (Jahre)' }
+    ];
+    stats.forEach((s) => {
+      const tile = document.createElement('div');
+      tile.className = 'stat-tile';
+      const value = document.createElement('div');
+      value.className = 'stat-value';
+      value.textContent = String(s.value);
+      const label = document.createElement('div');
+      label.className = 'stat-label';
+      label.textContent = s.label;
+      tile.append(value, label);
+      grid.appendChild(tile);
+    });
+    card.appendChild(grid);
+    wrap.appendChild(card);
+
+    return wrap;
+  }
+
+  function renderAnalyseLeistungenView() {
+    const card = document.createElement('div');
+    card.className = 'panel-card';
+    const heading = document.createElement('h2');
+    heading.textContent = 'Analyse Leistungen';
+    card.appendChild(heading);
+
+    const sumByKategorie = { privat: 0, gkv: 0, bg: 0 };
+    const countByZiffer = new Map();
+    state.patients.forEach((p) => {
+      (p.abrechnung || []).forEach((e) => {
+        if (sumByKategorie[e.kategorie] !== undefined) sumByKategorie[e.kategorie] += Number(e.betrag) || 0;
+        const key = e.ziffer || '–';
+        if (!countByZiffer.has(key)) countByZiffer.set(key, { bezeichnung: e.bezeichnung, count: 0, summe: 0 });
+        const rec = countByZiffer.get(key);
+        rec.count += 1;
+        rec.summe += Number(e.betrag) || 0;
+      });
+    });
+
+    const grid = document.createElement('div');
+    grid.className = 'stat-grid';
+    Object.entries(ABRECHNUNG_KATEGORIEN).forEach(([key, label]) => {
+      const tile = document.createElement('div');
+      tile.className = 'stat-tile';
+      const value = document.createElement('div');
+      value.className = 'stat-value';
+      value.textContent = formatEuro(sumByKategorie[key]);
+      const lbl = document.createElement('div');
+      lbl.className = 'stat-label';
+      lbl.textContent = label;
+      tile.append(value, lbl);
+      grid.appendChild(tile);
+    });
+    card.appendChild(grid);
+
+    const topZiffern = Array.from(countByZiffer.entries())
+      .map(([ziffer, rec]) => ({ ziffer, ...rec }))
+      .sort((a, b) => b.summe - a.summe)
+      .slice(0, 10);
+
+    if (topZiffern.length > 0) {
+      const subHeading = document.createElement('h3');
+      subHeading.textContent = 'Häufigste Ziffern';
+      card.appendChild(subHeading);
+      const table = document.createElement('table');
+      table.className = 'patient-table';
+      const thead = document.createElement('thead');
+      const headRow = document.createElement('tr');
+      ['Ziffer', 'Bezeichnung', 'Anzahl', 'Summe'].forEach((h) => {
+        const th = document.createElement('th');
+        th.textContent = h;
+        headRow.appendChild(th);
+      });
+      thead.appendChild(headRow);
+      table.appendChild(thead);
+      const tbody = document.createElement('tbody');
+      topZiffern.forEach((z) => {
+        const tr = document.createElement('tr');
+        [z.ziffer, z.bezeichnung, String(z.count), formatEuro(z.summe)].forEach((val) => {
+          const td = document.createElement('td');
+          td.textContent = val;
+          tr.appendChild(td);
+        });
+        tbody.appendChild(tr);
+      });
+      table.appendChild(tbody);
+      card.appendChild(table);
+    } else {
+      const p = document.createElement('p');
+      p.className = 'entry-empty';
+      p.textContent = 'Noch keine erfassten Leistungen.';
+      card.appendChild(p);
+    }
+
+    return card;
+  }
+
+  function renderAnalyseVerordnungenView() {
+    const card = document.createElement('div');
+    card.className = 'panel-card';
+    const heading = document.createElement('h2');
+    heading.textContent = 'Analyse Verordnungen';
+    card.appendChild(heading);
+
+    let total = 0;
+    const byMedikament = new Map();
+    const byStatus = { offen: 0, eingeloest: 0, storniert: 0 };
+    state.patients.forEach((p) => {
+      (p.rezepte || []).forEach((e) => {
+        total += 1;
+        const key = (e.medikament || '–').trim().toLowerCase();
+        if (!byMedikament.has(key)) byMedikament.set(key, { name: e.medikament, count: 0 });
+        byMedikament.get(key).count += 1;
+        const status = e.status || 'offen';
+        if (byStatus[status] !== undefined) byStatus[status] += 1;
+      });
+    });
+
+    const grid = document.createElement('div');
+    grid.className = 'stat-grid';
+    const stats = [
+      { value: total, label: 'Rezepte gesamt' },
+      { value: byStatus.offen, label: VERORDNUNGSSTATUS_LABEL.offen },
+      { value: byStatus.eingeloest, label: VERORDNUNGSSTATUS_LABEL.eingeloest },
+      { value: byStatus.storniert, label: VERORDNUNGSSTATUS_LABEL.storniert }
+    ];
+    stats.forEach((s) => {
+      const tile = document.createElement('div');
+      tile.className = 'stat-tile';
+      const value = document.createElement('div');
+      value.className = 'stat-value';
+      value.textContent = String(s.value);
+      const lbl = document.createElement('div');
+      lbl.className = 'stat-label';
+      lbl.textContent = s.label;
+      tile.append(value, lbl);
+      grid.appendChild(tile);
+    });
+    card.appendChild(grid);
+
+    const topMeds = Array.from(byMedikament.values()).sort((a, b) => b.count - a.count).slice(0, 10);
+    if (topMeds.length > 0) {
+      const subHeading = document.createElement('h3');
+      subHeading.textContent = 'Häufigste Verordnungen';
+      card.appendChild(subHeading);
+      const table = document.createElement('table');
+      table.className = 'patient-table';
+      const thead = document.createElement('thead');
+      const headRow = document.createElement('tr');
+      ['Medikament', 'Anzahl'].forEach((h) => {
+        const th = document.createElement('th');
+        th.textContent = h;
+        headRow.appendChild(th);
+      });
+      thead.appendChild(headRow);
+      table.appendChild(thead);
+      const tbody = document.createElement('tbody');
+      topMeds.forEach((m) => {
+        const tr = document.createElement('tr');
+        [m.name, String(m.count)].forEach((val) => {
+          const td = document.createElement('td');
+          td.textContent = val;
+          tr.appendChild(td);
+        });
+        tbody.appendChild(tr);
+      });
+      table.appendChild(tbody);
+      card.appendChild(table);
+    } else {
+      const p = document.createElement('p');
+      p.className = 'entry-empty';
+      p.textContent = 'Noch keine erfassten Rezepte.';
+      card.appendChild(p);
+    }
+
+    return card;
+  }
+
+  function renderWeitereServicesView() {
+    const wrap = document.createDocumentFragment();
+    const card = document.createElement('div');
+    card.className = 'panel-card';
+    const heading = document.createElement('h2');
+    heading.textContent = 'Weitere Services';
+    card.appendChild(heading);
+
+    const hint = document.createElement('p');
+    hint.className = 'entry-empty';
+    hint.textContent = 'Katalog zusätzlicher Selbstzahlerleistungen (z. B. IGeL-Leistungen), die Ihre Praxis anbietet.';
+    card.appendChild(hint);
+
+    const formGrid = document.createElement('div');
+    formGrid.className = 'form-grid';
+    const nameLabel = fieldLabel('Name', 'zlName', 'text');
+    const nameInput = nameLabel.querySelector('input');
+    const preisLabel = fieldLabel('Preis (€)', 'zlPreis', 'number');
+    const preisInput = preisLabel.querySelector('input');
+    preisInput.step = '0.01';
+    preisInput.min = '0';
+    const beschreibungLabel = textAreaField('Beschreibung', 'zlBeschreibung');
+    const beschreibungArea = beschreibungLabel.querySelector('textarea');
+    formGrid.append(nameLabel, preisLabel, beschreibungLabel);
+    card.appendChild(formGrid);
+
+    const addBtn = document.createElement('button');
+    addBtn.className = 'btn-glossy btn-primary btn-small';
+    addBtn.textContent = '+ Leistung anlegen';
+    addBtn.addEventListener('click', () => {
+      const name = nameInput.value.trim();
+      if (!name) return;
+      const preis = parseFloat(preisInput.value);
+      state.zusatzleistungen.push({ id: uid(), name, preis: Number.isFinite(preis) ? preis : 0, beschreibung: beschreibungArea.value.trim() });
+      logAction('Zusatzleistung angelegt', name);
+      persist();
+      render();
+    });
+    card.appendChild(addBtn);
+    wrap.appendChild(card);
+
+    const listCard = document.createElement('div');
+    listCard.className = 'panel-card';
+    if (state.zusatzleistungen.length === 0) {
+      const p = document.createElement('p');
+      p.className = 'entry-empty';
+      p.textContent = 'Noch keine Zusatzleistungen angelegt.';
+      listCard.appendChild(p);
+    } else {
+      const list = document.createElement('ul');
+      list.className = 'entry-list';
+      state.zusatzleistungen.forEach((z) => {
+        const li = document.createElement('li');
+        li.className = 'entry-row';
+        const text = document.createElement('div');
+        text.className = 'entry-text';
+        text.textContent = z.beschreibung ? `${z.name} — ${z.beschreibung} (${formatEuro(z.preis)})` : `${z.name} (${formatEuro(z.preis)})`;
+        li.appendChild(text);
+        const delBtn = document.createElement('button');
+        delBtn.className = 'btn-glossy btn-danger btn-icon';
+        delBtn.textContent = '✕';
+        delBtn.addEventListener('click', () => {
+          state.zusatzleistungen = state.zusatzleistungen.filter((x) => x.id !== z.id);
+          logAction('Zusatzleistung gelöscht', z.name);
+          persist();
+          render();
+        });
+        li.appendChild(delBtn);
+        list.appendChild(li);
+      });
+      listCard.appendChild(list);
+    }
+    wrap.appendChild(listCard);
+
+    return wrap;
+  }
+
+  // ---------- Patientenbezogene Werkzeuge (Leistungsstatus, Verordnungsstatus, Scheinrückseite, Archiv, Duplizieren) ----------
+
+  function renderLeistungsstatusView(patient) {
+    const card = document.createElement('div');
+    card.className = 'panel-card';
+    const heading = document.createElement('h2');
+    heading.textContent = 'Leistungsstatus';
+    card.appendChild(heading);
+
+    const entries = (patient.abrechnung || []).slice().sort((a, b) => (a.datum || '').localeCompare(b.datum || ''));
+    if (entries.length === 0) {
+      const p = document.createElement('p');
+      p.className = 'entry-empty';
+      p.textContent = 'Noch keine erfassten Leistungen.';
+      card.appendChild(p);
+      return card;
+    }
+
+    const table = document.createElement('table');
+    table.className = 'patient-table';
+    const thead = document.createElement('thead');
+    const headRow = document.createElement('tr');
+    ['Datum', 'Ziffer', 'Bezeichnung', 'Betrag', 'Status'].forEach((h) => {
+      const th = document.createElement('th');
+      th.textContent = h;
+      headRow.appendChild(th);
+    });
+    thead.appendChild(headRow);
+    table.appendChild(thead);
+
+    const tbody = document.createElement('tbody');
+    entries.forEach((entry) => {
+      const tr = document.createElement('tr');
+      [formatDate(entry.datum), entry.ziffer, entry.bezeichnung, formatEuro(entry.betrag)].forEach((val) => {
+        const td = document.createElement('td');
+        td.textContent = val;
+        tr.appendChild(td);
+      });
+      const tdStatus = document.createElement('td');
+      const select = document.createElement('select');
+      Object.entries(LEISTUNGSSTATUS_LABEL).forEach(([value, label]) => {
+        const opt = document.createElement('option');
+        opt.value = value;
+        opt.textContent = label;
+        select.appendChild(opt);
+      });
+      select.value = entry.status || 'offen';
+      select.addEventListener('change', () => {
+        entry.status = select.value;
+        logAction('Leistungsstatus geändert', `${patient.nachname}, ${patient.vorname} — Ziffer ${entry.ziffer}`);
+        persist();
+      });
+      tdStatus.appendChild(select);
+      tr.appendChild(tdStatus);
+      tbody.appendChild(tr);
+    });
+    table.appendChild(tbody);
+    card.appendChild(table);
+    return card;
+  }
+
+  function renderVerordnungsstatusView(patient) {
+    const card = document.createElement('div');
+    card.className = 'panel-card';
+    const heading = document.createElement('h2');
+    heading.textContent = 'Verordnungsstatus';
+    card.appendChild(heading);
+
+    const entries = (patient.rezepte || []).slice().sort((a, b) => (a.datum || '').localeCompare(b.datum || ''));
+    if (entries.length === 0) {
+      const p = document.createElement('p');
+      p.className = 'entry-empty';
+      p.textContent = 'Noch keine Rezepte erfasst.';
+      card.appendChild(p);
+      return card;
+    }
+
+    const table = document.createElement('table');
+    table.className = 'patient-table';
+    const thead = document.createElement('thead');
+    const headRow = document.createElement('tr');
+    ['Datum', 'Medikament', 'Hinweis', 'Status'].forEach((h) => {
+      const th = document.createElement('th');
+      th.textContent = h;
+      headRow.appendChild(th);
+    });
+    thead.appendChild(headRow);
+    table.appendChild(thead);
+
+    const tbody = document.createElement('tbody');
+    entries.forEach((entry) => {
+      const tr = document.createElement('tr');
+      [formatDate(entry.datum), entry.medikament, entry.hinweis || '–'].forEach((val) => {
+        const td = document.createElement('td');
+        td.textContent = val;
+        tr.appendChild(td);
+      });
+      const tdStatus = document.createElement('td');
+      const select = document.createElement('select');
+      Object.entries(VERORDNUNGSSTATUS_LABEL).forEach(([value, label]) => {
+        const opt = document.createElement('option');
+        opt.value = value;
+        opt.textContent = label;
+        select.appendChild(opt);
+      });
+      select.value = entry.status || 'offen';
+      select.addEventListener('change', () => {
+        entry.status = select.value;
+        logAction('Verordnungsstatus geändert', `${patient.nachname}, ${patient.vorname} — ${entry.medikament}`);
+        persist();
+      });
+      tdStatus.appendChild(select);
+      tr.appendChild(tdStatus);
+      tbody.appendChild(tr);
+    });
+    table.appendChild(tbody);
+    card.appendChild(table);
+    return card;
+  }
+
+  function renderScheinrueckseiteView(patient) {
+    const card = document.createElement('div');
+    card.className = 'panel-card';
+    const heading = document.createElement('h2');
+    heading.textContent = 'Scheinrückseite';
+    card.appendChild(heading);
+
+    const hint = document.createElement('p');
+    hint.className = 'entry-empty';
+    hint.textContent = 'Freitext-Notizen, wie früher auf der Rückseite des Behandlungsscheins (z. B. Diagnosen für die Abrechnung, Überweisungsvermerke).';
+    card.appendChild(hint);
+
+    const formGrid = document.createElement('div');
+    formGrid.className = 'form-grid';
+    const label = textAreaField('Notizen', 'scheinrueckseiteText');
+    const textarea = label.querySelector('textarea');
+    textarea.value = patient.scheinrueckseite || '';
+    textarea.rows = 8;
+    formGrid.appendChild(label);
+    card.appendChild(formGrid);
+
+    const saveBtn = document.createElement('button');
+    saveBtn.className = 'btn-glossy btn-primary btn-small';
+    saveBtn.textContent = 'Speichern';
+    saveBtn.addEventListener('click', () => {
+      patient.scheinrueckseite = textarea.value;
+      logAction('Scheinrückseite gespeichert', `${patient.nachname}, ${patient.vorname}`);
+      persist();
+      render();
+    });
+    card.appendChild(saveBtn);
+
+    return card;
+  }
+
+  function renderArchivinfoView(patient) {
+    const card = document.createElement('div');
+    card.className = 'panel-card';
+    const heading = document.createElement('h2');
+    heading.textContent = 'Archivinformation';
+    card.appendChild(heading);
+
+    const formGrid = document.createElement('div');
+    formGrid.className = 'form-grid';
+    const sdLabel = fieldLabel('Archivinformation SD', 'archivSd', 'text');
+    const sdInput = sdLabel.querySelector('input');
+    sdInput.value = patient.archivinfo.sd || '';
+    const mdLabel = fieldLabel('Archivinformation MD', 'archivMd', 'text');
+    const mdInput = mdLabel.querySelector('input');
+    mdInput.value = patient.archivinfo.md || '';
+    formGrid.append(sdLabel, mdLabel);
+    card.appendChild(formGrid);
+
+    const saveBtn = document.createElement('button');
+    saveBtn.className = 'btn-glossy btn-primary btn-small';
+    saveBtn.textContent = 'Speichern';
+    saveBtn.addEventListener('click', () => {
+      patient.archivinfo = { sd: sdInput.value.trim(), md: mdInput.value.trim() };
+      logAction('Archivinformation gespeichert', `${patient.nachname}, ${patient.vorname}`);
+      persist();
+      render();
+    });
+    card.appendChild(saveBtn);
+
+    return card;
+  }
+
+  function duplicatePatient(patient) {
+    openConfirm(
+      'Patientendaten duplizieren?',
+      `Es wird ein neuer Patient mit denselben Stammdaten wie „${patient.nachname}, ${patient.vorname}" angelegt (z. B. für Familienangehörige). Einträge wie Verlauf, Rezepte oder Termine werden nicht übernommen.`,
+      () => {
+        const copy = normalizePatient({
+          id: uid(),
+          nachname: patient.nachname,
+          vorname: patient.vorname,
+          geburtsdatum: '',
+          geschlecht: patient.geschlecht,
+          versicherung: patient.versicherung,
+          versichertenNr: ''
+        });
+        copy.erstelltAm = new Date().toISOString();
+        state.patients.push(copy);
+        logAction('Patientendaten dupliziert', `${patient.nachname}, ${patient.vorname} → neuer Patient`);
+        ui.selectedPatientId = copy.id;
+        ui.viewMode = 'patient';
+        ui.activeTab = 'basis';
+        persist();
+        render();
+      }
+    );
+  }
+
+  function renderPatientToolView(renderFn) {
+    const patient = getPatient(ui.selectedPatientId);
+    if (!patient) {
+      ui.viewMode = 'list';
+      el.content.appendChild(renderPatientListView());
+      return;
+    }
+    el.content.appendChild(renderPatientBanner(patient));
+    el.content.appendChild(renderFn(patient));
+  }
+
   // ---------- Patient anlegen / bearbeiten ----------
 
   function openNewPatientModal() {
@@ -1656,16 +2956,8 @@
       if (patient) Object.assign(patient, data);
       logAction('Patient bearbeitet', `${nachname}, ${vorname}`);
     } else {
-      const patient = {
-        id: uid(),
-        ...data,
-        journal: [],
-        rezepte: [],
-        termine: [],
-        briefe: [],
-        labor: [],
-        abrechnung: []
-      };
+      const patient = normalizePatient({ id: uid(), ...data });
+      patient.erstelltAm = new Date().toISOString();
       state.patients.push(patient);
       ui.selectedPatientId = patient.id;
       ui.viewMode = 'patient';
@@ -1798,6 +3090,18 @@
           betragInput.select();
         }
       });
+    } else if (category === 'laborwerte') {
+      el.entryFormFields.appendChild(fieldLabel('Parameter', 'entryParameter', 'text'));
+      el.entryFormFields.appendChild(fieldLabel('Wert', 'entryWert', 'text'));
+      el.entryFormFields.appendChild(fieldLabel('Einheit', 'entryEinheit', 'text'));
+      el.entryFormFields.appendChild(fieldLabel('Referenzbereich', 'entryReferenzbereich', 'text'));
+    } else if (category === 'krankenscheine') {
+      el.entryFormFields.appendChild(fieldLabel('Art', 'entryArt', 'text'));
+      el.entryFormFields.appendChild(textAreaField('Notiz', 'entryNotiz'));
+    } else if (category === 'uebergaben') {
+      el.entryFormFields.appendChild(fieldLabel('Von', 'entryVon', 'text'));
+      el.entryFormFields.appendChild(fieldLabel('An', 'entryAn', 'text'));
+      el.entryFormFields.appendChild(textAreaField('Text', 'entryText'));
     }
 
     el.entryFormModal.classList.add('open');
@@ -1823,6 +3127,30 @@
     textarea.id = id;
     label.append(span, textarea);
     return label;
+  }
+
+  function selectField(labelText, id, options) {
+    const label = document.createElement('label');
+    const span = document.createElement('span');
+    span.textContent = labelText;
+    const select = document.createElement('select');
+    select.id = id;
+    options.forEach(([value, text]) => {
+      const opt = document.createElement('option');
+      opt.value = value;
+      opt.textContent = text;
+      select.appendChild(opt);
+    });
+    label.append(span, select);
+    return label;
+  }
+
+  function patientSelectOptions(includeEmpty) {
+    const opts = state.patients
+      .slice()
+      .sort((a, b) => `${a.nachname} ${a.vorname}`.localeCompare(`${b.nachname} ${b.vorname}`, 'de'))
+      .map((p) => [p.id, `${p.nachname}, ${p.vorname}`]);
+    return includeEmpty ? [['', '– kein Patient –'], ...opts] : opts;
   }
 
   function closeEntryModal() {
@@ -1851,6 +3179,7 @@
       if (!medikament) return;
       entry.medikament = medikament;
       entry.hinweis = byId('entryHinweis').value.trim();
+      entry.status = 'offen';
     } else if (category === 'termine') {
       const grund = byId('entryGrund').value.trim();
       if (!grund) return;
@@ -1874,6 +3203,25 @@
       entry.ziffer = ziffer;
       entry.bezeichnung = bezeichnung;
       entry.betrag = betrag;
+      entry.status = 'offen';
+    } else if (category === 'laborwerte') {
+      const parameter = byId('entryParameter').value.trim();
+      if (!parameter) return;
+      entry.parameter = parameter;
+      entry.wert = byId('entryWert').value.trim();
+      entry.einheit = byId('entryEinheit').value.trim();
+      entry.referenzbereich = byId('entryReferenzbereich').value.trim();
+    } else if (category === 'krankenscheine') {
+      const art = byId('entryArt').value.trim();
+      if (!art) return;
+      entry.art = art;
+      entry.notiz = byId('entryNotiz').value.trim();
+    } else if (category === 'uebergaben') {
+      const text = byId('entryText').value.trim();
+      if (!text) return;
+      entry.von = byId('entryVon').value.trim();
+      entry.an = byId('entryAn').value.trim();
+      entry.text = text;
     }
 
     if (!patient[category]) patient[category] = [];
@@ -1949,7 +3297,7 @@
   el.toolReloadBtn.addEventListener('click', async () => {
     const res = await window.patientenweltAPI.reloadData();
     if (res && res.success) {
-      state = res.state;
+      state = normalizeState(res.state);
       render();
     }
   });
@@ -2023,7 +3371,7 @@
   }
 
   function unlockApp(newState, user) {
-    state = newState && Array.isArray(newState.patients) ? newState : { patients: [] };
+    state = normalizeState(newState);
     currentUser = user;
     el.authScreen.hidden = true;
     el.appShell.hidden = false;
