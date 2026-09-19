@@ -41,10 +41,12 @@
   const ENTRY_LIST_KEYS = [
     'journal', 'rezepte', 'termine', 'briefe', 'labor',
     'laborwerte', 'krankenscheine', 'uebergaben',
-    'ueberweisungen', 'befundweiterleitung'
+    'ueberweisungen', 'befundweiterleitung', 'krankmeldungen'
   ];
 
   const DRINGLICHKEIT_LABEL = { normal: 'Normal', dringend: 'Dringend' };
+  const AU_ART_LABEL = { erst: 'Erstbescheinigung', folge: 'Folgebescheinigung' };
+  const KARTENGENERATION_LABEL = { g1: 'G1', g2: 'G2', 'g2.1': 'G2.1' };
 
   const VERORDNUNGSSTATUS_LABEL = { offen: 'Offen', eingeloest: 'Eingelöst', storniert: 'Storniert' };
   const LEISTUNGSSTATUS_LABEL = { offen: 'Offen', abgerechnet: 'Abgerechnet', bezahlt: 'Bezahlt' };
@@ -173,8 +175,10 @@
       if (!Array.isArray(patient[key])) patient[key] = [];
     });
     if (!patient.versichertenkarte || typeof patient.versichertenkarte !== 'object') {
-      patient.versichertenkarte = { status: 'ungeprueft', geprueftAm: '', gueltigBis: '' };
+      patient.versichertenkarte = { status: 'ungeprueft', geprueftAm: '', gueltigBis: '', kartennummer: '', kartengeneration: '' };
     }
+    if (typeof patient.versichertenkarte.kartennummer !== 'string') patient.versichertenkarte.kartennummer = '';
+    if (typeof patient.versichertenkarte.kartengeneration !== 'string') patient.versichertenkarte.kartengeneration = '';
     if (typeof patient.scheinrueckseite !== 'string') patient.scheinrueckseite = '';
     if (!patient.archivinfo || typeof patient.archivinfo !== 'object') {
       patient.archivinfo = { sd: '', md: '' };
@@ -243,13 +247,13 @@
       afterGroup: 'Praxis',
       items: [
         'Praxisgebühr Info', 'Praxisgebühr Kassenbuch', 'Registrierung Versichertenkarte',
-        'Krankenscheinabgabe', 'Formulare', 'Druckauftrag Formular', 'Recallfunktion',
-        'Warteliste Eintragen', 'Warteliste Nachsehen'
+        'Krankenkassenkarte lesen', 'Krankenscheinabgabe', 'Formulare', 'Druckauftrag Formular',
+        'Recallfunktion', 'Warteliste Eintragen', 'Warteliste Nachsehen'
       ]
     },
     {
       afterGroup: 'Behandlung',
-      items: ['Laborwerterfassung', 'Leistungsstatus', 'Verordnungsstatus', 'Überweisung', 'Befund weiterleiten']
+      items: ['Laborwerterfassung', 'Leistungsstatus', 'Verordnungsstatus', 'Überweisung', 'Befund weiterleiten', 'Krankmeldung']
     },
     {
       afterGroup: 'Termine',
@@ -281,6 +285,7 @@
     'Praxisgebühr Info': { activeViewMode: 'praxisgebuehr-info', onClick: () => gotoView('praxisgebuehr-info') },
     'Praxisgebühr Kassenbuch': { activeViewMode: 'kassenbuch', onClick: () => gotoView('kassenbuch') },
     'Registrierung Versichertenkarte': { activeViewMode: 'versichertenkarten', onClick: () => gotoView('versichertenkarten') },
+    'Krankenkassenkarte lesen': { activeViewMode: 'tool-krankenkassenkarte', requiresPatient: true, onClick: () => gotoView('tool-krankenkassenkarte') },
     'Krankenscheinabgabe': { activeViewMode: 'tool-krankenscheine', requiresPatient: true, onClick: () => gotoView('tool-krankenscheine') },
     'Formulare': { activeViewMode: 'formulare', onClick: () => gotoView('formulare') },
     'Druckauftrag Formular': { activeViewMode: 'druckauftrag', onClick: () => gotoView('druckauftrag') },
@@ -296,6 +301,7 @@
     'Verordnungsstatus': { activeViewMode: 'tool-verordnungsstatus', requiresPatient: true, onClick: () => gotoView('tool-verordnungsstatus') },
     'Überweisung': { activeViewMode: 'tool-ueberweisungen', requiresPatient: true, onClick: () => gotoView('tool-ueberweisungen') },
     'Befund weiterleiten': { activeViewMode: 'tool-befundweiterleitung', requiresPatient: true, onClick: () => gotoView('tool-befundweiterleitung') },
+    'Krankmeldung': { activeViewMode: 'tool-krankmeldungen', requiresPatient: true, onClick: () => gotoView('tool-krankmeldungen') },
     'Nächster Termin': { activeViewMode: 'tool-terminkarte', requiresPatient: true, onClick: () => gotoView('tool-terminkarte') },
 
     'Scheinrückseite': { activeViewMode: 'tool-scheinrueckseite', requiresPatient: true, onClick: () => gotoView('tool-scheinrueckseite') },
@@ -535,6 +541,14 @@
       renderPatientToolView((p) => renderEntryListPanel(p, 'befundweiterleitung'));
       return;
     }
+    if (ui.viewMode === 'tool-krankmeldungen') {
+      renderPatientToolView((p) => renderEntryListPanel(p, 'krankmeldungen'));
+      return;
+    }
+    if (ui.viewMode === 'tool-krankenkassenkarte') {
+      renderPatientToolView(renderKrankenkassenkarteLesenView);
+      return;
+    }
     if (ui.viewMode === 'tool-terminkarte') {
       renderPatientToolView(renderTerminkarteToolView);
       return;
@@ -545,6 +559,10 @@
     }
     if (ui.viewMode === 'print-befund') {
       renderPatientToolView(renderBefundPrintView);
+      return;
+    }
+    if (ui.viewMode === 'print-krankmeldung') {
+      renderPatientToolView(renderKrankmeldungPrintView);
       return;
     }
     if (ui.viewMode === 'print-terminkarte') {
@@ -1284,6 +1302,10 @@
     (patient.befundweiterleitung || []).forEach((e) => rows.push([
       'Befund weiterleiten', e.datum, '', `An ${e.empfaenger || ''}: ${e.betreff || ''}`.trim(), e.text || '', ''
     ]));
+    (patient.krankmeldungen || []).forEach((e) => rows.push([
+      'Krankmeldung', e.datum, '', AU_ART_LABEL[e.art] || e.art || '',
+      `${formatDate(e.von)} – ${formatDate(e.bis)}${e.diagnose ? ' — ' + e.diagnose : ''}`, ''
+    ]));
     return rows.sort((a, b) => (a[1] || '').localeCompare(b[1] || ''));
   }
 
@@ -1529,7 +1551,16 @@
     krankenscheine: { title: 'Krankenscheinabgabe', addLabel: '+ Krankenschein' },
     uebergaben: { title: 'Übergabe Patient', addLabel: '+ Übergabe' },
     ueberweisungen: { title: 'Überweisung', addLabel: '+ Überweisung' },
-    befundweiterleitung: { title: 'Befund weiterleiten', addLabel: '+ Befund weiterleiten' }
+    befundweiterleitung: { title: 'Befund weiterleiten', addLabel: '+ Befund weiterleiten' },
+    krankmeldungen: { title: 'Krankmeldung', addLabel: '+ Krankmeldung' }
+  };
+
+  // Eintrags-Kategorien, deren Zeilen einen "Drucken"-Button bekommen, und die
+  // dabei angesteuerte viewMode für die jeweilige Druckansicht.
+  const PRINTABLE_CATEGORY_VIEWS = {
+    ueberweisungen: 'print-ueberweisung',
+    befundweiterleitung: 'print-befund',
+    krankmeldungen: 'print-krankmeldung'
   };
 
   function formatEuro(value) {
@@ -1651,13 +1682,14 @@
     text.textContent = entryDisplayText(category, entry);
     li.appendChild(text);
 
-    if (category === 'ueberweisungen' || category === 'befundweiterleitung') {
+    const printViewMode = PRINTABLE_CATEGORY_VIEWS[category];
+    if (printViewMode) {
       const printBtn = document.createElement('button');
       printBtn.className = 'btn-glossy btn-secondary btn-small';
       printBtn.textContent = 'Drucken';
       printBtn.addEventListener('click', () => {
         ui.printEntryId = entry.id;
-        ui.viewMode = category === 'ueberweisungen' ? 'print-ueberweisung' : 'print-befund';
+        ui.viewMode = printViewMode;
         render();
       });
       li.appendChild(printBtn);
@@ -1710,6 +1742,10 @@
     }
     if (category === 'befundweiterleitung') {
       return `An ${entry.empfaenger} — ${entry.betreff}`;
+    }
+    if (category === 'krankmeldungen') {
+      const diag = entry.diagnose ? ` — ${entry.diagnose}` : '';
+      return `${formatDate(entry.von)} – ${formatDate(entry.bis)} (${AU_ART_LABEL[entry.art] || entry.art})${diag}`;
     }
     return entry.text;
   }
@@ -2029,6 +2065,7 @@
         saveBtn.textContent = 'Speichern';
         saveBtn.addEventListener('click', () => {
           patient.versichertenkarte = {
+            ...patient.versichertenkarte,
             status: select.value,
             gueltigBis: gueltigInput.value,
             geprueftAm: new Date().toISOString()
@@ -2044,6 +2081,70 @@
       });
     table.appendChild(tbody);
     card.appendChild(table);
+
+    return card;
+  }
+
+  function renderKrankenkassenkarteLesenView(patient) {
+    const card = document.createElement('div');
+    card.className = 'panel-card';
+    const heading = document.createElement('h2');
+    heading.textContent = 'Krankenkassenkarte lesen';
+    card.appendChild(heading);
+
+    const hint = document.createElement('p');
+    hint.className = 'entry-empty';
+    hint.textContent = 'Manuelle Eingabe der Kartendaten, da kein eGK-Kartenterminal/TI-Konnektor angebunden ist — ersetzt das automatische Einlesen.';
+    card.appendChild(hint);
+
+    const formGrid = document.createElement('div');
+    formGrid.className = 'form-grid';
+    const kkLabel = fieldLabel('Krankenkasse', 'kkName', 'text');
+    const kkInput = kkLabel.querySelector('input');
+    kkInput.value = patient.versicherung || '';
+    const nrLabel = fieldLabel('Versichertennummer', 'kkVersichertenNr', 'text');
+    const nrInput = nrLabel.querySelector('input');
+    nrInput.value = patient.versichertenNr || '';
+    const kartennrLabel = fieldLabel('Kartennummer / Prüfziffer', 'kkKartennummer', 'text');
+    const kartennrInput = kartennrLabel.querySelector('input');
+    kartennrInput.value = patient.versichertenkarte.kartennummer || '';
+    const genLabel = selectField('Kartengeneration', 'kkGeneration', [['', '– unbekannt –'], ...Object.entries(KARTENGENERATION_LABEL)]);
+    const genSelect = genLabel.querySelector('select');
+    genSelect.value = patient.versichertenkarte.kartengeneration || '';
+    const gueltigLabel = fieldLabel('Gültig bis', 'kkGueltigBis', 'date');
+    const gueltigInput = gueltigLabel.querySelector('input');
+    gueltigInput.value = patient.versichertenkarte.gueltigBis || '';
+    const statusLabel = selectField('Status', 'kkStatus', Object.entries(VERSICHERTENKARTE_STATUS_LABEL));
+    const statusSelect = statusLabel.querySelector('select');
+    statusSelect.value = patient.versichertenkarte.status || 'ungeprueft';
+    formGrid.append(kkLabel, nrLabel, kartennrLabel, genLabel, gueltigLabel, statusLabel);
+    card.appendChild(formGrid);
+
+    if (patient.versichertenkarte.geprueftAm) {
+      const lastRead = document.createElement('p');
+      lastRead.className = 'entry-empty';
+      lastRead.textContent = `Zuletzt eingelesen am: ${formatDateTime(patient.versichertenkarte.geprueftAm)}`;
+      card.appendChild(lastRead);
+    }
+
+    const saveBtn = document.createElement('button');
+    saveBtn.className = 'btn-glossy btn-primary btn-small';
+    saveBtn.textContent = 'Karte einlesen (manuell) & speichern';
+    saveBtn.addEventListener('click', () => {
+      patient.versicherung = kkInput.value.trim();
+      patient.versichertenNr = nrInput.value.trim();
+      patient.versichertenkarte = {
+        status: statusSelect.value,
+        gueltigBis: gueltigInput.value,
+        kartennummer: kartennrInput.value.trim(),
+        kartengeneration: genSelect.value,
+        geprueftAm: new Date().toISOString()
+      };
+      logAction('Krankenkassenkarte eingelesen', `${patient.nachname}, ${patient.vorname}`);
+      persist();
+      render();
+    });
+    card.appendChild(saveBtn);
 
     return card;
   }
@@ -3077,6 +3178,52 @@
     return wrap;
   }
 
+  function renderKrankmeldungPrintView(patient) {
+    const entry = (patient.krankmeldungen || []).find((e) => e.id === ui.printEntryId);
+    if (!entry) {
+      ui.viewMode = 'tool-krankmeldungen';
+      return renderEntryListPanel(patient, 'krankmeldungen');
+    }
+
+    const { wrap, card } = printDocumentHeader('Arbeitsunfähigkeitsbescheinigung', () => {
+      ui.viewMode = 'tool-krankmeldungen';
+      ui.printEntryId = null;
+      render();
+    });
+
+    const meta = document.createElement('div');
+    meta.className = 'invoice-meta';
+    meta.appendChild(metaRow('Ausstellungsdatum', formatDate(entry.datum)));
+    meta.appendChild(metaRow('Art', AU_ART_LABEL[entry.art] || entry.art));
+    meta.appendChild(metaRow('Patient', `${patient.nachname}, ${patient.vorname}`));
+    meta.appendChild(metaRow('Geburtsdatum', patient.geburtsdatum ? formatDate(patient.geburtsdatum) : '–'));
+    meta.appendChild(metaRow('Arbeitsunfähig von', formatDate(entry.von)));
+    meta.appendChild(metaRow('Arbeitsunfähig bis', formatDate(entry.bis)));
+    card.appendChild(meta);
+
+    if (entry.diagnose) {
+      const diagHeading = document.createElement('h3');
+      diagHeading.textContent = 'Diagnose';
+      card.appendChild(diagHeading);
+      const diagText = document.createElement('p');
+      diagText.textContent = entry.diagnose;
+      card.appendChild(diagText);
+      const diagNote = document.createElement('p');
+      diagNote.className = 'entry-empty';
+      diagNote.textContent = 'Hinweis: Die Diagnose ist nur für die Patientenunterlagen bestimmt, nicht für die Ausfertigung an den Arbeitgeber.';
+      card.appendChild(diagNote);
+    }
+
+    const footer = document.createElement('p');
+    footer.className = 'invoice-footer-note';
+    footer.textContent = 'Unterschrift / Praxisstempel: ________________________________';
+    card.appendChild(footer);
+
+    wrap.appendChild(card);
+    logAction('Krankmeldung gedruckt', `${patient.nachname}, ${patient.vorname} — ${formatDate(entry.von)} bis ${formatDate(entry.bis)}`);
+    return wrap;
+  }
+
   function upcomingTermine(patient) {
     const today = todayISO();
     return (patient.termine || [])
@@ -3448,6 +3595,14 @@
       } else {
         el.entryFormFields.appendChild(textAreaField('Befundtext', 'entryText'));
       }
+    } else if (category === 'krankmeldungen') {
+      const artLabel = selectField('Art', 'entryArt', Object.entries(AU_ART_LABEL).map(([v, l]) => [v, l]));
+      el.entryFormFields.appendChild(artLabel);
+      const vonLabel = fieldLabel('Arbeitsunfähig von', 'entryVon', 'date');
+      vonLabel.querySelector('input').value = presetDate || todayISO();
+      el.entryFormFields.appendChild(vonLabel);
+      el.entryFormFields.appendChild(fieldLabel('Arbeitsunfähig bis', 'entryBis', 'date'));
+      el.entryFormFields.appendChild(fieldLabel('Diagnose (optional)', 'entryDiagnose', 'text'));
     }
 
     el.entryFormModal.classList.add('open');
@@ -3583,6 +3738,14 @@
       entry.empfaenger = empfaenger;
       entry.betreff = byId('entryBetreff').value.trim();
       entry.text = text;
+    } else if (category === 'krankmeldungen') {
+      const von = byId('entryVon').value;
+      const bis = byId('entryBis').value;
+      if (!von || !bis) return;
+      entry.art = byId('entryArt').value;
+      entry.von = von;
+      entry.bis = bis;
+      entry.diagnose = byId('entryDiagnose').value.trim();
     }
 
     if (!patient[category]) patient[category] = [];
