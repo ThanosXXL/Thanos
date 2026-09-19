@@ -31,15 +31,27 @@ Markenname, Überschriften, Patientennamen-Banner und aktive Tabs. Sie ist unabh
     eine gemeinsame Tagesansicht mit Status wartet → aufgerufen → fertig)
   - **Behandlung** (je Patient): Laborwerterfassung (strukturiert: Parameter/Wert/Einheit/
     Referenzbereich), Leistungsstatus (offen/abgerechnet/bezahlt je Abrechnungsposition),
-    Verordnungsstatus (offen/eingelöst/storniert je Rezept)
+    Verordnungsstatus (offen/eingelöst/storniert je Rezept), **Überweisung** (Empfänger,
+    Fachrichtung, Dringlichkeit, Grund/Verdachtsdiagnose — am PC ausfüllen und als
+    Überweisungsschein für den Patienten ausdrucken), **Befund weiterleiten** (Befund an einen
+    anderen Arzt/eine Praxis adressieren; der Befundtext lässt sich optional aus einem
+    bestehenden Verlaufs- oder Laborwert-Eintrag übernehmen, dann ausdrucken)
   - **Patientenverwaltung** (je Patient): Scheinrückseite (Freitext-Notizen), Übergabe Patient
     (Übergabevermerke zwischen Behandelnden), Patientendaten duplizieren (z. B. für
     Familienangehörige — übernimmt Nachname/Krankenkasse, nicht Geburtsdatum/Vers.-Nr. oder
     Einträge), Archivinformation SD/MD (zwei Referenzfelder, eine gemeinsame Ansicht)
+  - **Termine & Kommunikation**: zusätzlich zu Termine/Kalender/Briefe der Punkt **Nächster
+    Termin** — für die Arzthelferin gedacht: nächsten Arzttermin (Datum/Uhrzeit/Grund) schnell
+    eintragen und als Terminkarte ausdrucken, die der Patient mitnimmt
   - **Auswertung** (praxisweit): Analyse allgemein (Geschlechterverteilung, Durchschnittsalter,
     neue Patienten), Analyse Leistungen (Summen je Abrechnungskategorie, häufigste Ziffern),
     Analyse Verordnungen (häufigste Medikamente, Status-Verteilung)
   - **Weitere Services**: Katalog zusätzlicher Selbstzahlerleistungen (z. B. IGeL) mit Preis
+- **Ausdrucke für Patienten**: Überweisungsschein, Befundmitteilung und Terminkarte nutzen alle
+  dasselbe Druck-Layout wie die Rechnung (Praxis-Kopfzeile, `window.print()` + `@media print`,
+  Unterschriftszeile wo passend) und werden im Protokoll festgehalten (z. B. „Überweisung
+  gedruckt"). Es handelt sich um ausdruckbare Dokumente, **keine elektronische Übermittlung**
+  (kein KIM/Fax/E-Mail-Versand) — passend zum Stand ohne TI-Anbindung, siehe „Grenzen"
 - Bedienkomfort: Enter speichert/bestätigt das offene Formular, Escape schließt es
 - **Datensicherheit**: verschlüsselte Datenablage (AES-256-GCM), Anmeldung mit Benutzerrollen
   (Administrator/Mitarbeiter), automatische Sperre nach Inaktivität, Audit-Protokoll, automatische

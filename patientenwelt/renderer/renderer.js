@@ -31,6 +31,8 @@
   ];
 
   const WOCHENTAGE_KURZ = ['Mo', 'Di', 'Mi', 'Do', 'Fr', 'Sa', 'So'];
+  // Indiziert wie Date#getDay() (0 = Sonntag), anders als WOCHENTAGE_KURZ (Montag zuerst).
+  const WOCHENTAGE_LANG = ['Sonntag', 'Montag', 'Dienstag', 'Mittwoch', 'Donnerstag', 'Freitag', 'Samstag'];
   const MONATSNAMEN = [
     'Januar', 'Februar', 'März', 'April', 'Mai', 'Juni',
     'Juli', 'August', 'September', 'Oktober', 'November', 'Dezember'
@@ -38,8 +40,11 @@
 
   const ENTRY_LIST_KEYS = [
     'journal', 'rezepte', 'termine', 'briefe', 'labor',
-    'laborwerte', 'krankenscheine', 'uebergaben'
+    'laborwerte', 'krankenscheine', 'uebergaben',
+    'ueberweisungen', 'befundweiterleitung'
   ];
+
+  const DRINGLICHKEIT_LABEL = { normal: 'Normal', dringend: 'Dringend' };
 
   const VERORDNUNGSSTATUS_LABEL = { offen: 'Offen', eingeloest: 'Eingelöst', storniert: 'Storniert' };
   const LEISTUNGSSTATUS_LABEL = { offen: 'Offen', abgerechnet: 'Abgerechnet', bezahlt: 'Bezahlt' };
@@ -60,7 +65,8 @@
     sortDir: 'asc', // 'asc' | 'desc'
     billingKategorie: 'privat', // 'privat' | 'gkv' | 'bg' – für viewMode === 'billing'
     abrechnungFilter: 'alle', // 'alle' | 'privat' | 'gkv' | 'bg' – Filter im Patienten-Tab "Abrechnung"
-    invoicePatientId: null // für viewMode === 'invoice'
+    invoicePatientId: null, // für viewMode === 'invoice'
+    printEntryId: null // id des zu druckenden Eintrags für viewMode === 'print-ueberweisung' | 'print-befund' | 'print-terminkarte'
   };
 
   const el = {
@@ -243,7 +249,11 @@
     },
     {
       afterGroup: 'Behandlung',
-      items: ['Laborwerterfassung', 'Leistungsstatus', 'Verordnungsstatus']
+      items: ['Laborwerterfassung', 'Leistungsstatus', 'Verordnungsstatus', 'Überweisung', 'Befund weiterleiten']
+    },
+    {
+      afterGroup: 'Termine',
+      items: ['Nächster Termin']
     },
     {
       title: 'Patientenverwaltung',
@@ -284,6 +294,9 @@
     'Laborwerterfassung': { activeViewMode: 'tool-laborwerte', requiresPatient: true, onClick: () => gotoView('tool-laborwerte') },
     'Leistungsstatus': { activeViewMode: 'tool-leistungsstatus', requiresPatient: true, onClick: () => gotoView('tool-leistungsstatus') },
     'Verordnungsstatus': { activeViewMode: 'tool-verordnungsstatus', requiresPatient: true, onClick: () => gotoView('tool-verordnungsstatus') },
+    'Überweisung': { activeViewMode: 'tool-ueberweisungen', requiresPatient: true, onClick: () => gotoView('tool-ueberweisungen') },
+    'Befund weiterleiten': { activeViewMode: 'tool-befundweiterleitung', requiresPatient: true, onClick: () => gotoView('tool-befundweiterleitung') },
+    'Nächster Termin': { activeViewMode: 'tool-terminkarte', requiresPatient: true, onClick: () => gotoView('tool-terminkarte') },
 
     'Scheinrückseite': { activeViewMode: 'tool-scheinrueckseite', requiresPatient: true, onClick: () => gotoView('tool-scheinrueckseite') },
     'Übergabe Patient': { activeViewMode: 'tool-uebergaben', requiresPatient: true, onClick: () => gotoView('tool-uebergaben') },
@@ -331,6 +344,7 @@
     el.sidebar.appendChild(sidebarNavBtn('Termine', hasPatient && ui.viewMode === 'patient' && ui.activeTab === 'termine', () => selectTab('termine'), !hasPatient));
     el.sidebar.appendChild(sidebarNavBtn('Kalender', hasPatient && ui.viewMode === 'patient' && ui.activeTab === 'kalender', () => selectTab('kalender'), !hasPatient));
     el.sidebar.appendChild(sidebarNavBtn('Briefe', hasPatient && ui.viewMode === 'patient' && ui.activeTab === 'briefe', () => selectTab('briefe'), !hasPatient));
+    appendMenuGroupItems('Termine');
 
     el.sidebar.appendChild(sidebarGroupTitle('Abrechnung'));
     Object.entries(ABRECHNUNG_KATEGORIEN).forEach(([key, label]) => {
@@ -511,6 +525,30 @@
     }
     if (ui.viewMode === 'tool-archivinfo') {
       renderPatientToolView(renderArchivinfoView);
+      return;
+    }
+    if (ui.viewMode === 'tool-ueberweisungen') {
+      renderPatientToolView((p) => renderEntryListPanel(p, 'ueberweisungen'));
+      return;
+    }
+    if (ui.viewMode === 'tool-befundweiterleitung') {
+      renderPatientToolView((p) => renderEntryListPanel(p, 'befundweiterleitung'));
+      return;
+    }
+    if (ui.viewMode === 'tool-terminkarte') {
+      renderPatientToolView(renderTerminkarteToolView);
+      return;
+    }
+    if (ui.viewMode === 'print-ueberweisung') {
+      renderPatientToolView(renderUeberweisungPrintView);
+      return;
+    }
+    if (ui.viewMode === 'print-befund') {
+      renderPatientToolView(renderBefundPrintView);
+      return;
+    }
+    if (ui.viewMode === 'print-terminkarte') {
+      renderPatientToolView(renderTerminkartePrintView);
       return;
     }
 
@@ -1238,6 +1276,14 @@
     (patient.uebergaben || []).forEach((e) => rows.push([
       'Übergabe', e.datum, '', [e.von, e.an].filter(Boolean).join(' → '), e.text || '', ''
     ]));
+    (patient.ueberweisungen || []).forEach((e) => rows.push([
+      'Überweisung', e.datum, '',
+      e.fachrichtung ? `${e.empfaenger} (${e.fachrichtung})` : e.empfaenger || '',
+      `${e.grund || ''}${e.dringlichkeit === 'dringend' ? ' [DRINGEND]' : ''}`, ''
+    ]));
+    (patient.befundweiterleitung || []).forEach((e) => rows.push([
+      'Befund weiterleiten', e.datum, '', `An ${e.empfaenger || ''}: ${e.betreff || ''}`.trim(), e.text || '', ''
+    ]));
     return rows.sort((a, b) => (a[1] || '').localeCompare(b[1] || ''));
   }
 
@@ -1481,7 +1527,9 @@
     abrechnung: { title: 'Abrechnung', addLabel: '+ Leistung' },
     laborwerte: { title: 'Laborwerterfassung', addLabel: '+ Laborwert (strukturiert)' },
     krankenscheine: { title: 'Krankenscheinabgabe', addLabel: '+ Krankenschein' },
-    uebergaben: { title: 'Übergabe Patient', addLabel: '+ Übergabe' }
+    uebergaben: { title: 'Übergabe Patient', addLabel: '+ Übergabe' },
+    ueberweisungen: { title: 'Überweisung', addLabel: '+ Überweisung' },
+    befundweiterleitung: { title: 'Befund weiterleiten', addLabel: '+ Befund weiterleiten' }
   };
 
   function formatEuro(value) {
@@ -1603,6 +1651,18 @@
     text.textContent = entryDisplayText(category, entry);
     li.appendChild(text);
 
+    if (category === 'ueberweisungen' || category === 'befundweiterleitung') {
+      const printBtn = document.createElement('button');
+      printBtn.className = 'btn-glossy btn-secondary btn-small';
+      printBtn.textContent = 'Drucken';
+      printBtn.addEventListener('click', () => {
+        ui.printEntryId = entry.id;
+        ui.viewMode = category === 'ueberweisungen' ? 'print-ueberweisung' : 'print-befund';
+        render();
+      });
+      li.appendChild(printBtn);
+    }
+
     const delBtn = document.createElement('button');
     delBtn.className = 'btn-glossy btn-danger btn-icon';
     delBtn.textContent = '✕';
@@ -1642,6 +1702,14 @@
     if (category === 'uebergaben') {
       const wer = [entry.von, entry.an].filter(Boolean).join(' → ');
       return wer ? `${wer}: ${entry.text}` : entry.text;
+    }
+    if (category === 'ueberweisungen') {
+      const ziel = entry.fachrichtung ? `${entry.empfaenger} (${entry.fachrichtung})` : entry.empfaenger;
+      const dring = entry.dringlichkeit === 'dringend' ? ' — DRINGEND' : '';
+      return `An ${ziel} — ${entry.grund}${dring}`;
+    }
+    if (category === 'befundweiterleitung') {
+      return `An ${entry.empfaenger} — ${entry.betreff}`;
     }
     return entry.text;
   }
@@ -2886,6 +2954,247 @@
     );
   }
 
+  function printDocumentHeader(title, onBack) {
+    const wrap = document.createDocumentFragment();
+
+    const backBtn = document.createElement('button');
+    backBtn.className = 'btn-glossy btn-secondary btn-small no-print';
+    backBtn.textContent = '← Zurück';
+    backBtn.style.marginBottom = '12px';
+    backBtn.addEventListener('click', onBack);
+    wrap.appendChild(backBtn);
+
+    const card = document.createElement('div');
+    card.className = 'panel-card invoice-card';
+
+    const header = document.createElement('div');
+    header.className = 'invoice-header';
+    const praxis = document.createElement('div');
+    praxis.className = 'invoice-praxis';
+    praxis.textContent = 'PatientenWelt Praxis · Musterstraße 1 · 12345 Musterstadt';
+    const printBtn = document.createElement('button');
+    printBtn.className = 'btn-glossy btn-primary btn-small no-print';
+    printBtn.textContent = 'Drucken';
+    printBtn.addEventListener('click', () => window.print());
+    header.append(praxis, printBtn);
+    card.appendChild(header);
+
+    const titleEl = document.createElement('h2');
+    titleEl.textContent = title;
+    card.appendChild(titleEl);
+
+    return { wrap, card };
+  }
+
+  function metaRow(label, value) {
+    const row = document.createElement('div');
+    const strong = document.createElement('span');
+    strong.className = 'invoice-meta-label';
+    strong.textContent = label + ': ';
+    row.appendChild(strong);
+    row.appendChild(document.createTextNode(value));
+    return row;
+  }
+
+  function renderUeberweisungPrintView(patient) {
+    const entry = (patient.ueberweisungen || []).find((e) => e.id === ui.printEntryId);
+    if (!entry) {
+      ui.viewMode = 'tool-ueberweisungen';
+      return renderEntryListPanel(patient, 'ueberweisungen');
+    }
+
+    const { wrap, card } = printDocumentHeader('Überweisungsschein', () => {
+      ui.viewMode = 'tool-ueberweisungen';
+      ui.printEntryId = null;
+      render();
+    });
+
+    const meta = document.createElement('div');
+    meta.className = 'invoice-meta';
+    meta.appendChild(metaRow('Datum', formatDate(entry.datum)));
+    meta.appendChild(metaRow('Patient', `${patient.nachname}, ${patient.vorname}`));
+    meta.appendChild(metaRow('Geburtsdatum', patient.geburtsdatum ? formatDate(patient.geburtsdatum) : '–'));
+    meta.appendChild(metaRow('Krankenkasse', patient.versicherung || '–'));
+    meta.appendChild(metaRow('Überweisung an', entry.fachrichtung ? `${entry.empfaenger} (${entry.fachrichtung})` : entry.empfaenger));
+    meta.appendChild(metaRow('Dringlichkeit', DRINGLICHKEIT_LABEL[entry.dringlichkeit] || DRINGLICHKEIT_LABEL.normal));
+    card.appendChild(meta);
+
+    const grundHeading = document.createElement('h3');
+    grundHeading.textContent = 'Grund / Verdachtsdiagnose';
+    card.appendChild(grundHeading);
+    const grundText = document.createElement('p');
+    grundText.style.whiteSpace = 'pre-wrap';
+    grundText.textContent = entry.grund;
+    card.appendChild(grundText);
+
+    const footer = document.createElement('p');
+    footer.className = 'invoice-footer-note';
+    footer.textContent = 'Unterschrift / Praxisstempel: ________________________________';
+    card.appendChild(footer);
+
+    wrap.appendChild(card);
+    logAction('Überweisung gedruckt', `${patient.nachname}, ${patient.vorname} — an ${entry.empfaenger}`);
+    return wrap;
+  }
+
+  function renderBefundPrintView(patient) {
+    const entry = (patient.befundweiterleitung || []).find((e) => e.id === ui.printEntryId);
+    if (!entry) {
+      ui.viewMode = 'tool-befundweiterleitung';
+      return renderEntryListPanel(patient, 'befundweiterleitung');
+    }
+
+    const { wrap, card } = printDocumentHeader('Befundmitteilung', () => {
+      ui.viewMode = 'tool-befundweiterleitung';
+      ui.printEntryId = null;
+      render();
+    });
+
+    const meta = document.createElement('div');
+    meta.className = 'invoice-meta';
+    meta.appendChild(metaRow('Datum', formatDate(entry.datum)));
+    meta.appendChild(metaRow('Patient', `${patient.nachname}, ${patient.vorname}`));
+    meta.appendChild(metaRow('Geburtsdatum', patient.geburtsdatum ? formatDate(patient.geburtsdatum) : '–'));
+    meta.appendChild(metaRow('An', entry.empfaenger));
+    meta.appendChild(metaRow('Betreff', entry.betreff || '–'));
+    card.appendChild(meta);
+
+    const textHeading = document.createElement('h3');
+    textHeading.textContent = 'Befund';
+    card.appendChild(textHeading);
+    const befundText = document.createElement('p');
+    befundText.style.whiteSpace = 'pre-wrap';
+    befundText.textContent = entry.text;
+    card.appendChild(befundText);
+
+    const footer = document.createElement('p');
+    footer.className = 'invoice-footer-note';
+    footer.textContent = 'Unterschrift / Praxisstempel: ________________________________';
+    card.appendChild(footer);
+
+    wrap.appendChild(card);
+    logAction('Befund weitergeleitet (gedruckt)', `${patient.nachname}, ${patient.vorname} — an ${entry.empfaenger}`);
+    return wrap;
+  }
+
+  function upcomingTermine(patient) {
+    const today = todayISO();
+    return (patient.termine || [])
+      .filter((t) => t.datum && t.datum >= today)
+      .sort((a, b) => (a.datum + (a.uhrzeit || '')).localeCompare(b.datum + (b.uhrzeit || '')));
+  }
+
+  function renderTerminkarteToolView(patient) {
+    const wrap = document.createDocumentFragment();
+    const card = document.createElement('div');
+    card.className = 'panel-card';
+    const heading = document.createElement('h2');
+    heading.textContent = 'Nächster Termin';
+    card.appendChild(heading);
+
+    const hint = document.createElement('p');
+    hint.className = 'entry-empty';
+    hint.textContent = 'Nächsten Arzttermin eintragen und als Terminkarte für den Patienten ausdrucken.';
+    card.appendChild(hint);
+
+    const formGrid = document.createElement('div');
+    formGrid.className = 'form-grid';
+    const datumLabel = fieldLabel('Datum', 'tkDatum', 'date');
+    const datumInput = datumLabel.querySelector('input');
+    datumInput.value = todayISO();
+    const uhrzeitLabel = fieldLabel('Uhrzeit', 'tkUhrzeit', 'time');
+    const uhrzeitInput = uhrzeitLabel.querySelector('input');
+    const grundLabel = fieldLabel('Grund', 'tkGrund', 'text');
+    const grundInput = grundLabel.querySelector('input');
+    formGrid.append(datumLabel, uhrzeitLabel, grundLabel);
+    card.appendChild(formGrid);
+
+    const addBtn = document.createElement('button');
+    addBtn.className = 'btn-glossy btn-primary btn-small';
+    addBtn.textContent = '+ Termin eintragen';
+    addBtn.addEventListener('click', () => {
+      const grund = grundInput.value.trim();
+      if (!grund || !datumInput.value) return;
+      if (!patient.termine) patient.termine = [];
+      patient.termine.push({ id: uid(), datum: datumInput.value, uhrzeit: uhrzeitInput.value, grund });
+      logAction('Termin eingetragen', `${patient.nachname}, ${patient.vorname} — ${grund}`);
+      persist();
+      render();
+    });
+    card.appendChild(addBtn);
+    wrap.appendChild(card);
+
+    const listCard = document.createElement('div');
+    listCard.className = 'panel-card';
+    const upcoming = upcomingTermine(patient);
+    if (upcoming.length === 0) {
+      const p = document.createElement('p');
+      p.className = 'entry-empty';
+      p.textContent = 'Kein bevorstehender Termin eingetragen.';
+      listCard.appendChild(p);
+    } else {
+      const list = document.createElement('ul');
+      list.className = 'entry-list';
+      upcoming.forEach((t) => {
+        const li = document.createElement('li');
+        li.className = 'entry-row';
+        const date = document.createElement('div');
+        date.className = 'entry-date';
+        date.textContent = formatDate(t.datum) + (t.uhrzeit ? ` ${t.uhrzeit}` : '');
+        li.appendChild(date);
+        const text = document.createElement('div');
+        text.className = 'entry-text';
+        text.textContent = t.grund;
+        li.appendChild(text);
+        const printBtn = document.createElement('button');
+        printBtn.className = 'btn-glossy btn-primary btn-small';
+        printBtn.textContent = 'Terminkarte drucken';
+        printBtn.addEventListener('click', () => {
+          ui.printEntryId = t.id;
+          ui.viewMode = 'print-terminkarte';
+          render();
+        });
+        li.appendChild(printBtn);
+        list.appendChild(li);
+      });
+      listCard.appendChild(list);
+    }
+    wrap.appendChild(listCard);
+
+    return wrap;
+  }
+
+  function renderTerminkartePrintView(patient) {
+    const entry = (patient.termine || []).find((t) => t.id === ui.printEntryId);
+    if (!entry) {
+      ui.viewMode = 'tool-terminkarte';
+      return renderTerminkarteToolView(patient);
+    }
+
+    const { wrap, card } = printDocumentHeader('Terminkarte', () => {
+      ui.viewMode = 'tool-terminkarte';
+      ui.printEntryId = null;
+      render();
+    });
+
+    const meta = document.createElement('div');
+    meta.className = 'invoice-meta';
+    meta.appendChild(metaRow('Patient', `${patient.nachname}, ${patient.vorname}`));
+    const weekday = WOCHENTAGE_LANG[new Date(entry.datum).getDay()] || '';
+    meta.appendChild(metaRow('Nächster Termin', `${weekday}, ${formatDate(entry.datum)}${entry.uhrzeit ? ' um ' + entry.uhrzeit + ' Uhr' : ''}`));
+    meta.appendChild(metaRow('Grund', entry.grund || '–'));
+    card.appendChild(meta);
+
+    const note = document.createElement('p');
+    note.className = 'invoice-footer-note';
+    note.textContent = 'Bitte bringen Sie diese Terminkarte zum nächsten Besuch mit und erscheinen Sie pünktlich.';
+    card.appendChild(note);
+
+    wrap.appendChild(card);
+    logAction('Terminkarte gedruckt', `${patient.nachname}, ${patient.vorname} — ${formatDate(entry.datum)}`);
+    return wrap;
+  }
+
   function renderPatientToolView(renderFn) {
     const patient = getPatient(ui.selectedPatientId);
     if (!patient) {
@@ -3102,6 +3411,43 @@
       el.entryFormFields.appendChild(fieldLabel('Von', 'entryVon', 'text'));
       el.entryFormFields.appendChild(fieldLabel('An', 'entryAn', 'text'));
       el.entryFormFields.appendChild(textAreaField('Text', 'entryText'));
+    } else if (category === 'ueberweisungen') {
+      el.entryFormFields.appendChild(fieldLabel('Empfänger (Facharzt/Einrichtung)', 'entryEmpfaenger', 'text'));
+      el.entryFormFields.appendChild(fieldLabel('Fachrichtung', 'entryFachrichtung', 'text'));
+      const dringLabel = selectField('Dringlichkeit', 'entryDringlichkeit', Object.entries(DRINGLICHKEIT_LABEL).map(([v, l]) => [v, l]));
+      el.entryFormFields.appendChild(dringLabel);
+      el.entryFormFields.appendChild(textAreaField('Grund / Verdachtsdiagnose', 'entryGrund'));
+    } else if (category === 'befundweiterleitung') {
+      el.entryFormFields.appendChild(fieldLabel('Empfänger (Arzt/Praxis)', 'entryEmpfaenger', 'text'));
+      el.entryFormFields.appendChild(fieldLabel('Betreff', 'entryBetreff', 'text'));
+
+      const patient = getPatient(ui.selectedPatientId);
+      const vorlagen = [];
+      (patient && patient.journal ? patient.journal : []).forEach((e) => {
+        vorlagen.push({ label: `Verlauf ${formatDate(e.datum)} (${e.typ || ''}): ${e.text}`.slice(0, 90), text: e.text });
+      });
+      (patient && patient.laborwerte ? patient.laborwerte : []).forEach((e) => {
+        const t = `${e.parameter}: ${e.wert || ''} ${e.einheit || ''}`.trim();
+        vorlagen.push({ label: `Laborwert ${formatDate(e.datum)}: ${t}`.slice(0, 90), text: t });
+      });
+      if (vorlagen.length > 0) {
+        const vorlageLabel = selectField(
+          'Text übernehmen aus (optional)',
+          'entryVorlage',
+          [['', '– frei eingeben –'], ...vorlagen.map((v, i) => [String(i), v.label])]
+        );
+        const vorlageSelect = vorlageLabel.querySelector('select');
+        el.entryFormFields.appendChild(vorlageLabel);
+        const befundLabel = textAreaField('Befundtext', 'entryText');
+        const befundArea = befundLabel.querySelector('textarea');
+        el.entryFormFields.appendChild(befundLabel);
+        vorlageSelect.addEventListener('change', () => {
+          if (vorlageSelect.value === '') return;
+          befundArea.value = vorlagen[Number(vorlageSelect.value)].text;
+        });
+      } else {
+        el.entryFormFields.appendChild(textAreaField('Befundtext', 'entryText'));
+      }
     }
 
     el.entryFormModal.classList.add('open');
@@ -3221,6 +3567,21 @@
       if (!text) return;
       entry.von = byId('entryVon').value.trim();
       entry.an = byId('entryAn').value.trim();
+      entry.text = text;
+    } else if (category === 'ueberweisungen') {
+      const empfaenger = byId('entryEmpfaenger').value.trim();
+      const grund = byId('entryGrund').value.trim();
+      if (!empfaenger || !grund) return;
+      entry.empfaenger = empfaenger;
+      entry.fachrichtung = byId('entryFachrichtung').value.trim();
+      entry.dringlichkeit = byId('entryDringlichkeit').value;
+      entry.grund = grund;
+    } else if (category === 'befundweiterleitung') {
+      const empfaenger = byId('entryEmpfaenger').value.trim();
+      const text = byId('entryText').value.trim();
+      if (!empfaenger || !text) return;
+      entry.empfaenger = empfaenger;
+      entry.betreff = byId('entryBetreff').value.trim();
       entry.text = text;
     }
 
