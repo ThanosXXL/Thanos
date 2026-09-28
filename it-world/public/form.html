@@ -1,0 +1,40 @@
+<!doctype html>
+<html lang="de" data-theme="dark">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Kontakt &amp; Anfrage · IT - World</title>
+  <meta name="theme-color" content="#07070a">
+  <link rel="icon" type="image/png" href="/img/favicon.png">
+  <link rel="stylesheet" href="/css/app.css">
+  <link rel="stylesheet" href="/css/form.css">
+  <script type="module" src="/js/form.js"></script>
+</head>
+<body class="public-form">
+  <main class="pf">
+    <header class="pf-head">
+      <div id="pf-logo"></div>
+      <h1 id="pf-firma">Anfrage senden</h1>
+      <p class="muted" id="pf-zusatz"></p>
+    </header>
+    <form class="card form-grid" id="pf-form" novalidate>
+      <label class="field"><span class="label">Name <b class="req">*</b></span><input name="name" required autocomplete="name" maxlength="120"></label>
+      <label class="field"><span class="label">Firma</span><input name="firma" autocomplete="organization" maxlength="200"></label>
+      <label class="field"><span class="label">E-Mail <b class="req">*</b></span><input name="email" type="email" required autocomplete="email"></label>
+      <label class="field"><span class="label">Telefon</span><input name="telefon" type="tel" autocomplete="tel"></label>
+      <label class="field full"><span class="label">Ich interessiere mich für</span>
+        <select name="interesse">
+          <option>Beratung</option><option>Webentwicklung</option><option>IT-Support</option>
+          <option>Cloud &amp; Hosting</option><option>Software-Lizenzen</option><option>Sonstiges</option>
+        </select>
+      </label>
+      <label class="field full"><span class="label">Ihre Nachricht</span><textarea name="nachricht" rows="6" maxlength="5000"></textarea></label>
+      <label class="hp" aria-hidden="true">Website<input name="website2" tabindex="-1" autocomplete="off"></label>
+      <label class="check full"><input type="checkbox" name="einwilligung" required><span>Ich bin einverstanden, dass meine Angaben zur Bearbeitung meiner Anfrage gespeichert und verarbeitet werden. <b class="req">*</b></span></label>
+      <div class="full form-actions"><button class="btn btn-primary btn-block" type="submit">Anfrage absenden</button></div>
+      <div class="full" id="pf-msg" role="status" aria-live="polite"></div>
+    </form>
+    <footer class="pf-foot"><div id="pf-social"></div><small class="muted">Powered by IT - World</small></footer>
+  </main>
+</body>
+</html>

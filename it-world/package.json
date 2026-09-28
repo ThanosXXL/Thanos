@@ -1,0 +1,16 @@
+{
+  "name": "it-world",
+  "version": "1.0.0",
+  "description": "IT - World – maßgeschneiderte SaaS ERP/CRM Business-Plattform mit Admin-Dashboard",
+  "main": "server.js",
+  "private": true,
+  "license": "MIT",
+  "engines": {
+    "node": ">=22.5"
+  },
+  "scripts": {
+    "start": "node --disable-warning=ExperimentalWarning server.js",
+    "dev": "node --disable-warning=ExperimentalWarning --watch server.js",
+    "test": "node --disable-warning=ExperimentalWarning --test test/*.test.js"
+  }
+}

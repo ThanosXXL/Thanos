@@ -1,0 +1,27 @@
+name: IT-World CI
+
+on:
+  push:
+    paths:
+      - "it-world/**"
+      - ".github/workflows/it-world-ci.yml"
+  pull_request:
+    paths:
+      - "it-world/**"
+      - ".github/workflows/it-world-ci.yml"
+  workflow_dispatch:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: it-world
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - run: npm test
+      - name: Docker-Image bauen
+        run: docker build -t it-world:ci .

@@ -1,0 +1,10 @@
+/* Öffentliches Anfrageformular */
+body.public-form { min-height: 100vh; }
+.pf { max-width: 720px; margin: 0 auto; padding: 28px 16px 40px; display: flex; flex-direction: column; gap: 20px; }
+.pf-head { text-align: center; display: flex; flex-direction: column; align-items: center; gap: 6px; }
+.pf-head h1 { font-size: 1.8rem; font-weight: 850; background: var(--gold-grad); -webkit-background-clip: text; background-clip: text; color: transparent; }
+#pf-logo .logo3d { width: min(220px, 60vw); }
+.hp { position: absolute; left: -9999px; width: 1px; height: 1px; overflow: hidden; }
+.pf-foot { display: flex; flex-direction: column; align-items: center; gap: 10px; }
+.pf-ok { display: flex; flex-direction: column; align-items: center; gap: 10px; text-align: center; padding: 20px; }
+.pf-ok b { font-size: 1.2rem; }

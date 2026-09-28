@@ -1,0 +1,26 @@
+services:
+  it-world:
+    build: .
+    container_name: it-world
+    restart: unless-stopped
+    ports:
+      - "3000:3000"
+    volumes:
+      - it-world-data:/data
+    environment:
+      # Beim ersten Start angelegter Administrator (ohne ADMIN_PASSWORD: admin1234 mit Änderungszwang)
+      - ADMIN_EMAIL=admin@it-world.de
+      # - ADMIN_PASSWORD=BitteSicheresPasswort123
+      - SEED_DEMO=true
+      - ALLOW_REGISTRATION=true
+      # Hinter einem HTTPS-Reverse-Proxy (nginx, Caddy, Traefik):
+      # - TRUST_PROXY=true
+      # - COOKIE_SECURE=true
+      # E-Mail-Versand (Autoresponder, Rechnungen per E-Mail):
+      # - SMTP_HOST=smtp.example.com
+      # - SMTP_PORT=587
+      # - SMTP_USER=noreply@example.com
+      # - SMTP_PASS=geheim
+      # - SMTP_FROM=IT - World <noreply@example.com>
+volumes:
+  it-world-data:
