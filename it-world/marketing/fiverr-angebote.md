@@ -93,3 +93,23 @@ Ja, in allen Paketen – komplett und ohne Lizenzgebühren.
 
 **Hilfst du bei der Installation?**
 Jedes Paket enthält eine Schritt-für-Schritt-Anleitung. Im Premium-Paket richte ich das Dashboard mit dir gemeinsam im Übergabe-Call ein.
+
+## Premium: 30-Minuten-Übergabe-Call
+
+**Kurztext für Fiverr (Extra/Paketbeschreibung):**
+> Nach der Lieferung zeige ich dir in einem 30-minütigen Video-Call dein Dashboard live, richte es gemeinsam mit dir ein und beantworte deine Fragen.
+
+**Ablauf (30 Minuten):**
+
+| Zeit | Inhalt |
+|---|---|
+| 0–5 Min. | Begrüßung, kurzer Überblick über die gelieferten Dateien |
+| 5–15 Min. | Installation/Start gemeinsam (`npm start` oder Docker), erster Admin-Login, Passwort ändern |
+| 15–25 Min. | Rundgang durch alle 8 Seiten: Benutzer anlegen, Rollen, Tickets, Incidents, Deployments, Audit-Log, Einstellungen |
+| 25–30 Min. | Fragen, Hinweise zu Updates und Revisionswünschen |
+
+**Rahmen:**
+- Termin wird nach der Lieferung über den Fiverr-Chat vereinbart; der Call läuft über Fiverr (Zoom-Integration), damit er abgesichert und dokumentiert ist.
+- Kunde teilt dabei seinen Bildschirm, damit die Einrichtung direkt auf seinem Rechner/Server passiert – es werden keine Passwörter weitergegeben.
+- Nicht enthalten: Programmierung neuer Funktionen während des Calls (dafür gibt es die Revisionen) und Server-Einrichtung beim Hoster.
+- Gültig bis 14 Tage nach Lieferung.
