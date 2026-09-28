@@ -9,7 +9,7 @@
 | | **Basic** | **Standard** | **Premium** |
 |---|---|---|---|
 | **Paketname** | 🧩 Starter Ops Tool | ⭐ Business Dashboard | ✨ Enterprise Ops Suite |
-| **Kurzbeschreibung** (max. 100 Zeichen) | Login + Übersichts-Dashboard mit KPIs und Diagramm – schnell einsatzbereit | 4 Seiten inkl. Monitoring, Tickets und Rollen – im Design deiner Marke | Komplettes 8-Seiten-Dashboard mit Rollen, Audit-Log, Docker und Übergabe-Call |
+| **Kurzbeschreibung** (max. 100 Zeichen) | Login + Übersichts-Dashboard mit KPIs und Diagramm – schnell einsatzbereit | 4 Seiten inkl. Monitoring, Tickets und Rollen – im Design deiner Marke | Komplettes 8-Seiten-Dashboard mit Rollen, Audit-Log, Docker und Video-Anleitung |
 | **Seiten** | 2 | 4 | 8 |
 | **Lieferzeit** | 7 Tage | 14 Tage | 21 Tage |
 | **Revisionen** | 1 | 2 | 2 |
@@ -52,7 +52,7 @@ Alles aus Standard, plus:
 - Wartungsmodus, Sicherheits-Einstellungen, Health-Check
 - Docker + docker-compose für den Server-Betrieb
 - Content Upload: Einrichtung mit deinen Services, Benutzern und Startdaten
-- 30-Minuten-Übergabe per Video-Call
+- Video-Anleitung (ca. 7 Minuten, mit Kapiteln): Installation, alle 8 Seiten, Tipps für den Betrieb
 
 ## Gig-Beschreibung
 
@@ -92,24 +92,18 @@ Eine Revision ist eine gesammelte Liste von Änderungswünschen am gelieferten S
 Ja, in allen Paketen – komplett und ohne Lizenzgebühren.
 
 **Hilfst du bei der Installation?**
-Jedes Paket enthält eine Schritt-für-Schritt-Anleitung. Im Premium-Paket richte ich das Dashboard mit dir gemeinsam im Übergabe-Call ein.
+Jedes Paket enthält eine Schritt-für-Schritt-Anleitung. Im Premium-Paket bekommst du zusätzlich ein Anleitungsvideo, das Installation und alle 8 Seiten zeigt.
 
-## Premium: 30-Minuten-Übergabe-Call
+## Premium: Video-Anleitung
 
-**Kurztext für Fiverr (Extra/Paketbeschreibung):**
-> Nach der Lieferung zeige ich dir in einem 30-minütigen Video-Call dein Dashboard live, richte es gemeinsam mit dir ein und beantworte deine Fragen.
+**Kurztext für Fiverr (Paketbeschreibung):**
+> Du bekommst ein Anleitungsvideo (ca. 7 Minuten, mit Kapiteln), das Installation, alle 8 Seiten und den sicheren Betrieb Schritt für Schritt zeigt – jederzeit zum Nachschauen.
 
-**Ablauf (30 Minuten):**
+**Datei:** `marketing/output/it-world-anleitung.mp4` (1280×720, H.264, ohne Ton, mit deutschen Untertiteln)
+**Kapitel:** `marketing/output/it-world-anleitung-kapitel.txt` – in die Lieferungsnachricht kopieren, damit der Kunde direkt springen kann.
 
-| Zeit | Inhalt |
-|---|---|
-| 0–5 Min. | Begrüßung, kurzer Überblick über die gelieferten Dateien |
-| 5–15 Min. | Installation/Start gemeinsam (`npm start` oder Docker), erster Admin-Login, Passwort ändern |
-| 15–25 Min. | Rundgang durch alle 8 Seiten: Benutzer anlegen, Rollen, Tickets, Incidents, Deployments, Audit-Log, Einstellungen |
-| 25–30 Min. | Fragen, Hinweise zu Updates und Revisionswünschen |
+**Lieferung an den Kunden:** Video zusammen mit dem Quellcode als Datei in der Fiverr-Lieferung hochladen (oder als nicht gelisteten YouTube-Link in der Lieferungsnachricht).
 
-**Rahmen:**
-- Termin wird nach der Lieferung über den Fiverr-Chat vereinbart; der Call läuft über Fiverr (Zoom-Integration), damit er abgesichert und dokumentiert ist.
-- Kunde teilt dabei seinen Bildschirm, damit die Einrichtung direkt auf seinem Rechner/Server passiert – es werden keine Passwörter weitergegeben.
-- Nicht enthalten: Programmierung neuer Funktionen während des Calls (dafür gibt es die Revisionen) und Server-Einrichtung beim Hoster.
-- Gültig bis 14 Tage nach Lieferung.
+**Neu aufnehmen** (z. B. nach Änderungen am Design): `npm run record:tutorial` – siehe README.
+
+**Vorteile gegenüber einem Call:** kein Termin nötig, der Kunde kann es beliebig oft ansehen und im Team weitergeben, und du nimmst es nur einmal auf.

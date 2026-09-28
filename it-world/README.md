@@ -57,6 +57,7 @@ Im Produktionsmodus gibt es **keine Demo-Konten**: Es wird genau ein Administrat
 | `ADMIN_EMAIL` / `ADMIN_PASSWORD` | `admin@it-world.local` / zufällig | Erster Administrator (nur ohne Demo-Modus) |
 | `COOKIE_SECURE` | `true` in Produktion | Cookie nur über HTTPS (`__Host-`-Präfix) |
 | `TRUST_PROXY` | – | `true` hinter nginx/Traefik, damit IPs im Audit-Log stimmen |
+| `DEPLOY_FAILURE_RATE` | `0.1` | Anteil fehlschlagender Deployments in der Pipeline-Simulation (0–1) |
 
 `GET /healthz` liefert den Status für Load-Balancer, Docker und Kubernetes.
 
@@ -99,8 +100,10 @@ Fertig in `marketing/output/`:
 - `fiverr-gallery-features.png` – „8 Seiten“ mit Screenshots
 - `fiverr-gallery-security.png` – Sicherheits-Features + Handy-Ansicht
 - `it-world-logo.png` – 3D-Goldglobus mit Schriftzug „IT - WORLD“ (1024×1024, @2x)
+- `it-world-anleitung.mp4` – Anleitungsvideo (ca. 7 Min., 1280×720, deutsche Untertitel, sichtbarer Mauszeiger) + `it-world-anleitung-kapitel.txt` mit Zeitmarken
 
 Neu erzeugen: `npm i -D playwright && npx playwright install chromium && npm run gen:marketing`.
+Anleitungsvideo neu aufnehmen (braucht zusätzlich ffmpeg im PATH oder `FFMPEG_PATH`): `npm run record:tutorial`.
 Logo/Globus neu erzeugen: `npm run gen:globe`.
 
 ## Lizenzen

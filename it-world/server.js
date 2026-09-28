@@ -18,6 +18,8 @@ const DEMO = process.env.DEMO_MODE ? process.env.DEMO_MODE === 'true' : !IS_PROD
 const COOKIE_SECURE = process.env.COOKIE_SECURE ? process.env.COOKIE_SECURE === 'true' : IS_PROD;
 const COOKIE_NAME = COOKIE_SECURE ? '__Host-itw_session' : 'itw_session';
 const TRUST_PROXY = process.env.TRUST_PROXY || false;
+// Anteil fehlschlagender Deployments in der Pipeline-Simulation (0 … 1)
+const DEPLOY_FAILURE_RATE = Math.min(1, Math.max(0, Number(process.env.DEPLOY_FAILURE_RATE ?? 0.1) || 0));
 
 // ---------- Daten laden ----------
 const store = new Store(DATA_FILE);
@@ -433,7 +435,7 @@ app.post('/api/deployments', requireRole('ops'), wrap((req, res) => {
   setTimeout(() => {
     if (d.status !== 'läuft') return;
     d.duration = Math.round((Date.now() - started) / 1000) + 60 + Math.round(Math.random() * 180);
-    d.status = Math.random() < 0.9 ? 'erfolgreich' : 'fehlgeschlagen';
+    d.status = Math.random() >= DEPLOY_FAILURE_RATE ? 'erfolgreich' : 'fehlgeschlagen';
     const svc = db.services.find(x => x.id === d.serviceId);
     if (d.status === 'erfolgreich' && d.environment === 'production' && svc) svc.version = d.version;
     db.audit.unshift({ id: uid('a_'), time: new Date().toISOString(), userId: null, userName: 'CI/CD', action: `deployment.${d.status === 'erfolgreich' ? 'succeeded' : 'failed'}`,

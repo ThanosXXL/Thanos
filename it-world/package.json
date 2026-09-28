@@ -11,7 +11,8 @@
     "dev": "NODE_ENV=development node --watch server.js",
     "reset-data": "node tools/reset-data.js",
     "gen:globe": "node tools/gen-globe.mjs",
-    "gen:marketing": "node tools/render-marketing.mjs"
+    "gen:marketing": "node tools/render-marketing.mjs",
+    "record:tutorial": "node tools/record-tutorial.mjs"
   },
   "dependencies": {
     "express": "^5.1.0"

@@ -1,0 +1,18 @@
+IT - World · Anleitungsvideo – Kapitel
+
+00:00 Einführung
+00:07 Installation & Start
+00:25 Anmeldung
+00:47 Passwort ändern
+01:15 Übersicht
+01:45 Monitoring
+02:24 Incidents
+03:13 Tickets
+04:12 Deployments
+04:50 Benutzer & Rollen
+05:35 Audit-Log
+05:49 Einstellungen
+06:11 Auf dem Handy
+06:27 Abmelden
+06:39 Tipps für den Betrieb
+06:50 Abschluss

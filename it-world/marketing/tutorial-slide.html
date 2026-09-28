@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="de"><head><meta charset="UTF-8"><title>IT - World · Anleitung</title>
+<link rel="stylesheet" href="marketing.css">
+<style>
+  /* Titel-/Kapitelfolien für das Anleitungsvideo (1280×720) */
+  body { width: 1280px; height: 720px; }
+  #globe { position: absolute; right: -40px; top: 90px; width: 560px; height: 560px; }
+  .wrap { position: absolute; left: 80px; top: 0; bottom: 0; width: 720px; display: flex; flex-direction: column; justify-content: center; }
+  .brand { font-size: 26px; font-weight: 900; letter-spacing: .08em; margin-bottom: 26px; }
+  .kicker { font-size: 18px; letter-spacing: .3em; text-transform: uppercase; color: #d9cfb8; font-weight: 600; margin-bottom: 12px; }
+  h1 { font-size: 62px; line-height: 1.08; font-weight: 800; }
+  .lines { margin-top: 28px; list-style: none; padding: 0; display: grid; gap: 12px; font-size: 22px; font-weight: 600; color: #efe7d6; }
+  .lines li::before { content: '✔'; color: #f3cf6b; margin-right: 12px; }
+  .code { margin-top: 28px; background: rgba(12,11,9,.92); border: 1px solid rgba(212,165,58,.45); border-radius: 14px; padding: 18px 22px;
+    font-family: 'DejaVu Sans Mono', ui-monospace, monospace; font-size: 20px; line-height: 1.7; color: #f6f2ea; box-shadow: 0 20px 50px rgba(0,0,0,.6); }
+  .code .c { color: #8a8374; }
+  .code .p { color: #f3cf6b; }
+</style></head>
+<body>
+  <canvas class="waves"></canvas>
+  <canvas id="globe"></canvas>
+  <div class="wrap">
+    <div class="brand gold">IT - WORLD</div>
+    <div class="kicker" id="kicker"></div>
+    <h1 id="title"></h1>
+    <ul class="lines" id="lines"></ul>
+    <div class="code" id="code" hidden></div>
+  </div>
+  <script src="waves.js"></script>
+  <script src="../public/globe.js"></script>
+  <script>
+    window.ITWGlobe.mount(document.getElementById('globe'), { speed: 10, scale: 0.34 });
+    // Wird vom Aufnahme-Skript aufgerufen: setSlide({ kicker, title, lines: [], code: ['# Kommentar', '$ befehl'] })
+    window.setSlide = function (s) {
+      document.getElementById('kicker').textContent = s.kicker || '';
+      const t = document.getElementById('title'); t.textContent = '';
+      (s.title || '').split('\n').forEach((part, i) => { if (i) t.append(document.createElement('br')); t.append(part); });
+      const ul = document.getElementById('lines'); ul.textContent = '';
+      for (const l of s.lines || []) { const li = document.createElement('li'); li.textContent = l; ul.append(li); }
+      const code = document.getElementById('code'); code.textContent = ''; code.hidden = !s.code;
+      for (const l of s.code || []) {
+        const div = document.createElement('div');
+        if (l.startsWith('#')) { div.className = 'c'; div.textContent = l; }
+        else { const p = document.createElement('span'); p.className = 'p'; p.textContent = '$ '; div.append(p, l); }
+        code.append(div);
+      }
+    };
+  </script>
+</body></html>
