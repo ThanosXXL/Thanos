@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html lang="de"><head><meta charset="UTF-8"><title>IT - World · Funktionen</title>
+<link rel="stylesheet" href="marketing.css">
+<style>
+  body { width: 1280px; height: 769px; }
+  h2 { position: absolute; left: 60px; top: 42px; font-size: 44px; font-weight: 800; }
+  .logo { position: absolute; right: 50px; top: 26px; display: flex; align-items: center; gap: 10px; font-size: 26px; font-weight: 900; letter-spacing: .05em; }
+  .logo img { width: 70px; }
+  .tile { position: absolute; width: 560px; }
+  .tile .screen { position: relative; height: 270px; }
+  .tile .screen img { object-fit: cover; object-position: top left; height: 100%; }
+  .tile .cap { margin-top: 10px; font-size: 20px; font-weight: 700; color: #f3cf6b; }
+  .tile .cap span { color: #d9cfb8; font-weight: 500; font-size: 16px; margin-left: 8px; }
+</style></head>
+<body>
+  <canvas class="waves"></canvas>
+  <h2>8 Seiten · <span class="gold">alles an einem Ort</span></h2>
+  <div class="logo"><img src="../public/assets/logo.svg" alt=""><span class="gold">IT - WORLD</span></div>
+  <div class="tile" style="left:60px;top:120px"><div class="screen"><img src="screens/monitoring.png" alt=""></div><div class="cap">Live-Monitoring<span>CPU · RAM · Latenz · Fehlerrate</span></div></div>
+  <div class="tile" style="left:660px;top:120px"><div class="screen"><img src="screens/tickets.png" alt=""></div><div class="cap">Tickets &amp; Service Desk<span>Suche · Filter · CSV-Export</span></div></div>
+  <div class="tile" style="left:60px;top:440px"><div class="screen"><img src="screens/deployments.png" alt=""></div><div class="cap">Deployments<span>Pipeline · Rollback</span></div></div>
+  <div class="tile" style="left:660px;top:440px"><div class="screen"><img src="screens/users.png" alt=""></div><div class="cap">Benutzer &amp; Rollen<span>RBAC · Audit-Log</span></div></div>
+  <script src="waves.js"></script>
+</body></html>

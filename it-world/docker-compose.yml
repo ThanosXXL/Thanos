@@ -1,0 +1,15 @@
+services:
+  it-world:
+    build: .
+    ports:
+      - "8080:8080"
+    environment:
+      ADMIN_EMAIL: admin@it-world.local
+      # ADMIN_PASSWORD: bitte-sicher-setzen-123   # sonst wird beim ersten Start eins erzeugt (siehe Logs)
+      COOKIE_SECURE: "false"                       # auf "true" setzen, sobald HTTPS davor läuft
+      # TRUST_PROXY: "true"                        # hinter Reverse-Proxy (nginx, Traefik)
+    volumes:
+      - it-world-data:/data
+    restart: unless-stopped
+volumes:
+  it-world-data:

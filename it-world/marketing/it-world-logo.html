@@ -1,0 +1,16 @@
+<!DOCTYPE html>
+<html lang="de"><head><meta charset="UTF-8"><title>IT - World · Logo</title>
+<link rel="stylesheet" href="marketing.css">
+<style>
+  body { width: 1024px; height: 1024px; background: radial-gradient(600px 500px at 50% 40%, #1c1408, #030303 70%); }
+  #globe { position: absolute; left: 112px; top: 30px; width: 800px; height: 800px; }
+  .name { position: absolute; left: 0; right: 0; top: 740px; text-align: center; font-size: 132px; font-weight: 900; letter-spacing: .05em; }
+  .sub { position: absolute; left: 0; right: 0; top: 915px; text-align: center; font-size: 26px; font-weight: 600; letter-spacing: .5em; color: #d9cfb8; }
+</style></head>
+<body>
+  <canvas id="globe"></canvas>
+  <div class="name gold gold3d">IT - WORLD</div>
+  <div class="sub">IT SOLUTIONS</div>
+  <script src="../public/globe.js"></script>
+  <script>window.ITWGlobe.mount(document.getElementById('globe'), { speed: 0.0001, scale: 0.34 });</script>
+</body></html>

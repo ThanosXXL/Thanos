@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Anmelden · IT - World</title>
+  <link rel="icon" href="/assets/favicon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="/style.css">
+</head>
+<body>
+  <main class="login-page">
+    <section class="login-hero" aria-label="IT - World">
+      <canvas id="globe" aria-hidden="true"></canvas>
+      <div class="brand-title gold-text">IT - WORLD</div>
+      <div class="brand-sub">Internal Admin &amp; Ops Dashboard</div>
+      <div class="brand-tags">Production Ready · Secure · Scalable</div>
+    </section>
+    <section class="login-panel">
+      <form class="login-card" id="loginForm" novalidate>
+        <h1>Willkommen zurück</h1>
+        <p class="lead">Melde dich mit deinem Firmenkonto an.</p>
+        <div class="form-error hidden" id="loginError" role="alert"></div>
+        <div class="field">
+          <label for="email">E-Mail</label>
+          <input class="input" id="email" name="email" type="email" autocomplete="username" required>
+        </div>
+        <div class="field">
+          <label for="password">Passwort</label>
+          <input class="input" id="password" name="password" type="password" autocomplete="current-password" required>
+        </div>
+        <button class="btn btn-primary" type="submit" id="loginBtn">Anmelden</button>
+        <div class="demo-box hidden" id="demoBox">
+          <h2>Demo-Zugänge</h2>
+          <div class="demo-list" id="demoList"></div>
+        </div>
+      </form>
+    </section>
+  </main>
+  <script src="/globe.js"></script>
+  <script src="/login.js"></script>
+</body>
+</html>

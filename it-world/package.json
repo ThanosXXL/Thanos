@@ -1,0 +1,24 @@
+{
+  "name": "it-world-admin",
+  "version": "1.0.0",
+  "private": true,
+  "description": "IT - World: Internal Admin & Ops Dashboard (Monitoring, Incidents, Tickets, Deployments, Benutzer, Audit-Log)",
+  "main": "server.js",
+  "license": "MIT",
+  "engines": { "node": ">=18" },
+  "scripts": {
+    "start": "node server.js",
+    "dev": "NODE_ENV=development node --watch server.js",
+    "reset-data": "node tools/reset-data.js",
+    "gen:globe": "node tools/gen-globe.mjs",
+    "gen:marketing": "node tools/render-marketing.mjs"
+  },
+  "dependencies": {
+    "express": "^5.1.0"
+  },
+  "devDependencies": {
+    "d3-geo": "^3.1.1",
+    "topojson-client": "^3.1.0",
+    "world-atlas": "^2.0.2"
+  }
+}

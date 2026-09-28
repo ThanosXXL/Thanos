@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="de"><head><meta charset="UTF-8"><title>IT - World · Fiverr Thumbnail</title>
+<link rel="stylesheet" href="marketing.css">
+<style>
+  body { width: 1280px; height: 769px; }
+  .screen.main { width: 760px; right: -90px; top: 150px; transform: perspective(1400px) rotateY(-16deg) rotateX(6deg) rotateZ(1deg); opacity: .9; }
+  .screen.main::after { content: ''; position: absolute; inset: 0; background: linear-gradient(90deg, rgba(3,3,3,.85) 0%, rgba(3,3,3,.15) 45%, rgba(3,3,3,0) 100%); }
+  #globe { position: absolute; left: 20px; top: 20px; width: 300px; height: 300px; }
+  .brand { position: absolute; left: 300px; top: 92px; font-size: 64px; font-weight: 900; letter-spacing: .05em; }
+  .brand-sub { position: absolute; left: 305px; top: 172px; font-size: 16px; letter-spacing: .34em; color: #d9cfb8; font-weight: 600; }
+  h1 { position: absolute; left: 64px; top: 330px; font-size: 70px; line-height: 1.05; font-weight: 800; text-shadow: 0 6px 20px rgba(0,0,0,.9); }
+  .biz { position: absolute; left: 66px; top: 490px; font-size: 44px; font-weight: 700; }
+  .tags { position: absolute; left: 0; right: 0; bottom: 0; height: 88px; display: flex; align-items: center; justify-content: center; gap: 26px;
+    font-size: 30px; font-weight: 700; background: linear-gradient(0deg, rgba(0,0,0,.9), rgba(0,0,0,0)); }
+  .tags .star { color: #f3cf6b; font-size: 26px; }
+</style></head>
+<body>
+  <canvas class="waves"></canvas>
+  <div class="screen main"><img src="screens/overview.png" alt=""></div>
+  <canvas id="globe"></canvas>
+  <div class="brand gold gold3d">IT - WORLD</div>
+  <div class="brand-sub">IT SOLUTIONS</div>
+  <h1>Internal Admin<br>&amp; Ops Dashboard</h1>
+  <div class="biz gold gold3d">Business Systems</div>
+  <div class="tags"><span>Production Ready</span><span class="star">✦</span><span>Secure</span><span class="star">✦</span><span>Scalable</span></div>
+  <script src="waves.js"></script>
+  <script src="../public/globe.js"></script>
+  <script>window.ITWGlobe.mount(document.getElementById('globe'), { speed: 0.0001, scale: 0.3 });</script>
+</body></html>
