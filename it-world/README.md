@@ -9,6 +9,8 @@ Landingpage für Web-App-Entwicklung im schwarz-goldenen 3D-/Hochglanz-Design (F
 Eine einseitige Landingpage (`app/page.tsx`) mit folgenden Abschnitten:
 
 - **Hero** – Logo, Headline, Kurzbeschreibung, Tech-Badges, CTA
+- **Demo** – eingebetteter `<video>`-Player (Poster-Frame + Controls) plus Download-Button für das
+  Demo-Video (`components/Demo.tsx`)
 - **Leistungen** – die sechs Kernangebote (SaaS, CRM/ERP, eCommerce, Buchungsportale,
   KI-Web-Apps, Workflow-Automatisierung)
 - **Warum uns** – fünf Gründe für IT-World
@@ -24,6 +26,18 @@ nachgebaut, keine externe Bilddatei nötig. `components/Nav.tsx` ist eine fixier
 Anker-Links zu den Sektionen (Desktop-Leiste + Mobile-Menü). Favicon (`app/icon.tsx`) und das
 Social-Share-Vorschaubild (`app/opengraph-image.tsx`) werden zur Build-Zeit von Next.js aus Code
 generiert (`next/og`), ebenso `app/robots.ts`/`app/sitemap.ts`.
+
+## Demo-Video (`public/demo/`)
+
+`public/demo/it-world-demo.mp4` (~2,8 MB, ~30s, 1440×900) ist eine aufgezeichnete Bildschirmtour
+durch die Seite, unterlegt mit einer Musikspur passender Länge; `it-world-demo-poster.jpg` ist das
+Vorschaubild für den `<video>`-Tag. Beides sind fertige, eingecheckte Binärdateien – keine
+Build-Artefakte. Neu erzeugt wurden sie mit Playwrights `recordVideo` (Chromium fährt automatisiert
+durch alle Sektionen inkl. Hover-Effekten) und ffmpeg (Zuschnitt auf die Musiklänge, Ein-/Ausblenden,
+H.264/AAC-Mux); beide Tools waren dafür nur temporär als devDependency installiert und sind nicht
+Teil von `package.json`. Um das Video zu ersetzen, einfach eine neue Datei unter demselben Pfad
+ablegen (Seitenverhältnis/Codec wie oben, `<video>`-Tag und Download-Button in `components/Demo.tsx`
+bleiben unverändert).
 
 ## Bekannter Hinweis (npm audit)
 

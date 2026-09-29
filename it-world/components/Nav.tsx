@@ -4,6 +4,7 @@ import { useState } from "react";
 import Logo from "./Logo";
 
 const links = [
+  { href: "#demo", label: "Demo" },
   { href: "#leistungen", label: "Leistungen" },
   { href: "#warum-wir", label: "Warum wir" },
   { href: "#pakete", label: "Pakete" },
