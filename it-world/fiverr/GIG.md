@@ -111,6 +111,8 @@ Bilder im Ordner `it-world/fiverr/` (1280 × 769 px, von Fiverr empfohlenes Form
 2. `02-funktionen.png` – Funktionsübersicht
 3. `03-pdf-mobil.png` – PDF-Rechnung & Handy-Ansicht
 
+Gig-Video: `IT-World-Demo.mp4` (29,65 s, 1920 × 1080, 12,7 MB – innerhalb der Fiverr-Grenzen von 75 s und 50 MB), mit Musik in exakt gleicher Länge.
+
 ## Hinweise zu den Fiverr-Regeln
 
 - Keine E-Mail-Adressen, Telefonnummern oder externen Links im Gig oder in den Bildern (die Bilder enthalten nur Demo-Daten).
