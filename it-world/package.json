@@ -12,7 +12,8 @@
     "reset-data": "node tools/reset-data.js",
     "gen:globe": "node tools/gen-globe.mjs",
     "gen:marketing": "node tools/render-marketing.mjs",
-    "record:tutorial": "node tools/record-tutorial.mjs"
+    "record:tutorial": "node tools/record-tutorial.mjs",
+    "render:demo": "node tools/render-demo-video.mjs"
   },
   "dependencies": {
     "express": "^5.1.0"

@@ -103,6 +103,8 @@ Fertig in `marketing/output/`:
 - `it-world-anleitung.mp4` – Anleitungsvideo (ca. 7 Min., 1280×720, deutsche Untertitel, sichtbarer Mauszeiger) + `it-world-anleitung-kapitel.txt` mit Zeitmarken
 
 Neu erzeugen: `npm i -D playwright && npx playwright install chromium && npm run gen:marketing`.
+- `it-world-demo.mp4` – 30-Sekunden-Promovideo für den Gig (1920×1080, 30 fps), exakt so lang wie die Musik `marketing/audio/demo-music.mp3`; neu rendern mit `npm run render:demo` (andere Musik: `MUSIC_PATH=…`, das Video passt sich der Länge an)
+
 Anleitungsvideo neu aufnehmen (braucht zusätzlich ffmpeg im PATH oder `FFMPEG_PATH`): `npm run record:tutorial`.
 Logo/Globus neu erzeugen: `npm run gen:globe`.
 

@@ -129,7 +129,15 @@
     resize();
     window.addEventListener('resize', () => { resize(); if (!o.animate || reduceMotion) draw(performance.now()); });
     loadDots().then(d => { dots = d; cancelAnimationFrame(raf); last = performance.now(); raf = requestAnimationFrame(draw); });
-    return { stop: () => cancelAnimationFrame(raf), setRotation: (v) => { lon0 = v; } };
+    // renderFrame(ms): zeichnet exakt den Zustand zum Zeitpunkt ms – für bildgenaues Video-Rendering
+    function renderFrame(ms) {
+      const anim = o.animate;
+      o.animate = false;
+      lon0 = o.lon0 - o.speed * ms / 1000; last = ms;
+      draw(ms);
+      o.animate = anim;
+    }
+    return { stop: () => cancelAnimationFrame(raf), setRotation: (v) => { lon0 = v; }, renderFrame, ready: loadDots() };
   }
 
   window.ITWGlobe = { mount };

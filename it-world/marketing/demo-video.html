@@ -1,0 +1,208 @@
+<!DOCTYPE html>
+<html lang="de"><head><meta charset="UTF-8"><title>IT - World · Demo-Video</title>
+<link rel="stylesheet" href="marketing.css">
+<style>
+  /* Demo-/Promo-Video (1920×1080). Jeder Frame wird über renderAt(t) bildgenau gesetzt,
+     tools/render-demo-video.mjs macht davon Screenshots und baut daraus das MP4. */
+  body { width: 1920px; height: 1080px; }
+  canvas.waves { transform-origin: 50% 50%; }
+  .scene { position: absolute; inset: 0; opacity: 0; will-change: opacity, transform; }
+  .text { position: absolute; width: 640px; }
+  .kicker { font-size: 22px; letter-spacing: .32em; text-transform: uppercase; color: #d9cfb8; font-weight: 600; }
+  .title { font-size: 76px; line-height: 1.05; font-weight: 800; margin-top: 14px; text-shadow: 0 8px 26px rgba(0,0,0,.8); }
+  .bullets { list-style: none; padding: 0; margin-top: 34px; display: grid; gap: 16px; font-size: 28px; font-weight: 600; color: #efe7d6; }
+  .bullets li::before { content: '✔'; color: #f3cf6b; margin-right: 14px; }
+  .frame { position: absolute; border-radius: 18px; overflow: hidden; border: 2px solid rgba(212,165,58,.55);
+    box-shadow: 0 40px 100px rgba(0,0,0,.85), 0 0 60px rgba(212,165,58,.18); background: #070707; transform-origin: 50% 50%; }
+  .frame img { display: block; width: 100%; transform-origin: 30% 20%; }
+  .phone { position: absolute; width: 400px; height: 820px; border-radius: 56px; border: 5px solid #d4a53a; padding: 12px; background: #0b0a09;
+    box-shadow: 0 40px 90px rgba(0,0,0,.85), 0 0 60px rgba(212,165,58,.3); }
+  .phone .screen-in { width: 100%; height: 100%; border-radius: 44px; overflow: hidden; }
+  .phone img { display: block; width: 100%; }
+  .brand-big { font-size: 150px; font-weight: 900; letter-spacing: .05em; text-align: center; }
+  .sub { font-size: 30px; letter-spacing: .34em; text-transform: uppercase; color: #d9cfb8; font-weight: 600; text-align: center; }
+  .pills { display: flex; gap: 22px; justify-content: center; }
+  .pill { padding: 14px 34px; border-radius: 999px; border: 2px solid rgba(212,165,58,.6); background: rgba(212,165,58,.1); font-size: 30px; font-weight: 700; color: #fff1b8; }
+  .tagline { font-size: 34px; font-weight: 700; text-align: center; }
+  .tagline .star { color: #f3cf6b; margin: 0 18px; }
+  #blackout { position: absolute; inset: 0; background: #000; opacity: 0; }
+</style></head>
+<body>
+  <canvas class="waves"></canvas>
+
+  <!-- 1 · Intro -->
+  <section class="scene" id="s1">
+    <canvas id="globe1" style="position:absolute;left:560px;top:20px;width:800px;height:800px"></canvas>
+    <div class="brand-big gold gold3d" style="position:absolute;left:0;right:0;top:700px" data-in="0.6">IT - WORLD</div>
+    <div class="sub" style="position:absolute;left:0;right:0;top:900px" data-in="1.2">Internal Admin &amp; Ops Dashboard</div>
+  </section>
+
+  <!-- 2 · Login -->
+  <section class="scene" id="s2">
+    <div class="text" style="left:110px;top:300px">
+      <div class="kicker" data-in="0.2">Sicherheit</div>
+      <div class="title" data-in="0.35">Sicherer<br><span class="gold">Login</span></div>
+      <ul class="bullets">
+        <li data-in="0.8">Verschlüsselte Passwörter</li>
+        <li data-in="1.05">Rollen: Admin · Ops · Nur Lesen</li>
+        <li data-in="1.3">Schutz vor Brute-Force &amp; CSRF</li>
+      </ul>
+    </div>
+    <div class="frame" data-frame="right" style="left:800px;top:170px;width:1040px"><img src="screens/demo/login.png" alt=""></div>
+  </section>
+
+  <!-- 3 · Übersicht -->
+  <section class="scene" id="s3">
+    <div class="frame" data-frame="left" style="left:80px;top:150px;width:1120px"><img src="screens/demo/overview.png" alt=""></div>
+    <div class="text" style="left:1250px;top:310px">
+      <div class="kicker" data-in="0.2">Übersicht</div>
+      <div class="title" data-in="0.35">Alles auf<br><span class="gold">einen Blick</span></div>
+      <ul class="bullets">
+        <li data-in="0.8">KPIs in Echtzeit</li>
+        <li data-in="1.05">Traffic &amp; Service-Status</li>
+        <li data-in="1.3">Auto-Aktualisierung</li>
+      </ul>
+    </div>
+  </section>
+
+  <!-- 4 · Monitoring -->
+  <section class="scene" id="s4">
+    <div class="text" style="left:110px;top:300px">
+      <div class="kicker" data-in="0.2">Monitoring</div>
+      <div class="title" data-in="0.35">Live-<br><span class="gold">Monitoring</span></div>
+      <ul class="bullets">
+        <li data-in="0.8">CPU · RAM · Latenz · Fehler</li>
+        <li data-in="1.05">1 Std. &amp; 24 Std. Verlauf</li>
+        <li data-in="1.3">Neustart per Klick</li>
+      </ul>
+    </div>
+    <div class="frame" data-frame="right" style="left:800px;top:170px;width:1040px"><img src="screens/demo/monitoring.png" alt=""></div>
+  </section>
+
+  <!-- 5 · Incidents & Tickets -->
+  <section class="scene" id="s5">
+    <div class="frame" data-frame="left" style="left:90px;top:90px;width:900px"><img src="screens/demo/incidents.png" alt=""></div>
+    <div class="frame" data-frame="left2" style="left:360px;top:480px;width:900px"><img src="screens/demo/tickets.png" alt=""></div>
+    <div class="text" style="left:1320px;top:320px;width:560px">
+      <div class="kicker" data-in="0.2">Service Desk</div>
+      <div class="title" data-in="0.35">Incidents<br><span class="gold">&amp; Tickets</span></div>
+      <ul class="bullets">
+        <li data-in="0.8">SEV1 – SEV4 Workflow</li>
+        <li data-in="1.05">Suche, Filter, CSV-Export</li>
+      </ul>
+    </div>
+  </section>
+
+  <!-- 6 · Deployments · Benutzer · Audit -->
+  <section class="scene" id="s6">
+    <div class="text" style="left:110px;top:130px;width:1700px">
+      <div class="kicker" data-in="0.1">Verwaltung</div>
+      <div class="title" data-in="0.25">Deployments · <span class="gold">Benutzer</span> · Audit-Log</div>
+    </div>
+    <div class="frame" data-frame="fan0" style="left:80px;top:420px;width:580px"><img src="screens/demo/deployments.png" alt=""></div>
+    <div class="frame" data-frame="fan1" style="left:670px;top:400px;width:580px"><img src="screens/demo/users.png" alt=""></div>
+    <div class="frame" data-frame="fan2" style="left:1260px;top:420px;width:580px"><img src="screens/demo/audit.png" alt=""></div>
+  </section>
+
+  <!-- 7 · Handy + Werte -->
+  <section class="scene" id="s7">
+    <div class="phone" data-frame="phone" style="left:1320px;top:130px"><div class="screen-in"><img id="mobileImg" src="screens/demo/mobile.png" alt=""></div></div>
+    <div class="text" style="left:130px;top:250px;width:1050px">
+      <div class="kicker" data-in="0.2">Überall einsatzbereit</div>
+      <div class="title" data-in="0.35">Desktop · Tablet · <span class="gold">Handy</span></div>
+      <ul class="bullets" style="font-size:36px;gap:22px;margin-top:46px">
+        <li data-in="0.8">Production Ready – Docker &amp; Health-Check</li>
+        <li data-in="1.1">Secure – RBAC, CSP, Audit-Log</li>
+        <li data-in="1.4">Scalable – saubere Architektur</li>
+        <li data-in="1.7">Kompletter Quellcode inklusive</li>
+      </ul>
+    </div>
+  </section>
+
+  <!-- 8 · Outro -->
+  <section class="scene" id="s8">
+    <canvas id="globe2" style="position:absolute;left:660px;top:0;width:600px;height:600px"></canvas>
+    <div class="brand-big gold gold3d" style="position:absolute;left:0;right:0;top:520px;font-size:130px" data-in="0.3">IT - WORLD</div>
+    <div class="tagline" style="position:absolute;left:0;right:0;top:720px" data-in="0.7">Production Ready<span class="star">✦</span>Secure<span class="star">✦</span>Scalable</div>
+    <div class="pills" style="position:absolute;left:0;right:0;top:820px" data-in="1.1"><span class="pill">Basic</span><span class="pill">Standard</span><span class="pill">Premium</span></div>
+    <div class="sub" style="position:absolute;left:0;right:0;top:950px;font-size:26px" data-in="1.5">Jetzt auf Fiverr bestellen</div>
+  </section>
+
+  <div id="blackout"></div>
+
+  <script src="waves.js"></script>
+  <script src="../public/globe.js"></script>
+  <script>
+    const DURATION = Number(new URLSearchParams(location.search).get('d')) || 29.65;
+    const clamp = (v, a = 0, b = 1) => Math.min(b, Math.max(a, v));
+    const easeOut = (x) => 1 - Math.pow(1 - x, 3);
+    const easeInOut = (x) => x < .5 ? 4 * x * x * x : 1 - Math.pow(-2 * x + 2, 3) / 2;
+    const prog = (t, a, b) => clamp((t - a) / (b - a));
+
+    // Szenen-Zeitplan (Sekunden); die letzte Szene endet mit dem Video
+    const OUT = DURATION;
+    const SCENES = [
+      ['s1', 0, 4.1], ['s2', 3.8, 7.9], ['s3', 7.6, 11.6], ['s4', 11.3, 15.2],
+      ['s5', 14.9, 18.8], ['s6', 18.5, 22.4], ['s7', 22.1, 25.9], ['s8', 25.6, OUT + 1],
+    ];
+    const FADE = 0.45;
+    const globe1 = ITWGlobe.mount(document.getElementById('globe1'), { animate: false, speed: 14, scale: 0.34 });
+    const globe2 = ITWGlobe.mount(document.getElementById('globe2'), { animate: false, speed: 14, scale: 0.34, lon0: 40 });
+    window.demoReady = Promise.all([globe1.ready, globe2.ready, document.fonts.ready,
+      ...[...document.images].map(i => i.complete ? 0 : new Promise(r => { i.onload = i.onerror = r; }))]);
+
+    const waves = document.querySelector('canvas.waves');
+
+    window.renderAt = function (t) {
+      waves.style.transform = `scale(1.12) translate(${(-t * 6).toFixed(1)}px, ${(Math.sin(t / 3) * 8).toFixed(1)}px)`;
+      for (const [id, a, b] of SCENES) {
+        const el = document.getElementById(id);
+        const vis = t >= a && t <= b;
+        el.style.visibility = vis ? 'visible' : 'hidden';
+        if (!vis) continue;
+        const fin = easeOut(prog(t, a, a + FADE)), fout = 1 - easeInOut(prog(t, b - FADE, b));
+        el.style.opacity = Math.min(fin, fout).toFixed(3);
+        el.style.transform = `scale(${(1 + (1 - fout) * 0.06).toFixed(4)})`;
+        const lt = t - a; // lokale Zeit
+        // gestaffelte Einblendungen
+        for (const n of el.querySelectorAll('[data-in]')) {
+          const p = easeOut(prog(lt, +n.dataset.in, +n.dataset.in + 0.55));
+          n.style.opacity = p.toFixed(3);
+          n.style.transform = `translateY(${((1 - p) * 40).toFixed(1)}px)`;
+        }
+        // Bildschirm-Rahmen: 3D-Einflug + langsamer Zoom (Ken Burns)
+        for (const f of el.querySelectorAll('[data-frame]')) {
+          const kind = f.dataset.frame;
+          const delay = kind === 'left2' ? 0.35 : kind.startsWith('fan') ? 0.25 + (+kind.slice(3)) * 0.2 : 0.1;
+          const p = easeOut(prog(lt, delay, delay + 0.9));
+          const dir = kind === 'right' || kind === 'phone' ? 1 : -1;
+          let tr;
+          if (kind.startsWith('fan')) {
+            const i = +kind.slice(3), rot = (i - 1) * 4;
+            tr = `perspective(1600px) translateY(${((1 - p) * 180).toFixed(1)}px) rotateZ(${(rot * p).toFixed(2)}deg) rotateX(${((1 - p) * 25).toFixed(2)}deg)`;
+          } else if (kind === 'phone') {
+            tr = `translateY(${((1 - p) * 260).toFixed(1)}px) rotateZ(${((1 - p) * 8).toFixed(2)}deg)`;
+          } else {
+            const ry = dir * (-(8 + (1 - p) * 22));
+            tr = `perspective(1800px) translateX(${(dir * (1 - p) * 320).toFixed(1)}px) rotateY(${ry.toFixed(2)}deg) rotateX(${(3).toFixed(1)}deg)`;
+          }
+          f.style.opacity = p.toFixed(3);
+          f.style.transform = tr;
+          const img = f.querySelector('img');
+          if (kind === 'phone') img.style.transform = `translateY(${(-easeInOut(prog(lt, 1.2, 3.6)) * 380).toFixed(1)}px)`;
+          else img.style.transform = `scale(${(1 + prog(lt, 0, b - a) * 0.08).toFixed(4)})`;
+        }
+      }
+      // Intro-Globus zoomt ein, Outro-Globus dreht sich weiter
+      const g1 = document.getElementById('globe1');
+      const gp = easeOut(prog(t, 0, 1.4));
+      g1.style.transform = `scale(${(0.55 + 0.45 * gp).toFixed(4)})`;
+      g1.style.opacity = gp.toFixed(3);
+      globe1.renderFrame(t * 1000);
+      globe2.renderFrame(t * 1000);
+      // Schwarzblende am Ende
+      document.getElementById('blackout').style.opacity = easeInOut(prog(t, DURATION - 0.8, DURATION - 0.05)).toFixed(3);
+    };
+    window.renderAt(0);
+  </script>
+</body></html>
