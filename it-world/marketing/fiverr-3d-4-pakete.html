@@ -1,0 +1,40 @@
+<!DOCTYPE html><html lang="de"><head><meta charset="UTF-8"><link rel="stylesheet" href="marketing.css"><link rel="stylesheet" href="fiverr-3d.css"><title>IT - World · 3D 4 Pakete</title>
+<style>
+  h2 { position: absolute; left: 0; right: 0; top: 30px; text-align: center; font-size: 50px; font-weight: 800; }
+  .cards { position: absolute; left: 60px; right: 60px; top: 125px; display: grid; grid-template-columns: repeat(3, 1fr); gap: 30px; align-items: end; transform-style: preserve-3d; }
+  .card { padding: 26px 26px 24px; display: grid; gap: 12px; }
+  .card.b { transform: rotateY(14deg); } .card.p { transform: rotateY(-14deg) translateZ(40px); border-width: 2px; border-color: #f3cf6b; box-shadow: 0 30px 70px rgba(0,0,0,.8), 0 0 60px rgba(212,165,58,.35), inset 0 1px 0 rgba(255,255,255,.5); }
+  .card.s { transform: translateZ(20px); }
+  .name { font-size: 30px; font-weight: 900; letter-spacing: .04em; }
+  .price { font-size: 44px; font-weight: 900; }
+  .facts { display: flex; gap: 8px; flex-wrap: wrap; }
+  .facts span { font-size: 15px; font-weight: 700; padding: 6px 12px; border-radius: 999px; background: rgba(0,0,0,.45); border: 1px solid rgba(243,207,107,.4); color: #fff1b8; }
+  ul { list-style: none; padding: 0; margin: 4px 0 0; display: grid; gap: 7px; font-size: 16.5px; font-weight: 600; color: #efe7d6; }
+  li::before { content: '✔'; color: #f3cf6b; margin-right: 10px; }
+  li.off { color: #6f685b; } li.off::before { content: '–'; color: #6f685b; }
+  .badge { position: absolute; top: 18px; right: -44px; transform: rotate(35deg); padding: 6px 50px; font-size: 13px; font-weight: 900; letter-spacing: .12em; color: #1a1204;
+    background: linear-gradient(180deg, #fff6cf, #f3cf6b 45%, #c9952b); }
+</style></head><body>
+  <canvas class="waves"></canvas>
+  <div class="floor"></div>
+  <h2><span class="gloss">Wähle dein </span><span class="chrome">Paket</span></h2>
+  <div class="cards">
+    <div class="glass card b reflect">
+      <div class="name chrome">BASIC</div><div class="price gloss">1.236 €</div>
+      <div class="facts"><span>◷ 7 Tage</span><span>↻ 1 Revision</span><span>2 Seiten</span></div>
+      <ul><li>Sicherer Login</li><li>Übersichts-Dashboard</li><li>Responsive Design</li><li>Quellcode</li><li class="off">Design-Anpassung</li><li class="off">Video-Anleitung</li></ul>
+    </div>
+    <div class="glass card s reflect">
+      <div class="name chrome">STANDARD</div><div class="price gloss">1.655 €</div>
+      <div class="facts"><span>◷ 14 Tage</span><span>↻ 2 Revisionen</span><span>4 Seiten</span></div>
+      <ul><li>Monitoring &amp; Tickets</li><li>3 Benutzerrollen</li><li>Design-Anpassung</li><li>CSV-Export</li><li>Codekommentare</li><li class="off">Video-Anleitung</li></ul>
+    </div>
+    <div class="glass card p reflect">
+      <div class="badge">EMPFOHLEN</div>
+      <div class="name chrome">PREMIUM</div><div class="price gloss">2.725 €</div>
+      <div class="facts"><span>◷ 21 Tage</span><span>↻ 2 Revisionen</span><span>8 Seiten</span></div>
+      <ul><li>Alle 8 Seiten + Audit-Log</li><li>Incidents &amp; Deployments</li><li>Docker &amp; Health-Check</li><li>Content Upload</li><li>Video-Anleitung</li><li>Quellcode + Kommentare</li></ul>
+    </div>
+  </div>
+  <script src="waves.js"></script>
+</body></html>

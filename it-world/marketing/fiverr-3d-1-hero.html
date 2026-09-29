@@ -1,0 +1,21 @@
+<!DOCTYPE html><html lang="de"><head><meta charset="UTF-8"><link rel="stylesheet" href="marketing.css"><link rel="stylesheet" href="fiverr-3d.css"><title>IT - World · 3D 1 Hero</title>
+<style>
+  #globe { position: absolute; left: -10px; top: 0; width: 250px; height: 250px; }
+  .brand { position: absolute; left: 225px; top: 78px; font-size: 58px; font-weight: 900; letter-spacing: .05em; }
+  h1 { position: absolute; left: 60px; top: 250px; font-size: 54px; line-height: 1.04; font-weight: 800; }
+  .biz { position: absolute; left: 62px; top: 380px; font-size: 44px; font-weight: 800; }
+  .laptop { right: 30px; top: 160px; width: 600px; transform: rotateY(-24deg) rotateX(4deg); transform-style: preserve-3d; }
+  .tags { position: absolute; left: 60px; top: 485px; display: flex; gap: 10px; }
+  .tags .chip { font-size: 16px; padding: 9px 16px; }
+</style></head><body>
+  <canvas class="waves"></canvas>
+  <div class="floor"></div>
+  <canvas id="globe"></canvas>
+  <div class="brand chrome">IT - WORLD</div>
+  <h1 class="gloss">Internal Admin<br>&amp; Ops Dashboard</h1>
+  <div class="biz chrome">Business Systems</div>
+  <div class="tags"><span class="chip">✦ Production Ready</span><span class="chip">✦ Secure</span><span class="chip">✦ Scalable</span></div>
+  <div class="device laptop reflect"><div class="display"><div class="inner"><img src="screens/demo/overview.png" alt=""></div></div><div class="base"></div></div>
+  <script src="waves.js"></script><script src="../public/globe.js"></script>
+  <script>ITWGlobe.mount(document.getElementById('globe'), { animate: false, speed: 0.0001, scale: 0.3 });</script>
+</body></html>

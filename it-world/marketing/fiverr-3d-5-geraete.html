@@ -1,0 +1,23 @@
+<!DOCTYPE html><html lang="de"><head><meta charset="UTF-8"><link rel="stylesheet" href="marketing.css"><link rel="stylesheet" href="fiverr-3d.css"><title>IT - World · 3D 5 Geräte</title>
+<style>
+  h2 { position: absolute; left: 0; right: 0; top: 30px; text-align: center; font-size: 52px; font-weight: 800; }
+  .sub { position: absolute; left: 0; right: 0; top: 102px; text-align: center; }
+  .laptop { left: 330px; top: 170px; width: 620px; }
+  .tablet { left: 70px; top: 230px; width: 290px; transform: rotateY(22deg); }
+  .tablet .display { height: 400px; }
+  .phone { left: 960px; top: 250px; width: 190px; transform: rotateY(-22deg); }
+  .phone .display { height: 380px; }
+  .tablet img, .phone img { object-fit: cover; object-position: top; height: 100%; }
+  .brandline { right: 40px; bottom: 26px; }
+</style></head><body>
+  <canvas class="waves"></canvas>
+  <div class="floor"></div>
+  <h2><span class="gloss">Desktop · Tablet · </span><span class="chrome">Handy</span></h2>
+  <div class="sub kicker">Responsive · Docker-ready · Quellcode inklusive</div>
+  <div class="device tablet reflect"><div class="display"><div class="inner"><img src="screens/demo/tablet.png" alt=""></div></div></div>
+  <div class="device laptop reflect"><div class="display"><div class="inner"><img src="screens/demo/monitoring.png" alt=""></div></div><div class="base"></div></div>
+  <div class="device phone reflect"><div class="display"><div class="inner"><img src="screens/demo/mobile.png" alt=""></div></div></div>
+  <div class="brandline"><canvas id="globe"></canvas><span class="chrome">IT - WORLD</span></div>
+  <script src="waves.js"></script><script src="../public/globe.js"></script>
+  <script>ITWGlobe.mount(document.getElementById('globe'), { animate: false, speed: 0.0001, scale: 0.34 });</script>
+</body></html>

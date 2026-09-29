@@ -13,7 +13,8 @@
     "gen:globe": "node tools/gen-globe.mjs",
     "gen:marketing": "node tools/render-marketing.mjs",
     "record:tutorial": "node tools/record-tutorial.mjs",
-    "render:demo": "node tools/render-demo-video.mjs"
+    "render:demo": "node tools/render-demo-video.mjs",
+    "render:3d": "node tools/render-fiverr-3d.mjs"
   },
   "dependencies": {
     "express": "^5.1.0"

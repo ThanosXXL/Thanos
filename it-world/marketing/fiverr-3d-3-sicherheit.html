@@ -1,0 +1,37 @@
+<!DOCTYPE html><html lang="de"><head><meta charset="UTF-8"><link rel="stylesheet" href="marketing.css"><link rel="stylesheet" href="fiverr-3d.css"><title>IT - World · 3D 3 Sicherheit</title>
+<style>
+  .shield { position: absolute; left: 70px; top: 120px; width: 380px; height: 460px; filter: drop-shadow(0 40px 50px rgba(0,0,0,.9)) drop-shadow(0 0 40px rgba(212,165,58,.35)); }
+  h2 { position: absolute; left: 520px; top: 70px; font-size: 54px; font-weight: 800; line-height: 1.05; }
+  .list { position: absolute; left: 520px; top: 225px; width: 700px; display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+  .item { padding: 18px 20px; display: flex; gap: 14px; align-items: center; font-size: 19px; font-weight: 700; }
+  .ic { flex: none; width: 46px; height: 46px; border-radius: 14px; display: grid; place-items: center; font-size: 22px; color: #1a1204;
+    background: linear-gradient(180deg, #fff6cf, #f3cf6b 40%, #c9952b 60%, #f0c860); box-shadow: inset 0 1px 0 #fff, 0 6px 14px rgba(0,0,0,.6); }
+  .item small { display: block; font-size: 14px; font-weight: 500; color: #cfc6b3; margin-top: 2px; }
+</style></head><body>
+  <canvas class="waves"></canvas>
+  <div class="floor"></div>
+  <svg class="shield reflect" viewBox="0 0 380 460">
+    <defs>
+      <linearGradient id="gOut" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#fff6cf"/><stop offset=".3" stop-color="#f3cf6b"/><stop offset=".55" stop-color="#9c6d16"/><stop offset=".75" stop-color="#f0c860"/><stop offset="1" stop-color="#6e4d10"/></linearGradient>
+      <linearGradient id="gIn" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#2b2419"/><stop offset="1" stop-color="#070605"/></linearGradient>
+      <linearGradient id="gLock" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#fffbe6"/><stop offset=".45" stop-color="#f3cf6b"/><stop offset=".55" stop-color="#b8861f"/><stop offset="1" stop-color="#f7d77e"/></linearGradient>
+      <linearGradient id="gShine" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#fff" stop-opacity=".45"/><stop offset="1" stop-color="#fff" stop-opacity="0"/></linearGradient>
+    </defs>
+    <path d="M190 10 L360 70 V210 C360 320 290 400 190 450 C90 400 20 320 20 210 V70 Z" fill="url(#gOut)"/>
+    <path d="M190 38 L334 90 V212 C334 306 274 376 190 420 C106 376 46 306 46 212 V90 Z" fill="url(#gIn)" stroke="#fff1b8" stroke-opacity=".35" stroke-width="2"/>
+    <path d="M140 205 V170 a50 50 0 0 1 100 0 V205" fill="none" stroke="url(#gLock)" stroke-width="22" stroke-linecap="round"/>
+    <rect x="112" y="200" width="156" height="130" rx="22" fill="url(#gLock)"/>
+    <circle cx="190" cy="252" r="16" fill="#3a2a0c"/><rect x="183" y="258" width="14" height="40" rx="6" fill="#3a2a0c"/>
+    <path d="M190 38 L334 90 V150 C250 160 120 120 46 150 V90 Z" fill="url(#gShine)" opacity=".5"/>
+  </svg>
+  <h2><span class="gloss">Sicher ab dem</span><br><span class="chrome">ersten Login</span></h2>
+  <div class="list">
+    <div class="glass item"><span class="ic"><svg viewBox="0 0 24 24" width="26" height="26" fill="none" stroke="#1a1204" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="8" cy="15" r="4"/><path d="M11 12l9-9m-3 3l3 3m-6 0l2 2"/></svg></span><div>scrypt-Passwörter<small>Salt pro Benutzer</small></div></div>
+    <div class="glass item"><span class="ic"><svg viewBox="0 0 24 24" width="26" height="26" fill="none" stroke="#1a1204" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="8" r="3.5"/><path d="M2.5 20a6.5 6.5 0 0113 0M16 4.5a3.5 3.5 0 010 7M18 14a6 6 0 013.5 6"/></svg></span><div>Rollen &amp; Rechte<small>Admin · Ops · Nur Lesen</small></div></div>
+    <div class="glass item"><span class="ic"><svg viewBox="0 0 24 24" width="26" height="26" fill="none" stroke="#1a1204" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l8 3v6c0 5-3.5 8-8 9-4.5-1-8-4-8-9V6z"/><path d="M8.5 12l2.5 2.5 4.5-5"/></svg></span><div>CSRF &amp; CSP<small>Schutz vor Angriffen</small></div></div>
+    <div class="glass item"><span class="ic"><svg viewBox="0 0 24 24" width="26" height="26" fill="none" stroke="#1a1204" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="13" r="8"/><path d="M12 9v4l3 2M9 2h6"/></svg></span><div>Rate-Limiting<small>gegen Brute-Force</small></div></div>
+    <div class="glass item"><span class="ic"><svg viewBox="0 0 24 24" width="26" height="26" fill="none" stroke="#1a1204" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 3h9l4 4v14H6z"/><path d="M9 11h7M9 15h7M14 3v5h5"/></svg></span><div>Audit-Log<small>jede Aktion protokolliert</small></div></div>
+    <div class="glass item"><span class="ic"><svg viewBox="0 0 24 24" width="26" height="26" fill="none" stroke="#1a1204" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 13h18c-1 4-4.5 7-9 7s-8-3-9-7z"/><path d="M6 10h3v3H6zM9 10h3v3H9zM12 10h3v3h-3zM9 7h3v3H9z"/></svg></span><div>Docker-ready<small>mit Health-Check</small></div></div>
+  </div>
+  <script src="waves.js"></script>
+</body></html>

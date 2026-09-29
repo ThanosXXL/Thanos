@@ -1,0 +1,26 @@
+<!DOCTYPE html><html lang="de"><head><meta charset="UTF-8"><link rel="stylesheet" href="marketing.css"><link rel="stylesheet" href="fiverr-3d.css"><title>IT - World · 3D 2 Seiten</title>
+<style>
+  h2 { position: absolute; left: 0; right: 0; top: 34px; text-align: center; font-size: 50px; font-weight: 800; }
+  .sub { position: absolute; left: 0; right: 0; top: 108px; text-align: center; font-size: 13px; letter-spacing: .2em; }
+  .stage { position: absolute; left: 0; right: 0; top: 200px; height: 420px; transform-style: preserve-3d; }
+  .screen3d { width: 420px; top: 40px; }
+  .lbl { position: absolute; top: 560px; font-size: 17px; }
+</style></head><body>
+  <canvas class="waves"></canvas>
+  <div class="floor"></div>
+  <h2><span class="gloss">8 Seiten · </span><span class="chrome">alles an einem Ort</span></h2>
+  <div class="sub kicker">Übersicht · Monitoring · Incidents · Tickets · Deployments · Benutzer · Audit-Log · Einstellungen</div>
+  <div class="stage">
+    <div class="screen3d" style="left:-20px;transform:rotateY(38deg) translateZ(-120px) scale(.86)"><img src="screens/demo/tickets.png" alt=""></div>
+    <div class="screen3d" style="left:210px;transform:rotateY(24deg) translateZ(-40px) scale(.93)"><img src="screens/demo/monitoring.png" alt=""></div>
+    <div class="screen3d" style="left:650px;transform:rotateY(-24deg) translateZ(-40px) scale(.93)"><img src="screens/demo/deployments.png" alt=""></div>
+    <div class="screen3d" style="left:880px;transform:rotateY(-38deg) translateZ(-120px) scale(.86)"><img src="screens/demo/users.png" alt=""></div>
+    <div class="screen3d" style="left:400px;width:480px;top:10px;transform:translateZ(60px);z-index:2"><img src="screens/demo/overview.png" alt=""></div>
+  </div>
+  <div class="lbl chip" style="left:50px">Tickets</div>
+  <div class="lbl chip" style="left:285px">Monitoring</div>
+  <div class="lbl chip" style="left:560px">Übersicht</div>
+  <div class="lbl chip" style="left:800px">Deployments</div>
+  <div class="lbl chip" style="left:1060px">Benutzer</div>
+  <script src="waves.js"></script>
+</body></html>
