@@ -6,9 +6,11 @@ type LogoProps = {
   size?: number;
   showText?: boolean;
   className?: string;
+  spin?: boolean;
 };
 
-export default function Logo({ size = 96, showText = true, className = "" }: LogoProps) {
+export default function Logo({ size = 96, showText = true, className = "", spin = false }: LogoProps) {
+  const ringClass = spin ? "[transform-box:view-box] origin-[100px_95px] animate-ring-spin" : "";
   const uid = useId();
   const id = (name: string) => `${uid}-${name}`;
 
@@ -64,7 +66,7 @@ export default function Logo({ size = 96, showText = true, className = "" }: Log
           </filter>
         </defs>
 
-        <g transform="rotate(-16 100 95)">
+        <g transform="rotate(-16 100 95)" className={ringClass}>
           <path
             d="M -8 95 A 108 30 0 0 0 208 95"
             fill="none"
@@ -90,7 +92,7 @@ export default function Logo({ size = 96, showText = true, className = "" }: Log
           filter={`url(#${id("softGlow")})`}
         />
 
-        <g transform="rotate(-16 100 95)">
+        <g transform="rotate(-16 100 95)" className={ringClass}>
           <path
             d="M -8 95 A 108 30 0 0 1 208 95"
             fill="none"

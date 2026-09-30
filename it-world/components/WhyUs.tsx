@@ -38,9 +38,11 @@ export default function WhyUs() {
         </h2>
 
         <div className="mt-10 grid grid-cols-1 gap-8 sm:grid-cols-2 lg:grid-cols-5">
-          {reasons.map((reason) => (
+          {reasons.map((reason, i) => (
             <div key={reason.title} className="flex flex-col items-start gap-3">
-              <IconBadge size={44}>{reason.icon}</IconBadge>
+              <div className="animate-float" style={{ animationDelay: `${i * 0.5}s` }}>
+                <IconBadge size={44}>{reason.icon}</IconBadge>
+              </div>
               <div className="font-bold">{reason.title}</div>
               <p className="text-sm leading-relaxed text-white/60">{reason.description}</p>
             </div>

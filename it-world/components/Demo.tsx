@@ -1,4 +1,4 @@
-const FILE_SIZE_MB = "2,8";
+const FILE_SIZE_MB = "3,3";
 
 export default function Demo() {
   return (

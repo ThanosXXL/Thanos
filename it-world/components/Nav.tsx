@@ -20,7 +20,7 @@ export default function Nav() {
       <div className="mx-auto flex max-w-6xl items-center justify-between px-6 py-3">
         <a href="#top" className="flex items-center gap-2" aria-label="IT-World Startseite">
           <Logo size={40} showText={false} />
-          <span className="hidden text-sm font-bold tracking-[0.2em] text-gold-gradient sm:inline">
+          <span className="hidden animate-shimmer text-sm font-bold tracking-[0.2em] text-gold-shimmer sm:inline">
             IT-WORLD
           </span>
         </a>
@@ -37,7 +37,7 @@ export default function Nav() {
           ))}
           <a
             href="#kontakt"
-            className="rounded-full bg-gold-gradient px-5 py-2 text-sm font-semibold text-ink-950 shadow-glossy transition-transform hover:scale-105"
+            className="animate-glow rounded-full bg-gold-gradient px-5 py-2 text-sm font-semibold text-ink-950 shadow-glossy transition-transform hover:scale-105"
           >
             Kontakt
           </a>

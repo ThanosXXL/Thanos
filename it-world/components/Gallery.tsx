@@ -47,8 +47,6 @@ export default function Gallery() {
                 alt="IT-World Gig-Cover: Custom Web App Development"
                 width={1280}
                 height={720}
-                loading="lazy"
-                decoding="async"
                 className="block w-full"
               />
             </figure>
@@ -64,8 +62,6 @@ export default function Gallery() {
                   alt={shot.alt}
                   width={1280}
                   height={720}
-                  loading="lazy"
-                  decoding="async"
                   className="block w-full"
                 />
                 <figcaption className="border-t border-white/10 px-5 py-3 text-sm text-white/65">

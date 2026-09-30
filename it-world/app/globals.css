@@ -44,4 +44,30 @@ button:focus-visible {
   .perspective-1000 {
     perspective: 1000px;
   }
+
+  .text-gold-shimmer {
+    background: linear-gradient(
+      100deg,
+      #d4a017 20%,
+      #f9edc9 45%,
+      #ffffff 50%,
+      #f9edc9 55%,
+      #d4a017 80%
+    );
+    background-size: 220% 100%;
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .animate-float,
+  .animate-float-slow,
+  .animate-glow,
+  .animate-shimmer,
+  .animate-ring-spin,
+  .animate-pulse {
+    animation: none !important;
+  }
 }

@@ -57,11 +57,11 @@ export default function Pricing() {
             <TiltCard key={tier.name} className="h-full">
               <div
                 className={`relative flex h-full flex-col rounded-2xl glass-panel p-8 shadow-card ${
-                  tier.recommended ? "border-gold-400/60 md:-translate-y-3" : ""
+                  tier.recommended ? "animate-glow border-gold-400/60 md:-translate-y-3" : ""
                 }`}
               >
                 {tier.recommended && (
-                  <span className="absolute -top-3 right-8 rounded-full bg-gold-gradient px-3 py-1 text-[11px] font-bold uppercase tracking-wide text-ink-950 shadow-glossy">
+                  <span className="animate-glow absolute -top-3 right-8 rounded-full bg-gold-gradient px-3 py-1 text-[11px] font-bold uppercase tracking-wide text-ink-950 shadow-glossy">
                     Für dich empfohlen
                   </span>
                 )}

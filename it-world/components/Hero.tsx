@@ -17,7 +17,7 @@ export default function Hero() {
         <div>
           <h1 className="text-4xl font-extrabold leading-tight tracking-tight sm:text-5xl">
             Verwandle deine Idee in eine{" "}
-            <span className="text-gold-gradient">hochwirksame Webanwendung</span>
+            <span className="animate-shimmer text-gold-shimmer">hochwirksame Webanwendung</span>
           </h1>
           <p className="mt-6 max-w-xl text-base leading-relaxed text-white/70">
             Bei <span className="text-gold-300 font-semibold">IT-World</span> programmieren wir
@@ -48,7 +48,7 @@ export default function Hero() {
 
           <a
             href="#kontakt"
-            className="mt-10 inline-flex items-center gap-2 rounded-full bg-gold-gradient px-7 py-3.5 text-sm font-bold text-ink-950 shadow-glossy transition-transform hover:scale-105"
+            className="animate-glow mt-10 inline-flex items-center gap-2 rounded-full bg-gold-gradient px-7 py-3.5 text-sm font-bold text-ink-950 shadow-glossy transition-transform hover:scale-105"
           >
             Jetzt Projekt starten
             <span aria-hidden>→</span>
@@ -56,8 +56,8 @@ export default function Hero() {
         </div>
 
         <div className="relative mx-auto flex h-[420px] w-full max-w-md items-center justify-center">
-          <div className="absolute h-72 w-72 rounded-full bg-gold-500/10 blur-3xl" />
-          <Logo size={220} />
+          <div className="absolute h-72 w-72 animate-pulse rounded-full bg-gold-500/10 blur-3xl" />
+          <Logo size={220} spin />
 
           <FloatingIcon size={62} className="left-2 top-6 animate-float">
             {IconPaths.gear}

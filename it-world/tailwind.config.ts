@@ -4,6 +4,17 @@ const config: Config = {
   content: ["./app/**/*.{ts,tsx}", "./components/**/*.{ts,tsx}"],
   theme: {
     extend: {
+      fontFamily: {
+        sans: [
+          "Nunito",
+          "ui-sans-serif",
+          "system-ui",
+          "-apple-system",
+          "Segoe UI",
+          "Roboto",
+          "sans-serif",
+        ],
+      },
       colors: {
         gold: {
           100: "#f9edc9",
@@ -35,11 +46,26 @@ const config: Config = {
         float: "float 6s ease-in-out infinite",
         "float-slow": "float 9s ease-in-out infinite",
         "spin-slow": "spin 18s linear infinite",
+        glow: "glow 2.4s ease-in-out infinite",
+        shimmer: "shimmer 3.5s linear infinite",
+        "ring-spin": "ringSpin 14s linear infinite",
       },
       keyframes: {
         float: {
           "0%, 100%": { transform: "translateY(0px) rotate(0deg)" },
           "50%": { transform: "translateY(-14px) rotate(3deg)" },
+        },
+        glow: {
+          "0%, 100%": { boxShadow: "0 0 0 0 rgba(212,160,23,0.45)" },
+          "50%": { boxShadow: "0 0 26px 6px rgba(212,160,23,0.4)" },
+        },
+        shimmer: {
+          "0%": { backgroundPosition: "0% 0" },
+          "100%": { backgroundPosition: "200% 0" },
+        },
+        ringSpin: {
+          "0%": { transform: "rotate(-16deg)" },
+          "100%": { transform: "rotate(344deg)" },
         },
       },
     },

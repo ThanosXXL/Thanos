@@ -23,21 +23,43 @@ Eine einseitige Landingpage (`app/page.tsx`) mit folgenden Abschnitten:
 - **Kontakt** – CTA mit Kontakt-Link (`mailto:info.it-world@gmx.net` in `components/Contact.tsx`)
 
 Das Logo (glänzende 3D-Weltkugel mit Goldring, `components/Logo.tsx`) ist als reines SVG
-nachgebaut, keine externe Bilddatei nötig. `components/Nav.tsx` ist eine fixierte Kopfzeile mit
+nachgebaut, keine externe Bilddatei nötig. Der Goldring lässt sich per `<Logo spin />` (aktuell nur
+auf dem großen Hero- und dem Kontakt-Logo) als langsame 14s-Rotation animieren, siehe
+`animate-ring-spin` in `tailwind.config.ts`. `components/Nav.tsx` ist eine fixierte Kopfzeile mit
 Anker-Links zu den Sektionen (Desktop-Leiste + Mobile-Menü). Favicon (`app/icon.tsx`) und das
 Social-Share-Vorschaubild (`app/opengraph-image.tsx`) werden zur Build-Zeit von Next.js aus Code
 generiert (`next/og`), ebenso `app/robots.ts`/`app/sitemap.ts`.
 
+## Schrift & Animationen
+
+Die Seite nutzt **Nunito** (warme, humanistische Sans-Serif, über `@fontsource/nunito`
+selbst-gehostet, keine Netzwerkabfrage zur Laufzeit) statt der System-Schrift, eingebunden in
+`app/layout.tsx` und als Standard in `tailwind.config.ts` (`theme.fontFamily.sans`) gesetzt.
+Zusätzlich zu den bestehenden `float`-Animationen (Hero-Icons) und dem `TiltCard`-3D-Hover gibt es:
+
+- **`animate-shimmer`** (+ `.text-gold-shimmer`) – ein durchlaufender Lichtreflex auf Gold-Text,
+  genutzt für den Nav-Schriftzug und die hervorgehobenen Wörter in Hero-/Kontakt-Überschrift
+- **`animate-glow`** – ein pulsierender Gold-Schein (`box-shadow`), genutzt auf den primären
+  CTA-Buttons und der "Für dich empfohlen"-Karte/Badge in `components/Pricing.tsx`
+- **`animate-ring-spin`** – die langsame Ring-Rotation am Logo (siehe oben)
+
+Alle neuen Animationen respektieren `prefers-reduced-motion` (siehe `app/globals.css`) und werden
+dort für Nutzer mit reduzierter Bewegungseinstellung deaktiviert.
+
 ## Demo-Video (`public/demo/`)
 
-`public/demo/it-world-demo.mp4` (~2,8 MB, ~30s, 1440×900) ist eine aufgezeichnete Bildschirmtour
-durch die Seite, unterlegt mit einer Musikspur passender Länge; `it-world-demo-poster.jpg` ist das
-Vorschaubild für den `<video>`-Tag. Beides sind fertige, eingecheckte Binärdateien – keine
-Build-Artefakte. Neu erzeugt wurden sie mit Playwrights `recordVideo` (Chromium fährt automatisiert
-durch alle Sektionen inkl. Hover-Effekten) und ffmpeg (Zuschnitt auf die Musiklänge, Ein-/Ausblenden,
-H.264/AAC-Mux); beide Tools waren dafür nur temporär als devDependency installiert und sind nicht
-Teil von `package.json`. Um das Video zu ersetzen, einfach eine neue Datei unter demselben Pfad
-ablegen (Seitenverhältnis/Codec wie oben, `<video>`-Tag und Download-Button in `components/Demo.tsx`
+`public/demo/it-world-demo.mp4` (~3,3 MB, ~30s, 1440×900) ist eine aufgezeichnete Bildschirmtour
+durch die Seite (Hero, Galerie, Leistungen, Warum-uns, Pakete, Tech-Stack, Kontakt), unterlegt mit
+einer Musikspur passender Länge; `it-world-demo-poster.jpg` ist das Vorschaubild für den
+`<video>`-Tag. Beides sind fertige, eingecheckte Binärdateien – keine Build-Artefakte. Neu erzeugt
+wurden sie mit Playwrights `recordVideo` (Chromium fährt automatisiert durch alle Sektionen inkl.
+Hover-/Tilt-Effekten) und ffmpeg (Zuschnitt auf die Musiklänge, Ein-/Ausblenden, H.264/AAC-Mux);
+beide Tools waren dafür nur temporär als devDependency installiert und sind nicht Teil von
+`package.json`. Bei jeder sichtbaren Änderung an der Seite (neue Sektion, neue Preise, neues
+Design) sollte das Video neu aufgenommen werden, sonst zeigt es einen veralteten Stand; die
+Dateigröße in `components/Demo.tsx` (`FILE_SIZE_MB`) danach auf die tatsächliche Dateigröße
+anpassen. Um das Video zu ersetzen, einfach eine neue Datei unter demselben Pfad ablegen
+(Seitenverhältnis/Codec wie oben, `<video>`-Tag und Download-Button in `components/Demo.tsx`
 bleiben unverändert).
 
 ## Galerie (`public/gig/`)
@@ -47,7 +69,10 @@ KI-generiert (gpt-image-2 über die ElevenLabs-Bildgenerierung) und mit ffmpeg v
 konvertiert (nur temporär als devDependency installiert, nicht Teil von `package.json`). Sie sind
 fertige, eingecheckte Binärdateien. Zum Austauschen einfach eine neue Datei unter demselben Pfad
 und Namen ablegen (Seitenverhältnis 16:9); `components/Gallery.tsx` referenziert sie per `<img>`
-mit festen `width`/`height` (1280×720) gegen Layout-Shift.
+mit festen `width`/`height` (1280×720) gegen Layout-Shift. Bewusst **kein** `loading="lazy"` und
+**kein** `decoding="async"` auf diesen `<img>`-Tags: beides führte in Tests zu Bildern, die bei
+synthetischen Full-Page-Screenshots (Crawler, Vorschau-Tools) leer/schwarz blieben, weil Laden bzw.
+Decodieren nicht rechtzeitig vor der Aufnahme abgeschlossen war.
 
 ## Rechtliches: Impressum (`app/impressum/`)
 
