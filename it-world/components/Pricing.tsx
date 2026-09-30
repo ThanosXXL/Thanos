@@ -14,15 +14,15 @@ const tiers: Tier[] = [
   {
     name: "Basic",
     tagline: "Prototyp-App",
-    price: "460,90 €",
+    price: "989 €",
     description: "Klickbarer Prototyp zur Validierung deiner Idee.",
-    revisions: "0 Revisionen",
+    revisions: "1 Revision",
     delivery: "14 Tage Lieferzeit",
   },
   {
     name: "Standard",
     tagline: "MVP-Start",
-    price: "1.844 €",
+    price: "2.440 €",
     description: "Kernfunktionen + APIs, bereit für den Marktstart.",
     revisions: "3 Revisionen",
     delivery: "60 Tage Lieferzeit",
