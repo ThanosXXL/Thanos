@@ -19,8 +19,8 @@ export default function Nav() {
     <header className="sticky top-0 z-50 border-b border-white/5 bg-ink-950/70 backdrop-blur-md">
       <div className="mx-auto flex max-w-6xl items-center justify-between px-6 py-3">
         <a href="#top" className="flex items-center gap-2" aria-label="IT-World Startseite">
-          <Logo size={40} showText={false} />
-          <span className="hidden animate-shimmer text-sm font-bold tracking-[0.2em] text-gold-shimmer sm:inline">
+          <Logo size={36} showText={false} className="shrink-0" />
+          <span className="animate-shimmer whitespace-nowrap text-xs font-bold tracking-[0.12em] text-gold-shimmer sm:text-sm sm:tracking-[0.2em]">
             IT-WORLD
           </span>
         </a>
