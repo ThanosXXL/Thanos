@@ -14,7 +14,7 @@ export default function Contact() {
           uns noch heute, um loszulegen.
         </p>
         <a
-          href="mailto:kontakt@it-world.dev"
+          href="mailto:info.it-world@gmx.net"
           className="mt-8 inline-flex items-center gap-2 rounded-full bg-gold-gradient px-8 py-4 text-sm font-bold text-ink-950 shadow-glossy transition-transform hover:scale-105"
         >
           Jetzt Kontakt aufnehmen

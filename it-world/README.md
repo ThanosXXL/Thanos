@@ -20,8 +20,7 @@ Eine einseitige Landingpage (`app/page.tsx`) mit folgenden Abschnitten:
   Lieferzeiten
 - **Tech-Stack** – Programmiersprache, Expertise, Frontend-/Backend-Frameworks sowie
   KI-/No-Code-Builder als gruppierte Badges
-- **Kontakt** – CTA mit Kontakt-Link (Platzhalter-E-Mail in `components/Contact.tsx`, bitte durch
-  die echte Kontaktadresse bzw. den Fiverr-Gig-Link ersetzen)
+- **Kontakt** – CTA mit Kontakt-Link (`mailto:info.it-world@gmx.net` in `components/Contact.tsx`)
 
 Das Logo (glänzende 3D-Weltkugel mit Goldring, `components/Logo.tsx`) ist als reines SVG
 nachgebaut, keine externe Bilddatei nötig. `components/Nav.tsx` ist eine fixierte Kopfzeile mit
@@ -92,8 +91,7 @@ Ausführen aus `it-world/`, nicht aus dem Repo-Root.
 ### 1. Vor der Veröffentlichung ausfüllen (Checkliste)
 
 - [ ] **Impressum** – echte Angaben in `app/impressum/page.tsx` eintragen (siehe oben)
-- [ ] **Kontakt-E-Mail** – Platzhalter `kontakt@it-world.dev` in `components/Contact.tsx` durch die
-      echte Adresse bzw. den Fiverr-Gig-Link ersetzen
+- [x] **Kontakt-E-Mail** – gesetzt auf `info.it-world@gmx.net` in `components/Contact.tsx`
 - [ ] **Domain** – Umgebungsvariable `NEXT_PUBLIC_SITE_URL` auf die echte Domain setzen (wirkt sich
       auf `sitemap.xml`, `robots.txt` und die Open-Graph-Vorschau aus)
 - [ ] Optional: eigenes Logo/Bilder/Preise anpassen (`components/Logo.tsx`, `public/gig/`,
