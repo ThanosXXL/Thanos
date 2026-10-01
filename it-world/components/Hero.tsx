@@ -15,9 +15,10 @@ export default function Hero() {
     <section id="top" className="relative overflow-hidden px-6 pb-24 pt-14 sm:pt-20">
       <div className="mx-auto grid max-w-6xl grid-cols-1 items-center gap-16 lg:grid-cols-2">
         <div>
-          <h1 className="text-4xl font-extrabold leading-tight tracking-tight sm:text-5xl">
-            Verwandle deine Idee in eine{" "}
-            <span className="animate-shimmer text-gold-shimmer">hochwirksame Webanwendung</span>
+          <h1 className="text-5xl font-extrabold leading-[1.05] tracking-tight sm:text-6xl">
+            Deine Idee. Unser Code.
+            <br />
+            <span className="animate-shimmer text-gold-shimmer">Eine Webapp, die gewinnt.</span>
           </h1>
           <p className="mt-6 max-w-xl text-base leading-relaxed text-white/70">
             Bei <span className="text-gold-300 font-semibold">IT-World</span> programmieren wir
