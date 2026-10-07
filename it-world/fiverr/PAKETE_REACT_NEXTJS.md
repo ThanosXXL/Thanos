@@ -31,6 +31,8 @@ Legende: ✅ inklusive · ❌ nicht enthalten · 🔽 Dropdown-Auswahl · 🔢 Z
 - ✅ Google Analytics oder Plausible
 - ✅ Deployment auf Vercel oder Netlify
 - ✅ Quellcode und README
+- ✅ HTML-Link auf Windows, macOS, Linux, Android, iOS und ChromeOS
+- ✅ Übergabe-Call (Video, 30 Min) und Einweisung
 - ✅ 14 Tage Support
 - ❌ CMS, Mehrsprachigkeit, Login, Datenbank
 
@@ -62,6 +64,8 @@ Legende: ✅ inklusive · ❌ nicht enthalten · 🔽 Dropdown-Auswahl · 🔢 Z
 - ✅ Domain-Anbindung und SSL
 - ✅ Google Maps, Kalender oder Calendly
 - ✅ Cookie-Consent mit Tracking-Steuerung
+- ✅ Installierbar als App (PWA) auf allen Plattformen
+- ✅ Übergabe-Call (Video, 60 Min), Einweisungsvideo und Doku
 - ✅ 30 Tage Support
 - Optional gegen Aufpreis: Shop-Funktion (Stripe), Mitgliederbereich, Live-Chat
 
@@ -99,7 +103,8 @@ Legende: ✅ inklusive · ❌ nicht enthalten · 🔽 Dropdown-Auswahl · 🔢 Z
 - ✅ Automatisierte Tests (Unit und E2E)
 - ✅ CI/CD-Pipeline und Staging-Umgebung
 - ✅ Dokumentierter TypeScript-Code
-- ✅ Übergabe-Call (Video) und Einweisung
+- ✅ Installierbar als App (PWA) auf allen Plattformen, Offline-Grundfunktion
+- ✅ Übergabe-Call (Video, 90 Min), Einweisungsvideo, Doku und Team-Einweisung (bis 5 Personen)
 - ✅ 60 Tage Support
 
 ---
@@ -120,8 +125,38 @@ Legende: ✅ inklusive · ❌ nicht enthalten · 🔽 Dropdown-Auswahl · 🔢 Z
 | Automatisierte Tests (E2E) | +590 € | +4 Tage |
 | 30 Tage zusätzlicher Support | +290 € | |
 | Wartungspaket (monatlich) | +190 €/Monat | |
+| Offline-Modus + Push-Benachrichtigungen | +690 € | +4 Tage |
+| Desktop-App (Windows/macOS/Linux) | +1.490 € | +7 Tage |
+| Native App Android + iOS (Store-Veröffentlichung) | +2.490 € | +14 Tage |
+| Zusätzlicher Einweisungs-Call (60 Min) | +190 € | |
 
 ---
+
+---
+
+## 🌍 Plattformen & Zugriff per HTML-Link (alle Pakete)
+Deine Web-App läuft per **Link im Browser** auf allen Geräten, ohne Installation, ohne App-Store:
+
+| Plattform | Zugriff | Installierbar als App (PWA) |
+|---|---|---|
+| 🪟 Windows | Chrome, Edge, Firefox | ✅ (Chrome/Edge) |
+| 🍎 macOS | Safari, Chrome, Edge, Firefox | ✅ (Safari „Zum Dock“, Chrome/Edge) |
+| 🐧 Linux | Chrome, Chromium, Firefox, Edge | ✅ (Chrome/Chromium/Edge) |
+| 🤖 Android | Chrome, Samsung Internet, Firefox | ✅ „Zum Startbildschirm“ |
+| 📱 iOS / iPadOS (iPhone, iPad) | Safari, Chrome | ✅ „Zum Home-Bildschirm“ |
+| 💻 ChromeOS (Chromebooks) | Chrome | ✅ |
+| 📲 Tablets & Foldables | alle Browser oben | ✅ |
+
+**Zusätzlich enthalten:** responsives Layout für Handy, Tablet, Laptop und große Bildschirme · Touch- und Tastaturbedienung · Dark/Light-Mode · getestet in Chrome, Edge, Firefox, Safari und Samsung Internet · eigene Domain mit SSL · Lade-Link zum Teilen (auch per QR-Code).
+
+**Optional gegen Aufpreis:** Offline-Modus und Push-Benachrichtigungen · Desktop-App (Windows .exe, macOS .dmg, Linux AppImage) mit Electron/Tauri · native App für Android (APK/Play Store) und iOS (App Store) mit Capacitor.
+
+## 🎥 Übergabe & Einweisung
+- **Übergabe-Call per Video** (Zoom, Google Meet oder Teams), Dauer je Paket: Basic 30 Min · Standard 60 Min · Premium 90 Min
+- **Aufgezeichnetes Einweisungsvideo** zum Nachschauen (Bedienung, Inhalte pflegen, Deployment)
+- **Schriftliche Doku:** README, Setup-Anleitung, Zugangsdaten-Übersicht
+- **Einweisung für dein Team** (Premium: bis zu 5 Personen)
+- Fragen nach dem Call werden im Support-Zeitraum beantwortet
 
 ## ❓ FAQ
 1. **Kannst du mein Figma-, XD- oder PSD-Design umsetzen?** Ja, pixelgenau und responsive.

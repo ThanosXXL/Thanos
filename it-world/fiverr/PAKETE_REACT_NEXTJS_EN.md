@@ -31,6 +31,8 @@ Legend: ✅ included · ❌ not included · 🔽 dropdown · 🔢 number field
 - ✅ Google Analytics or Plausible
 - ✅ Deployment on Vercel or Netlify
 - ✅ Source code and README
+- ✅ HTML link for Windows, macOS, Linux, Android, iOS and ChromeOS
+- ✅ Handover video call (30 min) and onboarding
 - ✅ 14 days support
 - ❌ CMS, multi-language, login, database
 
@@ -62,6 +64,8 @@ Legend: ✅ included · ❌ not included · 🔽 dropdown · 🔢 number field
 - ✅ Domain setup and SSL
 - ✅ Google Maps, calendar or Calendly
 - ✅ Cookie consent with tracking control
+- ✅ Installable as an app (PWA) on all platforms
+- ✅ Handover video call (60 min), onboarding video and docs
 - ✅ 30 days support
 - Optional extras: shop (Stripe), member area, live chat
 
@@ -99,7 +103,8 @@ Legend: ✅ included · ❌ not included · 🔽 dropdown · 🔢 number field
 - ✅ Automated tests (unit and E2E)
 - ✅ CI/CD pipeline and staging environment
 - ✅ Documented TypeScript code
-- ✅ Handover call (video) and onboarding
+- ✅ Installable as an app (PWA) on all platforms, basic offline support
+- ✅ Handover video call (90 min), onboarding video, docs and team onboarding (up to 5 people)
 - ✅ 60 days support
 
 ---
@@ -120,8 +125,38 @@ Legend: ✅ included · ❌ not included · 🔽 dropdown · 🔢 number field
 | Automated tests (E2E) | €590 | +4 days |
 | 30 extra days of support | €290 | |
 | Maintenance plan (monthly) | €190/month | |
+| Offline mode + push notifications | €690 | +4 days |
+| Desktop app (Windows/macOS/Linux) | €1,490 | +7 days |
+| Native Android + iOS app (store publishing) | €2,490 | +14 days |
+| Additional onboarding call (60 min) | €190 | |
 
 ---
+
+---
+
+## 🌍 Platforms & Access via HTML Link (all packages)
+Your web app runs from a **link in the browser** on every device, with no installation and no app store:
+
+| Platform | Access | Installable as app (PWA) |
+|---|---|---|
+| 🪟 Windows | Chrome, Edge, Firefox | ✅ (Chrome/Edge) |
+| 🍎 macOS | Safari, Chrome, Edge, Firefox | ✅ (Safari "Add to Dock", Chrome/Edge) |
+| 🐧 Linux | Chrome, Chromium, Firefox, Edge | ✅ (Chrome/Chromium/Edge) |
+| 🤖 Android | Chrome, Samsung Internet, Firefox | ✅ "Add to Home screen" |
+| 📱 iOS / iPadOS (iPhone, iPad) | Safari, Chrome | ✅ "Add to Home Screen" |
+| 💻 ChromeOS (Chromebooks) | Chrome | ✅ |
+| 📲 Tablets & foldables | all browsers above | ✅ |
+
+**Also included:** responsive layout for phone, tablet, laptop and large screens · touch and keyboard control · dark/light mode · tested in Chrome, Edge, Firefox, Safari and Samsung Internet · custom domain with SSL · shareable link (also as QR code).
+
+**Optional, at extra cost:** offline mode and push notifications · desktop app (Windows .exe, macOS .dmg, Linux AppImage) with Electron/Tauri · native Android (APK/Play Store) and iOS (App Store) app with Capacitor.
+
+## 🎥 Handover & Onboarding
+- **Handover video call** (Zoom, Google Meet or Teams), length per package: Basic 30 min · Standard 60 min · Premium 90 min
+- **Recorded onboarding video** to rewatch (usage, editing content, deployment)
+- **Written docs:** README, setup guide, access/credentials overview
+- **Team onboarding** (Premium: up to 5 people)
+- Follow-up questions answered during the support period
 
 ## ❓ FAQ
 1. **Can you implement my Figma, XD or PSD design?** Yes, pixel-perfect and responsive.
