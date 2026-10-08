@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 220" width="800" height="220">
+  <rect width="800" height="220" fill="#06143a"/>
+  <g stroke="#1a3a7a" stroke-width="1">
+    <path d="M0 20h800M0 40h800M0 60h800M0 80h800M0 100h800M0 120h800M0 140h800M0 160h800M0 180h800M0 200h800"/>
+    <path d="M20 0v220M40 0v220M60 0v220M80 0v220M100 0v220M120 0v220M140 0v220M160 0v220M180 0v220M200 0v220M220 0v220M240 0v220M260 0v220M280 0v220M300 0v220M320 0v220M340 0v220M360 0v220M380 0v220M400 0v220M420 0v220M440 0v220M460 0v220M480 0v220M500 0v220M520 0v220M540 0v220M560 0v220M580 0v220M600 0v220M620 0v220M640 0v220M660 0v220M680 0v220M700 0v220M720 0v220M740 0v220M760 0v220M780 0v220"/>
+  </g>
+  <path d="M0 120 h60 q10 -20 20 0 h30 l10 14 l14 -90 l14 120 l10 -44 h40 q16 -30 34 0 h120 q10 -20 20 0 h30 l10 14 l14 -90 l14 120 l10 -44 h40 q16 -30 34 0 h120 q10 -20 20 0 h30 l10 14 l14 -90 l14 120 l10 -44 h40" fill="none" stroke="#5bf0a8" stroke-width="3" stroke-linejoin="round"/>
+  <text x="14" y="206" font-family="Open Sans, sans-serif" font-size="14" fill="#8fb4e6">Beispielbefund · Ruhe-EKG · 25 mm/s · Sinusrhythmus 72/min</text>
+</svg>

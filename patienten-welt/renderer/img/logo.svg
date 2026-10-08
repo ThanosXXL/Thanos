@@ -1,0 +1,34 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512">
+  <defs>
+    <radialGradient id="globe" cx="0.35" cy="0.3" r="0.85"><stop offset="0" stop-color="#7ef0e0"/><stop offset="0.4" stop-color="#1bb4c8"/><stop offset="1" stop-color="#0a4a8a"/></radialGradient>
+    <linearGradient id="heart" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#ff9aa6"/><stop offset="0.5" stop-color="#ee2f4d"/><stop offset="1" stop-color="#9a1030"/></linearGradient>
+    <linearGradient id="hs" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#8a1030"/><stop offset="1" stop-color="#450818"/></linearGradient>
+    <linearGradient id="gl" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#fff" stop-opacity="0.85"/><stop offset="1" stop-color="#fff" stop-opacity="0"/></linearGradient>
+    <linearGradient id="ring" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#fff6c8"/><stop offset="0.5" stop-color="#f2b632"/><stop offset="1" stop-color="#9a6410"/></linearGradient>
+    <filter id="bl"><feGaussianBlur stdDeviation="12"/></filter>
+    <filter id="bs"><feGaussianBlur stdDeviation="3"/></filter>
+    <clipPath id="gc"><circle cx="256" cy="246" r="190"/></clipPath>
+  </defs>
+  <ellipse cx="256" cy="488" rx="150" ry="14" fill="#000" opacity="0.5" filter="url(#bl)"/>
+  <circle cx="256" cy="262" r="200" fill="#042a55"/>
+  <circle cx="256" cy="246" r="200" fill="url(#ring)"/>
+  <circle cx="256" cy="246" r="190" fill="url(#globe)"/>
+  <g clip-path="url(#gc)" fill="none" stroke="#fff" stroke-opacity="0.35" stroke-width="4">
+    <ellipse cx="256" cy="246" rx="190" ry="70"/><ellipse cx="256" cy="246" rx="100" ry="190"/><path d="M66 246H446M256 56V436"/>
+    <path d="M90 150 Q256 190 422 150M90 342 Q256 302 422 342"/>
+  </g>
+  <g clip-path="url(#gc)" fill="#fff" opacity="0.22"><path d="M120 150c30-30 70-20 80 10s-20 50-50 50-60-30-30-60z"/><path d="M300 270c40-20 90 10 90 50s-40 60-70 40-50-70-20-90z"/></g>
+  <!-- 3D-Herz -->
+  <g transform="translate(0 -4)">
+    <g fill="url(#hs)">
+      <path id="h" d="M256 380 C170 316 140 262 140 220 C140 180 170 156 204 156 C228 156 246 168 256 188 C266 168 284 156 308 156 C342 156 372 180 372 220 C372 262 342 316 256 380z" transform="translate(0 24)"/>
+      <path d="M256 380 C170 316 140 262 140 220 C140 180 170 156 204 156 C228 156 246 168 256 188 C266 168 284 156 308 156 C342 156 372 180 372 220 C372 262 342 316 256 380z" transform="translate(0 16)"/>
+      <path d="M256 380 C170 316 140 262 140 220 C140 180 170 156 204 156 C228 156 246 168 256 188 C266 168 284 156 308 156 C342 156 372 180 372 220 C372 262 342 316 256 380z" transform="translate(0 8)"/>
+    </g>
+    <path d="M256 380 C170 316 140 262 140 220 C140 180 170 156 204 156 C228 156 246 168 256 188 C266 168 284 156 308 156 C342 156 372 180 372 220 C372 262 342 316 256 380z" fill="url(#heart)"/>
+    <path d="M168 214 C166 190 184 176 204 176" stroke="#fff" stroke-width="9" stroke-linecap="round" fill="none" opacity="0.8"/>
+    <path d="M166 250 H214 l14 -26 l22 56 l20 -42 l12 12 H350" stroke="#fff" stroke-width="9" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+  </g>
+  <!-- Hochglanz -->
+  <g clip-path="url(#gc)"><ellipse cx="200" cy="110" rx="130" ry="50" fill="url(#gl)" transform="rotate(-20 200 110)" opacity="0.75"/></g>
+</svg>
