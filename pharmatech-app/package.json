@@ -3,7 +3,7 @@
   "version": "1.0.0",
   "description": "Desktop-App für Pharma-Tech, das Apotheken-Betriebssystem",
   "main": "main.js",
-  "author": "",
+  "author": "IT-World",
   "license": "MIT",
   "scripts": {
     "start": "electron .",
@@ -16,6 +16,7 @@
   "build": {
     "appId": "com.pharmatech.app",
     "productName": "Pharma-Tech",
+    "copyright": "Copyright © IT-World",
     "files": [
       "main.js",
       "preload.js",
