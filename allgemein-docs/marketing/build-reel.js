@@ -17,7 +17,7 @@ const SCENES = [
   { len: 3000, h1: 'E-Rezept', accent: 'auf der Karte.', sub: 'Direkt nach dem Einlesen ausstellen.', img: 'erezept', pills: ['E-Rezept', 'Token', 'Apotheke'], orb: ['red', 'heart'] },
   { len: 3000, h1: 'Vorsorge', accent: 'im Blick.', sub: 'Recall-Liste und Impfstatus.', img: 'vorsorge', pills: ['Recall', 'Impfungen'], orb: ['green', 'check'] },
   { len: 3000, h1: 'Verschlüsselt.', accent: 'Von Anfang an.', sub: 'AES-256, Rollen, kein Internet.', img: 'datenschutz', pills: ['AES-256', 'Rollen', 'Check'], orb: ['blue', 'lock'] },
-  { len: 3000, h1: 'Strg+L.', accent: 'Gesperrt.', sub: 'Mit manipulationssicherem Protokoll.', img: 'protokoll', pills: ['Auto-Sperre', 'Protokoll', 'Betroffenenrechte'], orb: ['green', 'shield'] },
+  { len: 3000, h1: 'Strg+L.', accent: 'Gesperrt.', sub: 'Mit manipulationssicherem Protokoll.', img: 'protokoll', pills: ['Auto-Sperre', 'Protokoll', 'Rollen'], orb: ['green', 'shield'] },
   { len: 3000, type: 'outro' }
 ];
 const DURATION = SCENES.reduce((t, s) => t + s.len, 0) / 1000;
