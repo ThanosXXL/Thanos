@@ -11,6 +11,8 @@ const ICON = {
   doc: '<path d="M6 3h9l4 4v14H6z" fill="none" stroke="#fff" stroke-width="2.4" stroke-linejoin="round"/><path d="M9 12h7M9 16h7" stroke="#fff" stroke-width="2.4" stroke-linecap="round"/>',
   bell: '<path d="M6 16v-5a6 6 0 0 1 12 0v5l2 2H4zM10 21h4" fill="none" stroke="#fff" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/>',
   heart: '<path d="M12 20C5 15 3 11.5 3 8.8 3 6.5 4.8 5 7 5c2 0 3.5 1 5 3 1.5-2 3-3 5-3 2.2 0 4 1.5 4 3.8 0 2.7-2 6.2-9 11.2z" fill="#fff"/>',
+  lock: '<rect x="5" y="10.5" width="14" height="10" rx="2.2" fill="#fff"/><path d="M8 10.5V8a4 4 0 0 1 8 0v2.5" fill="none" stroke="#fff" stroke-width="2.6" stroke-linecap="round"/><circle cx="12" cy="15.5" r="1.7" fill="#2a5fb8"/>',
+  shield: '<path d="M12 2.8l7.5 2.8v6c0 4.7-3.1 8.2-7.5 9.8-4.4-1.6-7.5-5.1-7.5-9.8v-6z" fill="#fff"/><path d="M8.3 12l2.7 2.7 4.7-5.2" fill="none" stroke="#1b5fc9" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/>',
   chart: '<path d="M5 20V10M12 20V4M19 20v-7" stroke="#fff" stroke-width="3.4" stroke-linecap="round"/>'
 };
 

@@ -1,8 +1,10 @@
 const { contextBridge, ipcRenderer } = require('electron');
 
+// Einzige Brücke zwischen Oberfläche und Hauptprozess. Die Oberfläche bekommt weder Node noch Dateizugriff.
 contextBridge.exposeInMainWorld('welt', {
   loadData: () => ipcRenderer.invoke('load-data'),
   saveData: (data) => ipcRenderer.invoke('save-data', data),
-  exportBackup: (data) => ipcRenderer.invoke('export-backup', data),
-  importBackup: () => ipcRenderer.invoke('import-backup')
+  saveTextFile: (opts) => ipcRenderer.invoke('save-text-file', opts),
+  openTextFile: (opts) => ipcRenderer.invoke('open-text-file', opts),
+  deleteAllData: () => ipcRenderer.invoke('delete-all-data')
 });

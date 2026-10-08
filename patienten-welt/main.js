@@ -13,32 +13,60 @@ const dataFilePath = path.join(app.getPath('userData'), 'patienten-welt-data.jso
 const MAX_BYTES = 256 * 1024 * 1024;
 const trusted = (event) => !!event.senderFrame && String(event.senderFrame.url).startsWith('file://');
 
-// Gesundheitsdaten werden mit dem Schlüsselbund des Betriebssystems (safeStorage) verschlüsselt, soweit verfügbar.
-// Alte, unverschlüsselte Dateien werden weiter gelesen und beim nächsten Speichern verschlüsselt.
+let lastBackupAt = 0;
+let mainWindow = null;
+
+const readJson = (file) => JSON.parse(fs.readFileSync(file, 'utf-8'));
+// Die Datei enthält ausschließlich den undurchsichtigen, verschlüsselten Tresor (siehe renderer/vault.js).
+const isVaultFile = (file) => { try { const j = readJson(file); return !!j && typeof j.vault === 'number' && typeof j.data === 'string'; } catch (err) { return false; } };
+
+// Alte Versionen speicherten Klartext oder eine safeStorage-Hülle ({ enc }). Beides wird nur noch gelesen und
+// vom Renderer beim Einrichten des Passworts in den Tresor übernommen; es wird nie wieder so geschrieben.
 function loadData() {
-  try {
-    const parsed = JSON.parse(fs.readFileSync(dataFilePath, 'utf-8'));
-    if (parsed && typeof parsed.enc === 'string' && safeStorage.isEncryptionAvailable()) {
-      return JSON.parse(safeStorage.decryptString(Buffer.from(parsed.enc, 'base64')));
-    }
-    return parsed && parsed.enc ? null : parsed;
-  } catch (err) {
-    return null; // Renderer legt Beispieldaten an
+  for (const file of [dataFilePath, dataFilePath + '.bak']) {
+    try {
+      const parsed = readJson(file);
+      if (parsed && typeof parsed.enc === 'string') {
+        try {
+          return JSON.parse(safeStorage.decryptString(Buffer.from(parsed.enc, 'base64')));
+        } catch (err) { return { unreadable: true }; }
+      }
+      return parsed;
+    } catch (err) { /* nächste Datei versuchen */ }
   }
+  return null; // Renderer startet den Einrichtungsassistenten
 }
 
-// Atomar schreiben (Temp-Datei + Umbenennen), nur für den eigenen Benutzer lesbar
+// Atomar schreiben (Temp-Datei + Umbenennen), nur für den eigenen Benutzer lesbar, gelegentlich eine Sicherheitskopie.
+// Eine Kopie entsteht nur von verschlüsselten Dateien, damit nie Klartext einer alten Version übrig bleibt.
 function saveData(data) {
   const text = JSON.stringify(data);
   if (text.length > MAX_BYTES) throw new Error('Daten zu groß');
-  const out = safeStorage.isEncryptionAvailable() ? JSON.stringify({ enc: safeStorage.encryptString(text).toString('base64') }) : text;
   const tmp = dataFilePath + '.tmp';
-  fs.writeFileSync(tmp, out, { encoding: 'utf-8', mode: 0o600 });
+  fs.writeFileSync(tmp, text, { encoding: 'utf-8', mode: 0o600 });
+  const bak = dataFilePath + '.bak';
+  if (typeof data.vault === 'number') {
+    if (fs.existsSync(bak) && !isVaultFile(bak)) fs.rmSync(bak, { force: true });
+    if (fs.existsSync(dataFilePath) && isVaultFile(dataFilePath) && Date.now() - lastBackupAt > 5 * 60 * 1000) {
+      try {
+        fs.copyFileSync(dataFilePath, bak);
+        fs.chmodSync(bak, 0o600);
+        lastBackupAt = Date.now();
+      } catch (err) { /* Kopie ist optional */ }
+    }
+  }
   fs.renameSync(tmp, dataFilePath);
 }
 
+// Art. 17 DSGVO: Datendatei, Sicherheitskopie und Reste unwiderruflich entfernen
+function deleteAllData() {
+  for (const f of [dataFilePath, dataFilePath + '.bak', dataFilePath + '.tmp']) fs.rmSync(f, { force: true });
+}
+
+const safeName = (n, fallback) => path.basename(String(n || fallback)).replace(/[^\w.\- äöüÄÖÜß]/g, '_');
+
 function createWindow() {
-  const win = new BrowserWindow({
+  mainWindow = new BrowserWindow({
     width: 1440,
     height: 900,
     minWidth: 1000,
@@ -56,43 +84,49 @@ function createWindow() {
       devTools: !app.isPackaged
     }
   });
-  win.setMenuBarVisibility(false);
-  win.loadFile(path.join(__dirname, 'renderer', 'index.html'));
+  mainWindow.setMenuBarVisibility(false);
+  mainWindow.loadFile(path.join(__dirname, 'renderer', 'index.html'));
 }
 
 ipcMain.handle('load-data', (event) => (trusted(event) ? loadData() : null));
 
 ipcMain.handle('save-data', (event, data) => {
-  if (!trusted(event) || !data || typeof data !== 'object') return false;
+  // Es werden ausschließlich verschlüsselte Tresor-Umschläge geschrieben, niemals Klartext
+  if (!trusted(event) || !data || typeof data !== 'object' || typeof data.vault !== 'number' || typeof data.data !== 'string') return false;
   saveData(data);
   return true;
 });
 
-ipcMain.handle('export-backup', async (event, data) => {
+ipcMain.handle('delete-all-data', (event) => {
   if (!trusted(event)) return false;
-  const result = await dialog.showSaveDialog({
-    title: 'Datensicherung speichern',
-    defaultPath: 'patienten-welt-backup.json',
-    filters: [{ name: 'JSON', extensions: ['json'] }]
-  });
-  if (result.canceled || !result.filePath) return false;
-  fs.writeFileSync(result.filePath, JSON.stringify(data, null, 2), { encoding: 'utf-8', mode: 0o600 });
+  deleteAllData();
   return true;
 });
 
-ipcMain.handle('import-backup', async (event) => {
+// Datei speichern (Sicherung, Datenkopie, Auskunft): Dialog im Hauptprozess, Datei nur für den Benutzer lesbar
+ipcMain.handle('save-text-file', async (event, opts) => {
+  if (!trusted(event) || !opts || typeof opts.text !== 'string' || opts.text.length > MAX_BYTES) return { ok: false };
+  const result = await dialog.showSaveDialog(mainWindow, {
+    title: opts.title || 'Datei speichern',
+    defaultPath: safeName(opts.defaultName, 'patienten-welt.txt'),
+    filters: Array.isArray(opts.filters) ? opts.filters.slice(0, 4) : [{ name: 'Alle Dateien', extensions: ['*'] }]
+  });
+  if (result.canceled || !result.filePath) return { ok: false };
+  fs.writeFileSync(result.filePath, opts.text, { encoding: 'utf-8', mode: 0o600 });
+  return { ok: true, name: path.basename(result.filePath) };
+});
+
+ipcMain.handle('open-text-file', async (event, opts) => {
   if (!trusted(event)) return null;
-  const result = await dialog.showOpenDialog({
-    title: 'Datensicherung laden',
+  const result = await dialog.showOpenDialog(mainWindow, {
+    title: (opts && opts.title) || 'Datei öffnen',
     properties: ['openFile'],
-    filters: [{ name: 'JSON', extensions: ['json'] }]
+    filters: opts && Array.isArray(opts.filters) ? opts.filters.slice(0, 4) : [{ name: 'Alle Dateien', extensions: ['*'] }]
   });
   if (result.canceled || !result.filePaths.length) return null;
-  try {
-    return JSON.parse(fs.readFileSync(result.filePaths[0], 'utf-8'));
-  } catch (err) {
-    return null;
-  }
+  const file = result.filePaths[0];
+  if (fs.statSync(file).size > MAX_BYTES) return null;
+  return { name: path.basename(file), text: fs.readFileSync(file, 'utf-8') };
 });
 
 app.whenReady().then(() => {
@@ -115,8 +149,10 @@ app.on('web-contents-created', (event, contents) => {
 });
 
 app.on('second-instance', () => {
-  const w = BrowserWindow.getAllWindows()[0];
-  if (w) { if (w.isMinimized()) w.restore(); w.focus(); }
+  if (mainWindow) {
+    if (mainWindow.isMinimized()) mainWindow.restore();
+    mainWindow.focus();
+  }
 });
 
 app.on('window-all-closed', () => {

@@ -70,8 +70,8 @@ Im Ordner `marketing/` liegen die Skripte (Playwright + ffmpeg, alles reproduzie
 cd marketing
 node render-icon.js       # build/icon.png aus logo.svg
 node capture-shots.js     # App-Screenshots mit Beispieldaten
-node build-instagram.js   # 5 Feed-Bilder (1080x1080) + Story-Cover (1080x1920) -> renderer/media/instagram/
-node build-reel.js        # Reel 1080x1920, 18 s -> renderer/media/allgemein-docs-reel.mp4
+node build-instagram.js   # 15 Feed-Bilder (1080x1080) + Story-Cover (1080x1920) -> renderer/media/instagram/
+node build-reel.js        # Reel 1080x1920, 36 s -> renderer/media/allgemein-docs-reel.mp4
 node build-demo.js        # Demo-Video 1920x1080 (Intro, App-Tour, Outro) -> renderer/media/allgemein-docs-demo.mp4
 ```
 

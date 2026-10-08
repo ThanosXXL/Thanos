@@ -61,5 +61,20 @@ const OUT = path.join(__dirname, 'shots');
   await page.click('.nav-item >> text=Medikamentenkatalog');
   await page.fill('.med-panel input', 'ramip');
   await shot('katalog');
+  // Datenschutz & Sicherheit (vorher alles nach oben scrollen)
+  const top = () => page.evaluate(() => document.querySelectorAll('*').forEach((e) => { if (e.scrollTop) e.scrollTop = 0; }));
+  const shotTop = async (name) => { await page.waitForTimeout(800); await top(); await shot(name); };
+  await page.click('.nav-item >> text=Datenschutz & Sicherheit');
+  await shotTop('datenschutz');
+  await page.click('.tab >> text=Protokoll');
+  await shotTop('protokoll');
+  await page.click('.nav-item >> text=Patienten');
+  await page.click('.item.clickable >> nth=0');
+  await page.click('.tab:text-is("Datenschutz")');
+  await shotTop('patient-datenschutz');
+  // Sperrbildschirm (zuletzt: danach ist die App gesperrt)
+  await page.keyboard.press('Control+l');
+  await page.waitForSelector('#li-pw');
+  await shotTop('login');
   await browser.close();
 })();

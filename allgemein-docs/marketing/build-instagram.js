@@ -53,6 +53,9 @@ const posts = {
   'post-10-au-digital': feed({ h1: 'Krankmeldung', accent: 'digital an KV & AG.', sub: 'Krankenkasse und Arbeitgeber digital informieren – in der Demo simuliert.', img: 'au', orbs: orb('gold', 'doc', 130, 'right:70px;top:150px') + orb('green', 'check', 100, 'right:60px;top:400px') }),
   'post-11-erezept-menue': feed({ h1: 'Medikamente', accent: 'als E-Rezept.', sub: 'Mehrere auswählen, ein Klick, alle Token fertig.', img: 'erezept-batch', orbs: orb('red', 'heart', 130, 'right:70px;top:150px') + orb('blue', 'doc', 100, 'right:60px;top:400px') }),
   'post-12-katalog': feed({ h1: '339 Wirkstoffe.', accent: 'Ein Suchfeld.', sub: 'Wirkstoff, Handelsname oder ATC-Code – Stärke wählen, verordnen.', img: 'katalog', orbs: orb('blue', 'doc', 130, 'right:70px;top:150px') + orb('gold', 'bell', 100, 'right:60px;top:400px') }),
+  'post-13-verschluesselt': feed({ h1: 'Verschlüsselt.', accent: 'Von Anfang an.', sub: 'Praxisdaten mit AES-256 gesichert, ohne Internetverbindung – mit Sicherheits-Check.', img: 'datenschutz', orbs: orb('blue', 'lock', 130, 'right:70px;top:150px') + orb('green', 'shield', 100, 'right:60px;top:400px') }),
+  'post-14-betroffenenrechte': feed({ h1: 'Betroffenenrechte', accent: 'im Griff.', sub: 'Auskunft, Sperre, Löschung und Export – DSGVO-Werkzeuge direkt in der Akte.', img: 'patient-datenschutz', orbs: orb('green', 'shield', 130, 'right:70px;top:150px') + orb('blue', 'doc', 100, 'right:60px;top:400px') }),
+  'post-15-sperre-protokoll': feed({ h1: 'Strg+L.', accent: 'Gesperrt.', sub: 'Anmeldung mit Rollen, automatische Sperre und manipulationssicheres Protokoll.', img: 'protokoll', orbs: orb('gold', 'lock', 130, 'right:70px;top:150px') + orb('blue', 'shield', 100, 'right:60px;top:400px') }),
   'story-cover': page(`
 <div class="canvas" style="width:1080px;height:1920px">
   <div class="glow" style="width:800px;height:800px;background:#2f80ed;left:140px;top:120px"></div>
