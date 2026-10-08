@@ -492,6 +492,31 @@ tbody tr:last-child td{ border-bottom:none; }
 .delivery-schedule-form .field{ padding:7px 11px; }
 .delivery-row-actions{ display:flex; justify-content:flex-end; width:100%; }
 
+/* ---- Kundenkarte ---- */
+.loyalty-hero{ display:flex; gap:18px; align-items:stretch; flex-wrap:wrap; }
+.loyalty-card{
+  width:300px; min-height:176px; border-radius:20px; padding:20px; flex:none;
+  background:linear-gradient(135deg, #f7e3ad 0%, #d9ab49 45%, #8a6424 100%);
+  box-shadow: 0 1px 0 rgba(255,255,255,0.6) inset, 0 -16px 24px rgba(0,0,0,0.22) inset, 0 16px 34px rgba(89,64,20,0.4);
+  color:#3a2a08; display:flex; flex-direction:column; justify-content:space-between;
+  position:relative; overflow:hidden;
+}
+.loyalty-card::before{
+  content:""; position:absolute; inset:0 0 auto 0; height:50%;
+  background:linear-gradient(180deg, rgba(255,255,255,0.55), transparent);
+  pointer-events:none;
+}
+.loyalty-card-top{ display:flex; justify-content:space-between; align-items:center; position:relative; z-index:1; }
+.loyalty-card-brand{ font-family:var(--font-display); font-weight:800; font-size:13px; letter-spacing:0.5px; }
+.loyalty-card-chip{ width:30px; height:22px; border-radius:5px; background:linear-gradient(155deg, #fff4d6, #c7a04a); box-shadow:inset 0 1px 1px rgba(255,255,255,0.8); }
+.loyalty-card-mid{ position:relative; z-index:1; }
+.loyalty-card-tier{ font-weight:800; font-size:15px; }
+.loyalty-card-name{ font-size:12.5px; opacity:0.85; margin-top:2px; }
+.loyalty-card-bottom{ display:flex; justify-content:space-between; align-items:center; font-weight:700; font-size:12.5px; position:relative; z-index:1; }
+.loyalty-tier-row{ display:flex; justify-content:space-between; gap:10px; padding:8px 0; border-bottom:1px solid var(--line); font-size:12.5px; }
+.loyalty-tier-row:last-child{ border-bottom:none; }
+.loyalty-tier-name{ font-weight:800; }
+
 /* ---- Chat ---- */
 .chat-wrap{ display:flex; flex-direction:column; height:100%; }
 .chat-log{ display:flex; flex-direction:column; gap:10px; max-height:420px; overflow-y:auto; padding:4px 2px 10px; }
@@ -621,6 +646,10 @@ tbody tr:last-child td{ border-bottom:none; }
       <button class="nav-item" data-view="kunden">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4.4 3.6-8 8-8s8 3.6 8 8"/></svg>
         Kunden &amp; Rezepte
+      </button>
+      <button class="nav-item" data-view="kundenkarte">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="5" width="20" height="14" rx="2.5"/><path d="M2 10h20"/><path d="M6 15h4"/></svg>
+        Kundenkarte
       </button>
       <button class="nav-item" data-view="bestellungen">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 3h2l2.4 12.4A2 2 0 0 0 9.4 17H18a2 2 0 0 0 2-1.6L21 8H6"/><circle cx="10" cy="21" r="1.3"/><circle cx="18" cy="21" r="1.3"/></svg>
@@ -852,6 +881,45 @@ tbody tr:last-child td{ border-bottom:none; }
         </div>
       </section>
 
+      <!-- ============ KUNDENKARTE ============ -->
+      <section class="view" data-view="kundenkarte">
+        <div class="view-head">
+          <div>
+            <h1 class="view-title">Kundenkarte &amp; Vorteile</h1>
+            <p class="view-desc">Optionales Bonusprogramm · von jeder Apotheke auf Wunsch aktivierbar</p>
+          </div>
+          <div class="view-actions"><button class="pay-method active" id="loyaltyToggle">Kundenkarte: Aktiv</button></div>
+        </div>
+
+        <div class="alert-banner" id="loyaltyDisabledNote" style="display:none;">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 9v4"/><path d="M12 17h.01"/><path d="M10.3 3.9 1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0Z"/></svg>
+          <div><div class="t">Kundenkarte derzeit deaktiviert</div><div class="d">Dieses Modul ist optional — Ihre Apotheke entscheidet frei, ob ein Bonusprogramm genutzt wird. Jederzeit mit einem Klick aktivierbar, ohne Datenverlust.</div></div>
+        </div>
+
+        <div id="loyaltyContent">
+          <div class="loyalty-hero">
+            <div class="loyalty-card">
+              <div class="loyalty-card-top"><span class="loyalty-card-brand">PHARMA-TECH</span><span class="loyalty-card-chip"></span></div>
+              <div class="loyalty-card-mid">
+                <div class="loyalty-card-tier" id="loyaltyHeroTier"></div>
+                <div class="loyalty-card-name" id="loyaltyHeroName"></div>
+              </div>
+              <div class="loyalty-card-bottom"><span id="loyaltyHeroPoints"></span><span id="loyaltyHeroNumber"></span></div>
+            </div>
+            <div class="card" style="flex:1; min-width:260px;">
+              <div class="section-title" style="margin-bottom:8px;">Wie es funktioniert</div>
+              <p class="section-sub">Kund:innen sammeln bei jedem Einkauf automatisch Punkte und schalten so Vorteile frei — ganz ohne Mehraufwand für Ihr Team. Pharma-Tech bucht die Punkte direkt an der Kasse, ordnet sie dem Kundenprofil zu und zeigt den aktuellen Status sofort an.</p>
+              <div id="loyaltyTierList" style="margin-top:12px;"></div>
+            </div>
+          </div>
+
+          <div class="card">
+            <div class="card-head"><div class="section-title">Kund:innen im Bonusprogramm</div></div>
+            <div class="scroll-x"><table id="loyaltyTable"></table></div>
+          </div>
+        </div>
+      </section>
+
       <!-- ============ BESTELLUNGEN ============ -->
       <section class="view" data-view="bestellungen">
         <div class="view-head">
@@ -895,7 +963,7 @@ tbody tr:last-child td{ border-bottom:none; }
           <div class="card">
             <div class="card-head">
               <div class="section-title">Bestand unterwegs · mit Ankunftszeit</div>
-              <span class="badge b-info">Live</span>
+              <span class="badge b-info">Aktuell</span>
             </div>
             <div id="incomingDeliveryList"></div>
           </div>
@@ -975,8 +1043,8 @@ tbody tr:last-child td{ border-bottom:none; }
         <div class="alert-banner" style="background:color-mix(in srgb, var(--good) 14%, var(--surface)); border-color:color-mix(in srgb, var(--good) 40%, var(--line));">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="color:var(--good);"><path d="M9 12l2 2 4-4"/><circle cx="12" cy="12" r="9"/></svg>
           <div>
-            <div class="t">Garantierter Datenerhalt beim Software­wechsel</div>
-            <div class="d">Alle Kunden-, Rezept- und Bestelldaten bleiben beim Umstieg vollständig erhalten — rückwirkend bis einschließlich Januar 2023. Keine Lücken, kein manueller Neuaufbau von Kundenakten.</div>
+            <div class="t">Vollautomatische Übernahme — garantiert ohne Datenverlust</div>
+            <div class="d">Sortiment, Artikelstamm, Kontaktdaten und sämtliche Kundendaten werden beim Umstieg komplett und vollautomatisch übernommen — rückwirkend bis einschließlich Januar 2023. Keine Lücken, kein manueller Neuaufbau von Kunden- oder Artikelakten.</div>
           </div>
         </div>
 
@@ -985,19 +1053,22 @@ tbody tr:last-child td{ border-bottom:none; }
             <div class="section-title" style="margin-bottom:6px;">Migrationsübersicht</div>
             <div class="mig-stat"><span>Datenquelle</span><span class="cell-strong">Vorsystem (Altsoftware)</span></div>
             <div class="mig-stat"><span>Abgedeckter Zeitraum</span><span class="cell-strong tabular">01.01.2023 – heute</span></div>
-            <div class="mig-stat"><span>Kundenprofile übernommen</span><span class="cell-strong tabular">2 431 / 2 431 (100 %)</span></div>
+            <div class="mig-stat"><span>Sortiment &amp; Artikelstamm</span><span class="cell-strong tabular">8 206 / 8 206 (100 %)</span></div>
+            <div class="mig-stat"><span>Kundenprofile &amp; Kontaktdaten</span><span class="cell-strong tabular">2 431 / 2 431 (100 %)</span></div>
             <div class="mig-stat"><span>Rezepte &amp; Verordnungen</span><span class="cell-strong tabular">18 942 / 18 942 (100 %)</span></div>
             <div class="mig-stat"><span>Bestell- &amp; Kassenhistorie</span><span class="cell-strong tabular">64 118 / 64 118 (100 %)</span></div>
             <div class="mig-stat"><span>Letzter Abgleich</span><span class="cell-strong">Heute, 06:12 Uhr</span></div>
           </div>
           <div class="card">
             <div class="section-title" style="margin-bottom:10px;">Verifizierung</div>
+            <div class="mig-check"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M20 6 9 17l-5-5"/></svg> Sortiment, Preise &amp; Lagerbestände vollständig übernommen</div>
+            <div class="mig-check"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M20 6 9 17l-5-5"/></svg> Kontaktdaten aller Kund:innen, Lieferanten &amp; Ärzt:innen übertragen</div>
             <div class="mig-check"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M20 6 9 17l-5-5"/></svg> Datensätze auf Vollständigkeit geprüft</div>
             <div class="mig-check"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M20 6 9 17l-5-5"/></svg> Rezepthistorie chronologisch verifiziert</div>
             <div class="mig-check"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M20 6 9 17l-5-5"/></svg> Duplikate automatisch bereinigt</div>
             <div class="mig-check"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M20 6 9 17l-5-5"/></svg> Zugriffsrechte &amp; Rollen übernommen</div>
             <div class="mig-check"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M20 6 9 17l-5-5"/></svg> DSGVO-konforme Übertragung dokumentiert</div>
-            <p class="section-sub" style="margin-top:12px;">Ihr Praxisteam kann ab dem ersten Tag ohne Datenverlust in Pharma-Tech weiterarbeiten — inklusive vollständiger Kundenhistorie für Rückfragen, Wechselwirkungsprüfungen und Stammkundenbetreuung.</p>
+            <p class="section-sub" style="margin-top:12px;">Ihr Team kann ab dem ersten Tag ohne Datenverlust in Pharma-Tech weiterarbeiten — inklusive vollständigem Sortiment, allen Kontaktdaten und lückenloser Kundenhistorie für Rückfragen, Wechselwirkungsprüfungen und Stammkundenbetreuung.</p>
           </div>
         </div>
       </section>
@@ -1139,30 +1210,36 @@ const PRODUCTS = [
 ];
 
 const CUSTOMERS = [
-  { id:'c1', name:'Anna Hoffmann', sub:'geb. 14.03.1987 · 12 Rezepte', avatar:'AH', timeline:[
+  { id:'c1', name:'Anna Hoffmann', sub:'geb. 14.03.1987 · 12 Rezepte', avatar:'AH', punkte:860, timeline:[
     { date:'2023-02-11', title:'Kundenkonto angelegt', desc:'Aus Vorsystem migriert — inkl. vollständiger Historie', kind:'info' },
     { date:'2023-06-04', title:'E-Rezept eingelöst — Ibuprofen 400mg', desc:'Filiale Mitte', kind:'good' },
     { date:'2024-01-22', title:'Wechselwirkungshinweis geprüft', desc:'Kombination mit Blutverdünner beachtet', kind:'warn' },
     { date:'2025-09-10', title:'E-Rezept eingelöst — Levothyroxin', desc:'Dauermedikation, Erinnerung aktiv', kind:'good' },
     { date:'2026-08-05', title:'Beratungsgespräch', desc:'Reiseapotheke zusammengestellt', kind:'info' }
   ]},
-  { id:'c2', name:'Markus Weber', sub:'geb. 02.11.1975 · 7 Rezepte', avatar:'MW', timeline:[
+  { id:'c2', name:'Markus Weber', sub:'geb. 02.11.1975 · 7 Rezepte', avatar:'MW', punkte:340, timeline:[
     { date:'2023-04-03', title:'Kundenkonto angelegt', desc:'Aus Vorsystem migriert', kind:'info' },
     { date:'2024-03-18', title:'E-Rezept eingelöst — Metformin', desc:'Dauermedikation', kind:'good' },
     { date:'2025-11-02', title:'Botendienst genutzt', desc:'Lieferung nach Hause', kind:'info' },
     { date:'2026-07-29', title:'E-Rezept eingelöst — ASS 100mg', desc:'Filiale Nord', kind:'good' }
   ]},
-  { id:'c3', name:'Elif Yildiz', sub:'geb. 27.07.1993 · 4 Rezepte', avatar:'EY', timeline:[
+  { id:'c3', name:'Elif Yildiz', sub:'geb. 27.07.1993 · 4 Rezepte', avatar:'EY', punkte:120, timeline:[
     { date:'2023-09-14', title:'Kundenkonto angelegt', desc:'Aus Vorsystem migriert', kind:'info' },
     { date:'2025-02-20', title:'E-Rezept eingelöst — Vitamin D3', desc:'Filiale West', kind:'good' },
     { date:'2026-05-11', title:'Wechselwirkungshinweis geprüft', desc:'Keine Konflikte gefunden', kind:'good' }
   ]},
-  { id:'c4', name:'Peter Grünwald', sub:'geb. 09.01.1960 · 21 Rezepte', avatar:'PG', timeline:[
+  { id:'c4', name:'Peter Grünwald', sub:'geb. 09.01.1960 · 21 Rezepte', avatar:'PG', punkte:1240, timeline:[
     { date:'2023-01-05', title:'Kundenkonto angelegt', desc:'Aus Vorsystem migriert — längster Bestandskunde', kind:'info' },
     { date:'2024-06-12', title:'E-Rezept eingelöst — Insulin Glargin', desc:'Dauermedikation', kind:'good' },
     { date:'2025-08-30', title:'Wechselwirkungshinweis geprüft', desc:'Rücksprache mit behandelndem Arzt empfohlen', kind:'warn' },
     { date:'2026-08-01', title:'E-Rezept eingelöst — L-Thyroxin', desc:'Filiale Mitte', kind:'good' }
   ]}
+];
+
+const LOYALTY_TIERS = [
+  { name:'Bronze', min:0, color:'#8a6a3a', benefit:'1 Punkt pro 1 € Einkaufswert' },
+  { name:'Silber', min:300, color:'#6b7280', benefit:'1,5 Punkte pro 1 € + kostenloser Botendienst ab 20 €' },
+  { name:'Gold', min:800, color:'#b4861f', benefit:'2 Punkte pro 1 € + 5 % Rabatt auf Kosmetik &amp; Pflege + bevorzugte Terminvergabe im Botendienst' }
 ];
 
 const ORDERS = [
@@ -1259,7 +1336,7 @@ const INTEGRATIONS = [
   { name:'E-Rezept / TI-Anbindung', desc:'Gematik-Telematikinfrastruktur', emoji:'🔗', on:true },
   { name:'Kartenzahlung', desc:'EC- und Kreditkarten-Terminal', emoji:'💳', on:true },
   { name:'Kundenbindungsprogramm', desc:'Bonuspunkte & Gutscheine', emoji:'⭐', on:false },
-  { name:'Botendienst-Tracking', desc:'Live-Verfolgung für Lieferungen', emoji:'🚴', on:false },
+  { name:'Botendienst-Tracking', desc:'Echtzeit-Verfolgung für Lieferungen', emoji:'🚴', on:false },
   { name:'Buchhaltungsexport (DATEV)', desc:'Automatischer Monatsexport', emoji:'📊', on:true },
   { name:'SMS-/App-Erinnerungen', desc:'Rezept- & Abholbenachrichtigung', emoji:'📱', on:false }
 ];
@@ -1399,7 +1476,7 @@ function renderCustomerList(){
     const row=document.createElement('div');
     row.className = 'customer-row'+(c.id===state.activeCustomer?' active':'');
     row.innerHTML = '<div class="avatar">'+c.avatar+'</div><div class="meta"><div class="cname">'+c.name+'</div><div class="csub">'+c.sub+'</div></div>';
-    row.addEventListener('click', ()=>{ state.activeCustomer=c.id; renderCustomerList(); renderCustomerDetail(); });
+    row.addEventListener('click', ()=>{ state.activeCustomer=c.id; renderCustomerList(); renderCustomerDetail(); renderLoyaltyCard(); });
     wrap.appendChild(row);
   });
 }
@@ -1419,6 +1496,44 @@ function renderCustomerDetail(){
         '<div class="tl-item"><span class="tl-dot" style="background:'+(t.kind==='good'?'var(--good)':t.kind==='warn'?'var(--warn)':'var(--mint-500)')+';"></span>'
         + '<div><div class="tl-date">'+formatDate(t.date)+'</div><div class="tl-title">'+t.title+'</div><div class="tl-desc">'+t.desc+'</div></div></div>'
       )).join('') + '</div>';
+}
+
+/* ============ RENDER: KUNDENKARTE ============ */
+function loyaltyTierFor(points){
+  return LOYALTY_TIERS.slice().reverse().find(t=>points>=t.min);
+}
+let loyaltyEnabled = true;
+function renderLoyaltyTierList(){
+  document.getElementById('loyaltyTierList').innerHTML = LOYALTY_TIERS.map(t=>(
+    '<div class="loyalty-tier-row"><span class="loyalty-tier-name" style="color:'+t.color+';">'+t.name+'</span>'
+    + '<span class="cell-muted" style="text-align:right;">ab '+t.min+' Punkten · '+t.benefit+'</span></div>'
+  )).join('');
+}
+function renderLoyaltyCard(){
+  const c = CUSTOMERS.find(x=>x.id===state.activeCustomer) || CUSTOMERS[0];
+  const tier = loyaltyTierFor(c.punkte);
+  document.getElementById('loyaltyHeroTier').textContent = tier.name+'-Status';
+  document.getElementById('loyaltyHeroName').textContent = c.name;
+  document.getElementById('loyaltyHeroPoints').textContent = c.punkte.toLocaleString('de-DE')+' Punkte';
+  document.getElementById('loyaltyHeroNumber').textContent = '•••• '+c.id.replace(/\D/g,'').padStart(4,'0');
+}
+function renderLoyaltyTable(){
+  document.getElementById('loyaltyTable').innerHTML =
+    '<thead><tr><th>Kund:in</th><th>Punkte</th><th>Stufe</th><th>Bis zur nächsten Stufe</th></tr></thead><tbody>'
+    + CUSTOMERS.map(c=>{
+        const tier = loyaltyTierFor(c.punkte);
+        const next = LOYALTY_TIERS.find(t=>t.min>c.punkte);
+        return '<tr><td class="cell-strong">'+c.name+'</td><td class="tabular">'+c.punkte.toLocaleString('de-DE')+'</td>'
+          + '<td><span class="badge" style="color:'+tier.color+'; background:color-mix(in srgb, '+tier.color+' 20%, var(--surface));">'+tier.name+'</span></td>'
+          + '<td class="cell-muted">'+(next ? (next.min-c.punkte).toLocaleString('de-DE')+' Punkte bis '+next.name : 'Höchste Stufe erreicht')+'</td></tr>';
+      }).join('') + '</tbody>';
+}
+function applyLoyaltyState(){
+  document.getElementById('loyaltyContent').style.display = loyaltyEnabled ? '' : 'none';
+  document.getElementById('loyaltyDisabledNote').style.display = loyaltyEnabled ? 'none' : 'flex';
+  const btn = document.getElementById('loyaltyToggle');
+  btn.textContent = loyaltyEnabled ? 'Kundenkarte: Aktiv' : 'Kundenkarte: Deaktiviert';
+  btn.classList.toggle('active', loyaltyEnabled);
 }
 
 /* ============ RENDER: BESTELLUNGEN ============ */
@@ -1731,6 +1846,8 @@ renderCustomerList(); renderCustomerDetail();
 renderOrderTable(); renderSuggestions(); renderFilialTable();
 renderIncomingDeliveries(); renderCustomerDeliveries();
 document.getElementById('uspTruckIcon').innerHTML = ICONS.truck;
+renderLoyaltyTierList(); renderLoyaltyCard(); renderLoyaltyTable(); applyLoyaltyState();
+document.getElementById('loyaltyToggle').addEventListener('click', ()=>{ loyaltyEnabled=!loyaltyEnabled; applyLoyaltyState(); });
 renderAreaChart('revenueChart', REVENUE);
 renderChat(); renderHandover();
 renderCompare();
