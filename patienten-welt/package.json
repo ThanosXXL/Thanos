@@ -1,12 +1,14 @@
 {
   "name": "patienten-welt",
-  "version": "1.0.0",
-  "description": "Patienten Welt – die persönliche Gesundheits-App: Termine, Medikamente, Werte, Befunde",
+  "version": "1.1.0",
+  "description": "Patienten Welt – die persönliche Gesundheits-App: Medikamente, Werte, Labor, E-Rezepte, Krankmeldungen, verschlüsselt und lokal",
   "main": "main.js",
   "author": "",
   "license": "MIT",
   "scripts": {
     "start": "electron .",
+    "test": "node --test test/vault.test.js",
+    "test:e2e": "node test/e2e.js",
     "dist": "electron-builder"
   },
   "devDependencies": {

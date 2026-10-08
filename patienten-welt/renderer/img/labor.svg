@@ -1,0 +1,40 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 420 240" width="420" height="240">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#1d4aa8"/><stop offset="1" stop-color="#0b1f4b"/></linearGradient>
+    <linearGradient id="glass" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#fff" stop-opacity=".55"/><stop offset=".35" stop-color="#fff" stop-opacity=".12"/><stop offset="1" stop-color="#fff" stop-opacity=".3"/></linearGradient>
+    <linearGradient id="red" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#ff9aa6"/><stop offset="1" stop-color="#d81f45"/></linearGradient>
+    <linearGradient id="grn" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#b8ffd9"/><stop offset="1" stop-color="#1fb877"/></linearGradient>
+    <linearGradient id="gold" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#fff1b8"/><stop offset="1" stop-color="#e8a919"/></linearGradient>
+    <linearGradient id="blu" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#9ae7ff"/><stop offset="1" stop-color="#2a8cf0"/></linearGradient>
+  </defs>
+  <rect width="420" height="240" rx="18" fill="url(#bg)"/>
+  <ellipse cx="210" cy="212" rx="170" ry="14" fill="#000" opacity=".28"/>
+  <rect x="26" y="196" width="368" height="14" rx="7" fill="#26457f"/>
+  <g>
+    <rect x="62" y="64" width="40" height="128" rx="8" fill="#0a1a44" opacity=".5"/>
+    <path d="M62 120h40v64a8 8 0 0 1-8 8H70a8 8 0 0 1-8-8z" fill="url(#red)"/>
+    <rect x="62" y="48" width="40" height="144" rx="10" fill="url(#glass)" stroke="#fff" stroke-opacity=".5" stroke-width="2"/>
+    <rect x="58" y="42" width="48" height="12" rx="6" fill="#dbe8ff"/>
+  </g>
+  <g>
+    <path d="M128 90h40v94a8 8 0 0 1-8 8h-24a8 8 0 0 1-8-8z" fill="url(#grn)"/>
+    <rect x="128" y="64" width="40" height="128" rx="10" fill="url(#glass)" stroke="#fff" stroke-opacity=".5" stroke-width="2"/>
+    <rect x="124" y="58" width="48" height="12" rx="6" fill="#dbe8ff"/>
+  </g>
+  <g>
+    <path d="M194 140h40v44a8 8 0 0 1-8 8h-24a8 8 0 0 1-8-8z" fill="url(#gold)"/>
+    <rect x="194" y="56" width="40" height="136" rx="10" fill="url(#glass)" stroke="#fff" stroke-opacity=".5" stroke-width="2"/>
+    <rect x="190" y="50" width="48" height="12" rx="6" fill="#dbe8ff"/>
+  </g>
+  <g>
+    <path d="M260 104h40v80a8 8 0 0 1-8 8h-24a8 8 0 0 1-8-8z" fill="url(#blu)"/>
+    <rect x="260" y="72" width="40" height="120" rx="10" fill="url(#glass)" stroke="#fff" stroke-opacity=".5" stroke-width="2"/>
+    <rect x="256" y="66" width="48" height="12" rx="6" fill="#dbe8ff"/>
+  </g>
+  <g transform="translate(330 70)">
+    <circle cx="40" cy="60" r="44" fill="url(#glass)" stroke="#fff" stroke-opacity=".6" stroke-width="3"/>
+    <path d="M18 70c10-26 34-26 44 0" fill="none" stroke="#5bf0a8" stroke-width="4" stroke-linecap="round"/>
+    <path d="M22 54h12l6-14 8 28 6-14h8" fill="none" stroke="#4cc9f0" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round"/>
+    <rect x="30" y="102" width="20" height="24" rx="4" fill="#26457f"/>
+  </g>
+</svg>
