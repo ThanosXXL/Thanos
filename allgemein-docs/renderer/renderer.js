@@ -74,7 +74,13 @@
     left: 'M15 5l-7 7 7 7',
     right: 'M9 5l7 7-7 7',
     save: 'M5 3h12l4 4v14H5zM8 3v6h8V3M8 21v-7h8v7',
-    bell: 'M6 16V11a6 6 0 0 1 12 0v5l2 2H4zM10 21h4'
+    bell: 'M6 16V11a6 6 0 0 1 12 0v5l2 2H4zM10 21h4',
+    shield: 'M12 3l8 3v6c0 5-3.5 8-8 9-4.5-1-8-4-8-9V6zM8.5 12l2.5 2.5L16 9',
+    euro: 'M18 6a7 7 0 1 0 0 12M4 10h10M4 14h10',
+    chart: 'M4 20V4M4 20h16M8 16v-5M13 16V8M18 16v-9',
+    play: 'M5 4l15 8-15 8zM3 21h18',
+    help: 'M12 21a9 9 0 1 0 0-18 9 9 0 0 0 0 18M9.5 9.5a2.5 2.5 0 1 1 3.5 2.3c-.7.4-1 1-1 1.7M12 17h.01',
+    download: 'M12 3v12M7 11l5 5 5-5M4 21h16'
   };
   function icon(name) {
     const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
@@ -156,6 +162,17 @@
         [[60, 'Befund', 'Belastbar, keine Angina pectoris. Ruhe-EKG unauffällig.']],
         [{ id: uid(), src: 'img/ekg.svg', titel: 'Ruhe-EKG' }])
     ];
+    const ex = (idx, vorsorge, impfungen, leistungen) => {
+      patienten[idx].vorsorge = vorsorge.map(([art, tage]) => ({ id: uid(), art, faellig: addDays(today, tage) }));
+      patienten[idx].impfungen = impfungen.map(([name, back, vor]) => ({ id: uid(), name, datum: addDays(today, -back), naechste: vor === null ? '' : addDays(today, vor) }));
+      patienten[idx].leistungen = leistungen.map(([text, back, betrag]) => ({ id: uid(), text, datum: addDays(today, -back), betrag }));
+    };
+    ex(0, [['Gesundheits-Check-up', 12], ['Hautkrebs-Screening', 60]], [['Influenza', 20, 345], ['Tetanus/Diphtherie/Keuchhusten (Tdap)', 1800, 1850]], [['Beratung', 7, 18.5], ['Blutdruck-Langzeitmessung', 7, 32], ['Beratung', 40, 18.5]]);
+    ex(1, [['Lungenfunktionskontrolle', -5]], [['Influenza', 300, 65]], [['Lungenfunktion (Spirometrie)', 3, 24], ['Beratung', 3, 18.5]]);
+    ex(2, [['Diabetes-Fußuntersuchung', 9], ['Augenärztliche Kontrolle', 25]], [['Pneumokokken', 400, null], ['Influenza', 30, 335], ['Gürtelrose', 200, 20]], [['Diabetes-Check', 14, 41], ['Beratung', 14, 18.5]]);
+    ex(3, [['Magenspiegelung klären', 30]], [['Hepatitis B', 900, null]], [['Beratung', 30, 18.5]]);
+    ex(4, [['Jugendgesundheitsuntersuchung', -20]], [['Masern', 3000, null], ['COVID-19', 400, 10]], [['Erkältungsberatung', 1, 18.5]]);
+    ex(5, [['Darmkrebs-Vorsorge', 4], ['Gesundheits-Check-up', 3]], [['FSME', 500, 230]], [['Ruhe-EKG', 60, 21.5], ['Beratung', 60, 18.5]]);
     const termin = (idx, tag, zeit, dauer, grund, status) => ({ id: uid(), patientId: patienten[idx].id, datum: addDays(today, tag), zeit, dauer, grund, status: status || 'geplant' });
     return {
       version: 1,
@@ -267,14 +284,12 @@
   // Navigation
   // ---------------------------------------------------------------
   const NAV = [
-    ['start', 'Start', 'home'],
-    ['patienten', 'Patienten', 'users'],
-    ['termine', 'Terminkalender', 'calendar'],
-    ['wartezimmer', 'Wartezimmer', 'clock'],
-    ['aufgaben', 'Aufgaben', 'check'],
-    ['dokumente', 'Dokumente', 'file'],
-    ['einstellungen', 'Einstellungen', 'settings']
+    ['Praxis', [['start', 'Start', 'home'], ['patienten', 'Patienten', 'users'], ['termine', 'Terminkalender', 'calendar'], ['wartezimmer', 'Wartezimmer', 'clock']]],
+    ['Medizin', [['vorsorge', 'Vorsorge & Recall', 'bell'], ['impfungen', 'Impfungen', 'shield'], ['leistungen', 'Leistungen', 'euro']]],
+    ['Organisation', [['aufgaben', 'Aufgaben', 'check'], ['dokumente', 'Dokumente', 'file'], ['auswertung', 'Auswertung', 'chart']]],
+    ['System', [['medien', 'Demo & Medien', 'play'], ['hilfe', 'Hilfe & Tipps', 'help'], ['einstellungen', 'Einstellungen', 'settings']]]
   ];
+  const NAV_FLAT = NAV.flatMap(([, items]) => items);
 
   function goto(page, extra) {
     view.page = page;
@@ -289,13 +304,19 @@
     const counts = {
       wartezimmer: state.wartezimmer.length,
       aufgaben: state.aufgaben.filter((a) => !a.done).length,
-      termine: state.termine.filter((t) => t.datum === todayISO() && t.status !== 'fertig').length
+      termine: state.termine.filter((t) => t.datum === todayISO() && t.status !== 'fertig').length,
+      vorsorge: allVorsorge().filter((e) => e.faellig <= addDays(todayISO(), 30)).length,
+      impfungen: allImpfungen().filter((e) => e.naechste && e.naechste <= addDays(todayISO(), 30)).length
     };
-    NAV.forEach(([key, label, ic]) => {
-      const b = h('button', { class: 'nav-item' + (view.page === key ? ' active' : ''), type: 'button', onclick: () => goto(key) },
-        icon(ic), h('span', { text: label }),
-        counts[key] ? h('span', { class: 'badge', text: String(counts[key]) }) : null);
-      nav.appendChild(b);
+    let n = 0;
+    NAV.forEach(([group, items]) => {
+      nav.appendChild(h('div', { class: 'nav-group', text: group }));
+      items.forEach(([key, label, ic]) => {
+        n++;
+        nav.appendChild(h('button', { class: 'nav-item' + (view.page === key ? ' active' : ''), type: 'button', title: `Strg ${n <= 9 ? n : 0}`, onclick: () => goto(key) },
+          icon(ic), h('span', { text: label }),
+          counts[key] ? h('span', { class: 'badge', text: String(counts[key]) }) : null));
+      });
     });
     const foot = document.getElementById('sidebar-foot');
     foot.textContent = '';
@@ -307,7 +328,7 @@
     renderNav();
     const content = document.getElementById('content');
     content.textContent = '';
-    const views = { start: renderStart, patienten: renderPatienten, termine: renderTermine, wartezimmer: renderWartezimmer, aufgaben: renderAufgaben, dokumente: renderDokumente, einstellungen: renderEinstellungen };
+    const views = { start: renderStart, patienten: renderPatienten, termine: renderTermine, wartezimmer: renderWartezimmer, vorsorge: renderVorsorge, impfungen: renderImpfungen, leistungen: renderLeistungen, aufgaben: renderAufgaben, dokumente: renderDokumente, auswertung: renderAuswertung, medien: renderMedien, hilfe: renderHilfe, einstellungen: renderEinstellungen };
     content.appendChild((views[view.page] || renderStart)());
   }
 
@@ -488,10 +509,15 @@
           btn('Termin', { icon: 'calendar', onclick: () => editTermin(null, todayISO(), p.id) }),
           btn('Ins Wartezimmer', { icon: 'clock', onclick: () => checkIn(p.id) }),
           btn('Bearbeiten', { icon: 'edit', onclick: () => editPatient(p) }))),
-      h('div', { class: 'tabs' }, [['uebersicht', 'Übersicht'], ['karte', 'Karteikarte'], ['bilder', 'Bilder & Befunde'], ['dokumente', 'Dokumente']].map(([k, l]) =>
+      h('div', { class: 'tabs' }, [['uebersicht', 'Übersicht'], ['karte', 'Karteikarte'], ['impfungen', 'Impfungen'], ['leistungen', 'Leistungen'], ['bilder', 'Bilder & Befunde'], ['dokumente', 'Dokumente']].map(([k, l]) =>
         h('button', { class: 'tab' + (view.patientTab === k ? ' active' : ''), type: 'button', onclick: () => { view.patientTab = k; render(); } }, l)))));
 
-    const tabs = { uebersicht: tabUebersicht, karte: tabKarte, bilder: tabBilder, dokumente: tabDokumente };
+    const tabs = { uebersicht: tabUebersicht, karte: tabKarte, bilder: tabBilder, dokumente: tabDokumente,
+      impfungen: (p) => h('div', { class: 'card' }, h('div', { class: 'card-title' }, h('h2', { text: 'Impfungen' }), btn('Hinzufügen', { kind: 'small', icon: 'plus', onclick: () => addImpfung(p.id) })),
+        p.impfungen.length ? h('div', { class: 'list' }, p.impfungen.map((e) => impfRow({ ...e, p }, false))) : h('div', { class: 'empty', text: 'Keine Impfungen dokumentiert.' })),
+      leistungen: (p) => h('div', { class: 'card' }, h('div', { class: 'card-title' }, h('h2', { text: 'Leistungen' }), btn('Erfassen', { kind: 'small', icon: 'plus', onclick: () => addLeistung(p.id) })),
+        p.leistungen.length ? h('div', { class: 'list' }, p.leistungen.map((e) => h('div', { class: 'item' }, h('div', { class: 'grow' }, h('div', { class: 'title', text: e.text }), h('div', { class: 'soft small', text: fmtDate(e.datum) })), h('strong', { text: euro(e.betrag) }),
+          btn('', { kind: 'small', icon: 'trash', onclick: () => { p.leistungen = p.leistungen.filter((x) => x.id !== e.id); commit(); } })))) : h('div', { class: 'empty', text: 'Keine Leistungen erfasst.' })) };
     wrap.appendChild((tabs[view.patientTab] || tabUebersicht)(p));
     wrap.appendChild(h('div', { style: 'margin-top:18px' }, btn('Patientenakte löschen', { kind: 'danger small', icon: 'trash', onclick: () => confirmModal(`Akte von ${p.vorname} ${p.nachname} samt Terminen wirklich löschen?`, () => {
       state.patienten = state.patienten.filter((x) => x.id !== p.id);
@@ -830,6 +856,213 @@
     return v;
   }
 
+
+  // ---------------------------------------------------------------
+  // Vorsorge, Impfungen, Leistungen
+  // ---------------------------------------------------------------
+  const VORSORGE_ARTEN = ['Gesundheits-Check-up', 'Hautkrebs-Screening', 'Darmkrebs-Vorsorge', 'Diabetes-Fußuntersuchung', 'Lungenfunktionskontrolle', 'Jugendgesundheitsuntersuchung', 'Augenärztliche Kontrolle', 'Sonstiges'];
+  const IMPFSTOFFE = ['Influenza', 'COVID-19', 'Tetanus/Diphtherie/Keuchhusten (Tdap)', 'Pneumokokken', 'Gürtelrose', 'FSME', 'Hepatitis B', 'Masern', 'HPV'];
+  const LEISTUNGEN = [['Beratung', 18.5], ['Ruhe-EKG', 21.5], ['Lungenfunktion (Spirometrie)', 24], ['Blutdruck-Langzeitmessung', 32], ['Diabetes-Check', 41], ['Hausbesuch', 55], ['Impfung', 12]];
+  const euro = (n) => n.toLocaleString('de-DE', { style: 'currency', currency: 'EUR' });
+  const allVorsorge = () => state.patienten.flatMap((p) => p.vorsorge.map((e) => ({ ...e, p })));
+  const allImpfungen = () => state.patienten.flatMap((p) => p.impfungen.map((e) => ({ ...e, p })));
+  const allLeistungen = () => state.patienten.flatMap((p) => p.leistungen.map((e) => ({ ...e, p })));
+  const opt = (arr) => arr.map((x) => ({ value: x, label: x }));
+
+  function dueLabel(iso) {
+    const days = Math.round((new Date(iso + 'T12:00:00') - new Date(todayISO() + 'T12:00:00')) / 86400000);
+    if (days < 0) return ['danger', `${-days} Tage überfällig`];
+    if (days === 0) return ['warn', 'heute fällig'];
+    if (days <= 30) return ['warn', `in ${days} Tagen`];
+    return ['ok', fmtDate(iso)];
+  }
+
+  function noPatients() { toast('Bitte zuerst einen Patienten anlegen.'); }
+
+  function renderVorsorge() {
+    const v = h('div', { class: 'view' });
+    v.appendChild(h('div', { class: 'page-head' },
+      h('div', {}, h('h1', { text: 'Vorsorge & Recall' }), h('p', { text: 'Wer ist fällig? Nie wieder eine Vorsorge vergessen.' })),
+      btn('Vorsorge eintragen', { kind: 'primary', icon: 'plus', onclick: () => {
+        if (!state.patienten.length) return noPatients();
+        formModal('Vorsorge eintragen', [
+          { key: 'patientId', label: 'Patient', type: 'select', options: patientOptions() },
+          { key: 'art', label: 'Art', type: 'select', options: opt(VORSORGE_ARTEN) },
+          { key: 'faellig', label: 'Fällig am', type: 'date', value: addDays(todayISO(), 30) }
+        ], (f) => { getPatient(f.patientId).vorsorge.push({ id: uid(), art: f.art, faellig: f.faellig }); commit(); toast('Vorsorge eingetragen.'); });
+      } })));
+    const list = allVorsorge().sort((a, b) => a.faellig.localeCompare(b.faellig));
+    const overdue = list.filter((e) => e.faellig < todayISO()).length;
+    v.appendChild(h('div', { class: 'grid cols-3' },
+      h('div', { class: 'card stat', style: 'margin:0' }, h('div', { class: 'stat-icon' }, icon('bell')), h('div', {}, h('div', { class: 'stat-num', text: String(list.length) }), h('div', { class: 'soft small', text: 'Offene Vorsorgen' }))),
+      h('div', { class: 'card stat', style: 'margin:0' }, h('div', { class: 'stat-icon' }, icon('clock')), h('div', {}, h('div', { class: 'stat-num', text: String(list.filter((e) => e.faellig >= todayISO() && e.faellig <= addDays(todayISO(), 30)).length) }), h('div', { class: 'soft small', text: 'In 30 Tagen fällig' }))),
+      h('div', { class: 'card stat', style: 'margin:0' }, h('div', { class: 'stat-icon' }, icon('shield')), h('div', {}, h('div', { class: 'stat-num', text: String(overdue) }), h('div', { class: 'soft small', text: 'Überfällig' })))));
+    v.appendChild(h('div', { class: 'card', style: 'margin-top:18px' }, list.length ? h('div', { class: 'list' }, list.map((e) => {
+      const [cls, txt] = dueLabel(e.faellig);
+      return h('div', { class: 'item' },
+        h('img', { class: 'avatar', src: avatarSrc(e.p), alt: '' }),
+        h('div', { class: 'grow' }, h('div', { class: 'title', text: e.art }), h('div', { class: 'soft small', text: fullName(e.p) })),
+        h('span', { class: 'pill ' + cls, text: txt }),
+        btn('Termin', { kind: 'small', icon: 'calendar', onclick: () => editTermin(null, e.faellig < todayISO() ? todayISO() : e.faellig, e.p.id) }),
+        btn('Erledigt', { kind: 'small', icon: 'check', onclick: () => {
+          e.p.vorsorge = e.p.vorsorge.filter((x) => x.id !== e.id);
+          e.p.karte.push({ id: uid(), ts: Date.now(), typ: 'Therapie', text: `Vorsorge durchgeführt: ${e.art}` });
+          commit(); toast('Als erledigt in der Karteikarte vermerkt.');
+        } }));
+    })) : h('div', { class: 'empty', text: 'Keine offenen Vorsorgen.' })));
+    return v;
+  }
+
+  function addImpfung(patientId) {
+    if (!state.patienten.length) return noPatients();
+    const defs = [];
+    if (!patientId) defs.push({ key: 'patientId', label: 'Patient', type: 'select', options: patientOptions() });
+    defs.push({ key: 'name', label: 'Impfstoff', type: 'select', options: opt(IMPFSTOFFE) },
+      { key: 'datum', label: 'Geimpft am', type: 'date', value: todayISO(), half: true },
+      { key: 'naechste', label: 'Auffrischung (optional)', type: 'date', half: true });
+    formModal('Impfung dokumentieren', defs, (f) => {
+      getPatient(patientId || f.patientId).impfungen.push({ id: uid(), name: f.name, datum: f.datum, naechste: f.naechste });
+      commit(); toast('Impfung dokumentiert.');
+    });
+  }
+
+  function impfRow(e, showPatient) {
+    const due = e.naechste ? dueLabel(e.naechste) : ['info', 'keine Auffrischung'];
+    return h('div', { class: 'item' },
+      showPatient ? h('img', { class: 'avatar', src: avatarSrc(e.p), alt: '' }) : h('span', { style: 'color:var(--accent)' }, icon('shield')),
+      h('div', { class: 'grow' }, h('div', { class: 'title', text: e.name }), h('div', { class: 'soft small', text: (showPatient ? fullName(e.p) + ' · ' : '') + 'geimpft am ' + fmtDate(e.datum) })),
+      h('span', { class: 'pill ' + due[0], text: e.naechste ? 'Auffrischung ' + due[1] : due[1] }),
+      btn('', { kind: 'small', icon: 'trash', onclick: () => { e.p.impfungen = e.p.impfungen.filter((x) => x.id !== e.id); commit(); } }));
+  }
+
+  function renderImpfungen() {
+    const v = h('div', { class: 'view' });
+    v.appendChild(h('div', { class: 'page-head' }, h('div', {}, h('h1', { text: 'Impfungen' }), h('p', { text: 'Impfstatus aller Patienten und fällige Auffrischungen.' })),
+      btn('Impfung dokumentieren', { kind: 'primary', icon: 'plus', onclick: () => addImpfung(null) })));
+    const all = allImpfungen();
+    const due = all.filter((e) => e.naechste && e.naechste <= addDays(todayISO(), 60)).sort((a, b) => a.naechste.localeCompare(b.naechste));
+    v.appendChild(h('div', { class: 'card' }, h('h2', { style: 'margin-bottom:14px', text: 'Auffrischung fällig (60 Tage)' }),
+      due.length ? h('div', { class: 'list' }, due.map((e) => impfRow(e, true))) : h('div', { class: 'empty', text: 'Keine Auffrischungen in den nächsten 60 Tagen.' })));
+    v.appendChild(h('div', { class: 'card' }, h('h2', { style: 'margin-bottom:14px', text: 'Alle Impfungen' }),
+      all.length ? h('div', { class: 'list' }, all.sort((a, b) => b.datum.localeCompare(a.datum)).map((e) => impfRow(e, true))) : h('div', { class: 'empty', text: 'Noch keine Impfungen dokumentiert.' })));
+    return v;
+  }
+
+  function addLeistung(patientId) {
+    if (!state.patienten.length) return noPatients();
+    const defs = [];
+    if (!patientId) defs.push({ key: 'patientId', label: 'Patient', type: 'select', options: patientOptions() });
+    defs.push({ key: 'text', label: 'Leistung', type: 'select', options: LEISTUNGEN.map(([t, b]) => ({ value: t, label: `${t} (${euro(b)})` })) },
+      { key: 'datum', label: 'Datum', type: 'date', value: todayISO() });
+    formModal('Leistung erfassen', defs, (f) => {
+      const betrag = LEISTUNGEN.find(([t]) => t === f.text)[1];
+      getPatient(patientId || f.patientId).leistungen.push({ id: uid(), text: f.text, datum: f.datum, betrag });
+      commit(); toast('Leistung erfasst.');
+    });
+  }
+
+  function renderLeistungen() {
+    const v = h('div', { class: 'view' });
+    const month = todayISO().slice(0, 7);
+    const all = allLeistungen().sort((a, b) => b.datum.localeCompare(a.datum));
+    const sum = (arr) => arr.reduce((t, e) => t + e.betrag, 0);
+    v.appendChild(h('div', { class: 'page-head' }, h('div', {}, h('h1', { text: 'Leistungen' }), h('p', { text: 'Erbrachte Leistungen erfassen und Honorar im Blick behalten.' })),
+      btn('Leistung erfassen', { kind: 'primary', icon: 'plus', onclick: () => addLeistung(null) })));
+    v.appendChild(h('div', { class: 'grid cols-3' },
+      h('div', { class: 'card stat', style: 'margin:0' }, h('div', { class: 'stat-icon' }, icon('euro')), h('div', {}, h('div', { class: 'stat-num', text: euro(sum(all.filter((e) => e.datum.startsWith(month)))) }), h('div', { class: 'soft small', text: 'Dieser Monat' }))),
+      h('div', { class: 'card stat', style: 'margin:0' }, h('div', { class: 'stat-icon' }, icon('chart')), h('div', {}, h('div', { class: 'stat-num', text: euro(sum(all)) }), h('div', { class: 'soft small', text: 'Gesamt' }))),
+      h('div', { class: 'card stat', style: 'margin:0' }, h('div', { class: 'stat-icon' }, icon('file')), h('div', {}, h('div', { class: 'stat-num', text: String(all.length) }), h('div', { class: 'soft small', text: 'Leistungen' })))));
+    v.appendChild(h('div', { class: 'card', style: 'margin-top:18px' }, all.length ? h('div', { class: 'list' }, all.map((e) => h('div', { class: 'item' },
+      h('img', { class: 'avatar', src: avatarSrc(e.p), alt: '' }),
+      h('div', { class: 'grow' }, h('div', { class: 'title', text: e.text }), h('div', { class: 'soft small', text: `${fullName(e.p)} · ${fmtDate(e.datum)}` })),
+      h('strong', { text: euro(e.betrag) }),
+      btn('', { kind: 'small', icon: 'trash', onclick: () => { e.p.leistungen = e.p.leistungen.filter((x) => x.id !== e.id); commit(); } })))) : h('div', { class: 'empty', text: 'Noch keine Leistungen erfasst.' })));
+    v.appendChild(h('p', { class: 'soft small', style: 'margin-top:14px', text: 'Hinweis: Die Beträge sind frei gewählte Beispielwerte und keine amtliche Gebührenordnung (EBM/GOÄ). Allgemein Docs ersetzt keine Abrechnungssoftware.' }));
+    return v;
+  }
+
+  // ---------------------------------------------------------------
+  // Auswertung
+  // ---------------------------------------------------------------
+  function bars(title, rows, fmt) {
+    const max = Math.max(1, ...rows.map((r) => r[1]));
+    return h('div', { class: 'card', style: 'margin:0' }, h('h2', { style: 'margin-bottom:14px', text: title }),
+      rows.length ? h('div', { class: 'bars' }, rows.map(([label, val], i) => h('div', { class: 'bar-row' },
+        h('div', { class: 'bar-label', text: label }),
+        h('div', { class: 'bar-track' }, h('div', { class: 'bar-fill', style: `width:${(val / max) * 100}%;animation-delay:${i * 0.08}s` })),
+        h('div', { class: 'bar-val', text: fmt ? fmt(val) : String(val) }))))
+        : h('div', { class: 'empty', text: 'Keine Daten.' }));
+  }
+
+  function renderAuswertung() {
+    const v = h('div', { class: 'view' });
+    v.appendChild(h('div', { class: 'page-head' }, h('div', {}, h('h1', { text: 'Auswertung' }), h('p', { text: 'Ihre Praxis in Zahlen – ohne Excel.' }))));
+    const ages = [['0–17', 0, 17], ['18–39', 18, 39], ['40–64', 40, 64], ['65+', 65, 200]].map(([l, lo, hi]) => [l, state.patienten.filter((p) => { const a = ageFrom(p.geb); return a >= lo && a <= hi; }).length]);
+    const diag = {};
+    state.patienten.forEach((p) => p.diagnosen.forEach((d) => { diag[d.text] = (diag[d.text] || 0) + 1; }));
+    const topDiag = Object.entries(diag).sort((a, b) => b[1] - a[1]).slice(0, 6);
+    const wd = [1, 2, 3, 4, 5].map((d) => [WEEKDAYS_LONG[d], state.termine.filter((t) => new Date(t.datum + 'T12:00:00').getDay() === d).length]);
+    const monthly = {};
+    allLeistungen().forEach((e) => { monthly[e.datum.slice(0, 7)] = (monthly[e.datum.slice(0, 7)] || 0) + e.betrag; });
+    const months = Object.entries(monthly).sort().slice(-6).map(([k, val]) => [MONTHS[Number(k.slice(5)) - 1] + ' ' + k.slice(2, 4), val]);
+    const ins = [['gesetzlich', state.patienten.filter((p) => p.versicherung === 'gesetzlich').length], ['privat', state.patienten.filter((p) => p.versicherung === 'privat').length]];
+    v.appendChild(h('div', { class: 'grid cols-2' }, bars('Altersverteilung', ages), bars('Häufigste Diagnosen', topDiag), bars('Termine nach Wochentag', wd), bars('Honorar pro Monat', months, euro), bars('Versicherung', ins)));
+    return v;
+  }
+
+  // ---------------------------------------------------------------
+  // Demo & Medien, Hilfe
+  // ---------------------------------------------------------------
+  const MEDIA_IMAGES = [
+    ['Instagram-Post 1 – Logo', 'media/instagram/post-1-logo.png'],
+    ['Instagram-Post 2 – Patientenakte', 'media/instagram/post-2-akte.png'],
+    ['Instagram-Post 3 – Wartezimmer', 'media/instagram/post-3-wartezimmer.png'],
+    ['Instagram-Post 4 – Dokumente', 'media/instagram/post-4-dokumente.png'],
+    ['Instagram-Post 5 – Vorsorge', 'media/instagram/post-5-vorsorge.png'],
+    ['Story / Reel-Cover', 'media/instagram/story-cover.png']
+  ];
+
+  function downloadLink(label, href, filename) {
+    const a = h('a', { class: 'btn primary', href, download: filename });
+    a.appendChild(icon('download'));
+    a.appendChild(document.createTextNode(label));
+    return a;
+  }
+
+  function renderMedien() {
+    const v = h('div', { class: 'view' });
+    v.appendChild(h('div', { class: 'page-head' }, h('div', {}, h('h1', { text: 'Demo & Medien' }), h('p', { text: 'Vorführvideo, Social-Media-Reel und Instagram-Bilder zum Herunterladen.' }))));
+    v.appendChild(h('div', { class: 'card' }, h('div', { class: 'card-title' }, h('h2', { text: 'Demoversion – Video mit Musik' }), downloadLink('Demo-Video herunterladen', 'media/allgemein-docs-demo.mp4', 'Allgemein-Docs-Demo.mp4')),
+      h('video', { class: 'media-video', src: 'media/allgemein-docs-demo.mp4', controls: true, preload: 'metadata', poster: 'media/demo-poster.jpg' })));
+    v.appendChild(h('div', { class: 'grid cols-2' },
+      h('div', { class: 'card', style: 'margin:0' }, h('div', { class: 'card-title' }, h('h2', { text: 'Social-Media-Reel (9:16)' }), downloadLink('Reel herunterladen', 'media/allgemein-docs-reel.mp4', 'Allgemein-Docs-Reel.mp4')),
+        h('video', { class: 'media-video reel', src: 'media/allgemein-docs-reel.mp4', controls: true, preload: 'metadata', poster: 'media/instagram/story-cover.png' })),
+      h('div', { class: 'card', style: 'margin:0' }, h('h2', { style: 'margin-bottom:10px', text: 'Hinweis' }), h('p', { class: 'soft', text: 'Beide Videos sind mit der gleichen Hintergrundmusik unterlegt, die exakt so lang ist wie das Video. Reel: 1080×1920 (Instagram Reels, TikTok, Stories). Bilder: 1080×1080 (Feed).' }))));
+    v.appendChild(h('div', { class: 'card', style: 'margin-top:18px' }, h('h2', { style: 'margin-bottom:14px', text: 'Instagram-Bilder (3D-Hochglanz)' }),
+      h('div', { class: 'gallery' }, MEDIA_IMAGES.map(([t, src]) => h('figure', { class: 'figure', style: 'cursor:default' }, h('img', { src, alt: t }),
+        h('figcaption', { class: 'row' }, h('span', { style: 'flex:1', text: t }), (() => { const a = h('a', { class: 'btn small', href: src, download: src.split('/').pop() }); a.appendChild(icon('download')); a.appendChild(document.createTextNode('PNG')); return a; })()))))));
+    return v;
+  }
+
+  function renderHilfe() {
+    const v = h('div', { class: 'view' });
+    v.appendChild(h('div', { class: 'page-head' }, h('div', {}, h('h1', { text: 'Hilfe & Tipps' }), h('p', { text: 'In fünf Minuten startklar.' }))));
+    const steps = [
+      ['1', 'Patient anlegen', 'Unter „Patienten“ auf „Neuer Patient“ klicken – Name genügt, alles andere kann später ergänzt werden.'],
+      ['2', 'Termin vergeben', 'Im Terminkalender einen Tag wählen und „Neuer Termin“ klicken. Beim Eintreffen: „Eingetroffen“.'],
+      ['3', 'Behandeln & dokumentieren', 'Im Wartezimmer „Aufrufen“, dann in der Karteikarte mit Textbausteinen in Sekunden dokumentieren.'],
+      ['4', 'Rezept & Co. drucken', 'Unter „Dokumente“ Vorlage wählen – Patientendaten, Diagnosen und Medikation werden automatisch eingesetzt.'],
+      ['5', 'Vorsorge im Blick', 'Mit „Vorsorge & Recall“ und „Impfungen“ sehen Sie sofort, wer fällig ist.']
+    ];
+    v.appendChild(h('div', { class: 'grid cols-2' }, steps.map(([n, t, d]) => h('div', { class: 'card step', style: 'margin:0' }, h('div', { class: 'step-num', text: n }), h('div', {}, h('h3', { text: t }), h('p', { class: 'soft', style: 'margin:4px 0 0', text: d }))))));
+    v.appendChild(h('div', { class: 'card', style: 'margin-top:18px' }, h('h2', { style: 'margin-bottom:12px', text: 'Tastenkürzel' }),
+      h('dl', { class: 'kv' },
+        h('dt', {}, h('kbd', { text: 'Strg K' })), h('dd', { text: 'Globale Suche (Patienten, Vorlagen, Aufgaben)' }),
+        h('dt', {}, h('kbd', { text: 'Strg 1 – 9, 0' })), h('dd', { text: 'Menüpunkte direkt öffnen (in Menü-Reihenfolge)' }),
+        h('dt', {}, h('kbd', { text: 'Esc' })), h('dd', { text: 'Fenster schließen' }))));
+    return v;
+  }
+
   // ---------------------------------------------------------------
   // Globale Suche (Strg+K)
   // ---------------------------------------------------------------
@@ -866,7 +1099,7 @@
     const base = demoData();
     const s = Object.assign({}, data);
     s.einstellungen = Object.assign({ praxis: DEFAULT_PRAXIS, arzt: 'Praxisinhaber/in' }, s.einstellungen);
-    s.patienten = (s.patienten || []).map((p) => Object.assign({ diagnosen: [], medikation: [], karte: [], bilder: [], allergien: '', avatar: 'a1' }, p));
+    s.patienten = (s.patienten || []).map((p) => Object.assign({ diagnosen: [], medikation: [], karte: [], bilder: [], vorsorge: [], impfungen: [], leistungen: [], allergien: '', avatar: 'a1' }, p));
     s.termine = s.termine || [];
     s.wartezimmer = s.wartezimmer || [];
     s.aufgaben = s.aufgaben || [];
@@ -880,6 +1113,10 @@
     document.getElementById('search-btn').addEventListener('click', openSearch);
     document.addEventListener('keydown', (e) => {
       if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'k') { e.preventDefault(); openSearch(); }
+      if ((e.ctrlKey || e.metaKey) && /^[0-9]$/.test(e.key)) {
+        const target = NAV_FLAT[e.key === '0' ? 9 : Number(e.key) - 1];
+        if (target) { e.preventDefault(); closeModal(); goto(target[0]); }
+      }
       if (e.key === 'Escape') closeModal();
     });
     const loaded = await window.docsAPI.loadData();
