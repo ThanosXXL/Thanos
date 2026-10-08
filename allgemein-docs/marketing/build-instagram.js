@@ -52,6 +52,7 @@ const posts = {
   'post-8-krankmeldung': feed({ h1: 'Gelber Schein', accent: 'in Sekunden.', sub: 'Krankmeldung mit Diagnose aus der Akte – drucken und fertig.', img: 'au', orbs: orb('gold', 'doc', 130, 'right:70px;top:150px') + orb('green', 'check', 100, 'right:60px;top:400px') }),
   'post-10-au-digital': feed({ h1: 'Krankmeldung', accent: 'digital an KV & AG.', sub: 'Krankenkasse und Arbeitgeber digital informieren – in der Demo simuliert.', img: 'au', orbs: orb('gold', 'doc', 130, 'right:70px;top:150px') + orb('green', 'check', 100, 'right:60px;top:400px') }),
   'post-11-erezept-menue': feed({ h1: 'Medikamente', accent: 'als E-Rezept.', sub: 'Mehrere auswählen, ein Klick, alle Token fertig.', img: 'erezept-batch', orbs: orb('red', 'heart', 130, 'right:70px;top:150px') + orb('blue', 'doc', 100, 'right:60px;top:400px') }),
+  'post-12-katalog': feed({ h1: '339 Wirkstoffe.', accent: 'Ein Suchfeld.', sub: 'Wirkstoff, Handelsname oder ATC-Code – Stärke wählen, verordnen.', img: 'katalog', orbs: orb('blue', 'doc', 130, 'right:70px;top:150px') + orb('gold', 'bell', 100, 'right:60px;top:400px') }),
   'story-cover': page(`
 <div class="canvas" style="width:1080px;height:1920px">
   <div class="glow" style="width:800px;height:800px;background:#2f80ed;left:140px;top:120px"></div>

@@ -1,4 +1,4 @@
-// Social-Media-Reel (1080x1920, 27 s, 30 fps) mit Animationen und Hintergrundmusik in exakt gleicher Länge.
+// Social-Media-Reel (1080x1920, 30 s, 30 fps) mit Animationen und Hintergrundmusik in exakt gleicher Länge.
 // Aufruf: NODE_PATH=$(npm root -g) node build-reel.js
 const { chromium } = require('playwright');
 const path = require('path');
@@ -9,6 +9,7 @@ const FPS = 30;
 const SCENES = [
   { len: 3000, type: 'intro' },
   { len: 3000, h1: 'Karte rein.', accent: 'Patient da.', sub: 'Versichertenkarte einlesen.', img: 'karte', pills: ['Einlesen', 'Akte öffnen', 'Neu anlegen'], orb: ['blue', 'doc'] },
+  { len: 3000, h1: 'Über 300', accent: 'Wirkstoffe.', sub: 'Suchen, Stärke wählen, verordnen.', img: 'katalog', pills: ['Handelsname', 'ATC-Code', 'Import'], orb: ['gold', 'bell'] },
   { len: 3000, h1: 'Medikamente', accent: 'als E-Rezept.', sub: 'Mehrere auf einmal verordnen.', img: 'erezept-batch', pills: ['Auswahl', 'QR-Token'], orb: ['blue', 'doc'] },
   { len: 3000, h1: 'Die ganze Akte.', accent: 'Ein Klick.', sub: 'Diagnosen, Medikation, Karteikarte.', img: 'patient', pills: ['Diagnosen', 'Medikation', 'Karteikarte'], orb: ['red', 'heart'] },
   { len: 3000, h1: 'Laborwerte', accent: 'mit Ampel.', sub: 'Auffälliges sofort sehen.', img: 'labor', pills: ['Verlauf', 'Referenz', 'Karteikarte'], orb: ['gold', 'bell'] },

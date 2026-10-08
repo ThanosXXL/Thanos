@@ -84,7 +84,9 @@
     flask: 'M9 3h6M10 3v6l-5 9a2 2 0 0 0 2 3h10a2 2 0 0 0 2-3l-5-9V3M8 15h8',
     thermo: 'M10 14V5a2 2 0 0 1 4 0v9a4 4 0 1 1-4 0M12 8v8',
     swap: 'M4 8h13l-3-3M20 16H7l3 3',
-    card: 'M3 6h18v12H3zM3 10h18M7 15h4'
+    card: 'M3 6h18v12H3zM3 10h18M7 15h4',
+    book: 'M4 5a2 2 0 0 1 2-2h12v16H6a2 2 0 0 0-2 2zM4 21V5M9 7h6M9 11h6',
+    close: 'M6 6l12 12M18 6L6 18'
   };
   function icon(name) {
     const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
@@ -195,6 +197,7 @@
       version: 1,
       demo: true,
       karten: [],
+      katalogExtra: [],
       einstellungen: { praxis: DEFAULT_PRAXIS, arzt: 'Dr. med. Sabine Lindner' },
       patienten,
       termine: [
@@ -303,7 +306,7 @@
   // ---------------------------------------------------------------
   const NAV = [
     ['Praxis', [['start', 'Start', 'home'], ['patienten', 'Patienten', 'users'], ['karte', 'Karte & E-Rezept', 'card'], ['termine', 'Terminkalender', 'calendar'], ['wartezimmer', 'Wartezimmer', 'clock']]],
-    ['Medizin', [['labor', 'Laborergebnisse', 'flask'], ['erezept', 'E-Rezept', 'pill'], ['rezepte', 'Rezepte', 'pill'], ['krankmeldung', 'Krankmeldung', 'thermo'], ['ueberweisungen', 'Überweisungen', 'swap'], ['vorsorge', 'Vorsorge & Recall', 'bell'], ['impfungen', 'Impfungen', 'shield'], ['leistungen', 'Leistungen', 'euro']]],
+    ['Medizin', [['labor', 'Laborergebnisse', 'flask'], ['erezept', 'E-Rezept', 'pill'], ['katalog', 'Medikamentenkatalog', 'book'], ['rezepte', 'Rezepte', 'pill'], ['krankmeldung', 'Krankmeldung', 'thermo'], ['ueberweisungen', 'Überweisungen', 'swap'], ['vorsorge', 'Vorsorge & Recall', 'bell'], ['impfungen', 'Impfungen', 'shield'], ['leistungen', 'Leistungen', 'euro']]],
     ['Organisation', [['aufgaben', 'Aufgaben', 'check'], ['dokumente', 'Dokumente', 'file'], ['auswertung', 'Auswertung', 'chart']]],
     ['System', [['medien', 'Demo & Medien', 'play'], ['hilfe', 'Hilfe & Tipps', 'help'], ['einstellungen', 'Einstellungen', 'settings']]]
   ];
@@ -349,7 +352,7 @@
     renderNav();
     const content = document.getElementById('content');
     content.textContent = '';
-    const views = { start: renderStart, patienten: renderPatienten, termine: renderTermine, wartezimmer: renderWartezimmer, karte: renderKarte, labor: renderLabor, erezept: renderErezept, rezepte: renderRezepte, krankmeldung: renderKrankmeldungen, ueberweisungen: renderUeberweisungen, vorsorge: renderVorsorge, impfungen: renderImpfungen, leistungen: renderLeistungen, aufgaben: renderAufgaben, dokumente: renderDokumente, auswertung: renderAuswertung, medien: renderMedien, hilfe: renderHilfe, einstellungen: renderEinstellungen };
+    const views = { start: renderStart, patienten: renderPatienten, termine: renderTermine, wartezimmer: renderWartezimmer, karte: renderKarte, labor: renderLabor, erezept: renderErezept, katalog: renderKatalog, rezepte: renderRezepte, krankmeldung: renderKrankmeldungen, ueberweisungen: renderUeberweisungen, vorsorge: renderVorsorge, impfungen: renderImpfungen, leistungen: renderLeistungen, aufgaben: renderAufgaben, dokumente: renderDokumente, auswertung: renderAuswertung, medien: renderMedien, hilfe: renderHilfe, einstellungen: renderEinstellungen };
     content.appendChild((views[view.page] || renderStart)());
   }
 
@@ -561,6 +564,19 @@
     return card;
   }
 
+  function addMedikation(p) {
+    openModal('Medikament hinzufügen', (modal) => {
+      const text = h('input', { type: 'text', placeholder: 'Medikament und Stärke (aus dem Katalog wählen oder eintippen)' });
+      const dos = h('input', { type: 'text', placeholder: 'Dosierung, z. B. 1-0-0' });
+      modal.appendChild(h('div', { class: 'row' }, h('div', { class: 'field', style: 'flex:2' }, h('label', { text: 'Medikament' }), text), h('div', { class: 'field' }, h('label', { text: 'Dosierung' }), dos)));
+      modal.appendChild(medPanel({ onPick: (pk) => { text.value = pk.text; dos.focus(); } }));
+      modal.appendChild(h('div', { class: 'modal-actions' }, btn('Abbrechen', { onclick: closeModal }), btn('Hinzufügen', { kind: 'primary', icon: 'plus', onclick: () => {
+        if (!text.value.trim()) { toast('Bitte ein Medikament wählen oder eintippen.'); return; }
+        p.medikation.push({ id: uid(), text: `${text.value.trim()}${dos.value.trim() ? ' ' + dos.value.trim() : ''}` });
+        closeModal(); commit(); toast('Medikament hinzugefügt.');
+      } })));
+    }, { wide: true });
+  }
   function tabUebersicht(p) {
     const v = h('div', {});
     v.appendChild(h('div', { class: 'card' }, h('h2', { style: 'margin-bottom:14px', text: 'Stammdaten' }),
@@ -576,10 +592,7 @@
       }),
       (d) => { p.diagnosen = p.diagnosen.filter((x) => x.id !== d.id); commit(); }, 'pulse'));
     v.appendChild(simpleListCard('Medikation', p.medikation, (m) => m.text,
-      () => formModal('Medikament hinzufügen', [{ key: 'text', label: 'Medikament und Dosierung', placeholder: 'z. B. Ramipril 5 mg 1-0-0' }], (f) => {
-        if (!f.text) return false;
-        p.medikation.push({ id: uid(), text: f.text }); commit();
-      }),
+      () => addMedikation(p),
       (m) => { p.medikation = p.medikation.filter((x) => x.id !== m.id); commit(); }, 'pill',
       (m) => btn('E-Rezept', { kind: 'small', icon: 'pill', onclick: () => { const r = issueErezept(p, m.text); persist(); render(); viewErezept({ ...r, p }); toast('E-Rezept ausgestellt – auf der Karte abrufbar.'); } })));
     return v;
@@ -864,6 +877,27 @@
     v.appendChild(h('div', { class: 'card' }, h('h2', { style: 'margin-bottom:14px', text: 'Praxis' }),
       h('div', { class: 'row' }, h('div', { class: 'field' }, h('label', { text: 'Praxisname' }), praxis), h('div', { class: 'field' }, h('label', { text: 'Ärztin / Arzt' }), arzt)),
       btn('Speichern', { kind: 'primary', icon: 'save', onclick: () => { state.einstellungen.praxis = praxis.value.trim() || DEFAULT_PRAXIS; state.einstellungen.arzt = arzt.value.trim() || 'Praxisinhaber/in'; commit(); toast('Gespeichert.'); } })));
+    const katFile = h('input', { type: 'file', accept: '.csv,.json,text/csv,application/json', style: 'display:none' });
+    katFile.addEventListener('change', () => {
+      const f = katFile.files[0];
+      if (!f) return;
+      const r = new FileReader();
+      r.onload = () => {
+        try {
+          const list = parseImport(String(r.result), f.name);
+          if (!list.length) { toast('Keine Einträge gefunden.'); return; }
+          const extra = state.katalogExtra || [];
+          list.forEach((e) => { const i = extra.findIndex((x) => norm(x.name) === norm(e.name)); if (i >= 0) extra[i] = e; else extra.push(e); });
+          state.katalogExtra = extra; commit(); toast(`${list.length} Einträge importiert.`);
+        } catch (err) { toast('Import nicht möglich: ' + err.message); }
+      };
+      r.readAsText(f, 'utf-8');
+    });
+    v.appendChild(h('div', { class: 'card' }, h('h2', { style: 'margin-bottom:6px', text: 'Medikamentenkatalog' }),
+      h('p', { class: 'soft', text: `Eingebaut: ${CATALOG.length} Wirkstoffe (Stand ${CATALOG_STAND}, Beispielkatalog). Für die vollständige, aktuelle Auswahl lässt sich der Export einer lizenzierten Arzneimitteldatenbank importieren.` }),
+      h('p', { class: 'soft small', text: 'Format: CSV (Semikolon) mit Kopfzeile Name; Staerke; Form; ATC; Gruppe; Alias – oder JSON-Liste mit denselben Feldern. Importierte Einträge ergänzen oder ersetzen gleichnamige Wirkstoffe.' }),
+      h('div', { class: 'row' }, btn('Katalog importieren', { icon: 'file', onclick: () => katFile.click() }), katFile,
+        btn(`Importierte entfernen (${(state.katalogExtra || []).length})`, { kind: 'danger', icon: 'trash', onclick: () => { state.katalogExtra = []; commit(); toast('Importierte Einträge entfernt.'); } }))));
     v.appendChild(h('div', { class: 'card' }, h('h2', { style: 'margin-bottom:6px', text: 'Datensicherung' }),
       h('p', { class: 'soft', text: 'Alle Daten liegen ausschließlich lokal auf diesem Computer. Eine Sicherung als Datei schützt vor Datenverlust.' }),
       h('div', { class: 'row' },
@@ -1141,13 +1175,19 @@
       pSel.addEventListener('change', fillMeds); fillMeds();
       const artSel = h('select', { name: 'art' }, [['e', 'E-Rezept (über die Karte abrufbar)'], ['p', 'Papierrezept (Muster)']].map(([v, l]) => h('option', { value: v, text: l, selected: v === (preset.art || 'e') })));
       const own = h('input', { type: 'text', name: 'own', placeholder: 'Medikament und Stärke (falls „Anderes“)' });
+      if (preset.med) { own.value = preset.med; medSel.value = ''; }
+      const katBox = h('div', { class: 'cat-inline', hidden: true });
+      const katBtn = btn('Im Medikamentenkatalog suchen', { icon: 'book', onclick: () => {
+        katBox.hidden = !katBox.hidden;
+        if (!katBox.hidden && !katBox.firstChild) katBox.appendChild(medPanel({ onPick: (pk) => { own.value = pk.text; medSel.value = ''; katBox.hidden = true; toast('Medikament übernommen: ' + pk.text); } }));
+      } });
       const dos = h('input', { type: 'text', name: 'dosierung', placeholder: 'z. B. 1-0-0' });
       const packung = h('select', { name: 'packung' }, ['N1', 'N2', 'N3'].map((x) => h('option', { value: x, text: x })));
       const anzahl = h('input', { type: 'text', name: 'anzahl', value: '1' });
       const autidem = h('select', { name: 'autidem' }, [['ja', 'Ja'], ['nein', 'Nein']].map(([v, l]) => h('option', { value: v, text: l })));
       const hint = h('input', { type: 'text', name: 'hinweis', placeholder: 'optional, z. B. vor dem Essen einnehmen' });
       const row = (...f) => h('div', { class: 'row' }, f.map(([l, el]) => h('div', { class: 'field' }, h('label', { text: l }), el)));
-      form.append(row(['Patient', pSel], ['Art', artSel]), row(['Medikament aus der Medikation', medSel]), row(['…oder anderes Medikament', own]),
+      form.append(row(['Patient', pSel], ['Art', artSel]), row(['Medikament aus der Medikation', medSel]), row(['…oder anderes Medikament', own]), h('div', { style: 'margin:-6px 0 12px' }, katBtn, katBox),
         row(['Dosierung', dos], ['Packung', packung], ['Anzahl', anzahl]), row(['aut idem', autidem], ['Hinweis', hint]),
         h('div', { class: 'modal-actions' }, btn('Abbrechen', { onclick: closeModal }), h('button', { class: 'btn primary', type: 'submit' }, icon('pill'), 'Rezept ausstellen')));
       form.addEventListener('submit', (e) => {
@@ -1173,6 +1213,157 @@
       onView: () => viewRezept(r), onDelete: () => { r.p.rezepte = r.p.rezepte.filter((x) => x.id !== r.id); commit(); }
     }));
     return docPage({ title: 'Rezepte', sub: 'Medikamente verordnen – Rezept aus der Medikation in drei Klicks.', addLabel: 'Rezept ausstellen', onAdd: newRezept, rows, emptyText: 'Noch keine Rezepte ausgestellt.' });
+  }
+
+  // ---------------------------------------------------------------
+  // Medikamentenkatalog (Suche, Auswahl, Import)
+  // ---------------------------------------------------------------
+  const FORM_NAMES = {
+    Tbl: 'Tabletten', FTA: 'Filmtabletten', Kautbl: 'Kautabletten', Brausetbl: 'Brausetabletten', Drg: 'Dragees', Kps: 'Kapseln',
+    'MSR-Tbl': 'magensaftresistente Tabletten', 'MSR-Kps': 'magensaftresistente Kapseln', 'ret-Tbl': 'Retardtabletten', 'ret-Kps': 'Retardkapseln',
+    Sup: 'Zäpfchen', Tr: 'Tropfen', Saft: 'Saft', Susp: 'Suspension', Sirup: 'Sirup', Creme: 'Creme', Salbe: 'Salbe', Gel: 'Gel', Fettsalbe: 'Fettsalbe',
+    Pflaster: 'Pflaster', Inj: 'Injektionslösung', Fertigpen: 'Fertigpen', Fertigspritze: 'Fertigspritze', Infusion: 'Infusionslösung',
+    Dosieraerosol: 'Dosieraerosol', Inhalator: 'Inhalator', Inhalationskapseln: 'Inhalationskapseln', Respimat: 'Respimat', Pulver: 'Pulver', Granulat: 'Granulat',
+    Nasenspray: 'Nasenspray', 'Nasentr.': 'Nasentropfen', Aug: 'Augentropfen', 'Ohrentr.': 'Ohrentropfen', Spray: 'Spray', 'Lösung': 'Lösung',
+    Vaginaltbl: 'Vaginaltabletten', Vaginalcreme: 'Vaginalcreme', Nagellack: 'Nagellack', Kaugummi: 'Kaugummi', Hustentropfen: 'Hustentropfen', Schaum: 'Schaum'
+  };
+  const ATC_GROUPS = { A: 'Magen-Darm & Stoffwechsel', B: 'Blut & Gerinnung', C: 'Herz-Kreislauf', D: 'Haut', G: 'Urogenital & Hormone', H: 'Hormone (systemisch)', J: 'Infektionen & Impfstoffe', L: 'Immunsystem', M: 'Muskel & Skelett', N: 'Nervensystem', P: 'Parasiten', R: 'Atemwege & Allergie', S: 'Augen & Ohren', V: 'Sonstiges' };
+  const MED_ORDER = ['C', 'A', 'N', 'M', 'R', 'J', 'B', 'H', 'G', 'D', 'S', 'L', 'P', 'V'];
+  function parsePacks(fields) {
+    const packs = [];
+    fields.forEach((f) => {
+      const i = f.indexOf(':');
+      if (i < 0) return;
+      const form = f.slice(0, i).trim();
+      const list = f.slice(i + 1).split(';').map((x) => x.trim()).filter(Boolean);
+      const last = list[list.length - 1] || '';
+      const um = last.match(/[A-Za-zµ%.Ä-ü][^\d]*$/);
+      const unit = /\d/.test(last) && um ? um[0].trim() : '';
+      list.forEach((st) => {
+        const strength = /[A-Za-zµ%]/.test(st) || !unit ? st : `${st} ${unit}`;
+        packs.push({ form, formName: FORM_NAMES[form] || form, strength });
+      });
+    });
+    return packs;
+  }
+  function parseCatalog(raw) {
+    return String(raw || '').split('\n').map((l) => l.trim()).filter((l) => l && l.split('|').length >= 4 && !l.startsWith('/*') && !l.startsWith('Format'))
+      .map((l) => {
+        const f = l.split('|');
+        const atc = f[1].trim();
+        return { name: f[0].trim(), atc, grp: ATC_GROUPS[atc[0]] || 'Sonstiges', aliases: f[2].split(';').map((x) => x.trim()).filter(Boolean), packs: parsePacks(f.slice(3)), builtin: true };
+      });
+  }
+  const CATALOG = parseCatalog(window.MED_CATALOG_RAW);
+  const CATALOG_STAND = 'Oktober 2026';
+  const catalogAll = () => CATALOG.concat(state.katalogExtra || []);
+  const norm = (t) => String(t || '').toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '');
+  function searchCatalog(q, grpLetter) {
+    const all = catalogAll().filter((e) => !grpLetter || (e.atc || 'V')[0] === grpLetter);
+    const t = norm(q).trim();
+    if (!t) return null;
+    const toks = t.split(/\s+/);
+    return all.map((e) => {
+      const nm = norm(e.name), al = e.aliases.map(norm), atc = norm(e.atc);
+      let score = 0;
+      for (const k of toks) {
+        let sc = 0;
+        if (nm.startsWith(k)) sc = 5; else if (al.some((a) => a.startsWith(k))) sc = 5; else if (nm.includes(k)) sc = 3; else if (al.some((a) => a.includes(k))) sc = 3;
+        else if (atc.startsWith(k)) sc = 4; else if (norm(e.grp).includes(k)) sc = 1; else if (e.packs.some((p) => norm(p.strength + ' ' + p.formName).includes(k))) sc = 1;
+        if (!sc) return null;
+        score += sc;
+      }
+      return { e, score };
+    }).filter(Boolean).sort((a, b) => b.score - a.score || a.e.name.localeCompare(b.e.name, 'de')).slice(0, 40).map((x) => x.e);
+  }
+  const POPULAR = ['Ramipril', 'Bisoprolol', 'Amlodipin', 'Metformin', 'Pantoprazol', 'Ibuprofen', 'Paracetamol', 'Metamizol', 'Atorvastatin', 'Levothyroxin', 'Amoxicillin', 'Cetirizin'];
+
+  // Suchfeld mit Ergebnisliste; onPick({ text, name, atc, form, strength })
+  function medPanel(opts) {
+    opts = opts || {};
+    const wrap = h('div', { class: 'med-panel' });
+    let grp = opts.grp || '';
+    const input = h('input', { type: 'text', placeholder: 'Wirkstoff, Handelsname oder ATC-Code …', value: opts.query || '', 'aria-label': 'Medikament suchen' });
+    const chips = h('div', { class: 'chips med-groups' });
+    const results = h('div', { class: 'med-results' });
+    const drawChips = () => {
+      chips.textContent = '';
+      chips.appendChild(h('button', { class: 'chip' + (!grp ? ' on' : ''), type: 'button', onclick: () => { grp = ''; drawChips(); run(); } }, 'Alle'));
+      MED_ORDER.forEach((l) => chips.appendChild(h('button', { class: 'chip' + (grp === l ? ' on' : ''), type: 'button', onclick: () => { grp = l; drawChips(); run(); } }, ATC_GROUPS[l])));
+    };
+    const entry = (e) => h('div', { class: 'med-res' },
+      h('div', { class: 'med-head' }, h('strong', { text: e.name }), e.atc ? h('span', { class: 'pill info', text: e.atc }) : null, h('span', { class: 'soft small', text: e.grp }),
+        e.aliases.length ? h('span', { class: 'soft small', text: '· ' + e.aliases.slice(0, 3).join(', ') }) : null),
+      h('div', { class: 'med-packs' }, e.packs.map((pk) => h('button', { class: 'chip', type: 'button', title: `${e.name} ${pk.strength}, ${pk.formName}`, onclick: () => {
+        const text = `${e.name} ${pk.strength}`;
+        opts.onPick && opts.onPick({ text, name: e.name, atc: e.atc, form: pk.formName, strength: pk.strength });
+      } }, h('span', { text: pk.strength }), h('small', { text: pk.formName })))));
+    const run = () => {
+      const q = input.value;
+      opts.onQuery && opts.onQuery(q, grp);
+      results.textContent = '';
+      let list = searchCatalog(q, grp);
+      if (list === null) {
+        const all = catalogAll();
+        if (grp) list = all.filter((e) => (e.atc || 'V')[0] === grp).slice(0, 40);
+        else {
+          results.appendChild(h('div', { class: 'soft small', style: 'margin:8px 0', text: `${all.length} Wirkstoffe · Häufig verordnet:` }));
+          list = POPULAR.map((n) => all.find((e) => e.name === n)).filter(Boolean);
+        }
+      }
+      if (!list.length) { results.appendChild(h('div', { class: 'empty', text: 'Kein Treffer. Anderen Suchbegriff versuchen oder einen Katalog importieren (Einstellungen).' })); return; }
+      list.forEach((e) => results.appendChild(entry(e)));
+    };
+    input.addEventListener('input', run);
+    wrap.append(h('div', { class: 'field' }, input), chips, results);
+    drawChips(); run();
+    return wrap;
+  }
+
+  function renderKatalog() {
+    const v = h('div', { class: 'view' });
+    const all = catalogAll();
+    const packs = all.reduce((n, e) => n + e.packs.length, 0);
+    v.appendChild(h('div', { class: 'page-head' }, h('div', {}, h('h1', { text: 'Medikamentenkatalog' }), h('p', { text: 'Wirkstoffe, Stärken und Darreichungsformen suchen und direkt verordnen.' })),
+      btn('Katalog importieren', { icon: 'file', onclick: () => goto('einstellungen') })));
+    v.appendChild(h('div', { class: 'grid cols-3' },
+      h('div', { class: 'card stat', style: 'margin:0' }, h('div', { class: 'stat-icon' }, icon('book')), h('div', {}, h('div', { class: 'stat-num', text: String(all.length) }), h('div', { class: 'soft small', text: 'Wirkstoffe / Präparate' }))),
+      h('div', { class: 'card stat', style: 'margin:0' }, h('div', { class: 'stat-icon' }, icon('pill')), h('div', {}, h('div', { class: 'stat-num', text: String(packs) }), h('div', { class: 'soft small', text: 'Stärken und Darreichungsformen' }))),
+      h('div', { class: 'card stat', style: 'margin:0' }, h('div', { class: 'stat-icon' }, icon('save')), h('div', {}, h('div', { class: 'stat-num', text: String((state.katalogExtra || []).length) }), h('div', { class: 'soft small', text: 'eigene / importierte Einträge' })))));
+    v.appendChild(h('div', { class: 'card', style: 'margin-top:18px' },
+      h('div', { class: 'card-title' }, h('h2', { text: 'Suchen und verordnen' }), h('span', { class: 'pill info', text: 'Stand ' + CATALOG_STAND })),
+      medPanel({ query: view.katQuery || '', grp: view.katGrp || '', onQuery: (q, g) => { view.katQuery = q; view.katGrp = g; },
+        onPick: (pick) => { if (needPatients()) return; newRezept({ med: pick.text, art: 'e' }); } }),
+      h('p', { class: 'soft small', style: 'margin-top:14px', text: 'Hinweis: Beispielkatalog ohne Preis-, Liefer- und Interaktionsdaten. Für den echten Einsatz eine zugelassene Arzneimitteldatenbank (z. B. ABDATA, ifap, Rote Liste) importieren und die Fachinformation prüfen.' })));
+    return v;
+  }
+
+  // CSV/JSON-Import (z. B. Export aus einer lizenzierten Arzneimitteldatenbank)
+  function parseImport(text, filename) {
+    let rows = [];
+    if (/\.json$/i.test(filename)) {
+      const d = JSON.parse(text);
+      rows = Array.isArray(d) ? d : d.medikamente || [];
+    } else {
+      const lines = text.replace(/^﻿/, '').split(/\r?\n/).filter((l) => l.trim());
+      const delim = (lines[0].match(/;/g) || []).length >= (lines[0].match(/,/g) || []).length ? ';' : ',';
+      const split = (l) => l.split(delim).map((x) => x.replace(/^"|"$/g, '').trim());
+      const head = split(lines[0]).map(norm);
+      const col = (names) => head.findIndex((h2) => names.some((n) => h2 === n || h2.startsWith(n)));
+      const ix = { name: col(['name', 'wirkstoff', 'bezeichnung', 'praparat']), strength: col(['staerke', 'starke', 'strength', 'dosis']), form: col(['form', 'darreichungsform']), atc: col(['atc']), grp: col(['gruppe', 'group']), alias: col(['alias', 'handelsname']) };
+      if (ix.name < 0) throw new Error('Spalte „Name“ fehlt');
+      rows = lines.slice(1).map((l) => { const c = split(l); return { name: c[ix.name], strength: ix.strength >= 0 ? c[ix.strength] : '', form: ix.form >= 0 ? c[ix.form] : '', atc: ix.atc >= 0 ? c[ix.atc] : '', grp: ix.grp >= 0 ? c[ix.grp] : '', alias: ix.alias >= 0 ? c[ix.alias] : '' }; });
+    }
+    const map = new Map();
+    rows.filter((r) => r && r.name).forEach((r) => {
+      const key = norm(r.name);
+      if (!map.has(key)) map.set(key, { name: String(r.name).trim(), atc: (r.atc || '').trim(), grp: r.grp || ATC_GROUPS[(r.atc || 'V')[0]] || 'Sonstiges', aliases: [], packs: [] });
+      const e = map.get(key);
+      String(r.alias || '').split(/[;,]/).map((x) => x.trim()).filter(Boolean).forEach((a) => { if (!e.aliases.includes(a)) e.aliases.push(a); });
+      if (r.strength || r.form) e.packs.push({ form: r.form || '', formName: r.form || 'Packung', strength: r.strength || '–' });
+    });
+    map.forEach((e) => { if (!e.packs.length) e.packs.push({ form: '', formName: 'Packung', strength: '–' }); });
+    return [...map.values()];
   }
 
   // ---------------------------------------------------------------
@@ -1206,7 +1397,9 @@
       view.erSel = view.erSel || {};
       const pSel = h('select', {}, patientOptions().map((o) => h('option', { value: o.value, text: o.label, selected: o.value === view.erPatient })));
       pSel.addEventListener('change', () => { view.erPatient = pSel.value; view.erSel = {}; render(); });
+      view.erExtra = view.erExtra || [];
       const chosen = p.medikation.filter((m) => view.erSel[m.id]);
+      const total = chosen.length + view.erExtra.length;
       v.appendChild(h('div', { class: 'card', style: 'margin-top:18px' },
         h('div', { class: 'card-title' }, h('h2', { text: 'Aus der Medikation verordnen' }), h('div', { style: 'min-width:240px' }, pSel)),
         p.medikation.length ? h('div', { class: 'list' }, p.medikation.map((m) => h('label', { class: 'item clickable med-pick' },
@@ -1215,15 +1408,22 @@
           h('span', { class: 'pill info', text: 'N1' }))))
           : h('div', { class: 'empty', text: 'Für diesen Patienten ist keine Medikation eingetragen.' }),
         h('div', { class: 'actions-row' },
-          btn(chosen.length ? `${chosen.length} E-Rezept${chosen.length > 1 ? 'e' : ''} ausstellen` : 'Medikamente auswählen', { kind: 'primary', icon: 'pill', onclick: () => {
-            if (!chosen.length) { toast('Bitte mindestens ein Medikament auswählen.'); return; }
-            const list = chosen.map((m) => issueErezept(p, m.text));
-            view.erSel = {};
+          btn(total ? `${total} E-Rezept${total > 1 ? 'e' : ''} ausstellen` : 'Medikamente auswählen', { kind: 'primary', icon: 'pill', onclick: () => {
+            if (!total) { toast('Bitte mindestens ein Medikament auswählen.'); return; }
+            const list = chosen.map((m) => issueErezept(p, m.text)).concat(view.erExtra.map((x) => issueErezept(p, x.text, { packung: x.packung })));
+            view.erSel = {}; view.erExtra = [];
             persist(); render();
             list.length === 1 ? viewErezept({ ...list[0], p }) : viewErezeptBatch(p, list);
             toast(`${list.length} E-Rezept${list.length > 1 ? 'e' : ''} ausgestellt – auf der Karte abrufbar.`);
           } }),
           btn('Alle auswählen', { icon: 'check', onclick: () => { p.medikation.forEach((m) => { view.erSel[m.id] = true; }); render(); } }))));
+      v.appendChild(h('div', { class: 'card', style: 'margin-top:18px' },
+        h('div', { class: 'card-title' }, h('h2', { text: 'Aus dem Medikamentenkatalog ergänzen' }), h('span', { class: 'pill info', text: `${catalogAll().length} Wirkstoffe` })),
+        view.erExtra.length ? h('div', { class: 'list', style: 'margin-bottom:12px' }, view.erExtra.map((x, i) => h('div', { class: 'item' },
+          h('div', { class: 'grow' }, h('div', { class: 'title', text: x.text }), h('div', { class: 'soft small', text: x.form || '' })),
+          h('select', { style: 'width:90px', onchange: (e) => { x.packung = e.target.value; } }, ['N1', 'N2', 'N3'].map((n) => h('option', { value: n, text: n, selected: n === x.packung }))),
+          btn('', { kind: 'small', icon: 'close', onclick: () => { view.erExtra.splice(i, 1); render(); } })))) : null,
+        medPanel({ query: view.erQuery || '', onQuery: (q) => { view.erQuery = q; }, onPick: (pk) => { view.erExtra.push({ text: pk.text, form: pk.form, packung: 'N1' }); render(); toast('Zur Auswahl hinzugefügt: ' + pk.text); } })));
     }
 
     v.appendChild(h('div', { class: 'card', style: 'margin-top:18px' }, h('h2', { style: 'margin-bottom:12px', text: 'Alle E-Rezepte' }),
@@ -1622,6 +1822,7 @@
     ['Instagram-Post 9 – E-Rezept', 'media/instagram/post-9-erezept.png'],
     ['Instagram-Post 10 – Krankmeldung digital', 'media/instagram/post-10-au-digital.png'],
     ['Instagram-Post 11 – Medikamente als E-Rezept', 'media/instagram/post-11-erezept-menue.png'],
+    ['Instagram-Post 12 – Medikamentenkatalog', 'media/instagram/post-12-katalog.png'],
     ['Instagram-Post 7 – Laborwerte', 'media/instagram/post-7-labor.png'],
     ['Instagram-Post 8 – Krankmeldung', 'media/instagram/post-8-krankmeldung.png'],
     ['Story / Reel-Cover', 'media/instagram/story-cover.png']
@@ -1708,6 +1909,7 @@
     s.einstellungen = Object.assign({ praxis: DEFAULT_PRAXIS, arzt: 'Praxisinhaber/in' }, s.einstellungen);
     s.patienten = (s.patienten || []).map((p) => Object.assign({ diagnosen: [], medikation: [], karte: [], bilder: [], vorsorge: [], impfungen: [], leistungen: [], labor: [], rezepte: [], krankmeldungen: [], ueberweisungen: [], kvnr: '', allergien: '', avatar: 'a1' }, p));
     s.karten = s.karten || [];
+    s.katalogExtra = s.katalogExtra || [];
     s.termine = s.termine || [];
     s.wartezimmer = s.wartezimmer || [];
     s.aufgaben = s.aufgaben || [];
