@@ -22,6 +22,8 @@ A sixth project, `pharmatech-app/`, is the Electron desktop wrapper around that 
 
 A seventh project, `pharmatech-mobile/`, is the Android/iOS counterpart to `pharmatech-app/`. Since Pharma-Tech is pure demo UI with fake data and no native capability requirements, `pharmatech-mobile` takes the pragmatic route instead of a native rebuild: it bundles the identical prototype (`assets/www/index.html`, also a manually-kept-in-sync copy of `pharma-tech-prototype/index.html`) and renders it inside a single `react-native-webview` view (`App.tsx`). `metro.config.js` adds `html` to `resolver.assetExts` so `require('./assets/www/index.html')` bundles as an asset; `App.tsx` resolves it at runtime via `Asset.fromModule(...).downloadAsync()` and hands the WebView the resulting local URI. Because it has no native modules beyond the Expo-Go-compatible `react-native-webview`, it needs no Expo config plugin and runs directly in Expo Go, no dev client required. Run it with `npm install` / `npx expo start` (Expo Go) or `eas build -p android --profile preview` (real APK) from inside `pharmatech-mobile/`, not from the repo root. It shares no dependencies, build config, or CI with any other project in this repo.
 
+`it-world-brand/` is not a project — it's the permanent, repo-wide brand material for **IT-World**, the company behind these projects (as opposed to any one product's own branding, e.g. Pharma-Tech's droplet icon). `logo.png` is the real, user-provided IT-World logo (black/gold 3D globe, "IT-WORLD" wordmark, "IT Solutions" slogan). Reuse this file for any future IT-World company-facing material (contracts, imprints, contact pages) instead of inventing a placeholder — see `it-world-brand/README.md`.
+
 ## Commands
 
 ```bash
