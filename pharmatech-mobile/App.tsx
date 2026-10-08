@@ -27,7 +27,13 @@ export default function App() {
       {source ? (
         <WebView
           source={source}
-          originWhitelist={['*']}
+          originWhitelist={['file://*']}
+          onShouldStartLoadWithRequest={(request) => {
+            // Die Oberfläche ist eine reine Offline-Demo ohne echte Links —
+            // nur das Laden der mitgelieferten Datei selbst ist erlaubt,
+            // jede Navigation zu einer anderen Adresse wird blockiert.
+            return request.url === source.uri || request.url.startsWith('file://');
+          }}
           style={styles.webview}
           javaScriptEnabled
           domStorageEnabled
