@@ -29,3 +29,32 @@ Why work with me:
 • Runs via link on Windows, macOS, Linux, Android and iOS
 
 Send me a short message about your project and I will reply with a plan and timeline.
+
+
+---
+
+## FAQ (question max 100 chars, answer max 300)
+
+**1. How much experience do you have?**
+I have 4 years of experience in UI/UX design and frontend development with Next.js, React, TypeScript and Tailwind CSS. I am happy to share fitting reference projects on request.
+
+**2. Can you implement my Figma, XD or PSD design?**
+Yes, pixel-perfect and responsive for desktop, tablet and mobile. If you have no design yet, I can create one in Figma for an extra fee.
+
+**3. Do I get the source code?**
+Yes, with every package. You receive clean, documented TypeScript code with a README and instructions for deployment and maintenance.
+
+**4. Can you also build the backend and database?**
+Yes, with Node.js, Express, Next.js API routes and Supabase (PostgreSQL), including login, roles and API. This is included in the Premium package.
+
+**5. Which devices will my web app run on?**
+Via link in the browser on Windows, macOS, Linux, Android, iOS and ChromeOS. It is installable as an app (PWA), with no app store needed.
+
+**6. How does the handover work?**
+You get a handover video call (30 to 90 minutes depending on the package), onboarding and, from Standard up, a recorded video to rewatch.
+
+**7. Do you help after delivery?**
+Yes, 14, 30 or 60 days of support depending on the package. Afterwards you can extend support or book a monthly maintenance plan.
+
+**8. What do I need to get started?**
+Your design (or a rough sketch), copy, images and feature wishes. Message me before ordering and we will plan scope and timeline together.
