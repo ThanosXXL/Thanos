@@ -740,6 +740,10 @@ tbody tr:last-child td{ border-bottom:none; }
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="5" width="20" height="14" rx="2.5"/><path d="M2 10h20"/><path d="M6 15h4"/></svg>
         Kundenkarte
       </button>
+      <button class="nav-item" data-view="angebote">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8Z"/><path d="M14 2v6h6"/><path d="M9 13h6"/><path d="M9 17h4"/></svg>
+        Angebote
+      </button>
       <button class="nav-item" data-view="bestellungen">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 3h2l2.4 12.4A2 2 0 0 0 9.4 17H18a2 2 0 0 0 2-1.6L21 8H6"/><circle cx="10" cy="21" r="1.3"/><circle cx="18" cy="21" r="1.3"/></svg>
         Bestellungen
@@ -1005,6 +1009,39 @@ tbody tr:last-child td{ border-bottom:none; }
           <div class="card">
             <div class="card-head"><div class="section-title">Kund:innen im Bonusprogramm</div></div>
             <div class="scroll-x"><table id="loyaltyTable"></table></div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ============ ANGEBOTE ============ -->
+      <section class="view" data-view="angebote">
+        <div class="view-head">
+          <div>
+            <h1 class="view-title">Angebote</h1>
+            <p class="view-desc">Für Bestandskund:innen oder frei für Laufkundschaft — direkt erstellen und ausdrucken.</p>
+          </div>
+        </div>
+        <div class="grid-2">
+          <div class="card">
+            <div class="section-title" style="margin-bottom:10px;">Neues Angebot</div>
+            <div class="pay-methods" id="angeboteModeChoice" style="grid-template-columns:1fr 1fr; margin-bottom:14px;">
+              <button class="pay-method active" data-mode="bestand">Bestandskund:in</button>
+              <button class="pay-method" data-mode="separat">Separat eingeben</button>
+            </div>
+            <div id="angeboteKundeField"></div>
+            <div id="angeboteSuggest"></div>
+            <div id="angeboteItems" style="margin-top:10px;"></div>
+            <div class="angebot-add">
+              <input type="text" id="angeboteBez" placeholder="Bezeichnung" />
+              <input type="text" id="angebotePreis" placeholder="Preis €" style="max-width:110px;" />
+              <button class="pill-btn sm ghost" id="angeboteAddBtn">+ Position</button>
+            </div>
+            <div class="angebot-total">Gesamt: <span class="tabular" id="angeboteTotal">0,00 €</span></div>
+            <div id="angebotePrintWrap" style="margin-top:10px;"></div>
+          </div>
+          <div class="card">
+            <div class="card-head"><div class="section-title">Zuletzt erstellte Angebote</div></div>
+            <div id="angeboteHistory"></div>
           </div>
         </div>
       </section>
@@ -1662,7 +1699,8 @@ function renderCustomerDetail(){
           + '</div>';
       })();
 
-  document.querySelectorAll('.angebot-price-input').forEach(inp=>{
+  const detailEl = document.getElementById('customerDetail');
+  detailEl.querySelectorAll('.angebot-price-input').forEach(inp=>{
     inp.addEventListener('change', ()=>{
       const idx = parseInt(inp.dataset.i, 10);
       const val = inp.value.trim();
@@ -1670,7 +1708,7 @@ function renderCustomerDetail(){
       renderCustomerDetail();
     });
   });
-  document.querySelectorAll('.angebot-chip').forEach(chip=>{
+  detailEl.querySelectorAll('.angebot-chip').forEach(chip=>{
     chip.addEventListener('click', ()=>{
       getAngebot(c.id).push({ bezeichnung: chip.dataset.med, preis: chip.dataset.price || '' });
       renderCustomerDetail();
@@ -1684,7 +1722,7 @@ function renderCustomerDetail(){
     getAngebot(c.id).push({ bezeichnung:bez, preis:preis });
     renderCustomerDetail();
   });
-  document.querySelectorAll('.angebot-remove').forEach(btn=>{
+  detailEl.querySelectorAll('.angebot-remove').forEach(btn=>{
     btn.addEventListener('click', ()=>{
       getAngebot(c.id).splice(parseInt(btn.dataset.i,10), 1);
       renderCustomerDetail();
@@ -1693,8 +1731,8 @@ function renderCustomerDetail(){
   const printBtn = document.getElementById('angebotPrintBtn');
   if(printBtn) printBtn.addEventListener('click', ()=> printAngebot(c));
 }
-function printAngebot(c){
-  const items = getAngebot(c.id);
+const ANGEBOT_HISTORY = [];
+function printAngebotDoc(kundeName, items){
   if(!items.length) return;
   const total = angebotTotal(items);
   const dateStr = new Date().toLocaleDateString('de-DE');
@@ -1702,14 +1740,146 @@ function printAngebot(c){
     '<div class="print-letterhead"><svg width="40" height="40" viewBox="0 0 24 24" fill="none"><path d="M12 2C9 6 6 9 6 13.5C6 17.6 8.7 21 12 21C15.3 21 18 17.6 18 13.5C18 9 15 6 12 2Z" fill="#0A5C46"/><path d="M12 6C10.3 8.4 9 10.3 9 13" stroke="#EAFBF4" stroke-width="1.4" stroke-linecap="round"/></svg>'
     + '<div><div class="brand-name" style="font-family:\'Baloo 2\';font-weight:800;">Pharma-Tech</div><div class="brand-sub">Apotheken-OS</div></div></div>'
     + '<h1>Angebot</h1>'
-    + '<div class="print-meta">Datum: '+dateStr+' &middot; Für: '+c.name+'</div>'
+    + '<div class="print-meta">Datum: '+dateStr+' &middot; Für: '+kundeName+'</div>'
     + '<table class="print-table"><thead><tr><th>Position</th><th>Preis</th></tr></thead><tbody>'
     + items.map(it=>'<tr><td>'+it.bezeichnung+'</td><td>'+fmtEUR(parseFloat((it.preis+'').replace(',','.'))||0)+'</td></tr>').join('')
     + '</tbody></table>'
     + '<div class="print-total">Gesamt: '+fmtEUR(total)+'</div>'
     + '<p class="print-footnote">Unverbindliches Angebot &middot; Gültig 14 Tage &middot; Pharma-Tech Apotheken-OS</p>';
   window.print();
+  ANGEBOT_HISTORY.unshift({ kunde:kundeName, items:items.slice(), total, datum:dateStr });
 }
+function printAngebot(c){
+  printAngebotDoc(c.name, getAngebot(c.id));
+}
+
+/* ============ RENDER: ANGEBOTE (eigener Menüpunkt) ============ */
+let angeboteMode = 'bestand';
+let angeboteKundeId = CUSTOMERS[0].id;
+let angeboteKundeName = '';
+let angeboteDraftItems = [];
+
+function angeboteCurrentName(){
+  if(angeboteMode==='bestand'){
+    const c = CUSTOMERS.find(x=>x.id===angeboteKundeId);
+    return c ? c.name : '';
+  }
+  return angeboteKundeName.trim();
+}
+function renderAngeboteKundeField(){
+  const el = document.getElementById('angeboteKundeField');
+  if(angeboteMode==='bestand'){
+    el.innerHTML = '<div class="field"><select id="angeboteKundeSelect">'
+      + CUSTOMERS.map(c=>'<option value="'+c.id+'" '+(c.id===angeboteKundeId?'selected':'')+'>'+c.name+'</option>').join('')
+      + '</select></div>';
+    document.getElementById('angeboteKundeSelect').addEventListener('change', (e)=>{
+      angeboteKundeId = e.target.value;
+      renderAngeboteSuggest();
+    });
+  } else {
+    el.innerHTML = '<div class="field"><input type="text" id="angeboteKundeInput" placeholder="Name der Kundin/des Kunden" value="'+angeboteKundeName.replace(/"/g,'&quot;')+'"></div>';
+    document.getElementById('angeboteKundeInput').addEventListener('input', (e)=>{
+      angeboteKundeName = e.target.value;
+      renderAngebotePrintWrap();
+    });
+  }
+}
+function renderAngeboteSuggest(){
+  const el = document.getElementById('angeboteSuggest');
+  if(angeboteMode!=='bestand'){ el.innerHTML=''; return; }
+  const c = CUSTOMERS.find(x=>x.id===angeboteKundeId);
+  const already = angeboteDraftItems.map(it=>it.bezeichnung);
+  const meds = c ? orderedMedications(c).filter(m=>!already.includes(m)) : [];
+  if(!meds.length){ el.innerHTML=''; return; }
+  el.innerHTML = '<div class="angebot-suggest" style="margin-top:12px;">'
+    + '<span class="angebot-suggest-label">Bestellte Medikamente aus der Historie:</span>'
+    + meds.map(m=>{
+        const price = medicationPrice(m);
+        return '<button class="angebot-chip" data-med="'+m.replace(/"/g,'&quot;')+'" data-price="'+(price!=null?price:'')+'">+ '+m+(price!=null?' ('+fmtEUR(price)+')':'')+'</button>';
+      }).join('')
+    + '</div>';
+  el.querySelectorAll('.angebot-chip').forEach(chip=>{
+    chip.addEventListener('click', ()=>{
+      angeboteDraftItems.push({ bezeichnung: chip.dataset.med, preis: chip.dataset.price || '' });
+      renderAngeboteAll();
+    });
+  });
+}
+function renderAngeboteItems(){
+  const el = document.getElementById('angeboteItems');
+  el.innerHTML = angeboteDraftItems.length ? angeboteDraftItems.map((it,i)=>{
+    const hasPrice = it.preis !== '' && it.preis != null;
+    const priceCell = hasPrice
+      ? '<span class="tabular">'+fmtEUR(parseFloat((it.preis+'').replace(',','.'))||0)+'</span>'
+      : '<input type="text" class="angebot-price-input angebote-price-input" data-i="'+i+'" placeholder="Preis €" style="width:80px;">';
+    return '<div class="angebot-row"><span>'+it.bezeichnung+'</span><span style="display:flex;align-items:center;gap:10px;">'+priceCell
+      + '<button class="angebot-remove" data-i="'+i+'">✕</button></span></div>';
+  }).join('') : '<p class="cell-muted" style="padding:6px 0;">Noch keine Positionen.</p>';
+  el.querySelectorAll('.angebot-price-input').forEach(inp=>{
+    inp.addEventListener('change', ()=>{
+      const idx = parseInt(inp.dataset.i, 10);
+      const val = inp.value.trim();
+      if(val) angeboteDraftItems[idx].preis = val;
+      renderAngeboteAll();
+    });
+  });
+  el.querySelectorAll('.angebot-remove').forEach(btn=>{
+    btn.addEventListener('click', ()=>{
+      angeboteDraftItems.splice(parseInt(btn.dataset.i,10), 1);
+      renderAngeboteAll();
+    });
+  });
+}
+function renderAngebotePrintWrap(){
+  const el = document.getElementById('angebotePrintWrap');
+  document.getElementById('angeboteTotal').textContent = fmtEUR(angebotTotal(angeboteDraftItems));
+  const name = angeboteCurrentName();
+  const incomplete = angeboteDraftItems.some(it=> it.preis==='' || it.preis==null);
+  const disabled = !angeboteDraftItems.length || incomplete || !name;
+  let hint = '';
+  if(!name) hint = 'Bitte Kund:in auswählen oder Namen eingeben';
+  else if(incomplete) hint = 'Bitte fehlende Preise eintragen';
+  el.innerHTML = '<button class="pill-btn sm" id="angebotePrintBtn" '+(disabled ? 'disabled style="opacity:.5;"' : '')+'>🖨 Angebot drucken / als PDF</button>'
+    + (hint ? '<span class="cell-muted" style="margin-left:10px;">'+hint+'</span>' : '');
+  const btn = document.getElementById('angebotePrintBtn');
+  if(btn) btn.addEventListener('click', ()=>{
+    printAngebotDoc(name, angeboteDraftItems);
+    angeboteDraftItems = [];
+    renderAngeboteAll();
+  });
+}
+function renderAngeboteHistory(){
+  const el = document.getElementById('angeboteHistory');
+  if(!ANGEBOT_HISTORY.length){ el.innerHTML = '<p class="cell-muted" style="padding:6px 0;">Noch keine Angebote erstellt.</p>'; return; }
+  el.innerHTML = ANGEBOT_HISTORY.map(a=>(
+    '<div class="angebot-row"><span><strong>'+a.kunde+'</strong><span class="cell-muted" style="margin-left:8px;">'+a.datum+' · '+a.items.length+' Position'+(a.items.length===1?'':'en')+'</span></span>'
+    + '<span class="tabular">'+fmtEUR(a.total)+'</span></div>'
+  )).join('');
+}
+function renderAngeboteAll(){
+  renderAngeboteKundeField();
+  renderAngeboteSuggest();
+  renderAngeboteItems();
+  renderAngebotePrintWrap();
+  renderAngeboteHistory();
+}
+document.querySelectorAll('#angeboteModeChoice .pay-method').forEach(btn=>{
+  btn.addEventListener('click', ()=>{
+    angeboteMode = btn.dataset.mode;
+    document.querySelectorAll('#angeboteModeChoice .pay-method').forEach(b=>b.classList.toggle('active', b===btn));
+    renderAngeboteAll();
+  });
+});
+document.getElementById('angeboteAddBtn').addEventListener('click', ()=>{
+  const bezEl = document.getElementById('angeboteBez');
+  const preisEl = document.getElementById('angebotePreis');
+  const bez = bezEl.value.trim();
+  const preis = preisEl.value.trim();
+  if(!bez || !preis) return;
+  angeboteDraftItems.push({ bezeichnung:bez, preis:preis });
+  bezEl.value=''; preisEl.value='';
+  renderAngeboteAll();
+});
 
 /* ============ RENDER: KUNDENKARTE ============ */
 function loyaltyTierFor(points){
@@ -2119,6 +2289,7 @@ renderOrderTable(); renderSuggestions(); renderFilialTable();
 renderIncomingDeliveries(); renderCustomerDeliveries();
 document.getElementById('uspTruckIcon').innerHTML = ICONS.truck;
 renderLoyaltyTierList(); renderLoyaltyCard(); renderLoyaltyTable(); applyLoyaltyState();
+renderAngeboteAll();
 document.getElementById('loyaltyToggle').addEventListener('click', ()=>{ loyaltyEnabled=!loyaltyEnabled; applyLoyaltyState(); });
 renderAreaChart('revenueChart', REVENUE);
 renderChat(); renderHandover();
