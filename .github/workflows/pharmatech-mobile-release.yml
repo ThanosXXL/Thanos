@@ -1,0 +1,61 @@
+name: Build Pharma-Tech Mobile (Android/iOS via EAS)
+
+on:
+  push:
+    tags:
+      - "pharmatech-mobile-v*"
+  workflow_dispatch:
+    inputs:
+      platform:
+        description: "Plattform"
+        required: true
+        default: "all"
+        type: choice
+        options:
+          - all
+          - android
+          - ios
+      profile:
+        description: "EAS-Build-Profil (aus eas.json)"
+        required: true
+        default: "preview"
+        type: choice
+        options:
+          - preview
+          - production
+
+# Erfordert ein Repository-Secret EXPO_TOKEN (Expo-Zugriffstoken aus einem
+# eigenen, kostenlosen Expo-Account: https://expo.dev/accounts/[account]/settings/access-tokens).
+# Ohne dieses Secret schlägt der eas-cli-Login fehl und der Workflow bricht ab —
+# das ist beabsichtigt, da EAS-Builds in der Cloud von Expo laufen, nicht auf
+# diesem Runner, und einen echten Account brauchen.
+
+jobs:
+  eas-build:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: pharmatech-mobile
+    steps:
+      - name: Repository auschecken
+        uses: actions/checkout@v4
+
+      - name: Node.js einrichten
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Abhängigkeiten installieren
+        run: npm install
+
+      - name: EAS CLI einrichten
+        uses: expo/expo-github-action@v8
+        with:
+          eas-version: latest
+          token: ${{ secrets.EXPO_TOKEN }}
+
+      - name: EAS-Build auslösen (nicht-interaktiv, kein Warten auf Fertigstellung)
+        run: |
+          PLATFORM="${{ github.event.inputs.platform || 'all' }}"
+          PROFILE="${{ github.event.inputs.profile || 'preview' }}"
+          eas build --platform "$PLATFORM" --profile "$PROFILE" --non-interactive --no-wait
