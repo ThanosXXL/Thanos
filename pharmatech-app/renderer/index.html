@@ -490,7 +490,70 @@ tbody tr:last-child td{ border-bottom:none; }
 .eta-time{ font-size:11px; color:var(--ink-muted); font-weight:700; white-space:nowrap; }
 .delivery-schedule-form{ display:flex; align-items:center; gap:8px; flex-wrap:wrap; width:100%; margin-top:10px; padding-top:10px; border-top:1px dashed var(--line); }
 .delivery-schedule-form .field{ padding:7px 11px; }
-.delivery-row-actions{ display:flex; justify-content:flex-end; width:100%; }
+.delivery-row-actions{ display:flex; justify-content:flex-end; align-items:center; gap:8px; width:100%; }
+
+/* ---- Angebot ---- */
+.angebot-row{ display:flex; align-items:center; justify-content:space-between; gap:10px; padding:7px 0; border-bottom:1px solid var(--line); font-size:12.8px; }
+.angebot-row:last-child{ border-bottom:none; }
+.angebot-remove{ border:none; background:none; color:var(--ink-faint); cursor:pointer; font-size:13px; padding:2px 4px; }
+.angebot-add{ display:flex; gap:8px; margin-top:10px; flex-wrap:wrap; }
+.angebot-add input{ border:1px solid var(--line); background:var(--surface-2); border-radius:10px; padding:8px 12px; font-family:inherit; outline:none; color:var(--ink); flex:1; min-width:100px; }
+.angebot-total{ display:flex; justify-content:flex-end; gap:8px; margin-top:12px; font-size:13.5px; font-weight:700; }
+#angebotPrintView{ display:none; }
+@media print{
+  body *{ visibility:hidden; }
+  #angebotPrintView, #angebotPrintView *{ visibility:visible; }
+  #angebotPrintView{ display:block; position:absolute; top:0; left:0; width:100%; padding:50px; font-family:'Manrope', sans-serif; color:#0A2A20; }
+  .print-letterhead{ display:flex; align-items:center; gap:14px; margin-bottom:26px; }
+  .print-letterhead .brand-name{ color:#0A5C46; font-size:20px; }
+  .print-letterhead .brand-sub{ color:#3C6B5C; font-size:11px; text-transform:uppercase; }
+  #angebotPrintView h1{ font-family:'Baloo 2'; font-size:26px; margin-bottom:6px; }
+  #angebotPrintView .print-meta{ font-size:13px; color:#3C6B5C; margin-bottom:22px; }
+  .print-table{ width:100%; border-collapse:collapse; margin-bottom:16px; }
+  .print-table th{ text-align:left; font-size:11px; text-transform:uppercase; border-bottom:2px solid #0A5C46; padding:8px 4px; }
+  .print-table td{ padding:9px 4px; border-bottom:1px solid #ccc; font-size:13px; }
+  .print-total{ text-align:right; font-weight:800; font-size:16px; margin-bottom:30px; }
+  .print-footnote{ font-size:11px; color:#777; }
+}
+
+/* ---- Mitarbeiter-Login ---- */
+.login-overlay{
+  position:fixed; inset:0; z-index:100; display:flex; align-items:center; justify-content:center;
+  background:
+    radial-gradient(130% 70% at 50% 0%, rgba(255,255,255,0.08), transparent 45%),
+    linear-gradient(165deg, #06211a 0%, #0A5C46 70%, #0EA37D 130%);
+  padding:20px;
+}
+.login-overlay.hidden{ display:none; }
+.login-card{
+  width:100%; max-width:380px; background:var(--surface); border-radius:26px; padding:34px 30px;
+  box-shadow: 0 1px 0 var(--gloss-hi) inset, 0 30px 60px rgba(0,0,0,0.45);
+  text-align:center;
+}
+.login-logo{
+  width:56px; height:56px; border-radius:17px; margin:0 auto 16px;
+  background:linear-gradient(155deg, #E9FFF6 0%, var(--mint-300) 55%, var(--mint-600) 100%);
+  box-shadow: inset 0 1px 1px rgba(255,255,255,0.9), inset 0 -6px 10px rgba(6,60,45,0.35), 0 8px 18px rgba(4,30,22,0.4);
+  display:flex; align-items:center; justify-content:center;
+}
+.login-card h1{ font-family:var(--font-display); font-size:21px; }
+.login-card p{ font-size:12.5px; color:var(--ink-muted); margin-top:6px; }
+.pin-dots{ display:flex; justify-content:center; gap:14px; margin:22px 0 10px; }
+.pin-dot{ width:16px; height:16px; border-radius:99px; border:2px solid var(--line-strong); background:transparent; transition:background .12s ease, border-color .12s ease; }
+.pin-dot.filled{ background:var(--mint-500); border-color:var(--mint-500); }
+.pin-error{ font-size:12px; font-weight:700; color:var(--critical); min-height:16px; margin-bottom:10px; visibility:hidden; }
+.pin-error.show{ visibility:visible; }
+.keypad{ display:grid; grid-template-columns:repeat(3, 1fr); gap:12px; }
+.keypad button{
+  height:60px; border-radius:16px; border:none; cursor:pointer;
+  font-family:var(--font-display); font-weight:700; font-size:19px; color:var(--ink);
+  background:linear-gradient(165deg, var(--surface) 0%, var(--surface-2) 130%);
+  box-shadow: 0 1px 0 var(--gloss-hi) inset, 0 6px 14px var(--shadow-amb);
+}
+.keypad button:active{ transform:translateY(1px); }
+.keypad button.keypad-empty{ background:transparent; box-shadow:none; cursor:default; }
+.shake{ animation: pinShake .4s ease; }
+@keyframes pinShake{ 20%,60%{ transform:translateX(-8px); } 40%,80%{ transform:translateX(8px); } 100%{ transform:translateX(0); } }
 
 /* ---- Kundenkarte ---- */
 .loyalty-hero{ display:flex; gap:18px; align-items:stretch; flex-wrap:wrap; }
@@ -605,6 +668,24 @@ tbody tr:last-child td{ border-bottom:none; }
 </head>
 <body>
 
+<div class="login-overlay" id="loginOverlay">
+  <div class="login-card">
+    <div class="login-logo"><svg width="26" height="26" viewBox="0 0 24 24" fill="none"><path d="M12 2C9 6 6 9 6 13.5C6 17.6 8.7 21 12 21C15.3 21 18 17.6 18 13.5C18 9 15 6 12 2Z" fill="#0A5C46"/><path d="M12 6C10.3 8.4 9 10.3 9 13" stroke="#EAFBF4" stroke-width="1.4" stroke-linecap="round"/></svg></div>
+    <h1>Mitarbeiter-Anmeldung</h1>
+    <p>PIN eingeben, um sich an diesem Arbeitsplatz anzumelden.</p>
+    <div class="pin-dots" id="pinDots">
+      <span class="pin-dot"></span><span class="pin-dot"></span><span class="pin-dot"></span><span class="pin-dot"></span>
+    </div>
+    <div class="pin-error" id="pinError">Falsche PIN — bitte erneut versuchen.</div>
+    <div class="keypad" id="keypad">
+      <button data-k="1">1</button><button data-k="2">2</button><button data-k="3">3</button>
+      <button data-k="4">4</button><button data-k="5">5</button><button data-k="6">6</button>
+      <button data-k="7">7</button><button data-k="8">8</button><button data-k="9">9</button>
+      <button class="keypad-empty" disabled></button><button data-k="0">0</button><button data-k="back">⌫</button>
+    </div>
+  </div>
+</div>
+
 <div id="app">
   <!-- ============ SIDEBAR ============ -->
   <aside class="sidebar" id="sidebar">
@@ -689,11 +770,11 @@ tbody tr:last-child td{ border-bottom:none; }
         <svg id="themeIcon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></svg>
         <span id="themeLabel">Helles Design</span>
       </button>
-      <div class="user-chip">
-        <div class="avatar">SK</div>
+      <div class="user-chip" id="userChip" style="cursor:pointer;" title="Abmelden">
+        <div class="avatar" id="userAvatar">SK</div>
         <div class="user-meta">
-          <div class="user-name">Sabine Kraus</div>
-          <div class="user-role">Approbierte Apothekerin</div>
+          <div class="user-name" id="userName">Sabine Kraus</div>
+          <div class="user-role" id="userRole">Approbierte Apothekerin</div>
         </div>
       </div>
     </div>
@@ -732,7 +813,7 @@ tbody tr:last-child td{ border-bottom:none; }
       </div>
       <div style="position:relative;">
         <button class="icon-btn" id="updatesBtn2">
-          <div class="avatar" style="width:34px;height:34px;font-size:11.5px;">SK</div>
+          <div class="avatar" id="topbarAvatar" style="width:34px;height:34px;font-size:11.5px;">SK</div>
         </button>
       </div>
     </header>
@@ -742,7 +823,7 @@ tbody tr:last-child td{ border-bottom:none; }
       <section class="view active" data-view="dashboard">
         <div class="view-head">
           <div>
-            <h1 class="view-title">Guten Morgen, Sabine</h1>
+            <h1 class="view-title" id="dashGreeting">Guten Morgen, Sabine</h1>
             <p class="view-desc">Filiale Mitte · Dienstag, 11. August 2026 · Alles läuft normal</p>
           </div>
           <div class="view-actions">
@@ -1129,6 +1210,16 @@ tbody tr:last-child td{ border-bottom:none; }
         <div class="card">
           <div class="card-head">
             <div>
+              <div class="section-title">Mitarbeiter-PIN &amp; Anmeldung</div>
+              <div class="section-sub">PINs werden bei der Einrichtung von IT-World vergeben oder direkt vor Ort vom Team selbst geändert.</div>
+            </div>
+          </div>
+          <div id="staffPinList" style="display:flex; flex-direction:column; gap:9px;"></div>
+        </div>
+
+        <div class="card">
+          <div class="card-head">
+            <div>
               <div class="section-title">Integrationen</div>
               <div class="section-sub">Frei wählbar — nur aktivieren, was Ihre Apotheke wirklich braucht.</div>
             </div>
@@ -1139,6 +1230,8 @@ tbody tr:last-child td{ border-bottom:none; }
     </main>
   </div>
 </div>
+
+<div id="angebotPrintView"></div>
 
 <script>
 /* ============ ICONS ============ */
@@ -1332,6 +1425,12 @@ const BRANCHES = [
   { name:'Filiale West', addr:'Westallee 8', status:'online' }
 ];
 
+const STAFF = [
+  { id:'p1', name:'Sabine Kraus', role:'Approbierte Apothekerin', avatar:'SK', pin:'1234', pinSource:'it-world' },
+  { id:'p2', name:'Markus Weber', role:'PTA', avatar:'MW', pin:'2580', pinSource:'vor-ort' },
+  { id:'p3', name:'Elif Yildiz', role:'PKA', avatar:'EY', pin:'7319', pinSource:'it-world' }
+];
+
 const INTEGRATIONS = [
   { name:'E-Rezept / TI-Anbindung', desc:'Gematik-Telematikinfrastruktur', emoji:'🔗', on:true },
   { name:'Kartenzahlung', desc:'EC- und Kreditkarten-Terminal', emoji:'💳', on:true },
@@ -1480,8 +1579,17 @@ function renderCustomerList(){
     wrap.appendChild(row);
   });
 }
+const ANGEBOTE = {};
+function getAngebot(customerId){
+  if(!ANGEBOTE[customerId]) ANGEBOTE[customerId] = [];
+  return ANGEBOTE[customerId];
+}
+function angebotTotal(items){
+  return items.reduce((sum,it)=> sum + (parseFloat((it.preis+'').replace(',','.'))||0), 0);
+}
 function renderCustomerDetail(){
   const c = CUSTOMERS.find(x=>x.id===state.activeCustomer);
+  const items = getAngebot(c.id);
   document.getElementById('customerDetail').innerHTML =
     '<div style="display:flex;align-items:center;gap:12px;margin-bottom:14px;">'
     + '<div class="avatar" style="width:46px;height:46px;font-size:15px;border-radius:13px;">'+c.avatar+'</div>'
@@ -1495,7 +1603,54 @@ function renderCustomerDetail(){
     + '<div class="timeline">' + c.timeline.map(t=>(
         '<div class="tl-item"><span class="tl-dot" style="background:'+(t.kind==='good'?'var(--good)':t.kind==='warn'?'var(--warn)':'var(--mint-500)')+';"></span>'
         + '<div><div class="tl-date">'+formatDate(t.date)+'</div><div class="tl-title">'+t.title+'</div><div class="tl-desc">'+t.desc+'</div></div></div>'
-      )).join('') + '</div>';
+      )).join('') + '</div>'
+    + '<div class="section-title" style="margin-top:20px; margin-bottom:4px;">Angebot erstellen</div>'
+    + '<p class="section-sub" style="margin-bottom:8px;">Positionen aufschreiben und dem Kunden als Angebot mitgeben.</p>'
+    + '<div id="angebotItems">' + (items.length ? items.map((it,i)=>(
+        '<div class="angebot-row"><span>'+it.bezeichnung+'</span><span style="display:flex;align-items:center;gap:10px;"><span class="tabular">'+fmtEUR(parseFloat((it.preis+'').replace(',','.'))||0)+'</span>'
+        + '<button class="angebot-remove" data-i="'+i+'">✕</button></span></div>'
+      )).join('') : '<p class="cell-muted" style="padding:6px 0;">Noch keine Positionen.</p>') + '</div>'
+    + '<div class="angebot-add">'
+      + '<input type="text" id="angebotBez" placeholder="Bezeichnung" />'
+      + '<input type="text" id="angebotPreis" placeholder="Preis €" style="max-width:110px;" />'
+      + '<button class="pill-btn sm ghost" id="angebotAddBtn">+ Position</button>'
+    + '</div>'
+    + '<div class="angebot-total">Gesamt: <span class="tabular">'+fmtEUR(angebotTotal(items))+'</span></div>'
+    + '<div style="margin-top:10px;"><button class="pill-btn sm" id="angebotPrintBtn" '+(items.length ? '' : 'disabled style="opacity:.5;"')+'>🖨 Angebot drucken / als PDF</button></div>';
+
+  const addBtn = document.getElementById('angebotAddBtn');
+  addBtn.addEventListener('click', ()=>{
+    const bez = document.getElementById('angebotBez').value.trim();
+    const preis = document.getElementById('angebotPreis').value.trim();
+    if(!bez || !preis) return;
+    getAngebot(c.id).push({ bezeichnung:bez, preis:preis });
+    renderCustomerDetail();
+  });
+  document.querySelectorAll('.angebot-remove').forEach(btn=>{
+    btn.addEventListener('click', ()=>{
+      getAngebot(c.id).splice(parseInt(btn.dataset.i,10), 1);
+      renderCustomerDetail();
+    });
+  });
+  const printBtn = document.getElementById('angebotPrintBtn');
+  if(printBtn) printBtn.addEventListener('click', ()=> printAngebot(c));
+}
+function printAngebot(c){
+  const items = getAngebot(c.id);
+  if(!items.length) return;
+  const total = angebotTotal(items);
+  const dateStr = new Date().toLocaleDateString('de-DE');
+  document.getElementById('angebotPrintView').innerHTML =
+    '<div class="print-letterhead"><svg width="40" height="40" viewBox="0 0 24 24" fill="none"><path d="M12 2C9 6 6 9 6 13.5C6 17.6 8.7 21 12 21C15.3 21 18 17.6 18 13.5C18 9 15 6 12 2Z" fill="#0A5C46"/><path d="M12 6C10.3 8.4 9 10.3 9 13" stroke="#EAFBF4" stroke-width="1.4" stroke-linecap="round"/></svg>'
+    + '<div><div class="brand-name" style="font-family:\'Baloo 2\';font-weight:800;">Pharma-Tech</div><div class="brand-sub">Apotheken-OS</div></div></div>'
+    + '<h1>Angebot</h1>'
+    + '<div class="print-meta">Datum: '+dateStr+' &middot; Für: '+c.name+'</div>'
+    + '<table class="print-table"><thead><tr><th>Position</th><th>Preis</th></tr></thead><tbody>'
+    + items.map(it=>'<tr><td>'+it.bezeichnung+'</td><td>'+fmtEUR(parseFloat((it.preis+'').replace(',','.'))||0)+'</td></tr>').join('')
+    + '</tbody></table>'
+    + '<div class="print-total">Gesamt: '+fmtEUR(total)+'</div>'
+    + '<p class="print-footnote">Unverbindliches Angebot &middot; Gültig 14 Tage &middot; Pharma-Tech Apotheken-OS</p>';
+  window.print();
 }
 
 /* ============ RENDER: KUNDENKARTE ============ */
@@ -1619,11 +1774,33 @@ function renderCustomerDeliveries(){
     } else {
       const actions=document.createElement('div');
       actions.className='delivery-row-actions';
-      const btn=document.createElement('button');
-      btn.className='pill-btn sm ghost';
-      btn.textContent = d.status==='offen' ? 'Termin festlegen' : 'Termin ändern';
-      btn.addEventListener('click', ()=>{ schedulingDeliveryId=d.id; renderCustomerDeliveries(); });
-      actions.appendChild(btn);
+
+      if(d.status==='zugestellt'){
+        const done=document.createElement('span');
+        done.className='cell-muted';
+        done.textContent='✓ Zugestellt am '+formatDate(d.date)+', '+d.time+' Uhr';
+        actions.appendChild(done);
+      } else {
+        if(d.status==='unterwegs'){
+          const deliverBtn=document.createElement('button');
+          deliverBtn.className='pill-btn sm';
+          deliverBtn.textContent='Als zugestellt markieren';
+          deliverBtn.addEventListener('click', ()=>{ d.status='zugestellt'; renderCustomerDeliveries(); });
+          actions.appendChild(deliverBtn);
+        }
+        if(d.status==='geplant'){
+          const underwayBtn=document.createElement('button');
+          underwayBtn.className='pill-btn sm';
+          underwayBtn.textContent='Unterwegs melden';
+          underwayBtn.addEventListener('click', ()=>{ d.status='unterwegs'; renderCustomerDeliveries(); });
+          actions.appendChild(underwayBtn);
+        }
+        const btn=document.createElement('button');
+        btn.className='pill-btn sm ghost';
+        btn.textContent = d.status==='offen' ? 'Termin festlegen' : 'Termin ändern';
+        btn.addEventListener('click', ()=>{ schedulingDeliveryId=d.id; renderCustomerDeliveries(); });
+        actions.appendChild(btn);
+      }
       row.appendChild(actions);
     }
   });
@@ -1756,6 +1933,43 @@ function renderBranches(){
     + '<div><div style="font-size:12.6px;font-weight:700;">'+b.name+'</div><div class="cell-muted">'+b.addr+'</div></div></div>'
   )).join('');
 }
+let editingStaffId = null;
+function renderStaffPinList(){
+  const wrap = document.getElementById('staffPinList');
+  wrap.innerHTML = '';
+  STAFF.forEach(s=>{
+    const row=document.createElement('div');
+    row.style.cssText='display:flex;align-items:center;gap:10px;flex-wrap:wrap;padding:6px 0;border-bottom:1px solid var(--line);';
+    row.innerHTML = '<div class="avatar" style="width:34px;height:34px;font-size:11.5px;">'+s.avatar+'</div>'
+      + '<div style="flex:1;min-width:140px;"><div style="font-size:12.6px;font-weight:700;">'+s.name+'</div><div class="cell-muted">'+s.role+'</div></div>'
+      + '<span class="badge '+(s.pinSource==='it-world'?'b-info':'b-good')+'">'+(s.pinSource==='it-world'?'Von IT-World eingerichtet':'Vor Ort geändert')+'</span>';
+    wrap.appendChild(row);
+
+    if(editingStaffId===s.id){
+      const form=document.createElement('div');
+      form.style.cssText='display:flex;align-items:center;gap:8px;width:100%;padding:4px 0 10px;';
+      form.innerHTML = '<div class="field"><input type="text" class="new-pin" inputmode="numeric" maxlength="4" placeholder="Neue 4-stellige PIN" style="width:160px;" value="'+s.pin+'"></div>'
+        + '<button class="pill-btn sm">Speichern</button><button class="pill-btn ghost sm">Abbrechen</button>';
+      wrap.appendChild(form);
+      form.querySelector('.pill-btn.sm:not(.ghost)').addEventListener('click', ()=>{
+        const val = form.querySelector('.new-pin').value.trim();
+        if(/^\d{4}$/.test(val)){ s.pin=val; s.pinSource='vor-ort'; }
+        editingStaffId=null; renderStaffPinList();
+      });
+      form.querySelector('.pill-btn.ghost.sm').addEventListener('click', ()=>{ editingStaffId=null; renderStaffPinList(); });
+    } else {
+      const actions=document.createElement('div');
+      actions.style.cssText='width:100%; display:flex; justify-content:flex-end; padding-bottom:8px;';
+      const btn=document.createElement('button');
+      btn.className='pill-btn sm ghost';
+      btn.textContent='PIN ändern';
+      btn.addEventListener('click', ()=>{ editingStaffId=s.id; renderStaffPinList(); });
+      actions.appendChild(btn);
+      wrap.appendChild(actions);
+    }
+  });
+}
+
 function renderIntegrations(){
   document.getElementById('integGrid').innerHTML = INTEGRATIONS.map((it,i)=>(
     '<div class="card integ-card"><span class="integ-emoji">'+it.emoji+'</span>'
@@ -1853,8 +2067,50 @@ renderChat(); renderHandover();
 renderCompare();
 document.getElementById('changelogList').innerHTML = changelogHtml();
 document.getElementById('popChangelogList').innerHTML = changelogHtml();
-renderRoles(); renderBranches(); renderIntegrations(); renderNotifications();
+renderRoles(); renderBranches(); renderIntegrations(); renderNotifications(); renderStaffPinList();
 applyTheme();
+
+/* ============ MITARBEITER-LOGIN ============ */
+let pinInput = '';
+function updatePinDots(){
+  document.querySelectorAll('.pin-dot').forEach((dot,i)=> dot.classList.toggle('filled', i<pinInput.length));
+}
+function setLoggedInStaff(s){
+  document.getElementById('userAvatar').textContent = s.avatar;
+  document.getElementById('userName').textContent = s.name;
+  document.getElementById('userRole').textContent = s.role;
+  document.getElementById('topbarAvatar').textContent = s.avatar;
+  document.getElementById('dashGreeting').textContent = 'Guten Morgen, '+s.name.split(' ')[0];
+}
+function tryPinLogin(){
+  const match = STAFF.find(s=>s.pin===pinInput);
+  if(match){
+    setLoggedInStaff(match);
+    document.getElementById('loginOverlay').classList.add('hidden');
+    document.getElementById('pinError').classList.remove('show');
+    pinInput=''; updatePinDots();
+  } else {
+    const card = document.querySelector('.login-card');
+    document.getElementById('pinError').classList.add('show');
+    card.classList.add('shake');
+    setTimeout(()=>{ card.classList.remove('shake'); pinInput=''; updatePinDots(); }, 400);
+  }
+}
+document.getElementById('keypad').addEventListener('click', (e)=>{
+  const btn = e.target.closest('button[data-k]');
+  if(!btn) return;
+  const k = btn.dataset.k;
+  if(k==='back'){ pinInput = pinInput.slice(0,-1); updatePinDots(); return; }
+  if(pinInput.length>=4) return;
+  pinInput += k;
+  updatePinDots();
+  if(pinInput.length===4) setTimeout(tryPinLogin, 150);
+});
+document.getElementById('userChip').addEventListener('click', ()=>{
+  document.getElementById('loginOverlay').classList.remove('hidden');
+  pinInput=''; updatePinDots();
+  document.getElementById('pinError').classList.remove('show');
+});
 </script>
 </body>
 </html>
