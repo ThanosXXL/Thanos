@@ -453,6 +453,45 @@ tbody tr:last-child td{ border-bottom:none; }
 .alert-banner .t{ font-weight:800; font-size:12.8px; }
 .alert-banner .d{ font-size:12px; color:var(--ink-muted); margin-top:2px; }
 
+/* ---- Botendienst ---- */
+.usp-ribbon{
+  font-size:10.5px; font-weight:800; padding:5px 11px; border-radius:99px; white-space:nowrap;
+  background:linear-gradient(155deg, var(--mint-300) 0%, var(--mint-500) 45%, var(--mint-600) 100%);
+  color:var(--on-mint);
+  box-shadow: 0 1px 0 var(--gloss-hi) inset, 0 -6px 10px rgba(0,0,0,0.14) inset, 0 4px 10px var(--shadow-amb);
+}
+.usp-banner{
+  display:flex; gap:14px; align-items:center;
+  background:linear-gradient(135deg, var(--mint-100), var(--surface));
+  border:1px solid var(--mint-300);
+  border-radius:16px; padding:16px 18px;
+}
+.usp-banner .usp-icon{
+  width:46px; height:46px; border-radius:14px; flex:none;
+  background:linear-gradient(155deg, var(--mint-300), var(--mint-600));
+  box-shadow: inset 0 1px 1px rgba(255,255,255,0.85), 0 6px 14px var(--shadow-amb);
+  display:flex; align-items:center; justify-content:center; color:#fff;
+}
+.usp-banner .usp-icon svg{ width:22px; height:22px; }
+.usp-banner .t{ font-weight:800; font-size:13.5px; }
+.usp-banner .d{ font-size:12px; color:var(--ink-muted); margin-top:2px; }
+
+.delivery-row{ display:flex; align-items:center; gap:12px; padding:12px 2px; border-bottom:1px solid var(--line); flex-wrap:wrap; }
+.delivery-row:last-child{ border-bottom:none; }
+.delivery-icon{
+  width:38px; height:38px; border-radius:12px; flex:none;
+  background:linear-gradient(155deg, var(--mint-300), var(--mint-600));
+  box-shadow: inset 0 1px 1px rgba(255,255,255,0.8), 0 4px 10px var(--shadow-amb);
+  display:flex; align-items:center; justify-content:center; color:#fff;
+}
+.delivery-icon svg{ width:18px; height:18px; }
+.delivery-main{ flex:1; min-width:160px; }
+.delivery-eta{ display:flex; flex-direction:column; align-items:flex-end; gap:4px; margin-left:auto; }
+.eta-time{ font-size:11px; color:var(--ink-muted); font-weight:700; white-space:nowrap; }
+.delivery-schedule-form{ display:flex; align-items:center; gap:8px; flex-wrap:wrap; width:100%; margin-top:10px; padding-top:10px; border-top:1px dashed var(--line); }
+.delivery-schedule-form .field{ padding:7px 11px; }
+.delivery-row-actions{ display:flex; justify-content:flex-end; width:100%; }
+
 /* ---- Chat ---- */
 .chat-wrap{ display:flex; flex-direction:column; height:100%; }
 .chat-log{ display:flex; flex-direction:column; gap:10px; max-height:420px; overflow-y:auto; padding:4px 2px 10px; }
@@ -586,6 +625,11 @@ tbody tr:last-child td{ border-bottom:none; }
       <button class="nav-item" data-view="bestellungen">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 3h2l2.4 12.4A2 2 0 0 0 9.4 17H18a2 2 0 0 0 2-1.6L21 8H6"/><circle cx="10" cy="21" r="1.3"/><circle cx="18" cy="21" r="1.3"/></svg>
         Bestellungen
+      </button>
+      <button class="nav-item" data-view="botendienst">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="1" y="3" width="15" height="13" rx="1.5"/><path d="M16 8h4l3 3v5h-7V8Z"/><circle cx="5.5" cy="18.5" r="2.2"/><circle cx="18.5" cy="18.5" r="2.2"/></svg>
+        Botendienst
+        <span class="nav-badge" id="botendienstBadge">2</span>
       </button>
       <div class="nav-group-label">Wissen</div>
       <button class="nav-item" data-view="analysen">
@@ -831,6 +875,40 @@ tbody tr:last-child td{ border-bottom:none; }
         </div>
       </section>
 
+      <!-- ============ BOTENDIENST ============ -->
+      <section class="view" data-view="botendienst">
+        <div class="view-head">
+          <div>
+            <h1 class="view-title">Botendienst</h1>
+            <p class="view-desc" id="botendienstDesc">2 Liefertermine offen · 4 Bestellungen mit genauer Ankunftszeit</p>
+          </div>
+          <span class="usp-ribbon">★ Exklusiv bei Pharma-Tech</span>
+        </div>
+        <div class="usp-banner">
+          <div class="usp-icon" id="uspTruckIcon"></div>
+          <div>
+            <div class="t">Der Mehrwert, den klassische Apotheken-Software nicht bietet</div>
+            <div class="d">Bestand mit exakter Ankunftszeit statt nur einem Lieferdatum — und Botendienst-Termine, die Ihr Team in Sekunden mit Kunden vereinbart.</div>
+          </div>
+        </div>
+        <div class="grid-2">
+          <div class="card">
+            <div class="card-head">
+              <div class="section-title">Bestand unterwegs · mit Ankunftszeit</div>
+              <span class="badge b-info">Live</span>
+            </div>
+            <div id="incomingDeliveryList"></div>
+          </div>
+          <div class="card">
+            <div class="card-head">
+              <div class="section-title">Botendienst-Planung</div>
+              <span class="badge b-warn" id="deliveryOpenBadge">2 offen</span>
+            </div>
+            <div id="customerDeliveryList"></div>
+          </div>
+        </div>
+      </section>
+
       <!-- ============ ANALYSEN ============ -->
       <section class="view" data-view="analysen">
         <div class="view-head">
@@ -998,7 +1076,9 @@ const ICONS = {
   box:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 8l-9-5-9 5 9 5 9-5Z"/><path d="M3 8v8l9 5 9-5V8"/><path d="M12 13v8"/></svg>',
   alert:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 9v4"/><path d="M12 17h.01"/><path d="M10.3 3.9 1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0Z"/></svg>',
   file:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8Z"/><path d="M14 2v6h6"/></svg>',
-  check:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 12l2 2 4-4"/><circle cx="12" cy="12" r="9"/></svg>'
+  check:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 12l2 2 4-4"/><circle cx="12" cy="12" r="9"/></svg>',
+  truck:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="1" y="3" width="15" height="13" rx="1.5"/><path d="M16 8h4l3 3v5h-7V8Z"/><circle cx="5.5" cy="18.5" r="2.2"/><circle cx="18.5" cy="18.5" r="2.2"/></svg>',
+  pin:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 21s-7-5.5-7-11a7 7 0 1 1 14 0c0 5.5-7 11-7 11Z"/><circle cx="12" cy="10" r="2.5"/></svg>'
 };
 
 /* ============ STATE ============ */
@@ -1099,6 +1179,20 @@ const SUGGESTIONS = [
   { name:'Vitamin D3 Tropfen', reason:'Lieferzeit beim Lieferanten verlängert — früher bestellen empfohlen', qty:15, supplier:'Alliance Healthcare' }
 ];
 
+const INCOMING_DELIVERIES = [
+  { id:'B-1042', supplier:'Phoenix Pharmahandel', items:12, status:'unterwegs', date:'2026-08-12', time:'09:30' },
+  { id:'B-1033', supplier:'Gehe Pharma', items:8, status:'unterwegs', date:'2026-08-12', time:'14:30' },
+  { id:'B-1036', supplier:'Phoenix Pharmahandel', items:3, status:'bestellt', date:'2026-08-13', time:'16:00' },
+  { id:'B-1041', supplier:'Alliance Healthcare', items:5, status:'bestellt', date:'2026-08-14', time:'11:00' }
+];
+
+const CUSTOMER_DELIVERIES = [
+  { id:'L-401', kunde:'Frau Hoffmann', adresse:'Bahnhofstr. 12, Musterstadt', artikel:'Dauermedikation (3 Packungen)', status:'offen', date:null, time:null },
+  { id:'L-402', kunde:'Herr Brandt', adresse:'Gartenweg 4, Musterstadt', artikel:'Rezeptur + Verbandsmaterial', status:'geplant', date:'2026-08-12', time:'16:00' },
+  { id:'L-403', kunde:'Frau Celik', adresse:'Lindenallee 9, Musterstadt', artikel:'OTC-Bestellung (2 Artikel)', status:'unterwegs', date:'2026-08-11', time:'17:30' },
+  { id:'L-404', kunde:'Herr Özdemir', adresse:'Ringstr. 22, Musterstadt', artikel:'Insulin (kühlpflichtig)', status:'offen', date:null, time:null }
+];
+
 const FILIALEN = [
   { name:'Filiale Mitte', umsatz:'2.480 €', kunden:184, rezepte:41, status:'ok' },
   { name:'Filiale Nord', umsatz:'1.960 €', kunden:151, rezepte:33, status:'ok' },
@@ -1190,6 +1284,17 @@ function orderBadge(s){
   if(s==='offen') return '<span class="badge b-info">Offen</span>';
   if(s==='unterwegs') return '<span class="badge b-warn">Unterwegs</span>';
   return '<span class="badge b-good">Geliefert</span>';
+}
+function incomingDeliveryBadge(status){
+  if(status==='bestellt') return '<span class="badge b-info">Bestellt</span>';
+  if(status==='unterwegs') return '<span class="badge b-warn">Unterwegs</span>';
+  return '<span class="badge b-good">Angekommen</span>';
+}
+function customerDeliveryBadge(d){
+  if(d.status==='offen') return '<span class="badge b-warn">Termin offen</span>';
+  if(d.status==='geplant') return '<span class="badge b-info">Geplant</span>';
+  if(d.status==='unterwegs') return '<span class="badge b-warn">Unterwegs</span>';
+  return '<span class="badge b-good">Zugestellt</span>';
 }
 
 function sparkSvg(values){
@@ -1349,6 +1454,67 @@ function renderFilialTable(){
       '<tr><td class="cell-strong">'+f.name+'</td><td class="tabular">'+f.umsatz+'</td><td class="tabular">'+f.kunden+'</td>'
       + '<td class="tabular">'+f.rezepte+'</td><td>'+(f.status==='ok'?'<span class="badge b-good">Normal</span>':'<span class="badge b-warn">Beobachten</span>')+'</td></tr>'
     )).join('') + '</tbody>';
+}
+
+/* ============ RENDER: BOTENDIENST ============ */
+function renderIncomingDeliveries(){
+  const wrap=document.getElementById('incomingDeliveryList'); wrap.innerHTML='';
+  INCOMING_DELIVERIES.forEach(o=>{
+    const row=document.createElement('div');
+    row.className='delivery-row';
+    row.innerHTML = '<div class="delivery-icon">'+ICONS.truck+'</div>'
+      + '<div class="delivery-main"><div class="cell-strong">'+o.id+' · '+o.supplier+'</div>'
+      + '<div class="cell-muted">'+o.items+' Artikel</div></div>'
+      + '<div class="delivery-eta">'+incomingDeliveryBadge(o.status)
+      + '<div class="eta-time">'+formatDate(o.date)+' · '+o.time+' Uhr</div></div>';
+    wrap.appendChild(row);
+  });
+}
+let schedulingDeliveryId = null;
+function renderCustomerDeliveries(){
+  const wrap=document.getElementById('customerDeliveryList'); wrap.innerHTML='';
+  CUSTOMER_DELIVERIES.forEach(d=>{
+    const row=document.createElement('div');
+    row.className='delivery-row';
+    row.innerHTML = '<div class="delivery-icon">'+ICONS.pin+'</div>'
+      + '<div class="delivery-main"><div class="cell-strong">'+d.kunde+'</div>'
+      + '<div class="cell-muted">'+d.adresse+'</div>'
+      + '<div class="cell-muted" style="margin-top:2px;">'+d.artikel+'</div></div>'
+      + '<div class="delivery-eta">'+customerDeliveryBadge(d)
+      + (d.date&&d.time ? '<div class="eta-time">'+formatDate(d.date)+' · '+d.time+' Uhr</div>' : '')+'</div>';
+    wrap.appendChild(row);
+
+    if(schedulingDeliveryId===d.id){
+      const form=document.createElement('div');
+      form.className='delivery-schedule-form';
+      form.innerHTML = '<div class="field"><input type="date" class="sched-date" value="'+(d.date||'')+'"></div>'
+        + '<div class="field"><input type="time" class="sched-time" value="'+(d.time||'')+'"></div>'
+        + '<button class="pill-btn sm">Bestätigen</button>'
+        + '<button class="pill-btn ghost sm">Abbrechen</button>';
+      row.appendChild(form);
+      form.querySelector('.pill-btn.sm:not(.ghost)').addEventListener('click', ()=>{
+        const dateVal = form.querySelector('.sched-date').value;
+        const timeVal = form.querySelector('.sched-time').value;
+        if(dateVal && timeVal){ d.date=dateVal; d.time=timeVal; d.status='geplant'; }
+        schedulingDeliveryId=null; renderCustomerDeliveries();
+      });
+      form.querySelector('.pill-btn.ghost.sm').addEventListener('click', ()=>{
+        schedulingDeliveryId=null; renderCustomerDeliveries();
+      });
+    } else {
+      const actions=document.createElement('div');
+      actions.className='delivery-row-actions';
+      const btn=document.createElement('button');
+      btn.className='pill-btn sm ghost';
+      btn.textContent = d.status==='offen' ? 'Termin festlegen' : 'Termin ändern';
+      btn.addEventListener('click', ()=>{ schedulingDeliveryId=d.id; renderCustomerDeliveries(); });
+      actions.appendChild(btn);
+      row.appendChild(actions);
+    }
+  });
+  const openCount = CUSTOMER_DELIVERIES.filter(d=>d.status==='offen').length;
+  document.getElementById('deliveryOpenBadge').textContent = openCount+' offen';
+  document.getElementById('botendienstBadge').textContent = openCount;
 }
 
 /* ============ CHARTS ============ */
@@ -1563,6 +1729,8 @@ renderStockTable(STOCK);
 renderPOSGrid(); renderCart();
 renderCustomerList(); renderCustomerDetail();
 renderOrderTable(); renderSuggestions(); renderFilialTable();
+renderIncomingDeliveries(); renderCustomerDeliveries();
+document.getElementById('uspTruckIcon').innerHTML = ICONS.truck;
 renderAreaChart('revenueChart', REVENUE);
 renderChat(); renderHandover();
 renderCompare();
