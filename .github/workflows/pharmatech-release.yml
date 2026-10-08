@@ -37,8 +37,17 @@ jobs:
       - name: Abhängigkeiten installieren
         run: npm install
 
-      - name: Desktop-App bauen
+      - name: Desktop-App bauen (signiert, falls Zertifikat-Secrets gesetzt sind)
         run: npm run dist
+        env:
+          # Windows Authenticode-Zertifikat (.pfx, base64-kodiert) + Passwort.
+          # Ohne diese Secrets baut electron-builder ganz normal unsigniert weiter.
+          CSC_LINK: ${{ matrix.os == 'windows-latest' && secrets.WIN_CSC_LINK || matrix.os == 'macos-latest' && secrets.MAC_CSC_LINK || '' }}
+          CSC_KEY_PASSWORD: ${{ matrix.os == 'windows-latest' && secrets.WIN_CSC_KEY_PASSWORD || matrix.os == 'macos-latest' && secrets.MAC_CSC_KEY_PASSWORD || '' }}
+          # macOS-Notarisierung (nur wirksam, wenn alle drei gesetzt sind)
+          APPLE_ID: ${{ secrets.APPLE_ID }}
+          APPLE_APP_SPECIFIC_PASSWORD: ${{ secrets.APPLE_APP_SPECIFIC_PASSWORD }}
+          APPLE_TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
 
       - name: Installer als Artifact hochladen
         uses: actions/upload-artifact@v4
