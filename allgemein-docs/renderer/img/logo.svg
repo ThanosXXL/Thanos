@@ -1,0 +1,69 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512">
+  <defs>
+    <linearGradient id="body" x1="0" y1="0" x2="0.8" y2="1">
+      <stop offset="0" stop-color="#5cc8ff"/>
+      <stop offset="0.45" stop-color="#1e73e8"/>
+      <stop offset="1" stop-color="#0a2a7a"/>
+    </linearGradient>
+    <radialGradient id="glowBg" cx="0.3" cy="0.2" r="0.9">
+      <stop offset="0" stop-color="#9be2ff" stop-opacity="0.55"/>
+      <stop offset="1" stop-color="#9be2ff" stop-opacity="0"/>
+    </radialGradient>
+    <linearGradient id="gloss" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#fff" stop-opacity="0.85"/>
+      <stop offset="1" stop-color="#fff" stop-opacity="0.04"/>
+    </linearGradient>
+    <linearGradient id="doc" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#ffffff"/>
+      <stop offset="1" stop-color="#c9defa"/>
+    </linearGradient>
+    <linearGradient id="cross" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#ff7e86"/>
+      <stop offset="0.5" stop-color="#e3213a"/>
+      <stop offset="1" stop-color="#8f0c22"/>
+    </linearGradient>
+    <linearGradient id="crossSide" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#8f0c22"/>
+      <stop offset="1" stop-color="#4d0412"/>
+    </linearGradient>
+    <linearGradient id="rim" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#fff" stop-opacity="0.9"/>
+      <stop offset="0.5" stop-color="#fff" stop-opacity="0.05"/>
+      <stop offset="1" stop-color="#8fd6ff" stop-opacity="0.6"/>
+    </linearGradient>
+    <filter id="shadow" x="-30%" y="-30%" width="160%" height="160%">
+      <feGaussianBlur stdDeviation="14"/>
+    </filter>
+    <filter id="soft"><feGaussianBlur stdDeviation="3"/></filter>
+    <clipPath id="clipBody"><rect x="40" y="30" width="432" height="432" rx="104"/></clipPath>
+  </defs>
+  <!-- Bodenschatten -->
+  <ellipse cx="256" cy="488" rx="170" ry="16" fill="#000" opacity="0.45" filter="url(#shadow)"/>
+  <!-- Körper -->
+  <rect x="40" y="46" width="432" height="432" rx="104" fill="#06194d"/>
+  <rect x="40" y="30" width="432" height="432" rx="104" fill="url(#body)"/>
+  <rect x="40" y="30" width="432" height="432" rx="104" fill="url(#glowBg)"/>
+  <rect x="43" y="33" width="426" height="426" rx="101" fill="none" stroke="url(#rim)" stroke-width="4"/>
+  <!-- Dokument -->
+  <g>
+    <path d="M148 98 h150 l82 82 v186 a30 30 0 0 1 -30 30 h-202 a30 30 0 0 1 -30 -30 v-238 a30 30 0 0 1 30 -30z" fill="#0a2a7a" opacity="0.55" transform="translate(6 12)" filter="url(#soft)"/>
+    <path d="M148 90 h150 l82 82 v186 a30 30 0 0 1 -30 30 h-202 a30 30 0 0 1 -30 -30 v-238 a30 30 0 0 1 30 -30z" fill="url(#doc)"/>
+    <path d="M298 90 v52 a30 30 0 0 0 30 30 h52z" fill="#9dbfee"/>
+    <path d="M298 90 l82 82 h-52 a30 30 0 0 1 -30 -30z" fill="#e8f1ff" opacity="0.8"/>
+  </g>
+  <!-- 3D-Kreuz -->
+  <g transform="translate(0 -34)">
+    <g fill="url(#crossSide)"><path d="M226 190 h60 v54 h54 v60 h-54 v54 h-60 v-54 h-54 v-60 h54z" transform="translate(0 22)"/><path d="M226 190 h60 v54 h54 v60 h-54 v54 h-60 v-54 h-54 v-60 h54z" transform="translate(0 20)"/><path d="M226 190 h60 v54 h54 v60 h-54 v54 h-60 v-54 h-54 v-60 h54z" transform="translate(0 18)"/><path d="M226 190 h60 v54 h54 v60 h-54 v54 h-60 v-54 h-54 v-60 h54z" transform="translate(0 16)"/><path d="M226 190 h60 v54 h54 v60 h-54 v54 h-60 v-54 h-54 v-60 h54z" transform="translate(0 14)"/><path d="M226 190 h60 v54 h54 v60 h-54 v54 h-60 v-54 h-54 v-60 h54z" transform="translate(0 12)"/><path d="M226 190 h60 v54 h54 v60 h-54 v54 h-60 v-54 h-54 v-60 h54z" transform="translate(0 10)"/><path d="M226 190 h60 v54 h54 v60 h-54 v54 h-60 v-54 h-54 v-60 h54z" transform="translate(0 8)"/><path d="M226 190 h60 v54 h54 v60 h-54 v54 h-60 v-54 h-54 v-60 h54z" transform="translate(0 6)"/><path d="M226 190 h60 v54 h54 v60 h-54 v54 h-60 v-54 h-54 v-60 h54z" transform="translate(0 4)"/><path d="M226 190 h60 v54 h54 v60 h-54 v54 h-60 v-54 h-54 v-60 h54z" transform="translate(0 2)"/></g>
+    <path d="M226 190 h60 v54 h54 v60 h-54 v54 h-60 v-54 h-54 v-60 h54z" fill="url(#cross)"/>
+    <path d="M226 190 h60 v22 h-60z M172 244 h54 v20 h-54z" fill="#fff" opacity="0.5"/>
+    <path d="M232 197 h48" stroke="#fff" stroke-width="5" stroke-linecap="round" opacity="0.8"/>
+  </g>
+  <rect x="176" y="352" width="160" height="12" rx="6" fill="#8fb4e6"/>
+  <rect x="176" y="372" width="104" height="12" rx="6" fill="#b3cdf0"/>
+  <!-- Hochglanz -->
+  <g clip-path="url(#clipBody)">
+    <path d="M40 30 h432 v150 c-90 56 -250 70 -432 20z" fill="url(#gloss)" opacity="0.7"/>
+    <ellipse cx="130" cy="78" rx="70" ry="22" fill="#fff" opacity="0.5" transform="rotate(-24 130 78)" filter="url(#soft)"/>
+    <ellipse cx="400" cy="440" rx="120" ry="28" fill="#7fd2ff" opacity="0.35" filter="url(#soft)"/>
+  </g>
+</svg>

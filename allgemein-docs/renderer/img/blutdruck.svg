@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 520 300" width="520" height="300">
+  <rect width="520" height="300" rx="14" fill="#0e2559"/>
+  <g stroke="#27427f" stroke-width="1"><path d="M50 40h440M50 90h440M50 140h440M50 190h440M50 240h440"/></g>
+  <g font-family="Open Sans, sans-serif" font-size="12" fill="#9db4d6">
+    <text x="12" y="44">160</text><text x="12" y="94">140</text><text x="12" y="144">120</text><text x="12" y="194">100</text><text x="12" y="244">80</text>
+    <text x="64" y="268">Mo</text><text x="130" y="268">Di</text><text x="196" y="268">Mi</text><text x="262" y="268">Do</text><text x="328" y="268">Fr</text><text x="394" y="268">Sa</text><text x="456" y="268">So</text>
+  </g>
+  <polyline points="70,120 136,108 202,128 268,100 334,112 400,98 466,106" fill="none" stroke="#4cc9f0" stroke-width="4" stroke-linejoin="round"/>
+  <polyline points="70,215 136,206 202,222 268,200 334,210 400,198 466,204" fill="none" stroke="#ffd166" stroke-width="4" stroke-linejoin="round"/>
+  <g fill="#4cc9f0"><circle cx="70" cy="120" r="5"/><circle cx="136" cy="108" r="5"/><circle cx="202" cy="128" r="5"/><circle cx="268" cy="100" r="5"/><circle cx="334" cy="112" r="5"/><circle cx="400" cy="98" r="5"/><circle cx="466" cy="106" r="5"/></g>
+  <g fill="#ffd166"><circle cx="70" cy="215" r="5"/><circle cx="136" cy="206" r="5"/><circle cx="202" cy="222" r="5"/><circle cx="268" cy="200" r="5"/><circle cx="334" cy="210" r="5"/><circle cx="400" cy="198" r="5"/><circle cx="466" cy="204" r="5"/></g>
+  <text x="50" y="24" font-family="Open Sans, sans-serif" font-size="14" font-weight="700" fill="#fff">Blutdruck – Wochenverlauf (Beispiel)</text>
+</svg>

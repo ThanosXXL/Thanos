@@ -1,0 +1,22 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 480" width="400" height="480">
+  <defs>
+    <radialGradient id="bg" cx="0.5" cy="0.45" r="0.7"><stop offset="0" stop-color="#2a3a52"/><stop offset="1" stop-color="#05080f"/></radialGradient>
+    <radialGradient id="lung" cx="0.5" cy="0.5" r="0.6"><stop offset="0" stop-color="#0a0f18"/><stop offset="1" stop-color="#37495f"/></radialGradient>
+    <filter id="b"><feGaussianBlur stdDeviation="2.5"/></filter>
+  </defs>
+  <rect width="400" height="480" fill="url(#bg)"/>
+  <g filter="url(#b)">
+    <path d="M70 120 C60 220 80 340 150 380 C175 330 175 200 160 110 C130 90 90 100 70 120z" fill="url(#lung)"/>
+    <path d="M330 120 C340 220 320 340 250 380 C225 330 225 200 240 110 C270 90 310 100 330 120z" fill="url(#lung)"/>
+    <path d="M185 60 h30 v340 h-30z" fill="#b9c6d6" opacity="0.55"/>
+    <ellipse cx="170" cy="330" rx="46" ry="62" fill="#c2cfdf" opacity="0.5"/>
+  </g>
+  <g stroke="#cfd9e6" stroke-width="7" fill="none" opacity="0.55" stroke-linecap="round">
+    <path d="M200 100 C140 70 90 80 55 130"/><path d="M200 130 C140 100 85 118 50 175"/>
+    <path d="M200 160 C140 135 85 155 50 220"/><path d="M200 190 C140 170 88 195 54 260"/>
+    <path d="M200 100 C260 70 310 80 345 130"/><path d="M200 130 C260 100 315 118 350 175"/>
+    <path d="M200 160 C260 135 315 155 350 220"/><path d="M200 190 C260 170 312 195 346 260"/>
+  </g>
+  <path d="M120 60 C160 40 240 40 280 60 L260 85 C230 70 170 70 140 85z" fill="#cfd9e6" opacity="0.5"/>
+  <text x="14" y="466" font-family="Open Sans, sans-serif" font-size="13" fill="#9db4d6">Beispielbild · Röntgen Thorax p.a. (Illustration)</text>
+</svg>
