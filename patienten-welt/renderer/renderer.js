@@ -848,10 +848,10 @@
   // Linien- oder Balkendiagramm mit schraffiertem Referenzband
   function labChart(name, series, kind) {
     const p = LAB_PARAMS[name];
-    const W = 640, H = 270, L = 54, R = 20, T = 20, B = 40;
+    const W = 640, H = 270, L = 54, R = 40, T = 20, B = 40;
     const vals = series.map((x) => x.wert);
-    let lo = Math.min(...vals, p.min == null ? Infinity : p.min);
-    let hi = Math.max(...vals, p.max == null ? -Infinity : p.max);
+    let lo = Math.min(...vals, p.min == null ? p.max : p.min);
+    let hi = Math.max(...vals, p.max == null ? p.min : p.max);
     const padv = (hi - lo) * 0.22 || 1;
     const yMin = kind === 'bar' ? 0 : Math.max(0, lo - padv);
     const yMax = hi + padv;

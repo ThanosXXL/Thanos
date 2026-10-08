@@ -572,3 +572,6 @@ body.print-recovery #app, body.print-recovery #modal-root, body.print-recovery #
   .doc-preview.paper-au { background: #fff6b5 !important; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
   .no-print { display: none !important; }
 }
+.pill { white-space: nowrap; flex: none; }
+.item { flex-wrap: wrap; }
+.item .grow { flex: 1 1 140px; }

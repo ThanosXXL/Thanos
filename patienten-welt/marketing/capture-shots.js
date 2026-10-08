@@ -20,11 +20,11 @@ const OUT = path.join(__dirname, 'shots');
   await page.fill('#su-pw1', PW);
   await page.fill('#su-pw2', PW);
   await page.waitForTimeout(500);
-  await page.screenshot({ path: path.join(OUT, 'einrichtung.png') });
+  await page.screenshot({ path: path.join(OUT, 'einrichtung.jpg'), type: 'jpeg', quality: 92 });
   await setupDemo(page, APP);
   await page.waitForTimeout(800);
   const nav = (label) => page.click(`#sidebar .nav-item:has(span:text-is("${label}"))`);
-  const shot = async (name, wait = 1600) => { await page.waitForTimeout(wait); await page.screenshot({ path: path.join(OUT, name + '.png') }); };
+  const shot = async (name, wait = 1600) => { await page.waitForTimeout(wait); await page.screenshot({ path: path.join(OUT, name + '.jpg'), type: 'jpeg', quality: 92 }); };
 
   await shot('start', 2200);
   await nav('Medikamente');
