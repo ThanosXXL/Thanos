@@ -66,3 +66,50 @@ Reine Verwaltungs- und Abrechnungssoftware ist laut gängiger Auslegung kein Med
 - [KV Baden-Württemberg: E-Rezept](https://www.kvbawue.de/praxis/unternehmen-praxis/it-online-dienste/telematikinfrastruktur-ti-e-health/erezept)
 - [TI-Score: gematik fordert Pflicht-Check für Praxissoftware](https://pflege-helfer24.de/nachrichten/ti-score-gematik-fordert-pflicht-check-fur-praxissoftware)
 - Primärquellen: kbv.de (Zertifizierung/KVDT), gematik.de (Konformitätsbewertung), MDR (EU) 2017/745, DSGVO Art. 9/25/28/32, § 75b SGB V
+
+## Checkliste für den Anbieter (du als Verkäufer)
+
+Stand 08.10.2026, keine Rechtsberatung. Erst den Verkaufsweg wählen (Abschnitt „Schnellere Wege“), dann abarbeiten.
+
+### A. Unternehmen
+- [ ] Gewerbeanmeldung bzw. Einstufung durch das Finanzamt (Steuerberater fragen, ob Gewerbe oder freiberuflich)
+- [ ] Rechtsform prüfen: Einzelunternehmen haftet persönlich, bei Gesundheitsdaten ist eine UG/GmbH meist sinnvoller
+- [ ] Steuernummer, USt-ID, Buchhaltung, Rechnungsstellung (B2B)
+- [ ] Impressum und Datenschutzerklärung für Website und Download-Seite
+
+### B. Absicherung und Verträge
+- [ ] IT-/Berufshaftpflicht (Vermögensschäden) und Cyber-Versicherung
+- [ ] Lizenz-/SaaS-Vertrag und AGB für Praxen (B2B), Wartungs-/Supportvertrag mit Reaktionszeiten
+- [ ] Auftragsverarbeitungsvertrag (Art. 28 DSGVO) für jeden Fall, in dem du Zugriff auf Praxisdaten hast (Support, Fernwartung, Hosting)
+- [ ] Verpflichtung auf die Schweigepflicht (§ 203 StGB) für dich und alle, die mitarbeiten
+- [ ] Haftungs- und Gewährleistungsregeln, klare Aussage „Demo/kein zertifiziertes PVS“, solange das zutrifft
+
+### C. Datenschutz beim Anbieter
+- [ ] Verzeichnis der Verarbeitungstätigkeiten, Dokumentation der technischen und organisatorischen Maßnahmen (Art. 32)
+- [ ] Prüfen, ob ein Datenschutzbeauftragter nötig ist (hängt von der Zahl der mit Datenverarbeitung beschäftigten Personen ab)
+- [ ] Unterstützung der Praxen bei deren Pflichten (Datenschutz-Folgenabschätzung, Auskunft, Löschung)
+
+### D. Produkt-Mindeststandard vor dem ersten Verkauf
+- [ ] Anmeldung mit Rollen und Rechten, Verschlüsselung der Daten auf dem Gerät, Audit-Log
+- [ ] Verschlüsselte Datensicherung mit Wiederherstellungstest, Löschkonzept
+- [ ] Signierte Installer (Windows-Codesigning-Zertifikat, Apple Developer Program mit Notarisierung) und geprüfter Update-Weg
+- [ ] Handbuch, Release-Notes, Testprotokolle, Risikoanalyse
+- [ ] Aussagen im Marketing nur, was stimmt: keine Behauptung „zertifiziert“, „KBV-zugelassen“, „TI-fähig“ oder „kompatibel mit …“
+
+### E. Marke und Recht
+- [ ] Markenrecherche (DPMA/EUIPO) für „Allgemein Docs“; der Name ist stark beschreibend und möglicherweise schwer schützbar
+- [ ] Keine fremden Marken oder Logos nutzen; Domain sichern
+- [ ] Zweckbestimmung der Software schriftlich festhalten und mit Regulatory-Beratung gegen die MDR abgrenzen (vor allem Laborampel, Warnungen, Vorschläge)
+
+### F. Betrieb als Einzelperson
+- [ ] Erreichbarkeit und Vertretung (Urlaub, Krankheit); manche Praxen verlangen eine Quellcode-Hinterlegung (Escrow)
+- [ ] Prozess für gesetzliche Änderungen (Kataloge, Formulare, TI-Updates)
+- [ ] Pilotpraxen mit schriftlicher Vereinbarung, bevor breit verkauft wird
+
+### G. Nur für gesetzlich Versicherte
+- [ ] KBV-Zertifizierung, gematik-Konformitätsbewertung, TI-Anbindung, KVDT-Abrechnung, lizenzierte Arzneimitteldatenbank – siehe Abschnitte 1 und 2 oben. Allein kaum zu leisten; realistisch nur mit Partner oder als Zusatzmodul.
+
+### Vorschlag für die ersten Schritte
+1. **Diese Woche:** Verkaufsweg festlegen (Privatpraxen, Zusatzmodul oder Partnerschaft), Steuerberater und Fachanwalt für IT-/Datenschutzrecht ansprechen.
+2. **Etwa 30 Tage:** Rechtsform, Versicherung, AGB/AVV-Entwürfe, Markenrecherche.
+3. **Etwa 90 Tage:** Sicherheits-Mindeststandard bauen (Punkt D), zwei bis drei Pilotpraxen mit Vertrag.
