@@ -1,0 +1,36 @@
+{
+  "expo": {
+    "name": "Pharma-Tech",
+    "slug": "pharmatech-mobile",
+    "scheme": "pharmatech",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "icon": "./assets/icon.png",
+    "userInterfaceStyle": "light",
+    "backgroundColor": "#EAFBF3",
+    "splash": {
+      "image": "./assets/splash-icon.png",
+      "resizeMode": "contain",
+      "backgroundColor": "#EAFBF3"
+    },
+    "assetBundlePatterns": [
+      "assets/www/**/*"
+    ],
+    "ios": {
+      "supportsTablet": true,
+      "bundleIdentifier": "com.pharmatech.mobile"
+    },
+    "android": {
+      "package": "com.pharmatech.mobile",
+      "adaptiveIcon": {
+        "backgroundColor": "#EAFBF3",
+        "foregroundImage": "./assets/android-icon-foreground.png",
+        "backgroundImage": "./assets/android-icon-background.png",
+        "monochromeImage": "./assets/android-icon-monochrome.png"
+      }
+    },
+    "web": {
+      "favicon": "./assets/favicon.png"
+    }
+  }
+}

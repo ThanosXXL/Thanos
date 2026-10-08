@@ -1,0 +1,84 @@
+name: Build & Release Pharma-Tech Desktop App
+
+on:
+  push:
+    tags:
+      - "pharmatech-v*"
+  workflow_dispatch:
+    inputs:
+      version:
+        description: "Release-Version (z. B. v1.0.0)"
+        required: true
+        default: "v1.0.0"
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [windows-latest, macos-latest, ubuntu-latest]
+    runs-on: ${{ matrix.os }}
+    defaults:
+      run:
+        working-directory: pharmatech-app
+
+    steps:
+      - name: Repository auschecken
+        uses: actions/checkout@v4
+
+      - name: Node.js einrichten
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Abhängigkeiten installieren
+        run: npm install
+
+      - name: Desktop-App bauen
+        run: npm run dist
+
+      - name: Installer als Artifact hochladen
+        uses: actions/upload-artifact@v4
+        with:
+          name: pharmatech-app-${{ matrix.os }}
+          path: |
+            pharmatech-app/dist/*.exe
+            pharmatech-app/dist/*.dmg
+            pharmatech-app/dist/*.AppImage
+          if-no-files-found: warn
+
+  release:
+    needs: build
+    if: startsWith(github.ref, 'refs/tags/pharmatech-v') || github.event_name == 'workflow_dispatch'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Repository auschecken
+        uses: actions/checkout@v4
+
+      - name: Installer-Artifacts herunterladen
+        uses: actions/download-artifact@v4
+        with:
+          pattern: pharmatech-app-*
+          path: release-assets
+          merge-multiple: true
+
+      - name: Release-Tag bestimmen
+        id: tag
+        run: |
+          if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
+            echo "tag=pharmatech-${{ github.event.inputs.version }}" >> "$GITHUB_OUTPUT"
+          else
+            echo "tag=${{ github.ref_name }}" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: GitHub Release erstellen und Installer anhängen
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          gh release create "${{ steps.tag.outputs.tag }}" \
+            --title "Pharma-Tech ${{ steps.tag.outputs.tag }}" \
+            --notes "Automatisch veröffentlichter Build von Pharma-Tech für Windows, macOS und Linux." \
+            release-assets/*
