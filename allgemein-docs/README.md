@@ -13,8 +13,9 @@ Navy-blaues Design, weiße Schrift in der humanistischen Schrift *Open Sans*, gr
 - **Wartezimmer** – Wartezeit in Minuten, Patienten aufrufen
 - **Karte & E-Rezept** – Versichertenkarte (simuliert) einlesen, Patient finden oder anlegen, E-Rezept mit QR-Token ausstellen
 - **Laborergebnisse** – Werte mit Ampel (Referenzbereiche als Beispiel), Verlauf, Übernahme in die Karteikarte
+- **E-Rezept** – Medikamente aus der Akte auswählen, mehrere E-Rezepte mit QR-Token auf einmal ausstellen, Einlösung in der Apotheke simulieren
 - **Rezepte** – E-Rezept (über die Karte abrufbar) oder Papierrezept (Muster)
-- **Krankmeldung** – „Gelber Schein“ mit Diagnose aus der Akte
+- **Krankmeldung** – „Gelber Schein“ mit Diagnose aus der Akte, digitale Übermittlung an Krankenkasse (KV) und Arbeitgeber (AG) – simuliert
 - **Überweisungen** – an Fachrichtungen, mit Diagnose, Medikation und Allergien
 - **Vorsorge & Recall** – wer ist fällig (überfällig / in 30 Tagen), Termin direkt vergeben, „Erledigt“ vermerkt die Karteikarte
 - **Impfungen** – Impfstatus, fällige Auffrischungen (60 Tage), auch als Reiter in der Patientenakte

@@ -405,3 +405,20 @@ html { color-scheme: dark; }
 ::-webkit-scrollbar-track { background: rgba(255, 255, 255, 0.04); }
 ::-webkit-scrollbar-thumb { background: linear-gradient(180deg, #3a6fd0, #1b4aa8); border-radius: 999px; border: 2px solid rgba(7, 22, 52, 0.9); }
 ::-webkit-scrollbar-thumb:hover { background: linear-gradient(180deg, #5cd2ff, #2f80ed); }
+
+/* Digitale AU, E-Rezept-Sammelansicht */
+.paper-wrap { display: flex; flex-direction: column; gap: 16px; }
+.au-digital { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 16px; padding: 16px 18px; border-radius: 16px; background: rgba(255, 255, 255, 0.08); border: 1px solid var(--line); color: #fff; white-space: normal; }
+.au-steps { display: flex; flex-wrap: wrap; gap: 20px; flex: 1; min-width: 260px; }
+.au-step { display: flex; gap: 12px; align-items: center; opacity: 0.6; }
+.au-step.on { opacity: 1; }
+.au-step b { display: block; }
+.au-step small { display: block; color: var(--text-soft); font-size: 13px; }
+.au-dot { width: 34px; height: 34px; flex: none; border-radius: 50%; display: grid; place-items: center; background: rgba(255, 255, 255, 0.12); border: 2px dashed rgba(255, 255, 255, 0.4); }
+.au-step.on .au-dot { background: radial-gradient(circle at 35% 30%, #b8ffd9, #2fd88a 50%, #0a7a4a); border: 0; box-shadow: inset 0 2px 0 rgba(255, 255, 255, 0.6), 0 6px 12px rgba(0, 0, 0, 0.4); animation: pop 0.4s ease both; animation-delay: calc(var(--i) * 0.5s); }
+.au-dot svg { width: 18px; height: 18px; stroke: #fff; }
+.er-batch { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 14px; margin: 14px 0; }
+.er-mini { display: flex; gap: 14px; align-items: center; padding: 12px; border: 2px solid #0b1f4b; border-radius: 12px; }
+.er-mini small { color: #4a5c88; }
+.med-pick { cursor: pointer; }
+.actions-row { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 16px; }
