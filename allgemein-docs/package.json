@@ -7,7 +7,8 @@
   "license": "MIT",
   "scripts": {
     "start": "electron .",
-    "dist": "electron-builder"
+    "dist": "electron-builder",
+    "build:web": "node web/build-web.js"
   },
   "devDependencies": {
     "electron": "^31.0.0",
@@ -26,8 +27,42 @@
       "output": "dist",
       "buildResources": "build"
     },
-    "win": { "target": "nsis", "icon": "build/icon.png" },
-    "mac": { "target": "dmg", "icon": "build/icon.png" },
-    "linux": { "target": "AppImage", "icon": "build/icon.png" }
+    "win": {
+      "target": "nsis",
+      "icon": "build/icon.png"
+    },
+    "mac": {
+      "target": "dmg",
+      "icon": "build/icon.png"
+    },
+    "linux": {
+      "target": "AppImage",
+      "icon": "build/icon.png",
+      "category": "Office"
+    },
+    "artifactName": "Allgemein-Docs-${version}-${os}-${arch}.${ext}",
+    "nsis": {
+      "oneClick": true,
+      "perMachine": false,
+      "artifactName": "Allgemein-Docs-${version}-${os}-${arch}-Setup.${ext}"
+    },
+    "dmg": {
+      "artifactName": "Allgemein-Docs-${version}-${os}-${arch}.${ext}"
+    },
+    "appImage": {
+      "artifactName": "Allgemein-Docs-${version}-${os}-${arch}.${ext}"
+    },
+    "publish": [
+      {
+        "provider": "github",
+        "owner": "ThanosXXL",
+        "repo": "Thanos"
+      }
+    ]
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/ThanosXXL/Thanos.git",
+    "directory": "allgemein-docs"
   }
 }

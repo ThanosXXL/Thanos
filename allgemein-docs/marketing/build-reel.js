@@ -1,4 +1,4 @@
-// Social-Media-Reel (1080x1920, 18 s, 30 fps) mit Animationen und Hintergrundmusik in exakt gleicher Länge.
+// Social-Media-Reel (1080x1920, 24 s, 30 fps) mit Animationen und Hintergrundmusik in exakt gleicher Länge.
 // Aufruf: NODE_PATH=$(npm root -g) node build-reel.js
 const { chromium } = require('playwright');
 const path = require('path');
@@ -8,10 +8,12 @@ const { url, shot, orb, page, captureFrames, encode } = require('./lib');
 const FPS = 30;
 const SCENES = [
   { len: 3000, type: 'intro' },
+  { len: 3000, h1: 'Karte rein.', accent: 'Patient da.', sub: 'Versichertenkarte einlesen.', img: 'karte', pills: ['Einlesen', 'Akte öffnen', 'Neu anlegen'], orb: ['blue', 'doc'] },
   { len: 3000, h1: 'Die ganze Akte.', accent: 'Ein Klick.', sub: 'Diagnosen, Medikation, Karteikarte.', img: 'patient', pills: ['Diagnosen', 'Medikation', 'Karteikarte'], orb: ['red', 'heart'] },
-  { len: 3000, h1: 'Wartezeit', accent: 'im Blick.', sub: 'Patienten mit einem Klick aufrufen.', img: 'wartezimmer', pills: ['Live-Minuten', 'Aufrufen'], orb: ['gold', 'clock'] },
-  { len: 3000, h1: 'Rezept in', accent: '10 Sekunden.', sub: 'Daten werden automatisch eingesetzt.', img: 'dokument', pills: ['Rezept', 'AU', 'Überweisung'], orb: ['blue', 'doc'] },
-  { len: 3000, h1: 'Nie wieder', accent: 'Vorsorge vergessen.', sub: 'Recall-Liste und Impfstatus.', img: 'vorsorge', pills: ['Recall', 'Impfungen'], orb: ['green', 'check'] },
+  { len: 3000, h1: 'Laborwerte', accent: 'mit Ampel.', sub: 'Auffälliges sofort sehen.', img: 'labor', pills: ['Verlauf', 'Referenz', 'Karteikarte'], orb: ['gold', 'bell'] },
+  { len: 3000, h1: 'Gelber Schein', accent: 'in Sekunden.', sub: 'Krankmeldung mit Diagnose aus der Akte.', img: 'au', pills: ['Krankmeldung', 'Drucken'], orb: ['gold', 'doc'] },
+  { len: 3000, h1: 'E-Rezept', accent: 'auf der Karte.', sub: 'Direkt nach dem Einlesen ausstellen.', img: 'erezept', pills: ['E-Rezept', 'Token', 'Apotheke'], orb: ['red', 'heart'] },
+  { len: 3000, h1: 'Vorsorge', accent: 'im Blick.', sub: 'Recall-Liste und Impfstatus.', img: 'vorsorge', pills: ['Recall', 'Impfungen'], orb: ['green', 'check'] },
   { len: 3000, type: 'outro' }
 ];
 const DURATION = SCENES.reduce((t, s) => t + s.len, 0) / 1000;

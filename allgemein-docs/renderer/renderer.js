@@ -80,7 +80,11 @@
     chart: 'M4 20V4M4 20h16M8 16v-5M13 16V8M18 16v-9',
     play: 'M5 4l15 8-15 8zM3 21h18',
     help: 'M12 21a9 9 0 1 0 0-18 9 9 0 0 0 0 18M9.5 9.5a2.5 2.5 0 1 1 3.5 2.3c-.7.4-1 1-1 1.7M12 17h.01',
-    download: 'M12 3v12M7 11l5 5 5-5M4 21h16'
+    download: 'M12 3v12M7 11l5 5 5-5M4 21h16',
+    flask: 'M9 3h6M10 3v6l-5 9a2 2 0 0 0 2 3h10a2 2 0 0 0 2-3l-5-9V3M8 15h8',
+    thermo: 'M10 14V5a2 2 0 0 1 4 0v9a4 4 0 1 1-4 0M12 8v8',
+    swap: 'M4 8h13l-3-3M20 16H7l3 3',
+    card: 'M3 6h18v12H3zM3 10h18M7 15h4'
   };
   function icon(name) {
     const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
@@ -173,10 +177,24 @@
     ex(3, [['Magenspiegelung klären', 30]], [['Hepatitis B', 900, null]], [['Beratung', 30, 18.5]]);
     ex(4, [['Jugendgesundheitsuntersuchung', -20]], [['Masern', 3000, null], ['COVID-19', 400, 10]], [['Erkältungsberatung', 1, 18.5]]);
     ex(5, [['Darmkrebs-Vorsorge', 4], ['Gesundheits-Check-up', 3]], [['FSME', 500, 230]], [['Ruhe-EKG', 60, 21.5], ['Beratung', 60, 18.5]]);
+    ['A123456780', 'B234567891', 'C345678902', 'D456789013', 'E567890124', 'F678901235'].forEach((k, i) => { patienten[i].kvnr = k; });
+    const lab = (idx, back, werte, bem) => patienten[idx].labor.push({ id: uid(), datum: addDays(today, -back), labor: 'Labor Beispiel GmbH', werte: Object.entries(werte).map(([name, wert]) => ({ name, wert })), bemerkung: bem || '' });
+    patienten.forEach((q) => { q.labor = []; q.rezepte = []; q.krankmeldungen = []; q.ueberweisungen = []; });
+    lab(0, 90, { 'Cholesterin gesamt': 232, 'LDL-Cholesterin': 151, 'HDL-Cholesterin': 52, 'Triglyzeride': 140, 'Glukose nüchtern': 96, 'Kreatinin': 0.9, 'TSH': 2.1 });
+    lab(0, 10, { 'Cholesterin gesamt': 208, 'LDL-Cholesterin': 128, 'HDL-Cholesterin': 54, 'Triglyzeride': 132, 'Glukose nüchtern': 94, 'Kreatinin': 0.9, 'TSH': 1.9 }, 'Unter Atorvastatin deutlich gebessert.');
+    lab(2, 80, { 'HbA1c': 7.4, 'Glukose nüchtern': 138, 'Kreatinin': 1.1, 'eGFR': 68, 'Cholesterin gesamt': 189 });
+    lab(2, 14, { 'HbA1c': 7.1, 'Glukose nüchtern': 118, 'Kreatinin': 1.2, 'eGFR': 64, 'Cholesterin gesamt': 181, 'CRP': 3 }, 'Therapie unverändert.');
+    lab(5, 20, { 'Hämoglobin': 14.2, 'Leukozyten': 6.8, 'Thrombozyten': 240, 'CRP': 2, 'GGT': 52, 'GPT (ALT)': 31 });
+    patienten[0].rezepte.push({ id: uid(), datum: addDays(today, -7), medikament: 'Ramipril 5 mg', dosierung: '1-0-0', packung: 'N3', anzahl: '1', autidem: 'ja', hinweis: 'vor dem Essen', gueltigBis: addDays(today, 21), erezept: { id: '160.100.482.915.337.64', code: 'a3f1c9d27be84c0f91d5e6a7b8c2d3e4f5a6b7c8d9e0f1a2b3c4d5e6f7a8b9c0', status: 'signiert', abgabe: 'offen' } });
+    patienten[2].rezepte.push({ id: uid(), datum: addDays(today, -14), medikament: 'Metformin 1000 mg', dosierung: '1-0-1', packung: 'N3', anzahl: '1', autidem: 'ja', hinweis: '', gueltigBis: addDays(today, 14), erezept: { id: '160.100.771.208.945.12', code: 'b4e2d0a38cf95d1fa2e6f7b8c9d3e4f5a6b7c8d9e0f1a2b3c4d5e6f7a8b9c0d1', status: 'signiert', abgabe: 'eingelöst' } });
+    patienten[4].krankmeldungen.push({ id: uid(), datum: addDays(today, -1), art: 'Erstbescheinigung', von: addDays(today, -1), bis: addDays(today, 2), diagnose: 'J06.9 – Akute Infektion der oberen Atemwege', unfall: 'nein' });
+    patienten[2].ueberweisungen.push({ id: uid(), datum: addDays(today, -14), an: 'Augenheilkunde', diagnose: 'E11.9 – Diabetes mellitus Typ 2', auftrag: 'Jährliche Netzhautuntersuchung', dringend: 'nein' });
+    patienten[5].ueberweisungen.push({ id: uid(), datum: addDays(today, -2), an: 'Gastroenterologie', diagnose: 'Darmkrebs-Vorsorge', auftrag: 'Koloskopie', dringend: 'nein' });
     const termin = (idx, tag, zeit, dauer, grund, status) => ({ id: uid(), patientId: patienten[idx].id, datum: addDays(today, tag), zeit, dauer, grund, status: status || 'geplant' });
     return {
       version: 1,
       demo: true,
+      karten: [],
       einstellungen: { praxis: DEFAULT_PRAXIS, arzt: 'Dr. med. Sabine Lindner' },
       patienten,
       termine: [
@@ -284,14 +302,17 @@
   // Navigation
   // ---------------------------------------------------------------
   const NAV = [
-    ['Praxis', [['start', 'Start', 'home'], ['patienten', 'Patienten', 'users'], ['termine', 'Terminkalender', 'calendar'], ['wartezimmer', 'Wartezimmer', 'clock']]],
-    ['Medizin', [['vorsorge', 'Vorsorge & Recall', 'bell'], ['impfungen', 'Impfungen', 'shield'], ['leistungen', 'Leistungen', 'euro']]],
+    ['Praxis', [['start', 'Start', 'home'], ['patienten', 'Patienten', 'users'], ['karte', 'Karte & E-Rezept', 'card'], ['termine', 'Terminkalender', 'calendar'], ['wartezimmer', 'Wartezimmer', 'clock']]],
+    ['Medizin', [['labor', 'Laborergebnisse', 'flask'], ['rezepte', 'Rezepte', 'pill'], ['krankmeldung', 'Krankmeldung', 'thermo'], ['ueberweisungen', 'Überweisungen', 'swap'], ['vorsorge', 'Vorsorge & Recall', 'bell'], ['impfungen', 'Impfungen', 'shield'], ['leistungen', 'Leistungen', 'euro']]],
     ['Organisation', [['aufgaben', 'Aufgaben', 'check'], ['dokumente', 'Dokumente', 'file'], ['auswertung', 'Auswertung', 'chart']]],
     ['System', [['medien', 'Demo & Medien', 'play'], ['hilfe', 'Hilfe & Tipps', 'help'], ['einstellungen', 'Einstellungen', 'settings']]]
   ];
+  if (window.docsWeb) NAV[3][1] = NAV[3][1].filter((i) => i[0] !== 'medien');
   const NAV_FLAT = NAV.flatMap(([, items]) => items);
 
   function goto(page, extra) {
+    const sb = document.getElementById('sidebar');
+    if (sb) sb.classList.remove('open');
     view.page = page;
     Object.assign(view, extra || {});
     render();
@@ -328,7 +349,7 @@
     renderNav();
     const content = document.getElementById('content');
     content.textContent = '';
-    const views = { start: renderStart, patienten: renderPatienten, termine: renderTermine, wartezimmer: renderWartezimmer, vorsorge: renderVorsorge, impfungen: renderImpfungen, leistungen: renderLeistungen, aufgaben: renderAufgaben, dokumente: renderDokumente, auswertung: renderAuswertung, medien: renderMedien, hilfe: renderHilfe, einstellungen: renderEinstellungen };
+    const views = { start: renderStart, patienten: renderPatienten, termine: renderTermine, wartezimmer: renderWartezimmer, karte: renderKarte, labor: renderLabor, rezepte: renderRezepte, krankmeldung: renderKrankmeldungen, ueberweisungen: renderUeberweisungen, vorsorge: renderVorsorge, impfungen: renderImpfungen, leistungen: renderLeistungen, aufgaben: renderAufgaben, dokumente: renderDokumente, auswertung: renderAuswertung, medien: renderMedien, hilfe: renderHilfe, einstellungen: renderEinstellungen };
     content.appendChild((views[view.page] || renderStart)());
   }
 
@@ -411,8 +432,10 @@
       upcoming.length ? h('div', { class: 'list' }, upcoming.map((t) => appointmentRow(t, true))) : null);
 
     const quick = [
-      ['Patient aufrufen', 'bell', () => goto('wartezimmer')],
-      ['Rezept erstellen', 'pill', () => goto('dokumente')],
+      ['Karte einlesen', 'card', () => goto('karte')],
+      ['Rezept ausstellen', 'pill', () => { goto('rezepte'); newRezept(); }],
+      ['Krankmeldung', 'thermo', () => { goto('krankmeldung'); newAU(); }],
+      ['Überweisung', 'swap', () => { goto('ueberweisungen'); newUeberweisung(); }],
       ['Patient suchen', 'search', openSearch],
       ['Aufgabe notieren', 'check', () => addAufgabe()]
     ];
@@ -442,13 +465,14 @@
       { key: 'geschlecht', label: 'Geschlecht', type: 'select', value: src.geschlecht, half: true, options: [{ value: 'w', label: 'weiblich' }, { value: 'm', label: 'männlich' }, { value: 'd', label: 'divers' }] },
       { key: 'versicherung', label: 'Versicherung', type: 'select', value: src.versicherung, half: true, options: [{ value: 'gesetzlich', label: 'gesetzlich' }, { value: 'privat', label: 'privat' }] },
       { key: 'kasse', label: 'Krankenkasse', value: src.kasse, half: true },
+      { key: 'kvnr', label: 'Versichertennummer', value: src.kvnr || '', half: true },
       { key: 'telefon', label: 'Telefon', type: 'tel', value: src.telefon, half: true },
       { key: 'avatar', label: 'Beispielbild', type: 'select', value: src.avatar, half: true, options: AVATARS.map((a, i) => ({ value: a, label: 'Bild ' + (i + 1) })) },
       { key: 'allergien', label: 'Allergien / Unverträglichkeiten', value: src.allergien }
     ], (v) => {
       if (!v.vorname || !v.nachname) { toast('Bitte Vor- und Nachname angeben.'); return false; }
       if (isNew) {
-        const np = { id: uid(), ...v, diagnosen: [], medikation: [], karte: [], bilder: [] };
+        const np = { id: uid(), ...v, diagnosen: [], medikation: [], karte: [], bilder: [], vorsorge: [], impfungen: [], leistungen: [], labor: [], rezepte: [], krankmeldungen: [], ueberweisungen: [] };
         state.patienten.push(np);
         view.patientId = np.id;
         view.patientTab = 'uebersicht';
@@ -543,6 +567,7 @@
       h('dl', { class: 'kv' },
         h('dt', { text: 'Telefon' }), h('dd', { text: p.telefon || '–' }),
         h('dt', { text: 'Versicherung' }), h('dd', { text: `${p.versicherung}${p.kasse ? ', ' + p.kasse : ''}` }),
+        h('dt', { text: 'Versichertennr.' }), h('dd', { text: p.kvnr || '–' }),
         h('dt', { text: 'Letzter Eintrag' }), h('dd', { text: p.karte.length ? fmtStamp(Math.max(...p.karte.map((k) => k.ts))) : '–' }))));
     v.appendChild(simpleListCard('Diagnosen', p.diagnosen, (d) => `${d.icd ? d.icd + ' – ' : ''}${d.text}`,
       () => formModal('Diagnose hinzufügen', [{ key: 'icd', label: 'ICD-10-Code (optional)', placeholder: 'z. B. I10' }, { key: 'text', label: 'Diagnose' }], (f) => {
@@ -981,6 +1006,481 @@
     return v;
   }
 
+
+  // ---------------------------------------------------------------
+  // Dokument-Helfer (Papier-Vorschau, Karteikarten-Vermerk)
+  // ---------------------------------------------------------------
+  const allOf = (key) => state.patienten.flatMap((p) => (p[key] || []).map((e) => ({ ...e, p })));
+  const vermerk = (p, typ, text) => p.karte.push({ id: uid(), ts: Date.now(), typ, text });
+  const addDaysISO = (iso, n) => addDays(iso, n);
+  const dayDiff = (a, b) => Math.round((new Date(b + 'T12:00:00') - new Date(a + 'T12:00:00')) / 86400000);
+  const svgEl = (tag, attrs, ...kids) => {
+    const el = document.createElementNS('http://www.w3.org/2000/svg', tag);
+    for (const [k, v] of Object.entries(attrs || {})) el.setAttribute(k, v);
+    kids.flat().forEach((c) => c && el.appendChild(c));
+    return el;
+  };
+  const field = (label, value, cls) => h('div', { class: 'pf ' + (cls || '') }, h('span', { class: 'pf-l', text: label }), h('span', { class: 'pf-v', text: value || '–' }));
+
+  function paperModal(title, build) {
+    openModal(title, (modal) => {
+      const paper = build();
+      modal.appendChild(paper);
+      modal.appendChild(h('div', { class: 'modal-actions' }, btn('Schließen', { onclick: closeModal }), btn('Drucken', { kind: 'primary', icon: 'print', onclick: () => window.print() })));
+    }, { wide: true });
+  }
+  const letterhead = () => h('div', { class: 'letterhead' }, h('img', { src: 'img/logo.svg', alt: '' }), h('div', {}, h('strong', { text: state.einstellungen.praxis }), h('div', { text: state.einstellungen.arzt })));
+  const patientBlock = (p) => h('div', { class: 'pgrid' }, field('Name, Vorname', `${p.nachname}, ${p.vorname}`), field('geboren am', fmtDate(p.geb)), field('Krankenkasse', p.kasse || p.versicherung), field('Versichertennr.', p.kvnr));
+  const demoNote = (text) => h('div', { class: 'paper-note', text });
+
+  function docPage({ title, sub, addLabel, onAdd, rows, emptyText }) {
+    const v = h('div', { class: 'view' });
+    v.appendChild(h('div', { class: 'page-head' }, h('div', {}, h('h1', { text: title }), h('p', { text: sub })), btn(addLabel, { kind: 'primary', icon: 'plus', onclick: onAdd })));
+    v.appendChild(h('div', { class: 'card' }, rows.length ? h('div', { class: 'list' }, rows.map((r) => h('div', { class: 'item clickable', onclick: r.onView },
+      h('img', { class: 'avatar', src: avatarSrc(r.p), alt: '' }),
+      h('div', { class: 'grow' }, h('div', { class: 'title', text: r.title }), h('div', { class: 'soft small', text: r.meta })),
+      r.pill ? h('span', { class: 'pill ' + r.pill[0], text: r.pill[1] }) : null,
+      btn('', { kind: 'small', icon: 'print', onclick: (e) => { e.stopPropagation(); r.onView(); } }),
+      btn('', { kind: 'small', icon: 'trash', onclick: (e) => { e.stopPropagation(); confirmModal('Eintrag wirklich löschen?', r.onDelete); } })))) : h('div', { class: 'empty', text: emptyText })));
+    return v;
+  }
+  function needPatients() { if (!state.patienten.length) { noPatients(); return true; } return false; }
+
+  // ---------------------------------------------------------------
+  // E-Rezept (Demo-Simulation)
+  // ---------------------------------------------------------------
+  const rndDigits = (n) => Array.from(crypto.getRandomValues(new Uint8Array(n)), (b) => b % 10).join('');
+  const rndHex = (n) => Array.from(crypto.getRandomValues(new Uint8Array(n)), (b) => b.toString(16).padStart(2, '0')).join('');
+  const newErezeptMeta = () => ({ id: `160.${rndDigits(3)}.${rndDigits(3)}.${rndDigits(3)}.${rndDigits(3)}.${rndDigits(2)}`, code: rndHex(32), status: 'signiert', abgabe: 'offen' });
+  function qrSvg(text, px) {
+    const qr = qrcode(0, 'M');
+    qr.addData(text);
+    qr.make();
+    const n = qr.getModuleCount();
+    let d = '';
+    for (let r = 0; r < n; r++) for (let c = 0; c < n; c++) if (qr.isDark(r, c)) d += `M${c + 2} ${r + 2}h1v1h-1z`;
+    return svgEl('svg', { viewBox: `0 0 ${n + 4} ${n + 4}`, width: px, height: px, class: 'qr', 'shape-rendering': 'crispEdges' },
+      svgEl('rect', { width: n + 4, height: n + 4, fill: '#fff' }), svgEl('path', { d, fill: '#0b1f4b' }));
+  }
+  const isE = (r) => !!r.erezept;
+  const eStatus = (r) => (r.erezept.abgabe === 'eingelöst' ? ['ok', 'eingelöst'] : r.gueltigBis < todayISO() ? ['danger', 'abgelaufen'] : ['info', 'abrufbar']);
+
+  // ---------------------------------------------------------------
+  // Rezepte
+  // ---------------------------------------------------------------
+  function viewRezept(r) {
+    const p = r.p;
+    if (isE(r)) return viewErezept(r);
+    paperModal(`Rezept – ${p.vorname} ${p.nachname}`, () => h('div', { class: 'doc-preview paper-rx' },
+      letterhead(),
+      h('div', { class: 'paper-title', text: 'Rezept' }),
+      patientBlock(p),
+      h('div', { class: 'rx-body' },
+        h('div', { class: 'rx-sym', text: 'Rp.' }),
+        h('div', {}, h('div', { class: 'rx-med', text: r.medikament }),
+          h('div', { text: `${r.dosierung ? 'Dosierung: ' + r.dosierung : ''}` }),
+          h('div', { text: `Menge: ${r.anzahl}× ${r.packung}` }),
+          r.hinweis ? h('div', { text: 'Hinweis: ' + r.hinweis }) : null,
+          h('div', { text: r.autidem === 'ja' ? 'aut idem: Austausch zulässig' : 'aut idem: Austausch ausgeschlossen' }))),
+      h('div', { class: 'pgrid' }, field('Ausgestellt am', fmtDate(r.datum)), field('Gültig bis', fmtDate(r.gueltigBis))),
+      h('div', { class: 'sign' }, h('span', { text: state.einstellungen.arzt }), h('small', { text: 'Unterschrift / Stempel' })),
+      demoNote('Beispiel-Dokument (Demo). Gültige Kassenrezepte werden als E-Rezept über die Telematikinfrastruktur ausgestellt.')));
+  }
+  function viewErezept(r) {
+    const p = r.p;
+    const [cls, txt] = eStatus(r);
+    const token = `Task/${r.erezept.id}/$accept?ac=${r.erezept.code}`;
+    paperModal(`E-Rezept – ${p.vorname} ${p.nachname}`, () => h('div', { class: 'doc-preview paper-rx paper-er' },
+      letterhead(),
+      h('div', { class: 'er-head' }, h('div', {}, h('div', { class: 'paper-title', text: 'E-Rezept' }), h('div', { class: 'paper-sub', text: 'Elektronische Verordnung · einlösbar mit der Versichertenkarte' })), h('span', { class: 'pill ' + cls, text: txt })),
+      patientBlock(p),
+      h('div', { class: 'er-grid' },
+        h('div', { class: 'er-qr' }, qrSvg(token, 190), h('small', { text: 'Token für Apotheke / E-Rezept-App (Demo)' })),
+        h('div', {}, h('div', { class: 'rx-body' }, h('div', { class: 'rx-sym', text: 'Rp.' }), h('div', {},
+          h('div', { class: 'rx-med', text: r.medikament }),
+          h('div', { text: r.dosierung ? 'Dosierung: ' + r.dosierung : 'Dosierung: laut Anweisung' }),
+          h('div', { text: `Menge: ${r.anzahl}× ${r.packung}` }),
+          r.hinweis ? h('div', { text: 'Hinweis: ' + r.hinweis }) : null,
+          h('div', { text: r.autidem === 'ja' ? 'aut idem: Austausch zulässig' : 'aut idem: Austausch ausgeschlossen' }))),
+          h('div', { class: 'pgrid one' }, field('E-Rezept-ID', r.erezept.id), field('Ausgestellt / gültig bis', `${fmtDate(r.datum)} / ${fmtDate(r.gueltigBis)}`)))),
+      h('div', { class: 'er-steps' },
+        h('div', {}, h('b', { text: '1 · Signiert' }), h('span', { text: ' – von ' + state.einstellungen.arzt + ' (Demo)' })),
+        h('div', {}, h('b', { text: '2 · Gespeichert' }), h('span', { text: ' – im E-Rezept-Fachdienst (simuliert)' })),
+        h('div', {}, h('b', { text: '3 · Eingelöst' }), h('span', { text: ' – Apotheke liest die Karte oder scannt den Token' }))),
+      demoNote('Beispiel-Dokument (Demo). Echte E-Rezepte werden mit der qualifizierten elektronischen Signatur (eHBA) erstellt und über die Telematikinfrastruktur im E-Rezept-Fachdienst gespeichert.')));
+  }
+  function newRezept(preset) {
+    preset = preset || {};
+    if (needPatients()) return;
+    openModal('Rezept ausstellen', (modal) => {
+      const form = h('form', {});
+      const pSel = h('select', { name: 'patientId' }, patientOptions().map((o) => h('option', { value: o.value, text: o.label })));
+      const medSel = h('select', { name: 'med' });
+      const fillMeds = () => {
+        const p = getPatient(pSel.value);
+        medSel.textContent = '';
+        p.medikation.forEach((m) => medSel.appendChild(h('option', { value: m.text, text: m.text })));
+        medSel.appendChild(h('option', { value: '', text: 'Anderes Medikament …' }));
+      };
+      if (preset.patientId) pSel.value = preset.patientId;
+      pSel.addEventListener('change', fillMeds); fillMeds();
+      const artSel = h('select', { name: 'art' }, [['e', 'E-Rezept (über die Karte abrufbar)'], ['p', 'Papierrezept (Muster)']].map(([v, l]) => h('option', { value: v, text: l, selected: v === (preset.art || 'e') })));
+      const own = h('input', { type: 'text', name: 'own', placeholder: 'Medikament und Stärke (falls „Anderes“)' });
+      const dos = h('input', { type: 'text', name: 'dosierung', placeholder: 'z. B. 1-0-0' });
+      const packung = h('select', { name: 'packung' }, ['N1', 'N2', 'N3'].map((x) => h('option', { value: x, text: x })));
+      const anzahl = h('input', { type: 'text', name: 'anzahl', value: '1' });
+      const autidem = h('select', { name: 'autidem' }, [['ja', 'Ja'], ['nein', 'Nein']].map(([v, l]) => h('option', { value: v, text: l })));
+      const hint = h('input', { type: 'text', name: 'hinweis', placeholder: 'optional, z. B. vor dem Essen einnehmen' });
+      const row = (...f) => h('div', { class: 'row' }, f.map(([l, el]) => h('div', { class: 'field' }, h('label', { text: l }), el)));
+      form.append(row(['Patient', pSel], ['Art', artSel]), row(['Medikament aus der Medikation', medSel]), row(['…oder anderes Medikament', own]),
+        row(['Dosierung', dos], ['Packung', packung], ['Anzahl', anzahl]), row(['aut idem', autidem], ['Hinweis', hint]),
+        h('div', { class: 'modal-actions' }, btn('Abbrechen', { onclick: closeModal }), h('button', { class: 'btn primary', type: 'submit' }, icon('pill'), 'Rezept ausstellen')));
+      form.addEventListener('submit', (e) => {
+        e.preventDefault();
+        const p = getPatient(pSel.value);
+        const medikament = own.value.trim() || medSel.value;
+        if (!medikament) { toast('Bitte ein Medikament angeben.'); return; }
+        const r = { id: uid(), datum: todayISO(), medikament, dosierung: dos.value.trim(), packung: packung.value, anzahl: anzahl.value.trim() || '1', autidem: autidem.value, hinweis: hint.value.trim(), gueltigBis: addDays(todayISO(), artSel.value === 'e' ? 28 : 90) };
+        if (artSel.value === 'e') r.erezept = newErezeptMeta();
+        p.rezepte.push(r);
+        if (own.value.trim() && !p.medikation.some((m) => m.text === medikament)) p.medikation.push({ id: uid(), text: medikament });
+        vermerk(p, 'Therapie', `${r.erezept ? 'E-Rezept' : 'Rezept'} ausgestellt: ${medikament} (${r.anzahl}× ${r.packung})`);
+        persist(); render(); closeModal(); viewRezept({ ...r, p });
+        toast(r.erezept ? 'E-Rezept ausgestellt – auf der Karte abrufbar.' : 'Rezept ausgestellt und in der Karteikarte vermerkt.');
+      });
+      modal.appendChild(form);
+    });
+  }
+  function renderRezepte() {
+    const rows = allOf('rezepte').sort((a, b) => b.datum.localeCompare(a.datum)).map((r) => ({
+      p: r.p, title: r.medikament, meta: `${fullName(r.p)} · ${fmtDate(r.datum)} · ${r.anzahl}× ${r.packung}`,
+      pill: isE(r) ? [eStatus(r)[0], 'E-Rezept · ' + eStatus(r)[1]] : (r.gueltigBis < todayISO() ? ['danger', 'abgelaufen'] : ['ok', 'gültig bis ' + fmtDate(r.gueltigBis)]),
+      onView: () => viewRezept(r), onDelete: () => { r.p.rezepte = r.p.rezepte.filter((x) => x.id !== r.id); commit(); }
+    }));
+    return docPage({ title: 'Rezepte', sub: 'Medikamente verordnen – Rezept aus der Medikation in drei Klicks.', addLabel: 'Rezept ausstellen', onAdd: newRezept, rows, emptyText: 'Noch keine Rezepte ausgestellt.' });
+  }
+
+  // ---------------------------------------------------------------
+  // Krankmeldung (Arbeitsunfähigkeit, „Gelber Schein“)
+  // ---------------------------------------------------------------
+  function viewAU(a) {
+    const p = a.p;
+    paperModal(`Krankmeldung – ${p.vorname} ${p.nachname}`, () => h('div', { class: 'doc-preview paper-au' },
+      letterhead(),
+      h('div', { class: 'paper-title', text: 'Arbeitsunfähigkeitsbescheinigung' }),
+      h('div', { class: 'paper-sub', text: `${a.art} · Dauer: ${dayDiff(a.von, a.bis) + 1} Kalendertage` }),
+      patientBlock(p),
+      h('div', { class: 'pgrid' }, field('arbeitsunfähig seit', fmtDate(a.von)), field('voraussichtlich bis einschließlich', fmtDate(a.bis)), field('festgestellt am', fmtDate(a.datum)), field('Arbeitsunfall', a.unfall === 'ja' ? 'Ja' : 'Nein')),
+      h('div', { class: 'pgrid one' }, field('Diagnose (ICD-10)', a.diagnose)),
+      h('div', { class: 'sign' }, h('span', { text: state.einstellungen.arzt }), h('small', { text: 'Unterschrift / Stempel' })),
+      demoNote('Beispiel-Dokument (Demo). Die rechtsgültige eAU wird digital über die Telematikinfrastruktur (KIM) an die Krankenkasse übermittelt.')));
+  }
+  function newAU() {
+    if (needPatients()) return;
+    openModal('Krankmeldung erstellen', (modal) => {
+      const form = h('form', {});
+      const pSel = h('select', { name: 'patientId' }, patientOptions().map((o) => h('option', { value: o.value, text: o.label })));
+      const diag = h('select', { name: 'diag' });
+      const fillDiag = () => {
+        const p = getPatient(pSel.value);
+        diag.textContent = '';
+        p.diagnosen.forEach((d) => diag.appendChild(h('option', { value: `${d.icd ? d.icd + ' – ' : ''}${d.text}`, text: `${d.icd ? d.icd + ' – ' : ''}${d.text}` })));
+        diag.appendChild(h('option', { value: '', text: 'Andere Diagnose …' }));
+      };
+      pSel.addEventListener('change', fillDiag); fillDiag();
+      const own = h('input', { type: 'text', placeholder: 'z. B. J06.9 – Akute Infektion der oberen Atemwege' });
+      const art = h('select', {}, ['Erstbescheinigung', 'Folgebescheinigung'].map((x) => h('option', { value: x, text: x })));
+      const von = h('input', { type: 'date', value: todayISO() });
+      const bis = h('input', { type: 'date', value: addDays(todayISO(), 2) });
+      const unfall = h('select', {}, [['nein', 'Nein'], ['ja', 'Ja']].map(([v, l]) => h('option', { value: v, text: l })));
+      const row = (...f) => h('div', { class: 'row' }, f.map(([l, el]) => h('div', { class: 'field' }, h('label', { text: l }), el)));
+      form.append(row(['Patient', pSel]), row(['Diagnose aus der Akte', diag]), row(['…oder andere Diagnose', own]), row(['Art', art], ['Arbeitsunfähig von', von], ['bis einschließlich', bis]), row(['Arbeitsunfall', unfall]),
+        h('div', { class: 'modal-actions' }, btn('Abbrechen', { onclick: closeModal }), h('button', { class: 'btn primary', type: 'submit' }, icon('file'), 'Krankmeldung erstellen')));
+      form.addEventListener('submit', (e) => {
+        e.preventDefault();
+        if (bis.value < von.value) { toast('Das Enddatum liegt vor dem Beginn.'); return; }
+        const p = getPatient(pSel.value);
+        const a = { id: uid(), datum: todayISO(), art: art.value, von: von.value, bis: bis.value, diagnose: own.value.trim() || diag.value, unfall: unfall.value };
+        p.krankmeldungen.push(a);
+        vermerk(p, 'Therapie', `AU ausgestellt: ${fmtDate(a.von)} – ${fmtDate(a.bis)} (${a.diagnose || 'ohne Diagnose'})`);
+        persist(); render(); closeModal(); viewAU({ ...a, p });
+        toast('Krankmeldung erstellt und in der Karteikarte vermerkt.');
+      });
+      modal.appendChild(form);
+    });
+  }
+  function renderKrankmeldungen() {
+    const rows = allOf('krankmeldungen').sort((a, b) => b.datum.localeCompare(a.datum)).map((a) => ({
+      p: a.p, title: `${a.art}: ${fmtDate(a.von)} – ${fmtDate(a.bis)}`, meta: `${fullName(a.p)} · ${a.diagnose || 'ohne Diagnose'}`,
+      pill: a.bis >= todayISO() ? ['warn', 'läuft'] : ['ok', 'beendet'],
+      onView: () => viewAU(a), onDelete: () => { a.p.krankmeldungen = a.p.krankmeldungen.filter((x) => x.id !== a.id); commit(); }
+    }));
+    return docPage({ title: 'Krankmeldung', sub: 'Arbeitsunfähigkeit bescheinigen („Gelber Schein“) – Diagnose direkt aus der Akte.', addLabel: 'Krankmeldung erstellen', onAdd: newAU, rows, emptyText: 'Noch keine Krankmeldungen.' });
+  }
+
+  // ---------------------------------------------------------------
+  // Überweisungen
+  // ---------------------------------------------------------------
+  const FACHRICHTUNGEN = ['Allgemeinmedizin', 'Augenheilkunde', 'Chirurgie', 'Dermatologie', 'Gastroenterologie', 'Gynäkologie', 'HNO', 'Kardiologie', 'Labormedizin', 'Neurologie', 'Orthopädie', 'Pneumologie', 'Radiologie', 'Urologie'];
+  function viewUeberweisung(u) {
+    const p = u.p;
+    paperModal(`Überweisung – ${p.vorname} ${p.nachname}`, () => h('div', { class: 'doc-preview paper-ue' },
+      letterhead(),
+      h('div', { class: 'paper-title', text: 'Überweisungsschein' }),
+      patientBlock(p),
+      h('div', { class: 'pgrid' }, field('Überweisung an', u.an), field('Dringlichkeit', u.dringend === 'ja' ? 'DRINGEND' : 'normal', u.dringend === 'ja' ? 'urgent' : ''), field('Ausstellungsdatum', fmtDate(u.datum))),
+      h('div', { class: 'pgrid one' }, field('Diagnose / Verdachtsdiagnose', u.diagnose), field('Auftrag', u.auftrag),
+        field('Relevante Medikation', p.medikation.length ? p.medikation.map((m) => m.text).join('; ') : 'keine'), field('Allergien', p.allergien || 'keine bekannt')),
+      h('div', { class: 'sign' }, h('span', { text: state.einstellungen.arzt }), h('small', { text: 'Unterschrift / Stempel' })),
+      demoNote('Beispiel-Dokument (Demo) – kein amtliches Überweisungsformular (Muster 6).')));
+  }
+  function newUeberweisung() {
+    if (needPatients()) return;
+    openModal('Überweisung erstellen', (modal) => {
+      const form = h('form', {});
+      const pSel = h('select', {}, patientOptions().map((o) => h('option', { value: o.value, text: o.label })));
+      const an = h('select', {}, FACHRICHTUNGEN.map((x) => h('option', { value: x, text: x })));
+      const diag = h('select', {});
+      const fillDiag = () => {
+        const p = getPatient(pSel.value);
+        diag.textContent = '';
+        p.diagnosen.forEach((d) => diag.appendChild(h('option', { value: `${d.icd ? d.icd + ' – ' : ''}${d.text}`, text: `${d.icd ? d.icd + ' – ' : ''}${d.text}` })));
+        diag.appendChild(h('option', { value: '', text: 'Andere / Verdachtsdiagnose …' }));
+      };
+      pSel.addEventListener('change', fillDiag); fillDiag();
+      const own = h('input', { type: 'text', placeholder: 'Verdachtsdiagnose (falls „Andere“)' });
+      const auftrag = h('textarea', { placeholder: 'z. B. Bitte um Abklärung und Mitbehandlung', style: 'min-height:80px' });
+      const dring = h('select', {}, [['nein', 'Normal'], ['ja', 'Dringend']].map(([v, l]) => h('option', { value: v, text: l })));
+      const row = (...f) => h('div', { class: 'row' }, f.map(([l, el]) => h('div', { class: 'field' }, h('label', { text: l }), el)));
+      form.append(row(['Patient', pSel], ['Überweisung an', an]), row(['Diagnose aus der Akte', diag]), row(['…oder Verdachtsdiagnose', own]), row(['Auftrag', auftrag]), row(['Dringlichkeit', dring]),
+        h('div', { class: 'modal-actions' }, btn('Abbrechen', { onclick: closeModal }), h('button', { class: 'btn primary', type: 'submit' }, icon('send'), 'Überweisung erstellen')));
+      form.addEventListener('submit', (e) => {
+        e.preventDefault();
+        const p = getPatient(pSel.value);
+        const u = { id: uid(), datum: todayISO(), an: an.value, diagnose: own.value.trim() || diag.value, auftrag: auftrag.value.trim() || 'Bitte um Mitbehandlung', dringend: dring.value };
+        p.ueberweisungen.push(u);
+        vermerk(p, 'Therapie', `Überweisung an ${u.an}: ${u.auftrag}`);
+        persist(); render(); closeModal(); viewUeberweisung({ ...u, p });
+        toast('Überweisung erstellt und in der Karteikarte vermerkt.');
+      });
+      modal.appendChild(form);
+    });
+  }
+  function renderUeberweisungen() {
+    const rows = allOf('ueberweisungen').sort((a, b) => b.datum.localeCompare(a.datum)).map((u) => ({
+      p: u.p, title: `${u.an} – ${u.auftrag}`, meta: `${fullName(u.p)} · ${fmtDate(u.datum)} · ${u.diagnose || 'ohne Diagnose'}`,
+      pill: u.dringend === 'ja' ? ['danger', 'dringend'] : ['info', 'normal'],
+      onView: () => viewUeberweisung(u), onDelete: () => { u.p.ueberweisungen = u.p.ueberweisungen.filter((x) => x.id !== u.id); commit(); }
+    }));
+    return docPage({ title: 'Überweisungen', sub: 'Zu Fachärzten überweisen – Diagnose, Medikation und Allergien werden automatisch mitgegeben.', addLabel: 'Überweisung erstellen', onAdd: newUeberweisung, rows, emptyText: 'Noch keine Überweisungen.' });
+  }
+
+  // ---------------------------------------------------------------
+  // Laborergebnisse
+  // ---------------------------------------------------------------
+  const LAB_GROUPS = [
+    ['Blutbild', [['Hämoglobin', 'g/dl', 12, 17.5], ['Leukozyten', 'G/l', 4, 10], ['Thrombozyten', 'G/l', 150, 400]]],
+    ['Stoffwechsel', [['Glukose nüchtern', 'mg/dl', 70, 100], ['HbA1c', '%', 4, 5.7]]],
+    ['Blutfette', [['Cholesterin gesamt', 'mg/dl', 0, 200], ['LDL-Cholesterin', 'mg/dl', 0, 130], ['HDL-Cholesterin', 'mg/dl', 40, 200], ['Triglyzeride', 'mg/dl', 0, 150]]],
+    ['Niere', [['Kreatinin', 'mg/dl', 0.6, 1.2], ['eGFR', 'ml/min', 60, 200]]],
+    ['Leber', [['GOT (AST)', 'U/l', 0, 35], ['GPT (ALT)', 'U/l', 0, 35], ['GGT', 'U/l', 0, 40]]],
+    ['Weitere', [['TSH', 'mU/l', 0.4, 4], ['CRP', 'mg/l', 0, 5]]]
+  ];
+  const LAB_PARAMS = Object.fromEntries(LAB_GROUPS.flatMap(([, ps]) => ps).map(([name, unit, min, max]) => [name, { unit, min, max }]));
+  const labFlag = (name, wert) => { const r = LAB_PARAMS[name]; if (!r) return ''; if (wert < r.min) return 'low'; if (wert > r.max) return 'high'; return ''; };
+  const numFmt = (n) => String(n).replace('.', ',');
+
+  function sparkline(values) {
+    const w = 90, hh = 26;
+    const min = Math.min(...values), max = Math.max(...values);
+    const x = (i) => 3 + ((w - 6) * i) / Math.max(1, values.length - 1);
+    const y = (v) => (max === min ? hh / 2 : 3 + (hh - 6) * (1 - (v - min) / (max - min)));
+    return svgEl('svg', { viewBox: `0 0 ${w} ${hh}`, class: 'spark' },
+      svgEl('polyline', { points: values.map((v, i) => `${x(i)},${y(v)}`).join(' '), fill: 'none', stroke: '#4cc9f0', 'stroke-width': 2.4, 'stroke-linejoin': 'round' }),
+      svgEl('circle', { cx: x(values.length - 1), cy: y(values[values.length - 1]), r: 3.4, fill: '#ffd166' }));
+  }
+
+  function viewLabor(l) {
+    const p = l.p;
+    openModal(`Laborbefund – ${p.vorname} ${p.nachname}`, (modal) => {
+      const history = (name) => p.labor.filter((x) => x.datum <= l.datum && x.werte.some((w) => w.name === name)).sort((a, b) => a.datum.localeCompare(b.datum)).map((x) => x.werte.find((w) => w.name === name).wert);
+      const tbl = h('table', { class: 'lab-table' }, h('thead', {}, h('tr', {}, ['Parameter', 'Wert', 'Einheit', 'Referenz', 'Bewertung', 'Verlauf'].map((t) => h('th', { text: t })))),
+        h('tbody', {}, l.werte.map((w) => {
+          const r = LAB_PARAMS[w.name] || { unit: '', min: 0, max: 0 };
+          const f = labFlag(w.name, w.wert);
+          const hist = history(w.name);
+          return h('tr', { class: f }, h('td', { text: w.name }), h('td', { class: 'lab-val', text: numFmt(w.wert) }), h('td', { text: r.unit }),
+            h('td', { text: r.min === 0 ? `< ${numFmt(r.max)}` : r.max >= 200 ? `> ${numFmt(r.min)}` : `${numFmt(r.min)} – ${numFmt(r.max)}` }),
+            h('td', {}, f ? h('span', { class: 'pill ' + (f === 'high' ? 'danger' : 'warn'), text: f === 'high' ? '↑ erhöht' : '↓ erniedrigt' }) : h('span', { class: 'pill ok', text: 'normal' })),
+            h('td', {}, hist.length > 1 ? sparkline(hist) : h('span', { class: 'soft small', text: '–' })));
+        })));
+      modal.appendChild(h('div', { class: 'doc-preview paper-lab' }, letterhead(), h('div', { class: 'paper-title', text: 'Laborbefund' }),
+        h('div', { class: 'pgrid' }, field('Patient', `${p.nachname}, ${p.vorname}`), field('geboren am', fmtDate(p.geb)), field('Entnahme', fmtDate(l.datum)), field('Labor', l.labor)), tbl,
+        l.bemerkung ? h('div', { class: 'pgrid one' }, field('Bemerkung', l.bemerkung)) : null,
+        demoNote('Referenzbereiche sind allgemeine Beispielwerte; maßgeblich sind die Referenzwerte des jeweiligen Labors.')));
+      const abn = l.werte.filter((w) => labFlag(w.name, w.wert));
+      modal.appendChild(h('div', { class: 'modal-actions' },
+        btn('In Karteikarte übernehmen', { icon: 'file', onclick: () => { vermerk(p, 'Befund', `Labor ${fmtDate(l.datum)}: ${abn.length ? abn.map((w) => `${w.name} ${numFmt(w.wert)} ${LAB_PARAMS[w.name].unit} (${labFlag(w.name, w.wert) === 'high' ? '↑' : '↓'})`).join(', ') : 'alle Werte im Referenzbereich'}`); commit(); closeModal(); toast('Befund in die Karteikarte übernommen.'); } }),
+        btn('Schließen', { onclick: closeModal }), btn('Drucken', { kind: 'primary', icon: 'print', onclick: () => window.print() })));
+    }, { wide: true });
+  }
+
+  function newLabor() {
+    if (needPatients()) return;
+    openModal('Laborergebnis eintragen', (modal) => {
+      const form = h('form', {});
+      const pSel = h('select', {}, patientOptions().map((o) => h('option', { value: o.value, text: o.label })));
+      const datum = h('input', { type: 'date', value: todayISO() });
+      const labor = h('input', { type: 'text', value: 'Labor Beispiel GmbH' });
+      form.appendChild(h('div', { class: 'row' }, h('div', { class: 'field' }, h('label', { text: 'Patient' }), pSel), h('div', { class: 'field' }, h('label', { text: 'Entnahmedatum' }), datum), h('div', { class: 'field' }, h('label', { text: 'Labor' }), labor)));
+      const inputs = {};
+      const grid = h('div', { class: 'lab-form' });
+      LAB_GROUPS.forEach(([group, ps]) => {
+        grid.appendChild(h('h3', { text: group }));
+        ps.forEach(([name, unit, min, max]) => {
+          inputs[name] = h('input', { type: 'text', placeholder: '–', inputmode: 'decimal' });
+          grid.appendChild(h('div', { class: 'lab-line' }, h('label', { text: name }), inputs[name], h('span', { class: 'soft small', text: `${unit} · ${min === 0 ? '< ' + numFmt(max) : max >= 200 ? '> ' + numFmt(min) : numFmt(min) + '–' + numFmt(max)}` })));
+        });
+      });
+      form.appendChild(grid);
+      const bem = h('input', { type: 'text', placeholder: 'Bemerkung (optional)' });
+      form.appendChild(h('div', { class: 'field', style: 'margin-top:12px' }, h('label', { text: 'Bemerkung' }), bem));
+      form.appendChild(h('div', { class: 'modal-actions' }, btn('Abbrechen', { onclick: closeModal }), h('button', { class: 'btn primary', type: 'submit' }, icon('save'), 'Speichern')));
+      form.addEventListener('submit', (e) => {
+        e.preventDefault();
+        const werte = Object.entries(inputs).map(([name, el]) => [name, parseFloat(el.value.replace(',', '.'))]).filter(([, v]) => Number.isFinite(v)).map(([name, wert]) => ({ name, wert }));
+        if (!werte.length) { toast('Bitte mindestens einen Wert eintragen.'); return; }
+        const p = getPatient(pSel.value);
+        const l = { id: uid(), datum: datum.value, labor: labor.value.trim() || 'Labor', werte, bemerkung: bem.value.trim() };
+        p.labor.push(l);
+        persist(); render(); closeModal(); viewLabor({ ...l, p });
+        toast('Laborergebnis gespeichert.');
+      });
+      modal.appendChild(form);
+    }, { wide: true });
+  }
+
+  function renderLabor() {
+    const all = allOf('labor').sort((a, b) => b.datum.localeCompare(a.datum));
+    const abnormal = (l) => l.werte.filter((w) => labFlag(w.name, w.wert)).length;
+    const v = h('div', { class: 'view' });
+    v.appendChild(h('div', { class: 'page-head' }, h('div', {}, h('h1', { text: 'Laborergebnisse' }), h('p', { text: 'Befunde erfassen, Auffälliges sofort sehen, Verläufe vergleichen.' })), btn('Ergebnis eintragen', { kind: 'primary', icon: 'plus', onclick: newLabor })));
+    v.appendChild(h('div', { class: 'grid cols-3' },
+      h('div', { class: 'card stat', style: 'margin:0' }, h('div', { class: 'stat-icon' }, icon('flask')), h('div', {}, h('div', { class: 'stat-num', text: String(all.length) }), h('div', { class: 'soft small', text: 'Befunde' }))),
+      h('div', { class: 'card stat', style: 'margin:0' }, h('div', { class: 'stat-icon' }, icon('bell')), h('div', {}, h('div', { class: 'stat-num', text: String(all.filter((l) => abnormal(l) > 0).length) }), h('div', { class: 'soft small', text: 'mit auffälligen Werten' }))),
+      h('div', { class: 'card stat', style: 'margin:0' }, h('div', { class: 'stat-icon' }, icon('clock')), h('div', {}, h('div', { class: 'stat-num', text: String(all.filter((l) => l.datum >= addDays(todayISO(), -30)).length) }), h('div', { class: 'soft small', text: 'in den letzten 30 Tagen' })))));
+    v.appendChild(h('div', { class: 'card', style: 'margin-top:18px' }, all.length ? h('div', { class: 'list' }, all.map((l) => {
+      const n = abnormal(l);
+      return h('div', { class: 'item clickable', onclick: () => viewLabor(l) }, h('img', { class: 'avatar', src: avatarSrc(l.p), alt: '' }),
+        h('div', { class: 'grow' }, h('div', { class: 'title', text: `${fullName(l.p)} – ${fmtDate(l.datum)}` }), h('div', { class: 'soft small', text: `${l.labor} · ${l.werte.length} Werte` })),
+        h('span', { class: 'pill ' + (n ? 'danger' : 'ok'), text: n ? `${n} auffällig` : 'unauffällig' }),
+        btn('', { kind: 'small', icon: 'trash', onclick: (e) => { e.stopPropagation(); confirmModal('Laborbefund wirklich löschen?', () => { l.p.labor = l.p.labor.filter((x) => x.id !== l.id); commit(); }); } }));
+    })) : h('div', { class: 'empty', text: 'Noch keine Laborergebnisse.' })));
+    return v;
+  }
+
+  // ---------------------------------------------------------------
+  // Karte einlesen (Versichertenkarte – Demo-Simulation)
+  // ---------------------------------------------------------------
+  const kvnrOf = (p) => p.kvnr || '';
+  function demoKarten() {
+    const fromPatients = state.patienten.slice(0, 3).map((p) => ({ vorname: p.vorname, nachname: p.nachname, geb: p.geb, kasse: p.kasse || 'Krankenkasse', kvnr: p.kvnr || 'Z000000000', versicherung: p.versicherung, label: `${p.vorname} ${p.nachname} (in der Praxis bekannt)` }));
+    return [...fromPatients, { vorname: 'Sophie', nachname: 'Kramer', geb: '1993-06-21', kasse: 'Techniker Krankenkasse', kvnr: 'K482916037', versicherung: 'gesetzlich', label: 'Sophie Kramer (neue Patientin)' }];
+  }
+  function findPatientByCard(c) {
+    return state.patienten.find((p) => (c.kvnr && p.kvnr === c.kvnr) || (p.nachname.toLowerCase() === c.nachname.toLowerCase() && p.vorname.toLowerCase() === c.vorname.toLowerCase() && p.geb === c.geb));
+  }
+  function startReading(card) {
+    view.karte = { phase: 'reading', card };
+    render();
+    setTimeout(() => {
+      if (!view.karte || view.karte.card !== card) return;
+      view.karte.phase = 'done';
+      const found = findPatientByCard(card);
+      state.karten.unshift({ id: uid(), ts: Date.now(), name: `${card.vorname} ${card.nachname}`, kvnr: card.kvnr, ergebnis: found ? 'Patient gefunden' : 'Neue Person' });
+      state.karten = state.karten.slice(0, 15);
+      persist(); render();
+    }, 2200);
+  }
+  function cardVisual(card, phase) {
+    return h('div', { class: 'egk-wrap' },
+      h('div', { class: 'egk ' + (phase === 'reading' ? 'inserting' : phase === 'done' ? 'inserted' : '') },
+        h('div', { class: 'egk-top' }, h('span', { text: 'Gesundheitskarte' }), h('small', { text: 'DEMO' })),
+        h('div', { class: 'egk-chip' }),
+        h('div', { class: 'egk-name', text: card ? `${card.vorname} ${card.nachname}` : 'Vorname Nachname' }),
+        h('div', { class: 'egk-meta', text: card ? `${card.kasse} · ${card.kvnr}` : 'Krankenkasse · Versichertennummer' }),
+        h('div', { class: 'egk-sheen' })),
+      h('div', { class: 'egk-reader' }, h('div', { class: 'egk-slot' }), h('div', { class: 'egk-led ' + (phase === 'reading' ? 'busy' : phase === 'done' ? 'ok' : '') })));
+  }
+  function importCardFile(file) {
+    const reader = new FileReader();
+    reader.onload = () => {
+      try {
+        const d = JSON.parse(reader.result);
+        if (!d.vorname || !d.nachname || !d.geb) throw new Error('fehlende Felder');
+        startReading({ vorname: String(d.vorname), nachname: String(d.nachname), geb: String(d.geb), kasse: String(d.kasse || ''), kvnr: String(d.kvnr || ''), versicherung: d.versicherung === 'privat' ? 'privat' : 'gesetzlich' });
+      } catch (err) { toast('Datei ist keine gültige Kartendatei.'); }
+    };
+    reader.readAsText(file);
+  }
+  function erezeptPanel(p) {
+    const list = p.rezepte.filter(isE).sort((a, b) => b.datum.localeCompare(a.datum)).slice(0, 4);
+    return h('div', { class: 'er-panel' },
+      h('div', { class: 'card-title' }, h('h3', { text: 'E-Rezept' }), btn('E-Rezept ausstellen', { kind: 'primary small', icon: 'pill', onclick: () => newRezept({ patientId: p.id, art: 'e' }) })),
+      list.length ? h('div', { class: 'list' }, list.map((r) => {
+        const [cls, txt] = eStatus(r);
+        return h('div', { class: 'item' }, h('span', { style: 'color:var(--accent)' }, icon('pill')),
+          h('div', { class: 'grow' }, h('div', { class: 'title', text: r.medikament }), h('div', { class: 'soft small', text: `${r.erezept.id} · bis ${fmtDate(r.gueltigBis)}` })),
+          h('span', { class: 'pill ' + cls, text: txt }),
+          btn('', { kind: 'small', icon: 'file', onclick: () => viewErezept({ ...r, p }) }),
+          r.erezept.abgabe === 'offen' ? btn('Apotheke', { kind: 'small', onclick: () => { r.erezept.abgabe = 'eingelöst'; vermerk(p, 'Notiz', `E-Rezept eingelöst (Demo): ${r.medikament}`); commit(); toast('Einlösung in der Apotheke simuliert.'); } }) : null);
+      })) : h('div', { class: 'empty', text: 'Noch kein E-Rezept für diese Karte.' }));
+  }
+  function renderKarte() {
+    const k = view.karte || { phase: 'idle', card: null };
+    const v = h('div', { class: 'view' });
+    v.appendChild(h('div', { class: 'page-head' }, h('div', {}, h('h1', { text: 'Karte & E-Rezept' }), h('p', { text: 'Versichertenkarte lesen, Patient finden – und das E-Rezept direkt ausstellen.' }))));
+    const kartenSel = h('select', {}, demoKarten().map((c, i) => h('option', { value: String(i), text: c.label })));
+    const file = h('input', { type: 'file', accept: '.json,application/json', style: 'display:none' });
+    file.addEventListener('change', () => { if (file.files[0]) importCardFile(file.files[0]); });
+    const left = h('div', { class: 'card', style: 'margin:0' }, h('h2', { style: 'margin-bottom:14px', text: 'Kartenterminal' }), cardVisual(k.card, k.phase),
+      k.phase === 'reading' ? h('div', { class: 'read-progress' }, h('div', { class: 'read-bar' }), h('div', { class: 'soft', text: 'Karte wird gelesen …' })) : null,
+      h('div', { class: 'field', style: 'margin-top:16px' }, h('label', { text: 'Demo-Karte wählen' }), kartenSel),
+      h('div', { class: 'row' },
+        btn('Karte einlesen', { kind: 'primary', icon: 'card', onclick: () => startReading(demoKarten()[Number(kartenSel.value)]) }),
+        btn('Aus Datei', { icon: 'file', onclick: () => file.click() }), file,
+        btn('Manuell', { icon: 'edit', onclick: () => formModal('Kartendaten manuell eingeben', [
+          { key: 'vorname', label: 'Vorname', half: true }, { key: 'nachname', label: 'Nachname', half: true },
+          { key: 'geb', label: 'Geburtsdatum', type: 'date', half: true }, { key: 'kvnr', label: 'Versichertennummer', half: true },
+          { key: 'kasse', label: 'Krankenkasse' }
+        ], (f) => { if (!f.vorname || !f.nachname || !f.geb) { toast('Bitte Name und Geburtsdatum angeben.'); return false; } setTimeout(() => startReading({ ...f, versicherung: 'gesetzlich' }), 50); }, 'Einlesen') })),
+      h('p', { class: 'soft small', style: 'margin-top:14px', text: 'Demo: Echte Gesundheitskarten lesen Sie nur mit einem zugelassenen Kartenterminal und Anbindung an die Telematikinfrastruktur (Konnektor). Hier wird das Einlesen simuliert.' }));
+
+    let right;
+    if (k.phase === 'done' && k.card) {
+      const c = k.card;
+      const found = findPatientByCard(c);
+      right = h('div', { class: 'card', style: 'margin:0' }, h('div', { class: 'card-title' }, h('h2', { text: 'Gelesene Daten' }), h('span', { class: 'pill ' + (found ? 'ok' : 'warn'), text: found ? 'Patient gefunden' : 'Neue Person' })),
+        h('dl', { class: 'kv' }, h('dt', { text: 'Name' }), h('dd', { text: `${c.nachname}, ${c.vorname}` }), h('dt', { text: 'Geburtsdatum' }), h('dd', { text: `${fmtDate(c.geb)} (${ageFrom(c.geb)} Jahre)` }),
+          h('dt', { text: 'Versichertennr.' }), h('dd', { text: c.kvnr || '–' }), h('dt', { text: 'Krankenkasse' }), h('dd', { text: c.kasse || '–' }), h('dt', { text: 'Versichertenart' }), h('dd', { text: c.versicherung })),
+        h('div', { class: 'row', style: 'margin-top:18px' },
+          found ? btn('Akte öffnen', { kind: 'primary', icon: 'file', onclick: () => goto('patienten', { patientId: found.id, patientTab: 'uebersicht' }) }) : null,
+          found ? btn('Daten übernehmen', { icon: 'save', onclick: () => { found.kvnr = c.kvnr || found.kvnr; found.kasse = c.kasse || found.kasse; found.versicherung = c.versicherung; commit(); toast('Kartendaten in die Akte übernommen.'); } }) : null,
+          found ? btn('Ins Wartezimmer', { icon: 'clock', onclick: () => checkIn(found.id) }) : null,
+          !found ? btn('Als neuen Patienten anlegen', { kind: 'primary', icon: 'plus', onclick: () => {
+            const np = { id: uid(), vorname: c.vorname, nachname: c.nachname, geb: c.geb, geschlecht: 'w', versicherung: c.versicherung, kasse: c.kasse, kvnr: c.kvnr, telefon: '', allergien: '', avatar: AVATARS[state.patienten.length % AVATARS.length], diagnosen: [], medikation: [], karte: [], bilder: [], vorsorge: [], impfungen: [], leistungen: [], labor: [], rezepte: [], krankmeldungen: [], ueberweisungen: [] };
+            state.patienten.push(np); view.karte = { phase: 'idle', card: null }; goto('patienten', { patientId: np.id, patientTab: 'uebersicht' }); persist(); toast('Patient aus Kartendaten angelegt.');
+          } }) : null),
+        found ? erezeptPanel(found) : h('p', { class: 'soft small', style: 'margin-top:16px', text: 'E-Rezepte können ausgestellt werden, sobald die Person als Patient angelegt ist.' }));
+    } else {
+      right = h('div', { class: 'card empty', style: 'margin:0', text: k.phase === 'reading' ? 'Daten werden übertragen …' : 'Wählen Sie eine Demo-Karte und klicken Sie auf „Karte einlesen“.' });
+    }
+    v.appendChild(h('div', { class: 'grid cols-2' }, left, right));
+    v.appendChild(h('div', { class: 'card', style: 'margin-top:18px' }, h('h2', { style: 'margin-bottom:12px', text: 'Letzte Einlesevorgänge' }),
+      state.karten.length ? h('div', { class: 'list' }, state.karten.slice(0, 6).map((e) => h('div', { class: 'item' }, h('span', { style: 'color:var(--accent)' }, icon('card')), h('div', { class: 'grow' }, h('div', { class: 'title', text: e.name }), h('div', { class: 'soft small', text: `${fmtStamp(e.ts)} · ${e.kvnr || 'ohne Nummer'}` })), h('span', { class: 'pill info', text: e.ergebnis })))) : h('div', { class: 'empty', text: 'Noch keine Karte eingelesen.' })));
+    return v;
+  }
+
   // ---------------------------------------------------------------
   // Auswertung
   // ---------------------------------------------------------------
@@ -1019,6 +1519,10 @@
     ['Instagram-Post 3 – Wartezimmer', 'media/instagram/post-3-wartezimmer.png'],
     ['Instagram-Post 4 – Dokumente', 'media/instagram/post-4-dokumente.png'],
     ['Instagram-Post 5 – Vorsorge', 'media/instagram/post-5-vorsorge.png'],
+    ['Instagram-Post 6 – Karte einlesen', 'media/instagram/post-6-karte.png'],
+    ['Instagram-Post 9 – E-Rezept', 'media/instagram/post-9-erezept.png'],
+    ['Instagram-Post 7 – Laborwerte', 'media/instagram/post-7-labor.png'],
+    ['Instagram-Post 8 – Krankmeldung', 'media/instagram/post-8-krankmeldung.png'],
     ['Story / Reel-Cover', 'media/instagram/story-cover.png']
   ];
 
@@ -1052,7 +1556,9 @@
       ['2', 'Termin vergeben', 'Im Terminkalender einen Tag wählen und „Neuer Termin“ klicken. Beim Eintreffen: „Eingetroffen“.'],
       ['3', 'Behandeln & dokumentieren', 'Im Wartezimmer „Aufrufen“, dann in der Karteikarte mit Textbausteinen in Sekunden dokumentieren.'],
       ['4', 'Rezept & Co. drucken', 'Unter „Dokumente“ Vorlage wählen – Patientendaten, Diagnosen und Medikation werden automatisch eingesetzt.'],
-      ['5', 'Vorsorge im Blick', 'Mit „Vorsorge & Recall“ und „Impfungen“ sehen Sie sofort, wer fällig ist.']
+      ['5', 'Karte, Rezept, AU, Überweisung', 'Karte einlesen, dann Rezept, Krankmeldung oder Überweisung ausstellen – alles landet automatisch in der Karteikarte.'],
+      ['6', 'E-Rezept über die Karte', 'Unter „Karte & E-Rezept“ die Karte einlesen und direkt ein E-Rezept ausstellen – einlösbar mit der Karte oder per Token.'],
+      ['7', 'Labor & Vorsorge im Blick', 'Laborwerte mit Ampel und Verlauf, „Vorsorge & Recall“ und „Impfungen“ zeigen sofort, wer fällig ist.']
     ];
     v.appendChild(h('div', { class: 'grid cols-2' }, steps.map(([n, t, d]) => h('div', { class: 'card step', style: 'margin:0' }, h('div', { class: 'step-num', text: n }), h('div', {}, h('h3', { text: t }), h('p', { class: 'soft', style: 'margin:4px 0 0', text: d }))))));
     v.appendChild(h('div', { class: 'card', style: 'margin-top:18px' }, h('h2', { style: 'margin-bottom:12px', text: 'Tastenkürzel' }),
@@ -1099,7 +1605,8 @@
     const base = demoData();
     const s = Object.assign({}, data);
     s.einstellungen = Object.assign({ praxis: DEFAULT_PRAXIS, arzt: 'Praxisinhaber/in' }, s.einstellungen);
-    s.patienten = (s.patienten || []).map((p) => Object.assign({ diagnosen: [], medikation: [], karte: [], bilder: [], vorsorge: [], impfungen: [], leistungen: [], allergien: '', avatar: 'a1' }, p));
+    s.patienten = (s.patienten || []).map((p) => Object.assign({ diagnosen: [], medikation: [], karte: [], bilder: [], vorsorge: [], impfungen: [], leistungen: [], labor: [], rezepte: [], krankmeldungen: [], ueberweisungen: [], kvnr: '', allergien: '', avatar: 'a1' }, p));
+    s.karten = s.karten || [];
     s.termine = s.termine || [];
     s.wartezimmer = s.wartezimmer || [];
     s.aufgaben = s.aufgaben || [];
@@ -1110,7 +1617,8 @@
 
   async function init() {
     document.getElementById('search-icon').appendChild(icon('search'));
-    document.getElementById('search-btn').addEventListener('click', openSearch);
+    document.getElementById('search-btn').addEventListener('click', () => { document.getElementById('sidebar').classList.remove('open'); openSearch(); });
+    document.getElementById('menu-toggle').addEventListener('click', () => document.getElementById('sidebar').classList.toggle('open'));
     document.addEventListener('keydown', (e) => {
       if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'k') { e.preventDefault(); openSearch(); }
       if ((e.ctrlKey || e.metaKey) && /^[0-9]$/.test(e.key)) {

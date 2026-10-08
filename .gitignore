@@ -3,3 +3,4 @@ dist/
 *.log
 .uuid
 allgemein-docs/marketing/.tmp-*
+allgemein-docs/web/dist/

@@ -1,0 +1,367 @@
+<title>Allgemein Docs Download</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@400;600;700;800&display=swap">
+<style>
+/* Layout: eine Spalte, mittig; Hero mit schwebendem Logo, fünf 3D-Kacheln, Installationsfeld, Demo-Video.
+   Eine feste Optik (Navy, weiße Schrift, 3D-Hochglanz) – bewusst ohne Hell-Variante. */
+:root {
+  --navy-950: #040d26;
+  --navy-900: #071634;
+  --navy-800: #0b1f4b;
+  --navy-700: #112a63;
+  --navy-600: #19367d;
+  --sky: #4cc9f0;
+  --blue: #2f80ed;
+  --gold: #ffd166;
+  --ok: #5bf0a8;
+  --text: #ffffff;
+  --text-soft: rgba(255, 255, 255, 0.78);
+  --line: rgba(255, 255, 255, 0.16);
+  --font: 'Open Sans', 'Segoe UI', 'Helvetica Neue', Arial, sans-serif;
+  --mono: ui-monospace, 'SF Mono', Menlo, Consolas, 'Liberation Mono', monospace;
+  color-scheme: dark;
+}
+* { box-sizing: border-box; }
+html { background: var(--navy-900); }
+body {
+  margin: 0; padding-inline: 16px; padding-block: 0 56px;
+  font-family: var(--font); font-size: 17px; line-height: 1.6; color: var(--text);
+  background:
+    radial-gradient(1100px 650px at 85% -8%, #2d6be0 0%, transparent 60%),
+    radial-gradient(900px 800px at -12% 40%, #123c9c 0%, transparent 60%),
+    linear-gradient(165deg, #143a86, var(--navy-800) 45%, var(--navy-950));
+  background-color: var(--navy-900);
+  min-height: 100%;
+}
+body::before {
+  content: ''; position: fixed; inset: 0; pointer-events: none;
+  background: repeating-linear-gradient(115deg, rgba(255, 255, 255, 0.03) 0 2px, transparent 2px 96px);
+}
+.wrap { position: relative; max-width: 1080px; margin-inline: auto; }
+h1, h2, h3, p { margin: 0; }
+h1, h2 { text-wrap: balance; letter-spacing: -0.5px; }
+.eyebrow { font-weight: 700; font-size: 13px; letter-spacing: 2px; text-transform: uppercase; color: var(--sky); }
+
+/* ---------- Hero ---------- */
+.hero { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 360px); gap: 32px; align-items: center; padding-block: 44px 28px; }
+.hero h1 { font-size: clamp(36px, 6.4vw, 68px); font-weight: 800; line-height: 1.04; margin-block: 10px 16px; text-shadow: 0 6px 24px rgba(0, 0, 0, 0.45); }
+.hero h1 em { font-style: normal; background: linear-gradient(180deg, #bff1ff, var(--sky) 60%, #2f9bf0); -webkit-background-clip: text; background-clip: text; color: transparent; filter: drop-shadow(0 4px 12px rgba(76, 201, 240, 0.45)); }
+.hero p { color: var(--text-soft); font-size: 20px; max-width: 34ch; }
+.logo-stage { position: relative; display: grid; place-items: center; min-height: 300px; }
+.logo-stage::before { content: ''; position: absolute; width: 78%; aspect-ratio: 1; border-radius: 50%; background: radial-gradient(circle, rgba(76, 201, 240, 0.55), transparent 68%); filter: blur(30px); }
+.logo-stage img { position: relative; width: min(100%, 320px); filter: drop-shadow(0 30px 34px rgba(0, 0, 0, 0.55)); animation: float 6s ease-in-out infinite; }
+.orb { position: absolute; border-radius: 50%; display: grid; place-items: center; box-shadow: inset -8px -12px 22px rgba(0, 0, 0, 0.35), inset 6px 8px 16px rgba(255, 255, 255, 0.5), 0 20px 28px rgba(0, 0, 0, 0.45); }
+.orb::before { content: ''; position: absolute; left: 16%; top: 8%; width: 52%; height: 34%; border-radius: 50%; background: linear-gradient(180deg, rgba(255, 255, 255, 0.95), rgba(255, 255, 255, 0)); transform: rotate(-18deg); }
+.orb svg { width: 50%; height: 50%; position: relative; filter: drop-shadow(0 3px 2px rgba(0, 0, 0, 0.35)); }
+.orb.red { background: radial-gradient(circle at 35% 30%, #ffa0aa, #ee2f4d 50%, #8a0f2a); width: 74px; height: 74px; left: 2%; top: 12%; animation: float 5s ease-in-out infinite; }
+.orb.green { background: radial-gradient(circle at 35% 30%, #b8ffd9, #2fd88a 50%, #0a7a4a); width: 58px; height: 58px; right: 4%; top: 8%; animation: float 7s ease-in-out -2s infinite; }
+.orb.gold { background: radial-gradient(circle at 35% 30%, #fff1b8, #f2b632 50%, #9a6410); width: 52px; height: 52px; right: 10%; bottom: 8%; animation: float 5.5s ease-in-out -1s infinite; }
+
+/* ---------- Plattformen ---------- */
+h2 { font-size: clamp(26px, 4vw, 38px); font-weight: 800; }
+.section { padding-block: 26px; }
+.section > .eyebrow { display: block; margin-bottom: 6px; }
+.tiles { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 16px; margin-top: 22px; perspective: 1000px; }
+.tile {
+  position: relative; display: flex; flex-direction: column; align-items: center; gap: 10px; text-align: center;
+  padding: 22px 12px 18px; border-radius: 26px; cursor: pointer; color: var(--text); font: inherit;
+  background: linear-gradient(160deg, rgba(255, 255, 255, 0.22), rgba(255, 255, 255, 0.05) 42%, rgba(0, 0, 0, 0.2)), var(--navy-700);
+  border: 1px solid rgba(255, 255, 255, 0.34);
+  box-shadow: 0 22px 34px rgba(0, 0, 0, 0.45), inset 0 2px 0 rgba(255, 255, 255, 0.55), inset 0 -12px 22px rgba(0, 0, 0, 0.35);
+  transform: rotateX(var(--rx, 0deg)) rotateY(var(--ry, 0deg)); transition: transform 0.18s ease-out, box-shadow 0.25s, background 0.25s;
+  overflow: hidden; min-width: 0;
+}
+.tile::before { content: ''; position: absolute; left: 5%; right: 5%; top: 3%; height: 42%; border-radius: 22px 22px 70% 70% / 22px 22px 45% 45%; background: linear-gradient(180deg, rgba(255, 255, 255, 0.34), rgba(255, 255, 255, 0)); pointer-events: none; }
+.tile:hover { box-shadow: 0 30px 44px rgba(0, 0, 0, 0.5), 0 0 40px rgba(76, 201, 240, 0.3), inset 0 2px 0 rgba(255, 255, 255, 0.6), inset 0 -12px 22px rgba(0, 0, 0, 0.35); }
+.tile:focus-visible { outline: 3px solid var(--gold); outline-offset: 3px; }
+.tile[aria-selected="true"] { background: linear-gradient(160deg, rgba(255, 255, 255, 0.4), rgba(255, 255, 255, 0.08) 42%, rgba(0, 0, 0, 0.12)), linear-gradient(180deg, #4aa9ff, #1b5fc9); border-color: rgba(255, 255, 255, 0.7); box-shadow: 0 26px 40px rgba(0, 0, 0, 0.5), 0 0 46px rgba(76, 201, 240, 0.55), inset 0 2px 0 rgba(255, 255, 255, 0.75), inset 0 -12px 22px rgba(0, 0, 0, 0.3); }
+.tile .glyph { position: relative; width: 68px; height: 68px; border-radius: 20px; display: grid; place-items: center; background: linear-gradient(160deg, rgba(255, 255, 255, 0.35), rgba(255, 255, 255, 0.04)); border: 1px solid rgba(255, 255, 255, 0.35); box-shadow: inset 0 2px 0 rgba(255, 255, 255, 0.55), 0 8px 14px rgba(0, 0, 0, 0.35); }
+.tile .glyph svg { width: 38px; height: 38px; fill: none; stroke: #fff; stroke-width: 1.9; stroke-linecap: round; stroke-linejoin: round; filter: drop-shadow(0 3px 3px rgba(0, 0, 0, 0.4)); }
+.tile b { font-size: 19px; font-weight: 700; position: relative; }
+.tile small { color: var(--text-soft); font-size: 13.5px; line-height: 1.35; position: relative; }
+.tile .badge { position: absolute; top: 10px; right: 10px; z-index: 1; font-size: 11px; font-weight: 700; letter-spacing: 0.5px; padding: 2px 9px; border-radius: 999px; background: linear-gradient(180deg, #fff1b8, var(--gold)); color: #3a2a00; box-shadow: 0 4px 8px rgba(0, 0, 0, 0.35), inset 0 1px 0 #fff; }
+.tile .badge[hidden] { display: none; }
+
+.panel {
+  margin-top: 22px; padding: 28px; border-radius: 28px; position: relative; overflow: hidden;
+  background: linear-gradient(160deg, rgba(255, 255, 255, 0.14), rgba(255, 255, 255, 0.04) 40%, rgba(0, 0, 0, 0.22));
+  border: 1px solid rgba(255, 255, 255, 0.28);
+  box-shadow: 0 30px 50px rgba(0, 0, 0, 0.4), inset 0 2px 0 rgba(255, 255, 255, 0.4);
+  backdrop-filter: blur(6px);
+}
+.panel h3 { font-size: 26px; font-weight: 700; margin-bottom: 4px; }
+.panel .lead { color: var(--text-soft); margin-bottom: 18px; }
+.panel-grid { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 28px; align-items: start; }
+.steps { list-style: none; margin: 0; padding: 0; display: grid; gap: 14px; counter-reset: s; }
+.steps li { position: relative; padding-left: 52px; min-width: 0; counter-increment: s; }
+.steps li::before { content: counter(s); position: absolute; left: 0; top: -2px; width: 38px; height: 38px; border-radius: 50%; display: grid; place-items: center; font-weight: 800; background: radial-gradient(circle at 35% 30%, #8fe3ff, #2a8cf0 50%, #0b3a9e); box-shadow: inset 0 2px 0 rgba(255, 255, 255, 0.6), 0 6px 12px rgba(0, 0, 0, 0.4); }
+.steps strong { display: block; font-weight: 700; }
+.steps span { color: var(--text-soft); }
+.cmd { margin-top: 8px; display: flex; gap: 10px; align-items: stretch; }
+.cmd code { flex: 1; min-width: 0; display: block; overflow-x: auto; white-space: nowrap; padding: 12px 14px; border-radius: 14px; font: 14px/1.5 var(--mono); color: #d8f4ff; background: rgba(2, 8, 24, 0.7); border: 1px solid rgba(255, 255, 255, 0.16); box-shadow: inset 0 3px 8px rgba(0, 0, 0, 0.5); user-select: all; }
+.btn {
+  display: inline-flex; align-items: center; justify-content: center; gap: 10px; padding: 13px 24px; border-radius: 16px; border: 1px solid rgba(255, 255, 255, 0.55);
+  font: 700 17px/1.2 var(--font); color: #fff; text-decoration: none; cursor: pointer;
+  background: linear-gradient(180deg, #7fdcff, #2f80ed 55%, #1b5fc9);
+  box-shadow: 0 12px 24px rgba(47, 128, 237, 0.5), inset 0 2px 0 rgba(255, 255, 255, 0.7), inset 0 -4px 8px rgba(0, 0, 0, 0.18);
+  transition: transform 0.15s, box-shadow 0.2s; text-shadow: 0 1px 2px rgba(0, 0, 0, 0.35);
+}
+.btn:hover { transform: translateY(-2px); box-shadow: 0 18px 30px rgba(47, 128, 237, 0.62), inset 0 2px 0 rgba(255, 255, 255, 0.7), inset 0 -4px 8px rgba(0, 0, 0, 0.18); }
+.btn:active { transform: none; }
+.btn:focus-visible { outline: 3px solid var(--gold); outline-offset: 3px; }
+.btn.ghost { background: linear-gradient(180deg, rgba(255, 255, 255, 0.26), rgba(255, 255, 255, 0.06)); box-shadow: 0 10px 20px rgba(0, 0, 0, 0.35), inset 0 2px 0 rgba(255, 255, 255, 0.5); }
+.btn[disabled] { opacity: 0.7; cursor: progress; }
+.btn svg { width: 20px; height: 20px; fill: none; stroke: currentColor; stroke-width: 2.2; stroke-linecap: round; stroke-linejoin: round; }
+.btn.small { padding: 0 18px; font-size: 15px; border-radius: 14px; }
+.actions { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 20px; }
+.note { margin-top: 16px; font-size: 14.5px; color: var(--text-soft); }
+.qr-box { display: grid; justify-items: center; gap: 10px; padding: 16px; border-radius: 22px; background: linear-gradient(160deg, #fff, #dbe9ff); box-shadow: 0 20px 34px rgba(0, 0, 0, 0.45), inset 0 2px 0 #fff; color: #0b1f4b; text-align: center; font-weight: 700; font-size: 14px; }
+.qr-box svg { width: 190px; height: 190px; display: block; }
+.url-line { font: 14px/1.4 var(--mono); color: #d8f4ff; word-break: break-all; }
+
+/* ---------- Demo ---------- */
+.demo { display: grid; grid-template-columns: minmax(0, 1.7fr) minmax(0, 1fr); gap: 26px; align-items: center; }
+.screen { position: relative; border-radius: 22px; padding: 10px; background: linear-gradient(160deg, rgba(255, 255, 255, 0.35), rgba(255, 255, 255, 0.06) 40%, rgba(0, 0, 0, 0.3)); box-shadow: 0 40px 60px rgba(0, 0, 0, 0.55), 0 0 60px rgba(76, 201, 240, 0.25), inset 0 2px 0 rgba(255, 255, 255, 0.6); transform: perspective(1400px) rotateY(-5deg) rotateX(2deg); }
+.screen video { display: block; width: 100%; border-radius: 14px; background: #02081a; aspect-ratio: 16 / 9; }
+.demo h2 { margin-bottom: 10px; }
+.demo p { color: var(--text-soft); }
+.facts { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 14px; padding: 0; list-style: none; }
+.facts li { padding: 4px 14px; border-radius: 999px; font-size: 14px; font-weight: 600; background: linear-gradient(180deg, rgba(255, 255, 255, 0.24), rgba(255, 255, 255, 0.06)); border: 1px solid rgba(255, 255, 255, 0.32); box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.5); }
+.status { min-height: 1.5em; margin-top: 10px; font-size: 14.5px; color: var(--ok); }
+.status.err { color: #ff9aa4; }
+
+.features { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 14px; margin-top: 18px; }
+.feature { padding: 16px 18px; border-radius: 20px; background: linear-gradient(160deg, rgba(255, 255, 255, 0.12), rgba(255, 255, 255, 0.03)); border: 1px solid var(--line); box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.3); min-width: 0; }
+.feature b { display: block; font-weight: 700; }
+.feature span { color: var(--text-soft); font-size: 15px; }
+.fineprint { margin-top: 30px; padding-top: 18px; border-top: 1px solid var(--line); color: var(--text-soft); font-size: 14.5px; }
+
+@keyframes float { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-9px); } }
+@media (max-width: 820px) {
+  .hero { grid-template-columns: 1fr; text-align: left; }
+  .logo-stage { min-height: 240px; order: -1; }
+  .logo-stage img { width: min(70%, 240px); }
+  .panel-grid, .demo { grid-template-columns: 1fr; }
+  .screen { transform: none; }
+  .panel { padding: 20px; }
+  .qr-box { justify-self: start; }
+}
+@media (prefers-reduced-motion: reduce) { * { animation: none !important; transition: none !important; } }
+</style>
+
+<div class="wrap">
+  <header class="hero">
+    <div>
+      <span class="eyebrow">Allgemein Docs · Version 1.0</span>
+      <h1>Jetzt <em>installieren</em>.</h1>
+      <p>Gerät wählen, Befehl einfügen oder Web-App öffnen. Den Rest erledigt das Skript.</p>
+    </div>
+    <div class="logo-stage" aria-hidden="true">
+      <img src="logo.svg" alt="">
+      <div class="orb red"><svg viewBox="0 0 24 24"><path d="M12 20C5 15 3 11.5 3 8.8 3 6.5 4.8 5 7 5c2 0 3.5 1 5 3 1.5-2 3-3 5-3 2.2 0 4 1.5 4 3.8 0 2.7-2 6.2-9 11.2z" fill="#fff"/></svg></div>
+      <div class="orb green"><svg viewBox="0 0 24 24"><path d="M4 12.5l5 5L20 6.5" fill="none" stroke="#fff" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+      <div class="orb gold"><svg viewBox="0 0 24 24"><path d="M6 16v-5a6 6 0 0 1 12 0v5l2 2H4zM10 21h4" fill="none" stroke="#fff" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+    </div>
+  </header>
+
+  <section class="section" aria-labelledby="h-platform">
+    <span class="eyebrow">Fünf Plattformen</span>
+    <h2 id="h-platform">Auf welchem Gerät?</h2>
+    <div class="tiles" role="tablist" aria-label="Plattform wählen" id="tiles"></div>
+    <div class="panel" id="panel" role="tabpanel" aria-live="polite"></div>
+  </section>
+
+  <section class="section" aria-labelledby="h-demo">
+    <span class="eyebrow">Demoversion</span>
+    <div class="demo">
+      <div class="screen"><video id="demo-video" controls preload="metadata" playsinline poster="demo-poster.jpg" src="allgemein-docs-demo.mp4"></video></div>
+      <div>
+        <h2 id="h-demo">Erst ansehen, dann installieren.</h2>
+        <p>Das Demo-Video führt in rund anderthalb Minuten durch Karte und E-Rezept, Labor, Krankmeldung, Überweisung, Wartezimmer und Vorsorge. Hintergrundmusik ist unterlegt.</p>
+        <ul class="facts"><li>1920 × 1080</li><li>ca. 1:40 Min.</li><li>MP4 mit Musik</li></ul>
+        <div class="actions"><button class="btn" id="dl-demo" type="button"><svg viewBox="0 0 24 24"><path d="M12 3v12M7 11l5 5 5-5M4 21h16"/></svg><span>Demo-Video herunterladen</span></button></div>
+        <div class="status" id="dl-status" role="status"></div>
+      </div>
+    </div>
+  </section>
+
+  <section class="section" aria-labelledby="h-feat">
+    <span class="eyebrow">Das ist drin</span>
+    <h2 id="h-feat">Alles für den Praxisalltag.</h2>
+    <div class="features">
+      <div class="feature"><b>Karte &amp; E-Rezept</b><span>Versichertenkarte einlesen, E-Rezept mit Token ausstellen.</span></div>
+      <div class="feature"><b>Laborergebnisse</b><span>Werte mit Ampel und Verlauf, in die Akte übernehmen.</span></div>
+      <div class="feature"><b>Krankmeldung</b><span>Gelber Schein mit Diagnose aus der Akte.</span></div>
+      <div class="feature"><b>Überweisungen</b><span>Diagnose, Medikation und Allergien gehen automatisch mit.</span></div>
+      <div class="feature"><b>Vorsorge &amp; Impfungen</b><span>Recall-Liste zeigt sofort, wer fällig ist.</span></div>
+      <div class="feature"><b>Wartezimmer &amp; Termine</b><span>Live-Wartezeit, Wochenplan, Auswertung.</span></div>
+    </div>
+    <p class="fineprint">Allgemein Docs ist eine Demo- und Entwicklungsversion und kein zertifiziertes Praxisverwaltungssystem. Karte, E-Rezept und Krankmeldung sind simuliert; die Daten bleiben lokal auf Ihrem Gerät. Voraussetzungen für den Einsatz in Praxen stehen in <code>docs/VERKAUFSVORAUSSETZUNGEN.md</code>.</p>
+  </section>
+</div>
+
+<script src="qrcode.js"></script>
+<script>
+(function () {
+  // Einstellungen: nach dem Veröffentlichen des Releases ggf. anpassen
+  var CFG = {
+    repo: 'ThanosXXL/Thanos',
+    ref: 'ccr-bdc44794-92nrhi',                       // Branch, der install.sh / install.ps1 enthält
+    webApp: 'https://thanosxxl.github.io/Thanos/',   // Web-App (GitHub Pages)
+    video: 'allgemein-docs-demo.mp4',
+    videoName: 'Allgemein-Docs-Demo.mp4'
+  };
+  var RAW = 'https://raw.githubusercontent.com/' + CFG.repo + '/' + CFG.ref + '/allgemein-docs/install/';
+  var RELEASES = 'https://github.com/' + CFG.repo + '/releases';
+
+  var ICON = {
+    win: '<path d="M3 5.5l8-1.2v7.2H3zM13 4l8-1.2v8.7h-8zM3 12.5h8v7.2l-8-1.2zM13 12.5h8v8.7L13 20z"/>',
+    mac: '<rect x="4" y="5" width="16" height="11" rx="2"/><path d="M2 19h20M9 19l1-3h4l1 3"/>',
+    linux: '<rect x="3" y="4" width="18" height="16" rx="3"/><path d="M7 9l3 3-3 3M12 15h5"/>',
+    android: '<rect x="7" y="2.5" width="10" height="19" rx="2.5"/><path d="M10.5 18.5h3M10 5.5h4"/>',
+    ios: '<rect x="6" y="2.5" width="12" height="19" rx="3"/><path d="M10 5.5h4M10 19h4"/>'
+  };
+
+  var P = {
+    win: { name: 'Windows', sub: '10 / 11 · 64 Bit', kind: 'Installer', title: 'Windows installieren', lead: 'Ein Befehl in der PowerShell lädt das neueste Release und installiert es leise.',
+      cmd: 'irm ' + RAW + 'install.ps1 | iex',
+      steps: [['PowerShell öffnen', 'Startmenü öffnen, „PowerShell“ eintippen, Enter drücken.'], ['Befehl einfügen', 'Befehl kopieren, mit Rechtsklick einfügen, Enter drücken.'], ['Fertig', '„Allgemein Docs“ liegt im Startmenü und auf dem Desktop.']],
+      note: 'Der Installer ist noch nicht signiert; Windows kann beim ersten Start eine SmartScreen-Warnung zeigen.', direct: true },
+    mac: { name: 'macOS', sub: 'Apple Silicon (M1 und neuer)', kind: 'Installer', title: 'macOS installieren', lead: 'Ein Befehl im Terminal lädt das Installationsabbild, kopiert die App nach Programme und öffnet sie.',
+      cmd: 'curl -fsSL ' + RAW + 'install.sh | sh',
+      steps: [['Terminal öffnen', 'Spotlight mit ⌘ + Leertaste, „Terminal“ eintippen.'], ['Befehl einfügen', 'Befehl kopieren, mit ⌘ + V einfügen, Enter drücken.'], ['Fertig', 'Die App liegt im Ordner „Programme“ und startet automatisch.']],
+      note: 'Das Skript entfernt die Quarantäne-Markierung, weil die App noch nicht notarisiert ist. Intel-Macs brauchen eine eigene x64-Version.', direct: true },
+    linux: { name: 'Linux', sub: '64 Bit · AppImage', kind: 'Installer', title: 'Linux installieren', lead: 'Ein Befehl im Terminal lädt das AppImage, legt einen Startmenü-Eintrag an und den Befehl „allgemein-docs“.',
+      cmd: 'curl -fsSL ' + RAW + 'install.sh | sh',
+      steps: [['Terminal öffnen', 'Beliebiges Terminal, kein Administratorrecht nötig.'], ['Befehl einfügen', 'Befehl kopieren, einfügen, Enter drücken.'], ['Fertig', 'Start über das Anwendungsmenü oder mit dem Befehl allgemein-docs.']],
+      note: 'Installiert wird nur für Ihren Benutzer unter ~/.local. Fehlt FUSE, startet das AppImage mit der Option --appimage-extract-and-run.', direct: true },
+    android: { name: 'Android', sub: 'Chrome · Web-App', kind: 'Web-App', badge: 'App', title: 'Android installieren', lead: 'Die Web-App läuft wie eine normale App mit eigenem Symbol, auch ohne Internet.',
+      url: CFG.webApp,
+      steps: [['Web-App öffnen', 'QR-Code mit der Kamera scannen oder den Link in Chrome öffnen.'], ['Menü ⋮ antippen', 'Chrome-Menü oben rechts öffnen.'], ['„App installieren“ wählen', 'Allgemein Docs erscheint auf dem Startbildschirm.']],
+      note: 'Die Daten liegen nur im Browser dieses Geräts. Für ein Backup in der App „Einstellungen → Sicherung exportieren“ nutzen.' },
+    ios: { name: 'iPhone / iPad', sub: 'Safari · Web-App', kind: 'Web-App', badge: 'App', title: 'iPhone und iPad installieren', lead: 'Die Web-App wird über Safari zum Home-Bildschirm hinzugefügt und startet im Vollbild.',
+      url: CFG.webApp,
+      steps: [['Web-App in Safari öffnen', 'QR-Code mit der Kamera scannen oder den Link in Safari öffnen.'], ['Teilen-Symbol antippen', 'Quadrat mit Pfeil nach oben, unten in der Leiste.'], ['„Zum Home-Bildschirm“ wählen', 'Allgemein Docs erscheint als App-Symbol.']],
+      note: 'Der Link muss in Safari geöffnet werden, andere Browser bieten die Installation nicht an. Die Daten liegen nur auf diesem Gerät.' }
+  };
+  var ORDER = ['win', 'mac', 'linux', 'android', 'ios'];
+
+  function detect() {
+    var ua = (navigator.userAgent || '') + ' ' + (navigator.platform || '');
+    if (/android/i.test(ua)) return 'android';
+    if (/iphone|ipad|ipod/i.test(ua) || (/Mac/i.test(ua) && navigator.maxTouchPoints > 1)) return 'ios';
+    if (/win/i.test(ua)) return 'win';
+    if (/mac/i.test(ua)) return 'mac';
+    if (/linux|x11/i.test(ua)) return 'linux';
+    return 'win';
+  }
+  function el(tag, cls, text) { var e = document.createElement(tag); if (cls) e.className = cls; if (text != null) e.textContent = text; return e; }
+  function svgIcon(inner) { var s = document.createElementNS('http://www.w3.org/2000/svg', 'svg'); s.setAttribute('viewBox', '0 0 24 24'); s.innerHTML = inner; return s; }
+
+  var tilesEl = document.getElementById('tiles');
+  var panelEl = document.getElementById('panel');
+  var current = detect();
+
+  function copy(text, btn) {
+    var done = function (ok) { var l = btn.querySelector('span'); var old = l.textContent; l.textContent = ok ? 'Kopiert' : 'Markieren und kopieren'; setTimeout(function () { l.textContent = old; }, 1800); };
+    if (navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(text).then(function () { done(true); }, function () { done(false); });
+    else done(false);
+  }
+
+  function qr(text) {
+    var box = el('div', 'qr-box');
+    if (window.qrcode) {
+      var q = window.qrcode(0, 'M'); q.addData(text); q.make();
+      var n = q.getModuleCount(), d = '';
+      for (var r = 0; r < n; r++) for (var c = 0; c < n; c++) if (q.isDark(r, c)) d += 'M' + (c + 2) + ' ' + (r + 2) + 'h1v1h-1z';
+      var s = svgIcon('<rect width="' + (n + 4) + '" height="' + (n + 4) + '" fill="#fff"/><path d="' + d + '" fill="#0b1f4b"/>');
+      s.setAttribute('viewBox', '0 0 ' + (n + 4) + ' ' + (n + 4)); s.setAttribute('shape-rendering', 'crispEdges'); s.setAttribute('role', 'img'); s.setAttribute('aria-label', 'QR-Code zur Web-App');
+      box.appendChild(s);
+    }
+    box.appendChild(el('span', '', 'Mit der Kamera scannen'));
+    return box;
+  }
+
+  function renderTiles() {
+    tilesEl.textContent = '';
+    ORDER.forEach(function (k) {
+      var p = P[k];
+      var b = el('button', 'tile'); b.type = 'button'; b.setAttribute('role', 'tab'); b.id = 'tab-' + k;
+      b.setAttribute('aria-selected', String(k === current)); b.setAttribute('aria-controls', 'panel');
+      var g = el('span', 'glyph'); g.appendChild(svgIcon(ICON[k]));
+      b.appendChild(g); b.appendChild(el('b', '', p.name)); b.appendChild(el('small', '', p.sub));
+      if (p.badge) b.appendChild(el('span', 'badge', p.badge));
+      b.addEventListener('click', function () { current = k; renderTiles(); renderPanel(); });
+      b.addEventListener('pointermove', function (e) {
+        if (e.pointerType !== 'mouse') return;
+        var r = b.getBoundingClientRect();
+        b.style.setProperty('--ry', (((e.clientX - r.left) / r.width - 0.5) * 12).toFixed(1) + 'deg');
+        b.style.setProperty('--rx', ((0.5 - (e.clientY - r.top) / r.height) * 12).toFixed(1) + 'deg');
+      });
+      b.addEventListener('pointerleave', function () { b.style.removeProperty('--rx'); b.style.removeProperty('--ry'); });
+      tilesEl.appendChild(b);
+    });
+  }
+
+  function renderPanel() {
+    var p = P[current];
+    panelEl.setAttribute('aria-labelledby', 'tab-' + current);
+    panelEl.textContent = '';
+    panelEl.appendChild(el('h3', '', p.title));
+    panelEl.appendChild(el('p', 'lead', p.lead));
+    var grid = el('div', 'panel-grid');
+    var left = el('div');
+    var ol = el('ol', 'steps');
+    p.steps.forEach(function (s, i) {
+      var li = el('li'); li.appendChild(el('strong', '', s[0])); li.appendChild(el('span', '', s[1]));
+      if (i === 1 && p.cmd) {
+        var row = el('div', 'cmd'); var code = el('code', '', p.cmd); code.tabIndex = 0;
+        var cb = el('button', 'btn ghost small'); cb.type = 'button'; cb.appendChild(el('span', '', 'Kopieren'));
+        cb.addEventListener('click', function () { copy(p.cmd, cb); });
+        row.appendChild(code); row.appendChild(cb); li.appendChild(row);
+      }
+      ol.appendChild(li);
+    });
+    left.appendChild(ol);
+    var actions = el('div', 'actions');
+    if (p.url) {
+      var open = el('a', 'btn'); open.href = p.url; open.target = '_blank'; open.rel = 'noopener';
+      open.appendChild(svgIcon('<path d="M14 4h6v6M20 4l-9 9M18 14v5a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V7a1 1 0 0 1 1-1h5"/>')); open.appendChild(el('span', '', 'Web-App öffnen'));
+      actions.appendChild(open);
+      var urlLine = el('div', 'url-line', p.url); urlLine.style.alignSelf = 'center';
+      actions.appendChild(urlLine);
+    }
+    if (p.direct) {
+      var rel = el('a', 'btn ghost'); rel.href = RELEASES; rel.target = '_blank'; rel.rel = 'noopener';
+      rel.appendChild(svgIcon('<path d="M12 3v12M7 11l5 5 5-5M4 21h16"/>')); rel.appendChild(el('span', '', 'Installer manuell laden'));
+      actions.appendChild(rel);
+    }
+    left.appendChild(actions);
+    left.appendChild(el('p', 'note', p.note));
+    grid.appendChild(left);
+    if (p.url) grid.appendChild(qr(p.url));
+    panelEl.appendChild(grid);
+  }
+
+  // Demo-Video herunterladen: im Artifact über die Download-Funktion, sonst als normaler Download
+  var dlBtn = document.getElementById('dl-demo'), dlStatus = document.getElementById('dl-status');
+  function status(msg, err) { dlStatus.textContent = msg; dlStatus.className = 'status' + (err ? ' err' : ''); }
+  dlBtn.addEventListener('click', function () {
+    dlBtn.disabled = true; status('Video wird vorbereitet …');
+    var finish = function () { dlBtn.disabled = false; };
+    var useClaude = window.claude && typeof window.claude.use === 'function' ? window.claude.use('downloads') : Promise.resolve(null);
+    useClaude.then(function (dl) {
+      if (dl) {
+        return fetch(CFG.video).then(function (r) { if (!r.ok) throw new Error('fetch'); return r.blob(); })
+          .then(function (blob) { return dl.save({ filename: CFG.videoName, data: blob }); })
+          .then(function () { status('Gespeichert. Viel Freude mit der Demo!'); }, function (e) { status(e && e.code === 'declined' ? 'Download abgebrochen.' : 'Der Download konnte nicht gestartet werden.', true); });
+      }
+      var a = document.createElement('a'); a.href = CFG.video; a.download = CFG.videoName; document.body.appendChild(a); a.click(); a.remove();
+      status('Download gestartet.');
+    }).catch(function () { status('Der Download konnte nicht gestartet werden.', true); }).then(finish, finish);
+  });
+
+  renderTiles(); renderPanel();
+})();
+</script>

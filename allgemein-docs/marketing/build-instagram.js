@@ -46,6 +46,10 @@ const posts = {
   'post-3-wartezimmer': feed({ h1: 'Wartezeit', accent: 'im Blick.', sub: 'Wer ist da, wer wartet am längsten – Patienten mit einem Klick aufrufen.', img: 'wartezimmer', orbs: orb('gold', 'clock', 130, 'right:70px;top:150px') + orb('green', 'check', 100, 'right:60px;top:400px') }),
   'post-4-dokumente': feed({ h1: 'Rezept in', accent: '10 Sekunden.', sub: 'AU, Überweisung, Attest: Daten werden automatisch eingesetzt.', img: 'dokument', orbs: orb('blue', 'doc', 130, 'right:70px;top:150px') + orb('green', 'check', 100, 'right:60px;top:400px') }),
   'post-5-vorsorge': feed({ h1: 'Nie wieder', accent: 'Vorsorge vergessen.', sub: 'Recall-Liste und Impfstatus zeigen sofort, wer fällig ist.', img: 'vorsorge', orbs: orb('gold', 'bell', 130, 'right:70px;top:150px') + orb('red', 'heart', 100, 'right:60px;top:400px') }),
+  'post-6-karte': feed({ h1: 'Karte rein.', accent: 'Patient da.', sub: 'Versichertenkarte einlesen – Akte öffnen oder in Sekunden neu anlegen.', img: 'karte', orbs: orb('blue', 'doc', 130, 'right:70px;top:150px') + orb('green', 'check', 100, 'right:60px;top:400px') }),
+  'post-9-erezept': feed({ h1: 'E-Rezept', accent: 'auf der Karte.', sub: 'Karte einlesen, Medikament wählen, ausstellen – in der Apotheke abrufbar.', img: 'erezept', orbs: orb('red', 'heart', 130, 'right:70px;top:150px') + orb('blue', 'doc', 100, 'right:60px;top:400px') }),
+  'post-7-labor': feed({ h1: 'Laborwerte', accent: 'mit Ampel.', sub: 'Auffälliges sofort sehen, Verläufe vergleichen, in die Akte übernehmen.', img: 'labor', orbs: orb('red', 'heart', 130, 'right:70px;top:150px') + orb('gold', 'bell', 100, 'right:60px;top:400px') }),
+  'post-8-krankmeldung': feed({ h1: 'Gelber Schein', accent: 'in Sekunden.', sub: 'Krankmeldung mit Diagnose aus der Akte – drucken und fertig.', img: 'au', orbs: orb('gold', 'doc', 130, 'right:70px;top:150px') + orb('green', 'check', 100, 'right:60px;top:400px') }),
   'story-cover': page(`
 <div class="canvas" style="width:1080px;height:1920px">
   <div class="glow" style="width:800px;height:800px;background:#2f80ed;left:140px;top:120px"></div>

@@ -33,7 +33,7 @@ jobs:
         run: npm install
 
       - name: Desktop-App bauen
-        run: npm run dist
+        run: npm run dist -- --publish never
 
       - name: Installer als Artifact hochladen
         uses: actions/upload-artifact@v4
@@ -64,6 +64,8 @@ jobs:
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
+          cp allgemein-docs/install/install.sh allgemein-docs/install/install.ps1 release-assets/
+          cp allgemein-docs/build/icon.png release-assets/Allgemein-Docs-icon.png
           gh release create "${{ github.ref_name }}" \
             --title "Allgemein Docs ${{ github.ref_name }}" \
             --notes "Automatisch veröffentlichter Build von Allgemein Docs für Windows, macOS und Linux." \

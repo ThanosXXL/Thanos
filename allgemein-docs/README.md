@@ -11,6 +11,11 @@ Navy-blaues Design, weiße Schrift in der humanistischen Schrift *Open Sans*, gr
 - **Patienten** – Akte mit Stammdaten, Diagnosen (ICD-10), Medikation, Karteikarte mit Textbausteinen, Bilder & Befunde (Upload möglich)
 - **Terminkalender** – Wochenleiste, Tagesplan in 30-Minuten-Slots, Status „Eingetroffen“
 - **Wartezimmer** – Wartezeit in Minuten, Patienten aufrufen
+- **Karte & E-Rezept** – Versichertenkarte (simuliert) einlesen, Patient finden oder anlegen, E-Rezept mit QR-Token ausstellen
+- **Laborergebnisse** – Werte mit Ampel (Referenzbereiche als Beispiel), Verlauf, Übernahme in die Karteikarte
+- **Rezepte** – E-Rezept (über die Karte abrufbar) oder Papierrezept (Muster)
+- **Krankmeldung** – „Gelber Schein“ mit Diagnose aus der Akte
+- **Überweisungen** – an Fachrichtungen, mit Diagnose, Medikation und Allergien
 - **Vorsorge & Recall** – wer ist fällig (überfällig / in 30 Tagen), Termin direkt vergeben, „Erledigt“ vermerkt die Karteikarte
 - **Impfungen** – Impfstatus, fällige Auffrischungen (60 Tage), auch als Reiter in der Patientenakte
 - **Leistungen** – erbrachte Leistungen erfassen, Honorar je Monat (frei gewählte Beispielbeträge, keine amtliche Gebührenordnung)
@@ -25,6 +30,24 @@ Navy-blaues Design, weiße Schrift in der humanistischen Schrift *Open Sans*, gr
 Alle Daten liegen lokal (`allgemein-docs-data.json` im Benutzerdatenordner). Die mitgelieferten Patienten sind frei erfundene Beispieldaten.
 
 > Hinweis: Allgemein Docs ist ein eigenständiges Projekt und kein zertifiziertes Praxisverwaltungssystem (PVS). Es ersetzt weder KV-Anbindung, TI/ePA noch Abrechnungssoftware.
+
+## Installation auf allen Plattformen
+
+| Plattform | Weg |
+|---|---|
+| Windows | `irm https://raw.githubusercontent.com/ThanosXXL/Thanos/<branch>/allgemein-docs/install/install.ps1 \| iex` (PowerShell) |
+| macOS (Apple Silicon) | `curl -fsSL https://raw.githubusercontent.com/ThanosXXL/Thanos/<branch>/allgemein-docs/install/install.sh \| sh` |
+| Linux (x64) | derselbe `install.sh`-Befehl, installiert ein AppImage nach `~/.local` |
+| Android | Web-App (PWA) in Chrome öffnen, „App installieren“ |
+| iPhone / iPad | Web-App in Safari öffnen, Teilen → „Zum Home-Bildschirm“ |
+
+Die Installer-Skripte laden das neueste Release mit Tag `allgemein-docs-v*`. Voraussetzungen: das Repository ist öffentlich,
+ein Release wurde veröffentlicht (Tag `allgemein-docs-v1.0.0` pushen → Workflow baut Windows/macOS/Linux) und für Android/iOS ist
+GitHub Pages aktiv (Workflow `allgemein-docs-pages.yml`, URL `https://thanosxxl.github.io/Thanos/`). Die Download-Seite mit
+3D-Kacheln, Befehl zum Kopieren, QR-Code und Demo-Video liegt in `install/index.html` (erzeugt mit `node install/build-page.js`
+aus `install/page.fragment.html`; `<branch>` in den Befehlen bitte auf den Branch setzen, der die Skripte enthält).
+
+Verkaufsvoraussetzungen: siehe [docs/VERKAUFSVORAUSSETZUNGEN.md](docs/VERKAUFSVORAUSSETZUNGEN.md).
 
 ## Starten
 
