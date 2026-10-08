@@ -575,3 +575,4 @@ body.print-recovery #app, body.print-recovery #modal-root, body.print-recovery #
 .pill { white-space: nowrap; flex: none; }
 .item { flex-wrap: wrap; }
 .item .grow { flex: 1 1 140px; }
+.card-title { flex-wrap: wrap; } .btn { white-space: nowrap; }

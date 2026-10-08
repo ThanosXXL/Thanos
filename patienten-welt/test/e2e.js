@@ -55,7 +55,7 @@ async function setup(page, { mode = 'demo' } = {}) {
   const watch = (page) => {
     page.on('pageerror', (e) => errors.push(e.message));
     page.on('console', (m) => { if (m.type() === 'error') errors.push(m.text()); });
-    page.on('requestfailed', (r) => { if (!/media\//.test(r.url())) errors.push('Anfrage fehlgeschlagen: ' + r.url()); });
+    page.on('requestfailed', (r) => { const f = (r.failure() || {}).errorText || ''; if (!/ABORTED/.test(f)) errors.push('Anfrage fehlgeschlagen: ' + r.url() + ' ' + f); });
   };
   const ctx = await browser.newContext({ viewport: { width: 1440, height: 1000 }, acceptDownloads: true });
   const page = await ctx.newPage();
