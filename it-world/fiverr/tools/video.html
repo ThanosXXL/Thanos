@@ -1,0 +1,112 @@
+<!doctype html><meta charset=utf-8><title>demo</title><style>
+@font-face{font-family:OS;src:url(fonts/OpenSans-Regular.ttf);font-weight:400}
+@font-face{font-family:OS;src:url(fonts/OpenSans-Bold.ttf);font-weight:700}
+*{box-sizing:border-box}
+html,body{margin:0;background:#000;overflow:hidden}
+#st{position:relative;width:1920px;height:1080px;overflow:hidden;font-family:OS,sans-serif;color:#f3ead2;
+ background:radial-gradient(ellipse 70% 60% at 50% 45%,#2a1d06 0%,#0d0903 55%,#000 100%);perspective:1500px;perspective-origin:50% 45%}
+.g{position:absolute;inset:0;transform-style:preserve-3d}
+.a{position:absolute;transform-style:preserve-3d;will-change:transform,opacity}
+.gold{background:linear-gradient(180deg,#fff6c9 0%,#f6d56a 24%,#d9a62a 48%,#8c5f10 53%,#c99522 72%,#f3cf62 100%);-webkit-background-clip:text;background-clip:text;color:transparent;
+ filter:drop-shadow(0 1px 0 #7a520c) drop-shadow(0 2px 0 #6b4609) drop-shadow(0 3px 0 #5c3c07) drop-shadow(0 4px 0 #4d3105) drop-shadow(0 5px 0 #402803) drop-shadow(0 14px 16px rgba(0,0,0,.9)) drop-shadow(0 0 26px rgba(230,170,40,.35))}
+.silver{background:linear-gradient(180deg,#fff 0%,#e9e4d6 40%,#8d8678 52%,#d8d2c2 100%);-webkit-background-clip:text;background-clip:text;color:transparent;filter:drop-shadow(0 3px 0 #3b362c) drop-shadow(0 12px 14px rgba(0,0,0,.9))}
+.h1{font-weight:700;line-height:1;white-space:nowrap}
+.glass{position:absolute;overflow:hidden;border-radius:26px;border:3px solid transparent;
+ background:linear-gradient(160deg,#241a08,#0b0804 60%,#1a1206) padding-box,linear-gradient(160deg,#fff0a8,#c8921f 40%,#6d4a0b 60%,#f0c850) border-box;
+ box-shadow:0 0 50px rgba(230,170,40,.28),0 30px 60px rgba(0,0,0,.8),inset 0 0 40px rgba(255,200,80,.08);-webkit-box-reflect:below 8px linear-gradient(transparent 62%,rgba(255,255,255,.22))}
+.glass:before{content:"";position:absolute;left:0;right:0;top:0;height:46%;background:linear-gradient(180deg,rgba(255,255,255,.26),rgba(255,255,255,.04));border-radius:24px 24px 60% 60%/24px 24px 22px 22px;pointer-events:none}
+.sw{position:absolute;top:-20%;bottom:-20%;width:34%;left:0;background:linear-gradient(100deg,transparent,rgba(255,255,255,.55),transparent);transform:skewX(-18deg);mix-blend-mode:screen;pointer-events:none}
+.img{position:absolute;overflow:hidden;border-radius:22px;border:3px solid #d9a62a;box-shadow:0 0 60px rgba(230,170,40,.35),0 30px 60px rgba(0,0,0,.85);-webkit-box-reflect:below 8px linear-gradient(transparent 68%,rgba(255,255,255,.2))}
+.img img{width:100%;display:block}
+.pill{height:100%;display:flex;align-items:center;gap:22px;font-weight:700;font-size:48px;padding:0 34px;color:#fff3cf;text-shadow:0 3px 6px #000}
+.ic{width:84px;height:84px;border-radius:50%;flex:none;display:flex;align-items:center;justify-content:center;font-size:42px;color:#2a1a02;
+ background:radial-gradient(circle at 35% 28%,#fff6c9,#e8b93c 45%,#8c5f10);box-shadow:0 4px 10px rgba(0,0,0,.6),inset 0 -6px 10px rgba(90,50,0,.45)}
+.p{position:absolute;border-radius:50%;background:radial-gradient(circle,#ffe9a0,rgba(230,170,40,0) 70%)}
+.card{padding:46px 40px}.card .n{font-size:30px;letter-spacing:6px;color:#e8c868;font-weight:700}
+.card .pr{font-size:104px;font-weight:700;margin:14px 0 6px}.card .t{font-size:40px;font-weight:700;color:#fff3cf;margin-bottom:26px}
+.card li{list-style:none;font-size:32px;margin:14px 0;color:#e9dcc0;padding-left:44px;position:relative}
+.card li:before{content:"";position:absolute;left:0;top:10px;width:22px;height:22px;border-radius:50%;background:radial-gradient(circle at 35% 30%,#fff6c9,#d9a62a 55%,#7a520c)}
+.tile{width:240px;height:240px;border-radius:50%;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px}
+.tile b{font-size:34px;color:#fff3cf;text-shadow:0 2px 4px #000}.tile i{font-style:normal;font-size:92px;line-height:1}
+.cta{display:flex;align-items:center;justify-content:center;font-weight:700;font-size:64px;color:#2a1a02;border-radius:80px;
+ background:linear-gradient(180deg,#fff3b0 0%,#f2c94c 40%,#c8921f 52%,#e8b93c 100%);box-shadow:0 0 80px rgba(240,190,60,.6),0 20px 40px rgba(0,0,0,.7),inset 0 4px 6px rgba(255,255,255,.7);overflow:hidden}
+</style><div id=st><div id=ps></div>
+<div class=g id=gA>
+ <div class=a id=logo style="left:120px;top:260px;width:560px;height:560px"><div class=glass style="inset:0;-webkit-box-reflect:below 8px linear-gradient(transparent 70%,rgba(255,255,255,.22));border-radius:70px"><img src=../logo-3d-hochglanz.png style="width:100%;display:block;position:relative"><div class=sw id=sw0></div></div></div>
+ <div class="a h1" id=ttl style="left:760px;top:310px;font-size:122px"></div>
+ <div class="a h1 silver" id=sub style="left:764px;top:490px;font-size:62px"></div>
+ <div class=a id=bar style="left:764px;top:590px;width:900px;height:12px;border-radius:6px;background:linear-gradient(90deg,#7a520c,#fff0a8,#d9a62a,#7a520c);box-shadow:0 0 30px rgba(240,190,60,.8);transform-origin:0 50%"></div>
+ <div class=a id=tag style="left:764px;top:640px;font-size:42px;color:#e9dcc0;white-space:nowrap"></div>
+</div>
+<div class=g id=gB><div class="a h1 gold" id=hB style="left:0;width:1920px;text-align:center;top:90px;font-size:104px"></div><div id=bs></div>
+ <div class="a" id=capB style="left:0;width:1920px;text-align:center;top:900px;font-size:48px;color:#e9dcc0"></div></div>
+<div class=g id=gC><div class="a h1 gold" id=hC style="left:0;width:1920px;text-align:center;top:50px;font-size:96px"></div>
+ <div class="img a" id=iL style="left:50px;top:330px;width:640px"><img src=../3d/3d-03-rechnung.png></div>
+ <div class="img a" id=iR style="left:1230px;top:330px;width:640px"><img src=../3d/3d-04-mobil.png></div>
+ <div class="img a" id=iM style="left:430px;top:250px;width:1060px"><img src=../3d/3d-02-plattform.png><div class=sw id=sw1></div></div>
+ <div class="a" id=capC style="left:0;width:1920px;text-align:center;top:930px;font-size:50px;color:#fff3cf;font-weight:700"></div></div>
+<div class=g id=gD><div class="a h1 gold" id=hD style="left:0;width:1920px;text-align:center;top:60px;font-size:104px"></div><div id=cs></div></div>
+<div class=g id=gE><div class="a h1 gold" id=hE style="left:0;width:1920px;text-align:center;top:70px;font-size:100px"></div><div id=ts></div>
+ <div class="a cta" id=cta style="left:530px;top:690px;width:860px;height:160px"><span id=ctaT></span><div class=sw id=sw2></div></div>
+ <div class=a id=ctaS style="left:0;width:1920px;text-align:center;top:900px;font-size:40px;color:#e9dcc0"></div></div>
+<div id=fade style="position:absolute;inset:0;background:#000;opacity:0;pointer-events:none"></div></div>
+<script src=config.js></script>
+<script>
+const L=(new URLSearchParams(location.search).get('lang')||'de');const DE=L==='de';
+const X=DE?{ttl:'REACT / NEXT.JS',sub:'Websites & Web-Apps',tag:CFG.years+' Jahre Erfahrung  ·  pixelgenau  ·  responsive',hB:'Mein Tech-Stack',capB:'Sauberer, skalierbarer TypeScript-Code',hC:'Pixelgenau nach deinem Design',capC:'Figma · Adobe XD · PSD  →  Next.js',hD:'Meine Pakete',
+ cards:[['BASIC','Landingpage Pro',CFG.prices.basic,['bis zu 8 Sektionen','Animationen & SEO','Deployment inklusive'],'10 Tage Lieferzeit'],['STANDARD','Business Website',CFG.prices.standard,['bis zu 8 Seiten','CMS · Blog · 2 Sprachen','Analytics & Newsletter'],'20 Tage Lieferzeit'],['PREMIUM','SaaS Web-App',CFG.prices.premium,['Login · Dashboard · API','Datenbank · 3D · Tests','CI/CD & Übergabe-Call'],'30 Tage Lieferzeit']],
+ hE:'Läuft überall – per Link',cta:'Jetzt Projekt anfragen',ctaS:'Übergabe-Call, Einweisung & Support inklusive',cur:v=>v.toLocaleString('de-DE')+' €'}
+:{ttl:'REACT / NEXT.JS',sub:'Websites & Web Apps',tag:CFG.years+' years experience  ·  pixel-perfect  ·  responsive',hB:'My Tech Stack',capB:'Clean, scalable TypeScript code',hC:'Pixel-perfect to your design',capC:'Figma · Adobe XD · PSD  →  Next.js',hD:'My Packages',
+ cards:[['BASIC','Landing Page Pro',CFG.prices.basic,['up to 8 sections','Animations & SEO','Deployment included'],'10 days delivery'],['STANDARD','Business Website',CFG.prices.standard,['up to 8 pages','CMS · Blog · 2 languages','Analytics & newsletter'],'20 days delivery'],['PREMIUM','SaaS Web App',CFG.prices.premium,['Login · Dashboard · API','Database · 3D · Tests','CI/CD & handover call'],'30 days delivery']],
+ hE:'Runs everywhere – via link',cta:'Request your project',ctaS:'Handover call, onboarding & support included',cur:v=>'€'+v.toLocaleString('en-US')};
+const E={o:x=>1-Math.pow(1-x,3),io:x=>x<.5?4*x*x*x:1-Math.pow(-2*x+2,3)/2,b:x=>{const c=1.70158+1;return 1+c*Math.pow(x-1,3)+1.70158*Math.pow(x-1,2)},l:x=>x};
+function kf(a,t){if(t<=a[0][0])return a[0][1];for(let i=1;i<a.length;i++){if(t<=a[i][0]){const[t0,v0]=a[i-1],[t1,v1,e]=a[i];return v0+(v1-v0)*E[e||'o']((t-t0)/(t1-t0))}}return a[a.length-1][1]}
+const tracks=[];function T(el,o){tracks.push([el,o])}
+const $=id=>document.getElementById(id);
+function mk(p,c,css,txt){const d=document.createElement('div');d.className=c;d.style.cssText=css;if(txt)d.textContent=txt;p.appendChild(d);return d}
+// scene fades
+const sc=[['gA',0,5.6],['gB',5.2,12.2],['gC',11.8,19.2],['gD',18.8,25.8],['gE',25.4,29.7]];
+for(const[id,a,b]of sc)T($(id),{op:[[a,0],[a+.5,1,'o'],[b-.5,1],[b,id==='gE'?1:0,'io']]});
+// scene A
+$('ttl').textContent='';[...X.ttl].forEach((ch,i)=>{const s=document.createElement('span');s.textContent=ch===' '?' ':ch;s.className='gold';s.style.cssText='display:inline-block;transform-origin:50% 100%';$('ttl').appendChild(s);T(s,{op:[[0.6+i*.06,0],[0.9+i*.06,1]],rx:[[0.6+i*.06,-90],[1.1+i*.06,0,'b']],y:[[0.6+i*.06,60],[1.1+i*.06,0,'b']]})});
+T($('logo'),{op:[[0,0],[.8,1]],ry:[[0,-70],[1.6,0,'o']],s:[[0,.6],[1.6,1,'o'],[5.6,1.06,'io']],z:[[0,-600],[1.6,0,'o']]});
+$('sub').textContent=X.sub;$('tag').textContent=X.tag;T($('sub'),{op:[[1.5,0],[2.1,1]],x:[[1.5,-80],[2.2,0]]});T($('bar'),{s:[[1.9,0],[3,1,'io']],op:[[1.9,0],[2,1]]});T($('tag'),{op:[[2.6,0],[3.2,1]],y:[[2.6,30],[3.2,0]]});
+T($('sw0'),{x:[[1.4,-400],[2.6,900,'io'],[3.9,-400],[5.1,900,'io']]});
+// scene B
+const bd=[['⚛','React'],['▲','Next.js'],['≋','Tailwind CSS'],['TS','TypeScript'],['⚡','Supabase'],['◈','Three.js']];
+bd.forEach((b,i)=>{const col=i%3,row=(i/3)|0,t0=5.7+i*.18;const g=mk($('bs'),'glass a','left:'+(150+col*580)+'px;top:'+(330+row*250)+'px;width:540px;height:170px');g.innerHTML='<div class=pill><div class=ic></div><span></span></div>';g.querySelector('.ic').textContent=b[0];g.querySelector('span').textContent=b[1];mk(g,'sw','');
+ T(g,{op:[[t0,0],[t0+.4,1]],z:[[t0,-1200],[t0+.9,0,'o']],ry:[[t0,75],[t0+.9,0,'o'],[12.2,-8,'io']],y:[[t0+.9,0],[t0+2.5,-14,'io'],[t0+4,6,'io'],[12.2,-10,'io']]});
+ T(g.querySelector('.sw'),{x:[[t0+.9,-300],[t0+1.8,900,'io']]})});
+$('hB').textContent=X.hB;T($('hB'),{op:[[5.7,0],[6.2,1]],y:[[5.7,-50],[6.4,0,'b']]});$('capB').textContent=X.capB;T($('capB'),{op:[[8.4,0],[9,1]],y:[[8.4,30],[9,0]]});
+// scene C
+$('hC').textContent=X.hC;T($('hC'),{op:[[11.9,0],[12.4,1]],y:[[11.9,-50],[12.6,0,'b']]});
+T($('iM'),{op:[[12,0],[12.5,1]],z:[[12,-800],[13,0]],ry:[[12,40],[13,0],[19.2,-6,'io']],s:[[13,1],[19.2,1.05,'io']]});
+T($('iL'),{op:[[12.5,0],[13,1]],x:[[12.5,-500],[13.6,0]],ry:[[12.5,80],[13.6,38],[19.2,30,'io']],z:[[13.6,-120]]});
+T($('iR'),{op:[[12.9,0],[13.4,1]],x:[[12.9,500],[14,0]],ry:[[12.9,-80],[14,-38],[19.2,-30,'io']],z:[[14,-120]]});
+T($('sw1'),{x:[[13.2,-400],[14.8,1500,'io'],[16.4,-400],[17.9,1500,'io']]});
+$('capC').textContent=X.capC;T($('capC'),{op:[[14.6,0],[15.2,1]],y:[[14.6,30],[15.2,0]]});
+// scene D
+$('hD').textContent=X.hD;T($('hD'),{op:[[18.9,0],[19.4,1]],y:[[18.9,-50],[19.6,0,'b']]});
+const hooks=[];
+X.cards.forEach((c,i)=>{const t0=19.3+i*.4;const g=mk($('cs'),'glass card a','left:'+(130+i*580)+'px;top:'+(i==2?210:240)+'px;width:540px;height:'+(i==2?700:640)+'px');
+ g.innerHTML='<div class=n></div><div class="pr gold"></div><div class=t></div><ul style="padding:0;margin:0"></ul><div class=d style="position:absolute;left:40px;bottom:36px;font-size:30px;color:#e8c868"></div>';
+ g.querySelector('.n').textContent=c[0];g.querySelector('.t').textContent=c[1];g.querySelector('.d').textContent='⏱ '+c[4];c[3].forEach(f=>{const li=document.createElement('li');li.textContent=f;g.querySelector('ul').appendChild(li)});mk(g,'sw','');
+ const pr=g.querySelector('.pr');hooks.push(t=>{const k=Math.min(1,Math.max(0,(t-t0-.3)/1.6));pr.textContent=X.cur(Math.round(c[2]*E.o(k)))});
+ T(g,{op:[[t0,0],[t0+.4,1]],z:[[t0,-1000],[t0+1,i==2?80:0,'o']],ry:[[t0,85],[t0+1,0,'o'],[25.8,i==0?10:i==2?-10:0,'io']],y:[[t0+1,0],[t0+3,-12,'io'],[t0+5,8,'io'],[25.8,-8,'io']]});
+ T(g.querySelector('.sw'),{x:[[t0+1.4,-300],[t0+2.4,900,'io']]})});
+// scene E
+$('hE').textContent=X.hE;T($('hE'),{op:[[25.5,0],[26,1]],y:[[25.5,-50],[26.2,0,'b']]});
+[['🪟','Windows'],['🍎','macOS'],['🐧','Linux'],['🤖','Android'],['📱','iOS'],['💻','ChromeOS']].forEach((p,i)=>{const t0=26+i*.15;const g=mk($('ts'),'glass tile a','left:'+(150+i*285)+'px;top:300px;border-radius:50%');g.innerHTML='<i></i><b></b>';g.querySelector('i').textContent=p[0];g.querySelector('b').textContent=p[1];mk(g,'sw','');
+ T(g,{op:[[t0,0],[t0+.3,1]],z:[[t0,-900],[t0+.8,0,'o']],ry:[[t0,-120],[t0+.9,0,'o']],y:[[t0+.9,0],[t0+2,-12,'io'],[t0+3.3,4,'io']]});T(g.querySelector('.sw'),{x:[[t0+1,-200],[t0+1.9,500,'io']]})});
+$('ctaT').textContent=X.cta;$('ctaS').textContent=X.ctaS;
+T($('cta'),{op:[[27,0],[27.4,1]],z:[[27,-700],[27.9,0,'b']],s:[[27.9,1],[28.3,1.06,'io'],[28.7,1,'io'],[29.1,1.06,'io'],[29.6,1,'io']]});T($('sw2'),{x:[[27.9,-300],[28.9,1100,'io']]});
+T($('ctaS'),{op:[[27.8,0],[28.4,1]]});
+T($('fade'),{op:[[29.1,0],[29.66,1,'l']]});
+// particles
+const ps=[];for(let i=0;i<46;i++){const s=3+(i*7%9);const d=mk($('ps'),'p','width:'+s+'px;height:'+s+'px');ps.push([d,(i*173)%1920,(i*61)%1080,10+(i*13)%30,i])}
+function render(t){for(const[el,o]of tracks){const g=k=>o[k]?kf(o[k],t):null;const op=g('op'),x=g('x')||0,y=g('y')||0,z=g('z')||0,rx=g('rx')||0,ry=g('ry')||0,s=o.s?kf(o.s,t):1;
+ el.style.opacity=op===null?1:op;el.style.transform='translate3d('+x+'px,'+y+'px,'+z+'px) rotateX('+rx+'deg) rotateY('+ry+'deg) scale('+s+')'}
+ for(const h of hooks)h(t);
+ for(const[d,x,y,sp,i]of ps){d.style.left=(x+Math.sin(t*.8+i)*30)+'px';d.style.top=(((y-t*sp)%1080)+1080)%1080+'px';d.style.opacity=.25+.55*Math.abs(Math.sin(t*1.6+i))}}
+render(0);window.render=render;
+</script>
