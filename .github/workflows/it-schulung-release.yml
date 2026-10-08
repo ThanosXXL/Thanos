@@ -1,0 +1,70 @@
+name: Build & Release IT-Schulung Dashboard
+
+on:
+  push:
+    tags:
+      - "it-schulung-v*"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [windows-latest, macos-latest, ubuntu-latest]
+    runs-on: ${{ matrix.os }}
+    defaults:
+      run:
+        working-directory: it-schulung
+
+    steps:
+      - name: Repository auschecken
+        uses: actions/checkout@v4
+
+      - name: Node.js einrichten
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Abhängigkeiten installieren
+        run: npm install
+
+      - name: Desktop-App bauen
+        run: npm run dist
+
+      - name: Installer als Artifact hochladen
+        uses: actions/upload-artifact@v4
+        with:
+          name: it-schulung-dashboard-${{ matrix.os }}
+          path: |
+            it-schulung/dist/*.exe
+            it-schulung/dist/*.dmg
+            it-schulung/dist/*.AppImage
+          if-no-files-found: warn
+
+  release:
+    needs: build
+    if: startsWith(github.ref, 'refs/tags/it-schulung-v')
+    runs-on: ubuntu-latest
+    steps:
+      - name: Repository auschecken
+        uses: actions/checkout@v4
+
+      - name: Installer-Artifacts herunterladen
+        uses: actions/download-artifact@v4
+        with:
+          pattern: it-schulung-dashboard-*
+          path: release-assets
+          merge-multiple: true
+
+      - name: GitHub Release erstellen und Installer anhängen
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          gh release create "${{ github.ref_name }}" \
+            --title "IT-Schulung Dashboard ${{ github.ref_name }}" \
+            --notes "Automatisch veröffentlichter Build des IT-Schulung Dashboards für Windows, macOS und Linux." \
+            release-assets/*
