@@ -1,5 +1,5 @@
 // Einfacher Offline-Cache: Dateien der App werden beim ersten Aufruf gespeichert.
-var CACHE = 'allgemein-docs-v1';
+var CACHE = 'allgemein-docs-v2';
 self.addEventListener('install', function (e) { self.skipWaiting(); });
 self.addEventListener('activate', function (e) { e.waitUntil(self.clients.claim()); });
 self.addEventListener('fetch', function (e) {

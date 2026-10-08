@@ -2,6 +2,7 @@
 // Aufruf: NODE_PATH=$(npm root -g) node capture-shots.js
 const { chromium } = require('playwright');
 const path = require('path');
+const { mockDocsApi, setupDemo } = require('./setup-helper');
 const APP = 'file://' + path.resolve(__dirname, '../renderer/index.html');
 const OUT = path.join(__dirname, 'shots');
 
@@ -10,30 +11,9 @@ const OUT = path.join(__dirname, 'shots');
   const ctx = await browser.newContext({ viewport: { width: 1440, height: 1040 }, deviceScaleFactor: 1.5 });
   const page = await ctx.newPage();
   await page.clock.setFixedTime(new Date(new Date().setHours(10, 15, 0, 0)));
-  await page.addInitScript(() => {
-    const key = '__store';
-    window.docsAPI = {
-      loadData: async () => JSON.parse(sessionStorage.getItem(key) || 'null'),
-      saveData: async (d) => { sessionStorage.setItem(key, JSON.stringify(d)); return true; },
-      exportBackup: async () => true, importBackup: async () => null
-    };
-  });
-  await page.goto(APP);
+  await page.addInitScript(mockDocsApi);
+  await setupDemo(page, APP, [1, 4, 0, 3]);
   await page.waitForTimeout(800);
-  // Wartezimmer füllen
-  await page.evaluate(() => {
-    const st = JSON.parse(sessionStorage.getItem('__store'));
-    const now = Date.now();
-    st.wartezimmer = [
-      { id: 'w1', patientId: st.patienten[1].id, terminId: null, seit: now - 14 * 60000, status: 'behandlung' },
-      { id: 'w2', patientId: st.patienten[4].id, terminId: null, seit: now - 9 * 60000, status: 'wartet' },
-      { id: 'w3', patientId: st.patienten[0].id, terminId: null, seit: now - 4 * 60000, status: 'wartet' },
-      { id: 'w4', patientId: st.patienten[3].id, terminId: null, seit: now - 1 * 60000, status: 'wartet' }
-    ];
-    sessionStorage.setItem('__store', JSON.stringify(st));
-  });
-  await page.reload();
-  await page.waitForTimeout(1600);
   const shot = async (name) => { await page.waitForTimeout(1500); await page.screenshot({ path: path.join(OUT, name + '.png') }); };
 
   await shot('start');

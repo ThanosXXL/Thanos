@@ -2,12 +2,12 @@
 <html lang="de">
 <head>
   <meta charset="UTF-8" />
-  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self'" />
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; media-src 'self'; font-src 'self'; object-src 'none'; base-uri 'none'; form-action 'none'; frame-src 'none'; connect-src 'none'" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Allgemein Docs</title>
   <link rel="stylesheet" href="style.css" />
 </head>
-<body>
+<body class="locked">
   <button id="menu-toggle" type="button" aria-label="Menü öffnen"><span></span><span></span><span></span></button>
   <div id="app">
     <aside id="sidebar">
@@ -28,9 +28,11 @@
     </aside>
     <main id="content"></main>
   </div>
+  <div id="security-root"></div>
   <div id="modal-root"></div>
   <div id="toast-root"></div>
   <script src="vendor/qrcode.js"></script>
+  <script src="vault.js"></script>
   <script src="data/medikamente.js"></script>
   <script src="renderer.js"></script>
 </body>

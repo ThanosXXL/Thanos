@@ -27,7 +27,8 @@ Navy-blaues Design, weiße Schrift in der humanistischen Schrift *Open Sans*, gr
 - **Demo & Medien** – Demo-Video, Social-Media-Reel und Instagram-Bilder mit Download-Buttons
 - **Hilfe & Tipps** – Schnellstart in fünf Schritten
 - **Globale Suche** – `Strg K`; Menüpunkte direkt mit `Strg 1–9, 0`
-- **Datensicherung** – Export/Import als JSON
+- **Datenschutz & Sicherheit** – verschlüsselte Daten (AES-256), Anmeldung mit Rollen, Auto-Sperre, Protokoll, Betroffenenrechte, Löschkonzept, Anfragen- und Pannenregister, Verzeichnis (siehe `docs/DATENSCHUTZ.md`)
+- **Datensicherung** – verschlüsselter Export/Import (`.adbackup`)
 
 Alle Daten liegen lokal (`allgemein-docs-data.json` im Benutzerdatenordner). Die mitgelieferten Patienten sind frei erfundene Beispieldaten.
 

@@ -7,6 +7,7 @@ const fs = require('fs');
 const os = require('os');
 const { execFileSync } = require('child_process');
 const { url, orb, page, captureFrames, encode } = require('./lib');
+const { mockDocsApi, setupDemo } = require('./setup-helper');
 
 const FPS = 30;
 const W = 1920, H = 1080;
@@ -54,13 +55,8 @@ async function recordTour(browser) {
   const ctx = await browser.newContext({ viewport: { width: W, height: H }, recordVideo: { dir: path.join(TMP, 'rec'), size: { width: W, height: H } } });
   const p = await ctx.newPage();
   await p.clock.setFixedTime(new Date(new Date().setHours(10, 15, 0, 0)));
+  await p.addInitScript(mockDocsApi);
   await p.addInitScript(() => {
-    const key = '__store';
-    window.docsAPI = {
-      loadData: async () => JSON.parse(sessionStorage.getItem(key) || 'null'),
-      saveData: async (d) => { sessionStorage.setItem(key, JSON.stringify(d)); return true; },
-      exportBackup: async () => true, importBackup: async () => null
-    };
     window.addEventListener('DOMContentLoaded', () => {
       const st = document.createElement('style');
       st.textContent = `#fc{position:fixed;left:0;top:0;width:34px;height:34px;z-index:9999;pointer-events:none;filter:drop-shadow(0 4px 6px rgba(0,0,0,.6));transition:none}
@@ -82,19 +78,10 @@ async function recordTour(browser) {
       window.__cap = (t) => { cap.classList.remove('on'); if (t) setTimeout(() => { cap.textContent = t; cap.classList.add('on'); }, 350); };
     });
   });
-  await p.goto(APP);
-  await p.waitForTimeout(600);
-  await p.evaluate(() => {
-    const st = JSON.parse(sessionStorage.getItem('__store'));
-    const now = Date.now();
-    st.wartezimmer = [
-      { id: 'w2', patientId: st.patienten[4].id, terminId: null, seit: now - 9 * 60000, status: 'wartet' },
-      { id: 'w4', patientId: st.patienten[3].id, terminId: null, seit: now - 3 * 60000, status: 'wartet' }
-    ];
-    sessionStorage.setItem('__store', JSON.stringify(st));
-  });
-  await p.reload();
+  const tRec = Date.now();
+  await setupDemo(p, APP, [4, 3]);
   await p.waitForTimeout(500);
+  const trimStart = Math.max(0, (Date.now() - tRec) / 1000 - 0.3); // Einrichtung nicht im Video zeigen
 
   const cap = (t) => p.evaluate((x) => window.__cap(x), t);
   const hold = (ms) => p.waitForTimeout(ms);
@@ -172,12 +159,22 @@ async function recordTour(browser) {
   await hold(500); await p.keyboard.press('Control+k'); await hold(400);
   await p.keyboard.type('schn', { delay: 220 }); await hold(1800);
   await p.keyboard.press('Escape');
+  await cap('Datenschutz & Sicherheit – verschlüsselt und protokolliert');
+  await click('.nav-item >> text=Datenschutz', { after: 3200 });
+  await click('.tabs .tab:text-is("Betroffenenrechte")', { after: 1800 });
+  await click('.tabs .tab:text-is("Protokoll")', { after: 2800 });
+  await cap('Automatische Sperre – jederzeit mit Strg + L');
+  await hold(400); await p.keyboard.press('Control+l'); await hold(3000);
+  await cap('Anmelden mit persönlichem Passwort');
+  await click('#li-pw', { after: 300 });
+  await p.keyboard.type('Marketing-Demo-Passwort-2026!', { delay: 70 }); await hold(500);
+  await p.keyboard.press('Enter'); await hold(3200);
   await cap(''); await hold(500);
   await ctx.close();
   const vid = fs.readdirSync(path.join(TMP, 'rec')).find((f) => f.endsWith('.webm'));
   const out = path.join(TMP, 'tour.mp4');
-  const dur = parseFloat(execFileSync('ffprobe', ['-v', 'error', '-show_entries', 'format=duration', '-of', 'csv=p=0', path.join(TMP, 'rec', vid)]).toString());
-  ff('-i', path.join(TMP, 'rec', vid), '-vf', `scale=${W}:${H}:flags=lanczos,fps=${FPS},fade=t=in:st=0:d=0.5,fade=t=out:st=${(dur - 0.5).toFixed(2)}:d=0.5,format=yuv420p`, '-c:v', 'libx264', '-preset', 'slow', '-crf', '16', out);
+  const dur = parseFloat(execFileSync('ffprobe', ['-v', 'error', '-show_entries', 'format=duration', '-of', 'csv=p=0', path.join(TMP, 'rec', vid)]).toString()) - trimStart;
+  ff('-ss', trimStart.toFixed(2), '-i', path.join(TMP, 'rec', vid), '-vf', `scale=${W}:${H}:flags=lanczos,fps=${FPS},fade=t=in:st=0:d=0.5,fade=t=out:st=${(dur - 0.5).toFixed(2)}:d=0.5,format=yuv420p`, '-c:v', 'libx264', '-preset', 'slow', '-crf', '16', out);
   return out;
 }
 

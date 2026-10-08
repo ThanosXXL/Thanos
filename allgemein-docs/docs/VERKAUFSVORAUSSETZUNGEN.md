@@ -29,7 +29,8 @@ Allgemein Docs ist heute ein **Demo-/Prototyp-Stand**: Oberfläche, Abläufe und
 - **DSGVO**: Gesundheitsdaten sind besondere Kategorien (Art. 9); Datenschutz durch Technikgestaltung (Art. 25); technische und organisatorische Maßnahmen (Art. 32); **Auftragsverarbeitungsvertrag** mit jeder Praxis (Art. 28); ggf. Datenschutz-Folgenabschätzung
 - **Schweigepflicht** (§ 203 StGB): Dienstleister und Support müssen vertraglich darauf verpflichtet werden
 - **IT-Sicherheitsrichtlinie nach § 75b SGB V** (KBV): Anforderungen an Praxen und deren Software
-- **Technisch heute offen**: Daten liegen **unverschlüsselt** als JSON; es gibt **keine Anmeldung, keine Rollen, kein Audit-Log, keine verschlüsselte Datensicherung, kein Löschkonzept**
+- **Technisch umgesetzt (Details in `docs/DATENSCHUTZ.md`)**: AES-256-GCM-Verschlüsselung der Daten, Anmeldung mit Rollen, automatische Sperre, manipulationssicheres Protokoll, verschlüsselte Datensicherung, Löschkonzept mit Aufbewahrungsfristen, Betroffenenrechte, Anfragen- und Pannenregister, Verzeichnis der Verarbeitungstätigkeiten
+- **Weiterhin offen**: unabhängiger Penetrationstest und Sicherheitsaudit, Datenschutz-Folgenabschätzung, Verträge und Prozesse der Praxis, Zertifizierungen (KBV, gematik), Prüfung der Mustertexte durch Fachanwalt oder Datenschutzbeauftragte
 - Empfohlen: ISO 27001 oder BSI-Grundschutz, Pen-Test, Signierung der Installer (Windows Authenticode, Apple Notarisierung), Update-Kanal mit Signaturprüfung
 
 ## 4. Regulatorisches (MDR)
@@ -90,8 +91,8 @@ Stand 08.10.2026, keine Rechtsberatung. Erst den Verkaufsweg wählen (Abschnitt 
 - [ ] Unterstützung der Praxen bei deren Pflichten (Datenschutz-Folgenabschätzung, Auskunft, Löschung)
 
 ### D. Produkt-Mindeststandard vor dem ersten Verkauf
-- [ ] Anmeldung mit Rollen und Rechten, Verschlüsselung der Daten auf dem Gerät, Audit-Log
-- [ ] Verschlüsselte Datensicherung mit Wiederherstellungstest, Löschkonzept
+- [x] Anmeldung mit Rollen und Rechten, Verschlüsselung der Daten auf dem Gerät, Audit-Log (umgesetzt, extern prüfen lassen)
+- [x] Verschlüsselte Datensicherung, Löschkonzept (umgesetzt); Wiederherstellungstest in der Praxis bleibt offen
 - [ ] Signierte Installer (Windows-Codesigning-Zertifikat, Apple Developer Program mit Notarisierung) und geprüfter Update-Weg
 - [ ] Handbuch, Release-Notes, Testprotokolle, Risikoanalyse
 - [ ] Aussagen im Marketing nur, was stimmt: keine Behauptung „zertifiziert“, „KBV-zugelassen“, „TI-fähig“ oder „kompatibel mit …“

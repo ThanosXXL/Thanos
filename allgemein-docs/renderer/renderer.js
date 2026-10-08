@@ -86,7 +86,10 @@
     swap: 'M4 8h13l-3-3M20 16H7l3 3',
     card: 'M3 6h18v12H3zM3 10h18M7 15h4',
     book: 'M4 5a2 2 0 0 1 2-2h12v16H6a2 2 0 0 0-2 2zM4 21V5M9 7h6M9 11h6',
-    close: 'M6 6l12 12M18 6L6 18'
+    close: 'M6 6l12 12M18 6L6 18',
+    lock: 'M6 11h12v9H6zM8 11V8a4 4 0 0 1 8 0v3M12 15v2',
+    eye: 'M2 12s4-7 10-7 10 7 10 7-4 7-10 7S2 12 2 12zM12 15a3 3 0 1 0 0-6 3 3 0 0 0 0 6',
+    users2: 'M12 12a4 4 0 1 0 0-8 4 4 0 0 0 0 8M4 21a8 8 0 0 1 16 0'
   };
   function icon(name) {
     const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
@@ -101,7 +104,7 @@
     return svg;
   }
   const btn = (label, opts = {}) =>
-    h('button', { class: 'btn ' + (opts.kind || ''), type: 'button', onclick: opts.onclick }, opts.icon ? icon(opts.icon) : null, label);
+    h('button', { class: 'btn ' + (opts.kind || ''), type: 'button', onclick: opts.onclick, disabled: !!opts.disabled }, opts.icon ? icon(opts.icon) : null, label);
 
   function toast(msg) {
     const t = h('div', { class: 'toast', text: msg });
@@ -118,6 +121,14 @@
   const DEFAULT_PRAXIS = 'Praxis für Allgemeinmedizin';
 
   let state = null;
+  let envelope = null; // verschlüsselter Tresor (Dateiinhalt)
+  let session = null; // Entschlüsselungs-Sitzung, nur im Arbeitsspeicher
+  let me = null; // angemeldeter Benutzer { id, name, role }
+  let baseState = ''; // Stand beim Anmelden (Leserechte)
+  let lastActivity = Date.now();
+  let pendingRotation = null;
+  let saveChain = Promise.resolve();
+  const auditQueue = [];
   const view = { page: 'start', patientId: null, patientTab: 'uebersicht', patientSearch: '', day: todayISO() };
 
   function demoData() {
@@ -233,8 +244,351 @@
 
   const getPatient = (id) => state.patienten.find((x) => x.id === id);
   const fullName = (p) => (p ? `${p.nachname}, ${p.vorname}` : 'Unbekannt');
-  const persist = () => window.docsAPI.saveData(state);
+  function emptyData() {
+    const base = demoData();
+    return normalize({ demo: false, einstellungen: { praxis: DEFAULT_PRAXIS, arzt: 'Praxisinhaber/in' }, patienten: [], termine: [], wartezimmer: [], aufgaben: [], bausteine: base.bausteine, vorlagen: base.vorlagen, karten: [], katalogExtra: [] });
+  }
+  const displayName = (p) => (!p ? 'Unbekannt' : state.einstellungen.namenKurz ? `${p.nachname}, ${(p.vorname || '').charAt(0)}.` : fullName(p));
+
+  // ---------------------------------------------------------------
+  // Sicherheit: Tresor, Anmeldung, Rollen, Sperre, Protokoll
+  // ---------------------------------------------------------------
+  const ROLES = { admin: 'Inhaber/in (Vollzugriff)', arzt: 'Arzt / Ärztin', mfa: 'Praxispersonal (MFA)', lesen: 'Nur Lesen' };
+  const ALL_ROLES = ['admin', 'arzt', 'mfa', 'lesen'];
+  const CLIN = ['admin', 'arzt'];
+  const PAGE_ROLES = { karte: ['admin', 'arzt', 'mfa'], erezept: CLIN, rezepte: CLIN, krankmeldung: CLIN, ueberweisungen: CLIN, leistungen: ['admin', 'arzt', 'mfa'], dokumente: ['admin', 'arzt', 'mfa'], auswertung: CLIN, einstellungen: ['admin'] };
+  const can = (page) => !!me && (PAGE_ROLES[page] || ALL_ROLES).includes(me.role);
+  const isAdmin = () => !!me && me.role === 'admin';
+  const isClin = () => !!me && CLIN.includes(me.role);
+
+  // ---- Speichern (verschlüsselt, seriell) ----
+  function enqueue(fn) {
+    saveChain = saveChain.then(fn).catch((err) => { console.error(err); toast('Speichern fehlgeschlagen: ' + (err && err.message ? err.message : 'unbekannter Fehler')); });
+    return saveChain;
+  }
+  const stripAudit = (s) => { const copy = Object.assign({}, s); delete copy.audit; delete copy.auditBase; return JSON.stringify(copy); };
+  function enforceReadOnly() {
+    if (!me || me.role !== 'lesen' || !baseState) return;
+    const base = JSON.parse(baseState);
+    if (stripAudit(state) === stripAudit(base)) return;
+    const queued = auditQueue.slice();
+    state = normalize(base);
+    queued.forEach((e) => state.audit.push(e));
+    toast('Mit Leserechten werden Änderungen nicht gespeichert.');
+  }
+  function persist() {
+    if (!session || !state) return saveChain;
+    enforceReadOnly();
+    return enqueue(async () => {
+      if (!session || !state) return;
+      await sealAudit();
+      envelope = await Vault.seal(envelope, session, state);
+      await window.docsAPI.saveData(envelope);
+      auditQueue.length = 0;
+      if (me && me.role === 'lesen') baseState = JSON.stringify(state);
+    });
+  }
   const commit = () => { persist(); render(); };
+
+  // ---- Protokoll (manipulationssichere Hash-Kette) ----
+  function audit(aktion, objekt) {
+    if (!state) return;
+    const e = { id: uid(), ts: Date.now(), u: me ? me.name : '–', a: aktion, o: objekt || '' };
+    state.audit.push(e);
+    auditQueue.push(e);
+  }
+  const auditHash = (prev, e) => Vault.sha256Hex(`${prev}|${e.id}|${e.ts}|${e.u}|${e.a}|${e.o}`);
+  async function sealAudit() {
+    const list = state.audit;
+    for (let i = 0; i < list.length; i++) {
+      if (!list[i].h) list[i].h = await auditHash(i > 0 ? list[i - 1].h : state.auditBase || '', list[i]);
+    }
+    const cutoff = Date.now() - (state.einstellungen.auditMonate || 24) * 30 * 86400000;
+    while (list.length > 1 && list[0].h && list[0].ts < cutoff) state.auditBase = list.shift().h;
+  }
+  async function verifyAudit() {
+    await sealAudit();
+    let prev = state.auditBase || '';
+    for (let i = 0; i < state.audit.length; i++) {
+      if ((await auditHash(prev, state.audit[i])) !== state.audit[i].h) return { ok: false, index: i, count: state.audit.length };
+      prev = state.audit[i].h;
+    }
+    return { ok: true, count: state.audit.length };
+  }
+  const AUDIT_TEXT = {
+    tresor_angelegt: 'Tresor angelegt', anmeldung: 'Anmeldung', abmeldung: 'Abmeldung / Sperre', auto_sperre: 'Automatische Sperre', fehlversuche_gemeldet: 'Fehlgeschlagene Anmeldungen gemeldet',
+    passwort_geaendert: 'Passwort geändert', passwort_zurueckgesetzt: 'Passwort zurückgesetzt', schluessel_erneuert: 'Wiederherstellungsschlüssel erneuert',
+    benutzer_angelegt: 'Benutzer angelegt', benutzer_entfernt: 'Benutzer entfernt', rolle_geaendert: 'Rolle geändert',
+    akte_gelesen: 'Akte geöffnet', patient_angelegt: 'Patient angelegt', patient_geaendert: 'Patient geändert', patient_geloescht: 'Patient gelöscht', patient_gesperrt: 'Verarbeitung eingeschränkt (Sperre)', patient_entsperrt: 'Sperre aufgehoben',
+    rezept_ausgestellt: 'Rezept ausgestellt', erezept_ausgestellt: 'E-Rezept ausgestellt', au_ausgestellt: 'Krankmeldung ausgestellt', au_gesendet: 'Krankmeldung digital gesendet', ueberweisung_ausgestellt: 'Überweisung ausgestellt', labor_erfasst: 'Laborbefund erfasst',
+    karte_gelesen: 'Versichertenkarte gelesen', auskunft_erstellt: 'Datenauskunft erstellt (Art. 15)', datenexport: 'Daten exportiert (Art. 20)', einwilligung_geaendert: 'Einwilligung geändert', datenschutzhinweis: 'Datenschutzhinweis dokumentiert',
+    sicherung_exportiert: 'Sicherung exportiert', sicherung_eingespielt: 'Sicherung eingespielt', protokoll_exportiert: 'Protokoll exportiert', einstellungen_geaendert: 'Einstellungen geändert', katalog_importiert: 'Medikamentenkatalog importiert',
+    anfrage_angelegt: 'Betroffenenanfrage erfasst', anfrage_erledigt: 'Betroffenenanfrage erledigt', panne_erfasst: 'Datenpanne erfasst', alle_daten_geloescht: 'Alle Daten gelöscht', beispieldaten_geladen: 'Beispieldaten geladen'
+  };
+
+  // ---- Sperrbildschirm ----
+  const secRoot = () => document.getElementById('security-root');
+  function pwField(label, o) {
+    o = o || {};
+    const input = h('input', { type: 'password', autocomplete: o.autocomplete || 'current-password', id: o.id, 'aria-label': label });
+    const toggle = h('button', { class: 'pw-toggle', type: 'button', title: 'Anzeigen / Verbergen', onclick: () => { input.type = input.type === 'password' ? 'text' : 'password'; } }, icon('eye'));
+    const field = h('div', { class: 'field' }, h('label', { text: label }), h('div', { class: 'pw-wrap' }, input, toggle));
+    if (o.meter) {
+      const bar = h('div', { class: 'pw-bar', 'data-s': '0' }, h('i'));
+      const hints = h('div', { class: 'soft small pw-hints' });
+      field.appendChild(bar); field.appendChild(hints);
+      input.addEventListener('input', () => {
+        const r = Vault.checkPassword(input.value);
+        bar.dataset.s = String(r.score);
+        hints.textContent = input.value ? (r.ok ? 'Gute Wahl.' : 'Noch nötig: ' + r.hints.join('; ')) : '';
+      });
+    }
+    return { field, input };
+  }
+  function mountLock(...children) {
+    const r = secRoot();
+    r.textContent = '';
+    r.appendChild(h('div', { class: 'lockscreen' }, h('div', { class: 'lock-card' }, h('img', { class: 'lock-logo', src: 'img/logo.svg', alt: '' }), children)));
+    document.body.classList.add('locked');
+    const first = r.querySelector('input, select');
+    if (first) setTimeout(() => first.focus(), 50);
+  }
+
+  function showSetup(legacy) {
+    const praxis = h('input', { type: 'text', value: DEFAULT_PRAXIS, id: 'su-praxis' });
+    const name = h('input', { type: 'text', placeholder: 'z. B. Dr. med. Erika Mustermann', id: 'su-name', autocomplete: 'name' });
+    const pw1 = pwField('Passwort (mindestens 12 Zeichen)', { meter: true, autocomplete: 'new-password', id: 'su-pw1' });
+    const pw2 = pwField('Passwort wiederholen', { autocomplete: 'new-password', id: 'su-pw2' });
+    const modes = legacy
+      ? [['legacy', 'Vorhandene Daten übernehmen und verschlüsseln'], ['leer', 'Neu und leer starten (vorhandene Daten bleiben unverschlüsselt liegen)']]
+      : [['leer', 'Leer starten (Echtbetrieb)'], ['demo', 'Mit frei erfundenen Beispieldaten starten (Demo)']];
+    const mode = h('select', { id: 'su-mode' }, modes.map(([v, l]) => h('option', { value: v, text: l })));
+    const err = h('div', { class: 'form-error', role: 'alert' });
+    const go = h('button', { class: 'btn primary', type: 'submit', id: 'su-go' }, icon('lock'), 'Verschlüsselten Tresor anlegen');
+    const form = h('form', { class: 'lock-form' },
+      h('div', { class: 'row' }, h('div', { class: 'field' }, h('label', { text: 'Praxisname' }), praxis), h('div', { class: 'field' }, h('label', { text: 'Ihr Name (Praxisleitung)' }), name)),
+      pw1.field, pw2.field,
+      h('div', { class: 'field' }, h('label', { text: 'Startdaten' }), mode),
+      err, go);
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      err.textContent = '';
+      const n = name.value.trim();
+      if (!n) { err.textContent = 'Bitte Ihren Namen angeben.'; return; }
+      const chk = Vault.checkPassword(pw1.input.value);
+      if (!chk.ok) { err.textContent = 'Passwort zu schwach: ' + chk.hints.join('; ') + '.'; return; }
+      if (pw1.input.value !== pw2.input.value) { err.textContent = 'Die Passwörter stimmen nicht überein.'; return; }
+      go.disabled = true;
+      go.lastChild.textContent = 'Verschlüssele …';
+      try {
+        const id = uid();
+        const st = mode.value === 'legacy' ? normalize(legacy) : mode.value === 'demo' ? normalize(demoData()) : emptyData();
+        st.einstellungen.praxis = praxis.value.trim() || DEFAULT_PRAXIS;
+        st.einstellungen.arzt = n;
+        st.benutzer = [{ id, name: n, role: 'admin' }];
+        const created = await Vault.create({ state: st, user: { id, name: n, password: pw1.input.value } });
+        showRecoveryKey(created.recoveryKey, 'Weiter zur Praxis', async () => {
+          envelope = created.envelope; session = created.session; state = st; me = { id, name: n, role: 'admin' };
+          await window.docsAPI.saveData(envelope);
+          audit('tresor_angelegt', '');
+          startApp(0);
+          persist();
+        });
+      } catch (ex) { err.textContent = 'Fehler: ' + ex.message; go.disabled = false; go.lastChild.textContent = 'Verschlüsselten Tresor anlegen'; }
+    });
+    mountLock(h('h1', { text: 'Willkommen bei Allgemein Docs' }),
+      h('p', { class: 'soft', text: 'Alle Praxisdaten werden verschlüsselt gespeichert (AES-256). Legen Sie jetzt den Zugang für die Praxisleitung an. Weitere Benutzer richten Sie später ein.' }),
+      legacy ? h('p', { class: 'lock-note', text: 'Es wurden unverschlüsselte Daten einer früheren Version gefunden.' }) : null,
+      form);
+  }
+
+  // Wiederherstellungsschlüssel anzeigen (Einrichtung, Erneuerung)
+  function showRecoveryKey(key, buttonLabel, onDone) {
+    const confirmBox = h('input', { type: 'checkbox', id: 'rk-confirm' });
+    const go = h('button', { class: 'btn primary', type: 'button', id: 'rk-go', disabled: true }, buttonLabel);
+    confirmBox.addEventListener('change', () => { go.disabled = !confirmBox.checked; });
+    go.addEventListener('click', async () => { go.disabled = true; await onDone(); });
+    const sheet = h('div', { class: 'recovery-sheet' },
+      h('h2', { text: 'Wiederherstellungsschlüssel – Allgemein Docs' }),
+      h('p', { text: 'Bewahren Sie dieses Blatt getrennt vom Computer auf (z. B. im Praxis-Tresor). Wer den Schlüssel kennt, kann die Daten entschlüsseln.' }),
+      h('div', { class: 'recovery-key', text: key }),
+      h('p', { text: `Erstellt am ${fmtDate(todayISO())}.` }));
+    mountLock(h('h1', { text: 'Wiederherstellungsschlüssel' }),
+      h('p', { class: 'soft', text: 'Falls ein Passwort vergessen wird, ist dies der einzige Weg zurück zu den Daten. Ohne Passwort und ohne Schlüssel sind die Daten unwiederbringlich verschlüsselt.' }),
+      h('div', { class: 'recovery-key', id: 'rk-key', text: key }),
+      h('div', { class: 'row', style: 'justify-content:center;margin:12px 0' },
+        btn('Kopieren', { icon: 'file', onclick: () => { try { navigator.clipboard.writeText(key); toast('Schlüssel kopiert.'); } catch (e) { toast('Bitte Schlüssel abschreiben.'); } } }),
+        btn('Drucken', { icon: 'print', onclick: () => { document.body.classList.add('print-recovery'); window.print(); document.body.classList.remove('print-recovery'); } })),
+      h('label', { class: 'check-row' }, confirmBox, h('span', { text: 'Ich habe den Schlüssel ausgedruckt oder sicher notiert.' })),
+      go, sheet);
+  }
+
+  let loginFails = 0;
+  let loginBlockedUntil = 0;
+  function showLogin(message) {
+    const users = envelope.users;
+    const last = (() => { try { return localStorage.getItem('allgemein-docs-last-user'); } catch (e) { return null; } })();
+    const sel = users.length > 1 ? h('select', { id: 'li-user' }, users.map((u) => h('option', { value: u.id, text: u.name, selected: u.id === last }))) : null;
+    const pw = pwField('Passwort', { id: 'li-pw' });
+    const err = h('div', { class: 'form-error', role: 'alert', text: message || '' });
+    const go = h('button', { class: 'btn primary', type: 'submit', id: 'li-go' }, icon('lock'), 'Entsperren');
+    const form = h('form', { class: 'lock-form' },
+      sel ? h('div', { class: 'field' }, h('label', { text: 'Benutzer' }), sel) : h('p', { class: 'lock-user', text: users[0].name }),
+      pw.field, err, go,
+      h('button', { class: 'link-btn', type: 'button', onclick: showRecovery }, 'Passwort vergessen? Wiederherstellungsschlüssel verwenden'));
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const wait = loginBlockedUntil - Date.now();
+      if (wait > 0) { err.textContent = `Zu viele Versuche. Bitte ${Math.ceil(wait / 1000)} Sekunden warten.`; return; }
+      const userId = sel ? sel.value : users[0].id;
+      go.disabled = true;
+      try {
+        const res = await Vault.unlock(envelope, userId, pw.input.value);
+        loginFails = 0;
+        try { localStorage.setItem('allgemein-docs-last-user', userId); } catch (ex) { /* optional */ }
+        await onUnlocked(res, userId);
+      } catch (ex) {
+        if (ex.code === 'auth') {
+          loginFails++;
+          const secs = loginFails >= 3 ? Math.min(60, 2 ** (loginFails - 2)) : 0;
+          loginBlockedUntil = Date.now() + secs * 1000;
+          envelope = { ...envelope, events: (envelope.events || []).concat([{ ts: Date.now(), u: (users.find((u) => u.id === userId) || {}).name || '?' }]).slice(-20) };
+          window.docsAPI.saveData(envelope);
+          err.textContent = 'Anmeldung fehlgeschlagen.' + (secs ? ` Bitte ${secs} Sekunden warten.` : '');
+        } else err.textContent = ex.message;
+        go.disabled = false;
+        pw.input.value = '';
+        pw.input.focus();
+      }
+    });
+    mountLock(h('h1', { text: 'Anmelden' }), h('p', { class: 'soft', text: 'Die Praxisdaten sind verschlüsselt. Bitte Passwort eingeben.' }), form);
+  }
+
+  async function onUnlocked(res, userId, passwordResetNotice) {
+    state = normalize(res.state);
+    session = res.session;
+    const rec = state.benutzer.find((u) => u.id === userId);
+    const fallbackName = (envelope.users.find((u) => u.id === userId) || {}).name || 'Benutzer';
+    me = rec ? { id: rec.id, name: rec.name, role: rec.role } : { id: userId, name: fallbackName, role: 'lesen' };
+    const fails = (envelope.events || []).filter((e) => !e.seen);
+    envelope = { ...envelope, events: (envelope.events || []).map((e) => ({ ...e, seen: true })) };
+    audit('anmeldung', '');
+    if (fails.length) audit('fehlversuche_gemeldet', String(fails.length));
+    baseState = me.role === 'lesen' ? JSON.stringify(state) : '';
+    startApp(fails.length);
+    persist();
+  }
+
+  function showRecovery() {
+    const key = h('input', { type: 'text', id: 'rc-key', placeholder: 'XXXX-XXXX-XXXX-XXXX-XXXX-XXXX-XXXX-XXXX', autocomplete: 'off', spellcheck: 'false', class: 'mono' });
+    const pw1 = pwField('Neues Passwort', { meter: true, autocomplete: 'new-password', id: 'rc-pw1' });
+    const pw2 = pwField('Neues Passwort wiederholen', { autocomplete: 'new-password', id: 'rc-pw2' });
+    const err = h('div', { class: 'form-error', role: 'alert' });
+    const go = h('button', { class: 'btn primary', type: 'submit', id: 'rc-go' }, icon('lock'), 'Zurücksetzen und anmelden');
+    const form = h('form', { class: 'lock-form' },
+      h('div', { class: 'field' }, h('label', { text: 'Wiederherstellungsschlüssel' }), key), pw1.field, pw2.field, err, go,
+      h('button', { class: 'link-btn', type: 'button', onclick: () => showLogin() }, 'Zurück zur Anmeldung'));
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      err.textContent = '';
+      const chk = Vault.checkPassword(pw1.input.value);
+      if (!chk.ok) { err.textContent = 'Passwort zu schwach: ' + chk.hints.join('; ') + '.'; return; }
+      if (pw1.input.value !== pw2.input.value) { err.textContent = 'Die Passwörter stimmen nicht überein.'; return; }
+      go.disabled = true;
+      try {
+        const res = await Vault.unlockWithRecovery(envelope, key.value);
+        const st = normalize(res.state);
+        const target = st.benutzer.find((u) => u.role === 'admin') || st.benutzer[0];
+        envelope = await Vault.setPassword(envelope, res.session, target.id, pw1.input.value);
+        await window.docsAPI.saveData(envelope);
+        await onUnlocked({ session: res.session, state: res.state }, target.id);
+        audit('passwort_zurueckgesetzt', 'Wiederherstellungsschlüssel');
+        rotateRecoveryFlow('Der bisherige Wiederherstellungsschlüssel wurde verwendet. Erzeugen Sie jetzt einen neuen.');
+      } catch (ex) {
+        err.textContent = ex.code === 'auth' ? 'Wiederherstellungsschlüssel ungültig.' : ex.message;
+        go.disabled = false;
+      }
+    });
+    mountLock(h('h1', { text: 'Passwort zurücksetzen' }), h('p', { class: 'soft', text: 'Mit dem Wiederherstellungsschlüssel der Praxisleitung vergeben Sie ein neues Passwort für das erste Inhaber-Konto.' }), form);
+  }
+
+  async function rotateRecoveryFlow(note) {
+    const res = await Vault.rotateRecovery(envelope, session);
+    pendingRotation = res.envelope;
+    openModal('Neuer Wiederherstellungsschlüssel', (modal) => {
+      modal.appendChild(h('p', { class: 'soft', text: note || 'Der alte Schlüssel wird mit der Bestätigung ungültig.' }));
+      modal.appendChild(h('div', { class: 'recovery-key', id: 'rk-key', text: res.recoveryKey }));
+      const ok = h('input', { type: 'checkbox', id: 'rk-confirm' });
+      const go = h('button', { class: 'btn primary', type: 'button', id: 'rk-go', disabled: true }, 'Schlüssel übernehmen');
+      ok.addEventListener('change', () => { go.disabled = !ok.checked; });
+      go.addEventListener('click', async () => {
+        await enqueue(async () => { envelope = { ...envelope, recovery: pendingRotation.recovery }; });
+        audit('schluessel_erneuert', ''); commit(); closeModal(); toast('Neuer Wiederherstellungsschlüssel aktiv.');
+      });
+      modal.appendChild(h('div', { class: 'row', style: 'justify-content:center;margin:10px 0' }, btn('Drucken', { icon: 'print', onclick: () => { document.body.classList.add('print-recovery'); const sheet = h('div', { class: 'lockscreen' }, h('div', { class: 'lock-card' }, h('div', { class: 'recovery-sheet' }, h('h2', { text: 'Wiederherstellungsschlüssel – Allgemein Docs' }), h('div', { class: 'recovery-key', text: res.recoveryKey }), h('p', { text: `Erstellt am ${fmtDate(todayISO())}.` })))); secRoot().appendChild(sheet); window.print(); sheet.remove(); document.body.classList.remove('print-recovery'); } })));
+      modal.appendChild(h('label', { class: 'check-row' }, ok, h('span', { text: 'Ich habe den neuen Schlüssel sicher notiert.' })));
+      modal.appendChild(h('div', { class: 'modal-actions' }, btn('Später', { onclick: closeModal }), go));
+    });
+  }
+
+  // Passwort-Bestätigung vor heiklen Aktionen
+  function reauth(title, onOk) {
+    openModal(title, (modal) => {
+      const pw = pwField('Ihr Passwort zur Bestätigung', { id: 'ra-pw' });
+      const err = h('div', { class: 'form-error', role: 'alert' });
+      const form = h('form', {}, pw.field, err, h('div', { class: 'modal-actions' }, btn('Abbrechen', { onclick: closeModal }), h('button', { class: 'btn primary', type: 'submit', id: 'ra-go' }, 'Bestätigen')));
+      form.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        if (await Vault.verifyPassword(envelope, me.id, pw.input.value)) { closeModal(); onOk(); } else { err.textContent = 'Passwort falsch.'; pw.input.value = ''; }
+      });
+      modal.appendChild(form);
+      setTimeout(() => pw.input.focus(), 40);
+    });
+  }
+
+  // ---- Start und Sperre der Sitzung ----
+  let activityBound = false;
+  function startApp(failedLogins) {
+    document.body.classList.remove('locked');
+    secRoot().textContent = '';
+    resetView();
+    lastActivity = Date.now();
+    if (!activityBound) {
+      activityBound = true;
+      ['mousemove', 'mousedown', 'keydown', 'touchstart', 'wheel'].forEach((ev) => document.addEventListener(ev, () => { lastActivity = Date.now(); }, { passive: true }));
+      setInterval(() => {
+        if (!session || !state) return;
+        const min = state.einstellungen.autoLockMin;
+        if (min > 0 && Date.now() - lastActivity > min * 60000) lockApp('auto');
+      }, 10000);
+    }
+    render();
+    if (failedLogins) {
+      openModal('Sicherheitshinweis', (modal) => {
+        modal.appendChild(h('p', { text: `Seit der letzten Anmeldung gab es ${failedLogins} fehlgeschlagene Anmeldeversuch${failedLogins > 1 ? 'e' : ''}. Falls Sie diese nicht selbst waren, ändern Sie bitte das Passwort und prüfen Sie das Protokoll.` }));
+        modal.appendChild(h('div', { class: 'modal-actions' }, btn('Verstanden', { kind: 'primary', onclick: closeModal })));
+      });
+    }
+  }
+  function resetView() {
+    Object.keys(view).forEach((k) => delete view[k]);
+    Object.assign(view, { page: 'start', patientId: null, patientTab: 'uebersicht', patientSearch: '', day: todayISO() });
+  }
+  async function lockApp(reason) {
+    if (!session || !state) return;
+    audit(reason === 'auto' ? 'auto_sperre' : 'abmeldung', '');
+    closeModal();
+    await persist();
+    await saveChain;
+    state = null; session = null; me = null; baseState = '';
+    auditQueue.length = 0;
+    resetView();
+    document.getElementById('content').textContent = '';
+    document.getElementById('nav').textContent = '';
+    document.getElementById('toast-root').textContent = '';
+    showLogin(reason === 'auto' ? 'Automatisch gesperrt wegen Inaktivität.' : '');
+  }
+
 
   // ---------------------------------------------------------------
   // Modal-Helfer
@@ -308,12 +662,14 @@
     ['Praxis', [['start', 'Start', 'home'], ['patienten', 'Patienten', 'users'], ['karte', 'Karte & E-Rezept', 'card'], ['termine', 'Terminkalender', 'calendar'], ['wartezimmer', 'Wartezimmer', 'clock']]],
     ['Medizin', [['labor', 'Laborergebnisse', 'flask'], ['erezept', 'E-Rezept', 'pill'], ['katalog', 'Medikamentenkatalog', 'book'], ['rezepte', 'Rezepte', 'pill'], ['krankmeldung', 'Krankmeldung', 'thermo'], ['ueberweisungen', 'Überweisungen', 'swap'], ['vorsorge', 'Vorsorge & Recall', 'bell'], ['impfungen', 'Impfungen', 'shield'], ['leistungen', 'Leistungen', 'euro']]],
     ['Organisation', [['aufgaben', 'Aufgaben', 'check'], ['dokumente', 'Dokumente', 'file'], ['auswertung', 'Auswertung', 'chart']]],
-    ['System', [['medien', 'Demo & Medien', 'play'], ['hilfe', 'Hilfe & Tipps', 'help'], ['einstellungen', 'Einstellungen', 'settings']]]
+    ['System', [['medien', 'Demo & Medien', 'play'], ['datenschutz', 'Datenschutz & Sicherheit', 'lock'], ['hilfe', 'Hilfe & Tipps', 'help'], ['einstellungen', 'Einstellungen', 'settings']]]
   ];
   if (window.docsWeb) NAV[3][1] = NAV[3][1].filter((i) => i[0] !== 'medien');
-  const NAV_FLAT = NAV.flatMap(([, items]) => items);
+  const visibleNav = () => NAV.map(([g, items]) => [g, items.filter(([k]) => can(k))]).filter(([, items]) => items.length);
 
   function goto(page, extra) {
+    if (!state) return;
+    if (!can(page)) { toast('Dafür fehlt die Berechtigung.'); page = 'start'; }
     const sb = document.getElementById('sidebar');
     if (sb) sb.classList.remove('open');
     view.page = page;
@@ -333,7 +689,7 @@
       impfungen: allImpfungen().filter((e) => e.naechste && e.naechste <= addDays(todayISO(), 30)).length
     };
     let n = 0;
-    NAV.forEach(([group, items]) => {
+    visibleNav().forEach(([group, items]) => {
       nav.appendChild(h('div', { class: 'nav-group', text: group }));
       items.forEach(([key, label, ic]) => {
         n++;
@@ -344,16 +700,18 @@
     });
     const foot = document.getElementById('sidebar-foot');
     foot.textContent = '';
-    foot.appendChild(h('div', { text: state.einstellungen.arzt }));
-    foot.appendChild(h('div', { text: state.einstellungen.praxis }));
+    foot.appendChild(h('div', { class: 'foot-user' }, h('strong', { text: me.name }), h('span', { class: 'soft small', text: ROLES[me.role] })));
+    foot.appendChild(h('div', { class: 'soft small', text: state.einstellungen.praxis }));
+    foot.appendChild(btn('Sperren (Strg L)', { kind: 'small', icon: 'lock', onclick: () => lockApp('manuell') }));
   }
 
   function render() {
+    if (!state || !me) return;
     renderNav();
     const content = document.getElementById('content');
     content.textContent = '';
-    const views = { start: renderStart, patienten: renderPatienten, termine: renderTermine, wartezimmer: renderWartezimmer, karte: renderKarte, labor: renderLabor, erezept: renderErezept, katalog: renderKatalog, rezepte: renderRezepte, krankmeldung: renderKrankmeldungen, ueberweisungen: renderUeberweisungen, vorsorge: renderVorsorge, impfungen: renderImpfungen, leistungen: renderLeistungen, aufgaben: renderAufgaben, dokumente: renderDokumente, auswertung: renderAuswertung, medien: renderMedien, hilfe: renderHilfe, einstellungen: renderEinstellungen };
-    content.appendChild((views[view.page] || renderStart)());
+    const views = { start: renderStart, patienten: renderPatienten, termine: renderTermine, wartezimmer: renderWartezimmer, karte: renderKarte, labor: renderLabor, erezept: renderErezept, katalog: renderKatalog, rezepte: renderRezepte, krankmeldung: renderKrankmeldungen, ueberweisungen: renderUeberweisungen, vorsorge: renderVorsorge, impfungen: renderImpfungen, leistungen: renderLeistungen, aufgaben: renderAufgaben, dokumente: renderDokumente, auswertung: renderAuswertung, medien: renderMedien, hilfe: renderHilfe, einstellungen: renderEinstellungen, datenschutz: renderDatenschutz };
+    content.appendChild((can(view.page) ? views[view.page] || renderStart : renderStart)());
   }
 
   // ---------------------------------------------------------------
@@ -386,7 +744,7 @@
     return h('div', { class: 'item clickable', onclick: () => p && goto('patienten', { patientId: p.id, patientTab: 'uebersicht' }) },
       p ? h('img', { class: 'avatar', src: avatarSrc(p), alt: '' }) : null,
       h('div', { class: 'grow' },
-        h('div', { class: 'title', text: fullName(p) }),
+        h('div', { class: 'title', text: displayName(p) }),
         h('div', { class: 'soft small', text: t.grund || 'Termin' })),
       h('span', { class: 'pill info', text: (withDate ? fmtDate(t.datum) + ' · ' : '') + t.zeit + ' Uhr' }));
   }
@@ -435,13 +793,13 @@
       upcoming.length ? h('div', { class: 'list' }, upcoming.map((t) => appointmentRow(t, true))) : null);
 
     const quick = [
-      ['Karte einlesen', 'card', () => goto('karte')],
-      ['Rezept ausstellen', 'pill', () => { goto('rezepte'); newRezept(); }],
-      ['Krankmeldung', 'thermo', () => { goto('krankmeldung'); newAU(); }],
-      ['Überweisung', 'swap', () => { goto('ueberweisungen'); newUeberweisung(); }],
-      ['Patient suchen', 'search', openSearch],
-      ['Aufgabe notieren', 'check', () => addAufgabe()]
-    ];
+      ['Karte einlesen', 'card', () => goto('karte'), 'karte'],
+      ['Rezept ausstellen', 'pill', () => { goto('rezepte'); newRezept(); }, 'rezepte'],
+      ['Krankmeldung', 'thermo', () => { goto('krankmeldung'); newAU(); }, 'krankmeldung'],
+      ['Überweisung', 'swap', () => { goto('ueberweisungen'); newUeberweisung(); }, 'ueberweisungen'],
+      ['Patient suchen', 'search', openSearch, 'start'],
+      ['Aufgabe notieren', 'check', () => addAufgabe(), 'start']
+    ].filter((q) => can(q[3]));
     const right = h('div', {},
       h('div', { class: 'card' },
         h('div', { class: 'card-title' }, h('h2', { text: 'Schnellzugriff' })),
@@ -475,12 +833,14 @@
     ], (v) => {
       if (!v.vorname || !v.nachname) { toast('Bitte Vor- und Nachname angeben.'); return false; }
       if (isNew) {
-        const np = { id: uid(), ...v, diagnosen: [], medikation: [], karte: [], bilder: [], vorsorge: [], impfungen: [], leistungen: [], labor: [], rezepte: [], krankmeldungen: [], ueberweisungen: [] };
+        const np = { id: uid(), ...v, diagnosen: [], medikation: [], karte: [], bilder: [], vorsorge: [], impfungen: [], leistungen: [], labor: [], rezepte: [], krankmeldungen: [], ueberweisungen: [], angelegt: Date.now(), dsHinweis: '', einwilligungen: [], gesperrt: null };
         state.patienten.push(np);
+        audit('patient_angelegt', 'patient:' + np.id);
         view.patientId = np.id;
         view.patientTab = 'uebersicht';
       } else {
         Object.assign(p, v);
+        audit('patient_geaendert', 'patient:' + p.id);
       }
       view.page = 'patienten';
       commit();
@@ -525,6 +885,7 @@
 
   function renderPatientDetail(p) {
     const wrap = h('div', {});
+    touchAkte(p);
     wrap.appendChild(h('div', { class: 'card' },
       h('div', { class: 'patient-head' },
         h('img', { class: 'avatar big', src: avatarSrc(p), alt: '' }),
@@ -536,23 +897,17 @@
           btn('Termin', { icon: 'calendar', onclick: () => editTermin(null, todayISO(), p.id) }),
           btn('Ins Wartezimmer', { icon: 'clock', onclick: () => checkIn(p.id) }),
           btn('Bearbeiten', { icon: 'edit', onclick: () => editPatient(p) }))),
-      h('div', { class: 'tabs' }, [['uebersicht', 'Übersicht'], ['karte', 'Karteikarte'], ['impfungen', 'Impfungen'], ['leistungen', 'Leistungen'], ['bilder', 'Bilder & Befunde'], ['dokumente', 'Dokumente']].map(([k, l]) =>
+      p.gesperrt ? h('div', { class: 'lock-note', text: `Akte gesperrt (Art. 18 DSGVO) seit ${fmtDate(p.gesperrt.seit)}: ${p.gesperrt.grund}` }) : null,
+      h('div', { class: 'tabs' }, [['uebersicht', 'Übersicht'], ['karte', 'Karteikarte'], ['impfungen', 'Impfungen'], ['leistungen', 'Leistungen'], ['bilder', 'Bilder & Befunde'], ['dokumente', 'Dokumente'], ['datenschutz', 'Datenschutz']].map(([k, l]) =>
         h('button', { class: 'tab' + (view.patientTab === k ? ' active' : ''), type: 'button', onclick: () => { view.patientTab = k; render(); } }, l)))));
 
-    const tabs = { uebersicht: tabUebersicht, karte: tabKarte, bilder: tabBilder, dokumente: tabDokumente,
+    const tabs = { uebersicht: tabUebersicht, karte: tabKarte, bilder: tabBilder, dokumente: tabDokumente, datenschutz: tabDatenschutz,
       impfungen: (p) => h('div', { class: 'card' }, h('div', { class: 'card-title' }, h('h2', { text: 'Impfungen' }), btn('Hinzufügen', { kind: 'small', icon: 'plus', onclick: () => addImpfung(p.id) })),
         p.impfungen.length ? h('div', { class: 'list' }, p.impfungen.map((e) => impfRow({ ...e, p }, false))) : h('div', { class: 'empty', text: 'Keine Impfungen dokumentiert.' })),
       leistungen: (p) => h('div', { class: 'card' }, h('div', { class: 'card-title' }, h('h2', { text: 'Leistungen' }), btn('Erfassen', { kind: 'small', icon: 'plus', onclick: () => addLeistung(p.id) })),
         p.leistungen.length ? h('div', { class: 'list' }, p.leistungen.map((e) => h('div', { class: 'item' }, h('div', { class: 'grow' }, h('div', { class: 'title', text: e.text }), h('div', { class: 'soft small', text: fmtDate(e.datum) })), h('strong', { text: euro(e.betrag) }),
           btn('', { kind: 'small', icon: 'trash', onclick: () => { p.leistungen = p.leistungen.filter((x) => x.id !== e.id); commit(); } })))) : h('div', { class: 'empty', text: 'Keine Leistungen erfasst.' })) };
     wrap.appendChild((tabs[view.patientTab] || tabUebersicht)(p));
-    wrap.appendChild(h('div', { style: 'margin-top:18px' }, btn('Patientenakte löschen', { kind: 'danger small', icon: 'trash', onclick: () => confirmModal(`Akte von ${p.vorname} ${p.nachname} samt Terminen wirklich löschen?`, () => {
-      state.patienten = state.patienten.filter((x) => x.id !== p.id);
-      state.termine = state.termine.filter((t) => t.patientId !== p.id);
-      state.wartezimmer = state.wartezimmer.filter((w) => w.patientId !== p.id);
-      view.patientId = null;
-      commit();
-    }) })));
     return wrap;
   }
 
@@ -760,10 +1115,10 @@
       grid.appendChild(h('div', { class: 'card wait-card ' + (treating ? 'treating' : 'waiting'), style: 'margin:0' },
         p ? h('img', { class: 'avatar big', src: avatarSrc(p), alt: '' }) : null,
         h('div', { style: 'flex:1;min-width:0' },
-          h('h2', { text: fullName(p) }),
+          h('h2', { text: displayName(p) }),
           h('div', { class: 'soft', text: treating ? 'In Behandlung' : 'Wartet seit ' + fmtStamp(w.seit).slice(-5) + ' Uhr' }),
           h('div', { class: 'row', style: 'margin-top:12px' },
-            treating ? null : btn('Aufrufen', { kind: 'primary small', icon: 'bell', onclick: () => { w.status = 'behandlung'; w.seit = Date.now(); commit(); toast(`${fullName(p)} aufgerufen.`); } }),
+            treating ? null : btn('Aufrufen', { kind: 'primary small', icon: 'bell', onclick: () => { w.status = 'behandlung'; w.seit = Date.now(); commit(); toast(`${displayName(p)} aufgerufen.`); } }),
             btn('Akte', { kind: 'small', icon: 'file', onclick: () => goto('patienten', { patientId: w.patientId, patientTab: 'karte' }) }),
             btn(treating ? 'Fertig' : 'Entfernen', { kind: 'small', icon: 'check', onclick: () => {
               if (w.terminId) { const t = state.termine.find((x) => x.id === w.terminId); if (t) t.status = 'fertig'; }
@@ -899,20 +1254,40 @@
       h('div', { class: 'row' }, btn('Katalog importieren', { icon: 'file', onclick: () => katFile.click() }), katFile,
         btn(`Importierte entfernen (${(state.katalogExtra || []).length})`, { kind: 'danger', icon: 'trash', onclick: () => { state.katalogExtra = []; commit(); toast('Importierte Einträge entfernt.'); } }))));
     v.appendChild(h('div', { class: 'card' }, h('h2', { style: 'margin-bottom:6px', text: 'Datensicherung' }),
-      h('p', { class: 'soft', text: 'Alle Daten liegen ausschließlich lokal auf diesem Computer. Eine Sicherung als Datei schützt vor Datenverlust.' }),
+      h('p', { class: 'soft', text: 'Die Sicherung ist genauso verschlüsselt wie die Praxisdaten (Dateiendung .adbackup). Sie lässt sich nur mit einem Benutzerpasswort oder dem Wiederherstellungsschlüssel öffnen. Bewahren Sie sie getrennt vom Computer auf.' }),
+      state.einstellungen.letzteSicherung ? h('p', { class: 'soft small', text: 'Letzte Sicherung: ' + fmtStamp(state.einstellungen.letzteSicherung) }) : null,
       h('div', { class: 'row' },
-        btn('Sicherung exportieren', { icon: 'save', onclick: async () => { if (await window.docsAPI.exportBackup(state)) toast('Sicherung gespeichert.'); } }),
-        btn('Sicherung laden', { icon: 'file', onclick: async () => {
-          const data = await window.docsAPI.importBackup();
-          if (data && Array.isArray(data.patienten)) { state = normalize(data); commit(); toast('Sicherung geladen.'); } else if (data !== null) toast('Datei ist keine gültige Sicherung.');
-        } }))));
+        isAdmin() ? btn('Sicherung exportieren', { icon: 'save', onclick: async () => {
+          state.einstellungen.letzteSicherung = Date.now();
+          audit('sicherung_exportiert', '');
+          await persist();
+          const r = await window.docsAPI.saveTextFile({ title: 'Verschlüsselte Sicherung speichern', defaultName: `Allgemein-Docs-Sicherung-${todayISO()}.adbackup`, text: JSON.stringify(envelope), filters: [{ name: 'Allgemein Docs Sicherung', extensions: ['adbackup'] }] });
+          if (r && r.ok) { toast('Verschlüsselte Sicherung gespeichert.'); render(); } else { state.einstellungen.letzteSicherung = 0; persist(); }
+        } }) : null,
+        isAdmin() ? btn('Sicherung einspielen', { icon: 'file', onclick: async () => {
+          const f = await window.docsAPI.openTextFile({ title: 'Sicherung öffnen', filters: [{ name: 'Allgemein Docs Sicherung', extensions: ['adbackup', 'json'] }] });
+          if (!f) return;
+          let env = null;
+          try { env = JSON.parse(f.text); } catch (e) { /* ungültig */ }
+          if (!Vault.isEnvelope(env)) { toast('Datei ist keine gültige verschlüsselte Sicherung.'); return; }
+          confirmModal('Die aktuellen Daten werden durch die Sicherung ersetzt. Danach ist eine neue Anmeldung nötig (mit den Zugangsdaten der Sicherung). Fortfahren?', async () => {
+            audit('sicherung_eingespielt', ''); await persist(); await saveChain;
+            await window.docsAPI.saveData(env);
+            envelope = env; state = null; session = null; me = null; baseState = ''; auditQueue.length = 0;
+            resetView();
+            document.getElementById('content').textContent = ''; document.getElementById('nav').textContent = '';
+            showLogin('Sicherung eingespielt. Bitte anmelden.');
+          });
+        } }) : null,
+        isAdmin() ? null : h('span', { class: 'soft', text: 'Nur Inhaber/in darf Sicherungen erstellen und einspielen.' }))));
     v.appendChild(h('div', { class: 'card' }, h('h2', { style: 'margin-bottom:6px', text: 'Beispieldaten' }),
       h('p', { class: 'soft', text: 'Entfernt alle Patienten, Termine und Aufgaben und startet mit einer leeren Praxis (Vorlagen und Textbausteine bleiben).' }),
-      btn('Alle Daten löschen', { kind: 'danger', icon: 'trash', onclick: () => confirmModal('Wirklich ALLE Patienten, Termine und Aufgaben löschen?', () => {
+      btn('Alle Daten löschen', { kind: 'danger', icon: 'trash', disabled: !isAdmin(), onclick: () => confirmModal('Wirklich ALLE Patienten, Termine und Aufgaben löschen?', () => {
         Object.assign(state, { demo: false, patienten: [], termine: [], wartezimmer: [], aufgaben: [] });
+        audit('alle_daten_geloescht', '');
         view.patientId = null; commit();
       }) }),
-      ' ', btn('Beispieldaten neu laden', { icon: 'users', onclick: () => confirmModal('Aktuelle Daten durch Beispieldaten ersetzen?', () => { state = demoData(); view.patientId = null; commit(); }) })));
+      ' ', btn('Beispieldaten neu laden', { icon: 'users', disabled: !isAdmin(), onclick: () => confirmModal('Aktuelle Daten durch Beispieldaten ersetzen?', () => { const keep = { benutzer: state.benutzer, audit: state.audit, datenschutz: state.datenschutz, einstellungen: state.einstellungen }; state = Object.assign(normalize(demoData()), keep); state.demo = true; audit('beispieldaten_geladen', ''); view.patientId = null; commit(); }) })));
     return v;
   }
 
@@ -1108,6 +1483,7 @@
   function issueErezept(p, medText, o) {
     o = o || {};
     const pm = parseMed(medText);
+    audit('erezept_ausgestellt', 'patient:' + p.id);
     const r = { id: uid(), datum: todayISO(), medikament: pm.medikament, dosierung: pm.dosierung, packung: o.packung || 'N1', anzahl: o.anzahl || '1', autidem: 'ja', hinweis: '', gueltigBis: addDays(todayISO(), 28), erezept: newErezeptMeta() };
     p.rezepte.push(r);
     vermerk(p, 'Therapie', `E-Rezept ausgestellt: ${r.medikament}${r.dosierung ? ' ' + r.dosierung : ''} (${r.anzahl}× ${r.packung})`);
@@ -1197,7 +1573,9 @@
         if (!medikament) { toast('Bitte ein Medikament angeben.'); return; }
         const r = { id: uid(), datum: todayISO(), medikament, dosierung: dos.value.trim(), packung: packung.value, anzahl: anzahl.value.trim() || '1', autidem: autidem.value, hinweis: hint.value.trim(), gueltigBis: addDays(todayISO(), artSel.value === 'e' ? 28 : 90) };
         if (artSel.value === 'e') r.erezept = newErezeptMeta();
+        if (blockedPatient(p)) return;
         p.rezepte.push(r);
+        audit(r.erezept ? 'erezept_ausgestellt' : 'rezept_ausgestellt', 'patient:' + p.id);
         if (own.value.trim() && !p.medikation.some((m) => m.text === medikament)) p.medikation.push({ id: uid(), text: medikament });
         vermerk(p, 'Therapie', `${r.erezept ? 'E-Rezept' : 'Rezept'} ausgestellt: ${medikament} (${r.anzahl}× ${r.packung})`);
         persist(); render(); closeModal(); viewRezept({ ...r, p });
@@ -1499,7 +1877,10 @@
         const p = getPatient(pSel.value);
         const a = { id: uid(), datum: todayISO(), art: art.value, von: von.value, bis: bis.value, diagnose: own.value.trim() || diag.value, unfall: unfall.value };
         if (digi.value === 'ja') a.digital = { kasse: Date.now(), ag: Date.now() + 1500 };
+        if (blockedPatient(p)) return;
         p.krankmeldungen.push(a);
+        audit('au_ausgestellt', 'patient:' + p.id);
+        if (a.digital) audit('au_gesendet', 'patient:' + p.id);
         vermerk(p, 'Therapie', `AU ausgestellt: ${fmtDate(a.von)} – ${fmtDate(a.bis)} (${a.diagnose || 'ohne Diagnose'})${a.digital ? ' – digital an Krankenkasse und Arbeitgeber übermittelt (Demo)' : ''}`);
         persist(); render(); closeModal(); viewAU({ ...a, p });
         toast('Krankmeldung erstellt und in der Karteikarte vermerkt.');
@@ -1557,7 +1938,9 @@
         e.preventDefault();
         const p = getPatient(pSel.value);
         const u = { id: uid(), datum: todayISO(), an: an.value, diagnose: own.value.trim() || diag.value, auftrag: auftrag.value.trim() || 'Bitte um Mitbehandlung', dringend: dring.value };
+        if (blockedPatient(p)) return;
         p.ueberweisungen.push(u);
+        audit('ueberweisung_ausgestellt', 'patient:' + p.id);
         vermerk(p, 'Therapie', `Überweisung an ${u.an}: ${u.auftrag}`);
         persist(); render(); closeModal(); viewUeberweisung({ ...u, p });
         toast('Überweisung erstellt und in der Karteikarte vermerkt.');
@@ -1651,7 +2034,9 @@
         if (!werte.length) { toast('Bitte mindestens einen Wert eintragen.'); return; }
         const p = getPatient(pSel.value);
         const l = { id: uid(), datum: datum.value, labor: labor.value.trim() || 'Labor', werte, bemerkung: bem.value.trim() };
+        if (blockedPatient(p)) return;
         p.labor.push(l);
+        audit('labor_erfasst', 'patient:' + p.id);
         persist(); render(); closeModal(); viewLabor({ ...l, p });
         toast('Laborergebnis gespeichert.');
       });
@@ -1693,11 +2078,12 @@
     view.karte = { phase: 'reading', card };
     render();
     setTimeout(() => {
-      if (!view.karte || view.karte.card !== card) return;
+      if (!state || !view.karte || view.karte.card !== card) return;
       view.karte.phase = 'done';
       const found = findPatientByCard(card);
       state.karten.unshift({ id: uid(), ts: Date.now(), name: `${card.vorname} ${card.nachname}`, kvnr: card.kvnr, ergebnis: found ? 'Patient gefunden' : 'Neue Person' });
       state.karten = state.karten.slice(0, 15);
+      audit('karte_gelesen', found ? 'patient:' + found.id : 'neu');
       persist(); render();
     }, 2200);
   }
@@ -1903,38 +2289,626 @@
   // ---------------------------------------------------------------
   // Start
   // ---------------------------------------------------------------
+  // ---------------------------------------------------------------
+  // Datenschutz (DSGVO): Betroffenenrechte, Löschkonzept, Register, Verzeichnis
+  // ---------------------------------------------------------------
+  const EINWILLIGUNGEN = [
+    ['termin', 'Terminerinnerung per SMS oder E-Mail'],
+    ['befund', 'Befundübermittlung per E-Mail oder Telefon'],
+    ['recall', 'Recall-Benachrichtigung (Vorsorge, Impfungen)'],
+    ['foto', 'Fotodokumentation von Befunden']
+  ];
+  const ANFRAGEN_ARTEN = ['Auskunft (Art. 15)', 'Berichtigung (Art. 16)', 'Löschung (Art. 17)', 'Einschränkung (Art. 18)', 'Datenübertragbarkeit (Art. 20)', 'Widerspruch (Art. 21)', 'Widerruf einer Einwilligung (Art. 7)'];
+  const plusMonth = (iso) => { const d = new Date(iso + 'T12:00:00'); d.setMonth(d.getMonth() + 1); return isoDate(d); };
+  const daysUntil = (iso) => Math.round((new Date(iso + 'T12:00:00') - new Date(todayISO() + 'T12:00:00')) / 86400000);
+  const csvCell = (v) => `"${String(v == null ? '' : v).replace(/"/g, '""')}"`;
+  const blockedPatient = (p) => { if (p && p.gesperrt) { toast('Diese Akte ist gesperrt (Art. 18 DSGVO). Es sind keine neuen Einträge möglich.'); return true; } return false; };
+
+  function ensureVorlagen(s) {
+    const has = (t) => s.vorlagen.some((v) => v.titel === t);
+    if (!has('Datenschutzhinweis für Patienten (Art. 13 DSGVO)')) {
+      s.vorlagen.push({ id: uid(), titel: 'Datenschutzhinweis für Patienten (Art. 13 DSGVO)', text: [
+        'Datenschutzhinweis für Patientinnen und Patienten',
+        'Information nach Art. 13 und 14 DSGVO für {{name}}',
+        '',
+        'Verantwortlich: {{praxis}}, {{arzt}}',
+        '{{anschrift}} · Telefon {{telefon}}',
+        'Datenschutzbeauftragte/r: {{dsb}}',
+        '',
+        '1. Zwecke und Rechtsgrundlagen',
+        'Wir verarbeiten Ihre Daten, um Sie medizinisch zu behandeln und die Behandlung zu dokumentieren (Art. 6 Abs. 1 lit. b, Art. 9 Abs. 2 lit. h DSGVO i. V. m. § 22 BDSG und § 630f BGB), zur Abrechnung mit Krankenkassen, Kassenärztlicher Vereinigung und Privatversicherungen sowie zur Erfüllung gesetzlicher Pflichten (Art. 6 Abs. 1 lit. c DSGVO). Weitere Verarbeitungen, zum Beispiel Terminerinnerungen per SMS oder E-Mail oder Fotodokumentation, erfolgen nur mit Ihrer Einwilligung (Art. 6 Abs. 1 lit. a, Art. 9 Abs. 2 lit. a DSGVO). Sie können diese jederzeit mit Wirkung für die Zukunft widerrufen.',
+        '',
+        '2. Kategorien von Daten',
+        'Stammdaten (Name, Anschrift, Geburtsdatum, Versichertendaten), Gesundheitsdaten (Anamnese, Befunde, Diagnosen, Medikation, Laborwerte, Impfungen, Bescheinigungen) und Abrechnungsdaten.',
+        '',
+        '3. Empfänger',
+        'Soweit erforderlich: Krankenkassen und Kassenärztliche Vereinigung, Labore, mit- und weiterbehandelnde Ärztinnen und Ärzte, Apotheken (E-Rezept), Abrechnungsstellen sowie Dienstleister im Rahmen von Auftragsverarbeitungsverträgen. Eine Übermittlung in Drittländer findet nicht statt.',
+        '',
+        '4. Speicherdauer',
+        'Behandlungsunterlagen werden mindestens {{aufbewahrung}} Jahre nach Abschluss der Behandlung aufbewahrt (§ 630f Abs. 3 BGB). Für einzelne Unterlagen gelten längere Fristen. Danach werden die Daten gelöscht.',
+        '',
+        '5. Ihre Rechte',
+        'Sie haben das Recht auf Auskunft (Art. 15), Berichtigung (Art. 16), Löschung (Art. 17, soweit keine Aufbewahrungspflicht besteht), Einschränkung der Verarbeitung (Art. 18), Datenübertragbarkeit (Art. 20) und Widerspruch (Art. 21). Wenden Sie sich dazu an die Praxis. Außerdem können Sie sich bei einer Datenschutz-Aufsichtsbehörde beschweren: {{aufsicht}}.',
+        '',
+        '6. Erforderlichkeit',
+        'Die Angabe Ihrer Daten ist für Behandlung und Abrechnung erforderlich. Ohne diese Daten können wir Sie nicht behandeln.',
+        '',
+        'Erhalt bestätigt am {{datum}}: ______________________________'
+      ].join('\n') });
+    }
+    if (!has('Einwilligungserklärung (Kommunikation und Fotodokumentation)')) {
+      s.vorlagen.push({ id: uid(), titel: 'Einwilligungserklärung (Kommunikation und Fotodokumentation)', text: [
+        'Einwilligungserklärung',
+        '',
+        'Patient/in: {{name}}, geboren am {{geb}}',
+        'Praxis: {{praxis}}',
+        '',
+        'Ich willige freiwillig in Folgendes ein (Zutreffendes ankreuzen):',
+        '[ ] Terminerinnerungen per SMS oder E-Mail',
+        '[ ] Übermittlung von Befunden per E-Mail oder Telefon. Mir ist bekannt, dass unverschlüsselte E-Mails mitgelesen werden können.',
+        '[ ] Benachrichtigung über anstehende Vorsorgen und Impfungen (Recall)',
+        '[ ] Fotodokumentation von Befunden in meiner Patientenakte',
+        '',
+        'Meine Einwilligung kann ich jederzeit ohne Angabe von Gründen mit Wirkung für die Zukunft widerrufen, ohne dass mir Nachteile entstehen. Die Rechtmäßigkeit der bis dahin erfolgten Verarbeitung bleibt unberührt.',
+        '',
+        '{{praxis}}, {{datum}}                    ______________________________',
+        '                                         Unterschrift'
+      ].join('\n') });
+    }
+  }
+
+  // ---- Aufbewahrung / Löschkonzept ----
+  function lastContact(p) {
+    const d = [];
+    p.karte.forEach((k) => d.push(isoDate(new Date(k.ts))));
+    p.rezepte.forEach((r) => d.push(r.datum));
+    p.krankmeldungen.forEach((a) => d.push(a.datum));
+    p.ueberweisungen.forEach((u) => d.push(u.datum));
+    p.labor.forEach((l) => d.push(l.datum));
+    p.impfungen.forEach((i) => d.push(i.datum));
+    p.leistungen.forEach((l) => d.push(l.datum));
+    state.termine.filter((t) => t.patientId === p.id && t.datum <= todayISO()).forEach((t) => d.push(t.datum));
+    if (p.angelegt) d.push(isoDate(new Date(p.angelegt)));
+    return d.filter(Boolean).sort().pop() || '';
+  }
+  function retentionUntil(p) {
+    const l = lastContact(p);
+    if (!l) return '';
+    const d = new Date(l + 'T12:00:00');
+    d.setFullYear(d.getFullYear() + (state.einstellungen.aufbewahrungJahre || 10));
+    return isoDate(d);
+  }
+  const retentionExpired = (p) => { const u = retentionUntil(p); return !!u && u < todayISO(); };
+
+  function doDeletePatient(p, reason) {
+    const id = p.id;
+    state.patienten = state.patienten.filter((x) => x.id !== id);
+    state.termine = state.termine.filter((t) => t.patientId !== id);
+    state.wartezimmer = state.wartezimmer.filter((w) => w.patientId !== id);
+    state.datenschutz.anfragen.forEach((a) => { if (a.patientId === id) a.patientGeloescht = true; });
+    audit('patient_geloescht', 'patient:' + id + (reason ? ' | ' + reason.slice(0, 80) : ''));
+    view.patientId = null;
+    commit();
+    toast('Akte gelöscht.');
+  }
+  function deletePatientFlow(p) {
+    const until = retentionUntil(p);
+    const expired = retentionExpired(p);
+    const years = state.einstellungen.aufbewahrungJahre || 10;
+    openModal('Akte löschen (Art. 17 DSGVO)', (modal) => {
+      modal.appendChild(h('p', { text: expired
+        ? `Die Aufbewahrungsfrist (${years} Jahre nach dem letzten Kontakt, § 630f Abs. 3 BGB) ist am ${fmtDate(until)} abgelaufen. Die Akte kann endgültig gelöscht werden.`
+        : `Die Aufbewahrungsfrist läuft noch bis ${fmtDate(until)} (§ 630f Abs. 3 BGB). Ein Löschverlangen nach Art. 17 DSGVO ist bis dahin nicht erfüllbar (Art. 17 Abs. 3 lit. b). Empfehlung: die Verarbeitung einschränken (sperren).` }));
+      const reason = h('textarea', { placeholder: 'Begründung (ohne personenbezogene Daten), z. B. „Fehlanlage ohne Behandlung“', style: 'min-height:70px', id: 'del-reason' });
+      const sure = h('input', { type: 'checkbox', id: 'del-sure' });
+      const doIt = h('button', { class: 'btn danger', type: 'button', id: 'del-go', disabled: true }, icon('trash'), 'Endgültig löschen');
+      const check = () => { doIt.disabled = !sure.checked || (!expired && reason.value.trim().length < 10); };
+      sure.addEventListener('change', check); reason.addEventListener('input', check);
+      doIt.addEventListener('click', () => { closeModal(); doDeletePatient(p, expired ? 'Aufbewahrungsfrist abgelaufen' : reason.value.trim()); });
+      if (!expired) {
+        modal.appendChild(h('div', { class: 'field' }, h('label', { text: 'Ausnahme: Löschung trotz laufender Frist (nur bei Fehlanlage oder Testdaten)' }), reason));
+      }
+      modal.appendChild(h('label', { class: 'check-row' }, sure, h('span', { text: 'Ich bestätige, dass die Löschung endgültig und nicht rückgängig zu machen ist.' })));
+      modal.appendChild(h('div', { class: 'modal-actions' },
+        btn('Abbrechen', { onclick: closeModal }),
+        expired ? null : btn('Stattdessen sperren', { icon: 'lock', onclick: () => { closeModal(); sperrenFlow(p); } }), doIt));
+    });
+  }
+  function sperrenFlow(p) {
+    formModal('Verarbeitung einschränken (Art. 18 DSGVO)', [
+      { key: 'grund', label: 'Grund', type: 'select', options: opt(['Richtigkeit wird bestritten', 'Verarbeitung ist unrechtmäßig', 'Löschverlangen trotz Aufbewahrungspflicht', 'Widerspruch eingelegt (Prüfung läuft)', 'Sonstiges']) },
+      { key: 'notiz', label: 'Notiz (ohne Gesundheitsdaten)' }
+    ], (f) => {
+      p.gesperrt = { seit: todayISO(), grund: f.grund + (f.notiz ? ': ' + f.notiz : ''), von: me.name };
+      audit('patient_gesperrt', 'patient:' + p.id);
+      commit(); toast('Akte gesperrt. Es sind keine neuen Einträge mehr möglich.');
+    }, 'Sperren');
+  }
+
+  // ---- Einwilligungen ----
+  const consentOf = (p, art) => p.einwilligungen.find((e) => e.art === art);
+  function setConsent(p, art, erteilt) {
+    let e = consentOf(p, art);
+    if (!e) { e = { art, erteilt: '', widerrufen: '' }; p.einwilligungen.push(e); }
+    if (erteilt) { e.erteilt = todayISO(); e.widerrufen = ''; } else e.widerrufen = todayISO();
+    audit('einwilligung_geaendert', `patient:${p.id}:${art}:${erteilt ? 'erteilt' : 'widerrufen'}`);
+    commit();
+  }
+
+  // ---- Auskunft (Art. 15) und Export (Art. 20) ----
+  function datenInventar(p) {
+    return [['Stammdaten', 1], ['Diagnosen', p.diagnosen.length], ['Medikation', p.medikation.length], ['Karteikarteneinträge', p.karte.length], ['Laborbefunde', p.labor.length],
+      ['Rezepte und E-Rezepte', p.rezepte.length], ['Krankmeldungen', p.krankmeldungen.length], ['Überweisungen', p.ueberweisungen.length], ['Impfungen', p.impfungen.length],
+      ['Vorsorge-Erinnerungen (Recall)', p.vorsorge.length], ['Erbrachte Leistungen (Abrechnung)', p.leistungen.length], ['Termine', state.termine.filter((t) => t.patientId === p.id).length],
+      ['Bilder und Befunddateien', p.bilder.length], ['Einwilligungen', p.einwilligungen.length]];
+  }
+  function viewAuskunft(p) {
+    audit('auskunft_erstellt', 'patient:' + p.id);
+    persist();
+    const e = state.einstellungen;
+    openModal(`Datenauskunft – ${p.vorname} ${p.nachname}`, (modal) => {
+      const sec = (title, ...kids) => h('div', { class: 'ask-sec' }, h('h3', { text: title }), kids);
+      modal.appendChild(h('div', { class: 'doc-preview paper-ask' },
+        letterhead(),
+        h('div', { class: 'paper-title', text: 'Auskunft nach Art. 15 DSGVO' }),
+        h('div', { class: 'paper-sub', text: `Stand: ${fmtDate(todayISO())}` }),
+        patientBlock(p),
+        sec('Verantwortlicher', h('p', { text: `${e.praxis}, ${e.arzt}${e.anschrift ? ', ' + e.anschrift : ''}${e.telefon ? ', Tel. ' + e.telefon : ''}` }), e.dsbName ? h('p', { text: `Datenschutzbeauftragte/r: ${e.dsbName}${e.dsbKontakt ? ' (' + e.dsbKontakt + ')' : ''}` }) : null),
+        sec('Gespeicherte Daten', h('table', { class: 'lab-table' }, h('tbody', {}, datenInventar(p).map(([k, n]) => h('tr', {}, h('td', { text: k }), h('td', { class: 'lab-val', text: String(n) })))))),
+        sec('Zwecke und Rechtsgrundlagen', h('p', { text: 'Behandlung und Dokumentation, Abrechnung, gesetzliche Pflichten (Art. 6 Abs. 1 lit. b, c; Art. 9 Abs. 2 lit. h DSGVO, § 630f BGB). Einwilligungsbasierte Verarbeitungen siehe Einwilligungen.' })),
+        sec('Empfänger', h('p', { text: 'Krankenkassen und Kassenärztliche Vereinigung, Labore, mit- und weiterbehandelnde Ärztinnen und Ärzte, Apotheken, Abrechnungsstellen und Auftragsverarbeiter. Keine Übermittlung in Drittländer.' })),
+        sec('Speicherdauer', h('p', { text: `Mindestens ${e.aufbewahrungJahre} Jahre nach Abschluss der Behandlung (§ 630f Abs. 3 BGB), bei Ihnen voraussichtlich bis ${fmtDate(retentionUntil(p)) || '–'}.` })),
+        sec('Herkunft der Daten', h('p', { text: 'Von Ihnen selbst, von Ihrer Krankenversichertenkarte sowie aus Befunden beteiligter Ärztinnen, Ärzte und Labore.' })),
+        sec('Automatisierte Entscheidungen', h('p', { text: 'Es findet keine automatisierte Entscheidungsfindung einschließlich Profiling statt.' })),
+        sec('Ihre Rechte', h('p', { text: `Berichtigung (Art. 16), Löschung (Art. 17), Einschränkung (Art. 18), Datenübertragbarkeit (Art. 20), Widerspruch (Art. 21) und Widerruf von Einwilligungen (Art. 7 Abs. 3). Beschwerderecht bei einer Aufsichtsbehörde${e.aufsicht ? ': ' + e.aufsicht : ''}.` })),
+        sec('Kopie der Daten', h('p', { text: 'Eine vollständige Kopie der gespeicherten Daten (Art. 15 Abs. 3) erhalten Sie auf Wunsch als Datei.' })),
+        demoNote('Mustertext. Bitte vor dem Versand von der Praxis oder dem Datenschutzbeauftragten prüfen.')));
+      modal.appendChild(h('div', { class: 'modal-actions' }, btn('Schließen', { onclick: closeModal }), btn('Kopie als Datei', { icon: 'save', onclick: () => exportPatientJson(p) }), btn('Drucken', { kind: 'primary', icon: 'print', onclick: () => window.print() })));
+    }, { wide: true });
+  }
+  async function exportPatientJson(p) {
+    const data = { exportiert: new Date().toISOString(), grundlage: 'Art. 15 Abs. 3 / Art. 20 DSGVO', praxis: state.einstellungen.praxis, patient: p, termine: state.termine.filter((t) => t.patientId === p.id) };
+    const r = await window.docsAPI.saveTextFile({ title: 'Datenkopie speichern', defaultName: `Datenkopie-${p.nachname}-${todayISO()}.json`, text: JSON.stringify(data, null, 2), filters: [{ name: 'JSON', extensions: ['json'] }] });
+    if (r && r.ok) { audit('datenexport', 'patient:' + p.id); persist(); toast('Datenkopie gespeichert. Bitte sicher übergeben.'); }
+  }
+
+  // ---- Patientenakte: Tab „Datenschutz“ ----
+  function touchAkte(p) {
+    view.auditSeen = view.auditSeen || {};
+    const k = 'akte:' + p.id;
+    if (!view.auditSeen[k] || Date.now() - view.auditSeen[k] > 600000) {
+      view.auditSeen[k] = Date.now();
+      audit('akte_gelesen', 'patient:' + p.id);
+      persist();
+    }
+  }
+  function tabDatenschutz(p) {
+    const v = h('div', {});
+    const hinweisVorlage = state.vorlagen.find((t) => t.titel.startsWith('Datenschutzhinweis'));
+    v.appendChild(h('div', { class: 'card' },
+      h('div', { class: 'card-title' }, h('h2', { text: 'Datenschutzhinweis' }), p.dsHinweis ? h('span', { class: 'pill ok', text: 'ausgehändigt am ' + fmtDate(p.dsHinweis) }) : h('span', { class: 'pill warn', text: 'noch nicht dokumentiert' })),
+      h('p', { class: 'soft', text: 'Patientinnen und Patienten sind bei der Datenerhebung zu informieren (Art. 13 DSGVO).' }),
+      h('div', { class: 'row' },
+        hinweisVorlage ? btn('Hinweis drucken', { icon: 'print', onclick: () => openDocument(hinweisVorlage, p) }) : null,
+        btn(p.dsHinweis ? 'Erneut als ausgehändigt markieren' : 'Als ausgehändigt markieren', { kind: 'primary', icon: 'check', onclick: () => { p.dsHinweis = todayISO(); audit('datenschutzhinweis', 'patient:' + p.id); commit(); toast('Dokumentiert.'); } }))));
+    v.appendChild(h('div', { class: 'card' }, h('h2', { style: 'margin-bottom:12px', text: 'Einwilligungen' }),
+      h('div', { class: 'list' }, EINWILLIGUNGEN.map(([art, label]) => {
+        const e = consentOf(p, art);
+        const active = e && e.erteilt && !e.widerrufen;
+        return h('div', { class: 'item' }, h('div', { class: 'grow' }, h('div', { class: 'title', text: label }),
+          h('div', { class: 'soft small', text: active ? `erteilt am ${fmtDate(e.erteilt)}` : e && e.widerrufen ? `widerrufen am ${fmtDate(e.widerrufen)}` : 'nicht erteilt' })),
+          h('span', { class: 'pill ' + (active ? 'ok' : 'info'), text: active ? 'aktiv' : 'inaktiv' }),
+          active ? btn('Widerrufen', { kind: 'small', onclick: () => setConsent(p, art, false) }) : btn('Erteilt', { kind: 'small', icon: 'check', onclick: () => setConsent(p, art, true) }));
+      })),
+      h('p', { class: 'soft small', style: 'margin-top:10px', text: 'Behandlung, Abrechnung und gesetzliche Pflichten brauchen keine Einwilligung.' })));
+    const until = retentionUntil(p);
+    const clin = isClin();
+    v.appendChild(h('div', { class: 'card' }, h('h2', { style: 'margin-bottom:6px', text: 'Betroffenenrechte' }),
+      h('p', { class: 'soft', text: `Aufbewahrung bis ${fmtDate(until) || '–'} (${state.einstellungen.aufbewahrungJahre} Jahre nach dem letzten Kontakt).` }),
+      p.gesperrt ? h('p', { class: 'lock-note', text: `Verarbeitung eingeschränkt seit ${fmtDate(p.gesperrt.seit)} (${p.gesperrt.grund}).` }) : null,
+      h('div', { class: 'row' },
+        clin ? btn('Auskunft erstellen (Art. 15)', { icon: 'file', onclick: () => viewAuskunft(p) }) : null,
+        clin ? btn('Daten exportieren (Art. 20)', { icon: 'save', onclick: () => exportPatientJson(p) }) : null,
+        isAdmin() ? (p.gesperrt ? btn('Sperre aufheben', { icon: 'lock', onclick: () => { p.gesperrt = null; audit('patient_entsperrt', 'patient:' + p.id); commit(); toast('Sperre aufgehoben.'); } }) : btn('Verarbeitung einschränken (Art. 18)', { icon: 'lock', onclick: () => sperrenFlow(p) })) : null,
+        isAdmin() ? btn('Akte löschen (Art. 17)', { kind: 'danger', icon: 'trash', onclick: () => deletePatientFlow(p) }) : null))
+    );
+    return v;
+  }
+
+  // ---- Übersicht ----
+  function securityChecks() {
+    const e = state.einstellungen;
+    const out = [];
+    out.push(['ok', 'Daten verschlüsselt', 'AES-256-GCM, Schlüssel aus dem Passwort (PBKDF2, 600.000 Runden). Ohne Anmeldung ist kein Zugriff möglich.']);
+    out.push(envelope && envelope.recovery ? ['ok', 'Wiederherstellungsschlüssel vorhanden', `Erzeugt am ${fmtDate(isoDate(new Date(envelope.recovery.created)))}. Getrennt vom Computer aufbewahren.`] : ['bad', 'Kein Wiederherstellungsschlüssel', 'Ohne Schlüssel sind die Daten bei vergessenem Passwort verloren.']);
+    out.push(e.autoLockMin > 0 ? ['ok', 'Automatische Sperre', `Nach ${e.autoLockMin} Minuten ohne Eingabe.`] : ['warn', 'Automatische Sperre aus', 'Bildschirme bleiben ungeschützt, wenn niemand am Platz ist.']);
+    const admins = state.benutzer.filter((u) => u.role === 'admin').length;
+    out.push(['ok', 'Benutzer und Rollen', `${state.benutzer.length} Benutzer, davon ${admins} Inhaber-Konto${admins === 1 ? '' : 'en'}. Jede Person hat ein eigenes Passwort.`]);
+    out.push(e.letzteSicherung && Date.now() - e.letzteSicherung < 30 * 86400000 ? ['ok', 'Datensicherung', `Letzte verschlüsselte Sicherung am ${fmtDate(isoDate(new Date(e.letzteSicherung)))}.`] : ['warn', 'Datensicherung', e.letzteSicherung ? `Letzte Sicherung vor über 30 Tagen (${fmtDate(isoDate(new Date(e.letzteSicherung)))}).` : 'Es wurde noch keine Sicherung erstellt (Einstellungen → Datensicherung).']);
+    out.push(state.demo ? ['warn', 'Beispieldaten vorhanden', 'Vor dem Echtbetrieb unter Einstellungen löschen, damit keine fiktiven Daten mit echten vermischt werden.'] : ['ok', 'Keine Beispieldaten', 'Es sind nur echte Praxisdaten gespeichert.']);
+    const noHint = state.patienten.filter((p) => !p.dsHinweis).length;
+    out.push(noHint ? ['warn', 'Datenschutzhinweis (Art. 13)', `Bei ${noHint} von ${state.patienten.length} Patientinnen und Patienten ist die Aushändigung nicht dokumentiert.`] : ['ok', 'Datenschutzhinweis (Art. 13)', 'Bei allen Akten dokumentiert.']);
+    const due = state.patienten.filter(retentionExpired).length;
+    out.push(due ? ['warn', 'Löschfristen', `${due} Akte${due > 1 ? 'n' : ''} mit abgelaufener Aufbewahrungsfrist – Löschung prüfen.`] : ['ok', 'Löschfristen', 'Keine Akte mit abgelaufener Aufbewahrungsfrist.']);
+    const late = state.datenschutz.anfragen.filter((a) => a.status !== 'erledigt' && daysUntil(a.frist) < 0).length;
+    out.push(late ? ['bad', 'Betroffenenanfragen', `${late} Anfrage${late > 1 ? 'n' : ''} nicht innerhalb der Frist (1 Monat, Art. 12 Abs. 3) bearbeitet.`] : ['ok', 'Betroffenenanfragen', 'Keine überfällige Anfrage.']);
+    const open = state.datenschutz.pannen.filter((x) => !x.gemeldetAm && x.risiko !== 'kein').length;
+    out.push(open ? ['bad', 'Datenpannen', `${open} Panne${open > 1 ? 'n' : ''} mit Meldepflicht noch nicht gemeldet (72 Stunden, Art. 33).`] : ['ok', 'Datenpannen', 'Keine offene Meldung.']);
+    out.push(window.docsWeb ? ['info', 'Web-App', 'Die Daten liegen verschlüsselt im Browser dieses Geräts. Das Gerät selbst sollte gesperrt und verschlüsselt sein.'] : ['ok', 'Keine Netzwerkverbindung', 'Die App überträgt keine Daten. Internetverbindungen werden im Programm blockiert.']);
+    return out;
+  }
+  function dsUebersicht() {
+    const v = h('div', {});
+    const checks = securityChecks();
+    const bad = checks.filter((c) => c[0] === 'bad').length;
+    const warn = checks.filter((c) => c[0] === 'warn').length;
+    v.appendChild(h('div', { class: 'grid cols-3' },
+      h('div', { class: 'card stat', style: 'margin:0' }, h('div', { class: 'stat-icon' }, icon('shield')), h('div', {}, h('div', { class: 'stat-num', text: String(checks.filter((c) => c[0] === 'ok').length) }), h('div', { class: 'soft small', text: 'Prüfpunkte in Ordnung' }))),
+      h('div', { class: 'card stat', style: 'margin:0' }, h('div', { class: 'stat-icon' }, icon('bell')), h('div', {}, h('div', { class: 'stat-num', text: String(warn) }), h('div', { class: 'soft small', text: 'zu prüfen' }))),
+      h('div', { class: 'card stat', style: 'margin:0' }, h('div', { class: 'stat-icon' }, icon('lock')), h('div', {}, h('div', { class: 'stat-num', text: String(bad) }), h('div', { class: 'soft small', text: 'sofort handeln' })))));
+    v.appendChild(h('div', { class: 'card', style: 'margin-top:18px' }, h('h2', { style: 'margin-bottom:12px', text: 'Sicherheits- und Datenschutz-Check' }),
+      h('div', { class: 'list' }, checks.map(([st, title, text]) => h('div', { class: 'item' },
+        h('span', { class: 'pill ' + (st === 'ok' ? 'ok' : st === 'warn' ? 'warn' : st === 'bad' ? 'danger' : 'info'), text: st === 'ok' ? 'OK' : st === 'warn' ? 'Prüfen' : st === 'bad' ? 'Handeln' : 'Hinweis' }),
+        h('div', { class: 'grow' }, h('div', { class: 'title', text: title }), h('div', { class: 'soft small', text })))))));
+    if (isAdmin()) {
+      const e = state.einstellungen;
+      const sel = (label, key, options, fmt) => h('div', { class: 'field' }, h('label', { text: label }), h('select', { id: 'set-' + key, onchange: (ev) => { e[key] = Number(ev.target.value); audit('einstellungen_geaendert', key); commit(); toast('Gespeichert.'); } }, options.map((o) => h('option', { value: String(o), text: fmt(o), selected: e[key] === o }))));
+      v.appendChild(h('div', { class: 'card' }, h('h2', { style: 'margin-bottom:12px', text: 'Sicherheitseinstellungen' }),
+        h('div', { class: 'row' },
+          sel('Automatische Sperre', 'autoLockMin', [1, 2, 5, 10, 15, 30, 60], (n) => `nach ${n} Minute${n > 1 ? 'n' : ''}`),
+          sel('Aufbewahrung der Akten', 'aufbewahrungJahre', [10, 15, 20, 30], (n) => `${n} Jahre nach letztem Kontakt`),
+          sel('Protokoll aufbewahren', 'auditMonate', [6, 12, 24, 36, 60], (n) => `${n} Monate`)),
+        h('label', { class: 'check-row' }, h('input', { type: 'checkbox', id: 'set-namen', checked: !!e.namenKurz, onchange: (ev) => { e.namenKurz = ev.target.checked; audit('einstellungen_geaendert', 'namenKurz'); commit(); } }), h('span', { text: 'Namen im Wartezimmer und auf der Startseite kürzen (Datenschutz im Wartebereich)' }))));
+    }
+    const due = state.patienten.filter(retentionExpired);
+    v.appendChild(h('div', { class: 'card' }, h('h2', { style: 'margin-bottom:10px', text: 'Löschfällige Akten' }),
+      due.length ? h('div', { class: 'list' }, due.map((p) => h('div', { class: 'item' }, h('img', { class: 'avatar', src: avatarSrc(p), alt: '' }),
+        h('div', { class: 'grow' }, h('div', { class: 'title', text: displayName(p) }), h('div', { class: 'soft small', text: `Letzter Kontakt ${fmtDate(lastContact(p))}, Frist abgelaufen am ${fmtDate(retentionUntil(p))}` })),
+        isAdmin() ? btn('Löschen', { kind: 'small danger', icon: 'trash', onclick: () => deletePatientFlow(p) }) : null)))
+        : h('div', { class: 'empty', text: 'Keine Akte mit abgelaufener Aufbewahrungsfrist.' })));
+    return v;
+  }
+
+  // ---- Betroffenenanfragen ----
+  function dsAnfragen() {
+    const v = h('div', {});
+    const list = [...state.datenschutz.anfragen].sort((a, b) => (a.status === 'erledigt') - (b.status === 'erledigt') || a.frist.localeCompare(b.frist));
+    v.appendChild(h('div', { class: 'card' },
+      h('div', { class: 'card-title' }, h('h2', { text: 'Anfragen von Betroffenen' }), btn('Anfrage erfassen', { kind: 'primary small', icon: 'plus', onclick: () => {
+        formModal('Anfrage erfassen', [
+          { key: 'art', label: 'Art der Anfrage', type: 'select', options: opt(ANFRAGEN_ARTEN) },
+          { key: 'patientId', label: 'Patient/in', type: 'select', options: [{ value: '', label: '– nicht zugeordnet –' }].concat(patientOptions()) },
+          { key: 'eingang', label: 'Eingang am', type: 'date', value: todayISO() },
+          { key: 'notiz', label: 'Notiz (ohne Gesundheitsdaten)' }
+        ], (f) => {
+          const a = { id: uid(), art: f.art, patientId: f.patientId, eingang: f.eingang, frist: plusMonth(f.eingang), status: 'offen', notiz: f.notiz, erledigt: '' };
+          state.datenschutz.anfragen.push(a);
+          audit('anfrage_angelegt', a.art);
+          commit(); toast(`Anfrage erfasst. Frist: ${fmtDate(a.frist)}.`);
+        }, 'Erfassen');
+      } })),
+      h('p', { class: 'soft', text: 'Anfragen müssen unverzüglich, spätestens innerhalb eines Monats beantwortet werden (Art. 12 Abs. 3 DSGVO).' }),
+      list.length ? h('div', { class: 'list' }, list.map((a) => {
+        const p = a.patientId ? getPatient(a.patientId) : null;
+        const left = daysUntil(a.frist);
+        const pill = a.status === 'erledigt' ? ['ok', 'erledigt ' + fmtDate(a.erledigt)] : left < 0 ? ['danger', `${-left} Tage überfällig`] : left <= 7 ? ['warn', `noch ${left} Tage`] : ['info', 'Frist ' + fmtDate(a.frist)];
+        return h('div', { class: 'item' }, h('div', { class: 'grow' }, h('div', { class: 'title', text: a.art }),
+          h('div', { class: 'soft small', text: `${a.patientId ? (p ? displayName(p) : '[Akte gelöscht]') : 'nicht zugeordnet'} · eingegangen ${fmtDate(a.eingang)}${a.notiz ? ' · ' + a.notiz : ''}` })),
+          h('span', { class: 'pill ' + pill[0], text: pill[1] }),
+          a.status !== 'erledigt' && p && /Art\. 15/.test(a.art) ? btn('Auskunft', { kind: 'small', icon: 'file', onclick: () => viewAuskunft(p) }) : null,
+          a.status !== 'erledigt' ? btn('Erledigt', { kind: 'small', icon: 'check', onclick: () => { a.status = 'erledigt'; a.erledigt = todayISO(); audit('anfrage_erledigt', a.art); commit(); } }) : null);
+      })) : h('div', { class: 'empty', text: 'Noch keine Anfragen erfasst.' })));
+    return v;
+  }
+
+  // ---- Datenpannen ----
+  function meldungText(x) {
+    const e = state.einstellungen;
+    return [
+      `Meldung einer Verletzung des Schutzes personenbezogener Daten (Art. 33 DSGVO)`,
+      ``,
+      `Verantwortlicher: ${e.praxis}, ${e.arzt}${e.anschrift ? ', ' + e.anschrift : ''}${e.telefon ? ', Tel. ' + e.telefon : ''}`,
+      `Datenschutzbeauftragte/r / Kontakt: ${e.dsbName || '–'}${e.dsbKontakt ? ' (' + e.dsbKontakt + ')' : ''}`,
+      ``,
+      `Zeitpunkt der Kenntnisnahme: ${fmtStamp(new Date(x.entdeckt).getTime())}`,
+      `Beschreibung des Vorfalls: ${x.beschreibung}`,
+      `Betroffene Datenkategorien: ${x.kategorien || '–'}`,
+      `Ungefähre Zahl betroffener Personen: ${x.betroffene || 'unbekannt'}`,
+      `Wahrscheinliche Folgen: ${x.folgen || '–'}`,
+      `Ergriffene und vorgeschlagene Maßnahmen: ${x.massnahmen || '–'}`,
+      `Einschätzung des Risikos: ${x.risiko === 'hoch' ? 'hohes Risiko (Benachrichtigung der Betroffenen nach Art. 34 erforderlich)' : x.risiko === 'gering' ? 'Risiko für Betroffene' : 'voraussichtlich kein Risiko'}`
+    ].join('\n');
+  }
+  function dsPannen() {
+    const v = h('div', {});
+    const list = [...state.datenschutz.pannen].sort((a, b) => b.entdeckt.localeCompare(a.entdeckt));
+    v.appendChild(h('div', { class: 'card' },
+      h('div', { class: 'card-title' }, h('h2', { text: 'Verletzungen des Schutzes personenbezogener Daten' }), btn('Panne erfassen', { kind: 'primary small', icon: 'plus', onclick: () => {
+        formModal('Datenpanne erfassen', [
+          { key: 'entdeckt', label: 'Zeitpunkt der Kenntnisnahme', type: 'datetime-local', value: new Date(Date.now() - new Date().getTimezoneOffset() * 60000).toISOString().slice(0, 16) },
+          { key: 'beschreibung', label: 'Was ist passiert?', type: 'textarea' },
+          { key: 'kategorien', label: 'Betroffene Datenkategorien', placeholder: 'z. B. Stammdaten, Befunde' },
+          { key: 'betroffene', label: 'Zahl betroffener Personen (ungefähr)', placeholder: 'z. B. 1' },
+          { key: 'folgen', label: 'Mögliche Folgen für Betroffene' },
+          { key: 'massnahmen', label: 'Ergriffene Maßnahmen' },
+          { key: 'risiko', label: 'Risiko für die Betroffenen', type: 'select', options: [{ value: 'kein', label: 'voraussichtlich kein Risiko' }, { value: 'gering', label: 'Risiko, aber kein hohes' }, { value: 'hoch', label: 'hohes Risiko' }] }
+        ], (f) => {
+          if (!f.beschreibung) { toast('Bitte den Vorfall beschreiben.'); return false; }
+          state.datenschutz.pannen.push({ id: uid(), ...f, gemeldetAm: '', betroffeneInformiert: '' });
+          audit('panne_erfasst', f.risiko);
+          commit(); toast('Panne erfasst. Meldefrist beachten.');
+        }, 'Erfassen');
+      } })),
+      h('p', { class: 'soft', text: 'Eine Panne ist der Aufsichtsbehörde unverzüglich und möglichst binnen 72 Stunden nach Kenntnis zu melden (Art. 33), außer es besteht voraussichtlich kein Risiko. Bei hohem Risiko sind auch die Betroffenen zu benachrichtigen (Art. 34). Jede Panne wird dokumentiert.' }),
+      list.length ? h('div', { class: 'list' }, list.map((x) => {
+        const deadline = new Date(x.entdeckt).getTime() + 72 * 3600000;
+        const hours = Math.round((deadline - Date.now()) / 3600000);
+        const pill = x.gemeldetAm ? ['ok', 'gemeldet ' + fmtDate(x.gemeldetAm)] : x.risiko === 'kein' ? ['info', 'keine Meldung nötig'] : hours < 0 ? ['danger', `Frist überschritten (${-hours} h)`] : ['warn', `noch ${hours} h bis zur Frist`];
+        return h('div', { class: 'item' }, h('div', { class: 'grow' }, h('div', { class: 'title', text: x.beschreibung.slice(0, 90) }), h('div', { class: 'soft small', text: `Kenntnis: ${fmtStamp(new Date(x.entdeckt).getTime())} · ${x.betroffene ? x.betroffene + ' Personen · ' : ''}Risiko: ${x.risiko}` })),
+          h('span', { class: 'pill ' + pill[0], text: pill[1] }),
+          btn('Meldung', { kind: 'small', icon: 'file', onclick: () => openModal('Meldung an die Aufsichtsbehörde', (m) => {
+            m.appendChild(h('div', { class: 'doc-preview paper-ask' }, letterhead(), h('div', { style: 'white-space:pre-wrap', text: meldungText(x) }), demoNote('Entwurf. Bitte inhaltlich prüfen und über das Meldeportal der zuständigen Aufsichtsbehörde absenden.')));
+            m.appendChild(h('div', { class: 'modal-actions' }, btn('Schließen', { onclick: closeModal }), btn('Drucken', { kind: 'primary', icon: 'print', onclick: () => window.print() })));
+          }, { wide: true }) }),
+          !x.gemeldetAm && x.risiko !== 'kein' ? btn('Als gemeldet', { kind: 'small', icon: 'check', onclick: () => { x.gemeldetAm = todayISO(); commit(); } }) : null);
+      })) : h('div', { class: 'empty', text: 'Keine Datenpannen erfasst.' })));
+    return v;
+  }
+
+  // ---- Verzeichnis von Verarbeitungstätigkeiten und TOM ----
+  const VVT_LABELS = [['zwecke', 'Zwecke der Verarbeitung'], ['personen', 'Kategorien betroffener Personen'], ['daten', 'Kategorien personenbezogener Daten'], ['rechtsgrundlagen', 'Rechtsgrundlagen'], ['empfaenger', 'Empfänger'], ['drittland', 'Übermittlung in Drittländer'], ['fristen', 'Fristen für die Löschung']];
+  function vvtDefaults() {
+    return {
+      zwecke: 'Durchführung und Dokumentation der ärztlichen Behandlung; Terminorganisation; Abrechnung mit Krankenkassen, Kassenärztlicher Vereinigung und Privatpatienten; Erfüllung gesetzlicher Melde- und Aufbewahrungspflichten.',
+      personen: 'Patientinnen und Patienten; Beschäftigte der Praxis; Kontaktpersonen (zum Beispiel Notfallkontakte).',
+      daten: 'Stammdaten (Name, Anschrift, Geburtsdatum, Kontaktdaten, Versichertennummer); Gesundheitsdaten (Anamnese, Befunde, Diagnosen, Medikation, Laborwerte, Impfungen, Arbeitsunfähigkeit, Überweisungen); Abrechnungsdaten.',
+      rechtsgrundlagen: 'Art. 6 Abs. 1 lit. b und c DSGVO; Art. 9 Abs. 2 lit. h i. V. m. Abs. 3 DSGVO und § 22 BDSG; § 630f BGB; SGB V. Bei Einwilligungen Art. 6 Abs. 1 lit. a und Art. 9 Abs. 2 lit. a DSGVO.',
+      empfaenger: 'Krankenkassen, Kassenärztliche Vereinigung, Labore, mit- und weiterbehandelnde Ärztinnen und Ärzte, Apotheken (E-Rezept), Abrechnungsstellen, Software-Dienstleister (Auftragsverarbeitung nach Art. 28 DSGVO).',
+      drittland: 'Keine Übermittlung in Drittländer.',
+      fristen: 'Behandlungsdokumentation 10 Jahre nach Abschluss der Behandlung (§ 630f Abs. 3 BGB); längere Fristen für einzelne Unterlagen (zum Beispiel Röntgenaufzeichnungen).'
+    };
+  }
+  function tomListe() {
+    const e = state.einstellungen;
+    return [
+      ['Zutrittskontrolle (organisatorisch, von der Praxis zu ergänzen)', ['Praxisräume und Server-/Arbeitsplatzräume verschlossen halten', 'Bildschirme nicht einsehbar für Dritte aufstellen']],
+      ['Zugangs- und Zugriffskontrolle', [`Benutzerkonten mit eigenem Passwort (${state.benutzer.length}) und Rollen (Inhaber/in, Arzt/Ärztin, Praxispersonal, Nur Lesen)`, 'Passwortregeln: mindestens 12 Zeichen, keine gängigen Wörter', `Automatische Sperre nach ${e.autoLockMin} Minuten Inaktivität, manuelle Sperre mit Strg+L`, 'Verzögerung nach wiederholten Fehlanmeldungen; fehlgeschlagene Anmeldungen werden gemeldet']],
+      ['Verschlüsselung', ['Alle Daten auf dem Gerät mit AES-256-GCM verschlüsselt, Schlüssel aus dem Passwort (PBKDF2-HMAC-SHA256, 600.000 Iterationen)', 'Wiederherstellungsschlüssel für den Notfall, getrennt aufzubewahren', 'Datensicherungen sind ebenfalls verschlüsselt']],
+      ['Eingabe- und Zugriffskontrolle', [`Protokoll aller sicherheitsrelevanten Vorgänge (Anmeldung, Aktenzugriff, Ausstellen von Dokumenten, Export, Löschung) als manipulationssichere Hash-Kette, Aufbewahrung ${e.auditMonate} Monate`]],
+      ['Weitergabekontrolle', ['Keine Netzwerkverbindung und keine Telemetrie der Software; Verbindungen ins Internet werden blockiert', 'Exporte nur durch berechtigte Rollen, Dateien nur für den Benutzer lesbar']],
+      ['Verfügbarkeit und Belastbarkeit', ['Atomares Speichern mit Sicherheitskopie, verschlüsselte Datensicherung, Wiederherstellung über Sicherung und Schlüssel', 'Datensicherung regelmäßig an getrenntem Ort (von der Praxis zu organisieren)']],
+      ['Trennungsgebot und Datenschutz durch Voreinstellung', ['Namen im Wartezimmer standardmäßig gekürzt', 'Löschkonzept mit Aufbewahrungsfristen, Sperrung nach Art. 18']],
+      ['Organisatorische Maßnahmen (von der Praxis zu ergänzen)', ['Verpflichtung der Beschäftigten auf Vertraulichkeit und Schweigepflicht (§ 203 StGB)', 'Schulung der Beschäftigten, Regeln für mobile Geräte und Fernzugriff', 'Auftragsverarbeitungsverträge mit Dienstleistern (Art. 28 DSGVO), Meldeprozess für Datenpannen']]
+    ];
+  }
+  function dsVerzeichnis() {
+    const v = h('div', {});
+    const e = state.einstellungen;
+    const f = {};
+    const inp = (key, label, ph) => { f[key] = h('input', { type: 'text', value: e[key] || '', placeholder: ph || '', id: 'dsv-' + key }); return h('div', { class: 'field' }, h('label', { text: label }), f[key]); };
+    v.appendChild(h('div', { class: 'card' }, h('h2', { style: 'margin-bottom:12px', text: 'Stammdaten des Verantwortlichen' }),
+      h('div', { class: 'row' }, inp('anschrift', 'Anschrift der Praxis'), inp('telefon', 'Telefon')),
+      h('div', { class: 'row' }, inp('dsbName', 'Datenschutzbeauftragte/r', 'Name oder „nicht erforderlich“'), inp('dsbKontakt', 'Kontakt Datenschutz', 'E-Mail oder Telefon')),
+      inp('aufsicht', 'Zuständige Aufsichtsbehörde', 'z. B. Landesbeauftragte/r für den Datenschutz Ihres Bundeslandes'),
+      btn('Speichern', { kind: 'primary', icon: 'save', onclick: () => { ['anschrift', 'telefon', 'dsbName', 'dsbKontakt', 'aufsicht'].forEach((k) => { e[k] = f[k].value.trim(); }); audit('einstellungen_geaendert', 'datenschutz-stammdaten'); commit(); toast('Gespeichert.'); } })));
+    const vvt = Object.assign(vvtDefaults(), state.datenschutz.vvt);
+    const areas = {};
+    v.appendChild(h('div', { class: 'card' }, h('h2', { style: 'margin-bottom:6px', text: 'Verzeichnis von Verarbeitungstätigkeiten (Art. 30)' }),
+      h('p', { class: 'soft', text: 'Vorbelegt für eine Hausarztpraxis. Bitte an die tatsächlichen Abläufe anpassen.' }),
+      VVT_LABELS.map(([k, l]) => { areas[k] = h('textarea', { id: 'vvt-' + k, style: 'min-height:84px', value: vvt[k] }); return h('div', { class: 'field' }, h('label', { text: l }), areas[k]); }),
+      h('div', { class: 'row' },
+        btn('Speichern', { kind: 'primary', icon: 'save', onclick: () => { VVT_LABELS.forEach(([k]) => { state.datenschutz.vvt[k] = areas[k].value.trim(); }); commit(); toast('Verzeichnis gespeichert.'); } }),
+        btn('Verzeichnis und TOM drucken', { icon: 'print', onclick: () => {
+          VVT_LABELS.forEach(([k]) => { state.datenschutz.vvt[k] = areas[k].value.trim(); }); persist();
+          openModal('Verzeichnis von Verarbeitungstätigkeiten', (m) => {
+            m.appendChild(h('div', { class: 'doc-preview paper-ask' }, letterhead(), h('div', { class: 'paper-title', text: 'Verzeichnis von Verarbeitungstätigkeiten' }), h('div', { class: 'paper-sub', text: `Art. 30 DSGVO · Stand ${fmtDate(todayISO())}` }),
+              h('div', { class: 'ask-sec' }, h('h3', { text: 'Verantwortlicher' }), h('p', { text: `${e.praxis}, ${e.arzt}${e.anschrift ? ', ' + e.anschrift : ''}${e.telefon ? ', Tel. ' + e.telefon : ''}` }), h('p', { text: `Datenschutzbeauftragte/r: ${e.dsbName || '–'}${e.dsbKontakt ? ' (' + e.dsbKontakt + ')' : ''}` })),
+              h('div', { class: 'ask-sec' }, h('h3', { text: 'Verarbeitungstätigkeit: Patientenverwaltung und Behandlungsdokumentation' }), VVT_LABELS.map(([k, l]) => h('p', {}, h('strong', { text: l + ': ' }), document.createTextNode(state.datenschutz.vvt[k] || vvt[k])))),
+              h('div', { class: 'ask-sec' }, h('h3', { text: 'Technische und organisatorische Maßnahmen (Art. 32)' }), tomListe().map(([g, items]) => h('div', {}, h('strong', { text: g }), h('ul', {}, items.map((i) => h('li', { text: i })))))),
+              demoNote('Vorlage. Bitte durch die Praxis und, falls vorhanden, die/den Datenschutzbeauftragte/n prüfen und ergänzen.')));
+            m.appendChild(h('div', { class: 'modal-actions' }, btn('Schließen', { onclick: closeModal }), btn('Drucken', { kind: 'primary', icon: 'print', onclick: () => window.print() })));
+          }, { wide: true });
+        } }))));
+    return v;
+  }
+
+  // ---- Benutzer ----
+  function dsBenutzer() {
+    const v = h('div', {});
+    const admins = state.benutzer.filter((u) => u.role === 'admin').length;
+    v.appendChild(h('div', { class: 'card' },
+      h('div', { class: 'card-title' }, h('h2', { text: 'Benutzer und Rollen' }), btn('Benutzer anlegen', { kind: 'primary small', icon: 'plus', onclick: addUserModal })),
+      h('p', { class: 'soft', text: 'Jede Person arbeitet mit eigenem Zugang. Inhaber/in: alles. Arzt/Ärztin: klinische Arbeit, Dokumente, Auswertung. Praxispersonal: Termine, Wartezimmer, Karte, Stammdaten. Nur Lesen: ansehen.' }),
+      h('div', { class: 'list' }, state.benutzer.map((u) => {
+        const self = u.id === me.id;
+        return h('div', { class: 'item' }, h('div', { class: 'grow' }, h('div', { class: 'title', text: u.name + (self ? ' (Sie)' : '') })),
+          h('select', { style: 'width:230px', 'aria-label': 'Rolle von ' + u.name, disabled: self, onchange: (ev) => {
+            if (u.role === 'admin' && admins < 2) { toast('Es muss mindestens ein Inhaber-Konto bleiben.'); render(); return; }
+            u.role = ev.target.value; audit('rolle_geaendert', `user:${u.id}:${u.role}`); commit(); toast('Rolle geändert.');
+          } }, ALL_ROLES.map((r) => h('option', { value: r, text: ROLES[r], selected: u.role === r }))),
+          btn('Passwort', { kind: 'small', icon: 'lock', onclick: () => resetPasswordModal(u) }),
+          self ? null : btn('', { kind: 'small', icon: 'trash', onclick: () => confirmModal(`Zugang von ${u.name} wirklich entfernen?`, () => removeUser(u)) }));
+      }))));
+    v.appendChild(h('div', { class: 'card' }, h('h2', { style: 'margin-bottom:6px', text: 'Wiederherstellungsschlüssel' }),
+      h('p', { class: 'soft', text: 'Erneuern Sie den Schlüssel, wenn er verloren ging, weitergegeben wurde oder eine Person mit Zugriff die Praxis verlässt.' }),
+      btn('Schlüssel erneuern', { icon: 'lock', onclick: () => reauth('Wiederherstellungsschlüssel erneuern', () => rotateRecoveryFlow()) })));
+    return v;
+  }
+  function addUserModal() {
+    openModal('Benutzer anlegen', (modal) => {
+      const name = h('input', { type: 'text', id: 'nu-name', placeholder: 'Vor- und Nachname' });
+      const role = h('select', { id: 'nu-role' }, ['mfa', 'arzt', 'lesen', 'admin'].map((r) => h('option', { value: r, text: ROLES[r] })));
+      const pw1 = pwField('Startpasswort (mindestens 12 Zeichen)', { meter: true, autocomplete: 'new-password', id: 'nu-pw1' });
+      const pw2 = pwField('Startpasswort wiederholen', { autocomplete: 'new-password', id: 'nu-pw2' });
+      const err = h('div', { class: 'form-error', role: 'alert' });
+      const form = h('form', {}, h('div', { class: 'row' }, h('div', { class: 'field' }, h('label', { text: 'Name' }), name), h('div', { class: 'field' }, h('label', { text: 'Rolle' }), role)), pw1.field, pw2.field, err,
+        h('div', { class: 'modal-actions' }, btn('Abbrechen', { onclick: closeModal }), h('button', { class: 'btn primary', type: 'submit', id: 'nu-go' }, 'Anlegen')));
+      form.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const n = name.value.trim();
+        if (!n) { err.textContent = 'Bitte einen Namen angeben.'; return; }
+        if (state.benutzer.some((u) => u.name.toLowerCase() === n.toLowerCase())) { err.textContent = 'Dieser Name ist bereits vergeben.'; return; }
+        const chk = Vault.checkPassword(pw1.input.value);
+        if (!chk.ok) { err.textContent = 'Passwort zu schwach: ' + chk.hints.join('; ') + '.'; return; }
+        if (pw1.input.value !== pw2.input.value) { err.textContent = 'Die Passwörter stimmen nicht überein.'; return; }
+        const id = uid();
+        await enqueue(async () => { envelope = await Vault.addUser(envelope, session, { id, name: n, password: pw1.input.value }); });
+        state.benutzer.push({ id, name: n, role: role.value });
+        audit('benutzer_angelegt', `user:${id}:${role.value}`);
+        commit(); closeModal(); toast('Benutzer angelegt. Bitte das Startpasswort persönlich übergeben.');
+      });
+      modal.appendChild(form);
+      setTimeout(() => name.focus(), 40);
+    });
+  }
+  function resetPasswordModal(u) {
+    openModal('Passwort setzen – ' + u.name, (modal) => {
+      const pw1 = pwField('Neues Passwort', { meter: true, autocomplete: 'new-password', id: 'rp-pw1' });
+      const pw2 = pwField('Neues Passwort wiederholen', { autocomplete: 'new-password', id: 'rp-pw2' });
+      const err = h('div', { class: 'form-error', role: 'alert' });
+      const form = h('form', {}, pw1.field, pw2.field, err, h('div', { class: 'modal-actions' }, btn('Abbrechen', { onclick: closeModal }), h('button', { class: 'btn primary', type: 'submit', id: 'rp-go' }, 'Passwort setzen')));
+      form.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const chk = Vault.checkPassword(pw1.input.value);
+        if (!chk.ok) { err.textContent = 'Passwort zu schwach: ' + chk.hints.join('; ') + '.'; return; }
+        if (pw1.input.value !== pw2.input.value) { err.textContent = 'Die Passwörter stimmen nicht überein.'; return; }
+        await enqueue(async () => { envelope = await Vault.setPassword(envelope, session, u.id, pw1.input.value); });
+        audit('passwort_zurueckgesetzt', 'user:' + u.id);
+        commit(); closeModal(); toast('Passwort gesetzt.');
+      });
+      modal.appendChild(form);
+      setTimeout(() => pw1.input.focus(), 40);
+    });
+  }
+  async function removeUser(u) {
+    await enqueue(async () => { envelope = Vault.removeUser(envelope, u.id); });
+    state.benutzer = state.benutzer.filter((x) => x.id !== u.id);
+    audit('benutzer_entfernt', 'user:' + u.id);
+    commit(); toast('Zugang entfernt.');
+  }
+
+  // ---- Protokoll ----
+  function auditObject(o) {
+    const m = /^(patient|user):([^:|]+)(.*)$/.exec(o || '');
+    if (!m) return o || '';
+    if (m[1] === 'patient') { const p = getPatient(m[2]); return (p ? displayName(p) : '[gelöschte Akte]') + (m[3] || ''); }
+    const u = state.benutzer.find((x) => x.id === m[2]);
+    return (u ? u.name : '[entfernter Benutzer]') + (m[3] || '');
+  }
+  function dsProtokoll() {
+    const v = h('div', {});
+    const flt = view.auditFilter || { q: '', a: '' };
+    view.auditFilter = flt;
+    const rows = [...state.audit].reverse().filter((e) => (!flt.a || e.a === flt.a) && (!flt.q || `${e.u} ${AUDIT_TEXT[e.a] || e.a} ${auditObject(e.o)}`.toLowerCase().includes(flt.q.toLowerCase())));
+    const q = h('input', { type: 'text', placeholder: 'Suchen …', value: flt.q, id: 'au-q' });
+    q.addEventListener('input', () => { flt.q = q.value; const pos = q.selectionStart; render(); const again = document.getElementById('au-q'); if (again) { again.focus(); again.setSelectionRange(pos, pos); } });
+    const act = h('select', { id: 'au-a', onchange: (e) => { flt.a = e.target.value; render(); } }, [h('option', { value: '', text: 'Alle Vorgänge' })].concat([...new Set(state.audit.map((e) => e.a))].sort().map((a) => h('option', { value: a, text: AUDIT_TEXT[a] || a, selected: flt.a === a }))));
+    const result = h('div', { class: 'soft small', id: 'au-result' });
+    v.appendChild(h('div', { class: 'card' },
+      h('div', { class: 'card-title' }, h('h2', { text: 'Protokoll' }), h('div', { class: 'row' },
+        btn('Integrität prüfen', { kind: 'small', icon: 'shield', onclick: async () => { const r = await verifyAudit(); result.textContent = r.ok ? `Die Kette ist unverändert (${r.count} Einträge).` : `Manipulation erkannt bei Eintrag ${r.index + 1} von ${r.count}.`; result.className = 'small ' + (r.ok ? 'ok-text' : 'err-text'); } }),
+        btn('Als CSV exportieren', { kind: 'small', icon: 'save', onclick: async () => {
+          const csv = '﻿' + ['Zeitpunkt;Benutzer;Vorgang;Objekt'].concat(state.audit.map((e) => [fmtStamp(e.ts), e.u, AUDIT_TEXT[e.a] || e.a, auditObject(e.o)].map(csvCell).join(';'))).join('\r\n');
+          const r = await window.docsAPI.saveTextFile({ title: 'Protokoll speichern', defaultName: `Protokoll-${todayISO()}.csv`, text: csv, filters: [{ name: 'CSV', extensions: ['csv'] }] });
+          if (r && r.ok) { audit('protokoll_exportiert', ''); persist(); toast('Protokoll gespeichert.'); }
+        } }))),
+      h('p', { class: 'soft', text: `Jeder Eintrag ist mit dem vorherigen verkettet (SHA-256). Nachträgliche Änderungen fallen bei der Prüfung auf. Aufbewahrung: ${state.einstellungen.auditMonate} Monate. Es werden keine Namen von Patienten gespeichert, nur Verweise.` }),
+      result,
+      h('div', { class: 'row', style: 'margin:12px 0' }, h('div', { class: 'field', style: 'flex:2;margin:0' }, q), h('div', { class: 'field', style: 'flex:1;margin:0' }, act)),
+      rows.length ? h('div', { class: 'table-wrap' }, h('table', { class: 'lab-table audit-table' }, h('thead', {}, h('tr', {}, ['Zeitpunkt', 'Benutzer', 'Vorgang', 'Objekt'].map((t) => h('th', { text: t })))),
+        h('tbody', {}, rows.slice(0, 300).map((e) => h('tr', {}, h('td', { text: fmtStamp(e.ts) }), h('td', { text: e.u }), h('td', { text: AUDIT_TEXT[e.a] || e.a }), h('td', { text: auditObject(e.o) })))))) : h('div', { class: 'empty', text: 'Keine Einträge.' }),
+      rows.length > 300 ? h('p', { class: 'soft small', text: `Es werden die neuesten 300 von ${rows.length} Einträgen angezeigt. Der Export enthält alle.` }) : null));
+    return v;
+  }
+
+  // ---- Mein Konto ----
+  function dsKonto() {
+    const v = h('div', {});
+    v.appendChild(h('div', { class: 'card' }, h('h2', { style: 'margin-bottom:6px', text: 'Mein Konto' }),
+      h('p', { class: 'soft', text: `Angemeldet als ${me.name} · ${ROLES[me.role]}` }),
+      h('div', { class: 'row' }, btn('Jetzt sperren (Strg L)', { icon: 'lock', onclick: () => lockApp('manuell') }))));
+    const cur = pwField('Aktuelles Passwort', { id: 'cp-cur' });
+    const pw1 = pwField('Neues Passwort', { meter: true, autocomplete: 'new-password', id: 'cp-pw1' });
+    const pw2 = pwField('Neues Passwort wiederholen', { autocomplete: 'new-password', id: 'cp-pw2' });
+    const err = h('div', { class: 'form-error', role: 'alert' });
+    const form = h('form', {}, cur.field, pw1.field, pw2.field, err, h('button', { class: 'btn primary', type: 'submit', id: 'cp-go' }, 'Passwort ändern'));
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      err.textContent = '';
+      if (!(await Vault.verifyPassword(envelope, me.id, cur.input.value))) { err.textContent = 'Das aktuelle Passwort ist falsch.'; return; }
+      const chk = Vault.checkPassword(pw1.input.value);
+      if (!chk.ok) { err.textContent = 'Passwort zu schwach: ' + chk.hints.join('; ') + '.'; return; }
+      if (pw1.input.value !== pw2.input.value) { err.textContent = 'Die Passwörter stimmen nicht überein.'; return; }
+      await enqueue(async () => { envelope = await Vault.setPassword(envelope, session, me.id, pw1.input.value); });
+      audit('passwort_geaendert', '');
+      commit(); toast('Passwort geändert.');
+    });
+    v.appendChild(h('div', { class: 'card' }, h('h2', { style: 'margin-bottom:12px', text: 'Passwort ändern' }), form));
+    return v;
+  }
+
+  function dsTabs() {
+    const all = [['uebersicht', 'Übersicht'], ['anfragen', 'Betroffenenrechte'], ['pannen', 'Datenpannen'], ['verzeichnis', 'Verzeichnis & TOM'], ['benutzer', 'Benutzer'], ['protokoll', 'Protokoll'], ['konto', 'Mein Konto']];
+    const allowed = { admin: all.map((t) => t[0]), arzt: ['uebersicht', 'anfragen', 'pannen', 'konto'], mfa: ['konto'], lesen: ['konto'] }[me.role];
+    return all.filter((t) => allowed.includes(t[0]));
+  }
+  function renderDatenschutz() {
+    const tabs = dsTabs();
+    if (!view.dsTab || !tabs.some((t) => t[0] === view.dsTab)) view.dsTab = tabs[0][0];
+    const v = h('div', { class: 'view' });
+    v.appendChild(h('div', { class: 'page-head' }, h('div', {}, h('h1', { text: 'Datenschutz & Sicherheit' }), h('p', { text: 'Verschlüsselung, Zugriffe, Betroffenenrechte und Nachweise nach DSGVO.' }))));
+    v.appendChild(h('div', { class: 'tabs', style: 'margin-top:0' }, tabs.map(([k, l]) => h('button', { class: 'tab' + (view.dsTab === k ? ' active' : ''), type: 'button', onclick: () => { view.dsTab = k; render(); } }, l))));
+    const body = { uebersicht: dsUebersicht, anfragen: dsAnfragen, pannen: dsPannen, verzeichnis: dsVerzeichnis, benutzer: dsBenutzer, protokoll: dsProtokoll, konto: dsKonto }[view.dsTab];
+    v.appendChild(body());
+    return v;
+  }
+
   function normalize(data) {
     const base = demoData();
     const s = Object.assign({}, data);
-    s.einstellungen = Object.assign({ praxis: DEFAULT_PRAXIS, arzt: 'Praxisinhaber/in' }, s.einstellungen);
-    s.patienten = (s.patienten || []).map((p) => Object.assign({ diagnosen: [], medikation: [], karte: [], bilder: [], vorsorge: [], impfungen: [], leistungen: [], labor: [], rezepte: [], krankmeldungen: [], ueberweisungen: [], kvnr: '', allergien: '', avatar: 'a1' }, p));
+    s.einstellungen = Object.assign({ praxis: DEFAULT_PRAXIS, arzt: 'Praxisinhaber/in', autoLockMin: 10, auditMonate: 24, aufbewahrungJahre: 10, namenKurz: true, anschrift: '', telefon: '', dsbName: '', dsbKontakt: '', aufsicht: '', letzteSicherung: 0 }, s.einstellungen);
+    s.patienten = (s.patienten || []).map((p) => Object.assign({ diagnosen: [], medikation: [], karte: [], bilder: [], vorsorge: [], impfungen: [], leistungen: [], labor: [], rezepte: [], krankmeldungen: [], ueberweisungen: [], kvnr: '', allergien: '', avatar: 'a1', angelegt: 0, dsHinweis: '', einwilligungen: [], gesperrt: null }, p));
     s.karten = s.karten || [];
     s.katalogExtra = s.katalogExtra || [];
     s.termine = s.termine || [];
     s.wartezimmer = s.wartezimmer || [];
     s.aufgaben = s.aufgaben || [];
+    s.benutzer = s.benutzer || [];
+    s.audit = s.audit || [];
+    s.datenschutz = Object.assign({ anfragen: [], pannen: [], vvt: {} }, s.datenschutz);
     s.bausteine = s.bausteine || base.bausteine;
     s.vorlagen = s.vorlagen && s.vorlagen.length ? s.vorlagen : base.vorlagen;
+    ensureVorlagen(s);
     return s;
   }
 
   async function init() {
     document.getElementById('search-icon').appendChild(icon('search'));
-    document.getElementById('search-btn').addEventListener('click', () => { document.getElementById('sidebar').classList.remove('open'); openSearch(); });
+    document.getElementById('search-btn').addEventListener('click', () => { if (!state) return; document.getElementById('sidebar').classList.remove('open'); openSearch(); });
     document.getElementById('menu-toggle').addEventListener('click', () => document.getElementById('sidebar').classList.toggle('open'));
     document.addEventListener('keydown', (e) => {
-      if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'k') { e.preventDefault(); openSearch(); }
-      if ((e.ctrlKey || e.metaKey) && /^[0-9]$/.test(e.key)) {
-        const target = NAV_FLAT[e.key === '0' ? 9 : Number(e.key) - 1];
+      if (e.key === 'Escape') closeModal();
+      if (!state) return;
+      const mod = e.ctrlKey || e.metaKey;
+      if (mod && e.key.toLowerCase() === 'k') { e.preventDefault(); openSearch(); }
+      if (mod && e.key.toLowerCase() === 'l') { e.preventDefault(); lockApp('manuell'); }
+      if (mod && /^[0-9]$/.test(e.key)) {
+        const target = visibleNav().flatMap(([, items]) => items)[e.key === '0' ? 9 : Number(e.key) - 1];
         if (target) { e.preventDefault(); closeModal(); goto(target[0]); }
       }
-      if (e.key === 'Escape') closeModal();
     });
-    const loaded = await window.docsAPI.loadData();
-    state = loaded ? normalize(loaded) : demoData();
-    if (!loaded) persist();
-    render();
-    setInterval(() => { if (view.page === 'wartezimmer' && !closeCurrentModal) render(); }, 30000);
+    const stored = await window.docsAPI.loadData();
+    if (Vault.isEnvelope(stored)) { envelope = stored; showLogin(); }
+    else if (stored && Array.isArray(stored.patienten)) showSetup(stored); // unverschlüsselte Daten einer früheren Version
+    else if (stored) showUnreadable();
+    else showSetup(null);
+    setInterval(() => { if (state && view.page === 'wartezimmer' && !closeCurrentModal) render(); }, 30000);
+  }
+
+  function showUnreadable() {
+    mountLock(h('h1', { text: 'Datendatei nicht lesbar' }),
+      h('p', { class: 'soft', text: 'Die vorhandene Datendatei hat ein unbekanntes Format oder ist beschädigt. Um nichts zu überschreiben, wurde sie nicht geändert.' }),
+      h('div', { class: 'row', style: 'justify-content:center' }, btn('Neu beginnen (überschreibt die Datei)', { kind: 'danger', icon: 'trash', onclick: () => confirmModal('Die vorhandene Datendatei wird beim Einrichten ersetzt. Wirklich neu beginnen?', () => showSetup(null)) })));
   }
 
   init();
