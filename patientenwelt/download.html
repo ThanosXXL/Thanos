@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; connect-src 'none'; object-src 'none'; base-uri 'none'; form-action 'none'">
+<title>PatientenWelt – Installation</title>
+<style>
+  :root {
+    --blue-900: #062a5e; --blue-800: #0a3d91; --blue-700: #0f56b8; --blue-600: #1565c0;
+    --blue-500: #2f86e0; --blue-400: #5aa3ec; --blue-300: #8fc2f4; --blue-100: #dcedff;
+    --blue-50: #eef5ff; --white: #ffffff; --ink: #10233d; --ink-soft: #45587a;
+    --danger: #c0392b;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    min-height: 100vh;
+    font-family: "Segoe UI", "Helvetica Neue", Arial, sans-serif;
+    color: var(--ink);
+    background:
+      radial-gradient(circle at 20% 0%, rgba(255,255,255,0.55), rgba(255,255,255,0) 40%),
+      linear-gradient(180deg, var(--blue-50) 0%, var(--blue-100) 100%);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 56px 20px 80px;
+  }
+
+  .brand-row {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    margin-bottom: 10px;
+  }
+  .brand-chip {
+    width: 56px; height: 56px;
+    border-radius: 16px;
+    background: linear-gradient(180deg, var(--white) 0%, var(--blue-100) 45%, var(--blue-400) 100%);
+    box-shadow: 0 10px 20px rgba(6,42,94,0.3), inset 0 2px 2px rgba(255,255,255,0.9), inset 0 -5px 8px rgba(15,86,184,0.35);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 28px; font-weight: 800; color: var(--blue-800);
+  }
+  .brand-word {
+    font-size: 30px; font-weight: 800;
+    background: linear-gradient(180deg, var(--blue-700) 0%, var(--blue-900) 100%);
+    -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent;
+  }
+
+  h1 {
+    font-size: 36px; font-weight: 800; text-align: center; margin: 6px 0 4px;
+    background: linear-gradient(180deg, var(--blue-600) 0%, var(--blue-900) 100%);
+    -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent;
+  }
+  p.subtitle { color: var(--ink-soft); font-size: 16px; text-align: center; max-width: 60ch; margin: 0 0 34px; }
+
+  /* ---------- Hero: erkanntes System ---------- */
+  .hero-card {
+    width: min(620px, 100%);
+    border-radius: 24px;
+    padding: 30px 32px;
+    background: linear-gradient(165deg, var(--white) 0%, var(--blue-50) 100%);
+    box-shadow: 0 22px 46px rgba(6,42,94,0.22), inset 0 2px 3px rgba(255,255,255,0.9);
+    display: flex; flex-direction: column; align-items: center; gap: 14px;
+    margin-bottom: 44px;
+  }
+  .hero-eyebrow { font-size: 12.5px; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: var(--blue-600); }
+  .hero-os { font-size: 22px; font-weight: 800; color: var(--ink); }
+  .hero-note { font-size: 13.5px; color: var(--ink-soft); text-align: center; }
+
+  .btn-glossy {
+    appearance: none; border: none; cursor: pointer; text-decoration: none;
+    display: inline-flex; align-items: center; gap: 10px;
+    padding: 16px 36px; border-radius: 999px;
+    font-size: 17px; font-weight: 700; color: var(--white);
+    background: linear-gradient(180deg, var(--blue-500) 0%, var(--blue-700) 100%);
+    box-shadow: 0 14px 26px rgba(6,42,94,0.38), inset 0 2px 2px rgba(255,255,255,0.55), inset 0 -6px 10px rgba(6,42,94,0.4);
+    transition: transform 120ms ease;
+  }
+  .btn-glossy:hover { transform: translateY(-1px); }
+  .btn-glossy:active { transform: translateY(0); }
+  .btn-glossy.disabled {
+    pointer-events: none; cursor: default;
+    background: linear-gradient(180deg, #b9c6da 0%, #8fa0bc 100%);
+    box-shadow: none; color: rgba(255,255,255,0.85);
+  }
+  .btn-glossy svg { flex: none; }
+
+  /* ---------- Plattform-Grid ---------- */
+  .grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(230px, 1fr));
+    gap: 20px;
+    width: min(980px, 100%);
+  }
+  .platform-card {
+    border-radius: 20px;
+    padding: 26px 22px;
+    background: var(--white);
+    border: 1px solid var(--blue-100);
+    box-shadow: 0 12px 26px rgba(6,42,94,0.1);
+    display: flex; flex-direction: column; align-items: center; gap: 12px;
+    text-align: center;
+  }
+  .platform-card.unavailable { background: var(--blue-50); }
+  .platform-icon {
+    width: 64px; height: 64px; border-radius: 18px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 30px;
+    background: linear-gradient(180deg, var(--blue-400) 0%, var(--blue-700) 100%);
+    box-shadow: 0 8px 16px rgba(6,42,94,0.28), inset 0 2px 2px rgba(255,255,255,0.5);
+    color: var(--white);
+  }
+  .platform-card.unavailable .platform-icon {
+    background: linear-gradient(180deg, #c7d2e2 0%, #9fb0c9 100%);
+    box-shadow: none;
+  }
+  .platform-name { font-size: 17px; font-weight: 800; color: var(--ink); }
+  .platform-meta { font-size: 12.5px; color: var(--ink-soft); min-height: 32px; }
+  .status-pill {
+    font-size: 11.5px; font-weight: 700; letter-spacing: 0.04em; text-transform: uppercase;
+    padding: 4px 12px; border-radius: 999px;
+  }
+  .status-pill.ok { background: rgba(21,101,192,0.12); color: var(--blue-700); }
+  .status-pill.no { background: rgba(192,57,43,0.1); color: var(--danger); }
+  .btn-small {
+    font-size: 14px; padding: 10px 22px;
+  }
+  .btn-outline {
+    appearance: none; cursor: default; text-decoration: none;
+    display: inline-flex; align-items: center; gap: 8px;
+    padding: 10px 20px; border-radius: 999px;
+    font-size: 13.5px; font-weight: 700; color: var(--ink-soft);
+    background: var(--blue-50); border: 1px solid var(--blue-100);
+  }
+
+  /* ---------- Hinweis-Boxen ---------- */
+  .notice {
+    width: min(980px, 100%);
+    margin-top: 36px;
+    border-radius: 18px;
+    padding: 22px 26px;
+    background: var(--white);
+    border: 1px solid var(--blue-100);
+    box-shadow: 0 10px 22px rgba(6,42,94,0.08);
+  }
+  .notice h2 { margin: 0 0 10px; font-size: 16px; color: var(--blue-800); }
+  .notice p { margin: 0 0 8px; font-size: 13.5px; line-height: 1.6; color: var(--ink-soft); }
+  .notice p:last-child { margin-bottom: 0; }
+  .notice code {
+    background: var(--blue-50); padding: 1px 6px; border-radius: 5px; font-size: 12.5px;
+    color: var(--blue-800);
+  }
+
+  footer {
+    margin-top: 40px;
+    font-size: 12.5px;
+    color: var(--ink-soft);
+    text-align: center;
+  }
+  footer a { color: var(--blue-700); }
+</style>
+</head>
+<body>
+
+  <div class="brand-row">
+    <div class="brand-chip">&#9877;</div>
+    <div class="brand-word">PatientenWelt</div>
+  </div>
+  <h1>Installation</h1>
+  <p class="subtitle">Praxisverwaltung im blau-weißen Hochglanz-Design. Demo-/Prototyp-Software mit fiktiven Beispieldaten — siehe Hinweise unten.</p>
+
+  <div class="hero-card">
+    <span class="hero-eyebrow">Für Ihr System erkannt</span>
+    <span class="hero-os" id="heroOsName">wird ermittelt …</span>
+    <a class="btn-glossy" id="heroBtn" href="#" download>
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v12"/><path d="M7 10l5 5 5-5"/><path d="M4 21h16"/></svg>
+      <span id="heroBtnLabel">Herunterladen</span>
+    </a>
+    <span class="hero-note" id="heroNote"></span>
+  </div>
+
+  <div class="grid" id="platformGrid"></div>
+
+  <div class="notice">
+    <h2>Wichtig vor der Installation</h2>
+    <p><strong>Unsignierte Installer:</strong> Die Windows-/Mac-Installer sind nicht mit einem
+    kostenpflichtigen Herausgeber-Zertifikat signiert (reines Demo-Projekt). Windows SmartScreen
+    zeigt daher „Unbekannter Herausgeber" — über „Weitere Informationen → Trotzdem ausführen"
+    fortfahren. macOS Gatekeeper zeigt „nicht verifizierter Entwickler" — im Finder
+    Rechtsklick auf die App → „Öffnen" wählen, um das einmalig zu bestätigen.</p>
+    <p><strong>Automatischer Build:</strong> Jeder Download wird von GitHub Actions direkt aus dem
+    Quellcode dieses Repositories gebaut (<code>electron-builder</code>, NSIS/DMG/AppImage) und als
+    GitHub-Release veröffentlicht — die Links oben zeigen immer auf den neuesten Stand.</p>
+    <p><strong>Keine echten Patientendaten verwenden:</strong> PatientenWelt ist kein
+    zulassungsfähiges Praxisverwaltungssystem (keine KBV-Zulassung, keine TI-Anbindung). Details
+    siehe README im Repository, Abschnitt „Grenzen".</p>
+  </div>
+
+  <footer>
+    Quellcode &amp; Release-Übersicht:
+    <a href="https://github.com/ThanosXXL/Thanos/releases" target="_blank" rel="noopener">github.com/ThanosXXL/Thanos/releases</a>
+  </footer>
+
+<script src="download.js"></script>
+</body>
+</html>

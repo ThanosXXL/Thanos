@@ -26,13 +26,21 @@
       "output": "dist"
     },
     "win": {
-      "target": "nsis"
+      "target": "nsis",
+      "artifactName": "PatientenWelt-Setup.${ext}"
     },
     "mac": {
-      "target": "dmg"
+      "target": "dmg",
+      "artifactName": "PatientenWelt.${ext}"
     },
     "linux": {
-      "target": "AppImage"
-    }
+      "target": "AppImage",
+      "artifactName": "PatientenWelt.${ext}"
+    },
+    "publish": [
+      {
+        "provider": "github"
+      }
+    ]
   }
 }
