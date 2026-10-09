@@ -22,27 +22,20 @@
       url: LATEST + 'PatientenWelt.AppImage',
       meta: '64-Bit · tragbares AppImage, keine Installation nötig',
       available: true
-    },
-    android: {
-      name: 'Android', icon: '🤖',
-      url: null,
-      meta: 'Keine native App vorhanden — PatientenWelt ist aktuell eine reine Desktop-Anwendung (Electron).',
-      available: false
-    },
-    ios: {
-      name: 'iOS / iPadOS', icon: '📱',
-      url: null,
-      meta: 'Keine native App vorhanden — PatientenWelt ist aktuell eine reine Desktop-Anwendung (Electron).',
-      available: false
     }
   };
-  var ORDER = ['windows', 'mac', 'linux', 'android', 'ios'];
+  var ORDER = ['windows', 'mac', 'linux'];
 
+  // Erkennt nur Desktop-Betriebssysteme, da PatientenWelt eine reine Electron-Desktop-App
+  // ist und es keine native Android-/iOS-Version gibt. Mobile Besucher landen bewusst im
+  // "nicht automatisch erkannt"-Zustand statt auf einem für sie nicht passenden Vorschlag.
+  // Mobile zuerst ausschließen: Android meldet navigator.platform oft ebenfalls als "Linux
+  // ..." und iPads im Desktop-Modus als "MacIntel" — ohne diesen Ausschluss würden Handys/
+  // Tablets sonst fälschlich als Linux-/Mac-Desktop erkannt.
   function detectOS() {
     var ua = navigator.userAgent || '';
     var platform = navigator.platform || '';
-    if (/Android/i.test(ua)) return 'android';
-    if (/iPhone|iPad|iPod/i.test(ua) || (platform === 'MacIntel' && navigator.maxTouchPoints > 1)) return 'ios';
+    if (/Android|iPhone|iPad|iPod|Mobi/i.test(ua)) return null;
     if (/Win/i.test(platform) || /Windows/i.test(ua)) return 'windows';
     if (/Mac/i.test(platform) || /Macintosh/i.test(ua)) return 'mac';
     if (/Linux/i.test(platform) || /Linux/i.test(ua)) return 'linux';
