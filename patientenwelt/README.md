@@ -110,10 +110,23 @@ Gleiches Muster wie das Dozenten Dashboard: `contextIsolation: true`, `nodeInteg
 
 - **Verschlüsselung**: Die Datendatei (`patientenwelt-data.json` in `userData`) liegt als
   AES-256-GCM-verschlüsselte Hülle vor. Jeder Benutzer wickelt (wrapped) denselben zufälligen
-  Daten-Schlüssel (DEK) mit seinem eigenen, per PBKDF2-SHA256 (210.000 Iterationen) abgeleiteten
-  Passwort-Schlüssel ein — mehrere Benutzer können so unabhängig voneinander entschlüsseln, ohne
-  dass der DEK je unverschlüsselt gespeichert wird. Beide Krypto-Grundfunktionen nutzen ausschließlich
-  Node's eingebautes `crypto`-Modul, keine zusätzliche Abhängigkeit.
+  Daten-Schlüssel (DEK) mit seinem eigenen, per PBKDF2-SHA256 abgeleiteten Passwort-Schlüssel ein
+  — mehrere Benutzer können so unabhängig voneinander entschlüsseln, ohne dass der DEK je
+  unverschlüsselt gespeichert wird. Beide Krypto-Grundfunktionen nutzen ausschließlich Node's
+  eingebautes `crypto`-Modul, keine zusätzliche Abhängigkeit.
+  - **PBKDF2-Iterationen**: 600.000 (OWASP-Empfehlung 2023 für PBKDF2-HMAC-SHA256) für jedes neu
+    angelegte Konto und jeden Passwortwechsel. Jeder Benutzereintrag speichert seine tatsächlich
+    verwendete Iterationszahl (`iterations`); ältere Konten aus der Zeit vor dieser Härtung (ohne
+    gespeichertes Feld, Altwert 210.000) bleiben ohne Migration entschlüsselbar und werden beim
+    nächsten erfolgreichen Login automatisch — mit dem dabei ohnehin im Klartext vorliegenden
+    Passwort — still auf den neuen Standard angehoben, ohne erzwungenen Passwort-Reset.
+  - **Mindestpasswortlänge**: 10 Zeichen (serverseitig in `main.js` *und* clientseitig in
+    `renderer.js`/`index.html` durchgesetzt; beide Stellen müssen bei Änderungen synchron bleiben).
+- **Brute-Force-Schutz**: nach 5 falschen Passworteingaben wird genau das betroffene Benutzerkonto
+  für 5 Minuten gesperrt (`MAX_LOGIN_ATTEMPTS`/`LOCKOUT_DURATION_MS` in `main.js`). Der Zähler und
+  der Sperrzeitpunkt stehen unverschlüsselt neben Salt/IV in der Benutzerliste (nicht sensibel) und
+  überstehen daher auch einen Neustart der App. Nach einer erfolgreichen Anmeldung mit vorherigen
+  Fehlversuchen wird das im Audit-Protokoll vermerkt.
 - **Benutzerrollen**: `admin` (Benutzerverwaltung, Protokoll, Datensicherung, Patienten löschen)
   und `mitarbeiter` (alles andere: Patienten anlegen/bearbeiten, Einträge erfassen). Der letzte
   verbleibende Administrator kann nicht entfernt werden.
@@ -121,23 +134,46 @@ Gleiches Muster wie das Dozenten Dashboard: `contextIsolation: true`, `nodeInteg
   Inaktivität (`IDLE_LOCK_MS` in `renderer.js`). Beim Sperren wird der Hauptprozess-Schlüssel
   verworfen; ohne erneute Anmeldung ist kein Zugriff mehr möglich.
 - **Audit-Protokoll**: `state.auditLog` (Teil der verschlüsselten Daten) protokolliert jede Mutation
-  (Patient/Eintrag angelegt/geändert/gelöscht, Benutzer angelegt/entfernt, Anmeldung, Sperre) mit
-  Zeitstempel und Benutzer. Nur lesbar für Administratoren, im UI nicht löschbar.
+  (Patient/Eintrag angelegt/geändert/gelöscht, Benutzer angelegt/entfernt, Anmeldung, Sperre,
+  Anmeldung nach Fehlversuchen) mit Zeitstempel und Benutzer. Nur lesbar für Administratoren, im UI
+  nicht löschbar.
 - **Backups**: bei jedem Speichern wird automatisch eine Sicherung der verschlüsselten Datei unter
   `userData/backups/` abgelegt (die letzten 10 werden aufbewahrt). Administratoren können über
   „Datensicherung" einen früheren Stand wiederherstellen; der aktuelle Stand wird davor selbst noch
   gesichert.
+- **Dateirechte**: Datendatei und jede Sicherung werden nach dem Schreiben per `chmod 600` auf den
+  Besitzer beschränkt (`restrictToOwner()` in `main.js`), damit andere lokale Benutzerkonten auf
+  demselben Rechner die verschlüsselte Datei nicht einmal lesen können. Unter Windows greift das
+  POSIX-Rechtemodell nicht vollständig — dort bleibt die NTFS-ACL des `userData`-Ordners
+  maßgeblich; der Aufruf ist dort ein Best-Effort und schlägt nie fehl.
+- **Electron-Härtung** (`main.js`, `createWindow()`): `contextIsolation: true`, `nodeIntegration:
+  false`, zusätzlich `sandbox: true` (OS-Sandbox für den Renderer-Prozess) und `spellcheck: false`
+  — letzteres explizit, weil in Verlauf/Befund/Diagnose-Feldern echte Gesundheitsdaten getippt
+  werden und Chromiums Rechtschreibprüfung grundsätzlich serverseitige Wörterbücher nutzen kann.
+  `will-navigate` und `setWindowOpenHandler` blockieren jede Navigation weg von der lokalen
+  `index.html` bzw. das Öffnen neuer Fenster — die App lädt nie externe Inhalte, daher gibt es
+  dafür keinen legitimen Anwendungsfall.
+- **Content-Security-Policy**: `renderer/index.html` setzt eine restriktive CSP
+  (`default-src 'self'`, kein `connect-src`, kein `object-src`, kein `form-action`) als zusätzliche
+  Verteidigungslinie gegen das Nachladen/Ausführen fremder Inhalte, obwohl die App ohnehin nie
+  netzwerkfähig ist.
+- **CSV-Export-Härtung**: `csvEscape()` in `renderer.js` schützt vor CSV-/Formel-Injection — beginnt
+  ein frei eingetipptes Feld (Grund, Diagnose, Notiz, Betreff, …) beim Export mit `=`, `+`, `-`, `@`
+  oder einem Tab/CR, interpretiert Excel/LibreOffice es sonst als Formel statt als Text; ein
+  vorangestelltes Apostroph erzwingt die Textdarstellung.
 - **Kein Passwort-Recovery ohne zweiten Administrator**: Wer sein Passwort vergisst und der einzige
   Benutzer ist, kann die Daten nicht wiederherstellen — das ist die erwartete Konsequenz echter
   Verschlüsselung, keine fehlende Funktion. Ein zweiter Administrator kann das Passwort eines
   anderen Benutzers ohne Kenntnis des alten zurücksetzen (`auth:change-password`).
 
-Verifiziert über eine eigenständige Node-Testsuite für die Krypto-Grundfunktionen (Round-Trip,
-falsches Passwort, Mehrbenutzer-Unwrapping, Manipulationserkennung) sowie einen vollständigen
-Playwright-Durchlauf der UI (Einrichtung → Patient/Benutzer anlegen → Protokoll → Backup → Sperren →
-Rollenwechsel → Fehlermeldung bei falschem Passwort) gegen eine Stub-Implementierung von
-`window.patientenweltAPI`, da in dieser Umgebung kein `npm install`/`npm start` der echten
-Electron-App möglich war (kein Netzwerkzugriff für `electron`-Paket).
+Verifiziert über eine eigenständige Node-Testsuite für die Krypto-Grundfunktionen (Round-Trip bei
+neuer *und* alter Iterationszahl, falsches Passwort, stille Anhebung alter Konten,
+Lockout-Zustandsautomat) sowie mehrere vollständige Playwright-Durchläufe der UI (Einrichtung →
+Patient/Benutzer anlegen → Protokoll → Backup → Sperren → Rollenwechsel → Fehlermeldung bei
+falschem Passwort → Passwortlängen-Validierung an beiden Stellen → CSV-Export mit
+Formel-Injection-Payload) gegen eine Stub-Implementierung von `window.patientenweltAPI`, da in
+dieser Umgebung kein `npm install`/`npm start` der echten Electron-App möglich war (kein
+Netzwerkzugriff für das `electron`-Paket).
 
 ## Datenexport
 
@@ -187,6 +223,30 @@ ungeeignet.
 TI-Anbindungspflicht — Heilpraktiker, reine Privatpraxen, Physiotherapie, Osteopathie u. ä. Vertrags-
 und Haftungsvorlagen für diesen Einsatz liegen in `patientenwelt/legal/` (AVV-Vorlage,
 Haftungsausschluss — beides ungeprüfte Entwürfe, siehe dortige README).
+
+### Verbleibende Sicherheitsgrenzen (auch nach Härtung)
+
+Die unter „Datensicherheit" beschriebenen Maßnahmen heben das Schutzniveau deutlich an, lösen aber
+bewusst nicht jedes Risiko — zur ehrlichen Einordnung für eine Risikobewertung/DSFA:
+
+- **Keine Mehr-Faktor-Authentifizierung.** Login beruht allein auf Passwort + PBKDF2; kein TOTP/
+  Hardware-Token. Der Lockout-Mechanismus mindert automatisiertes Durchprobieren, ersetzt aber
+  keinen zweiten Faktor.
+- **Kein HSM/Secure-Enclave.** Der DEK liegt während einer entsperrten Sitzung ausschließlich im
+  Hauptprozess-Speicher (nie im Renderer, nie auf Platte) — das ist eine Software-Grenze, kein
+  Schutz vor einem Debugger/Memory-Dump mit vollem Zugriff auf den laufenden Prozess.
+  Physischer/administrativer Zugriff auf den laufenden Rechner hebelt jede Softwareverschlüsselung
+  aus; das ist bei einer lokalen Desktop-App ohne TPM-Anbindung unvermeidbar.
+- **Kein Audit außerhalb der App.** Das Protokoll liegt selbst innerhalb der verschlüsselten Datei
+  und ist damit beim Entsperren durch denselben Benutzer grundsätzlich manipulierbar, der auch
+  Schreibzugriff auf die Datei hat — kein externes, unveränderliches Log (SIEM/WORM-Speicher).
+  Für eine reine Desktop-Lösung ohne Server-Backend ist das die erwartete Grenze.
+- **Kein unabhängiger Sicherheits-Review/Penetrationstest.** Alle Härtungsmaßnahmen wurden intern
+  umgesetzt und getestet (siehe unten), aber nie von außenstehender Stelle geprüft — vor
+  produktivem Einsatz mit echten Patientendaten dringend empfohlen.
+- **Electron/Dependency-Patches nicht automatisiert.** `package.json` pinnt `electron` nur per
+  Caret-Range (`^31.0.0`); sicherheitsrelevante Updates (auch auf neuere Hauptversionen) erfordern
+  manuelles `npm update`/`npm audit` vor dem nächsten `npm run dist`.
 
 ### Hochglanz-3D-Schrift
 

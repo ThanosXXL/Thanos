@@ -134,15 +134,23 @@ Sicherheitsmechanismen der Software (`main.js`, `renderer/renderer.js`) diese An
 | Maßnahme | Umsetzung in PatientenWelt |
 |---|---|
 | Verschlüsselung ruhender Daten | AES-256-GCM-Verschlüsselung der gesamten Datendatei |
-| Schlüsselverwaltung | Daten-Schlüssel wird pro Benutzer per PBKDF2-SHA256 (210.000 Iterationen) aus dem individuellen Passwort abgeleitet; der Klartext-Schlüssel wird nie auf Datenträger gespeichert |
+| Schlüsselverwaltung | Daten-Schlüssel wird pro Benutzer per PBKDF2-SHA256 (600.000 Iterationen, OWASP-Empfehlung 2023; ältere Konten mit 210.000 Iterationen werden beim nächsten erfolgreichen Login automatisch auf den neuen Standard angehoben) aus dem individuellen Passwort abgeleitet; der Klartext-Schlüssel wird nie auf Datenträger gespeichert |
+| Passwortrichtlinie | Mindestlänge 10 Zeichen, serverseitig *und* clientseitig durchgesetzt |
 | Zugriffskontrolle | Anmeldepflicht (Login) vor jedem Zugriff; Rollenmodell Administrator/Mitarbeiter mit unterschiedlichen Berechtigungen |
+| Schutz vor Brute-Force-Angriffen | Kontosperre nach 5 fehlgeschlagenen Anmeldeversuchen für 5 Minuten, je betroffenem Benutzerkonto; übersteht einen Neustart der Anwendung |
 | Automatische Sperre | Manuelle Sperrfunktion sowie automatische Sperre nach 5 Minuten Inaktivität |
-| Protokollierung | Audit-Protokoll erfasst jede Änderung (Anlegen/Ändern/Löschen von Patienten und Einträgen, Benutzerverwaltung, Anmeldungen) mit Zeitstempel und Benutzer; im UI nicht löschbar |
+| Protokollierung | Audit-Protokoll erfasst jede Änderung (Anlegen/Ändern/Löschen von Patienten und Einträgen, Benutzerverwaltung, Anmeldungen, Anmeldung nach Fehlversuchen) mit Zeitstempel und Benutzer; im UI nicht löschbar |
 | Verfügbarkeit/Wiederherstellbarkeit | Automatische, rotierende Sicherungskopien (letzte 10 Stände) bei jedem Speichervorgang; Wiederherstellung durch Administratoren möglich |
-| Datenminimierung | Keine Cloud-Synchronisation, keine Übertragung an den Hersteller im Regelbetrieb |
+| Dateisystemrechte | Datendatei und Sicherungskopien werden nach dem Schreiben auf den Besitzer beschränkt (POSIX `chmod 600`); unter Windows bleibt die NTFS-ACL des Benutzerprofils maßgeblich |
+| Absicherung der Anwendungsumgebung | Electron-Renderer läuft mit `contextIsolation`, ohne Node-Integration und zusätzlich in einer OS-Sandbox (`sandbox: true`); Navigation zu fremden Inhalten und das Öffnen neuer Fenster sind unterbunden; Rechtschreibprüfung ist deaktiviert, damit getippte Gesundheitsdaten nicht an eine Wörterbuch-Komponente mit potenziellem Server-Bezug gehen; eine Content-Security-Policy blockiert zusätzlich das Nachladen/Ausführen fremder Inhalte |
+| Schutz vor Exportangriffen | CSV-Exporte entschärfen Formel-Injection (OWASP CSV-Injection) in frei eingegebenen Feldern, bevor sie in Tabellenkalkulationsprogrammen geöffnet werden |
+| Datenminimierung | Keine Cloud-Synchronisation, keine Übertragung an den Hersteller im Regelbetrieb, kein Netzwerkzugriff der Anwendung überhaupt |
 | Auftraggeberkontrolle | Quelloffener, für den Verantwortlichen einsehbarer Funktionsumfang (kein „Black-Box"-Cloud-Dienst) |
 
 **Nicht abgedeckt / vom Verantwortlichen zusätzlich sicherzustellen:** physische Sicherheit der
 Endgeräte, Betriebssystem-/Festplattenverschlüsselung des Geräts, Netzwerksicherheit, organisatorische
 Zugriffsregelungen im Praxisbetrieb, eigene Backup-Strategie außerhalb der Anwendung (z. B. bei
-Geräteverlust), regelmäßige Softwareaktualisierung.
+Geräteverlust), regelmäßige Softwareaktualisierung (einschließlich Electron/Node-Patches), eine
+Mehr-Faktor-Authentifizierung, ein unabhängiger Sicherheits-Review/Penetrationstest sowie ein von der
+Anwendung unabhängiges, manipulationssicheres Protokoll — siehe `patientenwelt/README.md`, Abschnitt
+„Verbleibende Sicherheitsgrenzen (auch nach Härtung)" für die vollständige, ehrliche Einordnung.

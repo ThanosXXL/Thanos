@@ -2,6 +2,15 @@
 <html lang="de">
 <head>
 <meta charset="UTF-8">
+<!--
+  Content-Security-Policy als zusätzliche Verteidigungslinie: diese Seite lädt nie externe
+  Inhalte (kein Netzwerkzugriff im Renderer, siehe CLAUDE.md), daher darf hier grundsätzlich
+  nichts von außerhalb nachgeladen oder ausgeführt werden. style-src erlaubt 'unsafe-inline',
+  weil renderer.js Elemente laufend per element.style.* inline stylt (CSS kann keinen Code
+  ausführen, daher vertretbar); script-src bleibt ohne 'unsafe-inline', damit eingeschleustes
+  Markup niemals als Skript laufen könnte.
+-->
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self'; connect-src 'none'; object-src 'none'; base-uri 'none'; form-action 'none'">
 <title>PatientenWelt</title>
 <link rel="stylesheet" href="style.css">
 </head>
@@ -129,11 +138,11 @@
             <option value="admin">Administrator</option>
           </select>
         </label>
-        <label>Passwort
-          <input type="password" id="fieldUserPassword" minlength="6">
+        <label>Passwort (mind. 10 Zeichen)
+          <input type="password" id="fieldUserPassword" minlength="10" autocomplete="new-password">
         </label>
         <label>Passwort bestätigen
-          <input type="password" id="fieldUserPasswordConfirm" minlength="6">
+          <input type="password" id="fieldUserPasswordConfirm" minlength="10" autocomplete="new-password">
         </label>
       </div>
       <p class="auth-error" id="userFormError"></p>

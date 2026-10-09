@@ -1,6 +1,10 @@
 (function () {
   'use strict';
 
+  // Muss mit MIN_PASSWORD_LENGTH in main.js übereinstimmen (dort die eigentlich
+  // durchgesetzte Grenze) — hier nur für konsistente Client-seitige Fehlermeldungen/Hinweise.
+  const MIN_PASSWORD_LENGTH = 10;
+
   const GESCHLECHT_LABEL = { w: 'weiblich', m: 'männlich', d: 'divers' };
 
   const JOURNAL_TYPEN = ['Anamnese', 'Befund', 'Diagnose', 'Therapie', 'Kontrolle', 'Sonstiges'];
@@ -893,8 +897,8 @@
       el.userFormError.textContent = 'Name ist erforderlich.';
       return;
     }
-    if (password.length < 6) {
-      el.userFormError.textContent = 'Passwort muss mindestens 6 Zeichen haben.';
+    if (password.length < MIN_PASSWORD_LENGTH) {
+      el.userFormError.textContent = `Passwort muss mindestens ${MIN_PASSWORD_LENGTH} Zeichen haben.`;
       return;
     }
     if (password !== passwordConfirm) {
@@ -1242,7 +1246,14 @@
   }
 
   function csvEscape(value) {
-    const s = value === null || value === undefined ? '' : String(value);
+    let s = value === null || value === undefined ? '' : String(value);
+    // Schutz vor CSV-/Formel-Injection (OWASP): Felder sind frei eingetippter Patiententext
+    // (Grund, Diagnose, Notiz, …). Beginnt eine Zelle mit =, +, -, @ oder einem Tab/CR,
+    // interpretiert Excel/LibreOffice sie beim Öffnen als Formel statt als Text — ein
+    // führendes Apostroph erzwingt die Textdarstellung und wird dabei nicht mit angezeigt.
+    if (/^[=+\-@\t\r]/.test(s)) {
+      s = "'" + s;
+    }
     if (/[",;\n\r]/.test(s)) {
       return '"' + s.replace(/"/g, '""') + '"';
     }
@@ -3904,12 +3915,13 @@
     resetIdleTimer();
   }
 
-  function fieldRow(labelText, type) {
+  function fieldRow(labelText, type, autocomplete) {
     const label = document.createElement('label');
     const span = document.createElement('span');
     span.textContent = labelText;
     const input = document.createElement('input');
     input.type = type;
+    if (autocomplete) input.autocomplete = autocomplete;
     label.append(span, input);
     return { label, input };
   }
@@ -3928,8 +3940,8 @@
     el.authCard.appendChild(subtitle);
 
     const nameRow = fieldRow('Name', 'text');
-    const pwRow = fieldRow('Passwort (mind. 6 Zeichen)', 'password');
-    const pwConfirmRow = fieldRow('Passwort bestätigen', 'password');
+    const pwRow = fieldRow(`Passwort (mind. ${MIN_PASSWORD_LENGTH} Zeichen)`, 'password', 'new-password');
+    const pwConfirmRow = fieldRow('Passwort bestätigen', 'password', 'new-password');
     el.authCard.append(nameRow.label, pwRow.label, pwConfirmRow.label);
 
     const error = document.createElement('p');
@@ -3946,7 +3958,7 @@
       const name = nameRow.input.value.trim();
       const password = pwRow.input.value;
       if (!name) { error.textContent = 'Name ist erforderlich.'; return; }
-      if (password.length < 6) { error.textContent = 'Passwort muss mindestens 6 Zeichen haben.'; return; }
+      if (password.length < MIN_PASSWORD_LENGTH) { error.textContent = `Passwort muss mindestens ${MIN_PASSWORD_LENGTH} Zeichen haben.`; return; }
       if (password !== pwConfirmRow.input.value) { error.textContent = 'Passwörter stimmen nicht überein.'; return; }
 
       const res = await window.patientenweltAPI.setup(name, password);
@@ -3992,7 +4004,7 @@
     userLabel.append(userSpan, userSelect);
     el.authCard.appendChild(userLabel);
 
-    const pwRow = fieldRow('Passwort', 'password');
+    const pwRow = fieldRow('Passwort', 'password', 'current-password');
     el.authCard.appendChild(pwRow.label);
 
     const error = document.createElement('p');

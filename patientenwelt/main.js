@@ -6,9 +6,19 @@ const crypto = require('crypto');
 const dataFilePath = path.join(app.getPath('userData'), 'patientenwelt-data.json');
 const backupsDir = path.join(app.getPath('userData'), 'backups');
 
-const PBKDF2_ITERATIONS = 210000;
+// OWASP (2023) empfiehlt mindestens 600.000 Iterationen für PBKDF2-HMAC-SHA256. Bestehende
+// Konten, die vor dieser Härtung angelegt wurden, speichern ihre tatsächliche Iterationszahl
+// pro Benutzer (Feld `iterations`); fehlt das Feld, war es der alte Standardwert. So bleiben
+// alte Konten ohne Migration entschlüsselbar, während jede Neuanlage und jeder Passwortwechsel
+// automatisch den aktuellen, stärkeren Wert verwendet (siehe `auth:login` für die stille
+// Anhebung bestehender Konten beim nächsten erfolgreichen Login).
+const PBKDF2_ITERATIONS = 600000;
+const PBKDF2_ITERATIONS_LEGACY = 210000;
 const KEY_LENGTH = 32; // 256 bit
 const MAX_BACKUPS = 10;
+const MIN_PASSWORD_LENGTH = 10;
+const MAX_LOGIN_ATTEMPTS = 5;
+const LOCKOUT_DURATION_MS = 5 * 60 * 1000; // 5 Minuten Sperre je Benutzerkonto nach zu vielen Fehlversuchen
 
 // ---------- Kryptografie-Hilfsfunktionen ----------
 // AES-256-GCM für die Daten, PBKDF2-SHA256 zur Passwort-Ableitung. Jeder Benutzer
@@ -16,19 +26,21 @@ const MAX_BACKUPS = 10;
 // sodass mehrere Benutzer unabhängig voneinander dieselben Daten entschlüsseln können,
 // ohne dass der DEK selbst je unverschlüsselt gespeichert wird.
 
-function deriveKey(password, saltHex) {
+function deriveKey(password, saltHex, iterations) {
   const salt = Buffer.from(saltHex, 'hex');
-  return crypto.pbkdf2Sync(password, salt, PBKDF2_ITERATIONS, KEY_LENGTH, 'sha256');
+  return crypto.pbkdf2Sync(password, salt, iterations, KEY_LENGTH, 'sha256');
 }
 
 function wrapKey(dek, password) {
   const salt = crypto.randomBytes(16);
-  const key = crypto.pbkdf2Sync(password, salt, PBKDF2_ITERATIONS, KEY_LENGTH, 'sha256');
+  const iterations = PBKDF2_ITERATIONS;
+  const key = crypto.pbkdf2Sync(password, salt, iterations, KEY_LENGTH, 'sha256');
   const iv = crypto.randomBytes(12);
   const cipher = crypto.createCipheriv('aes-256-gcm', key, iv);
   const wrapped = Buffer.concat([cipher.update(dek), cipher.final()]);
   return {
     salt: salt.toString('hex'),
+    iterations,
     iv: iv.toString('hex'),
     authTag: cipher.getAuthTag().toString('hex'),
     wrappedKey: wrapped.toString('hex')
@@ -36,7 +48,8 @@ function wrapKey(dek, password) {
 }
 
 function unwrapKey(userEntry, password) {
-  const key = deriveKey(password, userEntry.salt);
+  const iterations = userEntry.iterations || PBKDF2_ITERATIONS_LEGACY;
+  const key = deriveKey(password, userEntry.salt, iterations);
   const iv = Buffer.from(userEntry.iv, 'hex');
   const decipher = crypto.createDecipheriv('aes-256-gcm', key, iv);
   decipher.setAuthTag(Buffer.from(userEntry.authTag, 'hex'));
@@ -84,8 +97,21 @@ function readEnvelope() {
   }
 }
 
+// Beschränkt Dateirechte auf den Besitzer (0600), damit andere lokale Benutzerkonten auf
+// demselben Rechner die verschlüsselte Datei nicht einmal lesen können. Unter Windows greift
+// das POSIX-Rechtemodell nicht vollständig — dort bleibt die NTFS-ACL des userData-Ordners
+// maßgeblich; der Aufruf ist dort ein No-Op-artiger Best-Effort und darf nie fehlschlagen.
+function restrictToOwner(filePath) {
+  try {
+    fs.chmodSync(filePath, 0o600);
+  } catch (err) {
+    // Bewusst ignoriert (z. B. auf Windows oder bei Dateisystemen ohne POSIX-Rechte).
+  }
+}
+
 function writeEnvelope(envelope) {
   fs.writeFileSync(dataFilePath, JSON.stringify(envelope, null, 2), 'utf-8');
+  restrictToOwner(dataFilePath);
 }
 
 function writeBackup(envelope) {
@@ -93,6 +119,7 @@ function writeBackup(envelope) {
   const stamp = new Date().toISOString().replace(/[:.]/g, '-');
   const backupPath = path.join(backupsDir, `patientenwelt-${stamp}.json`);
   fs.writeFileSync(backupPath, JSON.stringify(envelope, null, 2), 'utf-8');
+  restrictToOwner(backupPath);
 
   const files = fs.readdirSync(backupsDir)
     .filter((f) => f.endsWith('.json'))
@@ -137,8 +164,8 @@ ipcMain.handle('auth:setup', (event, name, password) => {
   if (readEnvelope()) {
     return { success: false, error: 'Es existiert bereits ein Konto. Bitte anmelden.' };
   }
-  if (!name || !name.trim() || !password || password.length < 6) {
-    return { success: false, error: 'Name erforderlich, Passwort mindestens 6 Zeichen.' };
+  if (!name || !name.trim() || !password || password.length < MIN_PASSWORD_LENGTH) {
+    return { success: false, error: `Name erforderlich, Passwort mindestens ${MIN_PASSWORD_LENGTH} Zeichen.` };
   }
 
   const dek = crypto.randomBytes(KEY_LENGTH);
@@ -174,10 +201,27 @@ ipcMain.handle('auth:login', (event, userId, password) => {
   const userEntry = envelope.users.find((u) => u.id === userId);
   if (!userEntry) return { success: false, error: 'Unbekannter Benutzer.' };
 
+  // Brute-Force-Schutz: nach MAX_LOGIN_ATTEMPTS Fehlversuchen wird genau dieses Benutzerkonto
+  // für LOCKOUT_DURATION_MS gesperrt. Der Zähler steht unverschlüsselt neben Salt/IV in der
+  // Benutzerliste (nicht sensibel) und übersteht daher auch einen Neustart der App.
+  const now = Date.now();
+  if (userEntry.lockedUntil) {
+    const lockedUntilMs = new Date(userEntry.lockedUntil).getTime();
+    if (lockedUntilMs > now) {
+      const remainingMin = Math.ceil((lockedUntilMs - now) / 60000);
+      return { success: false, error: `Konto vorübergehend gesperrt (zu viele Fehlversuche). Bitte in ${remainingMin} Minute(n) erneut versuchen.` };
+    }
+  }
+
   let dek;
   try {
     dek = unwrapKey(userEntry, password || '');
   } catch (err) {
+    userEntry.failedAttempts = (userEntry.failedAttempts || 0) + 1;
+    if (userEntry.failedAttempts >= MAX_LOGIN_ATTEMPTS) {
+      userEntry.lockedUntil = new Date(now + LOCKOUT_DURATION_MS).toISOString();
+    }
+    writeEnvelope(envelope);
     return { success: false, error: 'Falsches Passwort.' };
   }
 
@@ -186,6 +230,39 @@ ipcMain.handle('auth:login', (event, userId, password) => {
     state = decryptData(dek, envelope);
   } catch (err) {
     return { success: false, error: 'Daten konnten nicht entschlüsselt werden.' };
+  }
+
+  let envelopeChanged = false;
+
+  const priorFailedAttempts = userEntry.failedAttempts || 0;
+  if (priorFailedAttempts > 0 || userEntry.lockedUntil) {
+    userEntry.failedAttempts = 0;
+    userEntry.lockedUntil = null;
+    envelopeChanged = true;
+    if (priorFailedAttempts > 0) {
+      if (!Array.isArray(state.auditLog)) state.auditLog = [];
+      state.auditLog.unshift({
+        id: crypto.randomUUID(),
+        datum: new Date().toISOString(),
+        userId: userEntry.id,
+        userName: userEntry.name,
+        action: 'Anmeldung nach Fehlversuchen',
+        details: `${priorFailedAttempts} fehlgeschlagene(r) Anmeldeversuch(e) vor dieser erfolgreichen Anmeldung.`
+      });
+    }
+  }
+
+  // Stillschweigende Anhebung älterer, schwächer gehärteter Konten auf den aktuellen
+  // PBKDF2-Standard — ohne erzwungenen Passwort-Reset, da das Passwort hier im Klartext vorliegt.
+  if ((userEntry.iterations || PBKDF2_ITERATIONS_LEGACY) < PBKDF2_ITERATIONS) {
+    Object.assign(userEntry, wrapKey(dek, password));
+    envelopeChanged = true;
+  }
+
+  if (envelopeChanged) {
+    const updated = { version: 2, users: envelope.users, ...encryptData(dek, state) };
+    writeEnvelope(updated);
+    writeBackup(updated);
   }
 
   cachedDEK = dek;
@@ -205,8 +282,8 @@ ipcMain.handle('auth:add-user', (event, name, password, role) => {
   } catch (err) {
     return { success: false, error: err.message };
   }
-  if (!name || !name.trim() || !password || password.length < 6) {
-    return { success: false, error: 'Name erforderlich, Passwort mindestens 6 Zeichen.' };
+  if (!name || !name.trim() || !password || password.length < MIN_PASSWORD_LENGTH) {
+    return { success: false, error: `Name erforderlich, Passwort mindestens ${MIN_PASSWORD_LENGTH} Zeichen.` };
   }
   if (role !== 'admin' && role !== 'mitarbeiter') {
     return { success: false, error: 'Ungültige Rolle.' };
@@ -266,8 +343,8 @@ ipcMain.handle('auth:change-password', (event, userId, oldPassword, newPassword)
   if (currentUser.id !== userId && currentUser.role !== 'admin') {
     return { success: false, error: 'Keine Berechtigung.' };
   }
-  if (!newPassword || newPassword.length < 6) {
-    return { success: false, error: 'Neues Passwort muss mindestens 6 Zeichen haben.' };
+  if (!newPassword || newPassword.length < MIN_PASSWORD_LENGTH) {
+    return { success: false, error: `Neues Passwort muss mindestens ${MIN_PASSWORD_LENGTH} Zeichen haben.` };
   }
 
   const envelope = readEnvelope();
@@ -420,12 +497,25 @@ function createWindow() {
     webPreferences: {
       preload: path.join(__dirname, 'preload.js'),
       contextIsolation: true,
-      nodeIntegration: false
+      nodeIntegration: false,
+      sandbox: true,
+      // Chromiums Rechtschreibprüfung kann serverseitige Wörterbücher nutzen; da hier
+      // Gesundheitsdaten (Diagnosen, Befunde, Verlaufstexte) eingetippt werden, bleibt
+      // Spellcheck komplett aus, statt sich auf die Standardeinstellung zu verlassen.
+      spellcheck: false
     }
   });
 
   win.setMenuBarVisibility(false);
   win.loadFile(path.join(__dirname, 'renderer', 'index.html'));
+
+  // Härtung gegen das Abdriften des Fensters zu fremden Inhalten (z. B. falls über eine noch
+  // unbekannte Lücke jemals Markup/Links in die rein lokale Seite gelangen sollten): die App
+  // lädt ausschließlich ihre eigene lokale index.html und öffnet nie neue Fenster/Tabs.
+  win.webContents.on('will-navigate', (event) => {
+    event.preventDefault();
+  });
+  win.webContents.setWindowOpenHandler(() => ({ action: 'deny' }));
 
   mainWindow = win;
   win.on('closed', () => {
