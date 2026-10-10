@@ -28,12 +28,45 @@ body {
   color: var(--white);
   padding: 16px 24px;
   flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  flex-wrap: wrap;
 }
 
 .app-header h1 {
   margin: 0;
   font-size: 22px;
   letter-spacing: 0.5px;
+}
+
+.header-actions {
+  display: flex;
+  gap: 8px;
+}
+
+.btn-header {
+  background: rgba(255, 255, 255, 0.15);
+  color: var(--white);
+  border: 1px solid rgba(255, 255, 255, 0.5);
+  padding: 7px 14px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 13px;
+}
+
+.btn-header:hover {
+  background: rgba(255, 255, 255, 0.28);
+}
+
+.btn-header.danger {
+  border-color: #ffb4a8;
+}
+
+.btn-header.danger:hover {
+  background: var(--danger);
+  border-color: var(--danger);
 }
 
 .dozent-tabs {

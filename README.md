@@ -53,3 +53,23 @@ npm run dist
 ```
 
 Erzeugt eine installierbare Desktop-Anwendung (Windows/macOS/Linux) im Ordner `dist/`.
+
+## Datenschutz (DSGVO)
+
+- **Rein lokale Verarbeitung:** Alle Daten (Dozenten, Aufgaben, Projekte, Chat-Notizen) werden
+  ausschließlich lokal in einer Datei im Benutzerdatenverzeichnis des jeweiligen Rechners
+  gespeichert (`dozenten-data.json`). Es gibt keine Cloud-Synchronisierung, keinen Server und
+  keine Telemetrie – die App sendet zu keinem Zeitpunkt Daten ins Internet.
+- **Datenportabilität (Art. 20 DSGVO):** Über den Button **„Daten exportieren"** im Kopfbereich
+  lässt sich der gesamte Datenbestand jederzeit als JSON-Datei an einem frei wählbaren Ort
+  speichern.
+- **Recht auf Löschung (Art. 17 DSGVO):** Über **„Alle Daten löschen"** (mit Bestätigungsdialog)
+  lassen sich alle gespeicherten Dozenten, Listen und Chat-Nachrichten unwiderruflich entfernen.
+  Einzelne Dozenten lassen sich zusätzlich gezielt über das „×" am jeweiligen Tab löschen.
+- **Eigenverantwortung bei gemeinsam genutzten Rechnern:** Die Datendatei liegt unverschlüsselt
+  auf der Festplatte. Auf gemeinsam genutzten oder nicht vollplattenverschlüsselten Geräten sollte
+  entsprechend sensibel mit den gespeicherten Namen/Notizen umgegangen werden (z. B. durch
+  Festplattenverschlüsselung des Betriebssystems).
+- **Vollständige Deinstallation:** Beim Deinstallieren der App bleibt die Datendatei im
+  Benutzerdatenverzeichnis erhalten (betriebssystemüblich); sie kann danach manuell gelöscht
+  werden, oder zuvor über „Alle Daten löschen" geleert werden.
