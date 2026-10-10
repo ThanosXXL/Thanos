@@ -88,17 +88,29 @@ async function pickImage() {
   return `data:${mime};base64,${buffer.toString('base64')}`;
 }
 
+function safeFileName(name) {
+  return path.basename(String(name || 'export')).replace(/[\\/:*?"<>|]/g, '_');
+}
+
 async function exportPdfReport(html, suggestedName) {
   const win = new BrowserWindow({
     show: false,
-    webPreferences: { sandbox: true, contextIsolation: true, nodeIntegration: false }
+    webPreferences: {
+      sandbox: true,
+      contextIsolation: true,
+      nodeIntegration: false,
+      webviewTag: false,
+      allowRunningInsecureContent: false
+    }
   });
+  win.webContents.setWindowOpenHandler(() => ({ action: 'deny' }));
+  win.webContents.on('will-navigate', (event) => event.preventDefault());
   try {
     await win.loadURL('data:text/html;charset=utf-8,' + encodeURIComponent(html));
     const pdfBuffer = await win.webContents.printToPDF({ printBackground: true, pageSize: 'A4' });
     const result = await dialog.showSaveDialog({
       title: 'Mängelbericht speichern',
-      defaultPath: suggestedName,
+      defaultPath: safeFileName(suggestedName),
       filters: [{ name: 'PDF', extensions: ['pdf'] }]
     });
     if (result.canceled || !result.filePath) return false;
@@ -112,7 +124,7 @@ async function exportPdfReport(html, suggestedName) {
 async function exportCsvReport(csv, suggestedName) {
   const result = await dialog.showSaveDialog({
     title: 'CSV-Export speichern',
-    defaultPath: suggestedName,
+    defaultPath: safeFileName(suggestedName),
     filters: [{ name: 'CSV', extensions: ['csv'] }]
   });
   if (result.canceled || !result.filePath) return false;
@@ -133,6 +145,8 @@ function createWindow() {
       nodeIntegration: false,
       sandbox: true,
       webSecurity: true,
+      webviewTag: false,
+      allowRunningInsecureContent: false,
       devTools: !app.isPackaged
     }
   });
@@ -158,7 +172,7 @@ function setupContentSecurityPolicy() {
       responseHeaders: {
         ...details.responseHeaders,
         'Content-Security-Policy': [
-          "default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; object-src 'none'; base-uri 'none'; form-action 'none';"
+          "default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; connect-src 'none'; frame-src 'none'; object-src 'none'; base-uri 'none'; form-action 'none';"
         ]
       }
     });
@@ -202,6 +216,16 @@ ipcMain.handle('notify', (event, { title, body }) => {
   if (Notification.isSupported()) {
     new Notification({ title: String(title).slice(0, 200), body: String(body).slice(0, 500) }).show();
   }
+});
+
+// Härtung: auch für künftig erzeugte WebContents (z.B. PDF-Export-Fenster)
+// grundsätzlich keine Navigation zu fremden Zielen und keine neuen Fenster
+// zulassen, unabhängig von der jeweiligen Stelle, die sie erstellt.
+app.on('web-contents-created', (event, contents) => {
+  contents.setWindowOpenHandler(() => ({ action: 'deny' }));
+  contents.on('will-navigate', (navEvent, url) => {
+    if (!url.startsWith('file://') && !url.startsWith('data:')) navEvent.preventDefault();
+  });
 });
 
 app.whenReady().then(() => {

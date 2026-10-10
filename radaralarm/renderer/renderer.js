@@ -1122,6 +1122,21 @@
     });
   }
 
+  // ---------- Impressum & Datenschutz ----------
+
+  document.getElementById('openImpressumBtn').addEventListener('click', () => {
+    document.getElementById('impressumModal').classList.add('visible');
+  });
+  document.getElementById('closeImpressumBtn').addEventListener('click', () => {
+    document.getElementById('impressumModal').classList.remove('visible');
+  });
+  document.getElementById('openDatenschutzBtn').addEventListener('click', () => {
+    document.getElementById('datenschutzModal').classList.add('visible');
+  });
+  document.getElementById('closeDatenschutzBtn').addEventListener('click', () => {
+    document.getElementById('datenschutzModal').classList.remove('visible');
+  });
+
   async function init() {
     demoLimits = await window.radarAlarmAPI.getDemoLimits();
     const loaded = await window.radarAlarmAPI.loadData();

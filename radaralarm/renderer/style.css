@@ -816,3 +816,78 @@ main#content {
 }
 
 .dashboard-card h3 { margin: 0 0 4px 0; color: var(--gold-bright); }
+
+/* ---------- Footer: Copyright, Impressum, Datenschutz ---------- */
+
+.app-footer {
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 8px 16px;
+  background: #0c0b0f;
+  border-top: 1px solid #2a2731;
+  font-size: 11px;
+  color: var(--text-muted);
+}
+
+.copyright-text {
+  flex: 1;
+  min-width: 0;
+}
+
+.footer-links {
+  display: flex;
+  gap: 14px;
+  flex-shrink: 0;
+}
+
+.link-btn {
+  background: none;
+  border: none;
+  padding: 0;
+  color: var(--text-muted);
+  font-size: 11px;
+  text-decoration: underline;
+  cursor: pointer;
+}
+
+.link-btn:hover {
+  color: var(--gold-bright);
+}
+
+.legal-modal {
+  width: 560px;
+  max-height: 80vh;
+  overflow-y: auto;
+}
+
+.legal-list {
+  margin: 14px 0;
+  font-size: 13px;
+}
+
+.legal-list dt {
+  color: var(--gold);
+  font-weight: 600;
+  margin-top: 10px;
+}
+
+.legal-list dd {
+  margin: 2px 0 0 0;
+  color: var(--text-muted);
+}
+
+.legal-text h3 {
+  color: var(--gold-bright);
+  font-size: 14px;
+  margin: 16px 0 4px 0;
+}
+
+.legal-text p {
+  font-size: 13px;
+  color: var(--text-muted);
+  line-height: 1.5;
+  margin: 0;
+}

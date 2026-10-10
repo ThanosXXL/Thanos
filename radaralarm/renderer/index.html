@@ -181,6 +181,55 @@
     <button id="toastUndoBtn" class="btn-secondary">Rückgängig</button>
   </div>
 
+  <footer class="app-footer">
+    <span class="copyright-text">© 2026 RadarAlarm. Alle Rechte vorbehalten. Vervielfältigung und Kopieren – auch auszugsweise – nur mit ausdrücklicher Genehmigung gestattet.</span>
+    <span class="footer-links">
+      <button class="link-btn" id="openImpressumBtn" type="button">Impressum</button>
+      <button class="link-btn" id="openDatenschutzBtn" type="button">Datenschutz</button>
+    </span>
+  </footer>
+
+  <!-- Modal: Impressum (Platzhalter) -->
+  <div class="modal-overlay" id="impressumModal">
+    <div class="modal legal-modal">
+      <h2>Impressum</h2>
+      <p class="settings-error">Platzhalter – vor echter Veröffentlichung durch die vollständigen, rechtlich korrekten Angaben ersetzen (Pflichtangaben nach §5 TMG).</p>
+      <dl class="legal-list">
+        <dt>Anbieter</dt><dd>[Firmen-/Personenname einfügen]</dd>
+        <dt>Anschrift</dt><dd>[Straße, Hausnummer, PLZ, Ort]</dd>
+        <dt>Vertretungsberechtigt</dt><dd>[Name der vertretungsberechtigten Person]</dd>
+        <dt>Kontakt</dt><dd>[Telefon] · [E-Mail-Adresse]</dd>
+        <dt>Handelsregister</dt><dd>[Registergericht und -nummer, falls vorhanden]</dd>
+        <dt>Umsatzsteuer-ID</dt><dd>[USt-IdNr. nach §27a UStG, falls vorhanden]</dd>
+        <dt>Inhaltlich verantwortlich</dt><dd>[Name gemäß §18 Abs. 2 MStV]</dd>
+      </dl>
+      <div class="modal-actions">
+        <button id="closeImpressumBtn" class="btn-secondary">Schließen</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal: Datenschutz -->
+  <div class="modal-overlay" id="datenschutzModal">
+    <div class="modal legal-modal">
+      <h2>Datenschutzerklärung</h2>
+      <p class="settings-error">Diese Fassung beschreibt den technischen Ist-Zustand der Demo-App. Vor echter Veröffentlichung/Verkauf rechtlich prüfen lassen und um Kontaktdaten der verantwortlichen Stelle ergänzen (siehe Impressum).</p>
+      <div class="legal-text">
+        <h3>Lokale Datenverarbeitung</h3>
+        <p>RadarAlarm speichert alle eingegebenen Daten (Projekte, Mängel, Fotos, Kommentare, Team-Angaben) ausschließlich lokal auf diesem Gerät, im Anwendungsdatenordner des Betriebssystems. Es findet keine automatische Übertragung an Server Dritter oder des Anbieters statt.</p>
+        <h3>Keine Analyse, kein Tracking</h3>
+        <p>Die App enthält keine Analytics-, Tracking- oder Werbe-Bibliotheken und sendet keine Nutzungsdaten an externe Dienste.</p>
+        <h3>Externe Links</h3>
+        <p>Der Button „Demo herunterladen" öffnet einen externen Link (GitHub) im Standardbrowser. Es gelten die Datenschutzbestimmungen des jeweiligen Anbieters.</p>
+        <h3>Betroffenenrechte</h3>
+        <p>Da alle Daten ausschließlich lokal bei Ihnen gespeichert werden, können Sie jederzeit selbst Auskunft nehmen, Daten berichtigen oder vollständig löschen (Löschen der Anwendungsdaten bzw. Deinstallation der App).</p>
+      </div>
+      <div class="modal-actions">
+        <button id="closeDatenschutzBtn" class="btn-secondary">Schließen</button>
+      </div>
+    </div>
+  </div>
+
   <script src="renderer.js"></script>
 </body>
 </html>
