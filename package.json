@@ -1,6 +1,6 @@
 {
   "name": "dozenten-dashboard",
-  "version": "1.0.0",
+  "version": "1.2.0",
   "description": "Desktop-Dashboard zur Verwaltung von Dozenten, Aufgaben und Projekten",
   "main": "main.js",
   "author": "",
