@@ -760,6 +760,31 @@ main#content {
   .kanban-board { grid-template-columns: 1fr; }
 }
 
+/* ---------- Stat-Pills (Übersicht & Projekt-Header) ---------- */
+
+.stats-bar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin: 10px 0;
+}
+
+.stat-pill {
+  font-size: 12px;
+  padding: 5px 12px;
+  border-radius: 14px;
+  background: var(--panel-gradient);
+  border: 1px solid #35323a;
+  color: var(--text-muted);
+  white-space: nowrap;
+}
+
+.stat-pill.warn {
+  border-color: var(--danger);
+  color: #ff8a80;
+  background: rgba(224, 72, 62, 0.12);
+}
+
 /* ---------- Dashboard ---------- */
 
 .dashboard-panel h2 {
