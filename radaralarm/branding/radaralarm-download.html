@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>RadarAlarm herunterladen</title>
+<style>
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: radial-gradient(ellipse at 50% 20%, #1c1a22 0%, #0a0a0c 55%, #050506 100%);
+    font-family: "Segoe UI", Arial, sans-serif;
+    color: #f3ecdd;
+    padding: 24px;
+  }
+  .card {
+    width: min(100%, 720px);
+    padding: 40px 36px;
+    text-align: center;
+    background: linear-gradient(155deg, #26232a 0%, #17161b 55%, #100f13 100%);
+    border: 1px solid #8a6d1f;
+    border-radius: 18px;
+    box-shadow: 0 24px 60px rgba(0,0,0,0.65), 0 0 0 1px rgba(212,175,55,0.15);
+  }
+  h1 {
+    margin: 0 0 4px 0;
+    font-size: 30px;
+    background: linear-gradient(180deg, #f6de8f 0%, #d4af37 45%, #8a6d1f 100%);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+  }
+  p.tagline { margin: 0 0 28px 0; color: #a89f8f; font-size: 14px; }
+  .platforms {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));
+    gap: 14px;
+    margin-bottom: 20px;
+  }
+  .plat-btn {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 6px;
+    text-decoration: none;
+    padding: 18px 10px;
+    border-radius: 12px;
+    border: 1px solid #35323a;
+    background: #1c1a20;
+    color: #d8d0c0;
+    transition: transform 0.12s ease, border-color 0.12s ease, background 0.12s ease;
+  }
+  .plat-btn .icon { font-size: 28px; }
+  .plat-btn .name { font-weight: 600; font-size: 14px; }
+  .plat-btn .sub { font-size: 11px; color: #8d8475; }
+  .plat-btn:hover { transform: translateY(-2px); border-color: #8a6d1f; }
+  .plat-btn.recommended {
+    background: linear-gradient(180deg, #f6de8f 0%, #d4af37 45%, #8a6d1f 100%);
+    color: #050505;
+    border-color: #f6de8f;
+    box-shadow: 0 6px 16px rgba(212,175,55,0.35), inset 0 1px 0 rgba(255,255,255,0.5);
+  }
+  .plat-btn.recommended .sub { color: #3a2f0f; }
+  .detected {
+    font-size: 12px;
+    color: #f6de8f;
+    margin-bottom: 14px;
+    min-height: 16px;
+  }
+  .note {
+    margin-top: 24px;
+    font-size: 11.5px;
+    color: #7d7568;
+    line-height: 1.6;
+    text-align: left;
+    background: #15131a;
+    border: 1px solid #2a2731;
+    border-radius: 10px;
+    padding: 14px 16px;
+  }
+  .note b { color: #cfc7b8; }
+</style>
+</head>
+<body>
+  <div class="card">
+    <h1>RadarAlarm</h1>
+    <p class="tagline">Baudokumentation &middot; Mängelmanagement &middot; Kommunikation — Download für Ihr System</p>
+    <div class="detected" id="detected"></div>
+    <div class="platforms">
+      <a class="plat-btn" id="win-btn" href="https://github.com/ThanosXXL/Thanos/releases" target="_blank" rel="noopener">
+        <span class="icon">🪟</span>
+        <span class="name">Windows</span>
+        <span class="sub">.exe &middot; Windows 10/11 (64-bit)</span>
+      </a>
+      <a class="plat-btn" id="mac-btn" href="https://github.com/ThanosXXL/Thanos/releases" target="_blank" rel="noopener">
+        <span class="icon">🍎</span>
+        <span class="name">macOS</span>
+        <span class="sub">.dmg &middot; macOS 11+</span>
+      </a>
+      <a class="plat-btn" id="linux-btn" href="https://github.com/ThanosXXL/Thanos/releases" target="_blank" rel="noopener">
+        <span class="icon">🐧</span>
+        <span class="name">Linux</span>
+        <span class="sub">.AppImage &middot; 64-bit</span>
+      </a>
+    </div>
+    <div class="note">
+      <b>Hinweis:</b> Aus Sicherheitsgründen kann keine Webseite Software automatisch und ohne
+      Ihre Bestätigung installieren — das würde eine Sicherheitslücke in Ihrem Betriebssystem
+      voraussetzen. Der Button lädt lediglich die passende Installationsdatei herunter; die
+      Installation selbst führen Sie danach mit einem Klick/Doppelklick aus (Schritt-für-Schritt
+      in der separaten Installationshilfe-PDF). Mobile Versionen (Android/iOS) existieren für
+      RadarAlarm aktuell nicht — das wäre ein eigenständiges Projekt.
+    </div>
+  </div>
+
+<script>
+(function () {
+  var ua = navigator.userAgent;
+  var detected = document.getElementById('detected');
+  var map = { win: 'win-btn', mac: 'mac-btn', linux: 'linux-btn' };
+  var platform = null;
+  if (/Windows/i.test(ua)) platform = 'win';
+  else if (/Macintosh|Mac OS X/i.test(ua)) platform = 'mac';
+  else if (/Linux/i.test(ua)) platform = 'linux';
+
+  if (platform) {
+    var btn = document.getElementById(map[platform]);
+    btn.classList.add('recommended');
+    var label = { win: 'Windows', mac: 'macOS', linux: 'Linux' }[platform];
+    detected.textContent = 'Erkanntes System: ' + label + ' — empfohlener Download hervorgehoben.';
+  }
+})();
+</script>
+</body>
+</html>
