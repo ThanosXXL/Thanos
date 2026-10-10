@@ -243,6 +243,13 @@
       tdTime.textContent = a.time;
       const tdAction = document.createElement("td");
       const btn = el("button", "ack-btn", "Quittieren");
+      btn.addEventListener("click", () => {
+        const idx = ALARMS.indexOf(a);
+        if (idx !== -1) ALARMS.splice(idx, 1);
+        renderAlarmTable();
+        renderHome();
+        renderSidebarAlarms();
+      });
       tdAction.appendChild(btn);
 
       tr.appendChild(tdSev);
@@ -454,6 +461,22 @@
     });
   }
 
+  function setupLegalModal() {
+    const modal = document.getElementById("legal-modal");
+    document.getElementById("legal-link").addEventListener("click", () => {
+      modal.classList.remove("hidden");
+    });
+    document.getElementById("legal-close").addEventListener("click", () => {
+      modal.classList.add("hidden");
+    });
+    modal.addEventListener("click", (e) => {
+      if (e.target === modal) modal.classList.add("hidden");
+    });
+    document.addEventListener("keydown", (e) => {
+      if (e.key === "Escape") modal.classList.add("hidden");
+    });
+  }
+
   /* ============ Navigation & Uhrzeit ============ */
 
   const VIEW_META = {
@@ -516,6 +539,7 @@
     renderSidebarAlarms();
     renderSidebarPlants();
     setupSidebarExtras();
+    setupLegalModal();
     setupNav();
     tickClock();
 

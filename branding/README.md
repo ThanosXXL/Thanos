@@ -30,3 +30,13 @@ einer Chat-Session zu existieren.
 Alle Assets sind synthetisch/prozedural erzeugt (ffmpeg-Audiosynthese,
 Fluidsynth + General-MIDI-Soundfont, Playwright-Screenshots/-Aufnahmen der
 HTML-Vorlagen) und lizenzfrei nutzbar für dieses Projekt.
+
+## Sicherheit & Rechtliches
+
+Die drei `.html`-Quelldateien sind vollständig eigenständig (kein externer
+Code/keine externen Schriften oder Bilder, Base64-eingebettete Medien) und
+tragen eine `Content-Security-Policy`, die jegliches Nachladen von
+Fremdressourcen verhindert. Jede Seite hat unten einen ausklappbaren
+"Impressum & Datenschutz"-Hinweis – ein **Platzhalter**, der vor einer
+öffentlichen oder gewerblichen Weitergabe (§ 5 TMG / § 18 MStV) durch die
+echte Anbieterkennzeichnung ersetzt werden muss.

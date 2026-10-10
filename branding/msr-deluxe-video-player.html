@@ -1,3 +1,10 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<meta name="referrer" content="no-referrer" />
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; media-src 'self' data: blob:; script-src 'self' 'unsafe-inline'; connect-src 'self' blob:; base-uri 'none'; form-action 'none';" />
 <title>MSR_DELUXE Dashboard Demo – Video</title>
 <style>
   :root {
@@ -150,7 +157,13 @@
   .dl-btn:hover { transform: translateY(-2px); }
   .dl-btn:focus-visible { outline: 2px solid var(--gold-soft); outline-offset: 3px; }
   .dl-btn svg { width: 15px; height: 15px; fill: var(--navy-950); }
+
+  .legal-footer { max-width: 760px; margin: 14px auto 0; font-size: 11px; line-height: 1.6; color: var(--muted); }
+  .legal-footer summary { cursor: pointer; color: var(--gold-soft); }
+  .legal-footer p { margin: 8px 0 0; }
 </style>
+</head>
+<body>
 
 <div class="page">
   <div class="eyebrow">MSR_DELUXE · Interaktive Demo</div>
@@ -179,6 +192,18 @@
     </a>
   </div>
 </div>
+
+<details class="legal-footer">
+  <summary>© 2026 MSR_DELUXE · Impressum &amp; Datenschutz</summary>
+  <p>
+    Diese Seite ist Marketing-Material zu einer unverbindlichen Demo-Software, kein
+    produktiv eingesetztes System. Die Anbieterkennzeichnung ist ein <strong>Platzhalter</strong>
+    und muss vor einer öffentlichen oder gewerblichen Nutzung durch die echten Angaben
+    (§ 5 TMG / § 18 MStV) ersetzt werden: [Name/Firmenname], [Straße, Hausnummer], [PLZ, Ort],
+    [Land] · Kontakt: [Telefonnummer] / [E-Mail-Adresse]. Diese Seite lädt keine externen
+    Ressourcen, setzt keine Cookies und übermittelt keine Daten an einen Server.
+  </p>
+</details>
 
 <script>
 (function () {
@@ -219,3 +244,6 @@
   link.rel = "noopener";
 })();
 </script>
+
+</body>
+</html>

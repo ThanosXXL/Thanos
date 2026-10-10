@@ -3,6 +3,10 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<!-- frame-ancestors/X-Frame-Options lassen sich nur per HTTP-Header setzen, nicht per <meta>
+     (vom Hosting der Demo abhängig) – die übrigen Direktiven greifen auch so. -->
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; script-src 'self'; connect-src 'none'; base-uri 'none'; form-action 'none';" />
+<meta name="referrer" content="no-referrer" />
 <title>MSR_DELUXE Dashboard – Demo</title>
 <link rel="stylesheet" href="style.css" />
 </head>
@@ -59,6 +63,11 @@
           <span class="sidebar-plants-count" id="sidebar-plants-count">– / –</span>
         </div>
         <ul class="sidebar-plant-list" id="sidebar-plant-list"></ul>
+      </div>
+
+      <div class="legal-footer">
+        <span>© 2026 MSR_DELUXE</span>
+        <button class="legal-link" id="legal-link" type="button">Impressum &amp; Datenschutz</button>
       </div>
     </aside>
 
@@ -201,6 +210,35 @@
         </div>
       </section>
     </main>
+  </div>
+
+  <div class="modal-overlay hidden" id="legal-modal">
+    <div class="modal-box">
+      <div class="modal-head">
+        <h2>Impressum &amp; Datenschutz</h2>
+        <button class="modal-close" id="legal-close" type="button" aria-label="Schließen">✕</button>
+      </div>
+      <div class="modal-body">
+        <p class="modal-note">
+          Dieses Dashboard ist eine <strong>unverbindliche Demo-Software</strong> zu Vorführzwecken,
+          kein produktiv eingesetztes System. Die folgenden Angaben sind <strong>Platzhalter</strong>
+          und müssen vor einer öffentlichen oder gewerblichen Nutzung durch die echte
+          Anbieterkennzeichnung (§ 5 TMG / § 18 MStV) ersetzt werden.
+        </p>
+        <h3>Verantwortlich für den Inhalt</h3>
+        <p>[Name / Firmenname]<br />[Straße, Hausnummer]<br />[PLZ, Ort]<br />[Land]</p>
+        <p>Vertreten durch: [Name der vertretungsberechtigten Person]<br />
+          Kontakt: Telefon [Telefonnummer] · E-Mail [E-Mail-Adresse]</p>
+        <p>Registereintrag (falls zutreffend): [Handelsregister, Registernummer]<br />
+          Umsatzsteuer-ID (falls zutreffend): [USt-IdNr. nach § 27a UStG]</p>
+        <h3>Datenschutz (DSGVO)</h3>
+        <p>
+          Dieses Dashboard läuft vollständig lokal im Browser mit frei erfundenen Demo-Messwerten.
+          Es werden keine echten Anlagendaten verarbeitet, keine Cookies gesetzt, keine Daten an
+          einen Server übertragen und keine Nutzungsdaten erhoben.
+        </p>
+      </div>
+    </div>
   </div>
 
   <script src="script.js"></script>
