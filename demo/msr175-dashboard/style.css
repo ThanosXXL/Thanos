@@ -15,6 +15,7 @@
   --radius: 18px;
   --shadow-deep: 0 24px 48px -18px rgba(6, 18, 41, 0.55);
   --shadow-soft: 0 10px 24px -12px rgba(6, 18, 41, 0.35);
+  color-scheme: dark;
 }
 
 * { box-sizing: border-box; }
@@ -686,4 +687,24 @@ body {
   .kpi-grid, .status-grid, .kpi-grid.gauges { grid-template-columns: repeat(2, 1fr); }
   .panel-grid { grid-template-columns: 1fr; }
   .app { grid-template-columns: 210px 1fr; }
+}
+
+/* ---------- Mobile (Handy) ---------- */
+@media (max-width: 720px) {
+  .app { grid-template-columns: 1fr; min-height: 0; }
+  .sidebar, .main { min-width: 0; }
+  .sidebar {
+    border-right: none;
+    border-bottom: 1px solid rgba(255,255,255,0.08);
+    padding: 18px 16px;
+  }
+  .nav { flex-direction: row; flex-wrap: wrap; gap: 8px; }
+  .nav-item { flex: 1 1 auto; justify-content: center; white-space: nowrap; }
+  .sidebar-plant-list { max-height: 140px; }
+  .main { padding: 18px 16px 28px; }
+  .topbar { flex-direction: column; align-items: flex-start; gap: 10px; }
+  .kpi-grid, .status-grid, .kpi-grid.gauges, .panel-grid { grid-template-columns: 1fr; }
+  .panel, .panel-grid, .status-grid, .kpi-grid { min-width: 0; }
+  .data-table { display: block; min-width: 0; max-width: 100%; overflow-x: auto; white-space: nowrap; }
+  .data-table thead, .data-table tbody { display: table; width: 100%; }
 }
