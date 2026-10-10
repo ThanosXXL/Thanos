@@ -2,12 +2,17 @@
 <html lang="de">
 <head>
 <meta charset="UTF-8">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self'; style-src 'self'; img-src 'self'; connect-src 'none'; base-uri 'none'; form-action 'none'; frame-ancestors 'none'">
 <title>IT-Schulung Dashboard</title>
 <link rel="stylesheet" href="style.css">
 </head>
 <body>
   <header class="app-header">
     <h1>IT-Schulung Dashboard</h1>
+    <div class="header-actions">
+      <button id="exportDataBtn" class="btn-header" title="Alle Daten als JSON-Datei exportieren">Daten exportieren</button>
+      <button id="deleteAllDataBtn" class="btn-header danger" title="Alle Schulungen und Daten unwiderruflich löschen">Alle Daten löschen</button>
+    </div>
   </header>
 
   <nav class="schulung-tabs" id="schulungTabs">
@@ -41,6 +46,18 @@
       <div class="modal-actions">
         <button id="cancelDeleteSchulung" class="btn-secondary">Abbrechen</button>
         <button id="confirmDeleteSchulung" class="btn-danger">Entfernen</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal: Alle Daten löschen bestätigen (DSGVO-Löschung) -->
+  <div class="modal-overlay" id="deleteAllDataModal">
+    <div class="modal">
+      <h2>Wirklich alle Daten löschen?</h2>
+      <p>Alle Schulungen, Listen und Chat-Nachrichten werden unwiderruflich gelöscht. Tipp: Vorher über „Daten exportieren" sichern.</p>
+      <div class="modal-actions">
+        <button id="cancelDeleteAllData" class="btn-secondary">Abbrechen</button>
+        <button id="confirmDeleteAllData" class="btn-danger">Endgültig löschen</button>
       </div>
     </div>
   </div>

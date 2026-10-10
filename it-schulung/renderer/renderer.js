@@ -522,6 +522,33 @@
   document.getElementById('cancelDeleteSchulung').addEventListener('click', closeDeleteSchulungModal);
   document.getElementById('confirmDeleteSchulung').addEventListener('click', confirmDeleteSchulung);
 
+  // DSGVO: Datenportabilität (Export) und Recht auf Löschung (alle Daten).
+  const deleteAllDataModal = document.getElementById('deleteAllDataModal');
+
+  document.getElementById('exportDataBtn').addEventListener('click', async () => {
+    try {
+      await window.schulungAPI.exportData(state);
+    } catch (err) {
+      console.error('Export fehlgeschlagen:', err);
+    }
+  });
+
+  document.getElementById('deleteAllDataBtn').addEventListener('click', () => {
+    deleteAllDataModal.classList.add('visible');
+  });
+
+  document.getElementById('cancelDeleteAllData').addEventListener('click', () => {
+    deleteAllDataModal.classList.remove('visible');
+  });
+
+  document.getElementById('confirmDeleteAllData').addEventListener('click', () => {
+    state = { schulungen: [] };
+    activeSchulungId = null;
+    persist();
+    deleteAllDataModal.classList.remove('visible');
+    render();
+  });
+
   async function init() {
     const loaded = await window.schulungAPI.loadData();
     state = loaded && Array.isArray(loaded.schulungen) ? loaded : { schulungen: [] };

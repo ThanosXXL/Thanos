@@ -36,3 +36,21 @@ npm run dist
 ```
 
 Erzeugt eine installierbare Desktop-Anwendung (Windows/macOS/Linux) im Ordner `dist/`.
+
+## Datenschutz (DSGVO)
+
+- **Rein lokale Verarbeitung:** Alle Daten (Schulungen, Teilnehmer, Aufgaben, Themen,
+  Chat-Notizen) werden ausschließlich lokal in `it-schulung-data.json` im
+  Benutzerdatenverzeichnis gespeichert. Keine Cloud-Synchronisierung, kein Server, keine
+  Telemetrie.
+- **Datenportabilität (Art. 20 DSGVO):** Button **„Daten exportieren"** im Kopfbereich speichert
+  den gesamten Datenbestand als JSON-Datei an einem frei wählbaren Ort.
+- **Recht auf Löschung (Art. 17 DSGVO):** Button **„Alle Daten löschen"** (mit
+  Bestätigungsdialog) entfernt alle Schulungen, Teilnehmer, Listen und Chat-Nachrichten
+  unwiderruflich. Einzelne Schulungen lassen sich zusätzlich gezielt über das „×" am jeweiligen
+  Tab löschen.
+- **Externe Links:** Der „Link – täglicher Live-Termin" öffnet ausschließlich `http(s)`-URLs im
+  System-Standardbrowser; andere Protokolle werden abgelehnt.
+- **Eigenverantwortung bei gemeinsam genutzten Rechnern:** Die Datendatei liegt unverschlüsselt
+  auf der Festplatte (inkl. Teilnehmernamen und Admin-Angabe) – auf gemeinsam genutzten Geräten
+  empfiehlt sich eine Festplattenverschlüsselung des Betriebssystems.
