@@ -33,7 +33,17 @@ function saveData(data) {
   if (Buffer.byteLength(serialized, 'utf-8') > MAX_PAYLOAD_BYTES) {
     throw new Error('Datenmenge überschreitet das zulässige Limit.');
   }
-  fs.writeFileSync(dataFilePath, serialized, 'utf-8');
+  // Atomar schreiben (temp + rename), damit ein Absturz mitten im Schreibvorgang
+  // nicht die bestehende Datendatei beschädigt; 0600, da personenbezogene Daten
+  // (Namen, Chat-Notizen) nur für den aktuellen Benutzer lesbar sein sollen.
+  const tmpPath = `${dataFilePath}.${process.pid}.tmp`;
+  fs.writeFileSync(tmpPath, serialized, { encoding: 'utf-8', mode: 0o600 });
+  fs.renameSync(tmpPath, dataFilePath);
+  try {
+    fs.chmodSync(dataFilePath, 0o600);
+  } catch (err) {
+    // Manche Dateisysteme (z. B. FAT/exFAT) unterstützen keine Unix-Rechte.
+  }
 }
 
 function createWindow() {
@@ -90,10 +100,26 @@ ipcMain.handle('export-data', async (event, data) => {
   return { exported: true, filePath };
 });
 
-ipcMain.handle('open-external', (event, url) => {
-  if (typeof url === 'string' && /^https?:\/\//i.test(url)) {
-    shell.openExternal(url);
+ipcMain.handle('open-external', async (event, url) => {
+  if (typeof url !== 'string' || !/^https?:\/\//i.test(url)) {
+    return { opened: false, reason: 'invalid-url' };
   }
+  // Rückfrage, bevor eine extern gespeicherte/manipulierbare URL im Systembrowser
+  // geöffnet wird (Schutz vor manipulierten Links in der Datendatei, z. B. über
+  // einen geteilten Ordner oder eine synchronisierte Kopie).
+  const win = BrowserWindow.fromWebContents(event.sender);
+  const { response } = await dialog.showMessageBox(win, {
+    type: 'question',
+    buttons: ['Abbrechen', 'Öffnen'],
+    defaultId: 0,
+    cancelId: 0,
+    title: 'Externen Link öffnen?',
+    message: 'Diese Seite im Standardbrowser öffnen?',
+    detail: url
+  });
+  if (response !== 1) return { opened: false, reason: 'cancelled' };
+  await shell.openExternal(url);
+  return { opened: true };
 });
 
 app.whenReady().then(() => {

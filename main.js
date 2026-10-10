@@ -33,7 +33,17 @@ function saveData(data) {
   if (Buffer.byteLength(serialized, 'utf-8') > MAX_PAYLOAD_BYTES) {
     throw new Error('Datenmenge überschreitet das zulässige Limit.');
   }
-  fs.writeFileSync(dataFilePath, serialized, 'utf-8');
+  // Atomar schreiben (temp + rename), damit ein Absturz mitten im Schreibvorgang
+  // nicht die bestehende Datendatei beschädigt; 0600, da personenbezogene Daten
+  // (Namen, Chat-Notizen) nur für den aktuellen Benutzer lesbar sein sollen.
+  const tmpPath = `${dataFilePath}.${process.pid}.tmp`;
+  fs.writeFileSync(tmpPath, serialized, { encoding: 'utf-8', mode: 0o600 });
+  fs.renameSync(tmpPath, dataFilePath);
+  try {
+    fs.chmodSync(dataFilePath, 0o600);
+  } catch (err) {
+    // Manche Dateisysteme (z. B. FAT/exFAT) unterstützen keine Unix-Rechte.
+  }
 }
 
 function createWindow() {
