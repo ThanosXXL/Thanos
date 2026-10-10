@@ -4,7 +4,7 @@
   "description": "VideoWelt – Desktop-Software zum Bearbeiten, Erstellen und Schneiden von Videos",
   "main": "main.js",
   "author": "",
-  "license": "MIT",
+  "license": "UNLICENSED",
   "repository": {
     "type": "git",
     "url": "https://github.com/ThanosXXL/Thanos.git"

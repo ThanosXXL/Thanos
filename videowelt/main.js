@@ -1,4 +1,4 @@
-const { app, BrowserWindow, ipcMain, dialog, shell } = require('electron');
+const { app, BrowserWindow, ipcMain, dialog, shell, Menu, session } = require('electron');
 const path = require('path');
 const fs = require('fs');
 const { probeMedia, generateThumbnail, runExport, extractStillFrame, SAMPLES_DIR } = require('./ffmpeg-export');
@@ -22,7 +22,29 @@ function loadSettings() {
 }
 
 function saveSettings(settings) {
-  fs.writeFileSync(settingsFile, JSON.stringify(settings, null, 2), 'utf-8');
+  // Atomar (temp + rename) und 0600, analog zur Dozenten-Dashboard-Härtung,
+  // damit ein Absturz mitten im Schreiben nicht die Einstellungen beschädigt.
+  const tmpPath = `${settingsFile}.${process.pid}.tmp`;
+  fs.writeFileSync(tmpPath, JSON.stringify(settings, null, 2), { encoding: 'utf-8', mode: 0o600 });
+  fs.renameSync(tmpPath, settingsFile);
+  try {
+    fs.chmodSync(settingsFile, 0o600);
+  } catch (err) {
+    // Manche Dateisysteme (z. B. FAT/exFAT) unterstützen keine Unix-Rechte.
+  }
+}
+
+const MAX_PROJECT_BYTES = 200 * 1024 * 1024; // 200 MB – Projekte referenzieren nur Medienpfade, kein Rohmaterial.
+
+function isValidProjectState(data) {
+  return (
+    data &&
+    typeof data === 'object' &&
+    !Array.isArray(data) &&
+    Array.isArray(data.mediaLibrary) &&
+    typeof data.timeline === 'object' &&
+    data.timeline !== null
+  );
 }
 
 const VIDEO_EXTENSIONS = ['mp4', 'mov', 'avi', 'mkv', 'webm', 'm4v'];
@@ -38,11 +60,22 @@ function createWindow() {
     webPreferences: {
       preload: path.join(__dirname, 'preload.js'),
       contextIsolation: true,
-      nodeIntegration: false
+      nodeIntegration: false,
+      sandbox: true,
+      devTools: !app.isPackaged
     }
   });
 
   win.setMenuBarVisibility(false);
+
+  // Keine Navigation weg von der lokal geladenen Oberfläche und keine neuen
+  // Fenster/Popups zulassen – die App lädt nie Remote-Inhalte, daher gibt es
+  // dafür keinen legitimen Anwendungsfall.
+  win.webContents.on('will-navigate', (event, url) => {
+    if (url !== win.webContents.getURL()) event.preventDefault();
+  });
+  win.webContents.setWindowOpenHandler(() => ({ action: 'deny' }));
+
   win.loadFile(path.join(__dirname, 'renderer', 'index.html'));
   return win;
 }
@@ -175,7 +208,18 @@ ipcMain.handle('save-project', async (event, { state, filePath }) => {
     if (result.canceled || !result.filePath) return { canceled: true };
     targetPath = result.filePath;
   }
-  fs.writeFileSync(targetPath, JSON.stringify(state, null, 2), 'utf-8');
+  if (!isValidProjectState(state)) {
+    return { canceled: false, error: 'Ungültige Projektdatenstruktur – Speichern abgelehnt.' };
+  }
+  const serialized = JSON.stringify(state, null, 2);
+  if (Buffer.byteLength(serialized, 'utf-8') > MAX_PROJECT_BYTES) {
+    return { canceled: false, error: 'Projektdatei überschreitet das zulässige Limit.' };
+  }
+  // Atomar schreiben (temp + rename), damit ein Absturz mitten im Schreiben
+  // nicht die bestehende Projektdatei beschädigt.
+  const tmpPath = `${targetPath}.${process.pid}.tmp`;
+  fs.writeFileSync(tmpPath, serialized, 'utf-8');
+  fs.renameSync(tmpPath, targetPath);
   const settings = loadSettings();
   settings.lastProjectPath = targetPath;
   saveSettings(settings);
@@ -192,6 +236,9 @@ ipcMain.handle('load-project', async () => {
   const filePath = result.filePaths[0];
   try {
     const data = JSON.parse(fs.readFileSync(filePath, 'utf-8'));
+    if (!isValidProjectState(data)) {
+      return { canceled: false, error: 'Projektdatei hat ein ungültiges Format.' };
+    }
     const settings = loadSettings();
     settings.lastProjectPath = filePath;
     saveSettings(settings);
@@ -206,8 +253,18 @@ ipcMain.handle('get-last-project-path', () => {
 });
 
 ipcMain.handle('load-project-path', async (event, filePath) => {
+  // Nur die zuletzt von der App selbst gespeicherte/geöffnete Projektdatei
+  // wird so nachgeladen (z. B. beim Start); auf eine .vwproj/.json-Endung
+  // beschränkt, damit dieser direkt mit einem Renderer-String aufrufbare
+  // IPC-Kanal kein beliebiges Auslesen von Dateien auf der Festplatte erlaubt.
+  if (typeof filePath !== 'string' || !/\.(vwproj|json)$/i.test(filePath)) {
+    return { canceled: false, error: 'Ungültiger Dateipfad' };
+  }
   try {
     const data = JSON.parse(fs.readFileSync(filePath, 'utf-8'));
+    if (!isValidProjectState(data)) {
+      return { canceled: false, error: 'Projektdatei hat ein ungültiges Format.' };
+    }
     return { canceled: false, path: filePath, data };
   } catch (err) {
     return { canceled: false, error: 'Projektdatei konnte nicht gelesen werden' };
@@ -218,13 +275,14 @@ ipcMain.handle('show-item-in-folder', (event, filePath) => {
   shell.showItemInFolder(filePath);
 });
 
-ipcMain.handle('open-external', (event, url) => {
-  if (typeof url === 'string' && /^https?:\/\//i.test(url)) {
-    shell.openExternal(url);
-  }
-});
-
 app.whenReady().then(() => {
+  // Kein Fenster darf Kamera/Mikrofon/Standort/Benachrichtigungen o.Ä.
+  // anfordern können – diese App braucht keine dieser Berechtigungen.
+  session.defaultSession.setPermissionRequestHandler((webContents, permission, callback) => {
+    callback(false);
+  });
+
+  Menu.setApplicationMenu(null);
   mainWindow = createWindow();
 
   app.on('activate', () => {

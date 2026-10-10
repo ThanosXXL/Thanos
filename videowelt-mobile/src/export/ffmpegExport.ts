@@ -207,7 +207,11 @@ export async function exportProject(
       onProgress(Math.min(1, Math.max(0, timeSeconds / totalDuration)));
     });
 
-    ffmpeg.FFmpegKit.execute(args.join(' '))
+    // executeWithArguments() passes the array straight to the native ffmpeg
+    // process instead of re-parsing a joined string as a shell command line,
+    // so a media URI or output path containing spaces or quote characters
+    // can't shift argument boundaries or smuggle in extra ffmpeg options.
+    ffmpeg.FFmpegKit.executeWithArguments(args)
       .then(async (session: any) => {
         const returnCode = await session.getReturnCode();
         if (ffmpeg.ReturnCode.isSuccess(returnCode)) {

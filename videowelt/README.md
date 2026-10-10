@@ -73,3 +73,44 @@ npm run dist
 Erzeugt eine installierbare Desktop-Anwendung (Windows/macOS/Linux) im Ordner `dist/`. Das benötigte
 ffmpeg/ffprobe wird automatisch mit ausgeliefert (`ffmpeg-static`/`ffprobe-static`), es ist keine separate
 Installation auf dem Zielrechner nötig.
+
+## Datenschutz (DSGVO)
+
+- **Rein lokale Verarbeitung:** VideoWelt verarbeitet importierte Videos/Audios und erzeugt Exporte
+  ausschließlich lokal auf dem jeweiligen Rechner über das mitgelieferte ffmpeg. Es gibt keine
+  Cloud-Synchronisierung, keinen Server und keine Telemetrie – die App sendet zu keinem Zeitpunkt
+  Daten (Medien, Projektinhalte oder Nutzungsdaten) ins Internet.
+- **Projektdateien (`.vwproj`):** liegen unverschlüsselt dort auf der Festplatte, wo sie gespeichert
+  werden; sie enthalten Pfade zu den verwendeten Mediendateien sowie Timeline-/Effekteinstellungen,
+  nicht die Mediendateien selbst. Eine `videowelt-settings.json` im Benutzerdatenverzeichnis merkt
+  sich nur den Pfad des zuletzt geöffneten Projekts.
+- **Recht auf Löschung/Portabilität:** Da sämtliche Daten als gewöhnliche Dateien (Projekte, Exporte,
+  Thumbnail-Cache im Benutzerdatenverzeichnis) auf dem eigenen Gerät liegen, lassen sie sich jederzeit
+  selbst kopieren, verschieben oder löschen – es findet keine Datenhaltung durch den Hersteller statt.
+- **Eigenverantwortung bei gemeinsam genutzten Rechnern:** Projekt-, Einstellungs- und Export-Dateien
+  liegen unverschlüsselt auf der Festplatte. Auf gemeinsam genutzten oder nicht vollplattenverschlüsselten
+  Geräten sollte entsprechend sensibel mit den verarbeiteten Medieninhalten umgegangen werden.
+
+## Impressum (Platzhalter)
+
+> **Hinweis:** Dieser Abschnitt ist ein **Platzhalter** und muss vor einer öffentlichen oder
+> gewerblichen Weitergabe dieser Software (z. B. Download-Seite, Verkauf, App-Store-Eintrag) durch
+> die gesetzlich vorgeschriebene Anbieterkennzeichnung (§ 5 TMG / § 18 MStV) ersetzt werden.
+
+**Verantwortlich für den Inhalt:**
+[Name / Firmenname], [Straße, Hausnummer], [PLZ, Ort], [Land]
+
+**Vertreten durch:** [Name der vertretungsberechtigten Person]
+
+**Kontakt:** Telefon [Telefonnummer] · E-Mail [E-Mail-Adresse]
+
+**Registereintrag** (falls zutreffend): [Handelsregister, Registernummer]
+**Umsatzsteuer-ID** (falls zutreffend): [USt-IdNr. nach § 27a UStG]
+
+**Verantwortlich für den Inhalt nach § 18 Abs. 2 MStV:** [Name, Anschrift wie oben]
+
+## Copyright
+
+Copyright © 2026. Alle Rechte vorbehalten. Vervielfältigung, Kopie und Weiterverbreitung
+dieser Software sind ohne vorherige schriftliche Genehmigung untersagt – siehe
+[`LICENSE`](LICENSE).

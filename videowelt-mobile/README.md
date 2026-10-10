@@ -121,3 +121,45 @@ videowelt-mobile/
                                probeMedia.ts (FFprobeKit-Wrapper), presets.ts (Export-Auflösungen)
     theme/                    Farben/Spacing, an die Desktop-App angelehnt
 ```
+
+## Datenschutz (DSGVO)
+
+- **Rein lokale Verarbeitung:** VideoWelt Mobile verarbeitet importierte Videos/Fotos und erzeugt
+  Exporte ausschließlich auf dem Gerät selbst über `ffmpeg-kit-react-native`. Es gibt keine
+  Cloud-Synchronisierung, keinen eigenen Server und keine Telemetrie – die App sendet zu keinem
+  Zeitpunkt Medien, Projektinhalte oder Nutzungsdaten ins Internet. (`eas build`/`expo start` nutzen
+  lediglich Expos eigene Build-/Entwicklungsdienste, nicht die laufende App.)
+- **Projektdateien (`.vwmproj`):** werden als Autosave ausschließlich in der app-eigenen
+  `AsyncStorage`-Datenbank auf dem Gerät gehalten; sie enthalten Verweise auf Mediathek-Elemente
+  sowie Timeline-/Effekteinstellungen, nicht die Mediendateien selbst.
+- **Berechtigungen:** Der Zugriff auf Mediathek/Fotos (Android `READ_MEDIA_VIDEO`/`READ_MEDIA_IMAGES`,
+  iOS `NSPhotoLibraryUsageDescription`/`NSPhotoLibraryAddUsageDescription`) wird ausschließlich zum
+  Importieren von Clips bzw. Speichern von Exporten genutzt und vom Betriebssystem per Dialog
+  bestätigt (siehe `app.json`).
+- **Recht auf Löschung/Portabilität:** Da alle App-Daten lokal auf dem Gerät liegen, werden sie beim
+  Deinstallieren der App betriebssystemüblich entfernt; einzelne Projekte lassen sich jederzeit über
+  den Projekt-Tab löschen.
+
+## Impressum (Platzhalter)
+
+> **Hinweis:** Dieser Abschnitt ist ein **Platzhalter** und muss vor einer öffentlichen oder
+> gewerblichen Veröffentlichung dieser App (z. B. App-Store-/Play-Store-Eintrag, Download-Seite)
+> durch die gesetzlich vorgeschriebene Anbieterkennzeichnung (§ 5 TMG / § 18 MStV) ersetzt werden.
+
+**Verantwortlich für den Inhalt:**
+[Name / Firmenname], [Straße, Hausnummer], [PLZ, Ort], [Land]
+
+**Vertreten durch:** [Name der vertretungsberechtigten Person]
+
+**Kontakt:** Telefon [Telefonnummer] · E-Mail [E-Mail-Adresse]
+
+**Registereintrag** (falls zutreffend): [Handelsregister, Registernummer]
+**Umsatzsteuer-ID** (falls zutreffend): [USt-IdNr. nach § 27a UStG]
+
+**Verantwortlich für den Inhalt nach § 18 Abs. 2 MStV:** [Name, Anschrift wie oben]
+
+## Copyright
+
+Copyright © 2026. Alle Rechte vorbehalten. Vervielfältigung, Kopie und Weiterverbreitung
+dieser Software sind ohne vorherige schriftliche Genehmigung untersagt – siehe
+[`LICENSE`](LICENSE).

@@ -16,6 +16,5 @@ contextBridge.exposeInMainWorld('videoWeltAPI', {
   loadProject: () => ipcRenderer.invoke('load-project'),
   getLastProjectPath: () => ipcRenderer.invoke('get-last-project-path'),
   loadProjectByPath: (filePath) => ipcRenderer.invoke('load-project-path', filePath),
-  showItemInFolder: (filePath) => ipcRenderer.invoke('show-item-in-folder', filePath),
-  openExternal: (url) => ipcRenderer.invoke('open-external', url)
+  showItemInFolder: (filePath) => ipcRenderer.invoke('show-item-in-folder', filePath)
 });

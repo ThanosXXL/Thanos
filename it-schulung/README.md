@@ -55,6 +55,24 @@ Erzeugt eine installierbare Desktop-Anwendung (Windows/macOS/Linux) im Ordner `d
   auf der Festplatte (inkl. Teilnehmernamen und Admin-Angabe) – auf gemeinsam genutzten Geräten
   empfiehlt sich eine Festplattenverschlüsselung des Betriebssystems.
 
+## Impressum (Platzhalter)
+
+> **Hinweis:** Dieser Abschnitt ist ein **Platzhalter** und muss vor einer öffentlichen oder
+> gewerblichen Weitergabe dieser Software (z. B. Download-Seite, Verkauf) durch die gesetzlich
+> vorgeschriebene Anbieterkennzeichnung (§ 5 TMG / § 18 MStV) ersetzt werden.
+
+**Verantwortlich für den Inhalt:**
+[Name / Firmenname], [Straße, Hausnummer], [PLZ, Ort], [Land]
+
+**Vertreten durch:** [Name der vertretungsberechtigten Person]
+
+**Kontakt:** Telefon [Telefonnummer] · E-Mail [E-Mail-Adresse]
+
+**Registereintrag** (falls zutreffend): [Handelsregister, Registernummer]
+**Umsatzsteuer-ID** (falls zutreffend): [USt-IdNr. nach § 27a UStG]
+
+**Verantwortlich für den Inhalt nach § 18 Abs. 2 MStV:** [Name, Anschrift wie oben]
+
 ## Copyright
 
 Copyright © 2026. Alle Rechte vorbehalten. Vervielfältigung, Kopie und Weiterverbreitung
