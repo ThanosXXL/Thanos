@@ -52,8 +52,9 @@ npm run dist
 
 Erzeugt eine installierbare Desktop-Anwendung (Windows/macOS/Linux) im Ordner `dist/`.
 
-## Demo-Musik
+## Demo-Video
 
-Im Ordner [`demo/`](demo/index.html) liegt eine Hintergrundmusik-Spur (`lounge-band.mp3`, 30 Sekunden)
-für ein Demo-Video, inklusive Download-Button. `demo/index.html` lokal im Browser öffnen, um die Musik
-anzuhören und herunterzuladen.
+Im Ordner [`demo/`](demo/index.html) liegt ein animiertes Demo-Video (`dashboard-demo.mp4`, ca. 30
+Sekunden) für Dozenten Dashboard & IT-Schulung Dashboard, mit Lounge-Band-Hintergrundmusik
+(`lounge-band.mp3`, gleiche Länge) – inklusive Download-Buttons für beide Dateien. `demo/index.html`
+lokal im Browser öffnen, um Video und Musik anzusehen/anzuhören und herunterzuladen.

@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Demo-Musik – Lounge Band</title>
+  <title>Dozenten Dashboard – Demo</title>
   <style>
     :root {
       color-scheme: light dark;
@@ -27,7 +27,7 @@
     }
     .card {
       width: 100%;
-      max-width: 480px;
+      max-width: 620px;
       background: var(--card);
       border-radius: 16px;
       padding: 32px;
@@ -43,9 +43,26 @@
       margin: 0 0 24px;
       font-size: 0.9rem;
     }
+    video {
+      width: 100%;
+      border-radius: 10px;
+      margin-bottom: 20px;
+      background: #000;
+    }
+    h2 {
+      font-size: 1.05rem;
+      margin: 28px 0 12px;
+      color: var(--text);
+    }
     audio {
       width: 100%;
-      margin-bottom: 24px;
+      margin-bottom: 16px;
+    }
+    .downloads {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px;
+      justify-content: center;
     }
     a.download {
       display: inline-flex;
@@ -59,12 +76,17 @@
       border-radius: 999px;
       transition: transform 0.15s ease, filter 0.15s ease;
     }
+    a.download.secondary {
+      background: transparent;
+      color: var(--accent);
+      border: 1px solid var(--accent);
+    }
     a.download:hover {
       filter: brightness(1.08);
       transform: translateY(-1px);
     }
     .note {
-      margin-top: 20px;
+      margin-top: 24px;
       font-size: 0.78rem;
       color: var(--muted);
       line-height: 1.4;
@@ -73,16 +95,24 @@
 </head>
 <body>
   <div class="card">
-    <h1>🎷 Lounge Band – Demo-Musik</h1>
-    <p class="meta">Hintergrundmusik für das Demo-Video · Dauer: 30 Sekunden</p>
-    <audio controls preload="none" src="lounge-band.mp3"></audio>
-    <div>
-      <a class="download" href="lounge-band.mp3" download="lounge-band.mp3">⬇ lounge-band.mp3 herunterladen</a>
+    <h1>📋 Dozenten Dashboard &amp; 💻 IT-Schulung Dashboard</h1>
+    <p class="meta">Demo-Video · ca. 30 Sekunden · mit Lounge-Band-Hintergrundmusik</p>
+    <video controls preload="metadata" src="dashboard-demo.mp4"></video>
+    <div class="downloads">
+      <a class="download" href="dashboard-demo.mp4" download="dashboard-demo.mp4">⬇ Demo-Video (MP4) herunterladen</a>
     </div>
+
+    <h2>🎷 Lounge Band – Hintergrundmusik</h2>
+    <audio controls preload="none" src="lounge-band.mp3"></audio>
+    <div class="downloads">
+      <a class="download secondary" href="lounge-band.mp3" download="lounge-band.mp3">⬇ lounge-band.mp3 herunterladen</a>
+    </div>
+
     <p class="note">
-      Hinweis: Dies ist ein synthetisch erzeugter Lounge-Loop (kein Aufnahme einer echten Band),
-      gedacht als Platzhalter-Hintergrundmusik. Bei Bedarf kann die Länge angepasst werden,
-      sobald die genaue Dauer des Demo-Videos feststeht.
+      Hinweis: Das Video ist eine animierte Markenvorstellung (HTML/CSS-Animation, per Playwright
+      aufgezeichnet), keine Aufnahme der echten App-Bedienung. Die Musik ist ein synthetisch
+      erzeugter Lounge-Loop (keine echte Band-Aufnahme). Video und Musik haben dieselbe Länge
+      (~30 s).
     </p>
   </div>
 </body>
