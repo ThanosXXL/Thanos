@@ -54,3 +54,9 @@ Erzeugt eine installierbare Desktop-Anwendung (Windows/macOS/Linux) im Ordner `d
 - **Eigenverantwortung bei gemeinsam genutzten Rechnern:** Die Datendatei liegt unverschlüsselt
   auf der Festplatte (inkl. Teilnehmernamen und Admin-Angabe) – auf gemeinsam genutzten Geräten
   empfiehlt sich eine Festplattenverschlüsselung des Betriebssystems.
+
+## Copyright
+
+Copyright © 2026. Alle Rechte vorbehalten. Vervielfältigung, Kopie und Weiterverbreitung
+dieser Software sind ohne vorherige schriftliche Genehmigung untersagt – siehe
+[`LICENSE`](LICENSE).

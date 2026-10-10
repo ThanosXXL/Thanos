@@ -73,3 +73,9 @@ Erzeugt eine installierbare Desktop-Anwendung (Windows/macOS/Linux) im Ordner `d
 - **Vollständige Deinstallation:** Beim Deinstallieren der App bleibt die Datendatei im
   Benutzerdatenverzeichnis erhalten (betriebssystemüblich); sie kann danach manuell gelöscht
   werden, oder zuvor über „Alle Daten löschen" geleert werden.
+
+## Copyright
+
+Copyright © 2026. Alle Rechte vorbehalten. Vervielfältigung, Kopie und Weiterverbreitung
+dieser Software sind ohne vorherige schriftliche Genehmigung untersagt – siehe
+[`LICENSE`](LICENSE).

@@ -4,7 +4,7 @@
   "description": "Desktop-Dashboard zur Verwaltung von IT-Schulungen, Aufgaben und Themen",
   "main": "main.js",
   "author": "",
-  "license": "MIT",
+  "license": "UNLICENSED",
   "scripts": {
     "start": "electron .",
     "dist": "electron-builder"
