@@ -1,0 +1,68 @@
+name: RadarAlarm Build & Release
+
+on:
+  push:
+    tags:
+      - "radaralarm-v*"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [windows-latest, macos-latest, ubuntu-latest]
+    runs-on: ${{ matrix.os }}
+    defaults:
+      run:
+        working-directory: radaralarm
+
+    steps:
+      - name: Repository auschecken
+        uses: actions/checkout@v4
+
+      - name: Node.js einrichten
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Abhängigkeiten installieren
+        run: npm install
+
+      - name: Desktop-App bauen
+        run: npm run dist
+
+      - name: Installer als Artifact hochladen
+        uses: actions/upload-artifact@v4
+        with:
+          name: radaralarm-${{ matrix.os }}
+          path: |
+            radaralarm/dist/*.exe
+            radaralarm/dist/*.dmg
+            radaralarm/dist/*.AppImage
+          if-no-files-found: warn
+
+  release:
+    needs: build
+    if: github.ref_type == 'tag'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Repository auschecken
+        uses: actions/checkout@v4
+
+      - name: Artifacts herunterladen
+        uses: actions/download-artifact@v4
+        with:
+          path: downloaded
+
+      - name: GitHub Release veröffentlichen
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          gh release create "${{ github.ref_name }}" \
+            --title "RadarAlarm ${{ github.ref_name }}" \
+            --notes "RadarAlarm Demo – automatisch gebaute Installationspakete für Windows, macOS und Linux." \
+            downloaded/*/*
