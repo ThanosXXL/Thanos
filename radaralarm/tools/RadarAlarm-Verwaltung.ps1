@@ -19,19 +19,24 @@
       dieselben Grenzen, damit die App die Datei danach noch speichern kann.
 
 .VERWENDUNG
-    1. Dieses Skript in der PowerShell "dot-sourcen" (mit führendem Punkt!):
-         . .\RadarAlarm-Verwaltung.ps1
+    EINFACHSTER WEG (für die meisten Kolleg:innen empfohlen):
+        Skript einfach ausführen, z.B. im PowerShell-Fenster:
+          .\RadarAlarm-Verwaltung.ps1
+        (oder Rechtsklick auf die Datei im Explorer -> "Mit PowerShell ausführen")
+        Es öffnet sich automatisch ein Menü mit Zahlen zum Auswählen -
+        keine Befehle, keine Parameter nötig.
 
-    2. Danach stehen folgende Befehle zur Verfügung:
-         Get-RadarAlarmProjekte
-         Neues-RadarAlarmProjekt -Name "Wohnanlage Lindenallee 12" -Adresse "Lindenallee 12, Düsseldorf"
-         Get-RadarAlarmMaengel -Projekt "Wohnanlage Lindenallee 12"
-         Neuer-RadarAlarmMangel -Projekt "Wohnanlage Lindenallee 12" -Titel "Steckdose defekt" -Prioritaet hoch -Gewerk Elektro
-         Bearbeite-RadarAlarmMangel -MangelId "abc123" -Status in_bearbeitung -Kommentar "Termin vereinbart"
-         Neues-RadarAlarmTeammitglied -Projekt "Wohnanlage Lindenallee 12" -Name "Markus Weber" -Rolle Bauleitung
-
-       Oder einfach das interaktive Menü starten:
-         Show-RadarAlarmMenue
+    FÜR TECHNISCH VERSIERTE (einzelne Funktionen direkt nutzen):
+        1. Dieses Skript "dot-sourcen" (mit führendem Punkt!):
+             . .\RadarAlarm-Verwaltung.ps1
+        2. Danach stehen diese Befehle zur Verfügung:
+             Get-RadarAlarmProjekte
+             Neues-RadarAlarmProjekt -Name "Wohnanlage Lindenallee 12" -Adresse "Lindenallee 12, Düsseldorf"
+             Get-RadarAlarmMaengel -Projekt "Wohnanlage Lindenallee 12"
+             Neuer-RadarAlarmMangel -Projekt "Wohnanlage Lindenallee 12" -Titel "Steckdose defekt" -Prioritaet hoch -Gewerk Elektro
+             Bearbeite-RadarAlarmMangel -MangelId "abc123" -Status in_bearbeitung -Kommentar "Termin vereinbart"
+             Neues-RadarAlarmTeammitglied -Projekt "Wohnanlage Lindenallee 12" -Name "Markus Weber" -Rolle Bauleitung
+           (oder trotzdem einfach Show-RadarAlarmMenue aufrufen)
 
 .HINWEIS
     Dieses Skript wurde unter PowerShell 7 entwickelt und getestet. Es sollte
@@ -391,5 +396,14 @@ function Show-RadarAlarmMenue {
     }
 }
 
-Write-Host "RadarAlarm-Verwaltung geladen. Datenpfad: $script:RadarAlarmDatenpfad" -ForegroundColor DarkGray
-Write-Host "Tippe 'Show-RadarAlarmMenue' für ein Menü, oder nutze die einzelnen Funktionen direkt (siehe Get-Help .\RadarAlarm-Verwaltung.ps1 -Full)." -ForegroundColor DarkGray
+if ($MyInvocation.InvocationName -ne '.') {
+    # Einfachster Weg: Datei direkt ausgeführt (nicht "dot-sourced") -> Menü
+    # startet sofort, keine weitere Eingabe/kein Funktionsname nötig.
+    Write-Host "RadarAlarm-Verwaltung. Datenpfad: $script:RadarAlarmDatenpfad" -ForegroundColor DarkGray
+    Show-RadarAlarmMenue
+} else {
+    # Für technisch Versierte: per ". .\RadarAlarm-Verwaltung.ps1" eingebunden,
+    # um die einzelnen Funktionen direkt in der eigenen Session zu nutzen.
+    Write-Host "RadarAlarm-Verwaltung geladen. Datenpfad: $script:RadarAlarmDatenpfad" -ForegroundColor DarkGray
+    Write-Host "Tippe 'Show-RadarAlarmMenue' für ein Menü, oder nutze die einzelnen Funktionen direkt (siehe Get-Help .\RadarAlarm-Verwaltung.ps1 -Full)." -ForegroundColor DarkGray
+}
