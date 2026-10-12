@@ -106,3 +106,31 @@ in a hidden `BrowserWindow`, no dependency needed) + CSV (semicolon-delimited,
 BOM-prefixed for Excel) exports per project. `window.prompt()` does not work
 in Electron's renderer (Chromium disabled it) — use a real modal for any new
 free-text input, not `prompt()`, as originally attempted for adding a floor.
+
+## PowerShell data-management script (`tools/RadarAlarm-Verwaltung.ps1`)
+
+A colleague-facing script to add/edit projects, defects, and team members
+directly in `radaralarm-data.json` without opening the app (dot-source it,
+then call its German-named functions, or run `Show-RadarAlarmMenue` for an
+interactive menu). It mirrors the exact data shape `renderer.js` builds
+(same field names, same `uid()`-style IDs — see `ConvertTo-Base36`, since
+.NET's `[Convert]::ToString` doesn't support base 36 the way JS's
+`Number.toString(36)` does) and enforces the same demo limits as `main.js`'s
+`isValidData` so the app can still save over a file this script touched.
+
+This was actually tested, not just written from memory: PowerShell 7.4.6 was
+installed in-session (there's no Windows here) and the full add/edit flow
+was run end-to-end, including loading the script's output JSON into the
+real Electron app via Playwright and screenshotting it. Two real bugs were
+caught and fixed this way (the base-36 conversion, and a `$_` variable
+collision inside a nested `Where-Object` in the assignee lookup) — keep
+testing changes to this script the same way rather than assuming PowerShell
+behaves like JavaScript. One thing that could *not* be verified here:
+`Format-Table`/`Out-String` console rendering produced no output at all in
+this sandbox's PowerShell install (missing `*.format.ps1xml` resources,
+reproducible even via the official `.deb` package) — the underlying data
+logic was confirmed correct via `Write-Host`-based inspection instead, but
+the actual table layout in a real Windows PowerShell console has not been
+eyeballed. If a colleague reports blank/missing `Format-Table` output, that
+is a plausible real issue to investigate, not necessarily this same sandbox
+quirk.
