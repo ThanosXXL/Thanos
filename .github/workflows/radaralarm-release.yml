@@ -5,6 +5,11 @@ on:
     tags:
       - "radaralarm-v*"
   workflow_dispatch:
+    inputs:
+      release_tag:
+        description: "Tag für den zu erstellenden Release (nur bei manuellem Start nötig, z.B. radaralarm-v0.1.0)"
+        required: false
+        type: string
 
 permissions:
   contents: write
@@ -47,7 +52,7 @@ jobs:
 
   release:
     needs: build
-    if: github.ref_type == 'tag'
+    if: github.ref_type == 'tag' || github.event_name == 'workflow_dispatch'
     runs-on: ubuntu-latest
     steps:
       - name: Repository auschecken
@@ -58,11 +63,25 @@ jobs:
         with:
           path: downloaded
 
+      - name: Release-Tag bestimmen
+        id: tag
+        run: |
+          if [ "${{ github.ref_type }}" = "tag" ]; then
+            echo "name=${{ github.ref_name }}" >> "$GITHUB_OUTPUT"
+          elif [ -n "${{ github.event.inputs.release_tag }}" ]; then
+            echo "name=${{ github.event.inputs.release_tag }}" >> "$GITHUB_OUTPUT"
+          else
+            echo "name=radaralarm-v0.1.0-manual.${{ github.run_number }}" >> "$GITHUB_OUTPUT"
+          fi
+
       - name: GitHub Release veröffentlichen
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          gh release create "${{ github.ref_name }}" \
-            --title "RadarAlarm ${{ github.ref_name }}" \
+          # Bei manuellem Start (workflow_dispatch) existiert der Tag noch nicht -
+          # "gh release create" legt ihn dann automatisch auf dem aktuellen Commit an.
+          gh release create "${{ steps.tag.outputs.name }}" \
+            --target "${{ github.sha }}" \
+            --title "RadarAlarm ${{ steps.tag.outputs.name }}" \
             --notes "RadarAlarm Demo – automatisch gebaute Installationspakete für Windows, macOS und Linux." \
             downloaded/*/*
