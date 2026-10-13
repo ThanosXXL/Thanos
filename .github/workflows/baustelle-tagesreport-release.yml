@@ -75,9 +75,6 @@ jobs:
           distribution: temurin
           java-version: "17"
 
-      - name: Android SDK einrichten
-        uses: android-actions/setup-android@v3
-
       - name: Abhängigkeiten installieren
         run: npm install --ignore-scripts
 
