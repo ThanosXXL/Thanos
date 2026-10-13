@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<title>Downloads</title>
+<style>
+  @page { size: A4; margin: 22mm 18mm 20mm 18mm; }
+  * { box-sizing: border-box; }
+  html, body {
+    margin: 0; padding: 0;
+    background: #ffffff;
+    color: #111111;
+    font-family: 'Inter', 'Segoe UI', Arial, sans-serif;
+  }
+
+  .eyebrow {
+    font-size: 13px; letter-spacing: 3px; color: #f2660c; font-weight: 700;
+    text-transform: uppercase; text-align: center; margin: 0 0 10px;
+  }
+  h1 { font-size: 30px; margin: 0 0 40px; color: #111111; text-align: center; }
+
+  .row {
+    display: flex; align-items: center; justify-content: space-between;
+    gap: 20px; padding: 18px 20px; margin-bottom: 12px;
+    background: #fafafa; border: 1px solid #e3c4a8; border-left: 4px solid #f2660c;
+    border-radius: 8px;
+  }
+  .row-left { display: flex; align-items: center; gap: 18px; }
+
+  .iso-wrap {
+    perspective: 900px; width: 60px; height: 72px;
+    display: flex; align-items: flex-end; justify-content: center; flex: 0 0 auto;
+  }
+  .iso-device {
+    position: relative; width: 48px; height: 30px;
+    transform-style: preserve-3d; transform: rotateX(52deg) rotateZ(-38deg);
+  }
+  .iso-face { position: absolute; border: 1px solid #c74e00; }
+  .iso-top {
+    width: 100%; height: 100%;
+    background: linear-gradient(135deg, #ff9143, #f2660c);
+    display: flex; align-items: center; justify-content: center;
+    color: #ffffff; font-weight: 700; font-size: 7px; letter-spacing: 0.4px;
+    transform: translateZ(9px); border-radius: 2px;
+  }
+  .iso-side-r { width: 9px; height: 100%; background: #c74e00; right: -9px; top: 0; transform-origin: left center; transform: rotateY(90deg); }
+  .iso-side-b { width: 100%; height: 9px; background: #a83f00; bottom: -9px; transform-origin: top center; transform: rotateX(-90deg); }
+
+  .name { font-size: 18px; font-weight: 700; color: #111111; }
+
+  .btn {
+    display: inline-block; padding: 10px 22px; background: #f2660c; color: #ffffff;
+    font-size: 13px; font-weight: 700; text-decoration: none; border-radius: 7px;
+  }
+  .btn.muted { background: #8a8a8a; }
+
+  .copyright-block { margin-top: 60px; text-align: center; }
+  .copyright-block .copyright-line { font-size: 11px; font-weight: 700; color: #111111; }
+  .copyright-block .copyright-note {
+    font-size: 9px; color: #666666; max-width: 420px; margin: 6px auto 0; line-height: 1.5;
+  }
+</style>
+</head>
+<body>
+
+  <p class="eyebrow">Baustelle Tagesreport</p>
+  <h1>Downloads &ndash; alle 5 Plattformen</h1>
+
+  <div class="row">
+    <div class="row-left">
+      <div class="iso-wrap"><div class="iso-device">
+        <div class="iso-face iso-top">WIN</div>
+        <div class="iso-face iso-side-r"></div>
+        <div class="iso-face iso-side-b"></div>
+      </div></div>
+      <span class="name">Windows</span>
+    </div>
+    <a class="btn" href="https://github.com/ThanosXXL/Thanos/releases/download/tagesreport-v1.0.0/BaustelleTagesreport-Windows-Setup.exe">Herunterladen</a>
+  </div>
+
+  <div class="row">
+    <div class="row-left">
+      <div class="iso-wrap"><div class="iso-device">
+        <div class="iso-face iso-top">MAC</div>
+        <div class="iso-face iso-side-r"></div>
+        <div class="iso-face iso-side-b"></div>
+      </div></div>
+      <span class="name">macOS</span>
+    </div>
+    <a class="btn" href="https://github.com/ThanosXXL/Thanos/releases/download/tagesreport-v1.0.0/BaustelleTagesreport-macOS.dmg">Herunterladen</a>
+  </div>
+
+  <div class="row">
+    <div class="row-left">
+      <div class="iso-wrap"><div class="iso-device">
+        <div class="iso-face iso-top">LNX</div>
+        <div class="iso-face iso-side-r"></div>
+        <div class="iso-face iso-side-b"></div>
+      </div></div>
+      <span class="name">Linux</span>
+    </div>
+    <a class="btn" href="https://github.com/ThanosXXL/Thanos/releases/download/tagesreport-v1.0.0/BaustelleTagesreport-Linux.AppImage">Herunterladen</a>
+  </div>
+
+  <div class="row">
+    <div class="row-left">
+      <div class="iso-wrap"><div class="iso-device">
+        <div class="iso-face iso-top">AND</div>
+        <div class="iso-face iso-side-r"></div>
+        <div class="iso-face iso-side-b"></div>
+      </div></div>
+      <span class="name">Android</span>
+    </div>
+    <a class="btn" href="https://github.com/ThanosXXL/Thanos/releases/download/tagesreport-v1.0.0/BaustelleTagesreport-Android.apk">Herunterladen</a>
+  </div>
+
+  <div class="row">
+    <div class="row-left">
+      <div class="iso-wrap"><div class="iso-device">
+        <div class="iso-face iso-top">iOS</div>
+        <div class="iso-face iso-side-r"></div>
+        <div class="iso-face iso-side-b"></div>
+      </div></div>
+      <span class="name">iOS</span>
+    </div>
+    <a class="btn muted" href="https://raw.githubusercontent.com/ThanosXXL/Thanos/claude/baustelle-tagesreport-ui-27wgvn/docs/app/index.html">Web-App öffnen</a>
+  </div>
+
+  <div class="copyright-block">
+    <div class="copyright-line">&copy; 2026 &Pi;&iota;&Chi;&iacute; Software Corporation. Alle Rechte vorbehalten.</div>
+    <div class="copyright-note">
+      Alle in diesem Dokument angegebenen Daten und Handhabungen unterliegen dem Copyright.
+      Eine Vervielfältigung sowie eine Veröffentlichung, auch auszugsweise, ist dementsprechend nicht gestattet.
+    </div>
+  </div>
+
+</body>
+</html>
