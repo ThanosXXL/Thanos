@@ -1,9 +1,9 @@
 # Baustelle Tagesreport
 
-Eigenständige Desktop-App (Electron) für den täglichen Baustellenreport. Kein Bezug zum
-Dozenten-Dashboard in diesem Repository – eigene Codebasis, eigener Prozess, eigene Datenablage.
+Eigenständige Desktop-App (Electron) für den täglichen Baustellenreport. Kein Bezug zu anderen
+Projekten in diesem Repository – eigene Codebasis, eigener Prozess, eigene Datenablage.
 
-**[📥 Download-Seite für alle 5 Plattformen](../docs/download.html)** (Windows/macOS/Linux/Android/iOS)
+**[📥 Bauplanphase – Demo & Download für alle 5 Plattformen](../docs/demo.html)** (Windows/macOS/Linux/Android/iOS)
 
 ## Funktionen
 
@@ -92,7 +92,7 @@ Apple-Developer-Konto (Code-Signierung) – das ist eine Einschränkung von Appl
 `.github/workflows/baustelle-tagesreport-release.yml` baut bei jedem Tag `tagesreport-v*` (z. B.
 `tagesreport-v1.0.0`) automatisch Installer für **Windows, macOS, Linux** sowie ein **Android**-APK und
 veröffentlicht alle vier Dateien gemeinsam in einem GitHub Release; **iOS** läuft über den PWA-Weg oben.
-Eigener Tag-Präfix, damit es nie mit den Tags des Dozenten Dashboards in diesem Repository kollidiert.
+Eigener Tag-Präfix, damit es nie mit den Tags anderer Projekte in diesem Repository kollidiert.
 Lässt sich auch manuell über **Actions → Build & Release Baustelle Tagesreport → Run workflow** anstoßen.
 
 ## Bekannte, akzeptierte Restrisiken

@@ -100,8 +100,22 @@
     word-break: break-all;
   }
 
+  pre {
+    background: #fafafa; border: 1px solid #e3c4a8; border-left: 4px solid #f2660c;
+    border-radius: 6px; padding: 12px 14px; margin-top: 8px;
+    font-family: 'Consolas', 'Courier New', monospace; font-size: 10.5px; line-height: 1.55;
+    color: #111111; white-space: pre-wrap; word-break: break-word;
+  }
+
   .page { page-break-before: always; padding-top: 4mm; }
   .toc-hint { text-align: center; font-size: 11px; color: #888888; margin-top: 4px; }
+
+  .example-figure { text-align: center; margin: 0 0 26px; page-break-inside: avoid; }
+  .example-figure img {
+    max-width: 240px; width: 100%; border: 1px solid #333b46; border-radius: 10px;
+    box-shadow: 0 6px 18px rgba(0,0,0,0.18);
+  }
+  .example-caption { font-size: 10.5px; color: #888888; margin-top: 8px; font-style: italic; }
 
   .copyright-block { margin-top: 34px; text-align: center; }
   .copyright-block .copyright-line { font-size: 11px; font-weight: 700; color: #111111; }
@@ -114,7 +128,7 @@
 
   <!-- ===================== TITELSEITE ===================== -->
   <div class="cover">
-    <div class="eyebrow">Dashboard &middot; Bauplanphase</div>
+    <div class="eyebrow">Baustelle Tagesreport</div>
     <h1>Installations<span class="orange">anleitung</span></h1>
     <div class="sub">
       Baustelle Tagesreport Schritt fuer Schritt installieren - fuer Windows, macOS, Linux,
@@ -144,11 +158,16 @@
       </div>
     </div>
 
-    <div class="toc-hint">Windows &middot; macOS &middot; Linux &middot; Android &middot; iOS (PWA)</div>
+    <div class="toc-hint">Windows &middot; macOS &middot; Linux &middot; Android &middot; iOS (PWA) &middot; Anhang: PowerShell</div>
   </div>
 
   <!-- ===================== INHALT ===================== -->
   <div class="page">
+
+    <div class="example-figure">
+      <img src="assets/bauplanphase-beispiel.png" alt="Beispielansicht Bauplanphase mit Download-Bereich">
+      <div class="example-caption">Beispielansicht: die Bauplanphase-Seite mit Live-Demo und Download-Bereich (Abschnitt 06)</div>
+    </div>
 
     <div class="platform-section">
       <div class="platform-header">
@@ -240,8 +259,58 @@
     </div>
 
     <div class="link-box">
-      Download-Seite (alle 5 Plattformen): https://ThanosXXL.github.io/Thanos/download.html<br>
-      GitHub Release direkt: https://github.com/ThanosXXL/Thanos/releases/tag/tagesreport-v1.0.0
+      <a href="https://github.com/ThanosXXL/Thanos/releases/tag/tagesreport-v1.0.0" style="color:#c74e00; text-decoration:none; font-weight:700;">&rarr; Alle Downloads &amp; die Bauplanphase-Demo (klickbarer Link im PDF)</a>
+    </div>
+
+    <div class="copyright-block">
+      <div class="copyright-line">&copy; 2026 ΠιΧί Software Corporation. Alle Rechte vorbehalten.</div>
+      <div class="copyright-note">
+        Alle in diesem Dokument angegebenen Daten und Handhabungen unterliegen dem Copyright.
+        Eine Vervielfältigung sowie eine Veröffentlichung, auch auszugsweise, ist dementsprechend nicht gestattet.
+      </div>
+    </div>
+  </div>
+
+  <!-- ===================== ANHANG: POWERSHELL ===================== -->
+  <div class="page">
+    <h2 class="section-title" style="margin-bottom:16px;">6&nbsp;&middot;&nbsp;Anhang: PowerShell-Download <span class="badge">optional</span></h2>
+    <p style="font-size:12.5px; color:#333333; line-height:1.6; margin:0 0 18px;">
+      Alternative zum Download-Button für Nutzer, die lieber per Skript installieren. Jedes Snippet
+      laedt die Datei direkt herunter - kein Login, keine Zwischenabfrage noetig.
+    </p>
+
+    <div class="platform-section">
+      <div class="platform-header">
+        <div class="platform-meta">
+          <h2 class="section-title">Windows <span class="badge">.exe</span></h2>
+        </div>
+      </div>
+      <pre>$url = "https://github.com/ThanosXXL/Thanos/releases/download/tagesreport-v1.0.0/BaustelleTagesreport-Windows-Setup.exe"
+Invoke-WebRequest -Uri $url -OutFile "BaustelleTagesreport-Setup.exe"
+Start-Process "BaustelleTagesreport-Setup.exe"</pre>
+    </div>
+
+    <div class="platform-section">
+      <div class="platform-header">
+        <div class="platform-meta">
+          <h2 class="section-title">macOS <span class="badge">.dmg</span></h2>
+        </div>
+      </div>
+      <pre>$url = "https://github.com/ThanosXXL/Thanos/releases/download/tagesreport-v1.0.0/BaustelleTagesreport-macOS.dmg"
+Invoke-WebRequest -Uri $url -OutFile "BaustelleTagesreport.dmg"
+open "BaustelleTagesreport.dmg"</pre>
+      <p style="font-size:11px; color:#888888; margin-top:6px;">Laeuft mit PowerShell (<code class="inline">pwsh</code>), das auch auf macOS installierbar ist; <code class="inline">open</code> ist der macOS-Befehl zum Oeffnen der Datei.</p>
+    </div>
+
+    <div class="platform-section">
+      <div class="platform-header">
+        <div class="platform-meta">
+          <h2 class="section-title">Android <span class="badge">.apk</span></h2>
+        </div>
+      </div>
+      <pre>$url = "https://github.com/ThanosXXL/Thanos/releases/download/tagesreport-v1.0.0/BaustelleTagesreport-Android.apk"
+Invoke-WebRequest -Uri $url -OutFile "BaustelleTagesreport.apk"</pre>
+      <p style="font-size:11px; color:#888888; margin-top:6px;">Datei anschliessend per USB/Cloud aufs Android-Geraet uebertragen und antippen.</p>
     </div>
 
     <div class="copyright-block">

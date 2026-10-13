@@ -22,7 +22,9 @@ Unter `docs/demo.html` liegt eine eigenständige, interaktive Klick-Demo ("Baupl
 Kernfunktionen (Tagesreport, Status, Bestellstatus, Screenshots, Team-Einladung) – ganz ohne Installation
 im Browser. Die Demo speichert bewusst nichts dauerhaft (nur im Arbeitsspeicher des Browser-Tabs); ein
 Banner weist darauf hin, dass in der echten App die Daten stattdessen per Cloud mit dem Team synchronisiert
-würden.
+würden. Am Ende der Seite (Abschnitt „06 · App herunterladen") liegen direkte Download-Links für alle
+5 Plattformen (Windows/macOS/Linux/Android/iOS) – eine Seite für Demo und Download, keine separate
+Landingpage.
 
 So bekommt sie einen öffentlichen Link über GitHub Pages:
 
@@ -31,14 +33,12 @@ So bekommt sie einen öffentlichen Link über GitHub Pages:
 3. Branch auf diesen Branch (bzw. nach dem Merge auf den Standard-Branch) und Ordner **`/docs`** stellen
 4. Speichern – GitHub zeigt danach die Demo-URL an (z. B. `https://<user>.github.io/<repo>/`)
 
-`docs/index.html` ist die Landingpage dieser URL: kurzer Auto-Loop-Vorschau-Clip
-(`docs/assets/bauplanphase-demo.webm`, automatisiert mit einem Headless-Browser aufgenommen) plus einem
-großen, glänzenden 3D-Button „Demo starten“, der mit einem Klick direkt zu `demo.html` führt.
+`docs/index.html` ist nur eine schlichte Weiterleitung auf `demo.html` (für die Root-URL von GitHub Pages).
 
 ## Handbücher (PDF)
 
-Unter [`docs/handbuecher/`](docs/handbuecher/) liegen die HTML-Quellen der PDF-Handbücher (PowerShell-
-Download-Skripte, Benutzerhandbuch) samt Design-Standard und Anleitung zum Neu-Erzeugen der PDFs. Jedes
+Unter [`docs/handbuecher/`](docs/handbuecher/) liegen die HTML-Quellen der PDF-Handbücher (Benutzerhandbuch,
+Installationsanleitung) samt Design-Standard und Anleitung zum Neu-Erzeugen der PDFs. Jedes
 künftige Handbuch/PDF in diesem Projekt folgt demselben Muster: Orange/Schwarz-auf-Weiß, 3D-isometrische
 Illustrationen, Copyright-Block ganz unten.
 

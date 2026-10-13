@@ -97,6 +97,11 @@
   .invite-row input{ flex:1; background:var(--panel-2); border:1px solid var(--line); border-radius:8px; color:var(--text); font-size:12px; padding:9px 10px; }
 
   .empty-note{ font-size:11.5px; color:var(--text-dim); text-align:center; padding:8px 0; }
+
+  .dl-row{ display:flex; align-items:center; gap:10px; padding:8px 0; border-bottom:1px solid var(--line); }
+  .dl-row:last-of-type{ border-bottom:none; }
+  .dl-name{ flex:1; font-size:12.5px; font-weight:600; }
+  .dl-link{ width:auto; padding:7px 14px; text-decoration:none; display:inline-block; }
   footer{ text-align:center; padding:10px 0 28px; font-size:10.5px; color:var(--text-dim); }
 </style>
 </head>
@@ -185,6 +190,31 @@
         <input id="inviteEmail" type="email" placeholder="E-Mail einladen">
         <button class="btn-add" id="inviteBtn" style="flex:0 0 auto; padding:9px 14px;">Einladen</button>
       </div>
+    </section>
+
+    <section class="card">
+      <div class="card-head"><div class="card-title"><span class="idx">06</span> App herunterladen</div></div>
+      <div class="dl-row">
+        <span class="dl-name">Windows</span>
+        <a class="btn-add dl-link" href="https://github.com/ThanosXXL/Thanos/releases/download/tagesreport-v1.0.0/BaustelleTagesreport-Windows-Setup.exe">Herunterladen</a>
+      </div>
+      <div class="dl-row">
+        <span class="dl-name">macOS</span>
+        <a class="btn-add dl-link" href="https://github.com/ThanosXXL/Thanos/releases/download/tagesreport-v1.0.0/BaustelleTagesreport-macOS.dmg">Herunterladen</a>
+      </div>
+      <div class="dl-row">
+        <span class="dl-name">Linux</span>
+        <a class="btn-add dl-link" href="https://github.com/ThanosXXL/Thanos/releases/download/tagesreport-v1.0.0/BaustelleTagesreport-Linux.AppImage">Herunterladen</a>
+      </div>
+      <div class="dl-row">
+        <span class="dl-name">Android</span>
+        <a class="btn-add dl-link" href="https://github.com/ThanosXXL/Thanos/releases/download/tagesreport-v1.0.0/BaustelleTagesreport-Android.apk">Herunterladen</a>
+      </div>
+      <div class="dl-row">
+        <span class="dl-name">iOS</span>
+        <a class="btn-add dl-link" href="app/index.html">Web-App öffnen</a>
+      </div>
+      <div class="empty-note">iOS: Safari &rarr; Teilen &rarr; „Zum Home-Bildschirm" (echte .ipa braucht ein kostenpflichtiges Apple-Developer-Konto)</div>
     </section>
   </main>
   <footer>Live-Demo · in der echten App synchronisieren diese Daten per Cloud mit deinem Team</footer>

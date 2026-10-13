@@ -49,4 +49,20 @@ Chrome-Binary ist oben im Skript als `CHROME = "..."` hinterlegt und muss ggf. a
 angepasst werden.
 
 Alternativ: HTML-Dokument im Browser öffnen und über die Druckfunktion als PDF speichern (Format A4,
-„Kopf- und Fußzeilen“ aktivieren) – dort setzt Chrome eigene (schlichtere) Standard-Seitenzahlen.
+„Kopf- und Fußzeilen” aktivieren) – dort setzt Chrome eigene (schlichtere) Standard-Seitenzahlen.
+
+## Beispielbilder erzeugen
+
+Die `.example-figure`-Screenshots in beiden Handbüchern (`assets/*.png`) stammen ebenfalls aus einem
+headless Chrome über das DevTools-Protokoll, diesmal per `Page.captureScreenshot` statt `Page.printToPDF`
+– nötig, weil ein einfacher Vollseiten-Screenshot bei langen Seiten (z. B. `docs/demo.html`) ein völlig
+überlanges, für ein PDF unbrauchbares Bild ergibt. `scroll_shot.py` navigiert stattdessen zu einer HTML-Datei,
+scrollt optional per `element.scrollIntoView()` zu einem CSS-Selektor und nimmt erst dann einen Screenshot
+in normaler Viewport-Größe auf:
+
+```bash
+python3 scroll_shot.py ../../baustelle-tagesreport/renderer/impressum.html assets/impressum-beispiel.png
+python3 scroll_shot.py ../demo.html assets/bauplanphase-beispiel.png “.dl-row”
+```
+
+Der dritte (optionale) Parameter ist ein CSS-Selektor, zu dem vor der Aufnahme gescrollt wird.
