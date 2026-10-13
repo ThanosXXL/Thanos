@@ -345,11 +345,34 @@ fileInput.addEventListener('change', async ()=>{
   loadShots();
 });
 
+// ---------- Export / Alle Daten löschen (DSGVO) ----------
+document.getElementById('exportDataBtn').addEventListener('click', async ()=>{
+  try{ await window.reportAPI.exportData(); }catch(e){ console.error('Export fehlgeschlagen', e); }
+});
+
+const confirmDeleteModal = document.getElementById('confirmDeleteModal');
+document.getElementById('deleteAllDataBtn').addEventListener('click', ()=>{
+  confirmDeleteModal.classList.add('open');
+});
+document.getElementById('cancelDeleteAll').addEventListener('click', ()=>{
+  confirmDeleteModal.classList.remove('open');
+});
+document.getElementById('confirmDeleteAll').addEventListener('click', async ()=>{
+  try{ await window.reportAPI.storageClear(); }catch(e){}
+  confirmDeleteModal.classList.remove('open');
+  reportEntryDates = new Set();
+  await loadReportFor(selectedDate);
+  renderCalendar();
+  await loadStatus();
+  await loadOrders();
+  await loadShots();
+  await updateReminder();
+});
+
 // ---------- Reminder (12:00 Uhr) ----------
 const reminderPill = document.getElementById('reminderPill');
 const reminderText = document.getElementById('reminderText');
 const reminderNote = document.getElementById('reminderNote');
-let notifiedToday = false;
 
 function clockStr(){
   const n = new Date();
@@ -366,10 +389,6 @@ async function updateReminder(){
   if(dueTime && notFilled){
     reminderPill.classList.add('due');
     reminderNote.textContent = 'Der heutige Tagesreport ist noch nicht ausgefüllt — bitte eintragen.';
-    if(!notifiedToday){
-      notifiedToday = true;
-      tryNotify();
-    }
   } else {
     reminderPill.classList.remove('due');
     reminderNote.textContent = 'Reminder aktiv täglich um 12:00 Uhr, solange der Tagesreport noch nicht ausgefüllt ist.';
@@ -382,15 +401,6 @@ reminderPill.addEventListener('click', async ()=>{
   renderCalendar();
   reportField.focus();
 });
-
-function tryNotify(){
-  if(!('Notification' in window)) return;
-  if(Notification.permission === 'granted'){
-    new Notification('Tagesreport', { body: 'Bitte den heutigen Tagesreport eintragen.' });
-  } else if(Notification.permission !== 'denied'){
-    Notification.requestPermission();
-  }
-}
 
 setInterval(updateReminder, 30000);
 

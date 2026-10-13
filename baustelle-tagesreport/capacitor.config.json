@@ -1,0 +1,6 @@
+{
+  "appId": "com.baustelle.tagesreport",
+  "appName": "Baustelle Tagesreport",
+  "webDir": "renderer",
+  "bundledWebRuntime": false
+}

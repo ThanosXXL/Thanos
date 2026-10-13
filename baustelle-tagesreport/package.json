@@ -10,8 +10,17 @@
     "dist": "electron-builder"
   },
   "devDependencies": {
-    "electron": "^31.0.0",
-    "electron-builder": "^24.13.3"
+    "@capacitor/android": "^8.4.2",
+    "@capacitor/cli": "^8.4.2",
+    "electron": "^44.7.0",
+    "electron-builder": "^26.15.3"
+  },
+  "dependencies": {
+    "@capacitor/core": "^8.4.2",
+    "@capacitor/preferences": "^8.0.1"
+  },
+  "overrides": {
+    "@electron/get": "^5.1.0"
   },
   "build": {
     "appId": "com.baustelle.tagesreport",
@@ -33,11 +42,6 @@
     },
     "linux": {
       "target": "AppImage"
-    },
-    "publish": [
-      {
-        "provider": "github"
-      }
-    ]
+    }
   }
 }
