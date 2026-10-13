@@ -1,6 +1,6 @@
 # Rechtliche Vorlagen (Szenario A: Heilpraktiker/Privatpraxen/Therapeuten)
 
-**Kein Ersatz für Rechtsberatung.** Beide Dokumente in diesem Ordner sind Entwürfe/Vorlagen,
+**Kein Ersatz für Rechtsberatung.** Alle Dokumente in diesem Ordner sind Entwürfe/Vorlagen,
 erstellt ohne anwaltliche Prüfung. Vor dem Einsatz mit echten, zahlenden Kunden müssen sie von
 einem Fachanwalt für IT-/Datenschutzrecht bzw. einer/einem Datenschutzbeauftragten geprüft und an
 die konkrete Rechtsform, das tatsächliche Geschäftsmodell und den tatsächlichen Datenfluss
@@ -41,3 +41,9 @@ Anlage 1 der AVV-Vorlage aktualisieren, damit sie nicht veraltet.
   „Technische und organisatorische Maßnahmen"
 - **`Haftungsausschluss.md`** — Haftungsbeschränkung/Disclaimer für den Softwareeinsatz (kein
   Medizinprodukt, keine KBV-Zulassung, EBM/GOÄ-Ziffernvorschläge unverbindlich, Haftungsgrenzen)
+- **`Impressum-Vorlage.md`** — Pflichtangaben nach § 5 TMG (inkl. Heilberufe-Zusatzangaben nach
+  § 5 Abs. 1 Nr. 6 TMG, EU-Streitschlichtung, Haftung für Inhalte/Links); dieselben Platzhalterfelder
+  erscheinen auch im Sidebar-Menüpunkt „Impressum" der App und im Footer von
+  `patientenwelt/download.html` — bei Ausfüllen bitte alle drei Stellen konsistent halten
+- **`patientenwelt/LICENSE.md`** (eine Ebene höher) — proprietäre Lizenz/Copyright-Vermerk für
+  PatientenWelt selbst (kein Open-Source-Lizenztext, Vervielfältigung/Weitergabe untersagt)

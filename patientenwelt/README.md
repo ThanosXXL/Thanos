@@ -7,6 +7,11 @@ Markenname, Überschriften, Patientennamen-Banner und aktive Tabs. Sie ist unabh
 `main.js`/`preload.js`/`renderer/`, eigene Datenablage) und wird nicht von dessen
 `npm install`/`npm start`/`npm run dist`-Befehlen berührt.
 
+**Lizenz:** proprietär (`UNLICENSED`), siehe `LICENSE.md` — Vervielfältigung, Weitergabe und
+Bearbeitung ohne ausdrückliche schriftliche Zustimmung sind untersagt. Das gilt nur für
+PatientenWelt selbst; andere Projekte in diesem Repository (z. B. `omniroute/`, die
+Dozenten-Dashboard-Anwendung im Projektwurzelverzeichnis) haben eigene, unabhängige Lizenzen.
+
 ## Funktionsumfang
 
 - Symbolleiste mit Hochglanz-3D-Icon-Buttons (Patient wählen, Neuer Patient, Suche, Termine,
@@ -53,6 +58,10 @@ Markenname, Überschriften, Patientennamen-Banner und aktive Tabs. Sie ist unabh
     neue Patienten), Analyse Leistungen (Summen je Abrechnungskategorie, häufigste Ziffern),
     Analyse Verordnungen (häufigste Medikamente, Status-Verteilung)
   - **Weitere Services**: Katalog zusätzlicher Selbstzahlerleistungen (z. B. IGeL) mit Preis
+  - **Rechtliches**: Impressum (§ 5 TMG inkl. Heilberufe-Angaben nach § 5 Abs. 1 Nr. 6 TMG,
+    EU-Streitschlichtung, Haftung für Inhalte/Links) — alle Felder sind erkennbar als Platzhalter
+    markiert und müssen vor echter Veröffentlichung ausgefüllt werden, siehe
+    `legal/Impressum-Vorlage.md`
 - **Ausdrucke für Patienten**: Überweisungsschein, Befundmitteilung, Krankmeldung
   (Arbeitsunfähigkeitsbescheinigung) und Terminkarte nutzen alle dasselbe Druck-Layout wie die
   Rechnung (Praxis-Kopfzeile, `window.print()` + `@media print`, Unterschriftszeile wo passend)
@@ -132,7 +141,9 @@ Gleiches Muster wie das Dozenten Dashboard: `contextIsolation: true`, `nodeInteg
   verbleibende Administrator kann nicht entfernt werden.
 - **Sperre**: manueller „Sperren"-Button im Header sowie automatische Sperre nach 5 Minuten
   Inaktivität (`IDLE_LOCK_MS` in `renderer.js`). Beim Sperren wird der Hauptprozess-Schlüssel
-  verworfen; ohne erneute Anmeldung ist kein Zugriff mehr möglich.
+  verworfen; ohne erneute Anmeldung ist kein Zugriff mehr möglich. `clearCachedDEK()` in `main.js`
+  überschreibt den Schlüssel-Buffer dabei zusätzlich mit Nullen, statt sich allein auf die
+  Garbage Collection zu verlassen, die den Speicher erst irgendwann zurückfordert.
 - **Audit-Protokoll**: `state.auditLog` (Teil der verschlüsselten Daten) protokolliert jede Mutation
   (Patient/Eintrag angelegt/geändert/gelöscht, Benutzer angelegt/entfernt, Anmeldung, Sperre,
   Anmeldung nach Fehlversuchen) mit Zeitstempel und Benutzer. Nur lesbar für Administratoren, im UI
@@ -142,10 +153,12 @@ Gleiches Muster wie das Dozenten Dashboard: `contextIsolation: true`, `nodeInteg
   „Datensicherung" einen früheren Stand wiederherstellen; der aktuelle Stand wird davor selbst noch
   gesichert.
 - **Dateirechte**: Datendatei und jede Sicherung werden nach dem Schreiben per `chmod 600` auf den
-  Besitzer beschränkt (`restrictToOwner()` in `main.js`), damit andere lokale Benutzerkonten auf
-  demselben Rechner die verschlüsselte Datei nicht einmal lesen können. Unter Windows greift das
-  POSIX-Rechtemodell nicht vollständig — dort bleibt die NTFS-ACL des `userData`-Ordners
-  maßgeblich; der Aufruf ist dort ein Best-Effort und schlägt nie fehl.
+  Besitzer beschränkt (`restrictToOwner()` in `main.js`), der `backups/`-Ordner zusätzlich auf
+  `chmod 700` (sowohl bei Neuanlage über `mkdirSync(..., { mode: 0o700 })` als auch nachträglich,
+  falls der Ordner schon vor dieser Härtung bestand) — damit andere lokale Benutzerkonten auf
+  demselben Rechner weder die verschlüsselte Datei noch den Sicherungsordner selbst lesen können.
+  Unter Windows greift das POSIX-Rechtemodell nicht vollständig — dort bleibt die NTFS-ACL des
+  `userData`-Ordners maßgeblich; der Aufruf ist dort ein Best-Effort und schlägt nie fehl.
 - **Electron-Härtung** (`main.js`, `createWindow()`): `contextIsolation: true`, `nodeIntegration:
   false`, zusätzlich `sandbox: true` (OS-Sandbox für den Renderer-Prozess) und `spellcheck: false`
   — letzteres explizit, weil in Verlauf/Befund/Diagnose-Feldern echte Gesundheitsdaten getippt

@@ -115,7 +115,8 @@ function writeEnvelope(envelope) {
 }
 
 function writeBackup(envelope) {
-  fs.mkdirSync(backupsDir, { recursive: true });
+  fs.mkdirSync(backupsDir, { recursive: true, mode: 0o700 });
+  restrictToOwner(backupsDir); // falls der Ordner schon vor dieser Härtung bestand
   const stamp = new Date().toISOString().replace(/[:.]/g, '-');
   const backupPath = path.join(backupsDir, `patientenwelt-${stamp}.json`);
   fs.writeFileSync(backupPath, JSON.stringify(envelope, null, 2), 'utf-8');
@@ -133,6 +134,14 @@ function writeBackup(envelope) {
 
 let cachedDEK = null;
 let currentUser = null; // { id, name, role } – unkritisch, darf an den Renderer
+
+// Überschreibt den Schlüssel-Buffer mit Nullen, bevor die Referenz fällt, statt sich beim
+// Sperren/Schließen allein auf die Garbage Collection zu verlassen — die reclaimt den
+// Speicher irgendwann, lässt die Schlüssel-Bytes bis dahin aber unverändert im RAM stehen.
+function clearCachedDEK() {
+  if (cachedDEK) cachedDEK.fill(0);
+  cachedDEK = null;
+}
 
 function requireUnlocked() {
   if (!cachedDEK || !currentUser) {
@@ -271,7 +280,7 @@ ipcMain.handle('auth:login', (event, userId, password) => {
 });
 
 ipcMain.handle('auth:lock', () => {
-  cachedDEK = null;
+  clearCachedDEK();
   currentUser = null;
   return true;
 });
@@ -327,7 +336,7 @@ ipcMain.handle('auth:remove-user', (event, userId) => {
   writeBackup(envelope);
 
   if (currentUser && currentUser.id === userId) {
-    cachedDEK = null;
+    clearCachedDEK();
     currentUser = null;
   }
 
@@ -519,7 +528,7 @@ function createWindow() {
 
   mainWindow = win;
   win.on('closed', () => {
-    cachedDEK = null;
+    clearCachedDEK();
     currentUser = null;
     mainWindow = null;
   });
@@ -534,7 +543,7 @@ app.whenReady().then(() => {
 });
 
 app.on('window-all-closed', () => {
-  cachedDEK = null;
+  clearCachedDEK();
   currentUser = null;
   if (process.platform !== 'darwin') app.quit();
 });

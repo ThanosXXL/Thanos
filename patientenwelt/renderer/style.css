@@ -87,10 +87,20 @@ body {
 
 .auth-overlay:not([hidden]) {
   display: flex;
+  flex-direction: column;
   align-items: center;
   justify-content: center;
+  gap: 16px;
   height: 100vh;
   background: linear-gradient(160deg, var(--blue-900) 0%, var(--blue-700) 55%, var(--blue-500) 100%);
+}
+
+.copyright-note {
+  margin: 0;
+  font-size: 11.5px;
+  color: rgba(255, 255, 255, 0.65);
+  text-align: center;
+  max-width: 420px;
 }
 
 .auth-card {
@@ -407,6 +417,15 @@ body {
 
 .sidebar-group-title:first-child { margin-top: 2px; }
 
+.sidebar-footer {
+  margin: 20px 8px 4px;
+  padding-top: 10px;
+  border-top: 1px solid var(--blue-100);
+  font-size: 10.5px;
+  color: var(--ink-soft);
+  opacity: 0.75;
+}
+
 .nav-btn {
   display: flex;
   align-items: center;
@@ -517,6 +536,22 @@ body {
 .panel-card h2, .panel-card h3 {
   margin-top: 0;
   color: var(--blue-800);
+}
+
+.impressum-placeholder-warning {
+  background: #fdf1ef;
+  border: 1px solid var(--danger);
+}
+
+.impressum-placeholder-warning h2 {
+  color: var(--danger-dark);
+  font-size: 15px;
+}
+
+.impressum-placeholder-warning p {
+  margin: 6px 0 0;
+  font-size: 13px;
+  color: var(--ink-soft);
 }
 
 /* ---------- Patienten-Banner (hochglanz) ---------- */

@@ -277,6 +277,10 @@
     {
       title: 'Weitere Services',
       items: ['Weitere Services']
+    },
+    {
+      title: 'Rechtliches',
+      items: ['Impressum']
     }
   ];
 
@@ -326,7 +330,9 @@
     'Analyse Leistungen': { activeViewMode: 'analyse-leistungen', onClick: () => gotoView('analyse-leistungen') },
     'Analyse Verordnungen': { activeViewMode: 'analyse-verordnungen', onClick: () => gotoView('analyse-verordnungen') },
 
-    'Weitere Services': { activeViewMode: 'weitere-services', onClick: () => gotoView('weitere-services') }
+    'Weitere Services': { activeViewMode: 'weitere-services', onClick: () => gotoView('weitere-services') },
+
+    'Impressum': { activeViewMode: 'impressum', onClick: () => gotoView('impressum') }
   };
 
   function renderSidebar() {
@@ -397,6 +403,15 @@
         render();
       }));
     }
+
+    el.sidebar.appendChild(sidebarCopyrightFooter());
+  }
+
+  function sidebarCopyrightFooter() {
+    const footer = document.createElement('div');
+    footer.className = 'sidebar-footer';
+    footer.textContent = '© 2026 PatientenWelt · Alle Rechte vorbehalten';
+    return footer;
   }
 
   function appendMenuGroupItems(afterGroup) {
@@ -506,6 +521,10 @@
     }
     if (ui.viewMode === 'weitere-services') {
       el.content.appendChild(renderWeitereServicesView());
+      return;
+    }
+    if (ui.viewMode === 'impressum') {
+      el.content.appendChild(renderImpressumView());
       return;
     }
 
@@ -2850,6 +2869,98 @@
     }
     wrap.appendChild(listCard);
 
+    return wrap;
+  }
+
+  function renderImpressumView() {
+    const wrap = document.createDocumentFragment();
+
+    const warning = document.createElement('div');
+    warning.className = 'panel-card impressum-placeholder-warning';
+    const warningHeading = document.createElement('h2');
+    warningHeading.textContent = '⚠ Platzhalter — noch nicht ausgefüllt';
+    warning.appendChild(warningHeading);
+    const warningText = document.createElement('p');
+    warningText.textContent = 'Dieses Impressum enthält ausschließlich Platzhalterfelder. Vor jeder echten Veröffentlichung oder kommerziellen Nutzung müssen Name/Firma, Anschrift, Kontakt und – bei Heilberufen – die berufsrechtlichen Angaben durch die tatsächlichen Daten ersetzt werden (siehe auch patientenwelt/legal/Impressum-Vorlage.md).';
+    warning.appendChild(warningText);
+    wrap.appendChild(warning);
+
+    const card = document.createElement('div');
+    card.className = 'panel-card';
+    const heading = document.createElement('h2');
+    heading.textContent = 'Impressum';
+    card.appendChild(heading);
+
+    const subHeading1 = document.createElement('h3');
+    subHeading1.textContent = 'Angaben gemäß § 5 TMG';
+    card.appendChild(subHeading1);
+
+    const grid = document.createElement('div');
+    grid.className = 'form-grid';
+    [
+      ['Name/Firma', '[Name oder Firmenname einsetzen]'],
+      ['Vertretungsberechtigte Person(en)', '[Name der/des Vertretungsberechtigten]'],
+      ['Anschrift', '[Straße, Hausnummer, PLZ, Ort, Land]'],
+      ['Telefon', '[Telefonnummer]'],
+      ['E-Mail', '[E-Mail-Adresse]'],
+      ['Registereintrag', '[Registergericht, Registernummer — falls zutreffend]'],
+      ['Umsatzsteuer-ID', '[USt-IdNr. gemäß § 27a UStG — falls zutreffend]']
+    ].forEach(([label, value]) => {
+      const wrapLabel = document.createElement('label');
+      const strong = document.createElement('span');
+      strong.textContent = label;
+      const span = document.createElement('div');
+      span.textContent = value;
+      span.style.fontWeight = '600';
+      span.style.color = 'var(--ink-soft)';
+      span.style.fontSize = '14px';
+      span.style.fontStyle = 'italic';
+      wrapLabel.append(strong, span);
+      grid.appendChild(wrapLabel);
+    });
+    card.appendChild(grid);
+
+    const subHeading2 = document.createElement('h3');
+    subHeading2.textContent = 'Angaben bei Heilberufen (§ 5 Abs. 1 Nr. 6 TMG, falls zutreffend)';
+    card.appendChild(subHeading2);
+
+    const grid2 = document.createElement('div');
+    grid2.className = 'form-grid';
+    [
+      ['Berufsbezeichnung', '[z. B. Heilpraktiker/in]'],
+      ['Zuständige Kammer/Aufsichtsbehörde', '[Kammer/Behörde einsetzen]'],
+      ['Verliehen in', '[Staat, in dem die Berufsbezeichnung verliehen wurde]'],
+      ['Berufsrechtliche Regelungen', '[z. B. Heilpraktikergesetz]']
+    ].forEach(([label, value]) => {
+      const wrapLabel = document.createElement('label');
+      const strong = document.createElement('span');
+      strong.textContent = label;
+      const span = document.createElement('div');
+      span.textContent = value;
+      span.style.fontWeight = '600';
+      span.style.color = 'var(--ink-soft)';
+      span.style.fontSize = '14px';
+      span.style.fontStyle = 'italic';
+      wrapLabel.append(strong, span);
+      grid2.appendChild(wrapLabel);
+    });
+    card.appendChild(grid2);
+
+    const subHeading3 = document.createElement('h3');
+    subHeading3.textContent = 'EU-Streitschlichtung';
+    card.appendChild(subHeading3);
+    const osText = document.createElement('p');
+    osText.textContent = 'Die Europäische Kommission stellt eine Plattform zur Online-Streitbeilegung (OS) bereit: ec.europa.eu/consumers/odr/. Wir sind nicht verpflichtet und nicht bereit, an Streitbeilegungsverfahren vor einer Verbraucherschlichtungsstelle teilzunehmen.';
+    card.appendChild(osText);
+
+    const subHeading4 = document.createElement('h3');
+    subHeading4.textContent = 'Haftung für Inhalte und Links';
+    card.appendChild(subHeading4);
+    const liabilityText = document.createElement('p');
+    liabilityText.textContent = 'Als Diensteanbieter sind wir gemäß § 7 Abs. 1 TMG für eigene Inhalte nach den allgemeinen Gesetzen verantwortlich. Für die Inhalte externer, verlinkter Seiten übernehmen wir keine Gewähr; für deren Inhalte ist stets der jeweilige Anbieter verantwortlich.';
+    card.appendChild(liabilityText);
+
+    wrap.appendChild(card);
     return wrap;
   }
 
