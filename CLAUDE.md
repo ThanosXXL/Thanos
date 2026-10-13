@@ -45,6 +45,14 @@ Each *Dozent* object is `{ id, name, todos, openProjects, doneProjects, chat }`.
 - User-facing strings, list labels, and comments are in German. Match the existing language when touching the UI.
 - Build DOM with `createElement` and set user-controlled text via `textContent` (never `innerHTML`) — this is done consistently to avoid injecting untrusted list/chat content.
 
+## Kunden-Download-Dateien (projektübergreifende Konvention)
+
+Wenn ein Projekt eine "Vollversion"-Downloadseite für externe Kunden braucht (HTML-Seite mit automatischem 1-Klick-Download, z. B. Installer-Links für mehrere Plattformen): **immer als eigenständige, lokale `.html`-Datei erzeugen und direkt als Dateianhang an den Nutzer senden** (so wie PDFs/ZIPs geliefert werden) – **nicht** als Claude-Artefakt-Link (`claude.ai/artifact/...`) ausliefern.
+
+Grund: Ein Claude-Artefakt ist standardmäßig privat und erfordert einen manuellen Freigabe-Schritt über das Share-Menü, der je nach Plan/Konto nicht zuverlässig funktioniert. Eine normale `.html`-Datei dagegen lässt sich sofort per Doppelklick im Browser öffnen und beliebig an Kunden weiterreichen, ganz ohne Freigabe-Einstellungen oder Login.
+
+Die Datei selbst enthält dann die eigentlichen Download-Buttons/Links (z. B. zu GitHub-Releases-Assets o. ä.), exakt wie bei einer normalen Weboberfläche – nur eben als einzelne, portable Datei statt als gehostete Seite.
+
 ## Sicherheit & Datenschutz
 
 Beide Apps (Dozenten Dashboard und `it-schulung/`) sind reine Offline-Desktop-Tools: keine Netzwerkanfragen zur Laufzeit, keine Telemetrie, kein Auto-Updater. Siehe jeweils den Abschnitt „Datenschutz (DSGVO)" in `README.md` bzw. `it-schulung/README.md` für Details zu Datenhaltung, Betroffenenrechten (Export/Löschen) und Verantwortlichkeit; die implementierten Electron-Härtungsmaßnahmen (Sandbox, CSP, Validierung/Größenlimit/atomare 0600-Writes der Datendatei, Popup-/Navigations-/Berechtigungs-Sperren, Rückfrage vor externen Links in `it-schulung/`) stehen oben unter "Architecture".
