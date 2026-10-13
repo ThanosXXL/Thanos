@@ -89,9 +89,9 @@ Apple-Developer-Konto (Code-Signierung) – das ist eine Einschränkung von Appl
 
 ## Releases (CI) – alle 5 Plattformen
 
-`.github/workflows/baustelle-tagesreport-release.yml` baut bei jedem Tag `tagesreport-v*` (z. B.
+Die CI-Pipeline `baustelle-tagesreport-release.yml` baut bei jedem Tag `tagesreport-v*` (z. B.
 `tagesreport-v1.0.0`) automatisch Installer für **Windows, macOS, Linux** sowie ein **Android**-APK und
-veröffentlicht alle vier Dateien gemeinsam in einem GitHub Release; **iOS** läuft über den PWA-Weg oben.
+veröffentlicht alle vier Dateien gemeinsam als ein Release; **iOS** läuft über den PWA-Weg oben.
 Eigener Tag-Präfix, damit es nie mit den Tags anderer Projekte in diesem Repository kollidiert.
 Lässt sich auch manuell über **Actions → Build & Release Baustelle Tagesreport → Run workflow** anstoßen.
 
