@@ -1,0 +1,6 @@
+{
+  "appId": "com.bauplanphase.tagesreport",
+  "appName": "Bauplanphase",
+  "webDir": "renderer",
+  "bundledWebRuntime": false
+}

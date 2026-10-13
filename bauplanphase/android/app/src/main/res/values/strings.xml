@@ -1,0 +1,7 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="app_name">Bauplanphase</string>
+    <string name="title_activity_main">Bauplanphase</string>
+    <string name="package_name">com.bauplanphase.tagesreport</string>
+    <string name="custom_url_scheme">com.bauplanphase.tagesreport</string>
+</resources>
