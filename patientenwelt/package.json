@@ -37,11 +37,6 @@
     "linux": {
       "target": "AppImage",
       "artifactName": "PatientenWelt.${ext}"
-    },
-    "publish": [
-      {
-        "provider": "github"
-      }
-    ]
+    }
   }
 }
