@@ -3,13 +3,20 @@
 Dieser Ordner enthält die HTML-Quelldateien der PDF-Handbücher als Vorlage für künftige Handbücher/PDFs
 in diesem Projekt:
 
-- `powershell-download-skripte.html` – die vier PowerShell-Download-Snippets (Windows/macOS/Android/iOS)
-- `benutzerhandbuch.html` – Benutzerhandbuch zu Dozenten Dashboard + Baustelle-Tagesreport
+- `benutzerhandbuch.html` – Benutzerhandbuch zu Baustelle Tagesreport (Funktionen, Bedienung, DSGVO)
+- `installationsanleitung.html` – Schritt-für-Schritt-Installation für alle 5 Plattformen (Windows/macOS/Linux/Android/iOS)
 
 ## Design-Standard
 
+- Schriftart: **Inter** (warme, humanistische Sans-Serif – auf dieser Maschine unter
+  `/usr/share/fonts/opentype/inter/` installiert, wird beim PDF-Druck mit eingebettet; Fallback
+  `'Segoe UI', Arial, sans-serif`)
 - Farben: Orange (`#f2660c`) als Akzent, schwarze Schrift auf weißem Hintergrund
 - 3D-isometrische Illustrationen (reines CSS, `transform-style: preserve-3d`) statt Fotos/Logos
+- **Fortlaufende Seitenzahl unten Mitte auf jeder Seite** (warmes Orange `#b35a1f`, Format „n / gesamt“) –
+  siehe „PDF erzeugen“ unten, das läuft über Chromes DevTools-Protokoll (`Page.printToPDF` mit
+  `displayHeaderFooter` + `footerTemplate`), nicht über CSS `@page` (von Chromes Druck-Engine nicht
+  unterstützt)
 - **Jedes Handbuch endet ganz unten mit folgendem Copyright-Block:**
 
   ```
@@ -25,12 +32,21 @@ in diesem Projekt:
 
 ## PDF erzeugen
 
+Chromes Kommandozeilen-Flag `--print-to-pdf` unterstützt keine eigene Fußzeilen-Vorlage. Für die
+fortlaufende Seitenzahl unten Mitte muss stattdessen `Page.printToPDF` direkt über das DevTools-Protokoll
+aufgerufen werden (`displayHeaderFooter: true` + `footerTemplate` mit `<span class="pageNumber">` /
+`<span class="totalPages">`). Ein fertiges Skript dafür:
+
 ```bash
-CHROME=/opt/pw-browsers/chromium-1194/chrome-linux/chrome   # Pfad je nach Umgebung anpassen
-"$CHROME" --headless --disable-gpu --no-sandbox \
-  --print-to-pdf="Benutzerhandbuch.pdf" --no-pdf-header-footer \
-  "file://$(pwd)/benutzerhandbuch.html"
+python3 -m pip install websocket-client requests
+python3 print_pdf.py benutzerhandbuch.html Benutzerhandbuch.pdf
+python3 print_pdf.py installationsanleitung.html Installationsanleitung.pdf
 ```
 
-Jeder beliebige Chromium/Chrome-Browser mit `--headless --print-to-pdf` funktioniert; alternativ das
-HTML-Dokument im Browser öffnen und über die Druckfunktion als PDF speichern (Format A4).
+`print_pdf.py` (liegt in diesem Ordner) startet Chrome headless mit `--remote-debugging-port`,
+verbindet sich per WebSocket und ruft `Page.printToPDF` mit der Fußzeilen-Vorlage auf. Der Pfad zum
+Chrome-Binary ist oben im Skript als `CHROME = "..."` hinterlegt und muss ggf. an die eigene Umgebung
+angepasst werden.
+
+Alternativ: HTML-Dokument im Browser öffnen und über die Druckfunktion als PDF speichern (Format A4,
+„Kopf- und Fußzeilen“ aktivieren) – dort setzt Chrome eigene (schlichtere) Standard-Seitenzahlen.

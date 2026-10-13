@@ -91,13 +91,13 @@ jobs:
           ./gradlew assembleDebug
 
       - name: APK umbenennen
-        run: cp android/app/build/outputs/apk/debug/app-debug.apk baustelle-tagesreport-android.apk
+        run: cp android/app/build/outputs/apk/debug/app-debug.apk BaustelleTagesreport-Android.apk
 
       - name: APK als Artifact hochladen
         uses: actions/upload-artifact@v4
         with:
           name: baustelle-tagesreport-android
-          path: baustelle-tagesreport/baustelle-tagesreport-android.apk
+          path: baustelle-tagesreport/BaustelleTagesreport-Android.apk
           if-no-files-found: warn
 
   release:

@@ -35,13 +35,16 @@
       "output": "dist"
     },
     "win": {
-      "target": "nsis"
+      "target": "nsis",
+      "artifactName": "BaustelleTagesreport-Windows-Setup.${ext}"
     },
     "mac": {
-      "target": "dmg"
+      "target": "dmg",
+      "artifactName": "BaustelleTagesreport-macOS.${ext}"
     },
     "linux": {
-      "target": "AppImage"
+      "target": "AppImage",
+      "artifactName": "BaustelleTagesreport-Linux.${ext}"
     }
   }
 }

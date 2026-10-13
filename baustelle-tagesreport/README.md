@@ -3,6 +3,8 @@
 Eigenständige Desktop-App (Electron) für den täglichen Baustellenreport. Kein Bezug zum
 Dozenten-Dashboard in diesem Repository – eigene Codebasis, eigener Prozess, eigene Datenablage.
 
+**[📥 Download-Seite für alle 5 Plattformen](../docs/download.html)** (Windows/macOS/Linux/Android/iOS)
+
 ## Funktionen
 
 - **Tagesreport**: Tageseinträge (Bautagebuch, Wetter, Besonderheiten) mit Wochen-/Monatskalender,

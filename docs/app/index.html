@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self'; style-src 'self'; img-src 'self' data:; connect-src 'none'; base-uri 'none'; form-action 'none'; frame-ancestors 'none'">
+<title>Baustelle — Tagesreport</title>
+<link rel="stylesheet" href="style.css">
+<link rel="manifest" href="manifest.json">
+<link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+<link rel="icon" href="icons/icon-192.png">
+<meta name="theme-color" content="#14171c">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Tagesreport">
+</head>
+<body>
+<div class="app">
+
+  <div class="topbar">
+    <div class="topbar-row">
+      <div class="brand">
+        <div class="brand-mark">TR</div>
+        <div>
+          <div class="brand-name">Tagesreport</div>
+          <div class="brand-sub" id="brandSub">Baustelle · wird geladen…</div>
+        </div>
+      </div>
+      <div class="header-actions">
+        <button class="btn-chip" id="exportDataBtn" title="Alle Daten als JSON-Datei exportieren">Export</button>
+        <button class="btn-chip danger" id="deleteAllDataBtn" title="Alle Daten unwiderruflich löschen">Löschen</button>
+      </div>
+    </div>
+    <div class="topbar-row" style="margin-top:10px;">
+      <button class="reminder-pill" id="reminderPill"><span class="dot"></span><span id="reminderText">12:00</span></button>
+    </div>
+    <div class="reminder-note" id="reminderNote">Reminder aktiv täglich um 12:00 Uhr, solange der Tagesreport noch nicht ausgefüllt ist.</div>
+  </div>
+
+  <main>
+
+    <!-- Tagesreport / Kalender -->
+    <section class="card">
+      <div class="card-head">
+        <div class="card-title"><span class="idx">01</span> Tagesreport</div>
+        <span class="save-tag" id="reportSaveTag">Gespeichert ✓</span>
+      </div>
+
+      <div class="cal-tabs" id="calTabs">
+        <div class="cal-tab active" data-view="woche">Woche</div>
+        <div class="cal-tab" data-view="monat">Monat</div>
+      </div>
+
+      <div class="cal-live">
+        <div class="cal-date" id="calDate">—</div>
+        <div class="cal-nav">
+          <button id="navPrev">‹</button>
+          <button class="cal-today-btn" id="navToday">Heute</button>
+          <button id="navNext">›</button>
+        </div>
+      </div>
+
+      <div class="week-strip" id="weekStrip"></div>
+
+      <textarea class="report-field" id="reportField" placeholder="Heutiger Eintrag: Bautagebuch, Wetter, Besonderheiten…" maxlength="4000"></textarea>
+      <div class="report-actions">
+        <button class="btn-save" id="saveReportBtn">Speichern</button>
+      </div>
+    </section>
+
+    <!-- Status -->
+    <section class="card">
+      <div class="card-head">
+        <div class="card-title"><span class="idx">02</span> Status</div>
+        <span class="save-tag" id="statusSaveTag">Gespeichert ✓</span>
+      </div>
+      <span class="field-label">Bauabschnitt</span>
+      <input class="status-title-input" id="statusTitle" placeholder="z. B. Bauabschnitt 2. OG" maxlength="80">
+
+      <div class="bar-row">
+        <div class="bar-label"><span>Wochenziel</span><b id="weekVal">0%</b></div>
+        <input type="range" min="0" max="100" value="0" id="weekSlider">
+      </div>
+      <div class="bar-row">
+        <div class="bar-label"><span>Monatsziel</span><b id="monthVal">0%</b></div>
+        <input type="range" min="0" max="100" value="0" id="monthSlider">
+      </div>
+    </section>
+
+    <!-- Bestellstatus -->
+    <section class="card">
+      <div class="card-head">
+        <div class="card-title"><span class="idx">03</span> Bestellstatus</div>
+      </div>
+      <div id="ordersList"></div>
+      <div class="empty-note" id="ordersEmpty" style="display:none;">Noch keine Bestellungen erfasst.</div>
+
+      <div class="add-order">
+        <input id="orderName" placeholder="Material / Bezeichnung" maxlength="120">
+        <div class="add-order-row">
+          <input id="orderDate" type="date">
+          <input id="orderNote" placeholder="Notiz (optional)" maxlength="200">
+        </div>
+        <button class="btn-add" id="addOrderBtn">+ Bestellung hinzufügen</button>
+      </div>
+    </section>
+
+    <!-- Screenshots -->
+    <section class="card">
+      <div class="card-head">
+        <div class="card-title"><span class="idx">04</span> Screenshots</div>
+      </div>
+      <div class="shots" id="shotsGrid"></div>
+      <input type="file" id="fileInput" accept="image/png,image/jpeg,image/webp" multiple>
+    </section>
+
+  </main>
+
+  <footer>
+    <div>Daten werden ausschließlich lokal auf diesem Gerät gespeichert.</div>
+    <div><a href="impressum.html">Impressum &amp; Datenschutz</a></div>
+  </footer>
+</div>
+
+<div class="modal-overlay" id="modalOverlay">
+  <img id="modalImg" src="" alt="">
+</div>
+
+<div class="modal-overlay" id="confirmDeleteModal">
+  <div class="confirm-modal">
+    <h3>Alle Daten löschen?</h3>
+    <p>Tagesreporte, Status, Bestellungen und Screenshots werden unwiderruflich gelöscht. Dieser Vorgang kann nicht rückgängig gemacht werden.</p>
+    <div class="actions">
+      <button id="cancelDeleteAll">Abbrechen</button>
+      <button class="danger" id="confirmDeleteAll">Endgültig löschen</button>
+    </div>
+  </div>
+</div>
+
+<script src="platform-bridge.js"></script>
+<script src="renderer.js"></script>
+</body>
+</html>
