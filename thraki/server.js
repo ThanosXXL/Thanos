@@ -11,7 +11,7 @@ const HEAD = {
   'Permissions-Policy': 'camera=(), microphone=(), geolocation=(), interest-cohort=()',
   'Cross-Origin-Opener-Policy': 'same-origin', 'Cross-Origin-Resource-Policy': 'same-origin',
 };
-const PUBLIC = /^(index|downloads|ensemble-gross|ensemble-mittel|ensemble-klein|trachten|taenze|instrumente|geschichte|tanzgruppe|impressum|datenschutz)\.html$|^(css|js|img|demo)\/[\w.-]+$/;
+const PUBLIC = /^[a-z-]+\.html$|^(css|js|img|demo)\/[\w.-]+$/;
 http.createServer((req, res) => {
   const send = (code, body, type = 'text/plain; charset=utf-8') => { res.writeHead(code, { ...HEAD, 'Content-Type': type }); res.end(body); };
   if (req.method !== 'GET' && req.method !== 'HEAD') return send(405, 'Method Not Allowed');
