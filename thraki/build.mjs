@@ -47,6 +47,8 @@ for (const [file, [title, body]] of Object.entries(pages)) {
 <a class="brand" href="index.html">Θρακικός Πολιτιστικός Σύλλογος<small>Stuttgart</small></a>
 <button class="menu-btn" aria-expanded="false" aria-controls="nav">☰ Menü</button>
 <nav aria-label="Hauptnavigation"><ul class="nav" id="nav">${items}</ul></nav></aside>
+<button class="music-btn" id="music" aria-pressed="false" title="Hintergrundmusik an/aus">♪ Musik</button>
+<audio id="bgm" src="img/hintergrund.mp3" loop preload="none"></audio>
 <main id="inhalt"><h1>${title}</h1>${body}
 <footer><a href="impressum.html">Impressum</a><a href="datenschutz.html">Datenschutz</a></footer></main></div></body></html>
 `);
