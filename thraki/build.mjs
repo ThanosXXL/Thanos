@@ -26,7 +26,11 @@ const card = t => `<div class="card reveal">${t}</div>`;
 
 const slides = [
   ['ΠΑΡΑΔΟΣΙΑΚΟΙ ΧΟΡΟΙ', 'Η Θράκη έχει να μας παρουσιάσει ένα δικό της ξεχωριστό και πολύ χαρακτηριστικό μάλιστα μουσικοχορευτικό ύφος και χρώμα, πράγμα που το διαπιστώνουμε όταν βλέπουμε τους υπέροχους Θρακιώτικους χορούς να χορεύονται.', 'tanzgruppe.html'],
-  ...[2, 3, 4, 5, 6].map(n => [`Platzhalter Bildtitel ${n}`, 'Dieser Inhalt wird ergänzt.', 'index.html']),
+  ['Trachten', 'Die farbenfrohen Trachten Thrakiens, mit Stickereien und Westen, werden bei jedem Auftritt getragen.', 'trachten.html'],
+  ['Tänze', 'Thrakische Tänze in ihrer ursprünglichen Form, gemeinsam getanzt und weitergegeben.', 'taenze.html'],
+  ['Instrumente', 'Musik und Instrumente, die den Tanz begleiten und Thrakien zum Klingen bringen.', 'instrumente.html'],
+  ['Geschichte', 'Die Geschichte Thrakiens und des Vereins in Stuttgart.', 'geschichte.html'],
+  ['Tanzgruppe', 'Über 50 Tänzerinnen und Tänzer proben einmal pro Woche.', 'tanzgruppe.html'],
 ];
 const home = `<section class="slider" aria-roledescription="carousel" aria-label="Bildergalerie">
 ${slides.map((s, i) => `<figure class="slide s${i + 1}" role="group" aria-label="${i + 1} von 6"><figcaption class="cap"><h2>${s[0]}</h2><p>${s[1]}</p><a class="more" href="${s[2]}">Μάθετε περισσότερα →</a></figcaption></figure>`).join('\n')}
