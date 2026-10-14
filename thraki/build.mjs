@@ -1,6 +1,6 @@
 // Erzeugt Logo und alle HTML-Seiten. Aufruf: node build.mjs
 import { writeFileSync } from 'node:fs';
-const TODO = '<p class="todo">Platzhalter – Originaltext von thraki.de hier einfügen (in <code>build.mjs</code>).</p>';
+const TODO = '<p class="todo">Dieser Inhalt wird ergänzt.</p>';
 
 // Lorbeerkranz-Logo (eigene Zeichnung, weiß auf Transparent)
 const leaves = [];
@@ -26,7 +26,7 @@ const card = t => `<div class="card reveal">${t}</div>`;
 
 const slides = [
   ['ΠΑΡΑΔΟΣΙΑΚΟΙ ΧΟΡΟΙ', 'Η Θράκη έχει να μας παρουσιάσει ένα δικό της ξεχωριστό και πολύ χαρακτηριστικό μάλιστα μουσικοχορευτικό ύφος και χρώμα, πράγμα που το διαπιστώνουμε όταν βλέπουμε τους υπέροχους Θρακιώτικους χορούς να χορεύονται.', 'tanzgruppe.html'],
-  ...[2, 3, 4, 5, 6].map(n => [`Platzhalter Bildtitel ${n}`, 'Platzhalter – Originaltext der Folie hier einfügen.', 'index.html']),
+  ...[2, 3, 4, 5, 6].map(n => [`Platzhalter Bildtitel ${n}`, 'Dieser Inhalt wird ergänzt.', 'index.html']),
 ];
 const home = `<section class="slider" aria-roledescription="carousel" aria-label="Bildergalerie">
 ${slides.map((s, i) => `<figure class="slide s${i + 1}" role="group" aria-label="${i + 1} von 6"><figcaption class="cap"><h2>${s[0]}</h2><p>${s[1]}</p><a class="more" href="${s[2]}">Μάθετε περισσότερα →</a></figcaption></figure>`).join('\n')}
