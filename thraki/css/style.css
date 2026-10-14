@@ -1,0 +1,58 @@
+/* Thraki – Thrakischer Kulturverein Stuttgart
+   FARBEN: zentral hier. TODO: Originalfarben von thraki.de eintragen. */
+:root{
+  --bg:#fbf3e6; --bg2:#f3e4cb; --card:#fffaf0; --ink:#3a2a1c; --muted:#6f5b47;
+  --accent:#b8402a; --accent2:#d9902f; --line:#e4d2b3;
+  --font:"Segoe UI","Candara","Optima","Trebuchet MS",Ubuntu,"Noto Sans",system-ui,sans-serif;
+  --font-head:"Palatino Linotype","Book Antiqua",Palatino,Georgia,serif;
+  --shadow:0 .6rem 1.4rem rgba(58,42,28,.18),0 .15rem .3rem rgba(58,42,28,.12);
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{margin:0;font:1.05rem/1.7 var(--font);color:var(--ink);
+  background:radial-gradient(circle at 20% 0,var(--bg2),var(--bg) 55%) fixed;min-height:100vh}
+a{color:var(--accent)}
+.skip{position:absolute;left:-999px}.skip:focus{left:1rem;top:1rem;background:#fff;padding:.5rem;z-index:99}
+.layout{display:grid;grid-template-columns:17rem 1fr;gap:2rem;max-width:72rem;margin:0 auto;padding:1.5rem}
+.side{position:sticky;top:1.5rem;align-self:start;perspective:900px}
+.brand{display:block;text-decoration:none;color:var(--ink);font:700 1.35rem/1.2 var(--font-head);margin-bottom:1rem}
+.brand small{display:block;font:400 .85rem var(--font);color:var(--muted)}
+.logo{width:4.2rem;height:4.2rem;border-radius:50%;margin-bottom:.6rem;
+  background:radial-gradient(circle at 32% 28%,#fff8,transparent 40%),linear-gradient(145deg,var(--accent2),var(--accent));
+  box-shadow:inset -.3rem -.4rem .8rem rgba(0,0,0,.25),var(--shadow);animation:float 5s ease-in-out infinite}
+.nav{list-style:none;margin:0;padding:0;display:grid;gap:.5rem}
+.nav a{display:block;padding:.6rem 1rem;border-radius:.9rem;text-decoration:none;color:var(--ink);
+  background:var(--card);border:1px solid var(--line);box-shadow:0 .2rem 0 var(--line);
+  transition:transform .18s,box-shadow .18s,background .18s}
+.nav a:hover,.nav a:focus-visible{transform:translateY(-.15rem) translateX(.2rem);box-shadow:0 .45rem .8rem rgba(58,42,28,.2)}
+.nav a[aria-current=page]{background:linear-gradient(145deg,var(--accent2),var(--accent));color:#fff;border-color:transparent}
+.nav .sep{margin:.6rem 0 .1rem;font-size:.8rem;text-transform:uppercase;letter-spacing:.08em;color:var(--muted)}
+.menu-btn{display:none}
+main{min-width:0}
+h1{font:700 clamp(1.9rem,4vw,2.9rem)/1.15 var(--font-head);margin:.2rem 0 1rem;
+  text-shadow:0 1px 0 #fff,0 .15rem .25rem rgba(58,42,28,.18)}
+h2{font:700 1.4rem var(--font-head)}
+.hero{padding:2rem;border-radius:1.4rem;background:linear-gradient(145deg,var(--card),var(--bg2));
+  border:1px solid var(--line);box-shadow:var(--shadow);margin-bottom:1.5rem;animation:rise .7s both}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(14rem,1fr));gap:1.2rem;perspective:1000px}
+.tile{display:block;padding:1.3rem;border-radius:1.1rem;background:var(--card);border:1px solid var(--line);
+  text-decoration:none;color:var(--ink);box-shadow:var(--shadow);transform-style:preserve-3d;
+  transform:rotateX(var(--rx,0deg)) rotateY(var(--ry,0deg));transition:transform .15s ease-out;animation:rise .7s both}
+.tile h3{margin:0 0 .3rem;font:700 1.15rem var(--font-head);transform:translateZ(1.2rem)}
+.tile p{margin:0;color:var(--muted)}
+.card{padding:1.5rem;border-radius:1.1rem;background:var(--card);border:1px solid var(--line);box-shadow:var(--shadow);margin:1rem 0}
+.todo{border-left:.35rem solid var(--accent2);background:#fff3d6;padding:.6rem 1rem;border-radius:.6rem;font-size:.95rem}
+footer{margin-top:2.5rem;padding-top:1rem;border-top:1px solid var(--line);color:var(--muted);font-size:.9rem}
+footer a{margin-right:1rem}
+.reveal{opacity:0;transform:translateY(1.4rem);transition:opacity .7s,transform .7s}
+.reveal.in{opacity:1;transform:none}
+@keyframes float{50%{transform:translateY(-.35rem) rotate(4deg)}}
+@keyframes rise{from{opacity:0;transform:translateY(1.2rem)}}
+@media (max-width:800px){
+  .layout{grid-template-columns:1fr;gap:1rem;padding:1rem}
+  .side{position:static}
+  .menu-btn{display:inline-block;margin:.5rem 0;padding:.6rem 1.1rem;border-radius:.9rem;border:1px solid var(--line);
+    background:var(--card);color:var(--ink);font:inherit;box-shadow:0 .2rem 0 var(--line)}
+  .nav{display:none}.nav.open{display:grid}
+}
+@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}.reveal{opacity:1;transform:none}}
