@@ -17,13 +17,3 @@
   const io = new IntersectionObserver(es => es.forEach(e => e.isIntersecting && (e.target.classList.add('in'), io.unobserve(e.target))), { threshold: .15 });
   document.querySelectorAll('.reveal').forEach(el => io.observe(el));
 })();
-(() => { // Hintergrundmusik: nur auf Klick, merkt sich Zustand nicht (kein Speichern -> DSGVO-neutral)
-  const b = document.getElementById('music'), a = document.getElementById('bgm');
-  if (!b || !a) return;
-  a.volume = .35;
-  b.addEventListener('click', () => {
-    const on = b.getAttribute('aria-pressed') !== 'true';
-    on ? a.play().catch(() => {}) : a.pause();
-    b.setAttribute('aria-pressed', String(on));
-  });
-})();
