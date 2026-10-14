@@ -48,6 +48,6 @@ for (const [file, [title, body]] of Object.entries(pages)) {
 <button class="menu-btn" aria-expanded="false" aria-controls="nav">☰ Menü</button>
 <nav aria-label="Hauptnavigation"><ul class="nav" id="nav">${items}</ul></nav></aside>
 <main id="inhalt"><h1>${title}</h1>${body}
-<footer><a href="impressum.html">Impressum</a><a href="datenschutz.html">Datenschutz</a></footer></main></div></body></html>
+<footer><a href="downloads.html">Downloads</a><a href="impressum.html">Impressum</a><a href="datenschutz.html">Datenschutz</a></footer></main></div></body></html>
 `);
 }

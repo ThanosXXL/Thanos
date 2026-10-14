@@ -1,0 +1,10 @@
+.dl{max-width:42rem;margin:0 auto;padding:2rem 1rem 4rem;text-align:center}
+.all{max-width:26rem;margin:1rem auto}
+.b{display:block;width:100%;padding:.9rem 1.2rem;border:0;border-radius:2.5rem;cursor:pointer;text-decoration:none;text-align:center;
+  font:700 1.05rem var(--font);color:#fff;background:linear-gradient(145deg,var(--accent2),var(--accent));
+  box-shadow:var(--shadow),inset 0 .15rem .25rem rgba(255,255,255,.45);transition:transform .15s,filter .15s}
+.b:hover{transform:translateY(-.15rem);filter:brightness(1.08)}
+.b.alt{color:var(--ink);background:var(--card);border:1px solid var(--line)}
+#s{min-height:1.5rem;color:var(--muted);margin:.6rem 0}
+.dl .card{text-align:left}.dl ul{columns:2;padding-left:1.2rem;margin:0}
+@media (max-width:520px){.dl ul{columns:1}}
