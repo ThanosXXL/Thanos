@@ -77,6 +77,18 @@ Sperren. Aufgenommen mit Playwright (Chromium, `recordVideo`) gegen die echte
 Version, die vor Einführung von Login/Verschlüsselung, Kalender und
 Abrechnung aufgenommen wurde.
 
+### Beste-Qualität-Variante
+
+```
+patientenwelt/assets/branding/patientenwelt-demo-video-beste-qualitaet.mp4
+```
+
+Gleicher Inhalt/gleiche Länge wie oben, aber mit `mix-demo-audio.sh` neu
+vertont: Videospur unverändert per Stream-Copy übernommen (kein
+Qualitätsverlust), Audiospur mit 320 kbit/s AAC statt der ursprünglichen
+123 kbit/s. Ersetzt die ältere Datei nicht, liegt als zusätzliche Variante
+daneben.
+
 ## Hintergrundmusik
 
 ```
@@ -105,4 +117,8 @@ als der Track). Das gilt für jedes künftige Demovideo, nicht nur für eines:
 patientenwelt/assets/branding/mix-demo-audio.sh eingabe-video.mp4 ausgabe-video-mit-musik.mp4
 ```
 
-Voraussetzung: `ffmpeg`/`ffprobe` installiert (`apt-get install -y --no-install-recommends ffmpeg`).
+Audio wird standardmäßig mit 320 kbit/s AAC @ 48 kHz encodiert (beste
+praktikable Qualität für diesen Zweck) — das gilt automatisch für jeden
+künftigen Aufruf dieses Skripts, nicht nur rückwirkend für ein einzelnes
+Video. Voraussetzung: `ffmpeg`/`ffprobe` installiert
+(`apt-get install -y --no-install-recommends ffmpeg`).

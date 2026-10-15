@@ -28,7 +28,7 @@ fi
 VIDEO_DURATION="$(ffprobe -v error -show_entries format=duration -of csv=p=0 "$INPUT_VIDEO")"
 
 ffmpeg -y -stream_loop -1 -i "$MUSIC" -i "$INPUT_VIDEO" \
-  -map 1:v -map 0:a -c:v copy -c:a aac -t "$VIDEO_DURATION" \
+  -map 1:v -map 0:a -c:v copy -c:a aac -b:a 320k -ar 48000 -t "$VIDEO_DURATION" \
   "$OUTPUT_VIDEO"
 
 echo "Fertig: $OUTPUT_VIDEO (Hintergrundmusik automatisch auf ${VIDEO_DURATION}s angepasst)"
