@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8" />
+  <meta
+    http-equiv="Content-Security-Policy"
+    content="default-src 'none'; script-src 'self'; style-src 'self'; img-src 'self' data:; font-src 'self'; base-uri 'none'; form-action 'none'"
+  />
+  <title>IT-WORLD Compliance-Assistent</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <div class="app">
+    <aside class="sidebar" id="sidebar">
+      <div class="brand">
+        <img class="brand-logo" src="assets/logo.png" alt="IT-WORLD – IT Solutions" />
+      </div>
+      <div class="brand-product">
+        <span class="brand-product-name">Compliance-Assistent</span>
+        <span class="brand-product-sub">NIS2 · DSGVO · IT-Sicherheit</span>
+      </div>
+      <nav id="nav" class="nav" aria-label="Hauptnavigation"></nav>
+      <div class="sidebar-foot">
+        <button id="btn-export" class="btn btn-ghost btn-small" type="button">Daten sichern</button>
+        <button id="btn-import" class="btn btn-ghost btn-small" type="button">Sicherung laden</button>
+        <p class="sidebar-note">Alle Daten bleiben lokal auf diesem Gerät.</p>
+      </div>
+    </aside>
+
+    <main class="main">
+      <header class="topbar">
+        <div>
+          <h1 id="view-title" class="view-title"></h1>
+          <p id="view-sub" class="view-sub"></p>
+        </div>
+        <div id="topbar-company" class="topbar-company"></div>
+      </header>
+      <div id="content" class="content"></div>
+      <footer class="footer">
+        IT-WORLD · IT Solutions &nbsp;|&nbsp; Orientierungshilfe, keine Rechtsberatung.
+      </footer>
+    </main>
+  </div>
+
+  <div id="modal-root"></div>
+  <div id="toast" class="toast" role="status" aria-live="polite"></div>
+
+  <script src="catalog.js"></script>
+  <script src="renderer.js"></script>
+</body>
+</html>

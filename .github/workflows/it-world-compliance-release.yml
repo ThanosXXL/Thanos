@@ -1,0 +1,74 @@
+name: Build & Release IT-WORLD Compliance-Assistent
+
+on:
+  push:
+    tags:
+      - "it-world-compliance-v*"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [windows-latest, macos-latest, ubuntu-latest]
+    runs-on: ${{ matrix.os }}
+    permissions:
+      contents: read
+    defaults:
+      run:
+        working-directory: it-world-compliance
+
+    steps:
+      - name: Repository auschecken
+        uses: actions/checkout@v4
+
+      - name: Node.js einrichten
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Abhängigkeiten installieren
+        run: npm install
+
+      - name: Desktop-App bauen
+        run: npm run dist
+
+      - name: Installer als Artifact hochladen
+        uses: actions/upload-artifact@v4
+        with:
+          name: it-world-compliance-${{ matrix.os }}
+          path: |
+            it-world-compliance/dist/*.exe
+            it-world-compliance/dist/*.dmg
+            it-world-compliance/dist/*.AppImage
+          if-no-files-found: warn
+
+  release:
+    needs: build
+    if: startsWith(github.ref, 'refs/tags/it-world-compliance-v')
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - name: Repository auschecken
+        uses: actions/checkout@v4
+
+      - name: Installer-Artifacts herunterladen
+        uses: actions/download-artifact@v4
+        with:
+          pattern: it-world-compliance-*
+          path: release-assets
+          merge-multiple: true
+
+      - name: GitHub Release erstellen und Installer anhängen
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          gh release create "${{ github.ref_name }}" \
+            --title "IT-WORLD Compliance-Assistent ${{ github.ref_name }}" \
+            --notes "Automatisch veröffentlichter Build des IT-WORLD Compliance-Assistents für Windows, macOS und Linux." \
+            release-assets/*
