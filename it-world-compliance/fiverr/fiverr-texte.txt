@@ -1,0 +1,50 @@
+FIVERR-TEXTE · IT-WORLD Compliance-Assistent
+© 2026 IT-WORLD. Alle Rechte vorbehalten. Vervielfältigung und Weitergabe untersagt.
+
+=== GIG-TITEL (max. 80 Zeichen) ===
+Ich liefere Ihnen Compliance-Software für NIS2, DSGVO und IT-Sicherheit (KMU)   [77/80]
+I will deliver NIS2, GDPR and IT security compliance software for your SME   [74/80]
+
+=== GIG-BESCHREIBUNG (max. 1200 Zeichen) ===
+NIS2, DSGVO und IT-Sicherheit: Checklisten, Nachweise und Fristen in einer Desktop-Software, die komplett offline läuft.
+
+Der IT-WORLD Compliance-Assistent führt Ihr Unternehmen Schritt für Schritt durch 57 Anforderungen mit Hilfetexten, Rechtsgrundlage und Nachweis-Tipps. Dazu: NIS2-Betroffenheits-Check, Verarbeitungsverzeichnis, Dienstleister und AV-Verträge, Betroffenenanfragen, Schulungen, Fristenkalender (.ics), Meldefristen mit Live-Countdown (24 h / 72 h / 1 Monat), 11 Dokumentvorlagen und ein PDF-Bericht.
+
+Ihre Daten bleiben auf Ihrem Rechner: kein Cloud-Zwang, keine Telemetrie, optional AES-256-verschlüsselt mit Auto-Sperre.
+
+Alle Pakete enthalten die Vollversion für Windows, macOS und Linux, ein PDF-Benutzerhandbuch mit Beispielbildern und eine Funktionsbeschreibung. Standard und Premium bieten zusätzlich Einrichtung, Online-Einführung, Anpassungen und Support.
+
+Hinweis: Orientierungs- und Dokumentationshilfe, keine Rechtsberatung und keine Zertifizierung.   [980/1200]
+
+=== PAKETE (Titel max. 25 Zeichen, Beschreibung max. 100 Zeichen) ===
+BASIC  1.800 EUR
+  Titel: Basic - Vollversion   [19/25]
+  Beschreibung: 1 Installation, PDF-Handbuch mit Bildern, Beschreibung, 30 Tage Support   [71/100]
+STANDARD  3.800 EUR
+  Titel: Standard - Einrichtung   [22/25]
+  Beschreibung: 3 Installationen, Einrichtung, Onboarding 45 Min., Handbuch, 60 Tage Support   [76/100]
+PREMIUM  7.579 EUR
+  Titel: Premium - Rundum-Paket   [22/25]
+  Beschreibung: 10 Installationen, Anpassung, Workshop 2 Std., Handbuch, 6 Monate Support   [73/100]
+
+=== FRAGEN AN KÄUFER ===
+1. Welches Betriebssystem nutzen Sie (Windows, macOS oder Linux)?
+2. Wie viele Arbeitsplätze sollen die Software nutzen?
+3. Firmenname, Branche und Anzahl Beschäftigte (für den Betroffenheits-Check)?
+4. Standard/Premium: Ihre Terminwünsche für die Online-Einführung. Premium: bitte Firmenlogo als PNG (mind. 1000 Pixel) bereitstellen.
+
+=== FAQ ===
+F: Läuft die Software wirklich offline?
+A: Ja. Netzwerkzugriffe werden blockiert, es gibt keine Telemetrie und keine Konten. Ihre Daten bleiben lokal.
+
+F: Ersetzt die Software eine Rechtsberatung?
+A: Nein. Sie ist eine Orientierungs- und Dokumentationshilfe und keine Zertifizierung.
+
+F: Was passiert bei Passwortverlust?
+A: Bei aktivierter Verschlüsselung gibt es keine Wiederherstellung. Legen Sie Datensicherungen an.
+
+F: Darf ich die Software weitergeben?
+A: Nein. Sie erhalten ein Nutzungsrecht für Ihr Unternehmen im Rahmen der Installationszahl Ihres Pakets.
+
+=== TAGS (max. 5) ===
+NIS2, DSGVO, Compliance, IT-Sicherheit, Datenschutz

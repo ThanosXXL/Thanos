@@ -1,0 +1,14 @@
+IT-WORLD Compliance-Assistent
+© 2026 IT-WORLD. Alle Rechte vorbehalten.
+
+Die Software und die zugehörige Dokumentation (Benutzerhandbuch, Angebotsunterlagen, Demovideo)
+sind urheberrechtlich geschützt. Vervielfältigung, Vermehrung, Kopieren, Weitergabe,
+Veröffentlichung, Verbreitung und Bearbeitung – auch auszugsweise – sind ohne vorherige
+schriftliche Zustimmung von IT-WORLD untersagt.
+
+Der Erwerber erhält ein einfaches, nicht übertragbares, nicht unterlizenzierbares Nutzungsrecht
+für das eigene Unternehmen im Rahmen der Installationszahl des erworbenen Pakets
+(Basic: 1, Standard: 3, Premium: 10).
+
+Drittkomponenten: Electron (MIT-Lizenz), Open Sans (SIL Open Font License 1.1,
+siehe renderer/fonts/OFL-LICENSE-OpenSans.txt).

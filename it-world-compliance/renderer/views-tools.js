@@ -474,7 +474,8 @@ Empfänger: keine. Drittlandübermittlung: keine.`;
       h('h2', { class: 'card-title' }, 'Über diese Anwendung'),
       h('p', { class: 'card-sub', style: 'margin:0 0 8px' }, `IT-WORLD Compliance-Assistent · Version ${App.info ? App.info.version : '–'}${App.info ? ' · Electron ' + App.info.electron : ''}`),
       h('p', { class: 'card-sub', style: 'margin:0 0 8px' }, 'Orientierungshilfe nach bestem Stand (NIS2-Umsetzungsgesetz/BSIG, DSGVO/BDSG, BSI-Grundschutz, CIS Controls). Sie ersetzt keine Rechtsberatung oder Zertifizierung; Paragrafen und Fristen bitte vor verbindlicher Nutzung rechtlich prüfen lassen.'),
-      h('p', { class: 'card-sub', style: 'margin:0' }, 'Eingebettete Komponenten: Electron (MIT), Open Sans (SIL Open Font License 1.1).')));
+      h('p', { class: 'card-sub', style: 'margin:0 0 8px' }, 'Eingebettete Komponenten: Electron (MIT), Open Sans (SIL Open Font License 1.1).'),
+      h('p', { class: 'card-sub', style: 'margin:0' }, '© 2026 IT-WORLD. Alle Rechte vorbehalten. Vervielfältigung, Vermehrung, Kopieren und Weitergabe der Software und der Dokumentation sind ohne schriftliche Zustimmung untersagt.')));
   }
 
   App.registerView({ id: 'hilfe', group: 'Einstellungen', label: 'Hilfe & Info', icon: '❓', titel: 'Hilfe & Info', sub: 'Tastenkürzel, Arbeitsweise und Hinweise', render: renderHilfe });
