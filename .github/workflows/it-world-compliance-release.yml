@@ -32,7 +32,7 @@ jobs:
           node-version: 20
 
       - name: Abhängigkeiten installieren
-        run: npm install
+        run: npm ci
 
       - name: Desktop-App bauen
         run: npm run dist
@@ -63,6 +63,11 @@ jobs:
           pattern: it-world-compliance-*
           path: release-assets
           merge-multiple: true
+
+      - name: Prüfsummen (SHA-256) erzeugen
+        run: |
+          cd release-assets
+          sha256sum * > SHA256SUMS.txt
 
       - name: GitHub Release erstellen und Installer anhängen
         env:

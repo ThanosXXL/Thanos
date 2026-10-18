@@ -2,7 +2,10 @@
 // Wird vor renderer.js geladen und stellt window.CATALOG bereit. Nur die
 // Bearbeitungsstände (Status, Notizen, Nachweise) landen in der Datendatei,
 // der Katalog selbst bleibt unveränderlich im Programm.
-(function () {
+(function (root, factory) {
+  if (typeof module === 'object' && module.exports) module.exports = factory();
+  else root.CATALOG = factory();
+})(typeof self !== 'undefined' ? self : this, function () {
   'use strict';
 
   const STATUS = [
@@ -160,6 +163,14 @@
               ref: '§ 39 BSIG',
               hilfe: 'Besonders wichtige Einrichtungen müssen die Umsetzung der Maßnahmen in regelmäßigen Abständen durch Audits, Prüfungen oder Zertifizierungen belegen. Sammeln Sie die Nachweise fortlaufend.',
               nachweise: 'Nachweismappe (siehe Bericht & Export), Audit-/Zertifizierungsberichte'
+            },
+            {
+              id: 'nis2-32',
+              prio: 'hoch',
+              text: 'Kriterien für „erhebliche Sicherheitsvorfälle“ festgelegt',
+              ref: '§ 32 BSIG',
+              hilfe: 'Meldepflichtig sind Vorfälle, die schwerwiegende Betriebsstörungen oder finanzielle Verluste verursachen oder verursachen können bzw. andere Personen erheblich schädigen. Legen Sie interne Schwellen fest (Ausfalldauer, betroffene Kunden, Schadenshöhe, Datenabfluss) und binden Sie sie in den Incident-Prozess ein.',
+              nachweise: 'Bewertungsmatrix, Beispiel-Einstufung eines Vorfalls'
             }
           ]
         }
@@ -206,6 +217,30 @@
               ref: 'Art. 29 / 32 Abs. 4 DSGVO',
               hilfe: 'Beschäftigte, die mit personenbezogenen Daten arbeiten, werden auf Vertraulichkeit verpflichtet und regelmäßig sensibilisiert.',
               nachweise: 'Unterschriebene Verpflichtungserklärungen, Schulungsnachweise'
+            },
+            {
+              id: 'dsgvo-05',
+              prio: 'mittel',
+              text: 'Verantwortlichkeiten geklärt (Verantwortlicher, gemeinsame Verantwortliche, Auftragsverarbeiter)',
+              ref: 'Art. 4 / 24 / 26 DSGVO',
+              hilfe: 'Klären Sie je Verarbeitung, wer über Zweck und Mittel entscheidet. Bei gemeinsamer Verantwortlichkeit (z. B. gemeinsames Kundenportal, Social-Media-Seite) ist eine Vereinbarung nach Art. 26 nötig, deren Kern Betroffenen zur Verfügung stehen muss.',
+              nachweise: 'Rollenübersicht, Vereinbarung nach Art. 26'
+            },
+            {
+              id: 'dsgvo-14',
+              prio: 'mittel',
+              text: 'Beschäftigten- und Bewerberdatenschutz geregelt',
+              ref: '§ 26 BDSG · Art. 88 DSGVO',
+              hilfe: 'Regeln Sie Umgang mit Personalakten, Bewerbungsunterlagen (Löschfristen), Zeiterfassung, privater E-Mail-/Internetnutzung und Leistungs-/Verhaltenskontrolle. Eine Betriebsvereinbarung kann nötig sein.',
+              nachweise: 'Richtlinie Beschäftigtendaten, Löschfristen Bewerbungen, ggf. Betriebsvereinbarung'
+            },
+            {
+              id: 'dsgvo-15',
+              prio: 'mittel',
+              text: 'Videoüberwachung und Standortdaten rechtmäßig geregelt (falls vorhanden)',
+              ref: 'Art. 6 DSGVO · § 4 BDSG',
+              hilfe: 'Videoüberwachung braucht einen klaren Zweck, Interessenabwägung, Hinweisschilder, kurze Speicherfristen und meist eine Datenschutz-Folgenabschätzung. Gleiches gilt für GPS-Ortung von Fahrzeugen.',
+              nachweise: 'Abwägungsdokument, Beschilderung (Foto), Speicherfristen, ggf. DSFA'
             }
           ]
         },
@@ -339,6 +374,14 @@
               ref: 'ISO 27001 A.5 / BSI ISMS.1',
               hilfe: 'Regeln zu privater Nutzung, mobilen Geräten, Homeoffice, USB-Medien und Cloud-Speicher, verständlich formuliert und bestätigt.',
               nachweise: 'Richtlinie, Kenntnisnahme-Listen'
+            },
+            {
+              id: 'it-04',
+              prio: 'mittel',
+              text: 'Software und Geräte ohne Herstellersupport (End-of-Life) erfasst und ersetzt',
+              ref: 'BSI OPS.1.1.3 / CIS 2',
+              hilfe: 'Systeme ohne Sicherheitsupdates sind das häufigste Einfallstor. Pflegen Sie in Ihrem Inventar das Support-Ende und planen Sie den Austausch rechtzeitig, oder isolieren Sie nicht ersetzbare Altsysteme im Netz.',
+              nachweise: 'Inventarliste mit Support-Ende, Migrations-/Isolationsplan'
             }
           ]
         },
@@ -437,6 +480,14 @@
               ref: 'BSI INF.1 / INF.2',
               hilfe: 'Zutrittsbeschränkung, Besucherregelung, Brand- und Wasserschutz sowie unterbrechungsfreie Stromversorgung für zentrale Technik.',
               nachweise: 'Fotos, Zutrittsliste, Wartungsprotokolle'
+            },
+            {
+              id: 'it-27',
+              prio: 'mittel',
+              text: 'Sichere Löschung und Entsorgung von Datenträgern und Altgeräten',
+              ref: 'BSI CON.6 · Art. 32 DSGVO',
+              hilfe: 'Datenträger vor Weitergabe oder Entsorgung nachweislich überschreiben bzw. vernichten (DIN 66399), auch Drucker, Smartphones und Backup-Medien. Dienstleister dokumentieren die Vernichtung.',
+              nachweise: 'Vernichtungsprotokolle, Zertifikat des Entsorgers'
             }
           ]
         },
@@ -532,5 +583,12 @@
     { id: 'kritis', label: 'Ja: Betreiber einer Kritischen Anlage (KRITIS)' }
   ];
 
-  window.CATALOG = { STATUS, FRAMEWORKS, SEKTOREN, SONDERFAELLE };
-})();
+  const INTERVALLE = [
+    { id: '', label: 'Keine Wiedervorlage' },
+    { id: '3', label: 'Vierteljährlich' },
+    { id: '6', label: 'Halbjährlich' },
+    { id: '12', label: 'Jährlich' }
+  ];
+
+  return { STATUS, FRAMEWORKS, SEKTOREN, SONDERFAELLE, INTERVALLE };
+});
