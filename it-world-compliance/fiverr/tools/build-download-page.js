@@ -47,8 +47,17 @@ video{width:100%;border-radius:12px;background:#000;display:block;border:1px sol
 .grid .card{padding:12px}.grid img{width:100%;border-radius:10px;display:block;border:1px solid rgba(224,180,74,.3)}
 .cap{font-weight:700;margin:10px 0 0;color:var(--g1)}.sub{font-size:13px;color:var(--muted)}
 .note{border:1px dashed rgba(240,200,100,.6);border-radius:12px;padding:12px 16px;color:var(--muted);font-size:14px;background:rgba(227,185,76,.05)}
+.top{position:sticky;top:0;z-index:20;display:flex;align-items:center;justify-content:space-between;gap:12px;padding:10px 16px;background:rgba(5,4,3,.92);backdrop-filter:blur(6px);border-bottom:1px solid rgba(224,180,74,.35)}
+.top .name{display:flex;align-items:center;gap:10px;font-weight:700;color:var(--g1);min-width:0}
+.top .name img{width:36px;height:36px;border-radius:8px;border:1px solid rgba(240,200,100,.6);background:#000;flex:none}
+.top .name span{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.top .btn{margin:0;padding:10px 18px;font-size:16px;white-space:nowrap;flex:none}
+@media (max-width:520px){.top .btn{padding:9px 14px;font-size:15px}.top .name span{font-size:14px}}
 footer{margin-top:40px;text-align:center;font-size:13px;color:var(--muted)}
-</style></head><body><div class="wrap">
+</style></head><body>
+<div class="top"><div class="name"><img alt="" src="data:image/png;base64,${logo}"><span>IT-WORLD · IT Solutions</span></div>
+<a class="btn" id="dl_video_top" download="IT-WORLD-Compliance-Assistent-Demovideo.mp4">⬇ Download Video</a></div>
+<div class="wrap">
 <header>
   <div><div class="tile"><img alt="IT-WORLD – IT Solutions" src="data:image/png;base64,${logo}"></div><div class="tag">IT Solutions</div></div>
   <div><h1>Fiverr-Downloadcenter</h1><p>IT-WORLD Compliance-Assistent · Demovideo und Galeriebilder</p></div>
@@ -72,7 +81,7 @@ ${images.map((f, i) => `  <div class="card"><img id="im${i}" alt="${esc(IMG_LABE
 ${assets.map((a) => `<script type="text/plain" id="${a.id}">${a.data}</script>`).join('\n')}
 <script>
 function blobUrl(id,type){var s=document.getElementById(id).textContent.trim();var bin=atob(s),n=bin.length,u=new Uint8Array(n);for(var i=0;i<n;i++)u[i]=bin.charCodeAt(i);return URL.createObjectURL(new Blob([u],{type:type}));}
-var v=blobUrl('d_video','video/mp4');document.getElementById('player').src=v;document.getElementById('dl_video').href=v;
+var v=blobUrl('d_video','video/mp4');document.getElementById('player').src=v;document.getElementById('dl_video').href=v;document.getElementById('dl_video_top').href=v;
 ${images.map((f, i) => `var u${i}=blobUrl('d_img${i}','image/png');document.getElementById('im${i}').src=u${i};document.getElementById('dl_img${i}').href=u${i};`).join('\n')}
 </script></body></html>`;
 fs.writeFileSync(OUT, html);
