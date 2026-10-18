@@ -58,6 +58,7 @@
     root.appendChild(h('div', { class: 'lock-screen' },
       h('div', { class: 'lock-card card' },
         h('img', { class: 'lock-logo', src: 'assets/logo.png', alt: 'IT-WORLD – IT Solutions' }),
+        h('div', { class: 'brand-tag', style: 'font-size:16px;margin-bottom:14px' }, 'IT Solutions'),
         h('h2', { class: 'card-title', style: 'text-align:center' }, 'Compliance-Assistent gesperrt'),
         h('p', { class: 'card-sub', style: 'text-align:center' }, 'Geben Sie Ihr Passwort ein, um die verschlüsselten Daten zu öffnen.'),
         pw, msg,

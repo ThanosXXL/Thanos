@@ -53,10 +53,18 @@ const UD = '/tmp/itw-demo-ud';
   });
   await page.evaluate(() => App.render());
 
+  const rects = {};
+  const FOCUS = {
+    '01-uebersicht': '#content .grid-4', '02-nis2-check': '.result', '04-anforderung-dialog': '.modal textarea',
+    '11-vorfaelle': '#content > .card:nth-child(2)', '06-vvt': '.record', '19-sperrbildschirm': '.lock-card input'
+  };
   const shot = async (name, prep) => {
     if (prep) await prep();
     await page.waitForTimeout(350);
     await page.screenshot({ path: path.join(OUT, name + '.png') });
+    if (FOCUS[name]) {
+      rects[name] = await page.evaluate((sel) => { const r = document.querySelector(sel).getBoundingClientRect(); return { x: r.x, y: r.y, w: r.width, h: r.height }; }, FOCUS[name]);
+    }
     console.log('Bild', name);
   };
   const go = async (id) => { await page.evaluate((v) => { App.closeModal(); App.go(v); }, id); };
@@ -86,6 +94,7 @@ const UD = '/tmp/itw-demo-ud';
   await page.evaluate(() => App.actions.lock());
   await page.waitForSelector('.lock-screen');
   await shot('19-sperrbildschirm');
+  fs.writeFileSync(path.join(OUT, 'rects.json'), JSON.stringify(rects, null, 2));
   await page.close().catch(() => {});
   await app.close();
 })();

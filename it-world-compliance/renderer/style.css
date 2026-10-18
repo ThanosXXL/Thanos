@@ -720,3 +720,16 @@ ol.steps li { margin-bottom: 8px; }
 }
 .brand-logo { max-width: 176px; margin: 0 auto; }
 .lock-logo { max-width: 230px; margin: 0 auto 14px; }
+
+/* Klar lesbarer Zusatz „IT Solutions“ unter dem Logo */
+.brand-tag {
+  text-align: center;
+  margin: 12px 0 0;
+  font-weight: 700;
+  font-size: 15px;
+  letter-spacing: 4.5px;
+  text-transform: uppercase;
+  color: var(--gold-1);
+  text-shadow: 0 1px 0 #7a5518, 0 2px 0 #3d2a0a, 0 0 14px rgba(227, 185, 76, 0.45);
+}
+.lock-logo { margin-bottom: 4px; }

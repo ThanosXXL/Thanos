@@ -33,9 +33,10 @@ body{margin:0;font-family:'Open Sans','Segoe UI',sans-serif;font-size:10pt;line-
 .cover{width:210mm;height:297mm;background:radial-gradient(150mm 110mm at 70% 18%,rgba(227,185,76,.28),transparent 70%),#050403;color:#f3e6c8;text-align:center;position:relative;page-break-after:always;overflow:hidden}
 .cover .tile{position:absolute;left:50mm;top:28mm;width:110mm;height:110mm;border-radius:6mm;overflow:hidden;border:.6mm solid rgba(240,200,100,.65);box-shadow:0 0 12mm rgba(227,185,76,.35)}
 .cover .tile img{width:100%;height:100%;display:block}
-.cover h1{position:absolute;left:0;right:0;top:152mm;margin:0;font-size:31pt;color:#f7dc84;line-height:1.15;text-shadow:0 .5mm 0 #d9a93e,0 1mm 0 #a67820,0 1.5mm 0 #6f4b10,0 2.5mm 3mm rgba(0,0,0,.7)}
-.cover .sub{position:absolute;left:0;right:0;top:186mm;font-size:13pt;letter-spacing:.9mm;text-transform:uppercase}
-.cover .ver{position:absolute;left:0;right:0;top:204mm;font-size:11pt;color:#d8c79c}
+.cover .tag{position:absolute;left:0;right:0;top:141mm;font-size:16pt;font-weight:700;letter-spacing:2.6mm;text-transform:uppercase;color:#f7dc84;text-shadow:0 .4mm 0 #7a5518,0 .9mm 0 #3d2a0a,0 0 4mm rgba(227,185,76,.5)}
+.cover h1{position:absolute;left:0;right:0;top:160mm;margin:0;font-size:31pt;color:#f7dc84;line-height:1.15;text-shadow:0 .5mm 0 #d9a93e,0 1mm 0 #a67820,0 1.5mm 0 #6f4b10,0 2.5mm 3mm rgba(0,0,0,.7)}
+.cover .sub{position:absolute;left:0;right:0;top:193mm;font-size:13pt;letter-spacing:.9mm;text-transform:uppercase}
+.cover .ver{position:absolute;left:0;right:0;top:211mm;font-size:11pt;color:#d8c79c}
 .cover .copy{position:absolute;left:14mm;right:14mm;bottom:14mm;font-size:8.5pt;color:#b5a27a;line-height:1.5}
 h1{font-size:21pt;color:#3d2a0a;margin:0 0 6mm;padding-bottom:2.5mm;border-bottom:.8mm solid #d9a93e;page-break-before:always;page-break-after:avoid}
 h1.first{page-break-before:auto}
@@ -89,7 +90,7 @@ function tocHtml(toc, pages) {
 }
 
 function cover(titel, untertitel, ver) {
-  return `<div class="cover"><div class="tile"><img src="${LOGO}"></div><h1>${titel}</h1><div class="sub">${untertitel}</div><div class="ver">${ver}</div>
+  return `<div class="cover"><div class="tile"><img src="${LOGO}"></div><div class="tag">IT Solutions</div><h1>${titel}</h1><div class="sub">${untertitel}</div><div class="ver">${ver}</div>
   <div class="copy">© 2026 IT-WORLD. Alle Rechte vorbehalten. Vervielfältigung, Vermehrung, Kopieren und Weitergabe – auch auszugsweise – sind ohne schriftliche Zustimmung untersagt.</div></div>`;
 }
 
