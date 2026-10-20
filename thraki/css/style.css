@@ -77,3 +77,18 @@ footer a{margin-right:1rem}
   .cap{right:1rem;bottom:1.5rem;width:calc(100% - 2rem)}.cap h2{font-size:1.3rem}.cap p{font-size:.9rem}.ctrl{right:1rem;bottom:auto;top:1rem}
 }
 @media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}.reveal{opacity:1;transform:none}}
+
+/* ---- 360°-Trachtenring ---- */
+.ring-scene{height:27rem;perspective:1500px;display:grid;place-items:center;overflow:hidden;cursor:grab;touch-action:pan-y;border-radius:1rem;
+  background:radial-gradient(ellipse at 50% 80%,rgba(179,38,30,.35),transparent 65%)}
+.ring-scene:active{cursor:grabbing}
+.ring-scene:focus-visible{outline:3px solid #fff;outline-offset:3px}
+.ring{position:relative;width:14rem;height:20rem;transform-style:preserve-3d;transform:rotateY(var(--ry,0deg))}
+.ring-p{position:absolute;inset:0;border-radius:.8rem;background-size:cover;background-position:center;backface-visibility:hidden;
+  box-shadow:0 1rem 2rem rgba(0,0,0,.55);border:2px solid rgba(255,255,255,.25);transform:rotateY(calc(var(--i) * 60deg)) translateZ(13.2rem)}
+.p1{--i:0}.p2{--i:1}.p3{--i:2}.p4{--i:3}.p5{--i:4}.p6{--i:5}
+.r1{background-image:url(../img/slide-1.jpg)}.r2{background-image:url(../img/slide-2.jpg)}.r3{background-image:url(../img/slide-3.jpg)}
+.r4{background-image:url(../img/slide-4.jpg)}.r5{background-image:url(../img/slide-5.jpg)}.r6{background-image:url(../img/slide-6.jpg)}
+.ring-ctrl{display:flex;align-items:center;justify-content:center;gap:1rem;margin:.8rem 0 1.4rem;color:#e8d6cc}
+.ring-ctrl button{width:2.6rem;height:2.6rem;border-radius:50%;border:0;color:#fff;font-size:1.5rem;cursor:pointer;background:linear-gradient(145deg,var(--red-hi),var(--red));box-shadow:0 .3rem .8rem rgba(0,0,0,.45)}
+@media (max-width:860px){.ring-scene{height:21rem}.ring{width:10rem;height:15rem}.ring-p{transform:rotateY(calc(var(--i) * 60deg)) translateZ(9.6rem)}}

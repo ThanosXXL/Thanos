@@ -36,6 +36,8 @@ const home = `<section class="slider" aria-roledescription="carousel" aria-label
 ${slides.map((s, i) => `<figure class="slide s${i + 1}" role="group" aria-label="${i + 1} von 6"><figcaption class="cap"><h2>${s[0]}</h2><p>${s[1]}</p><a class="more" href="${s[2]}">Μάθετε περισσότερα →</a></figcaption></figure>`).join('\n')}
 <div class="ctrl"><button id="pp" type="button" aria-label="Pause">❚❚</button><button id="prev" type="button" aria-label="Zurück">‹</button><button id="next" type="button" aria-label="Weiter">›</button><span id="cnt">1 / 6</span></div></section>`;
 
+const ring = `<div class="ring-scene" id="ring" role="group" aria-label="Trachten in 360 Grad, zum Drehen ziehen oder Pfeiltasten benutzen" tabindex="0"><div class="ring">${[1, 2, 3, 4, 5, 6].map(n => `<div class="ring-p p${n} r${n}"></div>`).join('')}</div></div>
+<div class="ring-ctrl"><button type="button" id="ring-l" aria-label="Nach links drehen">‹</button><span>360° – ziehen zum Drehen</span><button type="button" id="ring-r" aria-label="Nach rechts drehen">›</button></div>`;
 const pages = {
   'verein.html': ['Ο Σύλλογος', TODO],
   'nea.html': ['Τα νέα μας', TODO],
@@ -47,7 +49,7 @@ const pages = {
   'filoi.html': ['Φίλοι της παράδοσης', TODO],
   'nutzung.html': ['Όροι χρήσης', TODO],
   'ensemble-gross.html': ['Großes Ensemble', TODO], 'ensemble-mittel.html': ['Mittleres Ensemble', TODO], 'ensemble-klein.html': ['Kleines Ensemble', TODO],
-  'trachten.html': ['Thrakische Trachten', TODO], 'taenze.html': ['Thrakische Tänze', TODO],
+  'trachten.html': ['Thrakische Trachten', ring + TODO], 'taenze.html': ['Thrakische Tänze', TODO],
   'instrumente.html': ['Thrakische Instrumente', TODO], 'geschichte.html': ['Geschichte', TODO],
   'impressum.html': ['Impressum', card('<p><strong>Angaben gemäß § 5 DDG</strong></p><p class="todo">Platzhalter: Vereinsname (Θρακικός Πολιτιστικός Σύλλογος Στουτγάρδης / Thrakischer Kulturverein Stuttgart e.V.), Anschrift, Vertretungsberechtigte, Registernummer, Kontakt. Vom Verein ausfüllen und rechtlich prüfen lassen.</p>')],
   'datenschutz.html': ['Datenschutzerklärung', card(`<h2>1. Verantwortlicher</h2><p class="todo">Platzhalter: Name und Anschrift des Vereins, E-Mail.</p>

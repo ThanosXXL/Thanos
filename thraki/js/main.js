@@ -33,3 +33,25 @@
   const io = new IntersectionObserver(es => es.forEach(e => e.isIntersecting && (e.target.classList.add('in'), io.unobserve(e.target))), { threshold: .15 });
   document.querySelectorAll('.reveal').forEach(el => io.observe(el));
 })();
+
+(() => { // 360°-Ring: ziehen, Pfeiltasten, Auto-Drehung
+  const scene = document.getElementById('ring');
+  if (!scene) return;
+  const calm = matchMedia('(prefers-reduced-motion: reduce)').matches;
+  let ang = 0, target = 0, drag = false, lastX = 0, idle = !calm;
+  const frame = () => {
+    if (idle) target += .12;
+    ang += (target - ang) * (drag ? 1 : .12);
+    scene.style.setProperty('--ry', ang.toFixed(2) + 'deg');
+    requestAnimationFrame(frame);
+  };
+  scene.addEventListener('pointerdown', e => { drag = true; idle = false; lastX = e.clientX; scene.setPointerCapture(e.pointerId); });
+  scene.addEventListener('pointermove', e => { if (!drag) return; target += (e.clientX - lastX) * .45; lastX = e.clientX; });
+  const end = () => { drag = false; };
+  scene.addEventListener('pointerup', end); scene.addEventListener('pointercancel', end);
+  const turn = d => { idle = false; target += d * 60; };
+  document.getElementById('ring-l').addEventListener('click', () => turn(1));
+  document.getElementById('ring-r').addEventListener('click', () => turn(-1));
+  scene.addEventListener('keydown', e => { if (e.key === 'ArrowLeft') turn(1); if (e.key === 'ArrowRight') turn(-1); });
+  requestAnimationFrame(frame);
+})();
