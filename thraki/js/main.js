@@ -34,24 +34,37 @@
   document.querySelectorAll('.reveal').forEach(el => io.observe(el));
 })();
 
-(() => { // 360°-Ring: ziehen, Pfeiltasten, Auto-Drehung
-  const scene = document.getElementById('ring');
-  if (!scene) return;
-  const calm = matchMedia('(prefers-reduced-motion: reduce)').matches;
-  let ang = 0, target = 0, drag = false, lastX = 0, idle = !calm;
-  const frame = () => {
-    if (idle) target += .12;
-    ang += (target - ang) * (drag ? 1 : .12);
-    scene.style.setProperty('--ry', ang.toFixed(2) + 'deg');
-    requestAnimationFrame(frame);
-  };
-  scene.addEventListener('pointerdown', e => { drag = true; idle = false; lastX = e.clientX; scene.setPointerCapture(e.pointerId); });
-  scene.addEventListener('pointermove', e => { if (!drag) return; target += (e.clientX - lastX) * .45; lastX = e.clientX; });
-  const end = () => { drag = false; };
-  scene.addEventListener('pointerup', end); scene.addEventListener('pointercancel', end);
-  const turn = d => { idle = false; target += d * 60; };
-  document.getElementById('ring-l').addEventListener('click', () => turn(1));
-  document.getElementById('ring-r').addEventListener('click', () => turn(-1));
-  scene.addEventListener('keydown', e => { if (e.key === 'ArrowLeft') turn(1); if (e.key === 'ArrowRight') turn(-1); });
-  requestAnimationFrame(frame);
+(() => { // 360°-Ansicht: Bilderfolge img/trachten-360-01.jpg, -02.jpg, … (ziehen, Pfeile, Zoom, Auto-Drehung)
+  const box = document.getElementById('rot');
+  if (!box) return;
+  const img = document.getElementById('rot-img'), view = box.querySelector('.rot-view');
+  const [bl, br, bz, ba] = ['rot-l', 'rot-r', 'rot-z', 'rot-a'].map(id => document.getElementById(id));
+  const frames = [img.getAttribute('src')], pad = n => String(n).padStart(2, '0');
+  let cur = 0, zoom = false, auto = null, dragging = false, lastX = 0, acc = 0;
+  const show = i => { cur = (i + frames.length) % frames.length; img.src = frames[cur]; };
+  const step = d => show(cur + d);
+  const probe = n => { const t = new Image(); t.onload = () => { frames.push(t.src); probe(n + 1); }; t.onerror = ready; t.src = box.dataset.base + pad(n) + '.jpg'; };
+  function ready() {
+    if (frames.length < 2) { [bl, br, ba].forEach(b => { b.hidden = true; }); return; }
+    view.addEventListener('pointerdown', e => { dragging = true; stop(); lastX = e.clientX; acc = 0; view.setPointerCapture(e.pointerId); });
+    view.addEventListener('pointermove', e => { if (!dragging) return; acc += e.clientX - lastX; lastX = e.clientX; const per = view.clientWidth / frames.length * 1.4; while (Math.abs(acc) >= per) { step(acc > 0 ? -1 : 1); acc -= Math.sign(acc) * per; } });
+    view.addEventListener('pointerup', () => { dragging = false; }); view.addEventListener('pointercancel', () => { dragging = false; });
+    bl.addEventListener('click', () => { stop(); step(1); }); br.addEventListener('click', () => { stop(); step(-1); });
+    ba.addEventListener('click', () => auto ? stop() : start());
+    box.addEventListener('keydown', e => { if (e.key === 'ArrowLeft') { stop(); step(1); } if (e.key === 'ArrowRight') { stop(); step(-1); } });
+  }
+  function start() { if (matchMedia('(prefers-reduced-motion: reduce)').matches) return; auto = setInterval(() => step(1), 110); ba.setAttribute('aria-pressed', 'true'); }
+  function stop() { clearInterval(auto); auto = null; ba.setAttribute('aria-pressed', 'false'); }
+  bz.addEventListener('click', () => { zoom = !zoom; box.style.setProperty('--z', zoom ? 2 : 1); bz.setAttribute('aria-pressed', String(zoom)); });
+  view.addEventListener('mousemove', e => { if (!zoom) return; const r = view.getBoundingClientRect(); box.style.setProperty('--ox', ((e.clientX - r.left) / r.width * 100) + '%'); box.style.setProperty('--oy', ((e.clientY - r.top) / r.height * 100) + '%'); });
+  probe(2);
+})();
+
+(() => { // Nach-oben-Button
+  const b = document.getElementById('totop');
+  if (!b) return;
+  b.hidden = false;
+  const upd = () => b.classList.toggle('show', scrollY > 300);
+  addEventListener('scroll', upd, { passive: true }); upd();
+  b.addEventListener('click', () => scrollTo({ top: 0, behavior: matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth' }));
 })();
