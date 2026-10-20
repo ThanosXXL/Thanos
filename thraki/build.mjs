@@ -15,9 +15,9 @@ writeFileSync('img/logo.svg', `<svg xmlns="http://www.w3.org/2000/svg" viewBox="
 <path fill="url(#g)" d="M62 92c6-12 18-14 26-10 8-8 22-10 34-4 10 4 18 2 24 8-2 8-10 12-18 12-10 2-12 10-24 12-12 2-18-6-28-4-8 0-16-6-14-14z"/></svg>`);
 
 const nav = [
-  ['verein.html', 'Der Verband'], ['nea.html', 'Unsere Nachrichten'], ['tanzgruppe.html', 'Tanzabteilung'],
+  ['verein.html', 'Der Verband'], ['nea.html', 'Unsere Nachrichten'], ['tanzgruppe.html', 'Tanzabteilung', null, 5],
   ['thraki.html', 'Thrakien', [['thraki.html', 'Thrakien'], ['trachten.html', 'Traditionelle Kostüme'], ['taenze.html', 'Traditionelle Tänze'],
-    ['instrumente.html', 'Traditionelle Musikinstrumente'], ['geschichte.html', 'Geschichte'], ['physiognomie.html', 'Physiognome von Thrakien'], ['befreiung.html', 'Befreiung von Thraz']]],
+    ['instrumente.html', 'Traditionelle Musikinstrumente'], ['geschichte.html', 'Geschichte'], ['physiognomie.html', 'Physiognome von Thrakien'], ['befreiung.html', 'Befreiung von Thraz']], 7],
   ['korona.html', 'Die Corona'], ['kontakt.html', 'Kommunikation'],
   ['filoi.html', 'Freunde der Tradition'], ['nutzung.html', 'Nutzungsbedingungen'], ['datenschutz.html', 'Datenschutz'],
 ];
@@ -46,7 +46,7 @@ const trachten = `<div class="prose">
 <h2>Traditionelles Bannerkostüm</h2>
 <div class="rot" id="rot" data-base="img/trachten-360-" role="group" aria-label="Traditionelles Bannerkostüm in 360 Grad" tabindex="0">
 <div class="rot-view"><img id="rot-img" src="img/trachten-360-01.jpg" alt="Tracht der Frauen aus Lavara, Seitenansicht" width="888" height="664" draggable="false"></div>
-<div class="rot-ctrl"><button type="button" id="rot-l" aria-label="Nach links drehen">‹</button><button type="button" id="rot-r" aria-label="Nach rechts drehen">›</button><button type="button" id="rot-z" aria-label="Vergrößern">+</button><button type="button" id="rot-a" aria-label="Automatisch drehen">⟳</button></div></div>
+<div class="rot-ctrl"><button type="button" id="rot-l" aria-label="Nach links drehen"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 4l-8 8 8 8"/></svg></button><button type="button" id="rot-r" aria-label="Nach rechts drehen"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 4l8 8-8 8"/></svg></button><button type="button" id="rot-z" aria-label="Vergrößern"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 4v16M4 12h16"/></svg></button><button type="button" id="rot-a" aria-label="Automatisch drehen"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M19.500 12a7.500 7.500 0 01-13.200 4.900M4.500 12a7.500 7.500 0 0113.200-4.900M18 3.500v4.200h-4.200M6 20.500v-4.200h4.200"/></svg></button></div></div>
 <p>Die <strong>Tracht der Frauen</strong> im Dorf Lavara ist deutlich vom benachbarten Soufli beeinflusst. Charakteristisch für die Kleidung ist der Kaftan, ein langes, ärmelloses Kleid mit dreieckiger Öffnung im Brustbereich. Das Oberteil ist eng anliegend und weitet sich ab der Taille, wobei …</p>
 <p class="todo">Der restliche Text und die weiteren Ansichten folgen.</p></div>`;
 const pages = {
@@ -80,10 +80,10 @@ const socialHtml = `${social.map(([k, n]) => `<a href="kontakt.html" title="${n}
 const partner = `<section class="sponsors" aria-label="Unsere Partner">${[1, 2, 3, 4].map(n => `<img src="img/partner-${n}.jpg" alt="Partner ${n}" loading="lazy">`).join('')}</section>`;
 const render = (file, title, body, isHome) => {
   const cur = parent[file] || file;
-  const items = nav.map(([h, t, sub]) => {
+  const items = nav.map(([h, t, sub, cnt]) => {
     const open = sub && cur === h;
     const subHtml = open ? `<ul class="sub">${sub.map(([sh, st]) => `<li><a href="${sh}"${sh === file ? ' aria-current="page"' : ''}>${st}</a></li>`).join('')}</ul>` : '';
-    return `<li${open ? ' class="open"' : ''}><a href="${h}"${h === cur ? ' aria-current="page"' : ''}>${t}</a>${subHtml}</li>`;
+    return `<li${open ? ' class="open"' : ''}><a href="${h}"${h === cur ? ' aria-current="page"' : ''}>${t}</a>${cnt ? `<span class="cnt">${cnt}</span>` : ''}${subHtml}</li>`;
   }).join('');
   const lang = 'de';
   const main = isHome ? body : `<div class="page"><h1>${title}</h1>${body}${partner}<footer class="foot"><p class="copy">© 2019 - Thrakischer Kulturverein in Stuttgart e.V</p><div class="social foot-social">${socialHtml}</div><p class="legal"><a href="impressum.html">Impressum</a><a href="datenschutz.html">Datenschutz</a></p></footer></div>`;
@@ -95,7 +95,7 @@ const render = (file, title, body, isHome) => {
 <body><a class="skip" href="#inhalt">Zum Inhalt springen</a>
 <aside class="side"><a href="index.html"><img class="logo" src="img/logo.svg" alt="Logo Thrakischer Kulturverein Stuttgart"></a>
 <a class="brand" href="index.html">ΘΡΑΚΙΚΟΣ ΠΟΛΙΤΙΣΤΙΚΟΣ<br>ΣΥΛΛΟΓΟΣ ΣΤΟΥΤΓΑΡΔΗΣ</a>
-<button class="menu-btn" aria-expanded="false" aria-controls="nav">☰ Menü</button>
+<button class="menu-btn" aria-expanded="false" aria-controls="nav" aria-label="Menü"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 9l7 7 7-7z"/></svg></button>
 <nav aria-label="Hauptnavigation"><ul class="nav" id="nav">${items}</ul></nav>
 <div class="social">${socialHtml}</div></aside>
 <main class="stage" id="inhalt">${main}</main>

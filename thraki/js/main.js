@@ -45,7 +45,7 @@
   const step = d => show(cur + d);
   const probe = n => { const t = new Image(); t.onload = () => { frames.push(t.src); probe(n + 1); }; t.onerror = ready; t.src = box.dataset.base + pad(n) + '.jpg'; };
   function ready() {
-    if (frames.length < 2) { [bl, br, ba].forEach(b => { b.hidden = true; }); return; }
+    if (frames.length < 2) { [bl, br, ba].forEach(b => { b.disabled = true; b.title = 'Weitere Ansichten folgen'; }); return; }
     view.addEventListener('pointerdown', e => { dragging = true; stop(); lastX = e.clientX; acc = 0; view.setPointerCapture(e.pointerId); });
     view.addEventListener('pointermove', e => { if (!dragging) return; acc += e.clientX - lastX; lastX = e.clientX; const per = view.clientWidth / frames.length * 1.4; while (Math.abs(acc) >= per) { step(acc > 0 ? -1 : 1); acc -= Math.sign(acc) * per; } });
     view.addEventListener('pointerup', () => { dragging = false; }); view.addEventListener('pointercancel', () => { dragging = false; });
