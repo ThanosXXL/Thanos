@@ -6,5 +6,6 @@ contextBridge.exposeInMainWorld('myRouteAPI', {
   exportData: (data) => ipcRenderer.invoke('export-data', data),
   importData: () => ipcRenderer.invoke('import-data'),
   openExternal: (url) => ipcRenderer.invoke('open-external', url),
+  routeOptions: (req) => ipcRenderer.invoke('route-options', req),
   geocode: (query) => ipcRenderer.invoke('geocode', query)
 });

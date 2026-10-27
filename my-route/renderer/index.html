@@ -25,10 +25,16 @@
       <button class="tab" data-view="start">Start</button>
       <button class="tab" data-view="favorites">Favoriten</button>
       <button class="tab" data-view="routes">Routen</button>
+      <button class="tab" data-view="drive">Fahrmodus</button>
       <button class="tab" data-view="map">Karte</button>
       <button class="tab" data-view="info">Info</button>
     </nav>
     <div class="topbar-actions">
+      <select class="look-select" id="touch-select" aria-label="Bedienung wählen" title="Bedienung: Touch-Tasten für Auto, Tablet und Handy">
+        <option value="auto">Bedienung: Auto</option>
+        <option value="an">Bedienung: Touch</option>
+        <option value="aus">Bedienung: Maus</option>
+      </select>
       <select class="look-select" id="look-select" aria-label="Optik wählen" title="Optik wählen">
         <option value="gold3d">Optik: 3D Gold</option>
         <option value="klar">Optik: Klar Dunkel</option>
@@ -147,6 +153,16 @@
       </div>
     </section>
 
+    <!-- FAHRMODUS -->
+    <section class="view" id="view-drive" hidden>
+      <h2 class="section-title gold3d-sm">Fahrmodus</h2>
+      <p class="section-sub">Große Tasten für Auto, Tablet und Handy – ein Tipp genügt. Tipp: Handy oder Tablet in die Halterung stecken, Display-Spiegelung oder Bluetooth-Anzeige im Auto nutzen und vor der Fahrt kurz das Ziel wählen.</p>
+      <h3 class="drive-h">Deine Routen</h3>
+      <div class="grid drive-grid" id="drive-routes"></div>
+      <h3 class="drive-h">Schnell zu einem Ziel – mit Live-Optionen</h3>
+      <div class="grid drive-grid" id="drive-favs"></div>
+    </section>
+
     <!-- KARTE -->
     <section class="view" id="view-map" hidden>
       <h2 class="section-title gold3d-sm">Kartenvorschau</h2>
@@ -178,6 +194,24 @@
       </div>
     </section>
   </main>
+
+  <dialog class="live" id="live-dialog" aria-labelledby="live-title">
+    <div class="live-head">
+      <h3 class="gold3d-sm" id="live-title">Live-Routen zum Ziel</h3>
+      <button type="button" class="mini" id="live-close" title="Schließen">✕</button>
+    </div>
+    <div class="live-form">
+      <label>Start <select id="live-from"></select></label>
+      <label>Ziel <select id="live-to"></select></label>
+    </div>
+    <div class="row">
+      <button type="button" class="btn" id="live-go">Optionen laden</button>
+      <label class="check"><input type="checkbox" id="live-auto" checked><span>Live aktualisieren (jede Minute)</span></label>
+    </div>
+    <p class="live-status" id="live-status"></p>
+    <div class="live-options" id="live-options"></div>
+    <p class="hint">Bis zu drei Strecken mit dem Auto: die schnellste, die kürzeste und eine Alternative. Berechnung über OSRM / OpenStreetMap – es wird nur Start und Ziel (Koordinaten) gesendet, und nur wenn du „Optionen laden“ wählst.</p>
+  </dialog>
 
   <div class="toast" id="toast" role="status" aria-live="polite"></div>
   <script src="renderer.js"></script>

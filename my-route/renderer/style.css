@@ -275,7 +275,8 @@ input[type="checkbox"] { width: 20px; height: 20px; accent-color: var(--gold-2);
   .hero-actions { justify-content: center; }
   .split { grid-template-columns: 1fr; }
   .tabs { margin-left: 0; order: 3; width: 100%; }
-  .topbar-actions { margin-left: auto; }
+  .topbar-actions { margin-left: 0; flex-wrap: wrap; width: 100%; }
+  .topbar-actions .look-select { flex: 1 1 140px; min-width: 0; }
 }
 @media (max-width: 860px) {
   .tabs { overflow-x: auto; -webkit-overflow-scrolling: touch; }
@@ -284,7 +285,10 @@ input[type="checkbox"] { width: 20px; height: 20px; accent-color: var(--gold-2);
   .tab { padding: 10px 14px; }
 }
 @media (max-width: 480px) {
-  .stats { grid-template-columns: 1fr; }
+  .stats { gap: 8px; }
+  .stat { padding: 12px 4px; }
+  .stat-num { font-size: 28px; }
+  .stat-label { font-size: 11px; letter-spacing: .06em; }
   .brand-title { font-size: 22px; }
 }
 
@@ -332,3 +336,41 @@ input[type="checkbox"] { width: 20px; height: 20px; accent-color: var(--gold-2);
 [data-look="klar"] .map-label { fill: var(--text); stroke: var(--bg); }
 [data-look="hell"] .map-label { fill: var(--text); stroke: var(--bg); }
 [data-look="hell"] .mini { background: rgba(200, 147, 42, .12); }
+
+/* ---------- Fahrmodus & Touch-Bedienung (Auto, Tablet, Handy) ---------- */
+.drive-h { color: var(--gold-1); margin: 26px 0 12px; font-size: 20px; }
+.drive-grid { grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); }
+.drive-tile { display: flex; flex-direction: column; gap: 12px; }
+.drive-tile .card-title { font-size: 24px; }
+.btn.mega { font-size: 26px; padding: 22px 28px; width: 100%; border-radius: 18px; }
+.btn.mega-sub { width: 100%; font-size: 18px; padding: 16px 20px; }
+.drive-fav { display: flex; align-items: center; gap: 14px; text-align: left; font: inherit; color: var(--text); cursor: pointer; padding: 18px; width: 100%; }
+.drive-fav .card-title { display: block; font-size: 20px; }
+.drive-fav .card-meta { display: block; }
+.drive-fav .card-icon { width: 56px; height: 56px; font-size: 30px; }
+
+dialog.live { width: min(720px, 94vw); max-height: 92vh; overflow: auto; border-radius: 22px; border: 1px solid var(--line); color: var(--text); padding: 20px;
+  background: linear-gradient(160deg, #2a210f, #0e0b06); box-shadow: 0 30px 80px rgba(0, 0, 0, .8), inset 0 1px 0 rgba(255, 240, 180, .2); }
+dialog.live::backdrop { background: rgba(0, 0, 0, .65); backdrop-filter: blur(3px); }
+.live-head { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
+.live-head h3 { margin: 0; font-size: 22px; }
+.live-form { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 12px; }
+.live-form label { display: flex; flex-direction: column; gap: 5px; font-weight: 700; font-size: 14px; color: var(--gold-1); }
+.live-status { margin: 12px 0; font-weight: 700; color: var(--gold-1); min-height: 1.4em; }
+.live-options { display: grid; grid-template-columns: repeat(auto-fit, minmax(190px, 1fr)); gap: 12px; }
+.live-opt { display: flex; flex-direction: column; gap: 8px; animation: fadeUp .4s ease backwards; }
+.live-big { font-size: 22px; }
+.live-big b { color: var(--gold-1); font-size: 30px; }
+:root[data-look="klar"] dialog.live, :root[data-look="hell"] dialog.live { background: var(--panel); box-shadow: 0 20px 60px rgba(0, 0, 0, .35); }
+
+:root[data-touch="on"] body { font-size: 17px; }
+:root[data-touch="on"] .btn { min-height: 54px; font-size: 17px; padding: 14px 24px; }
+:root[data-touch="on"] .btn.small { min-height: 48px; font-size: 15px; padding: 10px 16px; }
+:root[data-touch="on"] .tab { min-height: 50px; font-size: 16px; padding: 12px 18px; }
+:root[data-touch="on"] input[type="text"], :root[data-touch="on"] select { min-height: 54px; font-size: 17px; }
+:root[data-touch="on"] .mini { width: 46px; height: 46px; font-size: 18px; }
+:root[data-touch="on"] input[type="checkbox"] { width: 28px; height: 28px; }
+:root[data-touch="on"] .card { transform: none !important; }
+:root[data-touch="on"] .card-actions { gap: 12px; }
+:root[data-touch="on"] .look-select { min-height: 48px; }
+@media (max-width: 600px) { .live-form { grid-template-columns: 1fr; } .btn.mega { font-size: 24px; } }

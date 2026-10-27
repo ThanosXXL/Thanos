@@ -161,6 +161,18 @@ ipcMain.handle('geocode', async (event, query) => {
   return { lat, lon, label: String(list[0].display_name || '') };
 });
 
+// Live-Routenoptionen: nur Start/Ziel-Koordinaten (Zahlen) gehen an den OSRM-Dienst.
+ipcMain.handle('route-options', async (event, req) => {
+  const ok = (p) => p && Number.isFinite(p.lat) && Number.isFinite(p.lon) && Math.abs(p.lat) <= 90 && Math.abs(p.lon) <= 180;
+  if (!req || !ok(req.from) || !ok(req.to)) return null;
+  const url =
+    `https://router.project-osrm.org/route/v1/driving/${req.from.lon},${req.from.lat};${req.to.lon},${req.to.lat}` +
+    '?alternatives=3&overview=simplified&geometries=geojson';
+  const res = await net.fetch(url, { headers: { 'User-Agent': 'MyRoute-Desktop/1.0 (IT-WORLD)' } });
+  if (!res.ok) throw new Error('Routing-Dienst antwortet nicht');
+  return res.json();
+});
+
 app.whenReady().then(() => {
   session.defaultSession.setPermissionRequestHandler((webContents, permission, callback) => {
     callback(false);

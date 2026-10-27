@@ -43,6 +43,8 @@ jobs:
           cp build/icon.png assets/icon-only.png
           cp build/icon.png assets/icon-foreground.png
           npx --yes @capacitor/assets@3.0.5 generate --android --iconBackgroundColor '#050403' --iconBackgroundColorDark '#050403' || echo "Icon-Erzeugung übersprungen"
+          # Standort-Freigabe für „Mein Standort“ (Live-Optionen)
+          sed -i 's#<uses-permission android:name="android.permission.INTERNET" />#&\n    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />\n    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />#' android/app/src/main/AndroidManifest.xml
           npx cap sync android
 
       - name: APK bauen (debug-signiert, direkt installierbar)

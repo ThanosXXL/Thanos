@@ -10,7 +10,7 @@
   const MODES = { driving: 'Auto', walking: 'zu Fuß', bicycling: 'Fahrrad', transit: 'Bus & Bahn' };
 
   const LOOKS = ['gold3d', 'klar', 'hell'];
-  let state = { favorites: [], routes: [], look: 'gold3d' };
+  let state = { favorites: [], routes: [], look: 'gold3d', touch: 'auto' };
   const ui = {
     view: 'start',
     editingFav: null,
@@ -19,6 +19,7 @@
   };
 
   // ---------- Speicher: Desktop (IPC) oder Browser (localStorage) ----------
+  const isApple = /iPhone|iPad|iPod|Macintosh/i.test(navigator.userAgent || '');
   const isAndroid = /Android/i.test(navigator.userAgent || '');
   const launcher = window.Capacitor && window.Capacitor.Plugins && window.Capacitor.Plugins.AppLauncher;
   const isDesktop = typeof window.myRouteAPI === 'object' && window.myRouteAPI !== null;
@@ -272,11 +273,18 @@
     renderFavorites();
     renderRoutes();
     renderMap();
+    renderDrive();
   }
 
   function applyLook() {
     document.documentElement.dataset.look = LOOKS.includes(state.look) ? state.look : 'gold3d';
     $('look-select').value = document.documentElement.dataset.look;
+    $('touch-select').value = ['auto', 'an', 'aus'].includes(state.touch) ? state.touch : 'auto';
+    document.documentElement.dataset.touch = touchOn() ? 'on' : 'off';
+  }
+
+  function touchOn() {
+    return state.touch === 'an' || (state.touch !== 'aus' && window.matchMedia('(pointer: coarse)').matches);
   }
 
   function greeting() {
@@ -343,8 +351,9 @@
       actions.append(h('button', { class: 'btn small', onclick: () => driveRoute(route, url) }, 'Teil ' + (i + 2)))
     );
     const second = h('div', { class: 'card-actions' },
-      isAndroid ? h('button', { class: 'btn small ghost', disabled: !stops.length, title: 'Startet die Navigation zum ersten Stopp in der Google-Maps-App', onclick: () => driveRoute(route, androidNavLink(route)) }, 'Navi-App (1. Stopp)') : h('button', { class: 'btn small ghost', disabled: !apple, onclick: () => driveRoute(route, apple) }, 'Apple Karten'),
+      isAndroid ? h('button', { class: 'btn small ghost', disabled: !stops.length, title: 'Startet die Navigation zum ersten Stopp in der Google-Maps-App', onclick: () => driveRoute(route, androidNavLink(route)) }, 'Navi-App (1. Stopp)') : isApple ? h('button', { class: 'btn small ghost', disabled: !apple, onclick: () => driveRoute(route, apple) }, 'Apple Karten') : null,
       h('button', { class: 'btn small ghost', disabled: !osm, title: osm ? '' : 'Dafür brauchen alle Stopps Koordinaten', onclick: () => driveRoute(route, osm) }, 'OpenStreetMap'),
+      h('button', { class: 'btn small', disabled: !stops.length, title: 'Schnellste, kürzeste und eine alternative Strecke live berechnen', onclick: () => openLive(stops.length ? stops[0].id : null) }, 'Live-Optionen'),
       h('button', { class: 'btn small ghost', disabled: !links.length, onclick: () => copyText(links.join('\n')) }, 'Link kopieren'),
       h('button', { class: 'btn small ghost', onclick: () => { ui.mapRouteId = route.id; ui.view = 'map'; render(); } }, 'Karte'),
       h('button', { class: 'btn small ghost', onclick: () => editRoute(route) }, 'Bearbeiten'),
@@ -581,6 +590,166 @@
     return svg;
   }
 
+
+  // ---------- Fahrmodus (große Touch-Tasten) ----------
+  function renderDrive() {
+    const rbox = $('drive-routes');
+    const routes = state.routes.slice().sort((a, b) => (b.starred ? 1 : 0) - (a.starred ? 1 : 0));
+    rbox.replaceChildren(
+      ...(routes.length
+        ? routes.map((route) => {
+            const links = googleLinks(route);
+            const stops = routeStops(route);
+            return h('article', { class: 'card drive-tile' },
+              h('div', { class: 'card-title', text: (route.starred ? '⭐ ' : '') + route.name }),
+              h('div', { class: 'card-meta', text: (MODES[route.mode] || 'Auto') + ' · ' + stops.length + (stops.length === 1 ? ' Stopp' : ' Stopps') }),
+              h('button', { class: 'btn mega', disabled: !links.length, onclick: () => driveRoute(route, links[0]) }, 'Losfahren'),
+              links.length > 1 ? h('div', { class: 'card-actions' }, ...links.slice(1).map((url, i) => h('button', { class: 'btn', onclick: () => driveRoute(route, url) }, 'Teil ' + (i + 2)))) : null,
+              h('button', { class: 'btn ghost mega-sub', disabled: !stops.length, onclick: () => openLive(stops[0].id) }, 'Live-Optionen')
+            );
+          })
+        : [emptyCard('Noch keine Route gespeichert – lege sie unter „Routen“ an, dann erscheint sie hier mit großer Taste.', [])])
+    );
+    const fbox = $('drive-favs');
+    fbox.replaceChildren(
+      ...(state.favorites.length
+        ? state.favorites.map((f) =>
+            h('button', { class: 'card drive-fav', onclick: () => openLive(f.id) },
+              h('span', { class: 'card-icon', text: f.icon || '📍' }),
+              h('span', { class: 'grow' }, h('span', { class: 'card-title', text: f.name }), h('span', { class: 'card-meta', text: hasCoords(f) ? 'Live-Optionen' : 'Ohne Koordinaten' }))
+            )
+          )
+        : [emptyCard('Sobald du Favoriten gespeichert hast, kannst du sie hier mit einem Tipp ansteuern.', [])])
+    );
+  }
+
+  // ---------- Live-Routen: bis zu 3 Optionen zum Ziel (schnellste, kürzeste, Alternative) ----------
+  const live = { timer: null, busy: false };
+
+  function openLive(toId) {
+    const dlg = $('live-dialog');
+    const fill = (sel, withHere, keep) => {
+      const prev = keep || sel.value;
+      sel.replaceChildren(
+        ...(withHere ? [h('option', { value: 'here' }, '📡 Mein Standort')] : []),
+        ...state.favorites.map((f) => h('option', { value: f.id }, `${f.icon || '📍'} ${f.name}`))
+      );
+      if (prev && [...sel.options].some((o) => o.value === prev)) sel.value = prev;
+    };
+    const canLocate = !isDesktop && !!navigator.geolocation;
+    fill($('live-from'), canLocate, canLocate ? 'here' : '');
+    fill($('live-to'), false, toId);
+    $('live-options').replaceChildren();
+    $('live-status').textContent = state.favorites.length ? 'Wähle Start und Ziel und tippe auf „Optionen laden“.' : 'Lege zuerst Favoriten mit Koordinaten an.';
+    if (typeof dlg.showModal === 'function') { if (!dlg.open) dlg.showModal(); } else dlg.setAttribute('open', '');
+    if (state.favorites.length && toId && hasCoords(favById(toId)) && ($('live-from').value === 'here' || hasCoords(favById($('live-from').value)))) loadLive();
+  }
+
+  function closeLive() {
+    clearInterval(live.timer);
+    live.timer = null;
+    const dlg = $('live-dialog');
+    if (typeof dlg.close === 'function') dlg.close(); else dlg.removeAttribute('open');
+  }
+
+  function getHere() {
+    return new Promise((resolve, reject) => {
+      if (!navigator.geolocation) { reject(new Error('Standort nicht verfügbar')); return; }
+      navigator.geolocation.getCurrentPosition((p) => resolve({ lat: p.coords.latitude, lon: p.coords.longitude }), () => reject(new Error('Standort nicht freigegeben')), { timeout: 10000, maximumAge: 30000 });
+    });
+  }
+
+  async function getRouteOptions(from, to) {
+    if (isDesktop) return normalizeOsrm(await window.myRouteAPI.routeOptions({ from, to }));
+    const url = `https://router.project-osrm.org/route/v1/driving/${from.lon},${from.lat};${to.lon},${to.lat}?alternatives=3&overview=simplified&geometries=geojson`;
+    const res = await fetch(url);
+    if (!res.ok) throw new Error('Dienst antwortet nicht');
+    return normalizeOsrm(await res.json());
+  }
+
+  function normalizeOsrm(d) {
+    if (!d || d.code !== 'Ok' || !Array.isArray(d.routes)) return [];
+    return d.routes.slice(0, 4).filter((r) => Number.isFinite(r.duration) && Number.isFinite(r.distance)).map((r) => ({
+      duration: r.duration,
+      distance: r.distance,
+      points: ((r.geometry && r.geometry.coordinates) || []).filter((c) => Array.isArray(c) && c.length >= 2).map((c) => ({ lat: c[1], lon: c[0] }))
+    }));
+  }
+
+  // Maximal drei Optionen: schnellste, kürzeste und – falls vorhanden – eine weitere Alternative
+  function pickOptions(routes) {
+    if (!routes.length) return [];
+    let fast = 0, short = 0;
+    routes.forEach((r, i) => { if (r.duration < routes[fast].duration) fast = i; if (r.distance < routes[short].distance) short = i; });
+    const out = [{ label: fast === short ? 'Schnellste & kürzeste' : 'Schnellste', r: routes[fast], fastest: true }];
+    if (short !== fast) out.push({ label: 'Kürzeste', r: routes[short] });
+    const alt = routes.findIndex((_, i) => i !== fast && i !== short);
+    if (alt >= 0) out.push({ label: 'Alternative', r: routes[alt] });
+    return out;
+  }
+
+  // Google Maps kennt keine „Strecken-ID“ – damit die gewählte Alternative gefahren wird,
+  // wird der Punkt als Zwischenziel gesetzt, der am weitesten von der schnellsten Strecke entfernt liegt.
+  function optionLink(opt, fastest, from, to) {
+    const params = new URLSearchParams({ api: '1', destination: `${to.lat},${to.lon}`, travelmode: 'driving' });
+    if (from.here !== true) params.set('origin', `${from.lat},${from.lon}`);
+    if (!opt.fastest && fastest.points.length) {
+      let best = null, bestD = 0.3;
+      opt.r.points.forEach((p) => {
+        const d = Math.min(...fastest.points.map((q) => haversineKm(p, q)));
+        if (d > bestD) { bestD = d; best = p; }
+      });
+      if (best) params.set('waypoints', `${best.lat},${best.lon}`);
+    }
+    return 'https://www.google.com/maps/dir/?' + params.toString();
+  }
+
+  function fmtDuration(sec) {
+    const m = Math.max(1, Math.round(sec / 60));
+    return m < 60 ? m + ' Min' : Math.floor(m / 60) + ' Std ' + (m % 60) + ' Min';
+  }
+
+  async function loadLive() {
+    if (live.busy) return;
+    const status = $('live-status');
+    const to = favById($('live-to').value);
+    const fromVal = $('live-from').value;
+    if (!to || !hasCoords(to)) { status.textContent = 'Für das Ziel fehlen Koordinaten – trage sie bei den Favoriten ein („Koordinaten zur Adresse finden“).'; return; }
+    live.busy = true;
+    status.textContent = 'Ich frage die Strecken ab …';
+    try {
+      let from;
+      if (fromVal === 'here') from = Object.assign(await getHere(), { here: true });
+      else {
+        const f = favById(fromVal);
+        if (!f || !hasCoords(f)) throw new Error('Dem Start fehlen Koordinaten');
+        from = { lat: f.lat, lon: f.lon };
+      }
+      if (!(haversineKm(from, to) > 0.05)) throw new Error('Start und Ziel sind (fast) identisch');
+      const options = pickOptions(await getRouteOptions(from, to));
+      if (!options.length) throw new Error('Keine Strecke gefunden');
+      const fastest = options[0].r;
+      $('live-options').replaceChildren(
+        ...options.map((o, i) => {
+          const extra = i === 0 ? '' : ((o.r.duration - fastest.duration >= 0 ? '+' : '−') + fmtDuration(Math.abs(o.r.duration - fastest.duration)) + ' · ' + ((o.r.distance - fastest.distance) / 1000 >= 0 ? '+' : '−') + fmtKm(Math.abs(o.r.distance - fastest.distance) / 1000) + ' km');
+          return h('article', { class: 'card live-opt' },
+            h('span', { class: 'badge', text: o.label }),
+            h('div', { class: 'live-big' }, h('b', { text: fmtDuration(o.r.duration) }), ' · ', fmtKm(o.r.distance / 1000) + ' km'),
+            extra ? h('div', { class: 'card-meta', text: 'gegenüber der schnellsten: ' + extra }) : h('div', { class: 'card-meta', text: 'Empfohlen für den schnellsten Weg' }),
+            h('button', { class: 'btn', onclick: () => { openLink(optionLink(o, { points: fastest.points }, from, to)); toast('Gute Fahrt! 🚗'); } }, 'Diese Strecke fahren')
+          );
+        })
+      );
+      status.textContent = '🟢 Live · aktualisiert um ' + new Date().toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+      clearInterval(live.timer);
+      live.timer = $('live-auto').checked ? setInterval(loadLive, 60000) : null;
+    } catch (err) {
+      status.textContent = '🔴 Keine Live-Verbindung: ' + (err && err.message ? err.message : 'bitte Internet prüfen') + '.';
+    } finally {
+      live.busy = false;
+    }
+  }
+
   // ---------- Aktionen ----------
   function loadDemo() {
     const demo = [
@@ -650,7 +819,7 @@
     });
 
     const locateBtn = $('fav-locate');
-    if (isDesktop || launcher || !navigator.geolocation) locateBtn.hidden = true;
+    if (isDesktop || !navigator.geolocation) locateBtn.hidden = true;
     locateBtn.addEventListener('click', () => {
       navigator.geolocation.getCurrentPosition(
         (pos) => { $('fav-coords').value = `${pos.coords.latitude.toFixed(5)}, ${pos.coords.longitude.toFixed(5)}`; toast('Dein Standort ist eingetragen.'); },
@@ -697,6 +866,13 @@
     $('rt-cancel').addEventListener('click', resetRouteForm);
 
     $('look-select').addEventListener('change', (e) => { state.look = e.target.value; persist(); render(); });
+    $('touch-select').addEventListener('change', (e) => { state.touch = e.target.value; persist(); render(); });
+    $('live-go').addEventListener('click', loadLive);
+    $('live-close').addEventListener('click', closeLive);
+    $('live-dialog').addEventListener('close', () => { clearInterval(live.timer); live.timer = null; });
+    $('live-auto').addEventListener('change', () => { clearInterval(live.timer); live.timer = $('live-auto').checked ? setInterval(loadLive, 60000) : null; });
+    $('live-from').addEventListener('change', () => { $('live-options').replaceChildren(); });
+    $('live-to').addEventListener('change', () => { $('live-options').replaceChildren(); });
     $('map-route').addEventListener('change', (e) => { ui.mapRouteId = e.target.value; renderMap(); });
 
     $('btn-export').addEventListener('click', async () => {
@@ -732,7 +908,7 @@
     document.addEventListener('mousemove', (e) => {
       const el = e.target.closest && e.target.closest('.tilt, .tilt-soft');
       document.querySelectorAll('.tilt, .tilt-soft').forEach((n) => { if (n !== el && n.style.getPropertyValue('--rx')) { n.style.removeProperty('--rx'); n.style.removeProperty('--ry'); } });
-      if (!el || window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+      if (!el || touchOn() || window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
       const r = el.getBoundingClientRect();
       const max = el.classList.contains('tilt-soft') ? 2.5 : 6;
       el.style.setProperty('--ry', ((e.clientX - r.left) / r.width - 0.5) * 2 * max + 'deg');
@@ -764,7 +940,7 @@
       drives: Number.isFinite(r.drives) ? Math.max(0, Math.floor(r.drives)) : 0, lastDriven: typeof r.lastDriven === 'string' ? r.lastDriven.slice(0, 40) : null,
       stops: r.stops.filter((id) => typeof id === 'string' && ids.has(id)).slice(0, MAX_STOPS)
     }));
-    return { favorites, routes, look: LOOKS.includes(data.look) ? data.look : 'gold3d' };
+    return { favorites, routes, look: LOOKS.includes(data.look) ? data.look : 'gold3d', touch: ['auto', 'an', 'aus'].includes(data.touch) ? data.touch : 'auto' };
   }
 
   async function init() {
@@ -772,7 +948,7 @@
       const loaded = await api.loadData();
       if (loaded && Array.isArray(loaded.favorites) && Array.isArray(loaded.routes)) state = sanitize(loaded);
     } catch (err) {
-      state = { favorites: [], routes: [], look: 'gold3d' };
+      state = { favorites: [], routes: [], look: 'gold3d', touch: 'auto' };
     }
     bind();
     render();

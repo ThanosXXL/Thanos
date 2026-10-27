@@ -28,7 +28,7 @@ function buildApp() {
 
   const csp =
     "default-src 'none'; img-src data:; style-src 'unsafe-inline'; font-src data:; script-src 'unsafe-inline'; " +
-    "connect-src https://nominatim.openstreetmap.org; base-uri 'none'; form-action 'none'";
+    "connect-src https://nominatim.openstreetmap.org https://router.project-osrm.org; base-uri 'none'; form-action 'none'";
 
   let html = read('index.html').toString('utf-8')
     .replace(/<meta http-equiv="Content-Security-Policy"[^>]*>/, `<meta http-equiv="Content-Security-Policy" content="${csp}">`)
