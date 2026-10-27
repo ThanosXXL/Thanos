@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'none'; img-src 'self' data:; style-src 'self'; font-src 'self'; script-src 'self'; connect-src 'none'; base-uri 'none'; form-action 'none'">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#050403">
+  <meta name="description" content="My Route – deine Lieblingsorte als Favoriten speichern und gespeicherte Routen mit einem Klick erneut anfahren. Von IT - WORLD · IT SOLUTIONS.">
+  <title>My Route</title>
+  <link rel="icon" type="image/png" href="assets/favicon.png">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div class="bg-glow" aria-hidden="true"></div>
+
+  <header class="topbar">
+    <div class="brand">
+      <img class="brand-logo" src="assets/logo.webp" alt="IT-WORLD Logo" width="56" height="56">
+      <div class="brand-text">
+        <div class="brand-title gold3d">MY ROUTE</div>
+        <div class="brand-sub">IT - WORLD · IT SOLUTIONS</div>
+      </div>
+    </div>
+    <nav class="tabs" id="tabs" aria-label="Hauptnavigation">
+      <button class="tab" data-view="start">Start</button>
+      <button class="tab" data-view="favorites">Favoriten</button>
+      <button class="tab" data-view="routes">Routen</button>
+      <button class="tab" data-view="map">Karte</button>
+      <button class="tab" data-view="info">Info</button>
+    </nav>
+    <div class="topbar-actions">
+      <button class="btn small ghost" id="btn-export" title="Favoriten und Routen als Datei sichern">Sichern</button>
+      <button class="btn small ghost" id="btn-import" title="Gesicherte Datei wieder einlesen">Einlesen</button>
+      <input type="file" id="file-import" accept="application/json,.json" hidden>
+    </div>
+  </header>
+
+  <main class="content">
+    <!-- START -->
+    <section class="view" id="view-start">
+      <div class="hero">
+        <div class="hero-logo-wrap tilt">
+          <img class="hero-logo" src="assets/logo.webp" alt="IT-WORLD – IT Solutions" width="480" height="480">
+        </div>
+        <div class="hero-copy">
+          <p class="greeting" id="greeting"></p>
+          <h1 class="hero-title gold3d">MY ROUTE</h1>
+          <p class="hero-sub">IT SOLUTIONS</p>
+          <p class="hero-text">Deine Lieblingswege, sicher aufgehoben. Speichere die Orte, die dir wichtig sind – und mit einem einzigen Klick bist du wieder unterwegs.</p>
+          <div class="hero-actions">
+            <button class="btn" data-goto="routes">Neue Route anlegen</button>
+            <button class="btn ghost" data-goto="favorites">Favoriten verwalten</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="stats" id="stats"></div>
+
+      <h2 class="section-title gold3d-sm">Deine Lieblingsrouten</h2>
+      <p class="section-sub">Ein Klick – und die Navigation startet mit allen Stopps.</p>
+      <div class="grid" id="quick-routes"></div>
+    </section>
+
+    <!-- FAVORITEN -->
+    <section class="view" id="view-favorites" hidden>
+      <h2 class="section-title gold3d-sm">Favoriten</h2>
+      <p class="section-sub">Orte, die du immer wieder gern ansteuerst – Zuhause, Büro, dein Lieblingscafé …</p>
+      <div class="split">
+        <form class="card form tilt-soft" id="fav-form" autocomplete="off">
+          <h3 id="fav-form-title">Neuen Lieblingsort speichern</h3>
+          <label>Name
+            <input id="fav-name" type="text" maxlength="80" placeholder="z. B. Mein Lieblingscafé" required>
+          </label>
+          <label>Adresse
+            <input id="fav-address" type="text" maxlength="200" placeholder="Straße, Hausnummer, Ort">
+          </label>
+          <label>Koordinaten <span class="hint">(optional – für Karte &amp; Reihenfolge-Optimierung)</span>
+            <input id="fav-coords" type="text" maxlength="60" placeholder="52.5163, 13.3777">
+          </label>
+          <div class="row">
+            <button type="button" class="btn small ghost" id="fav-geocode">Koordinaten zur Adresse finden</button>
+            <button type="button" class="btn small ghost" id="fav-locate">Mein Standort</button>
+          </div>
+          <label>Notiz
+            <input id="fav-note" type="text" maxlength="160" placeholder="z. B. Parkplatz hinterm Haus">
+          </label>
+          <label>Symbol
+            <select id="fav-icon"></select>
+          </label>
+          <div class="row">
+            <button type="submit" class="btn" id="fav-save">Speichern</button>
+            <button type="button" class="btn ghost" id="fav-cancel" hidden>Abbrechen</button>
+          </div>
+          <p class="hint" id="fav-privacy">Die Suche nach Koordinaten sendet nur den eingegebenen Adresstext an OpenStreetMap (Nominatim) – und nur, wenn du auf den Knopf klickst.</p>
+        </form>
+        <div>
+          <div class="grid" id="fav-list"></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ROUTEN -->
+    <section class="view" id="view-routes" hidden>
+      <h2 class="section-title gold3d-sm">Routen</h2>
+      <p class="section-sub">Stelle deine Favoriten zu einer Route zusammen und fahre sie jederzeit wieder.</p>
+      <div class="split">
+        <form class="card form tilt-soft" id="rt-form" autocomplete="off">
+          <h3 id="rt-form-title">Neue Route</h3>
+          <label>Name der Route
+            <input id="rt-name" type="text" maxlength="80" placeholder="z. B. Samstags-Runde" required>
+          </label>
+          <label>Unterwegs mit
+            <select id="rt-mode">
+              <option value="driving">Auto</option>
+              <option value="walking">zu Fuß</option>
+              <option value="bicycling">Fahrrad</option>
+              <option value="transit">Bus &amp; Bahn</option>
+            </select>
+          </label>
+          <label class="check">
+            <input id="rt-start" type="checkbox" checked>
+            <span>Start an meinem aktuellen Standort</span>
+          </label>
+          <label>Stopp hinzufügen
+            <div class="row nowrap">
+              <select id="rt-pick"></select>
+              <button type="button" class="btn small" id="rt-add">Hinzufügen</button>
+            </div>
+          </label>
+          <ol class="stops" id="draft-stops"></ol>
+          <div class="row">
+            <button type="button" class="btn small ghost" id="rt-opt">Reihenfolge optimieren</button>
+          </div>
+          <div class="row">
+            <button type="submit" class="btn" id="rt-save">Route speichern</button>
+            <button type="button" class="btn ghost" id="rt-cancel" hidden>Abbrechen</button>
+          </div>
+        </form>
+        <div>
+          <div class="grid" id="route-list"></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- KARTE -->
+    <section class="view" id="view-map" hidden>
+      <h2 class="section-title gold3d-sm">Kartenvorschau</h2>
+      <p class="section-sub">So liegen deine Stopps zueinander – schematisch und komplett offline.</p>
+      <div class="card map-card tilt-soft">
+        <label class="map-pick">Route
+          <select id="map-route"></select>
+        </label>
+        <div id="map-box"></div>
+        <p class="hint" id="map-note"></p>
+      </div>
+    </section>
+
+    <!-- INFO -->
+    <section class="view" id="view-info" hidden>
+      <h2 class="section-title gold3d-sm">Schön, dass du da bist</h2>
+      <div class="card info tilt-soft">
+        <p>My Route ist dein persönlicher Routenplaner: Du speicherst die Orte, die dir etwas bedeuten, stellst daraus Routen zusammen – und fährst sie jederzeit wieder, mit nur einem Klick.</p>
+        <ol class="howto">
+          <li><strong>Orte sammeln.</strong> Lege Zuhause, Büro, Lieblingscafé oder Urlaubsziel als Favoriten an.</li>
+          <li><strong>Route bauen.</strong> Wähle deine Stopps aus, bring sie in die richtige Reihenfolge – oder lass My Route die kürzeste Abfolge vorschlagen.</li>
+          <li><strong>Losfahren.</strong> „Route fahren“ öffnet deine Navigation (Google Maps, Apple Karten oder OpenStreetMap) – komplett mit allen Zwischenstopps.</li>
+        </ol>
+        <h3>Deine Daten gehören dir</h3>
+        <p>Favoriten und Routen bleiben auf deinem Gerät. Es gibt kein Konto, keine Werbung und keine Telemetrie. Nur wenn du ausdrücklich auf „Koordinaten zur Adresse finden“ oder „Route fahren“ klickst, wird der jeweilige Dienst (OpenStreetMap bzw. dein Karten-Dienst) angesprochen. Mit „Sichern“ und „Einlesen“ nimmst du deine Daten überallhin mit.</p>
+        <h3>Gut zu wissen</h3>
+        <p>Die angezeigte Entfernung ist die Luftlinie zwischen deinen Stopps – die echte Strecke berechnet dein Karten-Dienst. Lange Routen mit mehr als zehn Stopps teilt My Route automatisch in Abschnitte auf, weil Karten-Dienste pro Link nur eine begrenzte Zahl an Zwischenstopps erlauben.</p>
+        <p class="signature">IT - WORLD · IT SOLUTIONS</p>
+      </div>
+    </section>
+  </main>
+
+  <div class="toast" id="toast" role="status" aria-live="polite"></div>
+  <script src="renderer.js"></script>
+</body>
+</html>

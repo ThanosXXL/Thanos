@@ -1,0 +1,74 @@
+name: Build & Release My Route
+
+on:
+  push:
+    tags:
+      - "my-route-v*"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [windows-latest, macos-latest, ubuntu-latest]
+    runs-on: ${{ matrix.os }}
+    permissions:
+      contents: read
+    defaults:
+      run:
+        working-directory: my-route
+
+    steps:
+      - name: Repository auschecken
+        uses: actions/checkout@v4
+
+      - name: Node.js einrichten
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Abhängigkeiten installieren
+        run: npm install
+
+      - name: Desktop-App bauen
+        run: npm run dist
+
+      - name: Installer als Artifact hochladen
+        uses: actions/upload-artifact@v4
+        with:
+          name: my-route-${{ matrix.os }}
+          path: |
+            my-route/dist/*.exe
+            my-route/dist/*.dmg
+            my-route/dist/*.AppImage
+          if-no-files-found: warn
+
+  release:
+    needs: build
+    if: startsWith(github.ref, 'refs/tags/my-route-v')
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - name: Repository auschecken
+        uses: actions/checkout@v4
+
+      - name: Installer-Artifacts herunterladen
+        uses: actions/download-artifact@v4
+        with:
+          pattern: my-route-*
+          path: release-assets
+          merge-multiple: true
+
+      - name: GitHub Release erstellen und Installer anhängen
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          gh release create "${{ github.ref_name }}" \
+            --title "My Route ${{ github.ref_name }}" \
+            --notes "Automatisch veröffentlichter Build von My Route für Windows, macOS (Intel + Apple Silicon) und Linux." \
+            release-assets/*

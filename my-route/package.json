@@ -1,0 +1,52 @@
+{
+  "name": "my-route",
+  "version": "1.0.0",
+  "description": "My Route – Routenplaner nach Favoriten: gespeicherte Routen mit einem Klick erneut anfahren",
+  "main": "main.js",
+  "author": "IT-WORLD – IT Solutions",
+  "license": "UNLICENSED",
+  "scripts": {
+    "start": "electron .",
+    "build:web": "node scripts/build-web.js",
+    "dist": "electron-builder"
+  },
+  "devDependencies": {
+    "electron": "^44.7.0",
+    "electron-builder": "^26.15.3"
+  },
+  "overrides": {
+    "@electron/get": "^5.1.0"
+  },
+  "build": {
+    "appId": "de.itworld.myroute",
+    "productName": "My Route",
+    "files": [
+      "main.js",
+      "preload.js",
+      "renderer/**/*",
+      "build/icon.png",
+      "package.json"
+    ],
+    "directories": {
+      "output": "dist"
+    },
+    "icon": "build/icon.png",
+    "win": {
+      "target": "nsis",
+      "artifactName": "My-Route-Setup-${version}.${ext}"
+    },
+    "mac": {
+      "target": {
+        "target": "dmg",
+        "arch": ["x64", "arm64"]
+      },
+      "category": "public.app-category.navigation",
+      "artifactName": "My-Route-${version}-${arch}.${ext}"
+    },
+    "linux": {
+      "target": "AppImage",
+      "category": "Utility",
+      "artifactName": "My-Route-${version}.${ext}"
+    }
+  }
+}
