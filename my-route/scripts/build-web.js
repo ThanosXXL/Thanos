@@ -56,6 +56,13 @@ function buildDownloadPage(appHtml) {
   };
   const cfg = JSON.stringify({ base: RELEASE_BASE, files, releases: RELEASES_PAGE, version: v }).replace(/</g, '\\u003c');
   const appB64 = Buffer.from(appHtml, 'utf-8').toString('base64');
+  // Handbücher (falls erzeugt: npm-unabhängig via scripts/build-manual.js) – stecken ebenfalls in der Seite
+  const manual = (f) => {
+    const fp = path.join(root, 'docs', f);
+    return fs.existsSync(fp) ? fs.readFileSync(fp).toString('base64') : '';
+  };
+  const manualA4 = manual('My-Route-Handbuch-A4.pdf');
+  const manualMobile = manual('My-Route-Handbuch-Mobil.pdf');
 
   return `<!DOCTYPE html>
 <html lang="de">
@@ -93,6 +100,8 @@ a.btn { text-decoration: none; display: inline-block; }
     <p class="dl-note" id="dl-detect"></p>
   </div>
 
+  <div class="card dl-steps tilt-soft" id="dl-steps" style="margin:26px auto 0;max-width:640px;text-align:left"></div>
+
   <div class="dl-grid" id="dl-grid"></div>
   <p class="dl-foot">Die Browser-Vollversion ist eine einzelne HTML-Datei: Doppelklick genügt, sie läuft auf Windows, macOS, Linux, Android und iOS und braucht keine Installation. Deine Daten bleiben auf deinem Gerät.</p>
 </main>
@@ -100,16 +109,19 @@ a.btn { text-decoration: none; display: inline-block; }
 (function () {
   var CFG = ${cfg};
   var APP_B64 = "${appB64}";
+  var PDF_A4 = "${manualA4}";
+  var PDF_MOBILE = "${manualMobile}";
 
-  function saveApp() {
-    var bin = atob(APP_B64), bytes = new Uint8Array(bin.length);
+  function saveB64(b64, type, name) {
+    var bin = atob(b64), bytes = new Uint8Array(bin.length);
     for (var i = 0; i < bin.length; i++) bytes[i] = bin.charCodeAt(i);
-    var url = URL.createObjectURL(new Blob([bytes], { type: 'text/html' }));
+    var url = URL.createObjectURL(new Blob([bytes], { type: type }));
     var a = document.createElement('a');
-    a.href = url; a.download = 'My-Route-Vollversion.html';
+    a.href = url; a.download = name;
     document.body.appendChild(a); a.click(); a.remove();
     setTimeout(function () { URL.revokeObjectURL(url); }, 4000);
   }
+  function saveApp() { saveB64(APP_B64, 'text/html', 'My-Route-Vollversion.html'); }
 
   var ua = navigator.userAgent || '';
   var plat = /Android/i.test(ua) ? 'android' : /iPhone|iPad|iPod/i.test(ua) || (/Macintosh/i.test(ua) && navigator.maxTouchPoints > 1) ? 'ios'
@@ -157,6 +169,31 @@ a.btn { text-decoration: none; display: inline-block; }
     main.addEventListener('click', saveApp);
     detect.textContent = (plat === 'other' ? '' : names[plat] + ' erkannt. ') + 'Die Vollversion läuft direkt im Browser – ohne Installation.';
   }
+
+  // Benutzerhandbuch (A4 & Mobil) – steckt in dieser Seite, 1 Klick genügt
+  if (PDF_A4) {
+    var hb = document.createElement('div'); hb.className = 'row';
+    var b1 = document.createElement('button'); b1.className = 'btn small'; b1.textContent = 'Handbuch A4 (PDF)'; b1.addEventListener('click', function () { saveB64(PDF_A4, 'application/pdf', 'My-Route-Handbuch-A4.pdf'); });
+    var b2 = document.createElement('button'); b2.className = 'btn small ghost'; b2.textContent = 'Handbuch fürs Handy (PDF)'; b2.addEventListener('click', function () { saveB64(PDF_MOBILE, 'application/pdf', 'My-Route-Handbuch-Mobil.pdf'); });
+    hb.appendChild(b1); hb.appendChild(b2);
+    grid.appendChild(card('Benutzerhandbuch', 'Leicht verständlich, mit Beispielbildern – für Druck und Handy.', hb));
+  }
+
+  // Installation in 3 Schritten – passend zum erkannten Gerät
+  var STEPS = {
+    win: ['Auf „Für Windows herunterladen“ klicken.', 'Die Datei „My-Route-Setup“ öffnen – ggf. bei der Windows-Meldung „Weitere Informationen → Trotzdem ausführen“ wählen.', 'My Route startet automatisch, ein Symbol liegt auf dem Desktop.'],
+    mac: ['Auf „Für macOS herunterladen“ klicken (Intel-Mac: unten „macOS · Intel“).', 'Die .dmg-Datei öffnen und My Route in „Programme“ ziehen.', 'Beim ersten Start Rechtsklick → „Öffnen“ wählen und bestätigen.'],
+    linux: ['Auf „Für Linux herunterladen“ klicken.', 'Die .AppImage-Datei per Rechtsklick → Eigenschaften → „Ausführbar“ machen (oder: chmod +x).', 'Doppelklick – My Route startet.'],
+    android: ['Auf „Für Android herunterladen“ klicken und die APK öffnen.', 'Die Meldung „Installation aus dieser Quelle“ einmalig erlauben.', 'Auf „Installieren“ tippen – My Route erscheint auf dem Startbildschirm.'],
+    ios: ['Auf „Vollversion jetzt herunterladen“ tippen und die Datei öffnen.', 'Im Teilen-Menü „Zum Home-Bildschirm“ wählen.', 'My Route liegt jetzt wie eine App auf dem Startbildschirm.'],
+    other: ['Auf „Vollversion jetzt herunterladen“ klicken.', 'Die Datei „My-Route-Vollversion.html“ per Doppelklick öffnen.', 'Fertig – alles läuft direkt im Browser.']
+  };
+  var stepsBox = document.getElementById('dl-steps');
+  var list = STEPS[plat] || STEPS.other;
+  var ol = document.createElement('ol'); ol.className = 'howto';
+  list.forEach(function (t) { var li = document.createElement('li'); li.textContent = t; ol.appendChild(li); });
+  var h3 = document.createElement('h3'); h3.textContent = 'So installierst du My Route – in 3 Schritten';
+  stepsBox.appendChild(h3); stepsBox.appendChild(ol);
 
   document.addEventListener('mousemove', function (e) {
     var el = e.target.closest && e.target.closest('.tilt, .tilt-soft');

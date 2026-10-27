@@ -71,4 +71,4 @@ jobs:
           gh release create "${{ github.ref_name }}" \
             --title "My Route ${{ github.ref_name }}" \
             --notes "Automatisch veröffentlichter Build von My Route." 2>/dev/null || true
-          gh release upload "${{ github.ref_name }}" release-assets/* --clobber
+          gh release upload "${{ github.ref_name }}" release-assets/* my-route/docs/*.pdf my-route/web/My-Route-Vollversion.html my-route/web/My-Route-Download.html --clobber

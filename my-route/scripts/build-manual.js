@@ -35,33 +35,33 @@ async function shots() {
   await p.goto(APP);
   await p.click('text=Beispielroute laden');
   await p.waitForTimeout(3300);
-  await p.screenshot({ path: path.join(img, 's1-start.png') });
+  await p.screenshot({ path: path.join(img, 's1-start.jpg'), type: 'jpeg', quality: 88 });
 
   await p.click('.tab[data-view=favorites]');
   await p.fill('#fav-name', 'Mein Lieblingscafé'); await p.fill('#fav-address', 'Unter den Linden 40, Berlin');
   await p.fill('#fav-coords', '52.5170, 13.3888'); await p.fill('#fav-note', 'Bestes Frühstück der Stadt');
   await p.waitForTimeout(700);
-  await p.screenshot({ path: path.join(img, 's2-favoriten.png') });
+  await p.screenshot({ path: path.join(img, 's2-favoriten.jpg'), type: 'jpeg', quality: 88 });
 
   await p.click('.tab[data-view=routes]');
   await p.click('#route-list >> text=Bearbeiten');
   await p.waitForTimeout(700);
-  await p.screenshot({ path: path.join(img, 's3-routen.png') });
+  await p.screenshot({ path: path.join(img, 's3-routen.jpg'), type: 'jpeg', quality: 88 });
 
   await p.click('#route-list .btn:has-text("Live-Optionen")');
   await p.waitForTimeout(1300);
-  await p.locator('#live-dialog').screenshot({ path: path.join(img, 's4-live.png') });
+  await p.locator('#live-dialog').screenshot({ path: path.join(img, 's4-live.jpg'), type: 'jpeg', quality: 88 });
   await p.click('#live-close');
 
   await p.click('.tab[data-view=map]');
   await p.waitForTimeout(1800);
-  await p.screenshot({ path: path.join(img, 's5-karte.png') });
+  await p.screenshot({ path: path.join(img, 's5-karte.jpg'), type: 'jpeg', quality: 88 });
 
   for (const look of ['klar', 'hell']) {
     await p.click('.tab[data-view=start]');
     await p.selectOption('#look-select', look);
     await p.waitForTimeout(900);
-    await p.screenshot({ path: path.join(img, `s8-${look}.png`) });
+    await p.screenshot({ path: path.join(img, `s8-${look}.jpg`), type: 'jpeg', quality: 88 });
   }
 
   const phone = await b.newContext({ viewport: { width: 393, height: 851 }, deviceScaleFactor: 2, isMobile: true, hasTouch: true,
@@ -72,20 +72,20 @@ async function shots() {
   await q.goto(APP);
   await q.click('text=Beispielroute laden');
   await q.waitForTimeout(3300);
-  await q.screenshot({ path: path.join(img, 's10-handy-start.png') });
+  await q.screenshot({ path: path.join(img, 's10-handy-start.jpg'), type: 'jpeg', quality: 88 });
   await q.click('.tab[data-view=drive]');
   await q.waitForTimeout(600);
   await q.evaluate(() => window.scrollTo(0, 330));
   await q.waitForTimeout(500);
-  await q.screenshot({ path: path.join(img, 's6-fahrmodus.png') });
+  await q.screenshot({ path: path.join(img, 's6-fahrmodus.jpg'), type: 'jpeg', quality: 88 });
   await q.click('#drive-favs .drive-fav >> nth=1');
   await q.waitForTimeout(1300);
-  await q.screenshot({ path: path.join(img, 's7-handy-live.png') });
+  await q.screenshot({ path: path.join(img, 's7-handy-live.jpg'), type: 'jpeg', quality: 88 });
 
   const dl = await (await b.newContext({ viewport: { width: 1100, height: 760 }, deviceScaleFactor: 1.5 })).newPage();
   await dl.goto(DL);
   await dl.waitForTimeout(900);
-  await dl.screenshot({ path: path.join(img, 's9-download.png') });
+  await dl.screenshot({ path: path.join(img, 's9-download.jpg'), type: 'jpeg', quality: 88 });
   await b.close();
 }
 
@@ -127,6 +127,8 @@ figcaption{font-size:.86em;color:var(--soft);margin-top:.45em;font-style:italic}
 .toc{break-after:page} .toc h1{margin-top:0}
 .toc ol{list-style:none;padding:0;counter-reset:t} .toc li{counter-increment:t;padding:.4em 0;border-bottom:1px dotted var(--rule)}
 .toc li::before{content:counter(t) ".";display:inline-block;width:2em;color:var(--gold);font-weight:700}
+.steps{counter-reset:s;list-style:none;padding:0} .steps li{counter-increment:s;position:relative;padding:.7em 1em .7em 3.2em;margin:.6em 0;background:#fff3d6;border-radius:12px;break-inside:avoid} .steps li::before{content:counter(s);position:absolute;left:.8em;top:.55em;width:1.7em;height:1.7em;border-radius:50%;background:var(--gold);color:#fff;font-weight:700;text-align:center;line-height:1.7em}
+.quick{break-after:page}
 .sig{text-align:center;letter-spacing:.4em;color:var(--soft);margin-top:2.5em;font-size:.8em}
 table{border-collapse:collapse;width:100%;margin:.8em 0;font-size:.95em;break-inside:avoid} th,td{border:1px solid var(--rule);padding:.4em .6em;text-align:left;vertical-align:top} th{background:#fbefcf;color:var(--gold-d)}
 body.a4{} 
@@ -138,10 +140,24 @@ body.a4{}
 <section class="toc"><h1>Das erwartet dich</h1><ol>
 <li>Herzlich willkommen</li><li>Installation &amp; Start – auf jedem Gerät</li><li>Dein erster Start</li><li>Favoriten – deine Lieblingsorte</li><li>Routen zusammenstellen</li><li>Route fahren – ein Klick genügt</li><li>Live-Optionen: schnellste, kürzeste, Alternative</li><li>Fahrmodus &amp; Touch – für Auto, Tablet und Handy</li><li>Optik wählen</li><li>Kartenvorschau</li><li>Sichern, Einlesen &amp; Datenschutz</li><li>Hilfe, wenn es mal hakt</li></ol></section>
 
+<section class="quick"><h1 style="margin-top:0">In 3 Minuten startklar</h1>
+<p class="lead">Keine Sorge – du brauchst kein Vorwissen. Diese drei Schritte reichen für den Anfang:</p>
+<ol class="steps"><li><b>My Route öffnen.</b> Installiere die App oder öffne die Datei <b>My-Route-Vollversion.html</b> – Doppelklick genügt.</li>
+<li><b>Beispiel laden.</b> Tippe auf „Beispielroute laden“. Schon siehst du, wie alles aussieht.</li>
+<li><b>Losfahren.</b> Tippe bei der Route auf „Route fahren“. Deine Navigation öffnet sich – fertig!</li></ol>
+${fig('s1-start.jpg', 'So sieht der Start aus – ein Tipp auf „Route fahren“, und die Reise beginnt.')}
+<h2>Kleines Wörterbuch</h2>
+<table><tr><th>Wort</th><th>Das bedeutet es</th></tr>
+<tr><td>Favorit</td><td>Ein Ort, den du dir gemerkt hast – z. B. „Zuhause“ oder „Büro“.</td></tr>
+<tr><td>Stopp</td><td>Ein Favorit, der Teil einer Route ist.</td></tr>
+<tr><td>Route</td><td>Mehrere Stopps in einer festen Reihenfolge – mit Namen, damit du sie wiederfindest.</td></tr>
+<tr><td>Live-Optionen</td><td>Bis zu drei Wege zu einem Ziel: schnellste, kürzeste, Alternative.</td></tr>
+<tr><td>Fahrmodus</td><td>Eine Ansicht mit großen Tasten für Auto, Tablet und Handy.</td></tr></table></section>
+
 <h1><span class="num">1</span>Herzlich willkommen</h1>
 <p class="lead">Schön, dass du da bist! My Route ist dein persönlicher Routenplaner: Du sammelst die Orte, die dir etwas bedeuten, stellst daraus Routen zusammen – und fährst sie jederzeit wieder, mit nur einem Klick.</p>
 <p>Ob der tägliche Weg zur Arbeit, die Samstagsrunde bei den Lieblingsläden oder die Ausflugstour mit der Familie: Einmal gespeichert, ist alles sofort wieder da. Du musst nichts neu eintippen, nichts suchen und nichts vergessen.</p>
-${fig('s1-start.png', 'Die Startseite: Deine Lieblingsrouten sind immer nur einen Klick entfernt.')}
+${fig('s1-start.jpg', 'Die Startseite: Deine Lieblingsrouten sind immer nur einen Klick entfernt.')}
 <div class="note"><b>Gut zu wissen:</b> My Route braucht kein Konto und zeigt keine Werbung. Deine Orte und Routen bleiben auf deinem Gerät.</div>
 
 <h1><span class="num">2</span>Installation &amp; Start – auf jedem Gerät</h1>
@@ -151,7 +167,7 @@ ${fig('s1-start.png', 'Die Startseite: Deine Lieblingsrouten sind immer nur eine
 <tr><td>Linux</td><td><b>My-Route-${v}.AppImage</b> laden, ausführbar machen und starten.</td></tr>
 <tr><td>Android</td><td><b>My-Route-${v}-android.apk</b> laden, öffnen und die Installation bestätigen. Dafür musst du einmalig „Installation aus dieser Quelle“ erlauben.</td></tr>
 <tr><td>iPhone, iPad &amp; jeder Browser</td><td><b>My-Route-Vollversion.html</b> öffnen. Die komplette App steckt in dieser einen Datei. Mit „Zum Home-Bildschirm“ im Teilen-Menü legst du sie wie eine App ab.</td></tr></table>
-${fig('s9-download.png', 'Die Download-Seite erkennt dein Gerät und schlägt den passenden Weg vor.')}
+${fig('s9-download.jpg', 'Die Download-Seite erkennt dein Gerät und schlägt den passenden Weg vor.')}
 <div class="note">Alle Dateien findest du auf der Download-Seite <b>My-Route-Download.html</b> – ein Klick, und es geht los.</div>
 
 <h1><span class="num">3</span>Dein erster Start</h1>
@@ -161,13 +177,13 @@ ${fig('s9-download.png', 'Die Download-Seite erkennt dein Gerät und schlägt de
 <h1><span class="num">4</span>Favoriten – deine Lieblingsorte</h1>
 <p>Unter <b>Favoriten</b> speicherst du Orte, die du immer wieder ansteuerst – Zuhause, Büro, dein Lieblingscafé, die Schule der Kinder.</p>
 <ul><li><b>Name</b> und <b>Adresse</b> genügen.</li><li><b>Koordinaten</b> sind optional. Mit „Koordinaten zur Adresse finden“ trägt My Route sie für dich ein. Sie brauchst du für die Kartenvorschau, die Reihenfolge-Optimierung und die Live-Optionen.</li><li>Mit <b>Notiz</b> und <b>Symbol</b> machst du den Ort persönlich – z. B. „Parkplatz hinterm Haus“.</li></ul>
-${fig('s2-favoriten.png', 'Einen neuen Lieblingsort speichern – so einfach geht das.')}
+${fig('s2-favoriten.jpg', 'Einen neuen Lieblingsort speichern – so einfach geht das.')}
 <div class="note">Die Suche nach Koordinaten sendet nur den Adresstext an OpenStreetMap – und nur, wenn du auf den Knopf tippst. Auf dem Handy findet „Mein Standort“ deine aktuelle Position.</div>
 
 <h1><span class="num">5</span>Routen zusammenstellen</h1>
 <p>Unter <b>Routen</b> baust du aus deinen Favoriten eine Route:</p>
 <ol><li>Gib der Route einen Namen, z. B. „Samstags-Runde“.</li><li>Wähle, womit du unterwegs bist: Auto, zu Fuß, Fahrrad oder Bus &amp; Bahn.</li><li>Lass den Haken bei <b>„Start an meinem aktuellen Standort“</b>, wenn du immer von dort losfährst, wo du gerade bist.</li><li>Füge deine Stopps hinzu und bring sie mit den Pfeilen ↑ ↓ in die richtige Reihenfolge.</li><li>Tippe auf <b>„Route speichern“</b>.</li></ol>
-${fig('s3-routen.png', 'Die Route wird Stopp für Stopp zusammengestellt.')}
+${fig('s3-routen.jpg', 'Die Route wird Stopp für Stopp zusammengestellt.')}
 <h2>Reihenfolge optimieren</h2>
 <p>Haben alle Stopps Koordinaten, schlägt My Route mit <b>„Reihenfolge optimieren“</b> eine kürzere Abfolge vor. Der erste Stopp bleibt dein Startpunkt. Verglichen wird die Luftlinie – die genaue Strecke berechnet später dein Karten-Dienst.</p>
 
@@ -185,26 +201,26 @@ ${fig('s3-routen.png', 'Die Route wird Stopp für Stopp zusammengestellt.')}
 <p>Vor der Abfahrt lohnt der Blick auf <b>„Live-Optionen“</b>: My Route fragt bei bestehender Internetverbindung die Strecken zu deinem Ziel ab und zeigt dir <b>höchstens drei Möglichkeiten</b> für das Auto:</p>
 <ul><li><b>Schnellste</b> – die geringste Fahrzeit,</li><li><b>Kürzeste</b> – die geringste Strecke,</li><li><b>Alternative</b> – eine weitere sinnvolle Strecke, falls es sie gibt.</li></ul>
 <p>Ist die schnellste zugleich die kürzeste, steht sie als „Schnellste &amp; kürzeste“ da. Zu jeder Option siehst du Fahrzeit, Kilometer und den Unterschied zur schnellsten – und mit <b>„Diese Strecke fahren“</b> startest du die Navigation.</p>
-${fig('s4-live.png', 'Drei Strecken zur Auswahl (Beispielwerte im Handbuch – in der App kommen sie live).', 'half')}
+${fig('s4-live.jpg', 'Drei Strecken zur Auswahl (Beispielwerte im Handbuch – in der App kommen sie live).', 'half')}
 <ul><li><b>Start:</b> „Mein Standort“ (auf Handy, Tablet und im Browser) oder ein beliebiger Favorit.</li><li><b>Live aktualisieren:</b> Bleibt das Fenster offen, lädt My Route die Werte jede Minute neu. Die Zeile „🟢 Live · aktualisiert um …“ zeigt dir, dass die Verbindung steht. Bei „🔴“ prüfe bitte dein Internet.</li></ul>
 <div class="note">Die Strecken berechnet der OpenStreetMap-Dienst OSRM; dabei werden nur Start- und Zielkoordinaten übertragen – und nur, wenn du „Optionen laden“ wählst. Google Maps kennt keine feste Strecken-Nummer: Für Kürzeste und Alternative setzt My Route deshalb einen Zwischenpunkt auf der gewünschten Strecke, damit die Navigation ihr folgt. Der angezeigte Verkehrsstand ist nicht in Echtzeit eingerechnet – dein Navi korrigiert das unterwegs.</div>
 
 <h1><span class="num">8</span>Fahrmodus &amp; Touch – für Auto, Tablet und Handy</h1>
 <p>Der <b>Fahrmodus</b> zeigt deine Routen und Lieblingsziele mit großen Tasten. Er schaltet sich auf Touchscreens automatisch ein; über <b>„Bedienung“</b> oben kannst du zwischen Auto, Touch und Maus wählen.</p>
-${fig('s6-fahrmodus.png', 'Der Fahrmodus auf dem Handy: große Tasten, ein Tipp genügt.', 'phone')}
+${fig('s6-fahrmodus.jpg', 'Der Fahrmodus auf dem Handy: große Tasten, ein Tipp genügt.', 'phone')}
 <h2>Beispiele aus dem Alltag</h2>
 <ul><li><b>Im Auto:</b> Handy oder Tablet in die Halterung, Fahrmodus öffnen, <b>vor der Abfahrt</b> die Route wählen – und los. Die Anzeige lässt sich über die Bildschirmspiegelung deines Autos darstellen, sofern es diese unterstützt.</li><li><b>Auf dem Tablet:</b> Quer gehalten sind die Tasten besonders groß – ideal als Beifahrer-Display.</li><li><b>Auf dem Handy:</b> Das Ziel antippen, Live-Optionen ansehen, Strecke wählen.</li></ul>
-${fig('s7-handy-live.png', 'Live-Optionen auf dem Handy (Beispielwerte).', 'phone')}
+${fig('s7-handy-live.jpg', 'Live-Optionen auf dem Handy (Beispielwerte).', 'phone')}
 <div class="note warn"><b>Bitte beachten:</b> Bediene dein Gerät nur im Stand. Stelle Ziel und Strecke vor der Abfahrt ein. My Route ist keine integrierte Android-Auto-/CarPlay-App; es startet deine Karten-App, die dich unterwegs führt.</div>
 
 <h1><span class="num">9</span>Optik wählen</h1>
 <p>Oben rechts findest du <b>„Optik“</b>. Du hast die Wahl zwischen der glänzenden <b>3D-Gold</b>-Optik mit Animationen, der ruhigen <b>Klar-Dunkel</b>-Optik und der hellen Optik für den Tag. Deine Wahl wird gemerkt.</p>
-${fig('s8-klar.png', 'Optik „Klar Dunkel“ – ruhig und flach.', 'half')}
-${fig('s8-hell.png', 'Optik „Hell“ – übersichtlich bei Tageslicht.', 'half')}
+${fig('s8-klar.jpg', 'Optik „Klar Dunkel“ – ruhig und flach.', 'half')}
+${fig('s8-hell.jpg', 'Optik „Hell“ – übersichtlich bei Tageslicht.', 'half')}
 
 <h1><span class="num">10</span>Kartenvorschau</h1>
 <p>Unter <b>Karte</b> siehst du, wie deine Stopps zueinander liegen – mit nummerierten Markierungen und einer animierten Linie. Die Vorschau funktioniert ohne Internet. Angezeigt wird die Luftlinie; die echte Strecke ermittelt dein Karten-Dienst.</p>
-${fig('s5-karte.png', 'Die Kartenvorschau mit Reihenfolge und Luftlinie.', 'half')}
+${fig('s5-karte.jpg', 'Die Kartenvorschau mit Reihenfolge und Luftlinie.', 'half')}
 
 <h1><span class="num">11</span>Sichern, Einlesen &amp; Datenschutz</h1>
 <p>Mit <b>„Sichern“</b> speicherst du alle Favoriten und Routen in einer Datei, mit <b>„Einlesen“</b> holst du sie auf einem anderen Gerät zurück – praktisch beim Gerätewechsel.</p>
