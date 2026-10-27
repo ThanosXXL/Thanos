@@ -26,13 +26,19 @@
   --muted: #b9a982;
   --line: rgba(233, 181, 44, 0.28);
   --radius: 18px;
+  --accent: var(--gold-2);
+  --on-accent: #2a1c03;
+  --field: #0c0a06;
+  --map-bg: #0c0905;
   --font: "Open Sans", "Segoe UI", system-ui, -apple-system, Roboto, sans-serif;
 }
 
 * { box-sizing: border-box; }
 [hidden] { display: none !important; }
 
-html, body { margin: 0; min-height: 100%; }
+html, body { margin: 0; min-height: 100%; max-width: 100%; }
+.split > *, .grid > *, .hero > * { min-width: 0; }
+.card-actions .btn, .row .btn { max-width: 100%; }
 body {
   background: var(--bg);
   color: var(--text);
@@ -226,6 +232,8 @@ input[type="text"]:focus, select:focus { outline: none; border-color: var(--gold
 input[type="checkbox"] { width: 20px; height: 20px; accent-color: var(--gold-2); }
 .row { display: flex; gap: 10px; flex-wrap: wrap; }
 .row.nowrap { flex-wrap: nowrap; }
+.row.nowrap select { min-width: 0; }
+.row.nowrap .btn { flex: none; }
 .row.center { justify-content: center; }
 .grow { flex: 1; min-width: 0; }
 .mt10 { margin-top: 10px; }
@@ -245,6 +253,8 @@ input[type="checkbox"] { width: 20px; height: 20px; accent-color: var(--gold-2);
 .map-card { padding: 18px; }
 .map-pick { display: flex; flex-direction: column; gap: 5px; font-weight: 700; color: var(--gold-1); max-width: 360px; margin-bottom: 14px; }
 #map-box svg { width: 100%; height: auto; display: block; border-radius: 14px; background: radial-gradient(80% 80% at 50% 40%, #1a140a, #070504); box-shadow: inset 0 0 0 1px var(--line), inset 0 10px 30px rgba(0, 0, 0, .7); }
+.map-label { fill: #f4ecd9; stroke: #050403; }
+.look-select { width: auto; font-size: 13px; padding: 8px 10px; cursor: pointer; }
 .route-line { stroke-dasharray: 10 8; animation: dash 1.4s linear infinite; }
 @keyframes dash { to { stroke-dashoffset: -36; } }
 .pin { animation: pop .5s cubic-bezier(.2, 1.6, .4, 1) both; transform-box: fill-box; transform-origin: center; }
@@ -278,6 +288,12 @@ input[type="checkbox"] { width: 20px; height: 20px; accent-color: var(--gold-2);
   .tabs { margin-left: 0; order: 3; width: 100%; }
   .topbar-actions { margin-left: auto; }
 }
+@media (max-width: 860px) {
+  .tabs { overflow-x: auto; -webkit-overflow-scrolling: touch; }
+  .grid { grid-template-columns: minmax(0, 1fr); }
+  .btn.go { font-size: 16px; padding: 13px 20px; }
+  .tab { padding: 10px 14px; }
+}
 @media (max-width: 480px) {
   .stats { grid-template-columns: 1fr; }
   .brand-title { font-size: 22px; }
@@ -286,6 +302,47 @@ input[type="checkbox"] { width: 20px; height: 20px; accent-color: var(--gold-2);
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { animation: none !important; transition: none !important; }
 }
+
+/* ---------- Alternative Optiken: flach & ruhig (ohne 3D) ---------- */
+:root[data-look="klar"], :root[data-look="hell"] {
+  --radius: 14px;
+  --on-accent: #1d1503;
+}
+:root[data-look="klar"] {
+  --bg: #0f1115; --panel: #181b22; --text: #eceef2; --muted: #98a0ae; --line: rgba(255, 255, 255, .13);
+  --accent: #e9b52c; --field: #0c0e12; --map-bg: #0c0e12; --gold-1: #f0c75a;
+}
+:root[data-look="hell"] {
+  --bg: #f5f1e8; --panel: #ffffff; --text: #231d12; --muted: #6b6149; --line: rgba(60, 45, 10, .16);
+  --accent: #c8932a; --on-accent: #ffffff; --field: #faf7f0; --map-bg: #fbf8f1; --gold-1: #8f610a;
+}
+[data-look="klar"] .bg-glow, [data-look="hell"] .bg-glow { animation: none; opacity: .0; }
+[data-look="klar"] .bg-glow { opacity: .35; }
+[data-look="klar"] .gold3d, [data-look="klar"] .gold3d-sm, [data-look="hell"] .gold3d, [data-look="hell"] .gold3d-sm {
+  background: none; color: var(--gold-1); -webkit-text-fill-color: var(--gold-1); filter: none; animation: none; letter-spacing: .03em;
+}
+[data-look="klar"] .topbar, [data-look="hell"] .topbar { background: var(--panel); backdrop-filter: none; box-shadow: 0 1px 0 var(--line); }
+[data-look="klar"] .brand-logo, [data-look="klar"] .hero-logo, [data-look="hell"] .brand-logo, [data-look="hell"] .hero-logo { animation: none; box-shadow: 0 0 0 1px var(--line), 0 8px 24px rgba(0, 0, 0, .18); }
+[data-look="klar"] .card, [data-look="hell"] .card { background: var(--panel); box-shadow: 0 1px 2px rgba(0, 0, 0, .15), 0 8px 24px rgba(0, 0, 0, .1); transform: none !important; }
+[data-look="klar"] .card:hover, [data-look="hell"] .card:hover { border-color: var(--accent); box-shadow: 0 1px 2px rgba(0, 0, 0, .15), 0 10px 28px rgba(0, 0, 0, .16); }
+[data-look="klar"] .card::before, [data-look="hell"] .card::before, [data-look="klar"] .btn::before, [data-look="hell"] .btn::before, [data-look="klar"] .btn::after, [data-look="hell"] .btn::after { display: none; }
+[data-look="klar"] .btn, [data-look="hell"] .btn { background: var(--accent); color: var(--on-accent); box-shadow: none; text-shadow: none; border-radius: 10px; }
+[data-look="klar"] .btn:hover:not(:disabled), [data-look="hell"] .btn:hover:not(:disabled) { filter: brightness(1.08); transform: none; }
+[data-look="klar"] .btn:active:not(:disabled), [data-look="hell"] .btn:active:not(:disabled) { transform: scale(.98); box-shadow: none; }
+[data-look="klar"] .btn.ghost, [data-look="hell"] .btn.ghost { background: transparent; color: var(--text); box-shadow: inset 0 0 0 1px var(--line); }
+[data-look="klar"] .btn.danger, [data-look="hell"] .btn.danger { color: #d9493a; }
+[data-look="klar"] .tab.active, [data-look="hell"] .tab.active { background: var(--accent); color: var(--on-accent); box-shadow: none; }
+[data-look="klar"] input[type="text"], [data-look="klar"] select, [data-look="hell"] input[type="text"], [data-look="hell"] select { background: var(--field); color: var(--text); box-shadow: none; }
+[data-look="klar"] .card-icon, [data-look="hell"] .card-icon, [data-look="klar"] .stop-num, [data-look="hell"] .stop-num { background: var(--accent); box-shadow: none; color: var(--on-accent); }
+[data-look="klar"] .stat-num, [data-look="hell"] .stat-num { text-shadow: none; color: var(--gold-1); }
+[data-look="klar"] .stop, [data-look="hell"] .stop { background: var(--field); }
+[data-look="klar"] .hero-sub, [data-look="hell"] .hero-sub, [data-look="klar"] .info p, [data-look="hell"] .info p, [data-look="klar"] .info li, [data-look="hell"] .info li { color: var(--text); }
+[data-look="klar"] .signature, [data-look="hell"] .signature { color: var(--muted) !important; }
+[data-look="klar"] .toast, [data-look="hell"] .toast { background: var(--accent); color: var(--on-accent); box-shadow: 0 8px 24px rgba(0, 0, 0, .3); }
+[data-look="klar"] #map-box svg, [data-look="hell"] #map-box svg { background: var(--map-bg); box-shadow: inset 0 0 0 1px var(--line); }
+[data-look="klar"] .map-label { fill: var(--text); stroke: var(--bg); }
+[data-look="hell"] .map-label { fill: var(--text); stroke: var(--bg); }
+[data-look="hell"] .mini { background: rgba(200, 147, 42, .12); }
 
 </style>
 </head>
@@ -308,6 +365,11 @@ input[type="checkbox"] { width: 20px; height: 20px; accent-color: var(--gold-2);
       <button class="tab" data-view="info">Info</button>
     </nav>
     <div class="topbar-actions">
+      <select class="look-select" id="look-select" aria-label="Optik wählen" title="Optik wählen">
+        <option value="gold3d">Optik: 3D Gold</option>
+        <option value="klar">Optik: Klar Dunkel</option>
+        <option value="hell">Optik: Hell</option>
+      </select>
       <button class="btn small ghost" id="btn-export" title="Favoriten und Routen als Datei sichern">Sichern</button>
       <button class="btn small ghost" id="btn-import" title="Gesicherte Datei wieder einlesen">Einlesen</button>
       <input type="file" id="file-import" accept="application/json,.json" hidden>
@@ -466,7 +528,8 @@ input[type="checkbox"] { width: 20px; height: 20px; accent-color: var(--gold-2);
   const ICONS = ['📍', '🏠', '🏢', '☕', '🍽️', '🛒', '⛽', '🏖️', '🏔️', '🎭', '🏥', '🎓', '❤️', '⭐'];
   const MODES = { driving: 'Auto', walking: 'zu Fuß', bicycling: 'Fahrrad', transit: 'Bus & Bahn' };
 
-  let state = { favorites: [], routes: [] };
+  const LOOKS = ['gold3d', 'klar', 'hell'];
+  let state = { favorites: [], routes: [], look: 'gold3d' };
   const ui = {
     view: 'start',
     editingFav: null,
@@ -475,6 +538,8 @@ input[type="checkbox"] { width: 20px; height: 20px; accent-color: var(--gold-2);
   };
 
   // ---------- Speicher: Desktop (IPC) oder Browser (localStorage) ----------
+  const isAndroid = /Android/i.test(navigator.userAgent || '');
+  const launcher = window.Capacitor && window.Capacitor.Plugins && window.Capacitor.Plugins.AppLauncher;
   const isDesktop = typeof window.myRouteAPI === 'object' && window.myRouteAPI !== null;
 
   const webStorage = {
@@ -646,9 +711,22 @@ input[type="checkbox"] { width: 20px; height: 20px; accent-color: var(--gold-2);
   function openLink(url) {
     if (isDesktop) {
       window.myRouteAPI.openExternal(url).catch(() => toast('Der Link konnte nicht geöffnet werden.'));
+    } else if (launcher) {
+      // Android-App (Capacitor): Link direkt an die installierte Karten-App übergeben
+      launcher.openUrl({ url }).catch(() => toast('Der Link konnte nicht geöffnet werden.'));
     } else {
       window.open(url, '_blank', 'noopener');
     }
+  }
+
+  // Android: direkte Navigation (Google Maps App) zum ersten bzw. einzigen Ziel
+  function androidNavLink(route) {
+    const stops = routeStops(route);
+    if (!stops.length) return null;
+    const target = stops[0];
+    if (!launcher) return 'https://www.google.com/maps/dir/?' + new URLSearchParams({ api: '1', destination: placeOf(target), travelmode: route.mode || 'driving' }).toString();
+    const mode = { walking: 'w', bicycling: 'b', driving: 'd' }[route.mode];
+    return 'google.navigation:q=' + encodeURIComponent(placeOf(target)) + (mode ? '&mode=' + mode : '');
   }
 
   function markDriven(route) {
@@ -706,12 +784,18 @@ input[type="checkbox"] { width: 20px; height: 20px; accent-color: var(--gold-2);
 
   // ---------- Rendering ----------
   function render() {
+    applyLook();
     document.querySelectorAll('.tab').forEach((t) => t.classList.toggle('active', t.dataset.view === ui.view));
     document.querySelectorAll('.view').forEach((v) => { v.hidden = v.id !== 'view-' + ui.view; });
     renderStart();
     renderFavorites();
     renderRoutes();
     renderMap();
+  }
+
+  function applyLook() {
+    document.documentElement.dataset.look = LOOKS.includes(state.look) ? state.look : 'gold3d';
+    $('look-select').value = document.documentElement.dataset.look;
   }
 
   function greeting() {
@@ -778,7 +862,7 @@ input[type="checkbox"] { width: 20px; height: 20px; accent-color: var(--gold-2);
       actions.append(h('button', { class: 'btn small', onclick: () => driveRoute(route, url) }, 'Teil ' + (i + 2)))
     );
     const second = h('div', { class: 'card-actions' },
-      h('button', { class: 'btn small ghost', disabled: !apple, onclick: () => driveRoute(route, apple) }, 'Apple Karten'),
+      isAndroid ? h('button', { class: 'btn small ghost', disabled: !stops.length, title: 'Startet die Navigation zum ersten Stopp in der Google-Maps-App', onclick: () => driveRoute(route, androidNavLink(route)) }, 'Navi-App (1. Stopp)') : h('button', { class: 'btn small ghost', disabled: !apple, onclick: () => driveRoute(route, apple) }, 'Apple Karten'),
       h('button', { class: 'btn small ghost', disabled: !osm, title: osm ? '' : 'Dafür brauchen alle Stopps Koordinaten', onclick: () => driveRoute(route, osm) }, 'OpenStreetMap'),
       h('button', { class: 'btn small ghost', disabled: !links.length, onclick: () => copyText(links.join('\n')) }, 'Link kopieren'),
       h('button', { class: 'btn small ghost', onclick: () => { ui.mapRouteId = route.id; ui.view = 'map'; render(); } }, 'Karte'),
@@ -1009,7 +1093,7 @@ input[type="checkbox"] { width: 20px; height: 20px; accent-color: var(--gold-2);
         s('circle', { cx: p.x, cy: p.y, r: '17', fill: 'url(#pinG)', stroke: '#4a3207', 'stroke-width': '1.5' }),
         s('ellipse', { cx: p.x - 4, cy: p.y - 7, rx: '8', ry: '4.5', fill: 'rgba(255,255,255,.55)' }),
         s('text', { x: p.x, y: p.y + 5, 'text-anchor': 'middle', 'font-size': '14', 'font-weight': '800', fill: '#2a1c03' }, String(i + 1)),
-        s('text', { x: p.x, y: p.y - 26, 'text-anchor': 'middle', 'font-size': '14', 'font-weight': '700', fill: '#f4ecd9', stroke: '#050403', 'stroke-width': '3', 'paint-order': 'stroke' }, pts[i].name)
+        s('text', { x: p.x, y: p.y - 26, 'text-anchor': 'middle', 'font-size': '14', 'font-weight': '700', class: 'map-label', 'stroke-width': '3', 'paint-order': 'stroke' }, pts[i].name)
       );
       svg.append(g);
     });
@@ -1085,7 +1169,7 @@ input[type="checkbox"] { width: 20px; height: 20px; accent-color: var(--gold-2);
     });
 
     const locateBtn = $('fav-locate');
-    if (isDesktop || !navigator.geolocation) locateBtn.hidden = true;
+    if (isDesktop || launcher || !navigator.geolocation) locateBtn.hidden = true;
     locateBtn.addEventListener('click', () => {
       navigator.geolocation.getCurrentPosition(
         (pos) => { $('fav-coords').value = `${pos.coords.latitude.toFixed(5)}, ${pos.coords.longitude.toFixed(5)}`; toast('Dein Standort ist eingetragen.'); },
@@ -1131,6 +1215,7 @@ input[type="checkbox"] { width: 20px; height: 20px; accent-color: var(--gold-2);
     });
     $('rt-cancel').addEventListener('click', resetRouteForm);
 
+    $('look-select').addEventListener('change', (e) => { state.look = e.target.value; persist(); render(); });
     $('map-route').addEventListener('change', (e) => { ui.mapRouteId = e.target.value; renderMap(); });
 
     $('btn-export').addEventListener('click', async () => {
@@ -1198,7 +1283,7 @@ input[type="checkbox"] { width: 20px; height: 20px; accent-color: var(--gold-2);
       drives: Number.isFinite(r.drives) ? Math.max(0, Math.floor(r.drives)) : 0, lastDriven: typeof r.lastDriven === 'string' ? r.lastDriven.slice(0, 40) : null,
       stops: r.stops.filter((id) => typeof id === 'string' && ids.has(id)).slice(0, MAX_STOPS)
     }));
-    return { favorites, routes };
+    return { favorites, routes, look: LOOKS.includes(data.look) ? data.look : 'gold3d' };
   }
 
   async function init() {
@@ -1206,7 +1291,7 @@ input[type="checkbox"] { width: 20px; height: 20px; accent-color: var(--gold-2);
       const loaded = await api.loadData();
       if (loaded && Array.isArray(loaded.favorites) && Array.isArray(loaded.routes)) state = sanitize(loaded);
     } catch (err) {
-      state = { favorites: [], routes: [] };
+      state = { favorites: [], routes: [], look: 'gold3d' };
     }
     bind();
     render();

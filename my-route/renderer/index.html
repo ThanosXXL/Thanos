@@ -29,6 +29,11 @@
       <button class="tab" data-view="info">Info</button>
     </nav>
     <div class="topbar-actions">
+      <select class="look-select" id="look-select" aria-label="Optik wählen" title="Optik wählen">
+        <option value="gold3d">Optik: 3D Gold</option>
+        <option value="klar">Optik: Klar Dunkel</option>
+        <option value="hell">Optik: Hell</option>
+      </select>
       <button class="btn small ghost" id="btn-export" title="Favoriten und Routen als Datei sichern">Sichern</button>
       <button class="btn small ghost" id="btn-import" title="Gesicherte Datei wieder einlesen">Einlesen</button>
       <input type="file" id="file-import" accept="application/json,.json" hidden>

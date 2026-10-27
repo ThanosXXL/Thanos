@@ -1,0 +1,9 @@
+{
+  "appId": "de.itworld.myroute",
+  "appName": "My Route",
+  "webDir": "android-web",
+  "backgroundColor": "#050403",
+  "android": {
+    "allowMixedContent": false
+  }
+}

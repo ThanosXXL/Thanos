@@ -70,5 +70,5 @@ jobs:
         run: |
           gh release create "${{ github.ref_name }}" \
             --title "My Route ${{ github.ref_name }}" \
-            --notes "Automatisch veröffentlichter Build von My Route für Windows, macOS (Intel + Apple Silicon) und Linux." \
-            release-assets/*
+            --notes "Automatisch veröffentlichter Build von My Route." 2>/dev/null || true
+          gh release upload "${{ github.ref_name }}" release-assets/* --clobber

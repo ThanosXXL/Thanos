@@ -9,7 +9,8 @@
   const ICONS = ['📍', '🏠', '🏢', '☕', '🍽️', '🛒', '⛽', '🏖️', '🏔️', '🎭', '🏥', '🎓', '❤️', '⭐'];
   const MODES = { driving: 'Auto', walking: 'zu Fuß', bicycling: 'Fahrrad', transit: 'Bus & Bahn' };
 
-  let state = { favorites: [], routes: [] };
+  const LOOKS = ['gold3d', 'klar', 'hell'];
+  let state = { favorites: [], routes: [], look: 'gold3d' };
   const ui = {
     view: 'start',
     editingFav: null,
@@ -18,6 +19,8 @@
   };
 
   // ---------- Speicher: Desktop (IPC) oder Browser (localStorage) ----------
+  const isAndroid = /Android/i.test(navigator.userAgent || '');
+  const launcher = window.Capacitor && window.Capacitor.Plugins && window.Capacitor.Plugins.AppLauncher;
   const isDesktop = typeof window.myRouteAPI === 'object' && window.myRouteAPI !== null;
 
   const webStorage = {
@@ -189,9 +192,22 @@
   function openLink(url) {
     if (isDesktop) {
       window.myRouteAPI.openExternal(url).catch(() => toast('Der Link konnte nicht geöffnet werden.'));
+    } else if (launcher) {
+      // Android-App (Capacitor): Link direkt an die installierte Karten-App übergeben
+      launcher.openUrl({ url }).catch(() => toast('Der Link konnte nicht geöffnet werden.'));
     } else {
       window.open(url, '_blank', 'noopener');
     }
+  }
+
+  // Android: direkte Navigation (Google Maps App) zum ersten bzw. einzigen Ziel
+  function androidNavLink(route) {
+    const stops = routeStops(route);
+    if (!stops.length) return null;
+    const target = stops[0];
+    if (!launcher) return 'https://www.google.com/maps/dir/?' + new URLSearchParams({ api: '1', destination: placeOf(target), travelmode: route.mode || 'driving' }).toString();
+    const mode = { walking: 'w', bicycling: 'b', driving: 'd' }[route.mode];
+    return 'google.navigation:q=' + encodeURIComponent(placeOf(target)) + (mode ? '&mode=' + mode : '');
   }
 
   function markDriven(route) {
@@ -249,12 +265,18 @@
 
   // ---------- Rendering ----------
   function render() {
+    applyLook();
     document.querySelectorAll('.tab').forEach((t) => t.classList.toggle('active', t.dataset.view === ui.view));
     document.querySelectorAll('.view').forEach((v) => { v.hidden = v.id !== 'view-' + ui.view; });
     renderStart();
     renderFavorites();
     renderRoutes();
     renderMap();
+  }
+
+  function applyLook() {
+    document.documentElement.dataset.look = LOOKS.includes(state.look) ? state.look : 'gold3d';
+    $('look-select').value = document.documentElement.dataset.look;
   }
 
   function greeting() {
@@ -321,7 +343,7 @@
       actions.append(h('button', { class: 'btn small', onclick: () => driveRoute(route, url) }, 'Teil ' + (i + 2)))
     );
     const second = h('div', { class: 'card-actions' },
-      h('button', { class: 'btn small ghost', disabled: !apple, onclick: () => driveRoute(route, apple) }, 'Apple Karten'),
+      isAndroid ? h('button', { class: 'btn small ghost', disabled: !stops.length, title: 'Startet die Navigation zum ersten Stopp in der Google-Maps-App', onclick: () => driveRoute(route, androidNavLink(route)) }, 'Navi-App (1. Stopp)') : h('button', { class: 'btn small ghost', disabled: !apple, onclick: () => driveRoute(route, apple) }, 'Apple Karten'),
       h('button', { class: 'btn small ghost', disabled: !osm, title: osm ? '' : 'Dafür brauchen alle Stopps Koordinaten', onclick: () => driveRoute(route, osm) }, 'OpenStreetMap'),
       h('button', { class: 'btn small ghost', disabled: !links.length, onclick: () => copyText(links.join('\n')) }, 'Link kopieren'),
       h('button', { class: 'btn small ghost', onclick: () => { ui.mapRouteId = route.id; ui.view = 'map'; render(); } }, 'Karte'),
@@ -552,7 +574,7 @@
         s('circle', { cx: p.x, cy: p.y, r: '17', fill: 'url(#pinG)', stroke: '#4a3207', 'stroke-width': '1.5' }),
         s('ellipse', { cx: p.x - 4, cy: p.y - 7, rx: '8', ry: '4.5', fill: 'rgba(255,255,255,.55)' }),
         s('text', { x: p.x, y: p.y + 5, 'text-anchor': 'middle', 'font-size': '14', 'font-weight': '800', fill: '#2a1c03' }, String(i + 1)),
-        s('text', { x: p.x, y: p.y - 26, 'text-anchor': 'middle', 'font-size': '14', 'font-weight': '700', fill: '#f4ecd9', stroke: '#050403', 'stroke-width': '3', 'paint-order': 'stroke' }, pts[i].name)
+        s('text', { x: p.x, y: p.y - 26, 'text-anchor': 'middle', 'font-size': '14', 'font-weight': '700', class: 'map-label', 'stroke-width': '3', 'paint-order': 'stroke' }, pts[i].name)
       );
       svg.append(g);
     });
@@ -628,7 +650,7 @@
     });
 
     const locateBtn = $('fav-locate');
-    if (isDesktop || !navigator.geolocation) locateBtn.hidden = true;
+    if (isDesktop || launcher || !navigator.geolocation) locateBtn.hidden = true;
     locateBtn.addEventListener('click', () => {
       navigator.geolocation.getCurrentPosition(
         (pos) => { $('fav-coords').value = `${pos.coords.latitude.toFixed(5)}, ${pos.coords.longitude.toFixed(5)}`; toast('Dein Standort ist eingetragen.'); },
@@ -674,6 +696,7 @@
     });
     $('rt-cancel').addEventListener('click', resetRouteForm);
 
+    $('look-select').addEventListener('change', (e) => { state.look = e.target.value; persist(); render(); });
     $('map-route').addEventListener('change', (e) => { ui.mapRouteId = e.target.value; renderMap(); });
 
     $('btn-export').addEventListener('click', async () => {
@@ -741,7 +764,7 @@
       drives: Number.isFinite(r.drives) ? Math.max(0, Math.floor(r.drives)) : 0, lastDriven: typeof r.lastDriven === 'string' ? r.lastDriven.slice(0, 40) : null,
       stops: r.stops.filter((id) => typeof id === 'string' && ids.has(id)).slice(0, MAX_STOPS)
     }));
-    return { favorites, routes };
+    return { favorites, routes, look: LOOKS.includes(data.look) ? data.look : 'gold3d' };
   }
 
   async function init() {
@@ -749,7 +772,7 @@
       const loaded = await api.loadData();
       if (loaded && Array.isArray(loaded.favorites) && Array.isArray(loaded.routes)) state = sanitize(loaded);
     } catch (err) {
-      state = { favorites: [], routes: [] };
+      state = { favorites: [], routes: [], look: 'gold3d' };
     }
     bind();
     render();

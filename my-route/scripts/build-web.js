@@ -51,6 +51,7 @@ function buildDownloadPage(appHtml) {
     win: { label: 'Windows', file: `My-Route-Setup-${v}.exe`, note: 'Installer (.exe) für Windows 10/11' },
     macArm: { label: 'macOS · Apple Silicon', file: `My-Route-${v}-arm64.dmg`, note: 'für M1/M2/M3/M4-Macs (.dmg)' },
     macIntel: { label: 'macOS · Intel', file: `My-Route-${v}-x64.dmg`, note: 'für ältere Intel-Macs (.dmg)' },
+    android: { label: 'Android', file: `My-Route-${v}-android.apk`, note: 'APK – Installation aus „Unbekannten Quellen“ erlauben' },
     linux: { label: 'Linux', file: `My-Route-${v}.AppImage`, note: 'AppImage – ausführbar machen und starten' }
   };
   const cfg = JSON.stringify({ base: RELEASE_BASE, files, releases: RELEASES_PAGE, version: v }).replace(/</g, '\\u003c');
@@ -136,17 +137,17 @@ a.btn { text-decoration: none; display: inline-block; }
   htmlBtn.className = 'btn small'; htmlBtn.textContent = 'HTML herunterladen'; htmlBtn.addEventListener('click', saveApp);
   grid.appendChild(card('Alle Geräte · Browser-Vollversion', 'Eine Datei, Doppelklick genügt – auch für Android & iOS.', htmlBtn));
 
-  [['win', 'win'], ['macArm', 'mac'], ['macIntel', 'mac'], ['linux', 'linux']].forEach(function (pair) {
+  [['win', 'win'], ['macArm', 'mac'], ['macIntel', 'mac'], ['linux', 'linux'], ['android', 'android']].forEach(function (pair) {
     var f = CFG.files[pair[0]];
     grid.appendChild(card(f.label, f.note, link(CFG.base + f.file, 'Installer laden', 'btn small')));
   });
 
-  var desktop = { win: 'win', linux: 'linux' }[plat];
+  var desktop = { win: 'win', linux: 'linux', android: 'android' }[plat];
   if (desktop) {
     var f = CFG.files[desktop];
     main.textContent = 'Für ' + names[plat] + ' herunterladen';
     main.addEventListener('click', function () { window.location.href = CFG.base + f.file; });
-    detect.textContent = 'Wir haben ' + names[plat] + ' erkannt. Lieber ohne Installation? Unten findest du die Browser-Vollversion.';
+    detect.textContent = 'Wir haben ' + names[plat] + ' erkannt. ' + (plat === 'android' ? 'Die APK nach dem Laden öffnen und die Installation bestätigen – oder ohne Installation die Browser-Vollversion nutzen.' : 'Lieber ohne Installation? Unten findest du die Browser-Vollversion.');
   } else if (plat === 'mac') {
     main.textContent = 'Für macOS herunterladen';
     main.addEventListener('click', function () { window.location.href = CFG.base + CFG.files.macArm.file; });
@@ -176,4 +177,6 @@ fs.mkdirSync(outDir, { recursive: true });
 const app = buildApp();
 fs.writeFileSync(path.join(outDir, 'My-Route-Vollversion.html'), app);
 fs.writeFileSync(path.join(outDir, 'My-Route-Download.html'), buildDownloadPage(app));
+fs.mkdirSync(path.join(root, 'android-web'), { recursive: true });
+fs.writeFileSync(path.join(root, 'android-web', 'index.html'), app);
 console.log('Fertig:', fs.readdirSync(outDir).map((f) => f + ' (' + Math.round(fs.statSync(path.join(outDir, f)).size / 1024) + ' KB)').join(', '));
