@@ -1,7 +1,6 @@
 (function () {
   'use strict';
 
-  const MAX_FAVORITES = 200;
   const MAX_ROUTES = 100;
   const MAX_STOPS = 40;
   const MAX_WAYPOINTS_PER_LINK = 9; // Google Maps: höchstens 9 Zwischenstopps pro Link
@@ -18,7 +17,8 @@
     editingFav: null,
     draft: newDraft(),
     mapRouteId: null,
-    regionFilter: 'alle'
+    regionFilter: 'alle',
+    favFilter: 'alle'
   };
 
   // ---------- Speicher: Desktop (IPC) oder Browser (localStorage) ----------
@@ -99,6 +99,20 @@
     toastTimer = setTimeout(() => t.classList.remove('show'), 2800);
   }
 
+  const LISTS = { alle: 'Alle', 1: 'Favoritenliste 1', 2: 'Favoritenliste 2' };
+
+  function listOf(f) {
+    return f.liste === 2 ? 2 : 1;
+  }
+
+  // Auswahlfelder: Favoriten nach Liste gruppiert (leere Gruppen entfallen)
+  function favOptions(withIcons = true) {
+    return [1, 2]
+      .map((n) => ({ n, items: state.favorites.filter((f) => listOf(f) === n) }))
+      .filter((g) => g.items.length)
+      .map((g) => h('optgroup', { label: LISTS[g.n] }, ...g.items.map((f) => h('option', { value: f.id }, withIcons ? `${f.icon || '📍'} ${f.name}` : f.name))));
+  }
+
   function regionOf(route) {
     return route.region === 'ausland' ? 'ausland' : 'inland';
   }
@@ -120,6 +134,15 @@
         })
       );
     });
+  }
+
+  function renderFavChips() {
+    $('filter-favs').replaceChildren(
+      ...Object.keys(LISTS).map((key) => {
+        const n = key === 'alle' ? state.favorites.length : state.favorites.filter((f) => String(listOf(f)) === key).length;
+        return h('button', { type: 'button', class: 'chip' + (ui.favFilter === key ? ' active' : ''), 'aria-pressed': ui.favFilter === key ? 'true' : 'false', onclick: () => { ui.favFilter = key; render(); } }, `${LISTS[key]} (${n})`);
+      })
+    );
   }
 
   function favById(id) {
@@ -296,6 +319,7 @@
     document.querySelectorAll('.tab').forEach((t) => t.classList.toggle('active', t.dataset.view === ui.view));
     document.querySelectorAll('.view').forEach((v) => { v.hidden = v.id !== 'view-' + ui.view; });
     renderChips();
+    renderFavChips();
     renderStart();
     renderFavorites();
     renderRoutes();
@@ -409,12 +433,17 @@
     if (!sel.options.length) ICONS.forEach((ic) => sel.append(h('option', { value: ic }, ic)));
 
     const box = $('fav-list');
+    const shownFavs = state.favorites.filter((f) => ui.favFilter === 'alle' || String(listOf(f)) === ui.favFilter);
+    if (state.favorites.length && !shownFavs.length) {
+      box.replaceChildren(emptyCard('In dieser Liste ist noch nichts. Speichere links einen Ort oder verschiebe einen aus der anderen Liste.', []));
+      return;
+    }
     if (!state.favorites.length) {
       box.replaceChildren(emptyCard('Hier sammelst du die Orte, die dir wichtig sind. Trage links deinen ersten Lieblingsort ein.', [h('button', { class: 'btn ghost', onclick: loadDemo }, 'Beispiele laden')]));
       return;
     }
     box.replaceChildren(
-      ...state.favorites.map((f) => {
+      ...shownFavs.map((f) => {
         const used = state.routes.filter((r) => r.stops.includes(f.id)).length;
         return h('article', { class: 'card tilt' },
           h('div', { class: 'card-head' },
@@ -426,11 +455,13 @@
           ),
           f.note ? h('div', { class: 'card-meta mt10', text: '„' + f.note + '“' }) : null,
           h('div', { class: 'mt10' },
+            h('span', { class: 'badge', text: 'Liste ' + listOf(f) }),
             hasCoords(f) ? h('span', { class: 'badge', text: 'Koordinaten' }) : null,
             used ? h('span', { class: 'badge', text: used + (used === 1 ? ' Route' : ' Routen') }) : null
           ),
           h('div', { class: 'card-actions' },
             h('button', { class: 'btn small', onclick: () => openLink('https://www.google.com/maps/dir/?' + new URLSearchParams({ api: '1', destination: placeOf(f) })) }, 'Hierhin navigieren'),
+            h('button', { class: 'btn small ghost', title: 'In die andere Favoritenliste verschieben', onclick: () => { f.liste = listOf(f) === 1 ? 2 : 1; persist(); render(); toast('Verschoben in Favoritenliste ' + f.liste + '.'); } }, listOf(f) === 1 ? '→ Liste 2' : '→ Liste 1'),
             h('button', { class: 'btn small ghost', onclick: () => editFav(f) }, 'Bearbeiten'),
             h('button', { class: 'btn small ghost danger', onclick: () => deleteFav(f) }, 'Löschen')
           )
@@ -446,6 +477,7 @@
     $('fav-coords').value = hasCoords(f) ? `${f.lat}, ${f.lon}` : '';
     $('fav-note').value = f.note || '';
     $('fav-icon').value = f.icon || '📍';
+    $('fav-list-sel').value = String(listOf(f));
     $('fav-form-title').textContent = 'Lieblingsort bearbeiten';
     $('fav-cancel').hidden = false;
     $('fav-name').focus();
@@ -454,6 +486,7 @@
   function resetFavForm() {
     ui.editingFav = null;
     $('fav-form').reset();
+    $('fav-list-sel').value = ui.favFilter === '2' ? '2' : '1';
     $('fav-form-title').textContent = 'Neuen Lieblingsort speichern';
     $('fav-cancel').hidden = true;
   }
@@ -482,7 +515,7 @@
 
     const pick = $('rt-pick');
     const prev = pick.value;
-    pick.replaceChildren(...state.favorites.map((f) => h('option', { value: f.id }, `${f.icon || '📍'} ${f.name}`)));
+    pick.replaceChildren(...favOptions());
     if (prev && favById(prev)) pick.value = prev;
     $('rt-add').disabled = !state.favorites.length || d.stops.length >= MAX_STOPS;
     $('rt-opt').disabled = !optimizeIds(d.stops);
@@ -649,7 +682,7 @@
         ? state.favorites.map((f) =>
             h('button', { class: 'card drive-fav', onclick: () => openLive(f.id) },
               h('span', { class: 'card-icon', text: f.icon || '📍' }),
-              h('span', { class: 'grow' }, h('span', { class: 'card-title', text: f.name }), h('span', { class: 'card-meta', text: hasCoords(f) ? 'Live-Optionen' : 'Ohne Koordinaten' }))
+              h('span', { class: 'grow' }, h('span', { class: 'card-title', text: f.name }), h('span', { class: 'card-meta', text: (hasCoords(f) ? 'Live-Optionen' : 'Ohne Koordinaten') + ' · Liste ' + listOf(f) }))
             )
           )
         : [emptyCard('Sobald du Favoriten gespeichert hast, kannst du sie hier mit einem Tipp ansteuern.', [])])
@@ -665,7 +698,7 @@
       const prev = keep || sel.value;
       sel.replaceChildren(
         ...(withHere ? [h('option', { value: 'here' }, '📡 Mein Standort')] : []),
-        ...state.favorites.map((f) => h('option', { value: f.id }, `${f.icon || '📍'} ${f.name}`))
+        ...favOptions()
       );
       if (prev && [...sel.options].some((o) => o.value === prev)) sel.value = prev;
     };
@@ -794,7 +827,9 @@
       ['Stephansdom Wien', 'Stephansplatz 3, 1010 Wien', 48.2082, 16.3738, '🎭', 'Ausland-Beispiel'],
       ['Schloss Schönbrunn', 'Schönbrunner Schloßstraße 47, 1130 Wien', 48.1845, 16.3122, '⭐', '']
     ].map(([name, address, lat, lon, icon, note]) => ({ id: uid(), name, address, lat, lon, icon, note }));
-    state.favorites.push(...demo.slice(0, Math.max(0, MAX_FAVORITES - state.favorites.length)));
+    demo[5].liste = 2;
+    demo[6].liste = 2;
+    state.favorites.push(...demo);
     state.routes.push({
       id: uid(), name: 'Berlin – Sonntagstour', mode: 'driving', region: 'inland', land: '', startFromHere: false, starred: true, drives: 0, lastDriven: null,
       stops: [demo[0], demo[1], demo[2], demo[3], demo[4]].map((f) => f.id)
@@ -819,14 +854,13 @@
       const coordText = $('fav-coords').value.trim();
       const coords = coordText ? parseCoords(coordText) : null;
       if (coordText && !coords) { toast('Die Koordinaten sehen nicht richtig aus – Beispiel: 52.5163, 13.3777'); return; }
-      const rec = { name, address: $('fav-address').value.trim(), note: $('fav-note').value.trim(), icon: $('fav-icon').value || '📍' };
+      const rec = { name, address: $('fav-address').value.trim(), note: $('fav-note').value.trim(), icon: $('fav-icon').value || '📍', liste: $('fav-list-sel').value === '2' ? 2 : 1 };
       if (coords) { rec.lat = coords.lat; rec.lon = coords.lon; }
       const existing = ui.editingFav && favById(ui.editingFav);
       if (existing) {
         delete existing.lat; delete existing.lon;
         Object.assign(existing, rec);
       } else {
-        if (state.favorites.length >= MAX_FAVORITES) { toast('Das sind schon ganz schön viele Favoriten – bitte räume erst etwas auf.'); return; }
         state.favorites.push({ id: uid(), ...rec });
       }
       persist();
@@ -941,7 +975,7 @@
     $('file-import').addEventListener('change', async (e) => {
       const file = e.target.files[0];
       e.target.value = '';
-      if (!file || file.size > 5 * 1024 * 1024) return;
+      if (!file || file.size > 50 * 1024 * 1024) return;
       try { adopt(JSON.parse(await file.text())); } catch (err) { toast('Das ist keine gültige My-Route-Sicherung.'); }
     });
 
@@ -970,8 +1004,8 @@
   // Übernimmt nur bekannte Felder mit geprüften Typen (Schutz vor manipulierten Dateien).
   function sanitize(data) {
     const str = (v, n) => (typeof v === 'string' ? v.slice(0, n) : '');
-    const favorites = data.favorites.slice(0, MAX_FAVORITES).filter((f) => f && typeof f.id === 'string' && typeof f.name === 'string').map((f) => {
-      const out = { id: f.id.slice(0, 40), name: str(f.name, 80), address: str(f.address, 200), note: str(f.note, 160), icon: ICONS.includes(f.icon) ? f.icon : '📍' };
+    const favorites = data.favorites.filter((f) => f && typeof f.id === 'string' && typeof f.name === 'string').map((f) => {
+      const out = { id: f.id.slice(0, 40), name: str(f.name, 80), address: str(f.address, 200), note: str(f.note, 160), icon: ICONS.includes(f.icon) ? f.icon : '📍', liste: f.liste === 2 ? 2 : 1 };
       if (Number.isFinite(f.lat) && Number.isFinite(f.lon) && Math.abs(f.lat) <= 90 && Math.abs(f.lon) <= 180) { out.lat = f.lat; out.lon = f.lon; }
       return out;
     });

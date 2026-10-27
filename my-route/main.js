@@ -5,7 +5,7 @@ const fs = require('fs');
 const dataFilePath = path.join(app.getPath('userData'), 'my-route-data.json');
 
 // Obergrenze gegen eine fehlerhafte Payload, die die Datenablage unbegrenzt wachsen lässt.
-const MAX_PAYLOAD_BYTES = 5 * 1024 * 1024; // 5 MB
+const MAX_PAYLOAD_BYTES = 50 * 1024 * 1024; // 50 MB – Favoriten sind praktisch unbegrenzt
 
 // Nur diese Karten-Dienste dürfen über „Route fahren“ im Systembrowser geöffnet werden.
 const ALLOWED_LINK_HOSTS = new Set([
