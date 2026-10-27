@@ -3,3 +3,5 @@ dist/
 android/
 android-web/
 assets/
+web/demo/*.mp4
+web/demo/*.jpg

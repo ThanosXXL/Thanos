@@ -10,8 +10,14 @@ const css = read('renderer/style.css').toString('utf-8')
   .replace('url(assets/fonts/OpenSans-Regular.ttf)', `url(${font('OpenSans-Regular.ttf')})`)
   .replace('url(assets/fonts/OpenSans-Bold.ttf)', `url(${font('OpenSans-Bold.ttf')})`);
 const videos = JSON.stringify({
-  gold3d: { src: 'demo/My-Route-Demo-3D-Gold.mp4', poster: 'demo/poster-3d-gold.jpg', file: 'My-Route-Demo-3D-Gold.mp4', label: '3D Gold' },
-  hell: { src: 'demo/My-Route-Demo-Hell.mp4', poster: 'demo/poster-hell.jpg', file: 'My-Route-Demo-Hell.mp4', label: 'Hell' }
+  voll: {
+    gold3d: { src: 'demo/My-Route-Demo-3D-Gold.mp4', poster: 'demo/poster-3d-gold.jpg', file: 'My-Route-Demo-3D-Gold.mp4' },
+    hell: { src: 'demo/My-Route-Demo-Hell.mp4', poster: 'demo/poster-hell.jpg', file: 'My-Route-Demo-Hell.mp4' }
+  },
+  kurz: {
+    gold3d: { src: 'demo/My-Route-Demo-Kurz-3D-Gold.mp4', poster: 'demo/poster-kurz-3d-gold.jpg', file: 'My-Route-Demo-Kurz-3D-Gold.mp4' },
+    hell: { src: 'demo/My-Route-Demo-Kurz-Hell.mp4', poster: 'demo/poster-kurz-hell.jpg', file: 'My-Route-Demo-Kurz-Hell.mp4' }
+  }
 });
 const html = `<!DOCTYPE html>
 <html lang="de"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1">
@@ -34,7 +40,8 @@ a.btn{text-decoration:none;display:inline-block}
 <body><div class="bg-glow" aria-hidden="true"></div>
 <main class="demo-wrap">
   <div class="brand-row"><img src="${logo}" alt="IT-WORLD Logo"><div><h1 class="gold3d">MY ROUTE</h1><div class="brand-sub" style="font-size:12px;letter-spacing:.4em;color:var(--muted)">IT SOLUTIONS</div></div></div>
-  <p class="section-sub">Das Demovideo – deine Lieblingswege, sicher aufgehoben. Wähle deine Optik:</p>
+  <p class="section-sub">Das Demovideo – deine Lieblingswege, sicher aufgehoben. Wähle Länge und Optik:</p>
+  <div class="optik" id="laenge"></div>
   <div class="optik" id="optik"></div>
   <div class="player"><video id="vid" controls playsinline preload="metadata"></video></div>
   <div class="dl-row"><a class="btn go" id="dl" download>Video herunterladen (MP4, Full HD)</a></div>
@@ -43,23 +50,33 @@ a.btn{text-decoration:none;display:inline-block}
 <script>
 (function () {
   var V = ${videos};
-  var vid = document.getElementById('vid'), dl = document.getElementById('dl'), box = document.getElementById('optik');
-  function pick(key) {
-    var v = V[key];
-    var t = vid.currentTime || 0, wasPlaying = !vid.paused;
-    vid.src = v.src; vid.poster = v.poster; dl.href = v.src; dl.setAttribute('download', v.file);
-    dl.textContent = 'Video herunterladen – Optik ' + v.label;
-    Array.prototype.forEach.call(box.children, function (b) { b.classList.toggle('active', b.dataset.key === key); });
-    if (t > 0) { vid.addEventListener('loadedmetadata', function once() { vid.currentTime = t; if (wasPlaying) vid.play(); vid.removeEventListener('loadedmetadata', once); }); }
-    try { localStorage.setItem('my-route-demo-look', key); } catch (e) {}
-    document.documentElement.dataset.look = key === 'hell' ? 'hell' : 'gold3d';
+  var LEN = { voll: 'Vollversion', kurz: 'Kurzfassung' }, LOOK = { gold3d: '3D Gold', hell: 'Hell' };
+  var vid = document.getElementById('vid'), dl = document.getElementById('dl');
+  var state = { len: 'voll', look: 'gold3d' };
+  try { var s = JSON.parse(localStorage.getItem('my-route-demo') || '{}'); if (V[s.len]) state.len = s.len; if (V[state.len][s.look]) state.look = s.look; } catch (e) {}
+  function row(id, map, key) {
+    var box = document.getElementById(id);
+    Object.keys(map).forEach(function (k) {
+      var b = document.createElement('button'); b.className = 'btn'; b.dataset.key = k; b.textContent = (key === 'len' ? '' : 'Optik: ') + map[k];
+      b.addEventListener('click', function () { state[key] = k; apply(); }); box.appendChild(b);
+    });
   }
-  Object.keys(V).forEach(function (key) {
-    var b = document.createElement('button'); b.className = 'btn' + (key === 'hell' ? ' ghost' : ''); b.dataset.key = key; b.textContent = 'Optik: ' + V[key].label;
-    b.addEventListener('click', function () { pick(key); }); box.appendChild(b);
-  });
-  var saved = 'gold3d'; try { saved = localStorage.getItem('my-route-demo-look') || 'gold3d'; } catch (e) {}
-  pick(V[saved] ? saved : 'gold3d');
+  function apply() {
+    var v = V[state.len][state.look];
+    var t = vid.currentTime || 0, playing = !vid.paused;
+    vid.src = v.src; vid.poster = v.poster; dl.href = v.src; dl.setAttribute('download', v.file);
+    dl.textContent = 'Video herunterladen – ' + LEN[state.len] + ', Optik ' + LOOK[state.look];
+    ['laenge', 'optik'].forEach(function (id) {
+      var key = id === 'laenge' ? 'len' : 'look';
+      Array.prototype.forEach.call(document.getElementById(id).children, function (b) { b.classList.toggle('active', b.dataset.key === state[key]); b.classList.toggle('ghost', b.dataset.key !== state[key]); });
+    });
+    if (t > 0 && state.len === (apply.last || state.len)) vid.addEventListener('loadedmetadata', function once() { vid.currentTime = t; if (playing) vid.play(); vid.removeEventListener('loadedmetadata', once); });
+    apply.last = state.len;
+    document.documentElement.dataset.look = state.look === 'hell' ? 'hell' : 'gold3d';
+    try { localStorage.setItem('my-route-demo', JSON.stringify(state)); } catch (e) {}
+  }
+  row('laenge', LEN, 'len'); row('optik', LOOK, 'look');
+  apply();
 })();
 </script></body></html>`;
 fs.mkdirSync(path.join(root, 'web', 'demo'), { recursive: true });
