@@ -188,10 +188,15 @@
       <h2 class="section-title gold3d-sm">Kartenvorschau</h2>
       <p class="section-sub">So liegen deine Stopps zueinander – schematisch und komplett offline.</p>
       <div class="card map-card tilt-soft">
-        <label class="map-pick">Route
-          <select id="map-route"></select>
-        </label>
+        <div class="map-tools">
+          <label class="map-pick">Route
+            <select id="map-route"></select>
+          </label>
+          <div class="chips" id="map-mode" role="group" aria-label="Ansicht wählen"></div>
+          <label class="check" id="map-auto-wrap"><input id="map-auto" type="checkbox" checked><span>Auto-Drehung</span></label>
+        </div>
         <div id="map-box"></div>
+        <p class="hint" id="map-hint3d" hidden>3D-Ansicht: mit Maus oder Finger ziehen zum Drehen und Neigen, Mausrad zum Zoomen, Doppelklick setzt die Ansicht zurück.</p>
         <p class="hint" id="map-note"></p>
       </div>
     </section>
@@ -228,6 +233,8 @@
       <button type="button" class="btn" id="live-go">Optionen laden</button>
       <label class="check"><input type="checkbox" id="live-auto" checked><span>Live aktualisieren (jede Minute)</span></label>
     </div>
+    <label class="check live-3d-toggle"><input id="live-3d" type="checkbox" checked><span>3D-Karte der Strecken (zum Wählen anklicken)</span></label>
+    <div class="map3d live-map" id="live-map" hidden></div>
     <p class="live-status" id="live-status"></p>
     <div class="live-options" id="live-options"></div>
     <p class="hint">Bis zu drei Strecken mit dem Auto: die schnellste, die kürzeste und eine Alternative. Berechnung über OSRM / OpenStreetMap – es wird nur Start und Ziel (Koordinaten) gesendet, und nur wenn du „Optionen laden“ wählst.</p>

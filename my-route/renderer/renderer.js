@@ -11,12 +11,13 @@
   const MODES = { driving: 'Auto', walking: 'zu Fuß', bicycling: 'Fahrrad', transit: 'Bus & Bahn' };
 
   const LOOKS = ['gold3d', 'klar', 'hell'];
-  let state = { favorites: [], routes: [], look: 'gold3d', touch: 'auto' };
+  let state = { favorites: [], routes: [], look: 'gold3d', touch: 'auto', mapMode: '3d' };
   const ui = {
     view: 'start',
     editingFav: null,
     draft: newDraft(),
     mapRouteId: null,
+    mapAuto: true,
     regionFilter: 'alle',
     favFilter: 'alle'
   };
@@ -588,7 +589,9 @@
     const box = $('map-box');
     const note = $('map-note');
     const route = state.routes.find((r) => r.id === ui.mapRouteId);
+    renderMapTools();
     if (!route) {
+      stopScene(box);
       box.replaceChildren(h('p', { class: 'hint', text: 'Lege zuerst eine Route an – dann siehst du hier ihre Vorschau.' }));
       note.textContent = '';
       return;
@@ -600,10 +603,32 @@
       (located.length > 1 ? `Luftlinie insgesamt ca. ${fmtKm(pathKm(located))} km. ` : '') +
       (missing ? `${missing} Stopp(s) ohne Koordinaten werden hier nicht gezeigt – hinterlege sie bei den Favoriten.` : '');
     if (!located.length) {
+      stopScene(box);
       box.replaceChildren(h('p', { class: 'hint', text: 'Für die Vorschau brauchen die Stopps Koordinaten (Favoriten → „Koordinaten zur Adresse finden“).' }));
       return;
     }
-    box.replaceChildren(buildMapSvg(located));
+    if (state.mapMode === '3d') {
+      scene3d(box, {
+        auto: ui.mapAuto,
+        lines: [{ pts: located, color: LINE_COLORS[0], active: true }],
+        pins: located.map((f, i) => ({ lat: f.lat, lon: f.lon, label: f.name, tag: String(i + 1) }))
+      });
+    } else {
+      stopScene(box);
+      box.classList.remove('flat');
+      box.replaceChildren(buildMapSvg(located));
+    }
+  }
+
+  function renderMapTools() {
+    $('map-mode').replaceChildren(
+      ...[['2d', '2D-Skizze'], ['3d', '3D-Ansicht']].map(([key, label]) =>
+        h('button', { type: 'button', class: 'chip' + (state.mapMode === key ? ' active' : ''), 'aria-pressed': state.mapMode === key ? 'true' : 'false', onclick: () => { state.mapMode = key; persist(); render(); } }, label)
+      )
+    );
+    $('map-auto-wrap').hidden = state.mapMode !== '3d';
+    $('map-hint3d').hidden = state.mapMode !== '3d';
+    $('map-auto').checked = ui.mapAuto;
   }
 
   function buildMapSvg(pts) {
@@ -690,7 +715,7 @@
   }
 
   // ---------- Live-Routen: bis zu 3 Optionen zum Ziel (schnellste, kürzeste, Alternative) ----------
-  const live = { timer: null, busy: false };
+  const live = { timer: null, busy: false, last: null, sel: 0 };
 
   function openLive(toId) {
     const dlg = $('live-dialog');
@@ -706,12 +731,36 @@
     fill($('live-from'), canLocate, canLocate ? 'here' : '');
     fill($('live-to'), false, toId);
     $('live-options').replaceChildren();
+    live.last = null; live.sel = 0;
+    $('live-3d').checked = state.mapMode === '3d';
+    renderLiveMap();
     $('live-status').textContent = state.favorites.length ? 'Wähle Start und Ziel und tippe auf „Optionen laden“.' : 'Lege zuerst Favoriten mit Koordinaten an.';
     if (typeof dlg.showModal === 'function') { if (!dlg.open) dlg.showModal(); } else dlg.setAttribute('open', '');
     if (state.favorites.length && toId && hasCoords(favById(toId)) && ($('live-from').value === 'here' || hasCoords(favById($('live-from').value)))) loadLive();
   }
 
+  function renderLiveMap() {
+    const box = $('live-map');
+    const on = $('live-3d').checked && live.last;
+    box.hidden = !on;
+    if (!on) { stopScene(box); box.replaceChildren(); return; }
+    const { from, to, options } = live.last;
+    scene3d(box, {
+      auto: ui.mapAuto,
+      lines: options.map((o, i) => ({ pts: o.r.points, color: LINE_COLORS[i], active: i === live.sel })),
+      pins: [{ lat: from.lat, lon: from.lon, label: from.here ? 'Dein Standort' : 'Start', tag: 'S' }, { lat: to.lat, lon: to.lon, label: to.name || 'Ziel', tag: 'Z' }]
+    });
+  }
+
+  function selectLiveOption(i) {
+    live.sel = i;
+    document.querySelectorAll('#live-options .live-opt').forEach((c, k) => c.classList.toggle('selected', k === i));
+    renderLiveMap();
+  }
+
   function closeLive() {
+    stopScene($('live-map'));
+    live.last = null;
     clearInterval(live.timer);
     live.timer = null;
     const dlg = $('live-dialog');
@@ -795,17 +844,21 @@
       const options = pickOptions(await getRouteOptions(from, to));
       if (!options.length) throw new Error('Keine Strecke gefunden');
       const fastest = options[0].r;
+      live.last = { from, to: { lat: to.lat, lon: to.lon, name: to.name }, options };
+      if (live.sel >= options.length) live.sel = 0;
       $('live-options').replaceChildren(
         ...options.map((o, i) => {
           const extra = i === 0 ? '' : ((o.r.duration - fastest.duration >= 0 ? '+' : '−') + fmtDuration(Math.abs(o.r.duration - fastest.duration)) + ' · ' + ((o.r.distance - fastest.distance) / 1000 >= 0 ? '+' : '−') + fmtKm(Math.abs(o.r.distance - fastest.distance) / 1000) + ' km');
-          return h('article', { class: 'card live-opt' },
-            h('span', { class: 'badge', text: o.label }),
+          return h('article', { class: 'card live-opt' + (i === live.sel ? ' selected' : ''), title: 'Anklicken: Strecke auf der 3D-Karte hervorheben', onclick: () => selectLiveOption(i) },
+            h('span', { class: 'badge', text: o.label }, h('i', { class: 'dot', ...{} })),
             h('div', { class: 'live-big' }, h('b', { text: fmtDuration(o.r.duration) }), ' · ', fmtKm(o.r.distance / 1000) + ' km'),
             extra ? h('div', { class: 'card-meta', text: 'gegenüber der schnellsten: ' + extra }) : h('div', { class: 'card-meta', text: 'Empfohlen für den schnellsten Weg' }),
             h('button', { class: 'btn', onclick: () => { openLink(optionLink(o, { points: fastest.points }, from, to)); toast('Gute Fahrt! 🚗'); } }, 'Diese Strecke fahren')
           );
         })
       );
+      renderLiveMap();
+      document.querySelectorAll('#live-options .live-opt .dot').forEach((d, k) => d.setAttribute('data-c', String(k)));
       status.textContent = '🟢 Live · aktualisiert um ' + new Date().toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
       clearInterval(live.timer);
       live.timer = $('live-auto').checked ? setInterval(loadLive, 60000) : null;
@@ -814,6 +867,170 @@
     } finally {
       live.busy = false;
     }
+  }
+
+
+  // ---------- 3D-Karte: Kartenvorschau & Live-Optionen (schematisch, offline) ----------
+  const reduceMotion = () => window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const scenes = new WeakMap();
+  const LINE_COLORS = ['#f7d56a', '#62d0ff', '#ff9d5c'];
+
+  function stopScene(box) {
+    const st = scenes.get(box);
+    if (st) { cancelAnimationFrame(st.raf); scenes.delete(box); }
+  }
+
+  // data: { flat, auto, lines: [{ pts: [{lat,lon}], color, active }], pins: [{ lat, lon, label, tag }] }
+  function scene3d(box, data) {
+    let st = scenes.get(box);
+    if (!st) {
+      st = { yaw: -0.55, pitch: 0.95, zoom: 1, drag: null, idle: 0, raf: 0, last: 0, t: 0 };
+      scenes.set(box, st);
+    }
+    st.data = data;
+    st.flat = !!data.flat;
+    if (st.flat) { st.yaw = 0; st.pitch = Math.PI / 2; st.zoom = 1; }
+    box.classList.toggle('flat', st.flat);
+    if (!box.dataset.m3) {
+      box.dataset.m3 = '1';
+      box.addEventListener('pointerdown', (e) => {
+        const s = scenes.get(box);
+        if (!s || s.flat) return;
+        s.drag = { x: e.clientX, y: e.clientY, yaw: s.yaw, pitch: s.pitch };
+        box.setPointerCapture(e.pointerId);
+      });
+      box.addEventListener('pointermove', (e) => {
+        const s = scenes.get(box);
+        if (!s || !s.drag) return;
+        s.yaw = s.drag.yaw + (e.clientX - s.drag.x) * 0.008;
+        s.pitch = Math.max(0.3, Math.min(1.45, s.drag.pitch + (e.clientY - s.drag.y) * 0.005));
+        draw3d(box, s);
+      });
+      const end = () => { const s = scenes.get(box); if (s) { s.drag = null; s.idle = performance.now() + 2500; } };
+      box.addEventListener('pointerup', end);
+      box.addEventListener('pointercancel', end);
+      box.addEventListener('wheel', (e) => {
+        const s = scenes.get(box);
+        if (!s || s.flat) return;
+        e.preventDefault();
+        s.zoom = Math.max(0.6, Math.min(2.4, s.zoom * (e.deltaY < 0 ? 1.1 : 0.9)));
+        draw3d(box, s);
+      }, { passive: false });
+      box.addEventListener('dblclick', () => {
+        const s = scenes.get(box);
+        if (s && !s.flat) { s.yaw = -0.55; s.pitch = 0.95; s.zoom = 1; draw3d(box, s); }
+      });
+    }
+    draw3d(box, st);
+    if (!st.raf) {
+      const tick = (ts) => {
+        const s = scenes.get(box);
+        if (!s) return;
+        if (box.offsetParent === null) { s.raf = 0; return; } // verborgen: Schleife ruht, render() startet sie wieder
+        const dt = s.last ? Math.min(60, ts - s.last) : 16;
+        s.last = ts;
+        s.t = (s.t + dt / 4500) % 1;
+        if (!s.flat && s.data.auto && !s.drag && ts > s.idle && !reduceMotion()) s.yaw += dt * 0.00035;
+        draw3d(box, s);
+        s.raf = requestAnimationFrame(tick);
+      };
+      st.raf = requestAnimationFrame(tick);
+    }
+  }
+
+  function draw3d(box, st) {
+    const { lines, pins, flat } = st.data;
+    const all = lines.flatMap((l) => l.pts).concat(pins);
+    if (!all.length) { box.replaceChildren(); return; }
+    const lat0 = all.reduce((a, p) => a + p.lat, 0) / all.length;
+    const lon0 = all.reduce((a, p) => a + p.lon, 0) / all.length;
+    const kx = Math.cos((lat0 * Math.PI) / 180);
+    const wx = (p) => (p.lon - lon0) * kx;
+    const wy = (p) => p.lat - lat0;
+    const span = Math.max(1e-6, ...all.map((p) => Math.abs(wx(p))), ...all.map((p) => Math.abs(wy(p)))) ;
+    const u = 0.8 / span; // Welt -> Einheitswürfel
+    const W = 900, H = 520, D = 3.2, S = (flat ? 270 : 230) * st.zoom;
+    const cyw = Math.cos(st.yaw), syw = Math.sin(st.yaw), sp = Math.sin(st.pitch), cp = Math.cos(st.pitch);
+    const proj = (x, y, z) => {
+      const xr = x * cyw - y * syw, yr = x * syw + y * cyw;
+      const depth = yr * cp - z * sp;
+      const k = D / (D + depth);
+      return { x: W / 2 + xr * k * S, y: H / 2 + 36 - (yr * sp + z * cp) * k * S, k, depth };
+    };
+    const P = (p, z) => proj(wx(p) * u, wy(p) * u, z);
+    const f = (n) => n.toFixed(1);
+
+    const svg = s('svg', { viewBox: `0 0 ${W} ${H}`, role: 'img', 'aria-label': flat ? 'Streckenübersicht' : '3D-Kartenvorschau' });
+    svg.append(
+      s('defs', {},
+        s('radialGradient', { id: 'm3pin', cx: '30%', cy: '25%', r: '80%' },
+          s('stop', { offset: '0', 'stop-color': '#fff6c9' }), s('stop', { offset: '.5', 'stop-color': '#e9b52c' }), s('stop', { offset: '1', 'stop-color': '#7a5410' })),
+        s('filter', { id: 'm3glow', x: '-50%', y: '-50%', width: '200%', height: '200%' },
+          s('feGaussianBlur', { stdDeviation: '4', result: 'b' }), s('feMerge', {}, s('feMergeNode', { in: 'b' }), s('feMergeNode', { in: 'SourceGraphic' }))))
+    );
+    // Bodenplatte + Raster
+    const G = 1.15;
+    const corners = [[-G, -G], [G, -G], [G, G], [-G, G]].map(([x, y]) => proj(x, y, 0));
+    svg.append(s('polygon', { class: 'm3-ground', points: corners.map((c) => `${f(c.x)},${f(c.y)}`).join(' ') }));
+    for (let i = -5; i <= 5; i++) {
+      const g = (i / 5) * G;
+      const a = proj(g, -G, 0), b = proj(g, G, 0), c = proj(-G, g, 0), d = proj(G, g, 0);
+      svg.append(s('line', { class: 'm3-grid', x1: f(a.x), y1: f(a.y), x2: f(b.x), y2: f(b.y) }), s('line', { class: 'm3-grid', x1: f(c.x), y1: f(c.y), x2: f(d.x), y2: f(d.y) }));
+    }
+    if (!flat) {
+      const n = proj(0, G + 0.12, 0);
+      svg.append(s('text', { class: 'm3-label', x: f(n.x), y: f(n.y), 'text-anchor': 'middle', 'font-size': '15' }, 'N'));
+    }
+
+    // Strecken: Wand (Extrusion) + leuchtende Linie; aktive zuletzt
+    const ordered = lines.slice().sort((a, b) => (a.active ? 1 : 0) - (b.active ? 1 : 0));
+    ordered.forEach((l) => {
+      if (l.pts.length < 2) return;
+      const hz = flat ? 0 : l.active ? 0.17 : 0.07;
+      const top = l.pts.map((p) => P(p, hz));
+      if (!flat) {
+        const base = l.pts.map((p) => P(p, 0));
+        let d = '';
+        for (let i = 0; i < top.length - 1; i++) d += `M${f(base[i].x)} ${f(base[i].y)}L${f(base[i + 1].x)} ${f(base[i + 1].y)}L${f(top[i + 1].x)} ${f(top[i + 1].y)}L${f(top[i].x)} ${f(top[i].y)}Z`;
+        svg.append(s('path', { d, class: 'm3-wall', fill: l.color, 'fill-opacity': l.active ? '.38' : '.16' }));
+      }
+      const pts = top.map((p) => `${f(p.x)},${f(p.y)}`).join(' ');
+      const w = l.active ? 5 : 2.5;
+      svg.append(
+        s('polyline', { points: pts, fill: 'none', stroke: l.color, 'stroke-width': w + 7, 'stroke-opacity': l.active ? '.28' : '.1', 'stroke-linecap': 'round', 'stroke-linejoin': 'round', filter: 'url(#m3glow)' }),
+        s('polyline', { points: pts, fill: 'none', stroke: l.color, 'stroke-width': w, 'stroke-opacity': l.active ? '1' : '.7', 'stroke-linecap': 'round', 'stroke-linejoin': 'round' })
+      );
+      if (l.active) {
+        // leuchtender Punkt wandert entlang der Strecke
+        const seg = [0];
+        for (let i = 1; i < l.pts.length; i++) seg.push(seg[i - 1] + Math.hypot(wx(l.pts[i]) - wx(l.pts[i - 1]), wy(l.pts[i]) - wy(l.pts[i - 1])));
+        const total = seg[seg.length - 1] || 1;
+        const target = st.t * total;
+        let i = 1;
+        while (i < seg.length - 1 && seg[i] < target) i++;
+        const a = top[i - 1], b = top[i];
+        const q = (target - seg[i - 1]) / (seg[i] - seg[i - 1] || 1);
+        svg.append(s('circle', { cx: f(a.x + (b.x - a.x) * q), cy: f(a.y + (b.y - a.y) * q), r: '7', fill: '#fff8d6', filter: 'url(#m3glow)' }));
+      }
+    });
+
+    // Markierungen: Schatten, Stiel, Glanzkugel, Beschriftung – von hinten nach vorn
+    pins
+      .map((p) => ({ p, base: P(p, 0), top: P(p, flat ? 0.0 : 0.34) }))
+      .sort((a, b) => b.base.depth - a.base.depth)
+      .forEach(({ p, base, top }) => {
+        const r = (flat ? 22 : 20) * top.k;
+        const g = s('g', { class: 'm3-pin' });
+        if (!flat) g.append(s('ellipse', { cx: f(base.x), cy: f(base.y), rx: f(15 * base.k), ry: f(5 * base.k), fill: 'rgba(0,0,0,.45)' }), s('line', { x1: f(base.x), y1: f(base.y), x2: f(top.x), y2: f(top.y), stroke: '#c8932a', 'stroke-width': f(2.2 * top.k) }));
+        g.append(
+          s('circle', { cx: f(top.x), cy: f(top.y), r: f(r), fill: 'url(#m3pin)', stroke: '#4a3207', 'stroke-width': '1.4' }),
+          s('ellipse', { cx: f(top.x - r * 0.28), cy: f(top.y - r * 0.4), rx: f(r * 0.5), ry: f(r * 0.28), fill: 'rgba(255,255,255,.55)' }),
+          s('text', { x: f(top.x), y: f(top.y + r * 0.3), 'text-anchor': 'middle', 'font-size': f(r * 0.85), 'font-weight': '800', fill: '#2a1c03' }, p.tag),
+          s('text', { class: 'm3-label', x: f(top.x), y: f(top.y - r - 8), 'text-anchor': 'middle', 'font-size': '14', 'stroke-width': '3' }, p.label)
+        );
+        svg.append(g);
+      });
+    box.replaceChildren(svg);
   }
 
   // ---------- Aktionen ----------
@@ -943,6 +1160,8 @@
     $('look-select').addEventListener('change', (e) => { state.look = e.target.value; persist(); render(); });
     $('touch-select').addEventListener('change', (e) => { state.touch = e.target.value; persist(); render(); });
     $('live-go').addEventListener('click', loadLive);
+    $('live-3d').addEventListener('change', renderLiveMap);
+    $('map-auto').addEventListener('change', (e) => { ui.mapAuto = e.target.checked; renderMap(); });
     $('live-close').addEventListener('click', closeLive);
     $('live-dialog').addEventListener('close', () => { clearInterval(live.timer); live.timer = null; });
     $('live-auto').addEventListener('change', () => { clearInterval(live.timer); live.timer = $('live-auto').checked ? setInterval(loadLive, 60000) : null; });
@@ -1015,7 +1234,7 @@
       drives: Number.isFinite(r.drives) ? Math.max(0, Math.floor(r.drives)) : 0, lastDriven: typeof r.lastDriven === 'string' ? r.lastDriven.slice(0, 40) : null,
       stops: r.stops.filter((id) => typeof id === 'string' && ids.has(id)).slice(0, MAX_STOPS)
     }));
-    return { favorites, routes, look: LOOKS.includes(data.look) ? data.look : 'gold3d', touch: ['auto', 'an', 'aus'].includes(data.touch) ? data.touch : 'auto' };
+    return { favorites, routes, look: LOOKS.includes(data.look) ? data.look : 'gold3d', touch: ['auto', 'an', 'aus'].includes(data.touch) ? data.touch : 'auto', mapMode: data.mapMode === '2d' ? '2d' : '3d' };
   }
 
   async function init() {
@@ -1023,7 +1242,7 @@
       const loaded = await api.loadData();
       if (loaded && Array.isArray(loaded.favorites) && Array.isArray(loaded.routes)) state = sanitize(loaded);
     } catch (err) {
-      state = { favorites: [], routes: [], look: 'gold3d', touch: 'auto' };
+      state = { favorites: [], routes: [], look: 'gold3d', touch: 'auto', mapMode: '3d' };
     }
     bind();
     render();

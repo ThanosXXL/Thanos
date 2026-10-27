@@ -206,6 +206,7 @@ ${fig('s3-routen.jpg', 'Die Route wird Stopp für Stopp zusammengestellt.')}
 <h1><span class="num">7</span>Live-Optionen: schnellste, kürzeste, Alternative</h1>
 <p>Vor der Abfahrt lohnt der Blick auf <b>„Live-Optionen“</b>: My Route fragt bei bestehender Internetverbindung die Strecken zu deinem Ziel ab und zeigt dir <b>höchstens drei Möglichkeiten</b> für das Auto:</p>
 <ul><li><b>Schnellste</b> – die geringste Fahrzeit,</li><li><b>Kürzeste</b> – die geringste Strecke,</li><li><b>Alternative</b> – eine weitere sinnvolle Strecke, falls es sie gibt.</li></ul>
+<p>Auf Wunsch zeigt eine <b>3D-Karte der Strecken</b> alle Optionen in unterschiedlichen Farben (Gold, Blau, Orange). Tippe eine Option an – dann wird ihre Strecke auf der Karte hervorgehoben.</p>
 <p>Ist die schnellste zugleich die kürzeste, steht sie als „Schnellste &amp; kürzeste“ da. Zu jeder Option siehst du Fahrzeit, Kilometer und den Unterschied zur schnellsten – und mit <b>„Diese Strecke fahren“</b> startest du die Navigation.</p>
 ${fig('s4-live.jpg', 'Drei Strecken zur Auswahl (Beispielwerte im Handbuch – in der App kommen sie live).', 'half')}
 <ul><li><b>Start:</b> „Mein Standort“ (auf Handy, Tablet und im Browser) oder ein beliebiger Favorit.</li><li><b>Live aktualisieren:</b> Bleibt das Fenster offen, lädt My Route die Werte jede Minute neu. Die Zeile „🟢 Live · aktualisiert um …“ zeigt dir, dass die Verbindung steht. Bei „🔴“ prüfe bitte dein Internet.</li></ul>
@@ -226,6 +227,7 @@ ${fig('s8-hell.jpg', 'Optik „Hell“ – übersichtlich bei Tageslicht.', 'hal
 
 <h1><span class="num">10</span>Kartenvorschau</h1>
 <p>Unter <b>Karte</b> siehst du, wie deine Stopps zueinander liegen – mit nummerierten Markierungen und einer animierten Linie. Die Vorschau funktioniert ohne Internet. Angezeigt wird die Luftlinie; die echte Strecke ermittelt dein Karten-Dienst.</p>
+<p>Mit den Knöpfen <b>„2D-Skizze“</b> und <b>„3D-Ansicht“</b> wählst du die Darstellung. In der 3D-Ansicht stehen deine Stopps als glänzende Kugeln auf Stielen über der Karte, die Route leuchtet als erhöhtes Band. <b>Ziehe</b> mit Maus oder Finger, um die Karte zu drehen und zu neigen, nutze das <b>Mausrad</b> zum Zoomen und setze die Ansicht per <b>Doppelklick</b> zurück. „Auto-Drehung“ lässt die Karte sanft kreisen.</p>
 ${fig('s5-karte.jpg', 'Die Kartenvorschau mit Reihenfolge und Luftlinie.', 'half')}
 
 <h1><span class="num">11</span>Sichern, Einlesen &amp; Datenschutz</h1>
