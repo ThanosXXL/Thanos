@@ -4,8 +4,14 @@
 // installiert (oder auf Wunsch sofort). Fehler dürfen die App nie beeinträchtigen.
 
 const CHECK_INTERVAL_MS = 4 * 60 * 60 * 1000;
+const FIRST_CHECK_DELAY_MS = 3000; // kurz nach dem Start, sobald die Einstellungen geladen sind
+const STARTUP_APPLY_WINDOW_MS = 90 * 1000; // Updates, die in dieser Zeit nach dem Start fertig werden, werden sofort eingespielt
+const APPLY_DELAY_MS = 5000; // kurze Anzeige „wird installiert“, bevor die App neu startet
+const RETRY_AFTER_MS = 24 * 60 * 60 * 1000; // pro Version höchstens ein automatischer Einspiel-Versuch am Tag (keine Neustart-Schleife)
 
-function createUpdater({ app, send }) {
+function createUpdater({ app, send, fs, path, userDataDir }) {
+  const startedAt = Date.now();
+  const markerFile = userDataDir ? path.join(userDataDir, 'update-attempt.json') : null;
   let autoUpdater = null;
   let status = { state: 'idle' };
   let timer = null;
@@ -16,6 +22,28 @@ function createUpdater({ app, send }) {
       send(status);
     } catch (err) {
       /* Fenster evtl. schon geschlossen */
+    }
+  }
+
+  // Nach jedem Start gefundene Updates sofort einspielen – aber pro Version nur einmal am Tag versuchen.
+  function shouldApplyNow(version) {
+    if (!version || Date.now() - startedAt > STARTUP_APPLY_WINDOW_MS) return false;
+    if (!markerFile) return true;
+    try {
+      const m = JSON.parse(fs.readFileSync(markerFile, 'utf-8'));
+      if (m && m.version === version && Date.now() - Number(m.ts) < RETRY_AFTER_MS) return false;
+    } catch (err) {
+      /* noch kein Versuch */
+    }
+    return true;
+  }
+
+  function rememberAttempt(version) {
+    if (!markerFile) return;
+    try {
+      fs.writeFileSync(markerFile, JSON.stringify({ version, ts: Date.now() }), { encoding: 'utf-8', mode: 0o600 });
+    } catch (err) {
+      /* ohne Marker greift nur die Zeitfenster-Regel */
     }
   }
 
@@ -39,7 +67,23 @@ function createUpdater({ app, send }) {
     autoUpdater.on('download-progress', (p) =>
       publish({ state: 'downloading', version: status.version, percent: Math.round((p && p.percent) || 0) })
     );
-    autoUpdater.on('update-downloaded', (info) => publish({ state: 'downloaded', version: info && info.version }));
+    autoUpdater.on('update-downloaded', (info) => {
+      const version = info && info.version;
+      if (shouldApplyNow(version)) {
+        publish({ state: 'downloaded', version, installing: true });
+        const t = setTimeout(() => {
+          rememberAttempt(version);
+          try {
+            autoUpdater.quitAndInstall(true, true); // still installieren und danach automatisch neu starten
+          } catch (err) {
+            publish({ state: 'error', message: String((err && err.message) || err).slice(0, 160) });
+          }
+        }, APPLY_DELAY_MS);
+        t.unref();
+      } else {
+        publish({ state: 'downloaded', version }); // wird beim Beenden installiert oder per „Jetzt neu starten“
+      }
+    });
     autoUpdater.on('error', (err) => publish({ state: 'error', message: String((err && err.message) || err).slice(0, 160) }));
     return true;
   }
@@ -64,7 +108,7 @@ function createUpdater({ app, send }) {
     const run = () => {
       if (isEnabled()) check();
     };
-    setTimeout(run, 6000).unref();
+    setTimeout(run, FIRST_CHECK_DELAY_MS).unref();
     timer = setInterval(run, CHECK_INTERVAL_MS);
     timer.unref();
   }

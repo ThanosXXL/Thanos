@@ -30,7 +30,7 @@ Nur die jeweils **neueste Version** wird mit Sicherheitsupdates versorgt. Die De
 
 **Updates**
 - Update-Quelle ist fest eingebaut (`https://github.com/thanosxxl/thanos/releases/download/my-route-updates`), Dateien werden gegen den SHA-512-Hash aus `latest*.yml` geprüft; manipulierte Dateien werden abgelehnt.
-- Downgrades und Vorabversionen sind ausgeschaltet.
+- Downgrades und Vorabversionen sind ausgeschaltet. Beim Start gefundene Updates werden sofort eingespielt (Schleifenschutz: pro Version höchstens ein automatischer Versuch in 24 h, Marker `update-attempt.json`).
 - Prüfsummen aller Downloads: `SHA256SUMS.txt` im Release (APK zusätzlich als `.apk.sha256`).
 
 **Entwicklung & Lieferkette**

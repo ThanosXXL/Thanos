@@ -1531,7 +1531,7 @@
     switch (u.state) {
       case 'checking': return 'Suche nach Updates …';
       case 'downloading': return `Update${v} wird geladen … ${u.percent || 0} %`;
-      case 'downloaded': return `Update${v} ist bereit – wird beim Beenden installiert.`;
+      case 'downloaded': return u.installing ? `Update${v} wird jetzt installiert – My Route startet gleich automatisch neu.` : `Update${v} ist bereit – wird beim Beenden installiert.`;
       case 'available': return `Neue Version${v} verfügbar.`;
       case 'uptodate': return 'My Route ist auf dem neuesten Stand.';
       case 'unsupported': return isDesktop ? 'Updates gibt es nur in der installierten App.' : 'Updates werden über die Download-Seite bezogen.';
@@ -1547,7 +1547,7 @@
     let text = '';
     let action = null;
     if (u.state === 'downloading' || u.state === 'downloaded' || u.state === 'available') text = updateText();
-    if (u.state === 'downloaded') action = { label: 'Jetzt neu starten', run: () => window.myRouteAPI.installUpdate().catch(() => {}) };
+    if (u.state === 'downloaded' && !u.installing) action = { label: 'Jetzt neu starten', run: () => window.myRouteAPI.installUpdate().catch(() => {}) };
     if (u.state === 'available') action = { label: 'Herunterladen', run: () => openLink(RELEASES_URL) };
     // Wenn das Installieren nicht klappt (z. B. unsignierte macOS-App), bleibt der Weg über die Download-Seite.
     if (u.state === 'error' && ui.updateSeen) { text = 'Das Update konnte nicht automatisch installiert werden.'; action = { label: 'Download-Seite öffnen', run: () => openLink(RELEASES_URL) }; }
@@ -1587,7 +1587,7 @@
     ];
     $('privacy-facts').replaceChildren(...rows.flatMap(([k, v]) => [h('dt', { text: k }), h('dd', { text: v })]));
     $('pv-autoupdate').checked = state.privacy.autoUpdate;
-    $('pv-auto-label').textContent = isDesktop ? 'Beim Start automatisch nach Updates suchen und installieren' : 'Beim Start automatisch nach neuen Versionen suchen';
+    $('pv-auto-label').textContent = isDesktop ? 'Bei jedem Start automatisch nach Updates suchen und sofort installieren' : 'Beim Start automatisch nach neuen Versionen suchen';
     $('pv-c-geocode').checked = state.privacy.consent.geocode;
     $('pv-c-route').checked = state.privacy.consent.route;
     $('pv-update-status').textContent = updateText();

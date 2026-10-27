@@ -206,6 +206,9 @@ if (!gotLock) {
     });
     updater = createUpdater({
       app,
+      fs,
+      path,
+      userDataDir: app.getPath('userData'),
       send: (status) => { if (mainWindow && !mainWindow.isDestroyed()) mainWindow.webContents.send('update-status', status); }
     });
     registerIpc();
