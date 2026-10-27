@@ -374,3 +374,11 @@ dialog.live::backdrop { background: rgba(0, 0, 0, .65); backdrop-filter: blur(3p
 :root[data-touch="on"] .card-actions { gap: 12px; }
 :root[data-touch="on"] .look-select { min-height: 48px; }
 @media (max-width: 600px) { .live-form { grid-template-columns: 1fr; } .btn.mega { font-size: 24px; } }
+
+/* ---------- Gebiet: Inland / Ausland ---------- */
+.chips { display: flex; gap: 8px; flex-wrap: wrap; margin: 0 0 16px; }
+.chip { font: inherit; font-weight: 700; font-size: 14px; color: var(--gold-1); cursor: pointer; padding: 8px 16px; border-radius: 999px; border: 1px solid var(--line); background: rgba(233, 181, 44, .08); transition: all .2s ease; }
+.chip:hover { transform: translateY(-1px); border-color: var(--gold-1); }
+.chip.active { color: #2a1c03; border-color: transparent; background: linear-gradient(180deg, var(--gold-hi), var(--gold-1) 45%, var(--gold-2)); box-shadow: 0 3px 0 var(--gold-4), 0 8px 16px rgba(233, 181, 44, .25); }
+:root[data-look="klar"] .chip.active, :root[data-look="hell"] .chip.active { background: var(--accent); color: var(--on-accent); box-shadow: none; }
+:root[data-touch="on"] .chip { min-height: 48px; font-size: 16px; padding: 10px 20px; }

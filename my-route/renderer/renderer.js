@@ -7,6 +7,8 @@
   const MAX_WAYPOINTS_PER_LINK = 9; // Google Maps: höchstens 9 Zwischenstopps pro Link
   const STORAGE_KEY = 'my-route-data-v1';
   const ICONS = ['📍', '🏠', '🏢', '☕', '🍽️', '🛒', '⛽', '🏖️', '🏔️', '🎭', '🏥', '🎓', '❤️', '⭐'];
+  const REGIONS = { alle: 'Alle', inland: 'Inland', ausland: 'Ausland' };
+  const LAENDER = ['Österreich', 'Schweiz', 'Italien', 'Frankreich', 'Spanien', 'Portugal', 'Niederlande', 'Belgien', 'Luxemburg', 'Dänemark', 'Polen', 'Tschechien', 'Ungarn', 'Slowenien', 'Kroatien', 'Griechenland', 'Schweden', 'Norwegen', 'Türkei', 'Anderes Land'];
   const MODES = { driving: 'Auto', walking: 'zu Fuß', bicycling: 'Fahrrad', transit: 'Bus & Bahn' };
 
   const LOOKS = ['gold3d', 'klar', 'hell'];
@@ -15,7 +17,8 @@
     view: 'start',
     editingFav: null,
     draft: newDraft(),
-    mapRouteId: null
+    mapRouteId: null,
+    regionFilter: 'alle'
   };
 
   // ---------- Speicher: Desktop (IPC) oder Browser (localStorage) ----------
@@ -54,7 +57,7 @@
   }
 
   function newDraft() {
-    return { id: null, name: '', mode: 'driving', startFromHere: true, stops: [] };
+    return { id: null, name: '', mode: 'driving', region: 'inland', land: '', startFromHere: true, stops: [] };
   }
 
   function $(id) {
@@ -94,6 +97,29 @@
     t.classList.add('show');
     clearTimeout(toastTimer);
     toastTimer = setTimeout(() => t.classList.remove('show'), 2800);
+  }
+
+  function regionOf(route) {
+    return route.region === 'ausland' ? 'ausland' : 'inland';
+  }
+
+  function regionLabel(route) {
+    return regionOf(route) === 'ausland' ? 'Ausland' + (route.land ? ' · ' + route.land : '') : 'Inland';
+  }
+
+  function visibleRoutes(list) {
+    return list.filter((r) => ui.regionFilter === 'alle' || regionOf(r) === ui.regionFilter);
+  }
+
+  function renderChips() {
+    ['filter-start', 'filter-routes', 'filter-drive'].forEach((id) => {
+      $(id).replaceChildren(
+        ...Object.keys(REGIONS).map((key) => {
+          const n = key === 'alle' ? state.routes.length : state.routes.filter((r) => regionOf(r) === key).length;
+          return h('button', { type: 'button', class: 'chip' + (ui.regionFilter === key ? ' active' : ''), 'aria-pressed': ui.regionFilter === key ? 'true' : 'false', onclick: () => { ui.regionFilter = key; render(); } }, `${REGIONS[key]} (${n})`);
+        })
+      );
+    });
   }
 
   function favById(id) {
@@ -269,6 +295,7 @@
     applyLook();
     document.querySelectorAll('.tab').forEach((t) => t.classList.toggle('active', t.dataset.view === ui.view));
     document.querySelectorAll('.view').forEach((v) => { v.hidden = v.id !== 'view-' + ui.view; });
+    renderChips();
     renderStart();
     renderFavorites();
     renderRoutes();
@@ -308,7 +335,7 @@
     );
 
     const box = $('quick-routes');
-    const routes = state.routes
+    const routes = visibleRoutes(state.routes)
       .slice()
       .sort((a, b) => (b.starred ? 1 : 0) - (a.starred ? 1 : 0) || String(b.lastDriven || '').localeCompare(String(a.lastDriven || '')))
       .slice(0, 6);
@@ -339,7 +366,7 @@
     });
     if (!stops.length) chain.textContent = 'Noch keine Stopps – bearbeite die Route, um Orte hinzuzufügen.';
 
-    const meta = [MODES[route.mode] || 'Auto', stops.length + (stops.length === 1 ? ' Stopp' : ' Stopps')];
+    const meta = [regionLabel(route), MODES[route.mode] || 'Auto', stops.length + (stops.length === 1 ? ' Stopp' : ' Stopps')];
     if (coordsAll) meta.push('ca. ' + fmtKm(pathKm(stops)) + ' km Luftlinie');
     const history = route.drives ? `${route.drives}× gefahren · zuletzt am ${fmtDate(route.lastDriven)}` : 'Noch nicht gefahren';
 
@@ -445,6 +472,11 @@
   function renderRoutes() {
     const d = ui.draft;
     $('rt-form-title').textContent = d.id ? 'Route bearbeiten' : 'Neue Route';
+    $('rt-region').value = d.region;
+    $('rt-land-wrap').hidden = d.region !== 'ausland';
+    const landSel = $('rt-land');
+    if (!landSel.options.length) LAENDER.forEach((l) => landSel.append(h('option', { value: l }, l)));
+    if (d.region === 'ausland') landSel.value = d.land && LAENDER.includes(d.land) ? d.land : LAENDER[0];
     $('rt-save').textContent = d.id ? 'Änderungen speichern' : 'Route speichern';
     $('rt-cancel').hidden = !d.id;
 
@@ -476,7 +508,8 @@
       box.replaceChildren(emptyCard('Noch keine Route gespeichert. Sobald du welche anlegst, findest du sie hier – bereit zum Losfahren.', []));
       return;
     }
-    box.replaceChildren(...state.routes.map(routeCard));
+    const shown = visibleRoutes(state.routes);
+    box.replaceChildren(...(shown.length ? shown.map(routeCard) : [emptyCard('In diesem Gebiet gibt es noch keine Route.', [])]));
   }
 
   function moveStop(i, dir) {
@@ -488,7 +521,7 @@
   }
 
   function editRoute(route) {
-    ui.draft = { id: route.id, name: route.name, mode: route.mode || 'driving', startFromHere: !!route.startFromHere, stops: route.stops.filter(favById) };
+    ui.draft = { id: route.id, name: route.name, mode: route.mode || 'driving', region: regionOf(route), land: route.land || '', startFromHere: !!route.startFromHere, stops: route.stops.filter(favById) };
     $('rt-name').value = ui.draft.name;
     $('rt-mode').value = ui.draft.mode;
     $('rt-start').checked = ui.draft.startFromHere;
@@ -594,7 +627,7 @@
   // ---------- Fahrmodus (große Touch-Tasten) ----------
   function renderDrive() {
     const rbox = $('drive-routes');
-    const routes = state.routes.slice().sort((a, b) => (b.starred ? 1 : 0) - (a.starred ? 1 : 0));
+    const routes = visibleRoutes(state.routes).slice().sort((a, b) => (b.starred ? 1 : 0) - (a.starred ? 1 : 0));
     rbox.replaceChildren(
       ...(routes.length
         ? routes.map((route) => {
@@ -602,7 +635,7 @@
             const stops = routeStops(route);
             return h('article', { class: 'card drive-tile' },
               h('div', { class: 'card-title', text: (route.starred ? '⭐ ' : '') + route.name }),
-              h('div', { class: 'card-meta', text: (MODES[route.mode] || 'Auto') + ' · ' + stops.length + (stops.length === 1 ? ' Stopp' : ' Stopps') }),
+              h('div', { class: 'card-meta', text: regionLabel(route) + ' · ' + (MODES[route.mode] || 'Auto') + ' · ' + stops.length + (stops.length === 1 ? ' Stopp' : ' Stopps') }),
               h('button', { class: 'btn mega', disabled: !links.length, onclick: () => driveRoute(route, links[0]) }, 'Losfahren'),
               links.length > 1 ? h('div', { class: 'card-actions' }, ...links.slice(1).map((url, i) => h('button', { class: 'btn', onclick: () => driveRoute(route, url) }, 'Teil ' + (i + 2)))) : null,
               h('button', { class: 'btn ghost mega-sub', disabled: !stops.length, onclick: () => openLive(stops[0].id) }, 'Live-Optionen')
@@ -757,12 +790,18 @@
       ['Fernsehturm', 'Panoramastraße 1A, 10178 Berlin', 52.5208, 13.4094, '🏢', ''],
       ['East Side Gallery', 'Mühlenstraße 3-100, 10243 Berlin', 52.505, 13.4397, '❤️', 'Lieblingsfoto-Spot'],
       ['Tempelhofer Feld', 'Tempelhofer Damm, 12101 Berlin', 52.4731, 13.401, '🏖️', 'Perfekt für einen Spaziergang'],
-      ['Schloss Charlottenburg', 'Spandauer Damm 10-22, 14059 Berlin', 52.5208, 13.2957, '⭐', '']
+      ['Schloss Charlottenburg', 'Spandauer Damm 10-22, 14059 Berlin', 52.5208, 13.2957, '⭐', ''],
+      ['Stephansdom Wien', 'Stephansplatz 3, 1010 Wien', 48.2082, 16.3738, '🎭', 'Ausland-Beispiel'],
+      ['Schloss Schönbrunn', 'Schönbrunner Schloßstraße 47, 1130 Wien', 48.1845, 16.3122, '⭐', '']
     ].map(([name, address, lat, lon, icon, note]) => ({ id: uid(), name, address, lat, lon, icon, note }));
     state.favorites.push(...demo.slice(0, Math.max(0, MAX_FAVORITES - state.favorites.length)));
     state.routes.push({
-      id: uid(), name: 'Berlin – Sonntagstour', mode: 'driving', startFromHere: false, starred: true, drives: 0, lastDriven: null,
+      id: uid(), name: 'Berlin – Sonntagstour', mode: 'driving', region: 'inland', land: '', startFromHere: false, starred: true, drives: 0, lastDriven: null,
       stops: [demo[0], demo[1], demo[2], demo[3], demo[4]].map((f) => f.id)
+    });
+    state.routes.push({
+      id: uid(), name: 'Wien – Kulturtour', mode: 'walking', region: 'ausland', land: 'Österreich', startFromHere: false, starred: false, drives: 0, lastDriven: null,
+      stops: [demo[5], demo[6]].map((f) => f.id)
     });
     persist();
     render();
@@ -830,6 +869,8 @@
 
     $('rt-name').addEventListener('input', (e) => { ui.draft.name = e.target.value; });
     $('rt-mode').addEventListener('change', (e) => { ui.draft.mode = e.target.value; });
+    $('rt-region').addEventListener('change', (e) => { ui.draft.region = e.target.value; ui.draft.land = e.target.value === 'ausland' ? $('rt-land').value || LAENDER[0] : ''; render(); });
+    $('rt-land').addEventListener('change', (e) => { ui.draft.land = e.target.value; });
     $('rt-start').addEventListener('change', (e) => { ui.draft.startFromHere = e.target.checked; });
     $('rt-add').addEventListener('click', () => {
       const id = $('rt-pick').value;
@@ -854,10 +895,10 @@
       if (!d.stops.length) { toast('Füge mindestens einen Stopp hinzu.'); return; }
       if (d.id) {
         const r = state.routes.find((x) => x.id === d.id);
-        if (r) Object.assign(r, { name, mode: d.mode, startFromHere: d.startFromHere, stops: d.stops.slice() });
+        if (r) Object.assign(r, { name, mode: d.mode, region: d.region, land: d.region === 'ausland' ? d.land : '', startFromHere: d.startFromHere, stops: d.stops.slice() });
       } else {
         if (state.routes.length >= MAX_ROUTES) { toast('Bitte lösche zuerst eine alte Route.'); return; }
-        state.routes.push({ id: uid(), name, mode: d.mode, startFromHere: d.startFromHere, stops: d.stops.slice(), starred: false, drives: 0, lastDriven: null });
+        state.routes.push({ id: uid(), name, mode: d.mode, region: d.region, land: d.region === 'ausland' ? d.land : '', startFromHere: d.startFromHere, stops: d.stops.slice(), starred: false, drives: 0, lastDriven: null });
       }
       persist();
       toast('Route gespeichert – bereit, wenn du es bist.');
@@ -936,7 +977,7 @@
     });
     const ids = new Set(favorites.map((f) => f.id));
     const routes = data.routes.slice(0, MAX_ROUTES).filter((r) => r && typeof r.id === 'string' && typeof r.name === 'string' && Array.isArray(r.stops)).map((r) => ({
-      id: r.id.slice(0, 40), name: str(r.name, 80), mode: MODES[r.mode] ? r.mode : 'driving', startFromHere: !!r.startFromHere, starred: !!r.starred,
+      id: r.id.slice(0, 40), name: str(r.name, 80), mode: MODES[r.mode] ? r.mode : 'driving', region: r.region === 'ausland' ? 'ausland' : 'inland', land: r.region === 'ausland' && LAENDER.includes(r.land) ? r.land : '', startFromHere: !!r.startFromHere, starred: !!r.starred,
       drives: Number.isFinite(r.drives) ? Math.max(0, Math.floor(r.drives)) : 0, lastDriven: typeof r.lastDriven === 'string' ? r.lastDriven.slice(0, 40) : null,
       stops: r.stops.filter((id) => typeof id === 'string' && ids.has(id)).slice(0, MAX_STOPS)
     }));

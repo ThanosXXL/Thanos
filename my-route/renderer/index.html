@@ -68,6 +68,7 @@
       <div class="stats" id="stats"></div>
 
       <h2 class="section-title gold3d-sm">Deine Lieblingsrouten</h2>
+      <div class="chips" id="filter-start" role="group" aria-label="Gebiet filtern"></div>
       <p class="section-sub">Ein Klick – und die Navigation startet mit allen Stopps.</p>
       <div class="grid" id="quick-routes"></div>
     </section>
@@ -114,6 +115,7 @@
     <section class="view" id="view-routes" hidden>
       <h2 class="section-title gold3d-sm">Routen</h2>
       <p class="section-sub">Stelle deine Favoriten zu einer Route zusammen und fahre sie jederzeit wieder.</p>
+      <div class="chips" id="filter-routes" role="group" aria-label="Gebiet filtern"></div>
       <div class="split">
         <form class="card form tilt-soft" id="rt-form" autocomplete="off">
           <h3 id="rt-form-title">Neue Route</h3>
@@ -127,6 +129,16 @@
               <option value="bicycling">Fahrrad</option>
               <option value="transit">Bus &amp; Bahn</option>
             </select>
+          </label>
+          <label>Gebiet
+            <select id="rt-region">
+              <option value="inland">Inland (Deutschland)</option>
+              <option value="ausland">Ausland</option>
+            </select>
+          </label>
+          <label id="rt-land-wrap" hidden>Land
+            <select id="rt-land"></select>
+            <span class="hint">Tipp fürs Ausland: Maut bzw. Vignette, Ausweis/Papiere, Handy-Roaming und Tankmöglichkeiten vorher prüfen.</span>
           </label>
           <label class="check">
             <input id="rt-start" type="checkbox" checked>
@@ -157,6 +169,7 @@
     <section class="view" id="view-drive" hidden>
       <h2 class="section-title gold3d-sm">Fahrmodus</h2>
       <p class="section-sub">Große Tasten für Auto, Tablet und Handy – ein Tipp genügt. Tipp: Handy oder Tablet in die Halterung stecken, Display-Spiegelung oder Bluetooth-Anzeige im Auto nutzen und vor der Fahrt kurz das Ziel wählen.</p>
+      <div class="chips" id="filter-drive" role="group" aria-label="Gebiet filtern"></div>
       <h3 class="drive-h">Deine Routen</h3>
       <div class="grid drive-grid" id="drive-routes"></div>
       <h3 class="drive-h">Schnell zu einem Ziel – mit Live-Optionen</h3>
