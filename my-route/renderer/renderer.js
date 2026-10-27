@@ -138,9 +138,9 @@
 
   function renderFavChips() {
     $('filter-favs').replaceChildren(
-      ...Object.keys(LISTS).map((key) => {
+      ...['alle', '1', '2'].map((key) => {
         const n = key === 'alle' ? state.favorites.length : state.favorites.filter((f) => String(listOf(f)) === key).length;
-        return h('button', { type: 'button', class: 'chip' + (ui.favFilter === key ? ' active' : ''), 'aria-pressed': ui.favFilter === key ? 'true' : 'false', onclick: () => { ui.favFilter = key; render(); } }, `${LISTS[key]} (${n})`);
+        return h('button', { type: 'button', class: 'chip' + (ui.favFilter === key ? ' active' : ''), 'aria-pressed': ui.favFilter === key ? 'true' : 'false', onclick: () => { ui.favFilter = key; if (!ui.editingFav && key !== 'alle') $('fav-list-sel').value = key; render(); } }, `${LISTS[key]} (${n})`);
       })
     );
   }

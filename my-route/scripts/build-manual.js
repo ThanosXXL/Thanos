@@ -138,7 +138,7 @@ body.a4{}
 <section class="cover"><img src="${logo}" alt="IT-WORLD Logo"><h1>My Route</h1><div class="sub">BENUTZERHANDBUCH</div><p class="tag">Dein Weg, einmal gespeichert – immer wieder gern gefahren.</p><div class="ver">Version ${v} · IT - WORLD · IT SOLUTIONS</div></section>
 
 <section class="toc"><h1>Das erwartet dich</h1><ol>
-<li>Herzlich willkommen</li><li>Installation &amp; Start – auf jedem Gerät</li><li>Dein erster Start</li><li>Favoriten – deine Lieblingsorte</li><li>Routen zusammenstellen</li><li>Route fahren – ein Klick genügt</li><li>Live-Optionen: schnellste, kürzeste, Alternative</li><li>Fahrmodus &amp; Touch – für Auto, Tablet und Handy</li><li>Optik wählen</li><li>Kartenvorschau</li><li>Sichern, Einlesen &amp; Datenschutz</li><li>Hilfe, wenn es mal hakt</li></ol></section>
+<li>Herzlich willkommen</li><li>Installation &amp; Start – auf jedem Gerät</li><li>Dein erster Start</li><li>Favoriten – deine Lieblingsorte (Liste 1 &amp; 2)</li><li>Routen zusammenstellen (Inland &amp; Ausland)</li><li>Route fahren – ein Klick genügt</li><li>Live-Optionen: schnellste, kürzeste, Alternative</li><li>Fahrmodus &amp; Touch – für Auto, Tablet und Handy</li><li>Optik wählen</li><li>Kartenvorschau</li><li>Sichern, Einlesen &amp; Datenschutz</li><li>Hilfe, wenn es mal hakt</li></ol></section>
 
 <section class="quick"><h1 style="margin-top:0">In 3 Minuten startklar</h1>
 <p class="lead">Keine Sorge – du brauchst kein Vorwissen. Diese drei Schritte reichen für den Anfang:</p>
@@ -149,6 +149,8 @@ ${fig('s1-start.jpg', 'So sieht der Start aus – ein Tipp auf „Route fahren�
 <h2>Kleines Wörterbuch</h2>
 <table><tr><th>Wort</th><th>Das bedeutet es</th></tr>
 <tr><td>Favorit</td><td>Ein Ort, den du dir gemerkt hast – z. B. „Zuhause“ oder „Büro“.</td></tr>
+<tr><td>Favoritenliste</td><td>Zwei Ablagen (Liste 1 und 2), auf die du deine Favoritenorte verteilen kannst.</td></tr>
+<tr><td>Inland / Ausland</td><td>Das Gebiet einer Route – so findest du Auslandsrouten schnell wieder.</td></tr>
 <tr><td>Stopp</td><td>Ein Favorit, der Teil einer Route ist.</td></tr>
 <tr><td>Route</td><td>Mehrere Stopps in einer festen Reihenfolge – mit Namen, damit du sie wiederfindest.</td></tr>
 <tr><td>Live-Optionen</td><td>Bis zu drei Wege zu einem Ziel: schnellste, kürzeste, Alternative.</td></tr>
@@ -177,12 +179,16 @@ ${fig('s9-download.jpg', 'Die Download-Seite erkennt dein Gerät und schlägt de
 <h1><span class="num">4</span>Favoriten – deine Lieblingsorte</h1>
 <p>Unter <b>Favoriten</b> speicherst du Orte, die du immer wieder ansteuerst – Zuhause, Büro, dein Lieblingscafé, die Schule der Kinder.</p>
 <ul><li><b>Name</b> und <b>Adresse</b> genügen.</li><li><b>Koordinaten</b> sind optional. Mit „Koordinaten zur Adresse finden“ trägt My Route sie für dich ein. Sie brauchst du für die Kartenvorschau, die Reihenfolge-Optimierung und die Live-Optionen.</li><li>Mit <b>Notiz</b> und <b>Symbol</b> machst du den Ort persönlich – z. B. „Parkplatz hinterm Haus“.</li></ul>
+<h2>Zwei Favoritenlisten – ohne Obergrenze</h2>
+<p>Du kannst so viele Favoriten speichern, wie du möchtest. Damit nichts durcheinandergerät, teilst du sie auf <b>Favoritenliste 1</b> und <b>Favoritenliste 2</b> auf – zum Beispiel Liste 1 für Alltag und Liste 2 für Urlaub und Ausflüge. Beim Speichern wählst du im Feld <b>„Liste“</b> die gewünschte Liste. Oben in den Favoriten schaltest du mit <b>„Alle / Liste 1 / Liste 2“</b> um, und mit dem Knopf <b>„→ Liste 2“</b> (bzw. „→ Liste 1“) auf einer Karte verschiebst du einen Ort jederzeit in die andere Liste. Bei der Routenplanung sind die Orte in der Auswahl nach Listen gruppiert.</p>
 ${fig('s2-favoriten.jpg', 'Einen neuen Lieblingsort speichern – so einfach geht das.')}
 <div class="note">Die Suche nach Koordinaten sendet nur den Adresstext an OpenStreetMap – und nur, wenn du auf den Knopf tippst. Auf dem Handy findet „Mein Standort“ deine aktuelle Position.</div>
 
 <h1><span class="num">5</span>Routen zusammenstellen</h1>
 <p>Unter <b>Routen</b> baust du aus deinen Favoriten eine Route:</p>
 <ol><li>Gib der Route einen Namen, z. B. „Samstags-Runde“.</li><li>Wähle, womit du unterwegs bist: Auto, zu Fuß, Fahrrad oder Bus &amp; Bahn.</li><li>Lass den Haken bei <b>„Start an meinem aktuellen Standort“</b>, wenn du immer von dort losfährst, wo du gerade bist.</li><li>Füge deine Stopps hinzu und bring sie mit den Pfeilen ↑ ↓ in die richtige Reihenfolge.</li><li>Tippe auf <b>„Route speichern“</b>.</li></ol>
+<h2>Inland oder Ausland</h2>
+<p>Im Feld <b>„Gebiet“</b> legst du fest, ob die Route im <b>Inland</b> (Deutschland) oder im <b>Ausland</b> verläuft. Bei „Ausland“ wählst du zusätzlich das <b>Land</b>, zum Beispiel Österreich oder Italien. Auf der Startseite, bei den Routen und im Fahrmodus sortierst du mit <b>„Alle / Inland / Ausland“</b> – so findest du deine Auslandsrouten sofort. Praktisch fürs Ausland: Maut bzw. Vignette, Ausweis und Papiere, Handy-Roaming und Tankmöglichkeiten rechtzeitig prüfen.</p>
 ${fig('s3-routen.jpg', 'Die Route wird Stopp für Stopp zusammengestellt.')}
 <h2>Reihenfolge optimieren</h2>
 <p>Haben alle Stopps Koordinaten, schlägt My Route mit <b>„Reihenfolge optimieren“</b> eine kürzere Abfolge vor. Der erste Stopp bleibt dein Startpunkt. Verglichen wird die Luftlinie – die genaue Strecke berechnet später dein Karten-Dienst.</p>
