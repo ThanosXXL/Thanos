@@ -4,19 +4,20 @@ const path = require('path');
 const fs = require('fs');
 const BASE = path.resolve(__dirname, '..');
 const ROOT = path.resolve(BASE, '..');
-const OUT = path.join(BASE, 'IT-WORLD-Fiverr-Downloadcenter.html');
+const LITE = !!process.env.LITE; // schlanke Variante: nur Video, damit die Vorschau in Apps zuverlässig lädt
+const OUT = process.env.OUT || path.join(BASE, 'IT-WORLD-Fiverr-Downloadcenter.html');
 const b64 = (f) => fs.readFileSync(f).toString('base64');
 const mb = (f) => (fs.statSync(f).size / 1e6).toFixed(1).replace('.', ',') + ' MB';
 const esc = (s) => s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
 
-const VIDEO = path.join(BASE, 'IT-WORLD-Compliance-Assistent-Demovideo.mp4');
+const VIDEO = process.env.VIDEO || path.join(BASE, 'IT-WORLD-Compliance-Assistent-Demovideo.mp4');
 const imgDir = path.join(BASE, 'fiverr-bilder');
 const IMG_LABEL = {
   '01-fiverr-hero': 'Galerie 1: Hero', '02-fiverr-pakete': 'Galerie 2: Pakete mit Preisen', '03-fiverr-funktionen': 'Galerie 3: Funktionen',
   '04-fiverr-basic': 'Paket Basic', '05-fiverr-standard': 'Paket Standard', '06-fiverr-premium': 'Paket Premium',
   '07-fiverr-voraussetzungen': 'Voraussetzungen', '08-fiverr-handbuch': 'PDF-Benutzerhandbuch', '09-fiverr-sicherheit': 'Datenschutz und Sicherheit'
 };
-const images = fs.readdirSync(imgDir).filter((f) => f.endsWith('.png')).sort();
+const images = LITE ? [] : fs.readdirSync(imgDir).filter((f) => f.endsWith('.png')).sort();
 const logo = b64(path.join(ROOT, 'renderer', 'assets', 'logo.png'));
 // Standbild des Videos (aus dem Video selbst) als Vorschaubild des Players
 const { execFileSync } = require('child_process');
@@ -140,5 +141,11 @@ $('vopen').onclick=function(){viewer.classList.remove('hidden')};
 document.addEventListener('keydown',function(e){if(viewer.classList.contains('hidden'))return;if(e.key==='Escape')$('vclose').click();else if(e.key===' '){e.preventDefault();toggle()}});
 ${images.map((f, i) => `var u${i}=blobUrl('d_img${i}','image/png');document.getElementById('im${i}').src=u${i};document.getElementById('dl_img${i}').href=u${i};`).join('\n')}
 </script></body></html>`;
-fs.writeFileSync(OUT, html);
+let out = html;
+if (LITE) {
+  out = out.replace(/<h2>Bilder für Fiverr[\s\S]*?<\/div>\s*<div class="grid">\s*<\/div>/, '');
+  out = out.replace(/<div class="bar-gold">[\s\S]*?<\/button><\/div>/, '');
+  out = out.replace("$('vopen').onclick=function(){viewer.classList.remove('hidden')};", '').replace("$('vclose').onclick=function(){pl.pause();viewer.classList.add('hidden')};", "$('vclose').onclick=function(){pl.pause()};");
+}
+fs.writeFileSync(OUT, out);
 console.log('Download-Seite:', OUT, (fs.statSync(OUT).size / 1e6).toFixed(1) + ' MB');
