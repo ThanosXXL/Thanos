@@ -23,12 +23,14 @@ function buildApp() {
   let css = read('style.css').toString('utf-8')
     .replace('url(assets/fonts/OpenSans-Regular.ttf)', `url(${dataUri('assets/fonts/OpenSans-Regular.ttf', 'font/ttf')})`)
     .replace('url(assets/fonts/OpenSans-Bold.ttf)', `url(${dataUri('assets/fonts/OpenSans-Bold.ttf', 'font/ttf')})`);
-  const js = read('renderer.js').toString('utf-8');
+  const js = read('renderer.js').toString('utf-8').replace("'__APP_VERSION__'", JSON.stringify(pkg.version));
   if (js.includes('</script')) throw new Error('renderer.js darf kein </script enthalten');
 
   const csp =
     "default-src 'none'; img-src data:; style-src 'unsafe-inline'; font-src data:; script-src 'unsafe-inline'; " +
-    "connect-src https://nominatim.openstreetmap.org https://router.project-osrm.org; base-uri 'none'; form-action 'none'";
+    "connect-src https://nominatim.openstreetmap.org https://router.project-osrm.org https://api.github.com; " +
+    "object-src 'none'; frame-src 'none'; media-src 'none'; worker-src 'none'; base-uri 'none'; form-action 'none'; " +
+    "require-trusted-types-for 'script'";
 
   let html = read('index.html').toString('utf-8')
     .replace(/<meta http-equiv="Content-Security-Policy"[^>]*>/, `<meta http-equiv="Content-Security-Policy" content="${csp}">`)
@@ -54,7 +56,7 @@ function buildDownloadPage(appHtml) {
     android: { label: 'Android', file: `My-Route-${v}-android.apk`, note: 'APK – Installation aus „Unbekannten Quellen“ erlauben' },
     linux: { label: 'Linux', file: `My-Route-${v}.AppImage`, note: 'AppImage – ausführbar machen und starten' }
   };
-  const cfg = JSON.stringify({ base: RELEASE_BASE, files, releases: RELEASES_PAGE, version: v }).replace(/</g, '\\u003c');
+  const cfg = JSON.stringify({ sums: RELEASE_BASE + 'SHA256SUMS.txt', base: RELEASE_BASE, files, releases: RELEASES_PAGE, version: v }).replace(/</g, '\\u003c');
   const appB64 = Buffer.from(appHtml, 'utf-8').toString('base64');
   // Handbücher (falls erzeugt: npm-unabhängig via scripts/build-manual.js) – stecken ebenfalls in der Seite
   const manual = (f) => {
@@ -69,7 +71,8 @@ function buildDownloadPage(appHtml) {
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<meta http-equiv="Content-Security-Policy" content="default-src 'none'; img-src data: blob:; style-src 'unsafe-inline'; font-src data:; script-src 'unsafe-inline'; connect-src data: blob:; base-uri 'none'; form-action 'none'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; img-src data: blob:; style-src 'unsafe-inline'; font-src data:; script-src 'unsafe-inline'; connect-src data: blob:; object-src 'none'; frame-src 'none'; base-uri 'none'; form-action 'none'; require-trusted-types-for 'script'">
+<meta name="referrer" content="no-referrer">
 <meta name="theme-color" content="#050403">
 <title>My Route – Download Vollversion</title>
 <link rel="icon" type="image/png" href="${favicon}">
@@ -169,6 +172,9 @@ a.btn { text-decoration: none; display: inline-block; }
     main.addEventListener('click', saveApp);
     detect.textContent = (plat === 'other' ? '' : names[plat] + ' erkannt. ') + 'Die Vollversion läuft direkt im Browser – ohne Installation.';
   }
+
+  // Prüfsummen zum Verifizieren der Installer (Integrität)
+  grid.appendChild(card('Prüfsummen (SHA-256)', 'Damit kannst du prüfen, dass dein Download unverändert ist.', link(CFG.sums, 'SHA256SUMS.txt', 'btn small ghost')));
 
   // Benutzerhandbuch (A4 & Mobil) – steckt in dieser Seite, 1 Klick genügt
   if (PDF_A4) {

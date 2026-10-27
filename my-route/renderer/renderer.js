@@ -5,13 +5,20 @@
   const MAX_STOPS = 40;
   const MAX_WAYPOINTS_PER_LINK = 9; // Google Maps: höchstens 9 Zwischenstopps pro Link
   const STORAGE_KEY = 'my-route-data-v1';
+  const BUILD_VERSION = '__APP_VERSION__'; // beim Web-Build durch die Versionsnummer ersetzt
+  const RELEASES_URL = 'https://github.com/thanosxxl/thanos/releases/tag/my-route-updates';
+  const UPDATE_API = 'https://api.github.com/repos/thanosxxl/thanos/releases/tags/my-route-updates';
+  // Erlaubte Link-Ziele (Host, Pfadanfang) – Gegenstück zur Liste im Hauptprozess.
+  const LINK_RULES = [['www.google.com', '/maps/'], ['maps.apple.com', '/'], ['www.openstreetmap.org', '/directions'], ['github.com', '/thanosxxl/thanos/releases']];
   const ICONS = ['📍', '🏠', '🏢', '☕', '🍽️', '🛒', '⛽', '🏖️', '🏔️', '🎭', '🏥', '🎓', '❤️', '⭐'];
   const REGIONS = { alle: 'Alle', inland: 'Inland', ausland: 'Ausland' };
   const LAENDER = ['Österreich', 'Schweiz', 'Italien', 'Frankreich', 'Spanien', 'Portugal', 'Niederlande', 'Belgien', 'Luxemburg', 'Dänemark', 'Polen', 'Tschechien', 'Ungarn', 'Slowenien', 'Kroatien', 'Griechenland', 'Schweden', 'Norwegen', 'Türkei', 'Anderes Land'];
   const MODES = { driving: 'Auto', walking: 'zu Fuß', bicycling: 'Fahrrad', transit: 'Bus & Bahn' };
 
   const LOOKS = ['gold3d', 'klar', 'hell'];
-  let state = { favorites: [], routes: [], look: 'gold3d', touch: 'auto', mapMode: '3d' };
+  const defaultPrivacy = () => ({ accepted: false, autoUpdate: true, consent: { geocode: false, route: false } });
+  const defaultState = () => ({ favorites: [], routes: [], look: 'gold3d', touch: 'auto', mapMode: '3d', privacy: defaultPrivacy() });
+  let state = defaultState();
   const ui = {
     view: 'start',
     editingFav: null,
@@ -19,7 +26,11 @@
     mapRouteId: null,
     mapAuto: true,
     regionFilter: 'alle',
-    favFilter: 'alle'
+    favFilter: 'alle',
+    appInfo: null,
+    update: { state: 'idle' },
+    updateSeen: false,
+    updateDismissed: ''
   };
 
   // ---------- Speicher: Desktop (IPC) oder Browser (localStorage) ----------
@@ -28,22 +39,87 @@
   const launcher = window.Capacitor && window.Capacitor.Plugins && window.Capacitor.Plugins.AppLauncher;
   const isDesktop = typeof window.myRouteAPI === 'object' && window.myRouteAPI !== null;
 
+  // Browser-/Android-Speicher: localStorage, optional mit Passwort verschlüsselt (AES-GCM-256, Schlüssel per PBKDF2-SHA256).
+  const KDF_ITER = 600000;
+  const cryptoOk = !!(window.crypto && window.crypto.subtle);
+  const textEnc = new TextEncoder();
+  const textDec = new TextDecoder();
+  const b64 = (u8) => {
+    let s = '';
+    for (let i = 0; i < u8.length; i += 0x8000) s += String.fromCharCode.apply(null, u8.subarray(i, i + 0x8000));
+    return btoa(s);
+  };
+  const unb64 = (s) => Uint8Array.from(atob(s), (c) => c.charCodeAt(0));
+
+  async function deriveKey(pass, salt, iter) {
+    const base = await crypto.subtle.importKey('raw', textEnc.encode(pass), 'PBKDF2', false, ['deriveKey']);
+    return crypto.subtle.deriveKey({ name: 'PBKDF2', salt, iterations: iter, hash: 'SHA-256' }, base, { name: 'AES-GCM', length: 256 }, false, ['encrypt', 'decrypt']);
+  }
+
   const webStorage = {
+    key: null,
+    meta: null,
+    queue: Promise.resolve(),
+    get protectedOn() { return !!this.meta; },
     async loadData() {
+      let raw = null;
+      try { raw = localStorage.getItem(STORAGE_KEY); } catch (err) { return { state: null, status: 'new' }; }
+      if (!raw) return { state: null, status: 'new' };
+      let parsed;
       try {
-        const raw = localStorage.getItem(STORAGE_KEY);
-        return raw ? JSON.parse(raw) : null;
+        parsed = JSON.parse(raw);
       } catch (err) {
-        return null;
+        try { localStorage.setItem(STORAGE_KEY + '-unreadable', raw); } catch (e) { /* voll */ }
+        return { state: null, status: 'recovered' };
       }
+      if (parsed && parsed.v === 3 && parsed.salt && parsed.iv && parsed.ct) {
+        this.meta = { salt: String(parsed.salt), iter: Math.min(Math.max(Number(parsed.iter) || KDF_ITER, 100000), 5000000) };
+        return { state: null, status: 'locked' };
+      }
+      return { state: parsed, status: 'ok' };
     },
-    async saveData(data) {
-      try {
-        localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
-      } catch (err) {
-        toast('Speichern im Browser nicht möglich – bitte „Sichern“ nutzen.');
-      }
-      return true;
+    async unlock(pass) {
+      const raw = JSON.parse(localStorage.getItem(STORAGE_KEY));
+      const key = await deriveKey(pass, unb64(raw.salt), this.meta.iter);
+      const plain = await crypto.subtle.decrypt({ name: 'AES-GCM', iv: unb64(raw.iv) }, key, unb64(raw.ct)); // wirft bei falschem Passwort
+      this.key = key;
+      return JSON.parse(textDec.decode(plain));
+    },
+    async seal(data) {
+      const iv = crypto.getRandomValues(new Uint8Array(12));
+      const ct = await crypto.subtle.encrypt({ name: 'AES-GCM', iv }, this.key, textEnc.encode(JSON.stringify(data)));
+      return JSON.stringify({ v: 3, kdf: 'PBKDF2-SHA256', iter: this.meta.iter, salt: this.meta.salt, iv: b64(iv), ct: b64(new Uint8Array(ct)) });
+    },
+    // Speichern läuft nacheinander (Warteschlange), damit ein älterer Stand nie einen neueren überschreibt.
+    saveData(data) {
+      this.queue = this.queue.then(async () => {
+        try {
+          if (this.meta && !this.key) return true; // gesperrt: vorhandene verschlüsselte Daten nicht antasten
+          localStorage.setItem(STORAGE_KEY, this.meta ? await this.seal(data) : JSON.stringify(data));
+        } catch (err) {
+          toast('Speichern im Browser nicht möglich – bitte „Sichern“ nutzen.');
+        }
+        return true;
+      });
+      return this.queue;
+    },
+    async enableProtection(pass, data) {
+      const salt = crypto.getRandomValues(new Uint8Array(16));
+      this.meta = { salt: b64(salt), iter: KDF_ITER };
+      this.key = await deriveKey(pass, salt, KDF_ITER);
+      await this.saveData(data);
+    },
+    async disableProtection(data) {
+      this.meta = null;
+      this.key = null;
+      await this.saveData(data);
+    },
+    lock() { this.key = null; },
+    async wipe() {
+      await this.queue;
+      try { localStorage.removeItem(STORAGE_KEY); localStorage.removeItem(STORAGE_KEY + '-unreadable'); } catch (err) { /* nichts */ }
+      this.key = null;
+      this.meta = null;
     }
   };
   const api = isDesktop ? window.myRouteAPI : webStorage;
@@ -240,14 +316,28 @@
     return 'https://www.openstreetmap.org/directions?engine=' + engine + '&route=' + stops.map((f) => `${f.lat},${f.lon}`).join(';');
   }
 
+  function linkAllowed(url) {
+    if (typeof url !== 'string' || url.length > 4000) return false;
+    if (url.startsWith('google.navigation:')) return !!launcher;
+    try {
+      const u = new URL(url);
+      if (u.protocol !== 'https:' || u.username || u.password || u.port) return false;
+      const p = u.pathname.toLowerCase();
+      return LINK_RULES.some(([host, prefix]) => u.hostname === host && p.startsWith(prefix));
+    } catch (err) {
+      return false;
+    }
+  }
+
   function openLink(url) {
+    if (!linkAllowed(url)) { toast('Dieser Link ist nicht erlaubt.'); return; }
     if (isDesktop) {
       window.myRouteAPI.openExternal(url).catch(() => toast('Der Link konnte nicht geöffnet werden.'));
     } else if (launcher) {
       // Android-App (Capacitor): Link direkt an die installierte Karten-App übergeben
       launcher.openUrl({ url }).catch(() => toast('Der Link konnte nicht geöffnet werden.'));
     } else {
-      window.open(url, '_blank', 'noopener');
+      window.open(url, '_blank', 'noopener,noreferrer');
     }
   }
 
@@ -326,6 +416,7 @@
     renderRoutes();
     renderMap();
     renderDrive();
+    renderPrivacy();
   }
 
   function applyLook() {
@@ -715,7 +806,7 @@
   }
 
   // ---------- Live-Routen: bis zu 3 Optionen zum Ziel (schnellste, kürzeste, Alternative) ----------
-  const live = { timer: null, busy: false, last: null, sel: 0 };
+  const live = { timer: null, busy: false, last: null, sel: 0, consented: false };
 
   function openLive(toId) {
     const dlg = $('live-dialog');
@@ -761,6 +852,7 @@
   function closeLive() {
     stopScene($('live-map'));
     live.last = null;
+    live.consented = false;
     clearInterval(live.timer);
     live.timer = null;
     const dlg = $('live-dialog');
@@ -774,12 +866,27 @@
     });
   }
 
+  // Anfragen aus dem Browser: Zeitlimit, Größenlimit, keine Cookies, kein Referrer.
+  async function fetchText(url, maxBytes) {
+    const ctl = new AbortController();
+    const timer = setTimeout(() => ctl.abort(), 10000);
+    try {
+      const res = await fetch(url, { signal: ctl.signal, credentials: 'omit', referrerPolicy: 'no-referrer', cache: 'no-store', redirect: 'follow' });
+      if (!res.ok) throw new Error('Dienst antwortet nicht');
+      const declared = Number(res.headers.get('content-length'));
+      if (Number.isFinite(declared) && declared > maxBytes) throw new Error('Antwort zu groß');
+      const text = await res.text();
+      if (text.length > maxBytes) throw new Error('Antwort zu groß');
+      return text;
+    } finally {
+      clearTimeout(timer);
+    }
+  }
+
   async function getRouteOptions(from, to) {
     if (isDesktop) return normalizeOsrm(await window.myRouteAPI.routeOptions({ from, to }));
     const url = `https://router.project-osrm.org/route/v1/driving/${from.lon},${from.lat};${to.lon},${to.lat}?alternatives=3&overview=simplified&geometries=geojson`;
-    const res = await fetch(url);
-    if (!res.ok) throw new Error('Dienst antwortet nicht');
-    return normalizeOsrm(await res.json());
+    return normalizeOsrm(JSON.parse(await fetchText(url, 2 * 1024 * 1024)));
   }
 
   function normalizeOsrm(d) {
@@ -830,6 +937,14 @@
     const to = favById($('live-to').value);
     const fromVal = $('live-from').value;
     if (!to || !hasCoords(to)) { status.textContent = 'Für das Ziel fehlen Koordinaten – trage sie bei den Favoriten ein („Koordinaten zur Adresse finden“).'; return; }
+    if (!live.consented) {
+      const withLocation = fromVal === 'here' ? ' Bei „Mein Standort“ ist das deine aktuelle Position.' : '';
+      if (!(await askConsent('route', 'Für die Live-Optionen werden die Koordinaten von Start und Ziel an den Routing-Dienst OSRM gesendet.' + withLocation + ' Der Dienst sieht dabei auch deine IP-Adresse.'))) {
+        status.textContent = 'Ohne deine Zustimmung frage ich keine Strecken ab.';
+        return;
+      }
+      live.consented = true;
+    }
     live.busy = true;
     status.textContent = 'Ich frage die Strecken ab …';
     try {
@@ -1090,16 +1205,16 @@
     $('fav-geocode').addEventListener('click', async () => {
       const q = $('fav-address').value.trim();
       if (!q) { toast('Bitte trage zuerst eine Adresse ein.'); return; }
+      if (!(await askConsent('geocode', 'Für die Suche wird die eingegebene Adresse an OpenStreetMap (Nominatim) gesendet. Der Dienst sieht dabei auch deine IP-Adresse.'))) return;
       toast('Ich suche …');
       try {
         let res;
         if (isDesktop) res = await window.myRouteAPI.geocode(q);
         else {
-          const r = await fetch('https://nominatim.openstreetmap.org/search?format=jsonv2&limit=1&accept-language=de&q=' + encodeURIComponent(q));
-          const list = r.ok ? await r.json() : [];
-          res = list[0] ? { lat: Number(list[0].lat), lon: Number(list[0].lon) } : null;
+          const list = JSON.parse(await fetchText('https://nominatim.openstreetmap.org/search?format=jsonv2&limit=1&accept-language=de&q=' + encodeURIComponent(q), 200000));
+          res = Array.isArray(list) && list[0] ? { lat: Number(list[0].lat), lon: Number(list[0].lon) } : null;
         }
-        if (res && Number.isFinite(res.lat) && Number.isFinite(res.lon)) {
+        if (res && Number.isFinite(res.lat) && Number.isFinite(res.lon) && Math.abs(res.lat) <= 90 && Math.abs(res.lon) <= 180) {
           $('fav-coords').value = `${res.lat.toFixed(5)}, ${res.lon.toFixed(5)}`;
           toast('Gefunden – die Koordinaten sind eingetragen.');
         } else toast('Dazu habe ich leider nichts gefunden. Versuch es mit Straße und Ort.');
@@ -1172,10 +1287,10 @@
     $('btn-export').addEventListener('click', async () => {
       try {
         if (isDesktop) {
-          const res = await window.myRouteAPI.exportData(state);
+          const res = await window.myRouteAPI.exportData(exportable());
           if (res.exported) toast('Gesichert – gut aufgehoben.');
         } else {
-          const url = URL.createObjectURL(new Blob([JSON.stringify(state, null, 2)], { type: 'application/json' }));
+          const url = URL.createObjectURL(new Blob([JSON.stringify(exportable(), null, 2)], { type: 'application/json' }));
           const a = h('a', { href: url, download: 'my-route-sicherung.json' });
           document.body.append(a); a.click(); a.remove();
           setTimeout(() => URL.revokeObjectURL(url), 2000);
@@ -1210,10 +1325,19 @@
     });
   }
 
+  function exportable() {
+    const copy = { ...state };
+    delete copy.privacy; // Einstellungen zu Zustimmungen gehören nicht in die Sicherungsdatei
+    return copy;
+  }
+
   function adopt(data) {
     const ok = data && Array.isArray(data.favorites) && Array.isArray(data.routes);
     if (!ok) { toast('Das ist keine gültige My-Route-Sicherung.'); return; }
-    state = sanitize(data);
+    if ((state.favorites.length || state.routes.length) && !window.confirm('Die Sicherung ersetzt alle aktuellen Favoriten und Routen. Fortfahren?')) return;
+    const imported = sanitize(data);
+    imported.privacy = state.privacy; // Zustimmungen kommen nie aus einer Datei
+    state = imported;
     persist();
     ui.draft = newDraft();
     render();
@@ -1234,18 +1358,320 @@
       drives: Number.isFinite(r.drives) ? Math.max(0, Math.floor(r.drives)) : 0, lastDriven: typeof r.lastDriven === 'string' ? r.lastDriven.slice(0, 40) : null,
       stops: r.stops.filter((id) => typeof id === 'string' && ids.has(id)).slice(0, MAX_STOPS)
     }));
-    return { favorites, routes, look: LOOKS.includes(data.look) ? data.look : 'gold3d', touch: ['auto', 'an', 'aus'].includes(data.touch) ? data.touch : 'auto', mapMode: data.mapMode === '2d' ? '2d' : '3d' };
+    const pv = data.privacy && typeof data.privacy === 'object' ? data.privacy : {};
+    const consent = pv.consent && typeof pv.consent === 'object' ? pv.consent : {};
+    const privacy = { accepted: pv.accepted === true, autoUpdate: pv.autoUpdate !== false, consent: { geocode: consent.geocode === true, route: consent.route === true } };
+    return { privacy, favorites, routes, look: LOOKS.includes(data.look) ? data.look : 'gold3d', touch: ['auto', 'an', 'aus'].includes(data.touch) ? data.touch : 'auto', mapMode: data.mapMode === '2d' ? '2d' : '3d' };
+  }
+
+  // ---------- Dialoge ----------
+  const sleep = (ms) => new Promise((res) => setTimeout(res, ms));
+
+  function openDialog(dlg) {
+    if (typeof dlg.showModal === 'function') { if (!dlg.open) dlg.showModal(); } else dlg.setAttribute('open', '');
+  }
+
+  function closeDialog(dlg) {
+    if (typeof dlg.close === 'function') dlg.close(); else dlg.removeAttribute('open');
+  }
+
+  // Einwilligung vor jeder Übertragung an einen externen Dienst (auf Wunsch dauerhaft merken, widerrufbar).
+  function askConsent(key, text) {
+    if (state.privacy.consent[key]) return Promise.resolve(true);
+    return new Promise((resolve) => {
+      const dlg = $('consent-dialog');
+      $('consent-text').textContent = text;
+      $('consent-remember').checked = false;
+      const finish = (ok) => {
+        $('consent-ok').onclick = null;
+        $('consent-cancel').onclick = null;
+        dlg.oncancel = null;
+        closeDialog(dlg);
+        if (ok && $('consent-remember').checked) { state.privacy.consent[key] = true; persist(); renderPrivacy(); }
+        resolve(ok);
+      };
+      $('consent-ok').onclick = () => finish(true);
+      $('consent-cancel').onclick = () => finish(false);
+      dlg.oncancel = (e) => { e.preventDefault(); finish(false); };
+      openDialog(dlg);
+      $('consent-ok').focus();
+    });
+  }
+
+  function showWelcome() {
+    const dlg = $('welcome-dialog');
+    const finish = (auto) => {
+      $('welcome-auto').onclick = null;
+      $('welcome-manual').onclick = null;
+      dlg.oncancel = null;
+      state.privacy.accepted = true;
+      state.privacy.autoUpdate = auto;
+      persist();
+      closeDialog(dlg);
+      renderPrivacy();
+      if (auto) checkUpdatesNow(false);
+    };
+    $('welcome-auto').onclick = () => finish(true);
+    $('welcome-manual').onclick = () => finish(false);
+    dlg.oncancel = (e) => e.preventDefault();
+    openDialog(dlg);
+    $('welcome-auto').focus();
+  }
+
+  // Entsperr-Dialog (nur Browser/Android mit Passwortschutz); gibt den entschlüsselten Zustand zurück.
+  function runUnlock() {
+    return new Promise((resolve) => {
+      const dlg = $('unlock-dialog');
+      let attempts = 0;
+      dlg.oncancel = (e) => e.preventDefault();
+      $('unlock-pass').value = '';
+      $('unlock-error').textContent = '';
+      $('unlock-ok').onclick = async () => {
+        const pass = $('unlock-pass').value;
+        if (!pass) return;
+        $('unlock-ok').disabled = true;
+        try {
+          const plain = await webStorage.unlock(pass);
+          $('unlock-pass').value = '';
+          closeDialog(dlg);
+          resolve(plain);
+        } catch (err) {
+          attempts += 1;
+          $('unlock-error').textContent = 'Das Passwort stimmt nicht.';
+          await sleep(Math.min(4000, 500 * attempts)); // bremst Durchprobieren
+        } finally {
+          $('unlock-ok').disabled = false;
+        }
+      };
+      $('unlock-pass').onkeydown = (e) => { if (e.key === 'Enter') $('unlock-ok').click(); };
+      $('unlock-reset').onclick = async () => {
+        if (!window.confirm('Alle gespeicherten Daten werden unwiderruflich gelöscht. Fortfahren?')) return;
+        await webStorage.wipe();
+        closeDialog(dlg);
+        resolve(null);
+      };
+      openDialog(dlg);
+      $('unlock-pass').focus();
+    });
+  }
+
+  function askNewPassword() {
+    return new Promise((resolve) => {
+      const dlg = $('pw-dialog');
+      $('pw-1').value = '';
+      $('pw-2').value = '';
+      $('pw-error').textContent = '';
+      const finish = (val) => {
+        $('pw-ok').onclick = null;
+        $('pw-cancel').onclick = null;
+        dlg.oncancel = null;
+        $('pw-1').value = '';
+        $('pw-2').value = '';
+        closeDialog(dlg);
+        resolve(val);
+      };
+      $('pw-ok').onclick = () => {
+        const a = $('pw-1').value;
+        if (a.length < 8) { $('pw-error').textContent = 'Bitte mindestens 8 Zeichen wählen.'; return; }
+        if (a !== $('pw-2').value) { $('pw-error').textContent = 'Die beiden Eingaben stimmen nicht überein.'; return; }
+        finish(a);
+      };
+      $('pw-cancel').onclick = () => finish(null);
+      dlg.oncancel = (e) => { e.preventDefault(); finish(null); };
+      openDialog(dlg);
+      $('pw-1').focus();
+    });
+  }
+
+  async function lockNow() {
+    webStorage.lock();
+    state = defaultState();
+    ui.draft = newDraft();
+    render();
+    const plain = await runUnlock();
+    state = plain ? sanitize(plain) : defaultState();
+    render();
+  }
+
+  // ---------- Updates ----------
+  const versionParts = (v) => (String(v).match(/\d+/g) || []).slice(0, 3).map(Number);
+  function isNewer(a, b) {
+    const x = versionParts(a), y = versionParts(b);
+    for (let i = 0; i < 3; i++) { if ((x[i] || 0) !== (y[i] || 0)) return (x[i] || 0) > (y[i] || 0); }
+    return false;
+  }
+
+  async function webUpdateCheck(manual) {
+    if (!/^\d/.test(BUILD_VERSION)) { ui.update = { state: manual ? 'unsupported' : 'idle' }; renderUpdateBar(); renderPrivacy(); return; }
+    ui.update = { state: 'checking' };
+    renderPrivacy();
+    try {
+      const info = JSON.parse(await fetchText(UPDATE_API, 300000));
+      const m = String(info.name || info.tag_name || '').match(/\d+\.\d+\.\d+/);
+      if (!m) throw new Error('Keine Versionsangabe gefunden');
+      ui.update = isNewer(m[0], BUILD_VERSION) ? { state: 'available', version: m[0], web: true } : { state: 'uptodate' };
+    } catch (err) {
+      ui.update = { state: manual ? 'error' : 'idle', message: 'Keine Update-Information erreichbar.' };
+    }
+    renderUpdateBar();
+    renderPrivacy();
+  }
+
+  function checkUpdatesNow(manual) {
+    if (isDesktop) {
+      window.myRouteAPI.checkUpdates().catch(() => {});
+    } else {
+      webUpdateCheck(manual);
+    }
+  }
+
+  function updateText() {
+    const u = ui.update;
+    const v = u.version ? ' ' + u.version : '';
+    switch (u.state) {
+      case 'checking': return 'Suche nach Updates …';
+      case 'downloading': return `Update${v} wird geladen … ${u.percent || 0} %`;
+      case 'downloaded': return `Update${v} ist bereit – wird beim Beenden installiert.`;
+      case 'available': return `Neue Version${v} verfügbar.`;
+      case 'uptodate': return 'My Route ist auf dem neuesten Stand.';
+      case 'unsupported': return isDesktop ? 'Updates gibt es nur in der installierten App.' : 'Updates werden über die Download-Seite bezogen.';
+      case 'error': return u.message ? 'Update-Suche nicht möglich: ' + u.message : 'Update-Suche nicht möglich.';
+      default: return '';
+    }
+  }
+
+  function renderUpdateBar() {
+    const bar = $('update-bar');
+    const u = ui.update;
+    if (u.state === 'downloading' || u.state === 'downloaded') ui.updateSeen = true;
+    let text = '';
+    let action = null;
+    if (u.state === 'downloading' || u.state === 'downloaded' || u.state === 'available') text = updateText();
+    if (u.state === 'downloaded') action = { label: 'Jetzt neu starten', run: () => window.myRouteAPI.installUpdate().catch(() => {}) };
+    if (u.state === 'available') action = { label: 'Herunterladen', run: () => openLink(RELEASES_URL) };
+    // Wenn das Installieren nicht klappt (z. B. unsignierte macOS-App), bleibt der Weg über die Download-Seite.
+    if (u.state === 'error' && ui.updateSeen) { text = 'Das Update konnte nicht automatisch installiert werden.'; action = { label: 'Download-Seite öffnen', run: () => openLink(RELEASES_URL) }; }
+    const key = u.state + (u.version || '');
+    if (!text || ui.updateDismissed === key) { bar.hidden = true; return; }
+    $('update-text').textContent = text;
+    const btn = $('update-action');
+    btn.hidden = !action;
+    if (action) { btn.textContent = action.label; btn.onclick = action.run; }
+    $('update-dismiss').onclick = () => { ui.updateDismissed = key; bar.hidden = true; };
+    bar.hidden = false;
+  }
+
+  async function setupUpdates() {
+    if (isDesktop) {
+      try {
+        ui.appInfo = await window.myRouteAPI.getAppInfo();
+        ui.update = (await window.myRouteAPI.getUpdateStatus()) || ui.update;
+      } catch (err) { /* ohne Info weiter */ }
+      window.myRouteAPI.onUpdateStatus((s) => { ui.update = s; renderUpdateBar(); renderPrivacy(); });
+    } else {
+      ui.appInfo = { version: /^\d/.test(BUILD_VERSION) ? BUILD_VERSION : 'Entwicklung', platform: 'web', encrypted: false };
+      if (state.privacy.accepted && state.privacy.autoUpdate) webUpdateCheck(false);
+    }
+    renderUpdateBar();
+    renderPrivacy();
+  }
+
+  // ---------- Datenschutz & Sicherheit (Info) ----------
+  function renderPrivacy() {
+    const info = ui.appInfo || {};
+    const rows = [
+      ['Version', info.version || '–'],
+      ['Speicherort', isDesktop ? 'Nur auf diesem Gerät (App-Datenordner, nur für dich lesbar)' : 'Nur im Speicher dieses Browsers bzw. dieser App'],
+      ['Verschlüsselung', isDesktop ? (info.encrypted ? 'Ja – über den Schlüsselbund deines Betriebssystems' : 'Nein – kein Schlüsselbund gefunden (Schutz nur durch Dateirechte)') : (webStorage.protectedOn ? 'Ja – mit deinem Passwort (AES-256)' : 'Aus – optional per Passwortschutz')],
+      ['Telemetrie / Tracking', 'Keine']
+    ];
+    $('privacy-facts').replaceChildren(...rows.flatMap(([k, v]) => [h('dt', { text: k }), h('dd', { text: v })]));
+    $('pv-autoupdate').checked = state.privacy.autoUpdate;
+    $('pv-auto-label').textContent = isDesktop ? 'Beim Start automatisch nach Updates suchen und installieren' : 'Beim Start automatisch nach neuen Versionen suchen';
+    $('pv-c-geocode').checked = state.privacy.consent.geocode;
+    $('pv-c-route').checked = state.privacy.consent.route;
+    $('pv-update-status').textContent = updateText();
+    const canProtect = !isDesktop && cryptoOk;
+    $('pv-protect').hidden = !canProtect;
+    if (canProtect) {
+      const on = webStorage.protectedOn;
+      $('pv-protect-text').textContent = on
+        ? 'Dein Passwortschutz ist aktiv: Favoriten und Routen liegen verschlüsselt im Browser-Speicher und werden beim Start entsperrt.'
+        : 'Schütze deine Daten zusätzlich mit einem Passwort – sinnvoll, wenn mehrere Personen oder Programme auf dieses Gerät zugreifen.';
+      $('pv-protect-on').hidden = on;
+      $('pv-protect-change').hidden = !on;
+      $('pv-lock').hidden = !on;
+      $('pv-protect-off').hidden = !on;
+    }
+  }
+
+  async function wipeAll() {
+    if (!window.confirm('Wirklich ALLE Favoriten, Routen und Einstellungen unwiderruflich löschen?\n\nTipp: Erstelle vorher mit „Daten sichern“ eine Sicherung.')) return;
+    try {
+      if (isDesktop) await window.myRouteAPI.wipeData(); else await webStorage.wipe();
+    } catch (err) {
+      toast('Das Löschen hat leider nicht geklappt.');
+      return;
+    }
+    state = defaultState();
+    ui.draft = newDraft();
+    ui.editingFav = null;
+    ui.update = { state: 'idle' };
+    render();
+    toast('Alle Daten wurden gelöscht.');
+    showWelcome();
+  }
+
+  function bindPrivacy() {
+    $('pv-autoupdate').addEventListener('change', (e) => {
+      state.privacy.autoUpdate = e.target.checked;
+      persist();
+      if (e.target.checked) checkUpdatesNow(false);
+      renderPrivacy();
+    });
+    $('pv-check').addEventListener('click', () => checkUpdatesNow(true));
+    $('pv-c-geocode').addEventListener('change', (e) => { state.privacy.consent.geocode = e.target.checked; persist(); });
+    $('pv-c-route').addEventListener('change', (e) => { state.privacy.consent.route = e.target.checked; persist(); });
+    $('pv-export').addEventListener('click', () => $('btn-export').click());
+    $('pv-wipe').addEventListener('click', wipeAll);
+    $('pv-protect-on').addEventListener('click', async () => {
+      const pass = await askNewPassword();
+      if (!pass) return;
+      try { await webStorage.enableProtection(pass, state); toast('Passwortschutz ist aktiv.'); } catch (err) { toast('Der Passwortschutz konnte nicht eingerichtet werden.'); }
+      renderPrivacy();
+    });
+    $('pv-protect-change').addEventListener('click', async () => {
+      const pass = await askNewPassword();
+      if (!pass) return;
+      try { await webStorage.enableProtection(pass, state); toast('Passwort geändert.'); } catch (err) { toast('Das Passwort konnte nicht geändert werden.'); }
+    });
+    $('pv-protect-off').addEventListener('click', async () => {
+      if (!window.confirm('Passwortschutz ausschalten? Die Daten werden danach unverschlüsselt im Browser-Speicher abgelegt.')) return;
+      await webStorage.disableProtection(state);
+      toast('Passwortschutz ist ausgeschaltet.');
+      renderPrivacy();
+    });
+    $('pv-lock').addEventListener('click', lockNow);
   }
 
   async function init() {
+    let res = { state: null, status: 'new' };
     try {
-      const loaded = await api.loadData();
-      if (loaded && Array.isArray(loaded.favorites) && Array.isArray(loaded.routes)) state = sanitize(loaded);
+      res = (await api.loadData()) || res;
     } catch (err) {
-      state = { favorites: [], routes: [], look: 'gold3d', touch: 'auto', mapMode: '3d' };
+      res = { state: null, status: 'recovered' };
     }
+    if (res.status === 'locked') {
+      const plain = await runUnlock();
+      res = plain ? { state: plain, status: 'ok' } : { state: null, status: 'new' };
+    }
+    state = res.state && Array.isArray(res.state.favorites) && Array.isArray(res.state.routes) ? sanitize(res.state) : defaultState();
     bind();
+    bindPrivacy();
     render();
+    if (res.status === 'recovered') toast('Deine gespeicherten Daten waren nicht lesbar – die alte Datei wurde sicher beiseitegelegt.');
+    await setupUpdates();
+    if (!state.privacy.accepted) showWelcome();
   }
 
   init();

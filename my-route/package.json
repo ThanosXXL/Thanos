@@ -7,9 +7,11 @@
   "license": "UNLICENSED",
   "scripts": {
     "start": "electron .",
+    "check": "node scripts/check.js",
+    "test": "node --test tests/*.test.js",
     "build:web": "node scripts/build-web.js",
-    "dist": "electron-builder",
-    "build:android-web": "node scripts/build-web.js"
+    "build:android-web": "node scripts/build-web.js",
+    "dist": "electron-builder --publish never"
   },
   "devDependencies": {
     "electron": "^44.7.0",
@@ -28,6 +30,7 @@
     "files": [
       "main.js",
       "preload.js",
+      "lib/**/*",
       "renderer/**/*",
       "build/icon.png",
       "package.json"
@@ -41,20 +44,52 @@
       "artifactName": "My-Route-Setup-${version}.${ext}"
     },
     "mac": {
-      "target": {
-        "target": "dmg",
-        "arch": [
-          "x64",
-          "arm64"
-        ]
-      },
+      "target": [
+        {
+          "target": "dmg",
+          "arch": [
+            "x64",
+            "arm64"
+          ]
+        },
+        {
+          "target": "zip",
+          "arch": [
+            "x64",
+            "arm64"
+          ]
+        }
+      ],
       "category": "public.app-category.navigation",
-      "artifactName": "My-Route-${version}-${arch}.${ext}"
+      "artifactName": "My-Route-${version}-${arch}.${ext}",
+      "hardenedRuntime": true
     },
     "linux": {
       "target": "AppImage",
       "category": "Utility",
       "artifactName": "My-Route-${version}.${ext}"
+    },
+    "publish": [
+      {
+        "provider": "generic",
+        "url": "https://github.com/thanosxxl/thanos/releases/download/my-route-updates"
+      }
+    ],
+    "electronFuses": {
+      "runAsNode": false,
+      "enableCookieEncryption": true,
+      "enableNodeOptionsEnvironmentVariable": false,
+      "enableNodeCliInspectArguments": false,
+      "onlyLoadAppFromAsar": true
+    },
+    "nsis": {
+      "oneClick": true,
+      "perMachine": false,
+      "allowToChangeInstallationDirectory": false,
+      "deleteAppDataOnUninstall": false
     }
+  },
+  "dependencies": {
+    "electron-updater": "^6.6.2"
   }
 }

@@ -9,15 +9,59 @@ on:
 permissions:
   contents: read
 
+concurrency:
+  group: my-route-release-${{ github.ref }}
+  cancel-in-progress: false
+
 jobs:
+  check:
+    name: Sicherheits-Prüfung & Tests
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    defaults:
+      run:
+        working-directory: my-route
+    steps:
+      - name: Repository auschecken
+        uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+
+      - name: Node.js einrichten
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+          cache-dependency-path: my-route/package-lock.json
+
+      - name: Abhängigkeiten exakt nach Lockfile installieren (ohne Skripte)
+        run: npm ci --ignore-scripts
+
+      - name: Version von Tag und package.json stimmt überein
+        if: startsWith(github.ref, 'refs/tags/my-route-v')
+        run: |
+          PKG=$(node -p "require('./package.json').version")
+          TAG="${GITHUB_REF_NAME#my-route-v}"
+          if [ "$PKG" != "$TAG" ]; then echo "Tag $TAG passt nicht zu package.json $PKG"; exit 1; fi
+
+      - name: Quellcode-Sicherheitsprüfung (CSP, Electron-Einstellungen, verbotene Muster)
+        run: npm run check
+
+      - name: Tests (Speicher, Verschlüsselung, Link-/IPC-Prüfung)
+        run: npm test
+
+      - name: Bekannte Schwachstellen in Laufzeit-Abhängigkeiten
+        run: npm audit --omit=dev --audit-level=high
+
   build:
+    name: Build ${{ matrix.os }}
+    needs: check
     strategy:
       fail-fast: false
       matrix:
         os: [windows-latest, macos-latest, ubuntu-latest]
     runs-on: ${{ matrix.os }}
-    permissions:
-      contents: read
+    timeout-minutes: 40
     defaults:
       run:
         working-directory: my-route
@@ -25,50 +69,79 @@ jobs:
     steps:
       - name: Repository auschecken
         uses: actions/checkout@v4
+        with:
+          persist-credentials: false
 
       - name: Node.js einrichten
         uses: actions/setup-node@v4
         with:
           node-version: 20
+          cache: npm
+          cache-dependency-path: my-route/package-lock.json
 
-      - name: Abhängigkeiten installieren
-        run: npm install
+      - name: Abhängigkeiten exakt nach Lockfile installieren
+        run: npm ci
 
-      - name: Desktop-App bauen
+      - name: Desktop-App bauen (inkl. Update-Metadaten latest*.yml)
         run: npm run dist
 
-      - name: Installer als Artifact hochladen
+      - name: Installer und Update-Dateien als Artifact hochladen
         uses: actions/upload-artifact@v4
         with:
           name: my-route-${{ matrix.os }}
           path: |
             my-route/dist/*.exe
             my-route/dist/*.dmg
+            my-route/dist/*.zip
             my-route/dist/*.AppImage
-          if-no-files-found: warn
+            my-route/dist/*.blockmap
+            my-route/dist/latest*.yml
+          if-no-files-found: error
 
   release:
+    name: Release veröffentlichen
     needs: build
     if: startsWith(github.ref, 'refs/tags/my-route-v')
     runs-on: ubuntu-latest
+    timeout-minutes: 15
     permissions:
       contents: write
     steps:
       - name: Repository auschecken
         uses: actions/checkout@v4
+        with:
+          persist-credentials: false
 
-      - name: Installer-Artifacts herunterladen
+      - name: Artifacts herunterladen
         uses: actions/download-artifact@v4
         with:
           pattern: my-route-*
           path: release-assets
           merge-multiple: true
 
-      - name: GitHub Release erstellen und Installer anhängen
+      - name: Handbücher und Vollversion beilegen, Prüfsummen erzeugen
+        run: |
+          cp my-route/docs/*.pdf my-route/web/My-Route-Vollversion.html my-route/web/My-Route-Download.html release-assets/
+          cd release-assets
+          sha256sum $(ls | grep -v -E '^SHA256SUMS.txt$') > SHA256SUMS.txt
+          cat SHA256SUMS.txt
+
+      - name: Versioniertes Release und laufende Update-Quelle (my-route-updates) aktualisieren
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          gh release create "${{ github.ref_name }}" \
-            --title "My Route ${{ github.ref_name }}" \
-            --notes "Automatisch veröffentlichter Build von My Route." 2>/dev/null || true
-          gh release upload "${{ github.ref_name }}" release-assets/* my-route/docs/*.pdf my-route/web/My-Route-Vollversion.html my-route/web/My-Route-Download.html --clobber
+          VERSION="${GITHUB_REF_NAME#my-route-v}"
+          # 1) fest versioniertes Release (bleibt als Archiv bestehen)
+          gh release create "$GITHUB_REF_NAME" --title "My Route $VERSION" \
+            --notes "Automatisch veröffentlichter Build von My Route $VERSION. Prüfsummen: SHA256SUMS.txt" 2>/dev/null || true
+          gh release upload "$GITHUB_REF_NAME" release-assets/* --clobber
+          # 2) laufende Update-Quelle: die installierte App sucht hier beim Start nach neuen Versionen
+          gh release create my-route-updates --title "My Route $VERSION" --latest=false \
+            --notes "Laufende Update-Quelle der My-Route-Apps (nicht manuell verändern)." 2>/dev/null || true
+          gh release edit my-route-updates --title "My Route $VERSION" --latest=false
+          gh release upload my-route-updates release-assets/* --clobber
+          # Veraltete Dateien aus der Update-Quelle entfernen
+          KEEP=$(ls release-assets)
+          for NAME in $(gh release view my-route-updates --json assets --jq '.assets[].name'); do
+            echo "$KEEP" | grep -qxF "$NAME" || gh release delete-asset my-route-updates "$NAME" --yes
+          done

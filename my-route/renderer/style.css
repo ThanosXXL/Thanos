@@ -212,12 +212,12 @@ body {
 .form label { display: flex; flex-direction: column; gap: 5px; font-weight: 700; font-size: 14px; color: var(--gold-1); }
 .form label.check { flex-direction: row; align-items: center; gap: 10px; color: var(--text); font-weight: 600; }
 .hint { color: var(--muted); font-weight: 400; font-size: 12.5px; margin: 0; }
-input[type="text"], select {
+input[type="text"], input[type="password"], select {
   font: inherit; color: var(--text); width: 100%;
   background: linear-gradient(180deg, #080604, #120e07); border: 1px solid var(--line); border-radius: 12px; padding: 10px 12px;
   box-shadow: inset 0 3px 8px rgba(0, 0, 0, .7), 0 1px 0 rgba(255, 240, 180, .08);
 }
-input[type="text"]:focus, select:focus { outline: none; border-color: var(--gold-1); box-shadow: inset 0 3px 8px rgba(0, 0, 0, .7), 0 0 0 3px rgba(233, 181, 44, .25); }
+input[type="text"]:focus, input[type="password"]:focus, select:focus { outline: none; border-color: var(--gold-1); box-shadow: inset 0 3px 8px rgba(0, 0, 0, .7), 0 0 0 3px rgba(233, 181, 44, .25); }
 input[type="checkbox"] { width: 20px; height: 20px; accent-color: var(--gold-2); }
 .row { display: flex; gap: 10px; flex-wrap: wrap; }
 .row.nowrap { flex-wrap: nowrap; }
@@ -408,3 +408,34 @@ dialog.live::backdrop { background: rgba(0, 0, 0, .65); backdrop-filter: blur(3p
 :root[data-look="hell"] .m3-ground { fill: rgba(200, 147, 42, .1); stroke: rgba(150, 105, 20, .5); }
 :root[data-look="hell"] .m3-grid { stroke: rgba(150, 105, 20, .2); }
 :root[data-look="klar"] .m3-label, :root[data-look="hell"] .m3-label { fill: var(--text); stroke: var(--bg); }
+
+/* ---------- Tastatur-Fokus (Barrierefreiheit) ---------- */
+:focus-visible { outline: 3px solid var(--gold-1); outline-offset: 2px; }
+input[type="text"]:focus-visible, input[type="password"]:focus-visible, select:focus-visible { outline-offset: 0; }
+
+/* ---------- Datenschutz, Updates, Dialoge ---------- */
+.update-bar { position: sticky; top: 0; z-index: 30; display: flex; align-items: center; justify-content: center; gap: 12px; flex-wrap: wrap; padding: 10px 16px; font-weight: 700; color: #2a1c03; background: linear-gradient(180deg, var(--gold-hi), var(--gold-2)); box-shadow: 0 6px 20px rgba(0, 0, 0, .5); }
+.update-bar .mini { color: #2a1c03; background: rgba(255, 255, 255, .35); border-color: rgba(0, 0, 0, .25); }
+.update-bar .btn.small { color: var(--gold-1); background: #1a1308; box-shadow: none; text-shadow: none; }
+.update-bar .btn.small::before, .update-bar .btn.small::after { display: none; }
+:root[data-look="klar"] .update-bar, :root[data-look="hell"] .update-bar { background: var(--accent); color: var(--on-accent); }
+.privacy-card { margin-top: 18px; }
+.sub-h { font-size: 24px; display: inline-block; margin: 0 0 8px; }
+.facts { display: grid; grid-template-columns: max-content 1fr; gap: 6px 18px; margin: 10px 0 4px; }
+.facts dt { color: var(--muted); font-weight: 700; }
+.facts dd { margin: 0; word-break: break-word; }
+.privacy-card .check { display: flex; align-items: center; gap: 10px; margin: 8px 0; font-weight: 600; }
+.privacy-card .row { margin: 8px 0; }
+.legal { margin-top: 14px; }
+.legal summary { cursor: pointer; font-weight: 700; color: var(--gold-1); }
+.legal table { border-collapse: collapse; width: 100%; margin: 10px 0; font-size: 14px; }
+.legal th, .legal td { border: 1px solid var(--line); padding: 6px 10px; text-align: left; vertical-align: top; }
+.legal th { color: var(--gold-1); }
+.small-dialog { width: min(560px, 94vw); }
+.small-dialog p, .small-dialog li { color: var(--text); }
+.plain { padding-left: 20px; margin: 10px 0; }
+.plain li { margin: 8px 0; }
+.small-dialog .check { display: flex; align-items: flex-start; gap: 10px; margin: 12px 0; font-weight: 600; }
+.small-dialog .field { display: flex; flex-direction: column; gap: 5px; font-weight: 700; color: var(--gold-1); margin: 10px 0; }
+.small-dialog .row { margin-top: 14px; }
+@media (max-width: 600px) { .facts { grid-template-columns: 1fr; } .legal table { font-size: 12.5px; } }

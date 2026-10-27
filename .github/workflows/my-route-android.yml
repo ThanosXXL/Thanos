@@ -12,17 +12,22 @@ permissions:
 jobs:
   apk:
     runs-on: ubuntu-latest
+    timeout-minutes: 40
     defaults:
       run:
         working-directory: my-route
     steps:
       - name: Repository auschecken
         uses: actions/checkout@v4
+        with:
+          persist-credentials: false
 
       - name: Node.js einrichten
         uses: actions/setup-node@v4
         with:
           node-version: 20
+          cache: npm
+          cache-dependency-path: my-route/package-lock.json
 
       - name: Java 21 einrichten (Capacitor 7)
         uses: actions/setup-java@v4
@@ -30,8 +35,8 @@ jobs:
           distribution: temurin
           java-version: 21
 
-      - name: Abhängigkeiten installieren
-        run: npm install
+      - name: Abhängigkeiten exakt nach Lockfile installieren
+        run: npm ci
 
       - name: Web-Vollversion bauen
         run: npm run build:web
@@ -45,6 +50,10 @@ jobs:
           npx --yes @capacitor/assets@3.0.5 generate --android --iconBackgroundColor '#050403' --iconBackgroundColorDark '#050403' || echo "Icon-Erzeugung übersprungen"
           # Standort-Freigabe für „Mein Standort“ (Live-Optionen)
           sed -i 's#<uses-permission android:name="android.permission.INTERNET" />#&\n    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />\n    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />#' android/app/src/main/AndroidManifest.xml
+          # Härtung: keine Geräte-Backups der App-Daten (adb/Cloud), kein unverschlüsselter Netzwerkverkehr
+          sed -i 's/android:allowBackup="true"/android:allowBackup="false"/; s/<application/<application android:usesCleartextTraffic="false"/' android/app/src/main/AndroidManifest.xml
+          grep -q 'allowBackup="false"' android/app/src/main/AndroidManifest.xml
+          grep -q 'usesCleartextTraffic="false"' android/app/src/main/AndroidManifest.xml
           npx cap sync android
 
       - name: APK bauen (debug-signiert, direkt installierbar)
@@ -56,15 +65,19 @@ jobs:
           VERSION=$(node -p "require('./package.json').version")
           mkdir -p out
           cp android/app/build/outputs/apk/debug/app-debug.apk "out/My-Route-${VERSION}-android.apk"
+          (cd out && sha256sum "My-Route-${VERSION}-android.apk" > "My-Route-${VERSION}-android.apk.sha256")
 
       - name: APK als Artifact hochladen
         uses: actions/upload-artifact@v4
         with:
           name: my-route-android
-          path: my-route/out/*.apk
+          path: |
+            my-route/out/*.apk
+            my-route/out/*.sha256
           if-no-files-found: error
 
   release:
+    timeout-minutes: 15
     needs: apk
     if: startsWith(github.ref, 'refs/tags/my-route-v')
     runs-on: ubuntu-latest
@@ -83,6 +96,9 @@ jobs:
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          gh release create "${{ github.ref_name }}" --title "My Route ${{ github.ref_name }}" \
+          gh release create "${{ github.ref_name }}" --title "My Route" \
             --notes "Automatisch veröffentlichter Build von My Route." 2>/dev/null || true
           gh release upload "${{ github.ref_name }}" release-assets/* --clobber
+          gh release create my-route-updates --title "My Route" --latest=false \
+            --notes "Laufende Update-Quelle der My-Route-Apps (nicht manuell verändern)." 2>/dev/null || true
+          gh release upload my-route-updates release-assets/* --clobber

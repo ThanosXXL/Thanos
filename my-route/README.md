@@ -33,12 +33,13 @@ npm run build:web    # erzeugt web/My-Route-Vollversion.html und web/My-Route-Do
 - **Kartenvorschau**: schematisch und offline (SVG), mit Luftlinien-Entfernung.
 - **Sichern/Einlesen** als JSON.
 
-## Datenschutz (DSGVO)
+## Datenschutz, Sicherheit & Updates
 
-Keine Konten, keine Telemetrie, kein Auto-Updater. Favoriten und Routen liegen lokal (`my-route-data.json` im Benutzerverzeichnis der App,
-Rechte `0600`; in der Browser-Version im `localStorage`). Netzwerkzugriffe passieren nur auf ausdrücklichen Klick:
-„Koordinaten zur Adresse finden“ sendet den Adresstext an Nominatim (OpenStreetMap); „Route fahren“ öffnet den gewählten Karten-Dienst
-(in der Desktop-App nur `google.com`, `maps.apple.com`, `openstreetmap.org`). Löschen/Export: Favoriten und Routen lassen sich einzeln löschen
-und über „Sichern“ exportieren.
+- **Lokal & verschlüsselt:** Favoriten (unbegrenzt, Liste 1/2) und Routen liegen nur auf dem Gerät – Desktop über den Schlüsselbund des Betriebssystems verschlüsselt (`safeStorage`, Dateirechte `0600`, Sicherungskopie), Browser/Android optional per Passwort (AES-256).
+- **Keine Telemetrie, keine Konten, keine Cookies.** Externe Dienste werden nur nach Information/Zustimmung angesprochen (Adresssuche, Live-Optionen, Karten-App, Update-Suche) – Übersicht in der App unter „Info → Datenschutz & Sicherheit“.
+- **Betroffenenrechte** direkt in der App: Daten sichern (Portabilität), Alle Daten löschen, Zustimmungen widerrufen.
+- **Härtung:** Sandbox, strenge CSP mit Trusted Types, geprüfte IPC, Link-Allowlist, Electron-Fuses, Einzelinstanz, begrenzte/bereinigte Dienstantworten – Details und Grenzen in `SECURITY.md`, Maßnahmenliste und Datenschutz-Entwurf in `docs/Datenschutz-und-Sicherheit.md`.
+- **Automatische Updates:** Die Desktop-App sucht beim Start (und alle 4 Stunden) nach neuen Versionen, lädt sie im Hintergrund (SHA-512-geprüft) und installiert sie beim Beenden bzw. per „Jetzt neu starten“. Quelle: Release `my-route-updates` (wird bei jedem `my-route-v*`-Tag aktualisiert). Abschaltbar in der App. Browser/Android zeigen einen Hinweis mit Link zur neuen Version.
+- **Prüfen:** `npm run check` (Quellcode-Sicherheitsprüfung), `npm test` (Speicher/Verschlüsselung/Prüfungen).
 
 Schrift: Open Sans (SIL OFL, siehe `renderer/assets/fonts/OFL-LICENSE-OpenSans.txt`).

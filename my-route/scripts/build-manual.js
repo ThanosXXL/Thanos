@@ -31,6 +31,7 @@ async function shots() {
   const b = await chromium.launch();
   const desk = await b.newContext({ viewport: { width: 1280, height: 800 }, deviceScaleFactor: 1.5, geolocation: { latitude: 52.4731, longitude: 13.401 }, permissions: ['geolocation'] });
   await mockRoutes(desk);
+  await desk.addInitScript(() => { try { if (!localStorage.getItem('my-route-data-v1')) localStorage.setItem('my-route-data-v1', JSON.stringify({ favorites: [], routes: [], privacy: { accepted: true, autoUpdate: false, consent: { geocode: true, route: true } } })); } catch (e) {} });
   const p = await desk.newPage();
   await p.goto(APP);
   await p.click('text=Beispielroute laden');
@@ -68,6 +69,7 @@ async function shots() {
     geolocation: { latitude: 52.4731, longitude: 13.401 }, permissions: ['geolocation'],
     userAgent: 'Mozilla/5.0 (Linux; Android 14; Pixel 8) AppleWebKit/537.36 Chrome/130 Mobile Safari/537.36' });
   await mockRoutes(phone);
+  await phone.addInitScript(() => { try { if (!localStorage.getItem('my-route-data-v1')) localStorage.setItem('my-route-data-v1', JSON.stringify({ favorites: [], routes: [], privacy: { accepted: true, autoUpdate: false, consent: { geocode: true, route: true } } })); } catch (e) {} });
   const q = await phone.newPage();
   await q.goto(APP);
   await q.click('text=Beispielroute laden');
@@ -81,6 +83,13 @@ async function shots() {
   await q.click('#drive-favs .drive-fav >> nth=1');
   await q.waitForTimeout(1300);
   await q.screenshot({ path: path.join(img, 's7-handy-live.jpg'), type: 'jpeg', quality: 88 });
+
+  await p.selectOption('#look-select', 'gold3d');
+  await p.click('.tab[data-view=info]');
+  await p.evaluate(() => { document.querySelector('.topbar').style.position = 'static'; });
+  await p.locator('#privacy-card').scrollIntoViewIfNeeded();
+  await p.waitForTimeout(500);
+  await p.locator('#privacy-card').screenshot({ path: path.join(img, 's11-datenschutz.jpg'), type: 'jpeg', quality: 88 });
 
   const dl = await (await b.newContext({ viewport: { width: 1100, height: 760 }, deviceScaleFactor: 1.5 })).newPage();
   await dl.goto(DL);
@@ -138,7 +147,7 @@ body.a4{}
 <section class="cover"><img src="${logo}" alt="IT-WORLD Logo"><h1>My Route</h1><div class="sub">BENUTZERHANDBUCH</div><p class="tag">Dein Weg, einmal gespeichert – immer wieder gern gefahren.</p><div class="ver">Version ${v} · IT - WORLD · IT SOLUTIONS</div></section>
 
 <section class="toc"><h1>Das erwartet dich</h1><ol>
-<li>Herzlich willkommen</li><li>Installation &amp; Start – auf jedem Gerät</li><li>Dein erster Start</li><li>Favoriten – deine Lieblingsorte (Liste 1 &amp; 2)</li><li>Routen zusammenstellen (Inland &amp; Ausland)</li><li>Route fahren – ein Klick genügt</li><li>Live-Optionen: schnellste, kürzeste, Alternative</li><li>Fahrmodus &amp; Touch – für Auto, Tablet und Handy</li><li>Optik wählen</li><li>Kartenvorschau</li><li>Sichern, Einlesen &amp; Datenschutz</li><li>Hilfe, wenn es mal hakt</li></ol></section>
+<li>Herzlich willkommen</li><li>Installation &amp; Start – auf jedem Gerät</li><li>Dein erster Start</li><li>Favoriten – deine Lieblingsorte (Liste 1 &amp; 2)</li><li>Routen zusammenstellen (Inland &amp; Ausland)</li><li>Route fahren – ein Klick genügt</li><li>Live-Optionen: schnellste, kürzeste, Alternative</li><li>Fahrmodus &amp; Touch – für Auto, Tablet und Handy</li><li>Optik wählen</li><li>Kartenvorschau</li><li>Sichern, Einlesen &amp; Datenschutz</li><li>Updates – immer auf dem neuesten Stand</li><li>Hilfe, wenn es mal hakt</li></ol></section>
 
 <section class="quick"><h1 style="margin-top:0">In 3 Minuten startklar</h1>
 <p class="lead">Keine Sorge – du brauchst kein Vorwissen. Diese drei Schritte reichen für den Anfang:</p>
@@ -232,15 +241,22 @@ ${fig('s5-karte.jpg', 'Die Kartenvorschau mit Reihenfolge und Luftlinie.', 'half
 
 <h1><span class="num">11</span>Sichern, Einlesen &amp; Datenschutz</h1>
 <p>Mit <b>„Sichern“</b> speicherst du alle Favoriten und Routen in einer Datei, mit <b>„Einlesen“</b> holst du sie auf einem anderen Gerät zurück – praktisch beim Gerätewechsel.</p>
-<ul><li>Deine Daten liegen lokal auf deinem Gerät; es gibt kein Konto und keine Telemetrie.</li><li>Nur auf ausdrücklichen Tipp werden Dienste angesprochen: die Adresssuche (OpenStreetMap), die Live-Optionen (OSRM) und deine Karten-App beim Losfahren.</li><li>Einzelne Orte und Routen löschst du direkt auf ihrer Karte.</li></ul>
+<ul><li>Deine Daten liegen lokal auf deinem Gerät; es gibt kein Konto und keine Telemetrie. Auf dem Desktop sind sie über den Schlüsselbund deines Betriebssystems verschlüsselt; im Browser und auf Android schützt du sie bei Bedarf mit einem Passwort.</li><li>Bevor My Route einen externen Dienst anspricht, fragst du ja oder nein – und kannst die Zustimmung jederzeit widerrufen.</li><li>Nur auf ausdrücklichen Tipp werden Dienste angesprochen: die Adresssuche (OpenStreetMap), die Live-Optionen (OSRM) und deine Karten-App beim Losfahren.</li><li>Einzelne Orte und Routen löschst du direkt auf ihrer Karte; mit <b>„Alle Daten löschen“</b> räumst du alles auf einmal ab.</li></ul>
+${fig('s11-datenschutz.jpg', 'Info → Datenschutz &amp; Sicherheit: Verschlüsselung, Updates, Zustimmungen und deine Rechte.', 'half')}
 
-<h1><span class="num">12</span>Hilfe, wenn es mal hakt</h1>
+<h1><span class="num">12</span>Updates – immer auf dem neuesten Stand</h1>
+<p>Die <b>Desktop-App</b> sucht beim Start (und danach alle vier Stunden) automatisch nach einer neuen Version. Findet sie eine, lädt sie diese im Hintergrund, prüft die Datei mit einer Prüfsumme und installiert sie beim Beenden – oder sofort, wenn du oben im Hinweis auf <b>„Jetzt neu starten“</b> tippst. Manipulierte Dateien lehnt die App ab.</p>
+<p>In der <b>Browser- und Android-Version</b> erscheint ein Hinweis mit Download, sobald es eine neuere Version gibt. Dort kann ein Programm sich nicht selbst austauschen – ein Tipp auf „Herunterladen“ genügt.</p>
+<p>Beim ersten Start fragt My Route dich, ob die automatische Suche aktiv sein soll. Du änderst das jederzeit unter <b>Info → Datenschutz &amp; Sicherheit</b>; dort steht auch „Jetzt nach Updates suchen“. Für die Suche verbindet sich die App mit GitHub – GitHub sieht dabei deine IP-Adresse.</p>
+<div class="note"><b>Hinweis zu macOS:</b> Ohne Apple-Signatur kann macOS ein Update nicht selbst einspielen. My Route zeigt dann „Download-Seite öffnen“ – ein Klick, und du holst die neue Version von Hand.</div>
+
+<h1><span class="num">13</span>Hilfe, wenn es mal hakt</h1>
 <table><tr><th>Das ist passiert</th><th>Das hilft</th></tr>
 <tr><td>Für das Ziel fehlen Koordinaten</td><td>Bei den Favoriten die Adresse eintragen und „Koordinaten zur Adresse finden“ wählen.</td></tr>
 <tr><td>„Keine Live-Verbindung“</td><td>Internet prüfen und „Optionen laden“ erneut wählen.</td></tr>
 <tr><td>„Mein Standort“ funktioniert nicht</td><td>Standortfreigabe in den Geräte-Einstellungen für Browser bzw. App erlauben.</td></tr>
 <tr><td>Android blockiert die Installation</td><td>In den Einstellungen die Installation aus dieser Quelle einmalig erlauben.</td></tr>
-<tr><td>Daten auf neues Gerät übertragen</td><td>Auf dem alten Gerät „Sichern“, auf dem neuen „Einlesen“.</td></tr></table>
+<tr><td>Unter Linux startet die App nicht</td><td>Manche Systeme sperren die Prozess-Isolation. Als Notlösung die AppImage-Datei im Terminal mit „--no-sandbox“ starten – das schwächt die Sicherheit, nutze es nur, wenn es nicht anders geht.</td></tr>\n<tr><td>Passwort vergessen (Browser/Android)</td><td>Ohne Passwort sind die Daten nicht lesbar. Im Entsperr-Fenster bleibt nur „Passwort vergessen – Daten löschen“; danach kannst du eine Sicherung einlesen.</td></tr>\n<tr><td>Daten auf neues Gerät übertragen</td><td>Auf dem alten Gerät „Sichern“, auf dem neuen „Einlesen“.</td></tr></table>
 <p>Wir wünschen dir viel Freude und immer eine gute Fahrt!</p>
 <div class="sig">IT - WORLD · IT SOLUTIONS</div>
 </body></html>`;

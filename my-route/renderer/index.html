@@ -2,7 +2,8 @@
 <html lang="de">
 <head>
   <meta charset="UTF-8">
-  <meta http-equiv="Content-Security-Policy" content="default-src 'none'; img-src 'self' data:; style-src 'self'; font-src 'self'; script-src 'self'; connect-src 'none'; base-uri 'none'; form-action 'none'">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'none'; img-src 'self' data:; style-src 'self'; font-src 'self'; script-src 'self'; connect-src 'none'; object-src 'none'; frame-src 'none'; media-src 'none'; worker-src 'none'; base-uri 'none'; form-action 'none'; require-trusted-types-for 'script'">
+  <meta name="referrer" content="no-referrer">
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
   <meta name="theme-color" content="#050403">
   <meta name="description" content="My Route – deine Lieblingsorte als Favoriten speichern und gespeicherte Routen mit einem Klick erneut anfahren. Von IT - WORLD · IT SOLUTIONS.">
@@ -12,6 +13,12 @@
 </head>
 <body>
   <div class="bg-glow" aria-hidden="true"></div>
+
+  <div class="update-bar" id="update-bar" role="status" aria-live="polite" hidden>
+    <span id="update-text"></span>
+    <button class="btn small" id="update-action" type="button" hidden></button>
+    <button class="mini" id="update-dismiss" type="button" title="Ausblenden" aria-label="Hinweis ausblenden">✕</button>
+  </div>
 
   <header class="topbar">
     <div class="brand">
@@ -217,6 +224,51 @@
         <p>Die angezeigte Entfernung ist die Luftlinie zwischen deinen Stopps – die echte Strecke berechnet dein Karten-Dienst. Lange Routen mit mehr als zehn Stopps teilt My Route automatisch in Abschnitte auf, weil Karten-Dienste pro Link nur eine begrenzte Zahl an Zwischenstopps erlauben.</p>
         <p class="signature">IT - WORLD · IT SOLUTIONS</p>
       </div>
+
+      <div class="card info privacy-card tilt-soft" id="privacy-card">
+        <h2 class="gold3d-sm sub-h">Datenschutz &amp; Sicherheit</h2>
+        <dl class="facts" id="privacy-facts"></dl>
+
+        <h3>Updates</h3>
+        <label class="check"><input id="pv-autoupdate" type="checkbox"><span id="pv-auto-label">Beim Start automatisch nach Updates suchen</span></label>
+        <div class="row"><button class="btn small" id="pv-check" type="button">Jetzt nach Updates suchen</button></div>
+        <p class="hint" id="pv-update-status"></p>
+
+        <h3>Externe Dienste – nur mit deiner Zustimmung</h3>
+        <label class="check"><input id="pv-c-geocode" type="checkbox"><span>Adresssuche (OpenStreetMap Nominatim) ohne Rückfrage erlauben</span></label>
+        <label class="check"><input id="pv-c-route" type="checkbox"><span>Live-Optionen (OSRM) ohne Rückfrage erlauben</span></label>
+
+        <div id="pv-protect" hidden>
+          <h3>Passwortschutz (nur Browser- und Android-Version)</h3>
+          <p class="hint" id="pv-protect-text"></p>
+          <div class="row">
+            <button class="btn small" id="pv-protect-on" type="button">Passwortschutz einschalten</button>
+            <button class="btn small ghost" id="pv-protect-change" type="button">Passwort ändern</button>
+            <button class="btn small ghost" id="pv-lock" type="button">Jetzt sperren</button>
+            <button class="btn small ghost danger" id="pv-protect-off" type="button">Schutz ausschalten</button>
+          </div>
+        </div>
+
+        <h3>Deine Rechte</h3>
+        <p>Du siehst und änderst alle Daten direkt in der App (Auskunft, Berichtigung). Mit „Daten sichern“ nimmst du sie als Datei mit (Datenübertragbarkeit). Mit „Alle Daten löschen“ entfernst du alles unwiderruflich (Löschung).</p>
+        <div class="row">
+          <button class="btn small ghost" id="pv-export" type="button">Daten sichern</button>
+          <button class="btn small ghost danger" id="pv-wipe" type="button">Alle Daten löschen</button>
+        </div>
+
+        <details class="legal">
+          <summary>Welche Daten gehen wann an wen?</summary>
+          <table>
+            <tr><th>Dienst</th><th>Wann</th><th>Was wird gesendet</th></tr>
+            <tr><td>OpenStreetMap Nominatim</td><td>Nur bei „Koordinaten zur Adresse finden“</td><td>Der eingegebene Adresstext, deine IP-Adresse</td></tr>
+            <tr><td>OSRM (router.project-osrm.org)</td><td>Nur bei „Optionen laden“ (Live-Optionen)</td><td>Start- und Zielkoordinaten (bei „Mein Standort“ deine Position), deine IP-Adresse</td></tr>
+            <tr><td>Google Maps / Apple Karten / OpenStreetMap</td><td>Nur bei „Route fahren“</td><td>Link mit Start, Ziel und Zwischenstopps – danach gilt die Datenschutzerklärung des gewählten Dienstes</td></tr>
+            <tr><td>GitHub (Update-Suche)</td><td>Beim Start, wenn Updates eingeschaltet sind</td><td>Deine IP-Adresse und die App-Version</td></tr>
+            <tr><td>Alle anderen</td><td>Nie</td><td>Keine Analyse, keine Werbung, kein Tracking, keine Cookies, kein Konto</td></tr>
+          </table>
+          <p class="hint">Rechtsgrundlagen: Einwilligung bzw. Vertragserfüllung auf deine Anfrage (Art. 6 Abs. 1 lit. a/b DSGVO) für die genannten Dienste; berechtigtes Interesse an IT-Sicherheit (lit. f) für die Update-Suche. Verantwortlich ist der Anbieter der App (IT - WORLD · IT SOLUTIONS); die Anbieterangaben und eine Datenschutzerklärung für deine Nutzung ergänzt der Anbieter.</p>
+        </details>
+      </div>
     </section>
   </main>
 
@@ -238,6 +290,58 @@
     <p class="live-status" id="live-status"></p>
     <div class="live-options" id="live-options"></div>
     <p class="hint">Bis zu drei Strecken mit dem Auto: die schnellste, die kürzeste und eine Alternative. Berechnung über OSRM / OpenStreetMap – es wird nur Start und Ziel (Koordinaten) gesendet, und nur wenn du „Optionen laden“ wählst.</p>
+  </dialog>
+
+  <dialog class="live small-dialog" id="welcome-dialog" aria-labelledby="welcome-title">
+    <h3 class="gold3d-sm" id="welcome-title">Willkommen – kurz zu deinem Datenschutz</h3>
+    <ul class="plain">
+      <li><b>Deine Daten bleiben bei dir.</b> Orte und Routen liegen nur auf diesem Gerät – ohne Konto, Werbung oder Tracking.</li>
+      <li><b>Nur auf deinen Wunsch</b> sprechen wir externe Dienste an (Adresssuche, Live-Strecken, deine Karten-App) – vorher fragen wir dich.</li>
+      <li><b>Updates:</b> My Route kann beim Start nach neuen Versionen suchen. Dafür verbindet sich die App mit GitHub, das dabei deine IP-Adresse sieht. Auf dem Desktop installieren sich Updates dann automatisch.</li>
+    </ul>
+    <p class="hint">Du kannst das jederzeit unter „Info → Datenschutz &amp; Sicherheit“ ändern.</p>
+    <div class="row">
+      <button class="btn" id="welcome-auto" type="button">Updates automatisch (empfohlen)</button>
+      <button class="btn ghost" id="welcome-manual" type="button">Nur manuell</button>
+    </div>
+  </dialog>
+
+  <dialog class="live small-dialog" id="consent-dialog" aria-labelledby="consent-title">
+    <h3 class="gold3d-sm" id="consent-title">Externen Dienst nutzen?</h3>
+    <p id="consent-text"></p>
+    <label class="check"><input id="consent-remember" type="checkbox"><span>Nicht mehr fragen (jederzeit unter „Info → Datenschutz“ widerrufbar)</span></label>
+    <div class="row">
+      <button class="btn" id="consent-ok" type="button">Einverstanden</button>
+      <button class="btn ghost" id="consent-cancel" type="button">Abbrechen</button>
+    </div>
+  </dialog>
+
+  <dialog class="live small-dialog" id="unlock-dialog" aria-labelledby="unlock-title">
+    <h3 class="gold3d-sm" id="unlock-title">My Route ist gesperrt</h3>
+    <label class="field">Passwort
+      <input id="unlock-pass" type="password" autocomplete="current-password" maxlength="200">
+    </label>
+    <p class="live-status" id="unlock-error" role="alert"></p>
+    <div class="row">
+      <button class="btn" id="unlock-ok" type="button">Entsperren</button>
+      <button class="btn small ghost danger" id="unlock-reset" type="button">Passwort vergessen – Daten löschen</button>
+    </div>
+  </dialog>
+
+  <dialog class="live small-dialog" id="pw-dialog" aria-labelledby="pw-title">
+    <h3 class="gold3d-sm" id="pw-title">Passwort festlegen</h3>
+    <p class="hint">Mindestens 8 Zeichen. Vergisst du das Passwort, sind die Daten nicht wiederherstellbar – erstelle vorher eine Sicherung.</p>
+    <label class="field">Neues Passwort
+      <input id="pw-1" type="password" autocomplete="new-password" maxlength="200">
+    </label>
+    <label class="field">Wiederholen
+      <input id="pw-2" type="password" autocomplete="new-password" maxlength="200">
+    </label>
+    <p class="live-status" id="pw-error" role="alert"></p>
+    <div class="row">
+      <button class="btn" id="pw-ok" type="button">Speichern</button>
+      <button class="btn ghost" id="pw-cancel" type="button">Abbrechen</button>
+    </div>
   </dialog>
 
   <div class="toast" id="toast" role="status" aria-live="polite"></div>
